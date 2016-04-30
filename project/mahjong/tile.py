@@ -7,11 +7,5 @@ class Tile(int):
         wd gd rd
     '''.split()
 
-    def __str__(self):
-        return self.as_data()
-
-    def __repr__(self):
-        return self.__str__()
-
     def as_data(self):
         return self.TILES[self // 4]

@@ -2,40 +2,32 @@ import logging
 from threading import Thread
 from time import sleep
 
-from bs4 import BeautifulSoup
-
-from mahjong.hand import PlayerHand
-from mahjong.table import Table
+from mahjong.client import Client
 from tenhou.decoder import TenhouDecoder
 
 logger = logging.getLogger('tenhou')
 
 
-class TenhouClient(object):
+class TenhouClient(Client):
     socket = None
     game_is_continue = True
     keep_alive_thread = None
 
-    hand = PlayerHand()
-    table = Table()
-    decoder = TenhouDecoder(table, hand)
+    decoder = TenhouDecoder()
 
     def __init__(self, socket):
+        super().__init__()
         self.socket = socket
 
     def authenticate(self):
         self._send_message('<HELO name="NoName" tid="f0" sx="M" />')
         auth_message = self._read_message()
 
-        # I know about regexp, but I think using BeautifulSoup for parsing will be more effective
-        soup = BeautifulSoup(auth_message, 'html.parser')
-        soup = soup.find('helo')
-        if soup and 'auth' in soup.attrs:
-            auth_string = soup.attrs['auth']
-        else:
+        auth_string = self.decoder.parse_auth_string(auth_message)
+        if not auth_string:
             return False
 
-        auth_token = self._generate_auth_token(auth_string)
+        auth_token = self.decoder.generate_auth_token(auth_string)
 
         self._send_message('<AUTH val="{0}"/>'.format(auth_token))
         self._send_message('<PXR V="0" />')
@@ -50,9 +42,10 @@ class TenhouClient(object):
             return False
 
     def start_the_game(self):
+        log = ''
         game_started = False
         self._send_message('<JOIN t="0,1" />')
-        logger.info('Began looking for the game')
+        logger.info('Looking for the game...')
 
         while not game_started:
             sleep(1)
@@ -71,8 +64,11 @@ class TenhouClient(object):
 
                 if '<taikyoku' in message:
                     game_started = True
-                    logger.info('Game started')
-                    self.decoder.decode_log_link(message)
+                    log = self.decoder.parse_log_link(message)
+
+        logger.info('Game started')
+        logger.info('Log: {0}'.format(log))
+        logger.info('Players: {0}'.format(self.table.players))
 
         while self.game_is_continue:
             sleep(1)
@@ -82,56 +78,68 @@ class TenhouClient(object):
             for message in messages:
 
                 if '<init' in message:
-                    self.decoder.decode_initial_values(message)
+                    values = self.decoder.parse_initial_values(message)
+                    self.table.init_round(
+                        values['round_number'],
+                        values['count_of_honba_sticks'],
+                        values['count_of_riichi_sticks'],
+                        values['dora'],
+                        values['dealer'],
+                        values['scores'],
+                    )
+
+                    logger.info('Players: {0}'.format(self.table.get_players_sorted_by_scores()))
+
+                if '<un' in message:
+                    values = self.decoder.parse_names_and_ranks(message)
+                    self.table.set_players_names_and_ranks(values)
 
                 # draw and discard
                 if '<t' in message:
-                    self._draw_tile(message)
+                    tile = self.decoder.parse_tile(message)
+                    self.draw_tile(tile)
                     sleep(1)
-                    self._discard_tile()
+
+                    tile = self.discard_tile()
+                    # tenhou format: <D p="133" />
+                    self._send_message('<D p="{0}"/>'.format(tile))
 
                 # the end of round
                 if 'agari' in message or 'ryuukyoku' in message:
-                    logger.info('Player 1')
-                    logger.info(self.table.get_player(1))
-
-                    logger.info('Player 2')
-                    logger.info(self.table.get_player(2))
-
-                    logger.info('Player 3')
-                    logger.info(self.table.get_player(3))
-
                     sleep(2)
                     self._send_message('<NEXTREADY />')
 
                 open_sets = ['t="1"', 't="2"', 't="3"', 't="4"', 't="5"']
                 if any(i in message for i in open_sets):
                     sleep(1)
-                    result = self.hand.should_set_be_called(message)
-                    if result:
-                        pass
-                    else:
-                        self._send_message('<N />')
+                    self._send_message('<N />')
 
                 # set call
                 if '<n who=' in message:
-                    self.decoder.decode_meld(message)
+                    meld = self.decoder.parse_meld(message)
+                    self.call_meld(meld)
+
+                other_players_discards = ['<e', '<f', '<g']
+                if any(i in message for i in other_players_discards):
+                    tile = self.decoder.parse_tile(message)
+
+                    if '<e' in message:
+                        player_seat = 1
+                    elif '<f' in message:
+                        player_seat = 2
+                    else:
+                        player_seat = 3
+
+                    self.enemy_discard(player_seat, tile)
+
+                if 'owari' in message:
+                    values = self.decoder.parse_final_scores_and_uma(message)
+                    self.table.set_players_scores(values['scores'], values['uma'])
 
                 if '<prof' in message:
                     self.game_is_continue = False
 
-                other_players_discards = ['<e', '<f', '<g']
-                if any(i in message for i in other_players_discards):
-                    tile = self.decoder.decode_tile(message)
-
-                    if '<e' in message:
-                        player_number = 1
-                    elif '<f' in message:
-                        player_number = 2
-                    else:
-                        player_number = 3
-
-                    self.table.get_player(player_number).add_discard(tile)
+        logger.info('Players: {0}'.format(','.join(self.table.get_players_sorted_by_scores())))
 
         self.end_the_game()
 
@@ -142,16 +150,6 @@ class TenhouClient(object):
         self.keep_alive_thread.join()
 
         logger.info('End of the game')
-
-    def _draw_tile(self, tenhou_string):
-        tile = self.decoder.decode_tile(tenhou_string)
-        self.hand.draw_tile(tile)
-
-    def _discard_tile(self):
-        tile = self.hand.discard_tile()
-
-        # tenhou format: <D p="133" />
-        self._send_message('<D p="{0}"/>'.format(tile))
 
     def _send_message(self, message):
         # tenhou required the empty byte in the end of each sending message
@@ -186,28 +184,3 @@ class TenhouClient(object):
 
         self.keep_alive_thread = Thread(target=send_request)
         self.keep_alive_thread.start()
-
-    def _generate_auth_token(self, auth_string):
-        translation_table = [63006, 9570, 49216, 45888, 9822, 23121, 59830, 51114, 54831, 4189, 580, 5203, 42174, 59972,
-                             55457, 59009, 59347, 64456, 8673, 52710, 49975, 2006, 62677, 3463, 17754, 5357]
-
-        parts = auth_string.split('-')
-        if len(parts) != 2:
-            return False
-
-        first_part = parts[0]
-        second_part = parts[1]
-        if len(first_part) != 8 and len(second_part) != 8:
-            return False
-
-        table_index = int('2' + first_part[2:8]) % (12 - int(first_part[7:8])) * 2
-
-        a = translation_table[table_index] ^ int(second_part[0:4], 16)
-        b = translation_table[table_index + 1] ^ int(second_part[4:8], 16)
-
-        postfix = format(a, '2x') + format(b, '2x')
-
-        result = first_part + '-' + postfix
-
-        return result
-

@@ -5,6 +5,7 @@ from tenhou.client import TenhouClient
 HOST = '133.242.10.78'
 PORT = 10080
 
+
 def connect_and_play():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((HOST, PORT))

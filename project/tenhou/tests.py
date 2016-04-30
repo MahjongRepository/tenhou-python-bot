@@ -1,107 +1,130 @@
 import unittest
 
-from mahjong.hand import PlayerHand
-from mahjong.table import Table
-from tenhou.client import TenhouClient
 from tenhou.decoder import TenhouDecoder, Meld
 
 
-class TenhouClientTestCase(unittest.TestCase):
-
-    def test_generate_auth_token(self):
-        client = TenhouClient(None)
-
-        string = '20160318-54ebe070'
-        self.assertEqual('20160318-72b5ba21', client._generate_auth_token(string))
-
-        string = '20160319-5b859bb3'
-        self.assertEqual('20160319-9bc528f3', client._generate_auth_token(string))
-
-    def test_draw_tile(self):
-        client = TenhouClient(None)
-        client._draw_tile('<T23/>')
-        self.assertEqual(client.hand.tiles[0], 23)
-
 class TenhouDecoderTestCase(unittest.TestCase):
 
+    def test_parse_initial_round_values(self):
+        decoder = TenhouDecoder()
+        message = '<INIT seed="0,2,3,0,1,126" ten="250,250,250,250" oya="3" hai="30,67,44,21,133,123,87,69,36,34,94,4,128"/>'
+
+        values = decoder.parse_initial_values(message)
+        self.assertEqual(values['round_number'], 0)
+        self.assertEqual(values['count_of_honba_sticks'], 2)
+        self.assertEqual(values['count_of_riichi_sticks'], 3)
+        self.assertEqual(values['dora'], 126)
+        self.assertEqual(values['dealer'], 3)
+
     def test_parse_initial_hand(self):
-        hand = PlayerHand()
-        table = Table()
+        decoder = TenhouDecoder()
+        message = '<INIT seed="0,2,3,0,1,126" ten="250,250,250,250" oya="3" hai="30,67,44,21,133,123,87,69,36,34,94,4,128"/>'
+        tiles = decoder.parse_initial_hand(message)
 
-        decoder = TenhouDecoder(table, hand)
-        decoder.decode_initial_values('<INIT seed="0,2,3,0,1,126" ten="250,250,250,250" oya="3" hai="30,67,44,21,133,123,87,69,36,34,94,4,128"/>')
+        self.assertEqual(len(tiles), 13)
 
-        self.assertEqual(len(hand.tiles), 13)
-        self.assertTrue(table.get_player(3).is_dealer)
-        self.assertEqual(table.dora, 126)
-        self.assertEqual(table.count_of_honba_sticks, 2)
-        self.assertEqual(table.count_of_riichi_sticks, 3)
+    def test_parse_initial_scores(self):
+        decoder = TenhouDecoder()
+        message = '<INIT seed="0,2,3,0,1,126" ten="240,260,270,280" oya="3" hai="30,67,44,21,133,123,87,69,36,34,94,4,128"/>'
+        values = decoder.parse_initial_values(message)
+
+        self.assertEqual(values['scores'], [240, 260, 270, 280])
+
+    def test_parse_names_and_ranks(self):
+        decoder = TenhouDecoder()
+        message = '<un n0="%4e%6f%4e%61%6d%65" n1="%6f%32%6f%32" n2="%73%68%69%6d%6d%6d%6d%6d" n3="%e5%b7%9d%e6%b5%b7%e8%80%81" dan="0,7,12,1" rate="1500.00,1421.91,1790.94,1532.23" sx="m,m,m,m"/>'
+        values = decoder.parse_names_and_ranks(message)
+
+        self.assertEqual(values[0], {'name': 'NoName', 'rank': TenhouDecoder.RANKS[0]})
+        self.assertEqual(values[1], {'name': 'o2o2', 'rank': TenhouDecoder.RANKS[7]})
+        self.assertEqual(values[2], {'name': 'shimmmmm', 'rank': TenhouDecoder.RANKS[12]})
+        self.assertEqual(values[3], {'name': u'川海老', 'rank': TenhouDecoder.RANKS[1]})
+
+    def test_parse_final_scores_and_uma(self):
+        decoder = TenhouDecoder()
+        message = '<agari ba="0,0" hai="12,13,41,46,51,78,80,84,98,101,105" m="51243" machi="101" ten="30,1000,0" yaku="20,1" dorahai="89" who="2" fromwho="1" sc="225,0,240,-10,378,10,157,0" owari="225,-17.0,230,3.0,388,48.0,157,-34.0" />'
+        values = decoder.parse_final_scores_and_uma(message)
+
+        self.assertEqual(values['scores'], [225, 230, 388, 157])
+        self.assertEqual(values['uma'], [-17, 3, 48, -34])
+
+        message = '<ryuukyoku ten="30,1000,0" sc="225,0,240,-10,378,10,157,0" owari="225,-17.0,230,3.0,388,48.0,157,-34.0" />'
+        values = decoder.parse_final_scores_and_uma(message)
+
+        self.assertEqual(values['scores'], [225, 230, 388, 157])
+        self.assertEqual(values['uma'], [-17, 3, 48, -34])
+
+    def test_parse_log_link(self):
+        decoder = TenhouDecoder()
+        message = '<TAIKYOKU oya="1" log="2016031911gm-0001-0000-381f693b"/>'
+
+        result = decoder.parse_log_link(message)
+
+        self.assertEqual(result, 'http://tenhou.net/0/?log=2016031911gm-0001-0000-381f693b&tw=3')
+
+    def test_auth_message(self):
+        decoder = TenhouDecoder()
+        message = '<HELO uname="%4E%6F%4E%61%6D%65" auth="20160318-54ebe070" ratingscale=""/>'
+
+        result = decoder.parse_auth_string(message)
+
+        self.assertEqual(result, '20160318-54ebe070')
+
+    def test_generate_auth_token(self):
+        client = TenhouDecoder()
+
+        string = '20160318-54ebe070'
+        self.assertEqual(client.generate_auth_token(string), '20160318-72b5ba21')
+
+        string = '20160319-5b859bb3'
+        self.assertEqual(client.generate_auth_token(string), '20160319-9bc528f3')
 
     def test_parse_called_pon(self):
-        hand = PlayerHand()
-        table = Table()
+        decoder = TenhouDecoder()
+        meld = decoder.parse_meld('<N who="3" m="34314" />')
 
-        decoder = TenhouDecoder(table, hand)
-        decoder.decode_meld('<N who="3" m="34314" />')
-
-        self.assertEqual(len(table.get_player(3).open_sets), 1)
-        self.assertEqual(table.get_player(3).open_sets[0].who, 3)
-        self.assertEqual(table.get_player(3).open_sets[0].type, Meld.PON)
-        self.assertEqual(table.get_player(3).open_sets[0].tiles, (89, 90, 91))
+        self.assertEqual(meld.who, 3)
+        self.assertEqual(meld.type, Meld.PON)
+        self.assertEqual(meld.tiles, [89, 90, 91])
 
     def test_parse_called_kan(self):
-        hand = PlayerHand()
-        table = Table()
+        decoder = TenhouDecoder()
+        meld = decoder.parse_meld('<N who="3" m="13825" />')
 
-        decoder = TenhouDecoder(table, hand)
-        decoder.decode_meld('<N who="3" m="13825" />')
-
-        self.assertEqual(len(table.get_player(3).open_sets), 1)
-        self.assertEqual(table.get_player(3).open_sets[0].who, 3)
-        self.assertEqual(table.get_player(3).open_sets[0].type, Meld.KAN)
-        self.assertEqual(table.get_player(3).open_sets[0].tiles, (52, 53, 54, 55))
+        self.assertEqual(meld.who, 3)
+        self.assertEqual(meld.type, Meld.KAN)
+        self.assertEqual(meld.tiles, [52, 53, 54, 55])
 
     def test_parse_called_chakan(self):
-        hand = PlayerHand()
-        table = Table()
+        decoder = TenhouDecoder()
+        meld = decoder.parse_meld('<N who="3" m="18547" />')
 
-        decoder = TenhouDecoder(table, hand)
-        decoder.decode_meld('<N who="3" m="18547" />')
-
-        self.assertEqual(len(table.get_player(3).open_sets), 1)
-        self.assertEqual(table.get_player(3).open_sets[0].who, 3)
-        self.assertEqual(table.get_player(3).open_sets[0].type, Meld.CHAKAN)
-        self.assertEqual(table.get_player(3).open_sets[0].tiles, (48, 49, 50, 51))
+        self.assertEqual(meld.who, 3)
+        self.assertEqual(meld.type, Meld.CHAKAN)
+        self.assertEqual(meld.tiles, [48, 49, 50, 51])
 
     def test_parse_called_chi(self):
-        hand = PlayerHand()
+        decoder = TenhouDecoder()
+        meld = decoder.parse_meld('<N who="3" m="27031" />')
 
-        table = Table()
-
-        decoder = TenhouDecoder(table, hand)
-        decoder.decode_meld('<N who="3" m="27031" />')
-
-        self.assertEqual(len(table.get_player(3).open_sets), 1)
-        self.assertEqual(table.get_player(3).open_sets[0].who, 3)
-        self.assertEqual(table.get_player(3).open_sets[0].type, Meld.CHI)
-        self.assertEqual(table.get_player(3).open_sets[0].tiles, (42, 44, 51))
+        self.assertEqual(meld.who, 3)
+        self.assertEqual(meld.type, Meld.CHI)
+        self.assertEqual(meld.tiles, (42, 44, 51))
 
     def test_parse_tile(self):
-        hand = PlayerHand()
-        table = Table()
-        decoder = TenhouDecoder(table, hand)
+        decoder = TenhouDecoder()
 
-        tile = decoder.decode_tile('<t23/>')
+        tile = decoder.parse_tile('<t23/>')
         self.assertEqual(tile, 23)
 
-        tile = decoder.decode_tile('<e24/>')
+        tile = decoder.parse_tile('<e24/>')
         self.assertEqual(tile, 24)
 
-        tile = decoder.decode_tile('<f25/>')
+        tile = decoder.parse_tile('<f25/>')
         self.assertEqual(tile, 25)
 
-        tile = decoder.decode_tile('<g26/>')
+        tile = decoder.parse_tile('<g26/>')
         self.assertEqual(tile, 26)
 
-        tile = decoder.decode_tile('<f23 t="4"/>')
+        tile = decoder.parse_tile('<f23 t="4"/>')
         self.assertEqual(tile, 23)

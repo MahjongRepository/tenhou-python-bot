@@ -13,6 +13,7 @@ class Player(object):
     name = ''
     rank = ''
     discards = None
+    tiles = None
     melds = None
     is_dealer = False
 
@@ -25,7 +26,7 @@ class Player(object):
     def __str__(self):
         result = u'{0}'.format(self.name)
         if self.scores:
-            result += u' ({0})'.format(self.scores)
+            result += u' ({:,d})'.format(int(self.scores * 100))
             if self.uma:
                 result += u' {0}'.format(self.uma)
         else:
@@ -59,3 +60,9 @@ class Player(object):
         self.add_discarded_tile(tile_to_discard)
 
         return tile_to_discard
+
+    def erase_state(self):
+        self.discards = []
+        self.melds = []
+        self.tiles = []
+        self.is_dealer = False

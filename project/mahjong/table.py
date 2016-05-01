@@ -25,7 +25,9 @@ class Table(object):
         self.count_of_riichi_sticks = count_of_riichi_sticks
         self.dora = dora
 
-        self._init_players()
+        # erase players state
+        [i.erase_state() for i in self.players]
+
         self.get_player(dealer).is_dealer = True
 
         self.set_players_scores(scores)

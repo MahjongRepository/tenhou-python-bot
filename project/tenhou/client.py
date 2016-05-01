@@ -66,6 +66,10 @@ class TenhouClient(Client):
                     game_started = True
                     log = self.decoder.parse_log_link(message)
 
+                if '<un' in message:
+                    values = self.decoder.parse_names_and_ranks(message)
+                    self.table.set_players_names_and_ranks(values)
+
         logger.info('Game started')
         logger.info('Log: {0}'.format(log))
         logger.info('Players: {0}'.format(self.table.players))
@@ -88,11 +92,11 @@ class TenhouClient(Client):
                         values['scores'],
                     )
 
-                    logger.info('Players: {0}'.format(self.table.get_players_sorted_by_scores()))
+                    tiles = self.decoder.parse_initial_hand(message)
+                    self.table.init_main_player_hand(tiles)
 
-                if '<un' in message:
-                    values = self.decoder.parse_names_and_ranks(message)
-                    self.table.set_players_names_and_ranks(values)
+                    logger.info('Round: {0}, Honba: {1}'.format(self.table.round_number, self.table.count_of_honba_sticks))
+                    logger.info('Players: {0}'.format(self.table.get_players_sorted_by_scores()))
 
                 # draw and discard
                 if '<t' in message:
@@ -118,6 +122,7 @@ class TenhouClient(Client):
                 if '<n who=' in message:
                     meld = self.decoder.parse_meld(message)
                     self.call_meld(meld)
+                    logger.info('Meld: {0}, who {1}'.format(meld.type, meld.who))
 
                 other_players_discards = ['<e', '<f', '<g']
                 if any(i in message for i in other_players_discards):
@@ -139,7 +144,7 @@ class TenhouClient(Client):
                 if '<prof' in message:
                     self.game_is_continue = False
 
-        logger.info('Players: {0}'.format(','.join(self.table.get_players_sorted_by_scores())))
+        logger.info('Final results: {0}'.format(self.table.get_players_sorted_by_scores()))
 
         self.end_the_game()
 

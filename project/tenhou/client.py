@@ -121,6 +121,7 @@ class TenhouClient(Client):
                 if '<dora' in message:
                     tile = self.decoder.parse_dora_indicator(message)
                     self.table.add_dora_indicator(tile)
+                    logger.info('New dora indicator: {0}'.format(tile))
 
                 # the end of round
                 if 'agari' in message or 'ryuukyoku' in message:

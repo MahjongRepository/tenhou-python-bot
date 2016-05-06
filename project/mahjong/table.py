@@ -15,9 +15,9 @@ class Table(object):
         self._init_players()
 
     def __str__(self):
-        return 'Round: {0}, Honba: {1} Dora Indicators: {2}'.format(self.round_number,
-                                                                    self.count_of_honba_sticks,
-                                                                    self.dora_indicators)
+        return 'Round: {0}, Honba: {1}, Dora Indicators: {2}'.format(self.round_number,
+                                                                     self.count_of_honba_sticks,
+                                                                     self.dora_indicators)
 
     def init_round(self, round_number, count_of_honba_sticks, count_of_riichi_sticks,
                    dora_indicator, dealer, scores):

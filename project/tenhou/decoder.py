@@ -117,11 +117,11 @@ class TenhouDecoder(object):
         soup = BeautifulSoup(message, 'html.parser')
         tag = soup.find('taikyoku')
 
-        oya = int(tag.attrs['oya'])
-        oya = (4 - oya) % 4
-        log = tag.attrs['log']
+        seat = int(tag.attrs['oya'])
+        seat = (4 - seat) % 4
+        game_id = tag.attrs['log']
 
-        return 'http://tenhou.net/0/?log={0}&tw={1}'.format(log, oya)
+        return game_id, seat
 
     def parse_tile(self, message):
         # tenhou format: <t23/>, <e23/>, <f23 t="4"/>, <f23/>, <g23/>

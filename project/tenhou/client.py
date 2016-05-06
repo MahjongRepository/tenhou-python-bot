@@ -1,8 +1,10 @@
 import logging
 from threading import Thread
 from time import sleep
+from urllib.parse import quote
 
 from mahjong.client import Client
+from tenhou import settings
 from tenhou.decoder import TenhouDecoder
 
 logger = logging.getLogger('tenhou')
@@ -20,7 +22,7 @@ class TenhouClient(Client):
         self.socket = socket
 
     def authenticate(self):
-        self._send_message('<HELO name="NoName" tid="f0" sx="M" />')
+        self._send_message('<HELO name="{0}" tid="f0" sx="M" />'.format(quote(settings.USER_ID)))
         auth_message = self._read_message()
 
         auth_string = self.decoder.parse_auth_string(auth_message)
@@ -44,7 +46,7 @@ class TenhouClient(Client):
     def start_the_game(self):
         log = ''
         game_started = False
-        self._send_message('<JOIN t="0,1" />')
+        self._send_message('<JOIN t="{0}" />'.format(settings.GAME_TYPE))
         logger.info('Looking for the game...')
 
         while not game_started:
@@ -56,7 +58,7 @@ class TenhouClient(Client):
 
                 if '<rejoin' in message:
                     # game wasn't found, continue to wait
-                    self._send_message('<JOIN t="0,1,r" />')
+                    self._send_message('<JOIN t="{0},r" />'.format(settings.GAME_TYPE))
 
                 if '<go' in message:
                     self._send_message('<GOK />')
@@ -64,7 +66,10 @@ class TenhouClient(Client):
 
                 if '<taikyoku' in message:
                     game_started = True
-                    log = self.decoder.parse_log_link(message)
+                    game_id, seat = self.decoder.parse_log_link(message)
+                    log = 'http://tenhou.net/0/?log={0}&tw={1}'.format(game_id, seat)
+                    self.statistics.game_id = game_id
+                    self.statistics.seat = seat
 
                 if '<un' in message:
                     values = self.decoder.parse_names_and_ranks(message)
@@ -146,7 +151,13 @@ class TenhouClient(Client):
 
         logger.info('Final results: {0}'.format(self.table.get_players_sorted_by_scores()))
 
+        self.statistics.position = self.table.get_main_player().position
+        self.statistics.scores = self.table.get_main_player().scores
+
         self.end_the_game()
+
+        self.statistics.send_statistics()
+        logger.info('Statistics sent')
 
     def end_the_game(self):
         self._send_message('<BYE />')

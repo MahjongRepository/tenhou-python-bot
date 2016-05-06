@@ -58,9 +58,10 @@ class TenhouDecoderTestCase(unittest.TestCase):
         decoder = TenhouDecoder()
         message = '<TAIKYOKU oya="1" log="2016031911gm-0001-0000-381f693b"/>'
 
-        result = decoder.parse_log_link(message)
+        game_id, position = decoder.parse_log_link(message)
 
-        self.assertEqual(result, 'http://tenhou.net/0/?log=2016031911gm-0001-0000-381f693b&tw=3')
+        self.assertEqual(game_id, '2016031911gm-0001-0000-381f693b')
+        self.assertEqual(position, 3)
 
     def test_auth_message(self):
         decoder = TenhouDecoder()

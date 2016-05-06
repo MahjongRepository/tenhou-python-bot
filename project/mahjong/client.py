@@ -1,10 +1,13 @@
+from mahjong.stat import Statistics
 from mahjong.table import Table
 
 
 class Client(object):
+    statistics = None
 
     def __init__(self):
         self.table = Table()
+        self.statistics = Statistics()
 
     def authenticate(self):
         pass

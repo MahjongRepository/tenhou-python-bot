@@ -13,7 +13,7 @@ class TenhouDecoderTestCase(unittest.TestCase):
         self.assertEqual(values['round_number'], 0)
         self.assertEqual(values['count_of_honba_sticks'], 2)
         self.assertEqual(values['count_of_riichi_sticks'], 3)
-        self.assertEqual(values['dora'], 126)
+        self.assertEqual(values['dora_indicator'], 126)
         self.assertEqual(values['dealer'], 3)
 
     def test_parse_initial_hand(self):
@@ -79,6 +79,14 @@ class TenhouDecoderTestCase(unittest.TestCase):
 
         string = '20160319-5b859bb3'
         self.assertEqual(client.generate_auth_token(string), '20160319-9bc528f3')
+
+    def test_decode_new_dora_indicator(self):
+        decoder = TenhouDecoder()
+        message = '<DORA hai="125" />'
+
+        result = decoder.parse_dora_indicator(message)
+
+        self.assertEqual(result, 125)
 
     def test_parse_called_pon(self):
         decoder = TenhouDecoder()

@@ -29,7 +29,7 @@ class TenhouDecoder(object):
         '九段',
         '十段',
         '天鳳位'
-    ];
+    ]
 
     def parse_auth_string(self, message):
         soup = BeautifulSoup(message, 'html.parser')
@@ -59,7 +59,7 @@ class TenhouDecoder(object):
         round_number = seed[0]
         count_of_honba_sticks = seed[1]
         count_of_riichi_sticks = seed[2]
-        dora = seed[5]
+        dora_indicator = seed[5]
         dealer = int(tag.attrs['oya'])
 
         scores = tag.attrs['ten'].split(',')
@@ -69,7 +69,7 @@ class TenhouDecoder(object):
             'round_number': round_number,
             'count_of_honba_sticks': count_of_honba_sticks,
             'count_of_riichi_sticks': count_of_riichi_sticks,
-            'dora': dora,
+            'dora_indicator': dora_indicator,
             'dealer': dealer,
             'scores': scores
         }
@@ -178,6 +178,11 @@ class TenhouDecoder(object):
     def parse_nuki(self, data, meld):
         meld.type = Meld.NUKI
         meld.tiles = Tile(data >> 8)
+
+    def parse_dora_indicator(self, message):
+        soup = BeautifulSoup(message, 'html.parser')
+        tag = soup.find('dora')
+        return int(tag.attrs['hai'])
 
     def generate_auth_token(self, auth_string):
         translation_table = [63006, 9570, 49216, 45888, 9822, 23121, 59830, 51114, 54831, 4189, 580, 5203, 42174, 59972,

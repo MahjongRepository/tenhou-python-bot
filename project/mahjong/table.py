@@ -4,26 +4,28 @@ from mahjong.player import Player
 class Table(object):
     players = []
 
-    dora = None
+    dora_indicators = []
 
     round_number = 0
     count_of_riichi_sticks = 0
     count_of_honba_sticks = 0
 
     def __init__(self):
+        self.dora_indicators = []
         self._init_players()
 
     def __str__(self):
-        return 'Round: {0}, Dora: {1}, Riichi sticks: {2}, Honba sticks: {3}'.format(self.round_number,
-                                                                                     self.dora,
-                                                                                     self.count_of_riichi_sticks,
-                                                                                     self.count_of_honba_sticks)
+        return 'Round: {0}, Honba: {1} Dora Indicators: {2}'.format(self.round_number,
+                                                                    self.count_of_honba_sticks,
+                                                                    self.dora_indicators)
 
-    def init_round(self, round_number, count_of_honba_sticks, count_of_riichi_sticks, dora, dealer, scores):
+    def init_round(self, round_number, count_of_honba_sticks, count_of_riichi_sticks,
+                   dora_indicator, dealer, scores):
+
         self.round_number = round_number
         self.count_of_honba_sticks = count_of_honba_sticks
         self.count_of_riichi_sticks = count_of_riichi_sticks
-        self.dora = dora
+        self.add_dora_indicator(dora_indicator)
 
         # erase players state
         [i.erase_state() for i in self.players]
@@ -37,6 +39,9 @@ class Table(object):
 
     def add_open_set(self, meld):
         self.get_player(meld.who).add_open_set(meld)
+
+    def add_dora_indicator(self, tile):
+        self.dora_indicators.append(tile)
 
     def set_players_scores(self, scores, uma=None):
         for i in range(0, len(scores)):

@@ -96,7 +96,7 @@ class TenhouClient(Client):
                         values['round_number'],
                         values['count_of_honba_sticks'],
                         values['count_of_riichi_sticks'],
-                        values['dora'],
+                        values['dora_indicator'],
                         values['dealer'],
                         values['scores'],
                     )
@@ -104,7 +104,7 @@ class TenhouClient(Client):
                     tiles = self.decoder.parse_initial_hand(message)
                     self.table.init_main_player_hand(tiles)
 
-                    logger.info('Round: {0}, Honba: {1}'.format(self.table.round_number, self.table.count_of_honba_sticks))
+                    logger.info(self.table.__str__())
                     logger.info('Players: {0}'.format(self.table.get_players_sorted_by_scores()))
 
                 # draw and discard
@@ -116,6 +116,11 @@ class TenhouClient(Client):
                     tile = self.discard_tile()
                     # tenhou format: <D p="133" />
                     self._send_message('<D p="{0}"/>'.format(tile))
+
+                # new dora indicator after kan
+                if '<dora' in message:
+                    tile = self.decoder.parse_dora_indicator(message)
+                    self.table.add_dora_indicator(tile)
 
                 # the end of round
                 if 'agari' in message or 'ryuukyoku' in message:

@@ -20,16 +20,16 @@ class TableTestCase(unittest.TestCase):
         round_number = 4
         count_of_honba_sticks = 2
         count_of_riichi_sticks = 3
-        dora = 126
+        dora_indicator = 126
         dealer = 3
         scores = [250, 250, 250, 250]
 
-        table.init_round(round_number, count_of_honba_sticks, count_of_riichi_sticks, dora, dealer, scores)
+        table.init_round(round_number, count_of_honba_sticks, count_of_riichi_sticks, dora_indicator, dealer, scores)
 
         self.assertEqual(table.round_number, round_number)
         self.assertEqual(table.count_of_honba_sticks, count_of_honba_sticks)
         self.assertEqual(table.count_of_riichi_sticks, count_of_riichi_sticks)
-        self.assertEqual(table.dora, dora)
+        self.assertEqual(table.dora_indicators[0], dora_indicator)
         self.assertEqual(table.get_player(dealer).is_dealer, True)
         self.assertEqual(table.get_player(dealer).scores, 250)
 

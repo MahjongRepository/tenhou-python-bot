@@ -75,6 +75,10 @@ class TenhouClient(Client):
                     values = self.decoder.parse_names_and_ranks(message)
                     self.table.set_players_names_and_ranks(values)
 
+                # I have no idea why we need to send it, but it is exists in official client
+                if '<ln' in message:
+                    self._send_message('<PXR V="1" />')
+
         logger.info('Game started')
         logger.info('Log: {0}'.format(log))
         logger.info('Players: {0}'.format(self.table.players))

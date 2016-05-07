@@ -1,27 +1,35 @@
 import random
 
+from mahjong.ai.random import RandomAI
 from mahjong.tile import Tile
 
 
 class Player(object):
+    ai_class = RandomAI
     # the place where is player is sitting
     seat = 0
     # position based on scores
     position = 0
     scores = 0
     uma = 0
+
     name = ''
     rank = ''
+
+    table = None
     discards = None
     tiles = None
     melds = None
     is_dealer = False
 
-    def __init__(self, seat):
+    def __init__(self, seat, table):
         self.discards = []
         self.melds = []
         self.tiles = []
         self.seat = seat
+        self.table = table
+
+        self.ai = self.ai_class(self)
 
     def __str__(self):
         result = u'{0}'.format(self.name)
@@ -50,19 +58,12 @@ class Player(object):
         self.tiles.append(tile)
 
     def discard_tile(self):
-        # it will be complex logic for determination of discard tile (someday)
-        # but for now it is just random discard
-        tile_to_discard = random.randrange(len(self.tiles) - 1)
-        tile_to_discard = self.tiles[tile_to_discard]
-
-        self.tiles.remove(tile_to_discard)
-
-        self.add_discarded_tile(tile_to_discard)
-
-        return tile_to_discard
+        return self.ai.discard_tile()
 
     def erase_state(self):
         self.discards = []
         self.melds = []
         self.tiles = []
         self.is_dealer = False
+
+        self.ai = self.ai_class(self)

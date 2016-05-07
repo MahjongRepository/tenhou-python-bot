@@ -25,6 +25,8 @@ class Table(object):
         self.round_number = round_number
         self.count_of_honba_sticks = count_of_honba_sticks
         self.count_of_riichi_sticks = count_of_riichi_sticks
+
+        self.dora_indicators = []
         self.add_dora_indicator(dora_indicator)
 
         # erase players state
@@ -74,5 +76,5 @@ class Table(object):
         self.players = []
 
         for seat in range(0, 4):
-            player = Player(seat=seat)
+            player = Player(seat=seat, table=self)
             self.players.append(player)

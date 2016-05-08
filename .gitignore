@@ -6,3 +6,5 @@ __pycache__
 .DS_Store
 logs
 settings_local.py
+
+test.js

@@ -1,6 +1,3 @@
-from mahjong.ai import random
-
-
 class BaseAI(object):
     player = None
 

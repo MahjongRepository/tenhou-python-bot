@@ -1,5 +1,4 @@
 import random
-
 from mahjong.ai.base import BaseAI
 
 
@@ -14,7 +13,5 @@ class RandomAI(BaseAI):
         tile_to_discard = self.player.tiles[tile_to_discard]
 
         self.player.tiles.remove(tile_to_discard)
-
-        self.player.add_discarded_tile(tile_to_discard)
 
         return tile_to_discard

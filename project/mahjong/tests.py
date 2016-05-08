@@ -115,7 +115,7 @@ class ClientTestCase(unittest.TestCase):
 
         self.assertEqual(len(client.table.get_main_player().tiles), 13)
         self.assertEqual(len(client.table.get_main_player().discards), 1)
-        self.assertFalse(tile in tiles)
+        self.assertFalse(tile in client.table.get_main_player().tiles)
 
     def test_call_meld(self):
         client = Client()

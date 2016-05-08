@@ -52,13 +52,15 @@ class Player(object):
         self.discards.append(Tile(tile))
 
     def init_hand(self, tiles):
-        self.tiles = tiles
+        self.tiles = [Tile(i) for i in tiles]
 
     def draw_tile(self, tile):
-        self.tiles.append(tile)
+        self.tiles.append(Tile(tile))
 
     def discard_tile(self):
-        return self.ai.discard_tile()
+        tile_to_discard = self.ai.discard_tile()
+        self.add_discarded_tile(tile_to_discard)
+        return tile_to_discard
 
     def erase_state(self):
         self.discards = []

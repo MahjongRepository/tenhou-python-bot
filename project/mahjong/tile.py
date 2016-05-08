@@ -9,3 +9,25 @@ class Tile(int):
 
     def as_data(self):
         return self.TILES[self // 4]
+
+    # This method will prepare the list of tiles, to use in tenhou shanten analyzer
+    # it needed for debug
+    @staticmethod
+    def prepare_to_tenhou_analyzer(tiles):
+        sou = [t for t in tiles if t < 36]
+
+        pin = [t for t in tiles if 36 <= t < 72]
+        pin = [t - 36 for t in pin]
+
+        man = [t for t in tiles if 72 <= t < 108]
+        man = [t - 72 for t in man]
+
+        honors = [t for t in tiles if t >= 108]
+        honors = [t - 108 for t in honors]
+
+        man = ''.join([str((i // 4) + 1) for i in man]) + 'm'
+        pin = ''.join([str((i // 4) + 1) for i in pin]) + 'p'
+        sou = ''.join([str((i // 4) + 1) for i in sou]) + 's'
+        honors = ''.join([str((i // 4) + 1) for i in honors]) + 'z'
+
+        return 'http://tenhou.net/2/?q=' + sou + pin + man + honors

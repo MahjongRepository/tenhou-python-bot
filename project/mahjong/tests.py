@@ -3,6 +3,7 @@ import unittest
 from mahjong.client import Client
 from mahjong.meld import Meld
 from mahjong.table import Table
+from mahjong.tile import TilesConverter
 
 
 class TableTestCase(unittest.TestCase):
@@ -32,6 +33,17 @@ class TableTestCase(unittest.TestCase):
         self.assertEqual(table.dora_indicators[0], dora_indicator)
         self.assertEqual(table.get_player(dealer).is_dealer, True)
         self.assertEqual(table.get_player(dealer).scores, 250)
+
+        dealer = 2
+        table.get_main_player().in_tempai = True
+        table.get_main_player().in_riichi = True
+        table.init_round(round_number, count_of_honba_sticks, count_of_riichi_sticks, dora_indicator, dealer, scores)
+
+        # test that we reinit round properly
+        self.assertEqual(table.get_player(3).is_dealer, False)
+        self.assertEqual(table.get_main_player().in_tempai, False)
+        self.assertEqual(table.get_main_player().in_riichi, False)
+        self.assertEqual(table.get_player(dealer).is_dealer, True)
 
     def test_set_scores(self):
         table = Table()
@@ -107,7 +119,7 @@ class ClientTestCase(unittest.TestCase):
 
     def test_discard_tile(self):
         client = Client()
-        tiles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+        tiles = [1, 22, 3, 4, 43, 6, 7, 8, 9, 55, 11, 12, 13, 99]
         client.table.init_main_player_hand(tiles)
         self.assertEqual(len(client.table.get_main_player().tiles), 14)
 
@@ -133,3 +145,39 @@ class ClientTestCase(unittest.TestCase):
         client.enemy_discard(1, 10)
 
         self.assertEqual(len(client.table.get_player(1).discards), 1)
+
+
+class TileTestCase(unittest.TestCase):
+
+    def test_convert_to_one_line_string(self):
+        tiles = [0, 1, 34, 35, 36, 37, 70, 71, 72, 73, 106, 107, 108, 109, 133, 134]
+        result = TilesConverter.to_one_line_string(tiles)
+        self.assertEqual('1199s1199p1199m1177z', result)
+
+    def test_convert_to_34_array(self):
+        tiles = [0, 34, 35, 36, 37, 70, 71, 72, 73, 106, 107, 108, 109, 134]
+        result = TilesConverter.to_34_array(tiles)
+        self.assertEqual(result[0], 1)
+        self.assertEqual(result[8], 2)
+        self.assertEqual(result[9], 2)
+        self.assertEqual(result[17], 2)
+        self.assertEqual(result[18], 2)
+        self.assertEqual(result[26], 2)
+        self.assertEqual(result[27], 2)
+        self.assertEqual(result[33], 1)
+        self.assertEqual(sum(result), 14)
+
+    def test_convert_string_to_136_array(self):
+        tiles = TilesConverter.string_to_136_array(sou='19', pin='19', man='19', honors='1234567')
+
+        self.assertEqual([0, 32, 36, 68, 72, 104, 108, 112, 116, 120, 124, 128, 132], tiles)
+
+    def test_find_34_tile_in_136_array(self):
+        result = TilesConverter.find_34_tile_in_136_array(0, [3, 4, 5, 6])
+        self.assertEqual(result, 3)
+
+        result = TilesConverter.find_34_tile_in_136_array(33, [3, 4, 134, 135])
+        self.assertEqual(result, 134)
+
+        result = TilesConverter.find_34_tile_in_136_array(20, [3, 4, 134, 135])
+        self.assertEqual(result, None)

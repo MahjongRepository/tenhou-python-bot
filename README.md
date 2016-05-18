@@ -1,8 +1,6 @@
 # What is it?
 
-This is simple draw and discard bot for the popular riichi mahjong server tenhou.net.
-
-I have a plans to build an AI to play riichi mahjong, but will see what happen next.
+This is simple bot for the popular riichi mahjong server tenhou.net.
 
 # How to run it?
 

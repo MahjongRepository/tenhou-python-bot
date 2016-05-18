@@ -1,11 +1,10 @@
-import random
-
-from mahjong.ai.random import RandomAI
+from mahjong.ai.main import MainAI
+from mahjong.ai.shanten import Shanten
 from mahjong.tile import Tile
 
 
 class Player(object):
-    ai_class = RandomAI
+    ai_class = MainAI
     # the place where is player is sitting
     seat = 0
     # position based on scores
@@ -21,6 +20,8 @@ class Player(object):
     tiles = None
     melds = None
     is_dealer = False
+    in_tempai = False
+    in_riichi = False
 
     def __init__(self, seat, table):
         self.discards = []
@@ -56,10 +57,14 @@ class Player(object):
 
     def draw_tile(self, tile):
         self.tiles.append(Tile(tile))
+        # we need sort it to have a better string presentation
+        self.tiles = sorted(self.tiles)
 
     def discard_tile(self):
         tile_to_discard = self.ai.discard_tile()
-        self.add_discarded_tile(tile_to_discard)
+        if tile_to_discard != Shanten.AGARI_STATE:
+            self.add_discarded_tile(tile_to_discard)
+            self.tiles.remove(tile_to_discard)
         return tile_to_discard
 
     def erase_state(self):
@@ -67,5 +72,7 @@ class Player(object):
         self.melds = []
         self.tiles = []
         self.is_dealer = False
+        self.in_tempai = False
+        self.in_riichi = False
 
         self.ai = self.ai_class(self)

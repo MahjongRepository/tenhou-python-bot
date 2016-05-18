@@ -10,10 +10,15 @@ class Tile(int):
     def as_data(self):
         return self.TILES[self // 4]
 
-    # This method will prepare the list of tiles, to use in tenhou shanten analyzer
-    # it needed for debug
+
+class TilesConverter(object):
+
     @staticmethod
-    def prepare_to_tenhou_analyzer(tiles):
+    def to_one_line_string(tiles):
+        """
+        Convert 136 tiles array to the one line string
+        Example of output 123s123p123m33z
+        """
         sou = [t for t in tiles if t < 36]
 
         pin = [t for t in tiles if 36 <= t < 72]
@@ -25,9 +30,70 @@ class Tile(int):
         honors = [t for t in tiles if t >= 108]
         honors = [t - 108 for t in honors]
 
-        man = ''.join([str((i // 4) + 1) for i in man]) + 'm'
-        pin = ''.join([str((i // 4) + 1) for i in pin]) + 'p'
-        sou = ''.join([str((i // 4) + 1) for i in sou]) + 's'
-        honors = ''.join([str((i // 4) + 1) for i in honors]) + 'z'
+        man = man and ''.join([str((i // 4) + 1) for i in man]) + 'm' or ''
+        pin = pin and ''.join([str((i // 4) + 1) for i in pin]) + 'p' or ''
+        sou = sou and ''.join([str((i // 4) + 1) for i in sou]) + 's' or ''
+        honors = honors and ''.join([str((i // 4) + 1) for i in honors]) + 'z' or ''
 
-        return 'http://tenhou.net/2/?q=' + sou + pin + man + honors
+        return sou + pin + man + honors
+
+    @staticmethod
+    def to_34_array(tiles):
+        """
+        Convert 136 array to the 34 tiles array
+        """
+        results = [0] * 34
+        for tile in tiles:
+            tile //= 4
+            results[tile] += 1
+        return results
+
+    @staticmethod
+    def string_to_136_array(sou=None, pin=None, man=None, honors=None):
+        """
+        Method to convert one line string tiles format to the 136 array
+        We need it to increase readability of our tests
+        """
+        def _split_string(string, offset):
+            results = []
+
+            if not string:
+                return []
+
+            for i in string:
+                tile = offset + (int(i) - 1) * 4
+                results.append(tile)
+
+            return results
+
+        results = _split_string(sou, 0)
+        results += _split_string(pin, 36)
+        results += _split_string(man, 72)
+        results += _split_string(honors, 108)
+
+        return results
+
+    @staticmethod
+    def find_34_tile_in_136_array(tile34, tiles):
+        """
+        Our shanten calculator will operate with 34 tiles format,
+        after calculations we need to find calculated 34 tile
+        in player's 136 tiles.
+
+        For example we had 0 tile from 34 array
+        in 136 array it can be present as 0, 1, 2, 3
+        """
+        if tile34 > 33:
+            return None
+
+        tile = tile34 * 4
+
+        possible_tiles = [tile] + [tile + i for i in range(1, 4)]
+
+        found_tile = None
+        for possible_tile in possible_tiles:
+            if possible_tile in tiles:
+                found_tile = possible_tile
+                break
+
+        return found_tile

@@ -1,9 +1,12 @@
 import logging
+import re
 from threading import Thread
 from time import sleep
 from urllib.parse import quote
 
+from mahjong.ai.shanten import Shanten
 from mahjong.client import Client
+from mahjong.tile import TilesConverter
 from tenhou import settings
 from tenhou.decoder import TenhouDecoder
 
@@ -44,7 +47,9 @@ class TenhouClient(Client):
             return False
 
     def start_the_game(self):
-        log = ''
+        log_link = ''
+        game_id = ''
+
         game_started = False
         self._send_message('<JOIN t="{0}" />'.format(settings.GAME_TYPE))
         logger.info('Looking for the game...')
@@ -67,9 +72,8 @@ class TenhouClient(Client):
                 if '<taikyoku' in message:
                     game_started = True
                     game_id, seat = self.decoder.parse_log_link(message)
-                    log = 'http://tenhou.net/0/?log={0}&tw={1}'.format(game_id, seat)
+                    log_link = 'http://tenhou.net/0/?log={0}&tw={1}'.format(game_id, seat)
                     self.statistics.game_id = game_id
-                    self.statistics.seat = seat
 
                 if '<un' in message:
                     values = self.decoder.parse_names_and_ranks(message)
@@ -80,8 +84,10 @@ class TenhouClient(Client):
                     self._send_message('<PXR V="1" />')
 
         logger.info('Game started')
-        logger.info('Log: {0}'.format(log))
+        logger.info('Log: {0}'.format(log_link))
         logger.info('Players: {0}'.format(self.table.players))
+
+        main_player = self.table.get_main_player()
 
         while self.game_is_continue:
             sleep(1)
@@ -110,12 +116,27 @@ class TenhouClient(Client):
                 # draw and discard
                 if '<t' in message:
                     tile = self.decoder.parse_tile(message)
-                    self.draw_tile(tile)
-                    sleep(1)
 
-                    tile = self.discard_tile()
-                    # tenhou format: <D p="133" />
-                    self._send_message('<D p="{0}"/>'.format(tile))
+                    if not main_player.in_riichi:
+                        self.draw_tile(tile)
+                        sleep(1)
+
+                        logger.info('Hand: {0}'.format(TilesConverter.to_one_line_string(main_player.tiles)))
+
+                        tile = self.discard_tile()
+
+                    if 't="16"' in message:
+                        # we win by self draw (tsumo)
+                        self._send_message('<N type="7" />')
+                    else:
+                        # let's call riichi and after this discard tile
+                        if main_player.in_tempai and not main_player.in_riichi:
+                            self._send_message('<REACH hai="{0}" />'.format(tile))
+                            sleep(2)
+                            main_player.in_riichi = True
+
+                        # tenhou format: <D p="133" />
+                        self._send_message('<D p="{0}"/>'.format(tile))
 
                 # new dora indicator after kan
                 if '<dora' in message:
@@ -139,8 +160,13 @@ class TenhouClient(Client):
                     self.call_meld(meld)
                     logger.info('Meld: {0}, who {1}'.format(meld.type, meld.who))
 
-                other_players_discards = ['<e', '<f', '<g']
-                if any(i in message for i in other_players_discards):
+                # other players discards: <e, <f, <g + tile number
+                match_discard = re.match(r"^<[efg]+\d.*", message)
+                if match_discard:
+                    # we win by other player's discard
+                    if 't="8"' in message:
+                        self._send_message('<N type="6" />')
+
                     tile = self.decoder.parse_tile(message)
 
                     if '<e' in message:
@@ -161,13 +187,10 @@ class TenhouClient(Client):
 
         logger.info('Final results: {0}'.format(self.table.get_players_sorted_by_scores()))
 
-        self.statistics.position = self.table.get_main_player().position
-        self.statistics.scores = self.table.get_main_player().scores
-
         self.end_the_game()
 
-        self.statistics.send_statistics()
-        logger.info('Statistics sent')
+        result = self.statistics.send_statistics()
+        logger.info('Statistics sent: {0}'.format(result))
 
     def end_the_game(self):
         self._send_message('<BYE />')

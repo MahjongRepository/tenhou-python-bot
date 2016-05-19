@@ -47,7 +47,7 @@ class Table(object):
 
     def set_players_scores(self, scores, uma=None):
         for i in range(0, len(scores)):
-            self.get_player(i).scores = scores[i]
+            self.get_player(i).scores = scores[i] * 100
 
             if uma:
                 self.get_player(i).uma = uma[i]

@@ -35,7 +35,7 @@ class Player(object):
     def __str__(self):
         result = u'{0}'.format(self.name)
         if self.scores:
-            result += u' ({:,d})'.format(int(self.scores * 100))
+            result += u' ({:,d})'.format(int(self.scores))
             if self.uma:
                 result += u' {0}'.format(self.uma)
         else:
@@ -76,3 +76,6 @@ class Player(object):
         self.in_riichi = False
 
         self.ai = self.ai_class(self)
+
+    def can_call_riichi(self):
+        return self.in_tempai and not self.in_riichi and self.scores >= 1000

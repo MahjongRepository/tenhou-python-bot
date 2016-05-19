@@ -128,7 +128,7 @@ class TenhouClient(Client):
                         self._send_message('<N type="7" />')
                     else:
                         # let's call riichi and after this discard tile
-                        if main_player.in_tempai and not main_player.in_riichi:
+                        if main_player.can_call_riichi():
                             self._send_message('<REACH hai="{0}" />'.format(tile))
                             sleep(2)
                             main_player.in_riichi = True
@@ -187,7 +187,7 @@ class TenhouClient(Client):
 
         self.end_the_game()
 
-        # sometimes log is available just after the game
+        # sometimes log is not available just after the game
         # let's wait one minute before the statistics update
         sleep(60)
         result = self.statistics.send_statistics()

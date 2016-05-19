@@ -2,6 +2,7 @@ import unittest
 
 from mahjong.client import Client
 from mahjong.meld import Meld
+from mahjong.player import Player
 from mahjong.table import Table
 from mahjong.tile import TilesConverter
 
@@ -32,7 +33,7 @@ class TableTestCase(unittest.TestCase):
         self.assertEqual(table.count_of_riichi_sticks, count_of_riichi_sticks)
         self.assertEqual(table.dora_indicators[0], dora_indicator)
         self.assertEqual(table.get_player(dealer).is_dealer, True)
-        self.assertEqual(table.get_player(dealer).scores, 250)
+        self.assertEqual(table.get_player(dealer).scores, 25000)
 
         dealer = 2
         table.get_main_player().in_tempai = True
@@ -52,10 +53,10 @@ class TableTestCase(unittest.TestCase):
 
         table.set_players_scores(scores)
 
-        self.assertEqual(table.get_player(0).scores, 230)
-        self.assertEqual(table.get_player(1).scores, 110)
-        self.assertEqual(table.get_player(2).scores, 55)
-        self.assertEqual(table.get_player(3).scores, 405)
+        self.assertEqual(table.get_player(0).scores, 23000)
+        self.assertEqual(table.get_player(1).scores, 11000)
+        self.assertEqual(table.get_player(2).scores, 5500)
+        self.assertEqual(table.get_player(3).scores, 40500)
 
     def test_set_scores_and_uma(self):
         table = Table()
@@ -65,13 +66,13 @@ class TableTestCase(unittest.TestCase):
 
         table.set_players_scores(scores, uma)
 
-        self.assertEqual(table.get_player(0).scores, 230)
+        self.assertEqual(table.get_player(0).scores, 23000)
         self.assertEqual(table.get_player(0).uma, -17)
-        self.assertEqual(table.get_player(1).scores, 110)
+        self.assertEqual(table.get_player(1).scores, 11000)
         self.assertEqual(table.get_player(1).uma, 3)
-        self.assertEqual(table.get_player(2).scores, 55)
+        self.assertEqual(table.get_player(2).scores, 5500)
         self.assertEqual(table.get_player(2).uma, 48)
-        self.assertEqual(table.get_player(3).scores, 405)
+        self.assertEqual(table.get_player(3).scores, 40500)
         self.assertEqual(table.get_player(3).uma, -34)
 
     def test_set_scores_and_recalculate_player_position(self):
@@ -181,3 +182,27 @@ class TileTestCase(unittest.TestCase):
 
         result = TilesConverter.find_34_tile_in_136_array(20, [3, 4, 134, 135])
         self.assertEqual(result, None)
+
+
+class PlayerTestCase(unittest.TestCase):
+
+    def test_can_call_riichi(self):
+        table = Table()
+        player = Player(0, table)
+
+        player.in_tempai = True
+        player.in_riichi = False
+        player.scores = 2000
+
+        self.assertEqual(player.can_call_riichi(), True)
+
+        player.in_riichi = True
+        self.assertEqual(player.can_call_riichi(), False)
+
+        player.in_riichi = False
+        player.scores = 500
+        self.assertEqual(player.can_call_riichi(), False)
+
+        player.in_riichi = False
+        player.scores = 1000
+        self.assertEqual(player.can_call_riichi(), True)

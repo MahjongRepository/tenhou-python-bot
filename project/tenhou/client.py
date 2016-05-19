@@ -35,8 +35,7 @@ class TenhouClient(Client):
         auth_token = self.decoder.generate_auth_token(auth_string)
 
         self._send_message('<AUTH val="{0}"/>'.format(auth_token))
-        self._send_message('<PXR V="0" />')
-        self._send_message('<PXR V="1" />')
+        self._send_message(self._pxr_tag())
 
         message = self._read_message()
         if '<ln' in message:
@@ -79,9 +78,8 @@ class TenhouClient(Client):
                     values = self.decoder.parse_names_and_ranks(message)
                     self.table.set_players_names_and_ranks(values)
 
-                # I have no idea why we need to send it, but it is exists in official client
                 if '<ln' in message:
-                    self._send_message('<PXR V="1" />')
+                    self._send_message(self._pxr_tag())
 
         logger.info('Game started')
         logger.info('Log: {0}'.format(log_link))
@@ -189,6 +187,9 @@ class TenhouClient(Client):
 
         self.end_the_game()
 
+        # sometimes log is available just after the game
+        # let's wait one minute before the statistics update
+        sleep(60)
         result = self.statistics.send_statistics()
         logger.info('Statistics sent: {0}'.format(result))
 
@@ -233,3 +234,10 @@ class TenhouClient(Client):
 
         self.keep_alive_thread = Thread(target=send_request)
         self.keep_alive_thread.start()
+
+    def _pxr_tag(self):
+        # I have no idea why we need to send it, but better to do it
+        if settings.USER_ID == 'NoName':
+            return '<PXR V="1" />'
+        else:
+            return '<PXR V="9" />'

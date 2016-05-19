@@ -15,4 +15,4 @@ class Statistics(object):
 
         result = requests.post(url, {'id': self.game_id}, headers={'Token': settings.STAT_TOKEN})
 
-        return result.status_code == 200
+        return result.status_code == 200 and result.json()['success']

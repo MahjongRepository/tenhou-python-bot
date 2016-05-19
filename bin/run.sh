@@ -1,11 +1,12 @@
 #!/bin/sh -e
 
-# kill old process (just in case)
-# usually old process will be already ended
-PID=`ps -eaf | grep project/main.py | grep -v grep | awk '{print $2}'`
-if [[ "" !=  "$PID" ]]; then
-  echo "killing $PID"
-  kill -9 $PID
-fi
+# cron will run each 5 minutes
+# and will search the run process
+# if there is no process, it will run it
 
-/home/bot/env/bin/python /home/bot/app/project/main.py
+# */5 * * * * bash /home/bot/app/bin/run.sh
+
+PID=`ps -eaf | grep project/main.py | grep -v grep | awk '{print $2}'`
+if [[ "" =  "$PID" ]]; then
+  /home/bot/env/bin/python /home/bot/app/project/main.py
+fi

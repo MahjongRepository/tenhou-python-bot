@@ -55,16 +55,16 @@ class TilesConverter(object):
         We need it to increase readability of our tests
         """
         def _split_string(string, offset):
-            results = []
+            data = []
 
             if not string:
                 return []
 
             for i in string:
                 tile = offset + (int(i) - 1) * 4
-                results.append(tile)
+                data.append(tile)
 
-            return results
+            return data
 
         results = _split_string(sou, 0)
         results += _split_string(pin, 36)

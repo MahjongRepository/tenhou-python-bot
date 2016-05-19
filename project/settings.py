@@ -8,6 +8,6 @@ STAT_TOKEN = ''
 GAME_TYPE = '0,1'
 
 try:
-    from .settings_local import *
-except:
+    from settings_local import *
+except ImportError:
     pass

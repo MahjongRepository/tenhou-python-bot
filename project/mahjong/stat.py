@@ -1,6 +1,6 @@
 import requests
 
-from tenhou import settings
+import settings
 
 
 class Statistics(object):

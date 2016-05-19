@@ -1,13 +1,13 @@
 import logging
-import re
 from threading import Thread
 from time import sleep
 from urllib.parse import quote
 
-from mahjong.ai.shanten import Shanten
+import re
+
+import settings
 from mahjong.client import Client
 from mahjong.tile import TilesConverter
-from tenhou import settings
 from tenhou.decoder import TenhouDecoder
 
 logger = logging.getLogger('tenhou')
@@ -47,7 +47,6 @@ class TenhouClient(Client):
 
     def start_the_game(self):
         log_link = ''
-        game_id = ''
 
         game_started = False
         self._send_message('<JOIN t="{0}" />'.format(settings.GAME_TYPE))

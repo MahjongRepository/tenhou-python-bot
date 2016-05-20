@@ -8,12 +8,11 @@
 
 PID=`ps -eaf | grep project/main.py | grep -v grep | awk '{print $2}'`
 
-
 if [[ "" =  "$PID" ]]; then
   /home/bot/env/bin/python /home/bot/app/project/main.py
 else
   WORKED_SECONDS=`ps -p "$PID" -o etimes=`
-  # if process run > 60 minutes, probably it hand and we need to kill it
+  # if process run > 60 minutes, probably it hung and we need to kill it
   if [[ ${WORKED_SECONDS} > 3600 ]]; then
     kill -9 ${PID}
   fi

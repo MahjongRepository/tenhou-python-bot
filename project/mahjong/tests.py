@@ -103,7 +103,7 @@ class TableTestCase(unittest.TestCase):
 
         self.assertEqual(table.get_player(0).name, 'NoName')
         self.assertEqual(table.get_player(0).rank, u'新人')
-        self.assertEqual(table.get_player(3).name, '川海老')
+        self.assertEqual(table.get_player(3).name, u'川海老')
         self.assertEqual(table.get_player(3).rank, u'9級')
 
 

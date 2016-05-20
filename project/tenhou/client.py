@@ -23,7 +23,7 @@ class TenhouClient(Client):
     decoder = TenhouDecoder()
 
     def __init__(self, socket):
-        super().__init__()
+        super(TenhouClient, self).__init__()
         self.socket = socket
 
     def authenticate(self):

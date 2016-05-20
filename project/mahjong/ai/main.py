@@ -9,7 +9,7 @@ class MainAI(BaseAI):
     shanten = None
 
     def __init__(self, player):
-        super().__init__(player)
+        super(MainAI, self).__init__(player)
         self.shanten = Shanten()
         self.agari = Agari()
 

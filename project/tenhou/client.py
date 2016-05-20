@@ -1,3 +1,4 @@
+import datetime
 import logging
 from threading import Thread
 from time import sleep
@@ -16,6 +17,7 @@ logger = logging.getLogger('tenhou')
 class TenhouClient(Client):
     socket = None
     game_is_continue = True
+    looking_for_game = True
     keep_alive_thread = None
 
     decoder = TenhouDecoder()
@@ -48,11 +50,12 @@ class TenhouClient(Client):
     def start_the_game(self):
         log_link = ''
 
-        game_started = False
         self._send_message('<JOIN t="{0}" />'.format(settings.GAME_TYPE))
         logger.info('Looking for the game...')
 
-        while not game_started:
+        start_time = datetime.datetime.now()
+
+        while self.looking_for_game:
             sleep(1)
 
             messages = self._get_multiple_messages()
@@ -68,7 +71,7 @@ class TenhouClient(Client):
                     self._send_message('<NEXTREADY />')
 
                 if '<taikyoku' in message:
-                    game_started = True
+                    self.looking_for_game = False
                     game_id, seat = self.decoder.parse_log_link(message)
                     log_link = 'http://tenhou.net/0/?log={0}&tw={1}'.format(game_id, seat)
                     self.statistics.game_id = game_id
@@ -79,6 +82,20 @@ class TenhouClient(Client):
 
                 if '<ln' in message:
                     self._send_message(self._pxr_tag())
+
+            current_time = datetime.datetime.now()
+            time_difference = current_time - start_time
+            # 20 minutes
+            if time_difference.seconds > 60 * 20:
+                break
+
+        # we wasn't able to find the game in 20 minutes
+        # sometimes it happens and we need to end process
+        # and try again later
+        if self.looking_for_game:
+            logger.error('Game is not started. Can\'t find the game')
+            self.end_the_game()
+            return
 
         logger.info('Game started')
         logger.info('Log: {0}'.format(log_link))

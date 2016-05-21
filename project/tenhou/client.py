@@ -210,13 +210,16 @@ class TenhouClient(Client):
 
         logger.info('Final results: {0}'.format(self.table.get_players_sorted_by_scores()))
 
+        # we need to finish the game, and only after this try to send statistics
+        # if order will be different, tenhou will return 404 on log download endpoint
+        self.end_the_game()
+
         # sometimes log is not available just after the game
         # let's wait one minute before the statistics update
         sleep(60)
         result = self.statistics.send_statistics()
         logger.info('Statistics sent: {0}'.format(result))
 
-        self.end_the_game()
 
     def end_the_game(self):
         self.game_is_continue = False

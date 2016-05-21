@@ -202,16 +202,18 @@ class TenhouClient(Client):
 
         logger.info('Final results: {0}'.format(self.table.get_players_sorted_by_scores()))
 
-        self.end_the_game()
-
         # sometimes log is not available just after the game
         # let's wait one minute before the statistics update
         sleep(60)
         result = self.statistics.send_statistics()
         logger.info('Statistics sent: {0}'.format(result))
 
+        self.end_the_game()
+
     def end_the_game(self):
         self._send_message('<BYE />')
+
+        sleep(2)
 
         self.socket.shutdown(self.socket.SHUT_RDWR)
         self.socket.close()

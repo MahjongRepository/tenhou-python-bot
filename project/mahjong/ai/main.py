@@ -1,8 +1,8 @@
+# -*- coding: utf-8 -*-
 from mahjong.ai.agari import Agari
 from mahjong.ai.base import BaseAI
 from mahjong.ai.shanten import Shanten
 from mahjong.tile import TilesConverter
-
 
 class MainAI(BaseAI):
     player = None

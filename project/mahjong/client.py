@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from mahjong.stat import Statistics
 from mahjong.table import Table
 

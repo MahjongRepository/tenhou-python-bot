@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from mahjong.ai.main import MainAI
 from mahjong.ai.shanten import Shanten
 from mahjong.tile import Tile

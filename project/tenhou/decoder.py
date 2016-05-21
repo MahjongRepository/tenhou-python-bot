@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from urllib.parse import unquote
 
 from bs4 import BeautifulSoup
@@ -8,27 +9,27 @@ from mahjong.tile import Tile
 
 class TenhouDecoder(object):
     RANKS = [
-        '新人',
-        '9級',
-        '8級',
-        '7級',
-        '6級',
-        '5級',
-        '4級',
-        '3級',
-        '2級',
-        '1級',
-        '初段',
-        '二段',
-        '三段',
-        '四段',
-        '五段',
-        '六段',
-        '七段',
-        '八段',
-        '九段',
-        '十段',
-        '天鳳位'
+        u'新人',
+        u'9級',
+        u'8級',
+        u'7級',
+        u'6級',
+        u'5級',
+        u'4級',
+        u'3級',
+        u'2級',
+        u'1級',
+        u'初段',
+        u'二段',
+        u'三段',
+        u'四段',
+        u'五段',
+        u'六段',
+        u'七段',
+        u'八段',
+        u'九段',
+        u'十段',
+        u'天鳳位'
     ]
 
     def parse_auth_string(self, message):

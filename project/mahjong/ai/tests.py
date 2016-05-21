@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import unittest
 
 from mahjong.ai.agari import Agari

@@ -14,6 +14,6 @@ else
   WORKED_SECONDS=`ps -p "$PID" -o etimes=`
   # if process run > 60 minutes, probably it hang and we need to kill it
   if [ ${WORKED_SECONDS} -gt "3600" ]; then
-    echo "run"
+    kill ${PID}
   fi
 fi

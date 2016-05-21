@@ -166,7 +166,8 @@ class TenhouClient(Client):
                     sleep(2)
                     self._send_message('<NEXTREADY />')
 
-                open_sets = ['t="1"', 't="2"', 't="3"', 't="4"', 't="5"']
+                # t="7" - suggest to open kan
+                open_sets = ['t="1"', 't="2"', 't="3"', 't="4"', 't="5"', 't="7"']
                 if any(i in message for i in open_sets):
                     sleep(1)
                     self._send_message('<N />')

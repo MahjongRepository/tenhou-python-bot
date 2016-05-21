@@ -10,6 +10,7 @@ import re
 
 import settings
 from mahjong.client import Client
+from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
 from tenhou.decoder import TenhouDecoder
 
@@ -175,6 +176,12 @@ class TenhouClient(Client):
                     meld = self.decoder.parse_meld(message)
                     self.call_meld(meld)
                     logger.info('Meld: {0}, who {1}'.format(meld.type, meld.who))
+
+                    # other player upgraded pon to kan, and it is our winning tile
+                    if meld.type == Meld.CHAKAN and 't="8"' in message:
+                        # actually I don't know what exactly client response should be
+                        # let's try usual ron response
+                        self._send_message('<N type="6" />')
 
                 # other players discards: <e, <f, <g + tile number
                 match_discard = re.match(r"^<[efg]+\d.*", message)

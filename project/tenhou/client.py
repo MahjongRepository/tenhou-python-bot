@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 import logging
+import socket
 from threading import Thread
 from time import sleep
 from urllib.parse import quote
@@ -86,11 +87,11 @@ class TenhouClient(Client):
 
             current_time = datetime.datetime.now()
             time_difference = current_time - start_time
-            # 20 minutes
-            if time_difference.seconds > 60 * 20:
+            # 10 minutes
+            if time_difference.seconds > 60 * 10:
                 break
 
-        # we wasn't able to find the game in 20 minutes
+        # we wasn't able to find the game in 10 minutes
         # sometimes it happens and we need to end process
         # and try again later
         if self.looking_for_game:
@@ -211,15 +212,14 @@ class TenhouClient(Client):
         self.end_the_game()
 
     def end_the_game(self):
+        self.game_is_continue = False
         self._send_message('<BYE />')
-
-        sleep(2)
-
-        self.socket.shutdown(self.socket.SHUT_RDWR)
-        self.socket.close()
 
         if self.keep_alive_thread:
             self.keep_alive_thread.join()
+
+        self.socket.shutdown(socket.SHUT_RDWR)
+        self.socket.close()
 
         logger.info('End of the game')
 

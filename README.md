@@ -1,6 +1,10 @@
+[![Build Status](https://travis-ci.org/MahjongRepository/tenhou-python-bot.svg?branch=master)](https://travis-ci.org/MahjongRepository/tenhou-python-bot)
+
 # What is it?
 
 This is simple bot for the popular riichi mahjong server tenhou.net.
+
+For now only **Python 3** is supported.
 
 # How to run it?
 

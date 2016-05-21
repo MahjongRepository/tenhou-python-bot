@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import datetime
 import logging
 from threading import Thread
@@ -211,9 +212,12 @@ class TenhouClient(Client):
 
     def end_the_game(self):
         self._send_message('<BYE />')
+
+        self.socket.shutdown(self.socket.SHUT_RDWR)
         self.socket.close()
 
-        self.keep_alive_thread.join()
+        if self.keep_alive_thread:
+            self.keep_alive_thread.join()
 
         logger.info('End of the game')
 

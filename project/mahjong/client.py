@@ -27,6 +27,11 @@ class Client(object):
         return self.table.get_main_player().discard_tile()
 
     def call_meld(self, meld):
+        # when opponent called meld it is means
+        # that he will not get the tile from the wall
+        # so, we need to compensate "-" from enemy discard method
+        self.table.count_of_remaining_tiles += 1
+
         return self.table.get_player(meld.who).add_meld(meld)
 
     def enemy_discard(self, player_seat, tile):

@@ -137,12 +137,16 @@ class ClientTestCase(unittest.TestCase):
     def test_call_meld(self):
         client = Client()
 
+        client.table.init_round(0, 0, 0, 0, 0, [0, 0, 0, 0])
+        self.assertEqual(client.table.count_of_remaining_tiles, 70)
+
         meld = Meld()
         meld.who = 3
 
         client.call_meld(meld)
 
         self.assertEqual(len(client.table.get_player(3).melds), 1)
+        self.assertEqual(client.table.count_of_remaining_tiles, 71)
 
     def test_enemy_discard(self):
         client = Client()

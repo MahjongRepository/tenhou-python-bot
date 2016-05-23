@@ -129,6 +129,7 @@ class TenhouClient(Client):
 
                     logger.info(self.table.__str__())
                     logger.info('Players: {0}'.format(self.table.get_players_sorted_by_scores()))
+                    logger.info('Dealer: {0}'.format(self.table.get_player(values['dealer'])))
 
                 # draw and discard
                 if '<t' in message:
@@ -139,6 +140,7 @@ class TenhouClient(Client):
                         sleep(1)
 
                         logger.info('Hand: {0}'.format(TilesConverter.to_one_line_string(main_player.tiles)))
+                        logger.info('Remaining tiles: {0}'.format(self.table.count_of_remaining_tiles))
 
                         tile = self.discard_tile()
 
@@ -154,6 +156,7 @@ class TenhouClient(Client):
 
                         # tenhou format: <D p="133" />
                         self._send_message('<D p="{0}"/>'.format(tile))
+
 
                 # new dora indicator after kan
                 if '<dora' in message:

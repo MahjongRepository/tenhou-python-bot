@@ -20,6 +20,7 @@ class Client(object):
         pass
 
     def draw_tile(self, tile):
+        self.table.count_of_remaining_tiles -= 1
         self.table.get_main_player().draw_tile(tile)
 
     def discard_tile(self):
@@ -30,3 +31,4 @@ class Client(object):
 
     def enemy_discard(self, player_seat, tile):
         self.table.get_player(player_seat).add_discarded_tile(tile)
+        self.table.count_of_remaining_tiles -= 1

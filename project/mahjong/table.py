@@ -11,9 +11,13 @@ class Table(object):
     count_of_riichi_sticks = 0
     count_of_honba_sticks = 0
 
+    count_of_remaining_tiles = 0
+    count_of_players = 4
+
     def __init__(self):
         self.dora_indicators = []
         self._init_players()
+
 
     def __str__(self):
         return 'Round: {0}, Honba: {1}, Dora Indicators: {2}'.format(self.round_number,
@@ -36,6 +40,11 @@ class Table(object):
         self.get_player(dealer).is_dealer = True
 
         self.set_players_scores(scores)
+
+        # 136 - total count of tiles
+        # 14 - tiles in dead wall
+        # 13 - tiles in each player hand
+        self.count_of_remaining_tiles = 136 - 14 - self.count_of_players * 13
 
     def init_main_player_hand(self, tiles):
         self.get_main_player().init_hand(tiles)
@@ -76,6 +85,6 @@ class Table(object):
     def _init_players(self):
         self.players = []
 
-        for seat in range(0, 4):
+        for seat in range(0, self.count_of_players):
             player = Player(seat=seat, table=self)
             self.players.append(player)

@@ -79,4 +79,9 @@ class Player(object):
         self.ai = self.ai_class(self)
 
     def can_call_riichi(self):
-        return self.in_tempai and not self.in_riichi and self.scores >= 1000
+        return all([
+            self.in_tempai,
+            not self.in_riichi,
+            self.scores >= 1000,
+            self.table.count_of_remaining_tiles > 4
+        ])

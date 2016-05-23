@@ -112,12 +112,15 @@ class ClientTestCase(unittest.TestCase):
     def test_draw_tile(self):
         client = Client()
         tiles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+        client.table.init_round(0, 0, 0, 0, 0, [0, 0, 0, 0])
         client.table.init_main_player_hand(tiles)
         self.assertEqual(len(client.table.get_main_player().tiles), 13)
+        self.assertEqual(client.table.count_of_remaining_tiles, 70)
 
         client.draw_tile(14)
 
         self.assertEqual(len(client.table.get_main_player().tiles), 14)
+        self.assertEqual(client.table.count_of_remaining_tiles, 69)
 
     def test_discard_tile(self):
         client = Client()
@@ -143,10 +146,14 @@ class ClientTestCase(unittest.TestCase):
 
     def test_enemy_discard(self):
         client = Client()
+        client.table.init_round(0, 0, 0, 0, 0, [0, 0, 0, 0])
+
+        self.assertEqual(client.table.count_of_remaining_tiles, 70)
 
         client.enemy_discard(1, 10)
 
         self.assertEqual(len(client.table.get_player(1).discards), 1)
+        self.assertEqual(client.table.count_of_remaining_tiles, 69)
 
 
 class TileTestCase(unittest.TestCase):
@@ -187,23 +194,64 @@ class TileTestCase(unittest.TestCase):
 
 class PlayerTestCase(unittest.TestCase):
 
-    def test_can_call_riichi(self):
+    def test_can_call_riichi_and_tempai(self):
+        table = Table()
+        player = Player(0, table)
+
+        player.in_tempai = False
+        player.in_riichi = False
+        player.scores = 2000
+        player.table.count_of_remaining_tiles = 40
+
+        self.assertEqual(player.can_call_riichi(), False)
+
+        player.in_tempai = True
+
+        self.assertEqual(player.can_call_riichi(), True)
+
+
+    def test_can_call_riichi_and_already_in_riichi(self):
+        table = Table()
+        player = Player(0, table)
+
+        player.in_tempai = True
+        player.in_riichi = True
+        player.scores = 2000
+        player.table.count_of_remaining_tiles = 40
+
+        self.assertEqual(player.can_call_riichi(), False)
+
+        player.in_riichi = False
+
+        self.assertEqual(player.can_call_riichi(), True)
+
+    def test_can_call_riichi_and_scores(self):
+        table = Table()
+        player = Player(0, table)
+
+        player.in_tempai = True
+        player.in_riichi = False
+        player.scores = 0
+        player.table.count_of_remaining_tiles = 40
+
+        self.assertEqual(player.can_call_riichi(), False)
+
+        player.scores = 1000
+
+        self.assertEqual(player.can_call_riichi(), True)
+
+    def test_can_call_riichi_and_remaining_tiles(self):
         table = Table()
         player = Player(0, table)
 
         player.in_tempai = True
         player.in_riichi = False
         player.scores = 2000
+        player.table.count_of_remaining_tiles = 3
+
+        self.assertEqual(player.can_call_riichi(), False)
+
+        player.table.count_of_remaining_tiles = 5
 
         self.assertEqual(player.can_call_riichi(), True)
 
-        player.in_riichi = True
-        self.assertEqual(player.can_call_riichi(), False)
-
-        player.in_riichi = False
-        player.scores = 500
-        self.assertEqual(player.can_call_riichi(), False)
-
-        player.in_riichi = False
-        player.scores = 1000
-        self.assertEqual(player.can_call_riichi(), True)

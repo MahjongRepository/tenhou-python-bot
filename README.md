@@ -13,3 +13,17 @@ For now only **Python 3** is supported.
 3. Run `vagrant up`. It will take a while, also it will ask your system root password to setup NFS
 4. Run `vagrant ssh`
 5. Run `python main.py` it will connect to the tenhou.net and will play a match. After the end of match it will close connection to the server
+
+# Main information about bot AI
+
+It played 326 games (hanchans) and achieved only first dan on the tenhou (and lost it later, and achieved it again...).
+
+Average position 2.79
+
+Win rate 20.63%
+
+Feed rate 19.33%
+
+Riichi rate	36.12%
+
+So, even with this simple logic it can play and win.

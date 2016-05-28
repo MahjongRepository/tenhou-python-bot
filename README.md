@@ -16,14 +16,14 @@ For now only **Python 3** is supported.
 
 # Main information about bot AI
 
-It played 326 games (hanchans) and achieved only first dan on the tenhou (and lost it later, and achieved it again...).
+It played 335 games (hanchans) and achieved only first dan on the tenhou (and lost it later, and achieved it again...)
 
-Average position 2.79
+Average position 2.78
 
-Win rate 20.63%
+Win rate 20.73%
 
-Feed rate 19.33%
+Feed rate 19.40%
 
-Riichi rate	36.12%
+Riichi rate	36.17%
 
-So, even with this simple logic it can play and win.
+So, even with current simple logic it can play and win.

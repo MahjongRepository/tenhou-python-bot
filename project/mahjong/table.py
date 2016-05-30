@@ -73,10 +73,10 @@ class Table(object):
             self.get_player(x).name = values[x]['name']
             self.get_player(x).rank = values[x]['rank']
 
-    def get_player(self, player_seat):
+    def get_player(self, player_seat) -> Player:
         return self.players[player_seat]
 
-    def get_main_player(self):
+    def get_main_player(self) -> Player:
         return self.players[0]
 
     def get_players_sorted_by_scores(self):

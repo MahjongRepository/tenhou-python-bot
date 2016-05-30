@@ -9,6 +9,7 @@ class Client(object):
     def __init__(self):
         self.table = Table()
         self.statistics = Statistics()
+        self.player = self.table.get_main_player()
 
     def authenticate(self):
         pass
@@ -19,12 +20,15 @@ class Client(object):
     def end_game(self):
         pass
 
+    def init_hand(self, tiles):
+        self.player.init_hand(tiles)
+
     def draw_tile(self, tile):
         self.table.count_of_remaining_tiles -= 1
-        self.table.get_main_player().draw_tile(tile)
+        self.player.draw_tile(tile)
 
     def discard_tile(self):
-        return self.table.get_main_player().discard_tile()
+        return self.player.discard_tile()
 
     def call_meld(self, meld):
         # when opponent called meld it is means

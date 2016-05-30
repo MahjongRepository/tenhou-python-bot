@@ -4,7 +4,7 @@
 
 This is simple bot for the popular riichi mahjong server tenhou.net.
 
-For now only **Python 3** is supported.
+For now only **Python 3.5** is supported.
 
 # How to run it?
 

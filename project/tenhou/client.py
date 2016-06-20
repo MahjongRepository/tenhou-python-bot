@@ -59,8 +59,10 @@ class TenhouClient(Client):
             sleep(5)
 
         game_type = '{0},{1}'.format(settings.LOBBY, settings.GAME_TYPE)
-        self._send_message('<JOIN t="{0}" />'.format(game_type))
-        logger.info('Looking for the game...')
+
+        if not settings.IS_TOURNAMENT:
+            self._send_message('<JOIN t="{0}" />'.format(game_type))
+            logger.info('Looking for the game...')
 
         start_time = datetime.datetime.now()
 
@@ -94,11 +96,11 @@ class TenhouClient(Client):
 
             current_time = datetime.datetime.now()
             time_difference = current_time - start_time
-            # 10 minutes
-            if time_difference.seconds > 60 * 10:
+
+            if time_difference.seconds > 60 * settings.WAITING_GAME_TIMEOUT_MINUTES:
                 break
 
-        # we wasn't able to find the game in 10 minutes
+        # we wasn't able to find the game in timeout minutes
         # sometimes it happens and we need to end process
         # and try again later
         if self.looking_for_game:

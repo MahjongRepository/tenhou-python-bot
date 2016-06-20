@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import requests
 
-import settings
+from utils.settings_handler import settings
 
 
 class Statistics(object):

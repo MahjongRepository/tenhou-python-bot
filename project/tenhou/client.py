@@ -8,7 +8,7 @@ from urllib.parse import quote
 
 import re
 
-import settings
+from utils.settings_handler import settings
 from mahjong.client import Client
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter

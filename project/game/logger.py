@@ -3,6 +3,9 @@ import logging
 
 
 def set_up_logging():
+    """
+    Logger for game manager, so only for our tests
+    """
     logger = logging.getLogger('game')
     logger.setLevel(logging.DEBUG)
 

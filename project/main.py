@@ -1,35 +1,27 @@
 # -*- coding: utf-8 -*-
-import datetime
-import logging
-import os
+from optparse import OptionParser
 
 from tenhou.main import connect_and_play
+from utils.logger import set_up_logging
+from utils.settings_handler import settings
 
+def parse_args_and_set_up_settings():
+    attrs = OptionParser()
+    attrs.add_option('-u', '--user_id',
+                     default=settings.USER_ID,
+                     help='Tenhou\'s user id. Example: IDXXXXXXXX-XXXXXXXX')
+    attrs.add_option('-g', '--game_type',
+                     default=settings.GAME_TYPE,
+                     help='The game type in Tenhou.net format: 0,1 or 0,9')
 
-def set_up_logging():
-    logger = logging.getLogger('tenhou')
-    logger.setLevel(logging.DEBUG)
+    opts, _ = attrs.parse_args()
 
-    logs_directory = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'logs')
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-
-    if not os.path.exists(logs_directory):
-        os.mkdir(logs_directory)
-
-    file_name = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '.log'
-    fh = logging.FileHandler(os.path.join(logs_directory, file_name))
-    fh.setLevel(logging.DEBUG)
-
-    formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-    ch.setFormatter(formatter)
-    fh.setFormatter(formatter)
-
-    logger.addHandler(ch)
-    logger.addHandler(fh)
+    settings.USER_ID = opts.user_id
+    settings.GAME_TYPE = opts.game_type
 
 
 def main():
+    parse_args_and_set_up_settings()
     set_up_logging()
 
     connect_and_play()

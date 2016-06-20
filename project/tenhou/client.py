@@ -53,7 +53,13 @@ class TenhouClient(Client):
     def start_the_game(self):
         log_link = ''
 
-        self._send_message('<JOIN t="{0}" />'.format(settings.GAME_TYPE))
+        if settings.LOBBY != '0':
+            logger.info('Go to the {0} lobby'.format(settings.LOBBY))
+            self._send_message('<CHAT text="{0}" />'.format(quote('/lobby {0}'.format(settings.LOBBY))))
+            sleep(5)
+
+        game_type = '{0},{1}'.format(settings.LOBBY, settings.GAME_TYPE)
+        self._send_message('<JOIN t="{0}" />'.format(game_type))
         logger.info('Looking for the game...')
 
         start_time = datetime.datetime.now()
@@ -67,7 +73,7 @@ class TenhouClient(Client):
 
                 if '<rejoin' in message:
                     # game wasn't found, continue to wait
-                    self._send_message('<JOIN t="{0},r" />'.format(settings.GAME_TYPE))
+                    self._send_message('<JOIN t="{0},r" />'.format(game_type))
 
                 if '<go' in message:
                     self._send_message('<GOK />')

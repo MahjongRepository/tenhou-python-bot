@@ -23,7 +23,7 @@ For now only **Python 3.5** is supported.
 
 Current version played 335 games (hanchans) and achieved only first dan on the tenhou (and lost it later, and achieved it again...)
 
-| Command | Description |
+|   | Result |
 | --- | --- |
 | Average position | 2.78 |
 | Win rate | 20.73% |

@@ -4,20 +4,25 @@ import unittest
 import game.game_manager
 from game.game_manager import GameManager
 from mahjong.client import Client
-from mahjong.player import Player
-from mahjong.table import Table
 
 
-class TenhouDecoderTestCase(unittest.TestCase):
+class GameManagerTestCase(unittest.TestCase):
+
+    def test_init_game(self):
+        clients = [Client() for _ in range(0, 4)]
+        manager = GameManager(clients)
+        manager.init_game()
+
+        self.assertTrue(manager.dealer in [0, 1, 2, 3])
 
     def test_init_round(self):
         clients = [Client() for _ in range(0, 4)]
         manager = GameManager(clients)
+        manager.init_game()
         manager.init_round()
 
         self.assertEqual(len(manager.dead_wall), 14)
         self.assertEqual(len(manager.dora_indicators), 1)
-        self.assertIsNotNone(manager.dealer)
         self.assertIsNotNone(manager.current_client)
         self.assertEqual(manager.round_number, 0)
         self.assertEqual(manager.honba_sticks, 0)
@@ -34,6 +39,7 @@ class TenhouDecoderTestCase(unittest.TestCase):
 
         clients = [Client() for _ in range(0, 4)]
         manager = GameManager(clients)
+        manager.init_game()
         manager.init_round()
 
         client = clients[0]
@@ -47,18 +53,203 @@ class TenhouDecoderTestCase(unittest.TestCase):
         self.assertEqual(client.player.scores, 24000)
         self.assertEqual(client.player.in_riichi, True)
 
-    def test_play_round(self):
+    def test_play_round_and_win_by_tsumo(self):
+        game.game_manager.shuffle_seed = lambda : 0.05
+
+        clients = [Client() for _ in range(0, 4)]
+        manager = GameManager(clients)
+        manager.set_dealer(3)
+        manager.init_round()
+
+        result = manager.play_round()
+
+        self.assertEqual(manager.round_number, 1)
+        self.assertEqual(result['is_tsumo'], True)
+        self.assertNotEqual(result['win_hand'], None)
+        self.assertNotEqual(result['win_client'], None)
+        self.assertEqual(result['lose_client'], None)
+
+    def test_play_round_and_win_by_ron(self):
         game.game_manager.shuffle_seed = lambda : 0.33
 
         clients = [Client() for _ in range(0, 4)]
         manager = GameManager(clients)
-        manager.init_round()
-        manager.dealer = 3
-
-        manager = GameManager(clients)
+        manager.set_dealer(3)
         manager.init_round()
 
-        manager.play_round()
+        result = manager.play_round()
 
         self.assertEqual(manager.round_number, 1)
+        self.assertEqual(result['is_tsumo'], False)
+        self.assertNotEqual(result['win_hand'], None)
+        self.assertNotEqual(result['win_client'], None)
+        self.assertNotEqual(result['lose_client'], None)
 
+    def test_play_round_with_retake(self):
+        game.game_manager.shuffle_seed = lambda : 0.01
+
+        clients = [Client() for _ in range(0, 4)]
+        manager = GameManager(clients)
+        manager.set_dealer(3)
+        manager.init_round()
+
+        result = manager.play_round()
+
+        self.assertEqual(manager.round_number, 1)
+        self.assertEqual(result['is_tsumo'], False)
+        self.assertEqual(result['win_hand'], None)
+        self.assertEqual(result['win_client'], None)
+        self.assertEqual(result['lose_client'], None)
+
+    def test_scores_calculations_after_retake(self):
+        clients = [Client() for _ in range(0, 4)]
+        manager = GameManager(clients)
+        manager.init_game()
+        manager.init_round()
+
+        manager.process_the_end_of_the_round(None, None, None, False)
+
+        self.assertEqual(clients[0].player.scores, 25000)
+        self.assertEqual(clients[1].player.scores, 25000)
+        self.assertEqual(clients[2].player.scores, 25000)
+        self.assertEqual(clients[3].player.scores, 25000)
+
+        clients[0].player.in_tempai = True
+        manager.process_the_end_of_the_round(None, None, None, False)
+
+        self.assertEqual(clients[0].player.scores, 28000)
+        self.assertEqual(clients[1].player.scores, 24000)
+        self.assertEqual(clients[2].player.scores, 24000)
+        self.assertEqual(clients[3].player.scores, 24000)
+
+        for client in clients:
+            client.player.scores = 25000
+
+        clients[0].player.in_tempai = True
+        clients[1].player.in_tempai = True
+        manager.process_the_end_of_the_round(None, None, None, False)
+
+        self.assertEqual(clients[0].player.scores, 26500)
+        self.assertEqual(clients[1].player.scores, 26500)
+        self.assertEqual(clients[2].player.scores, 23500)
+        self.assertEqual(clients[3].player.scores, 23500)
+
+        for client in clients:
+            client.player.scores = 25000
+
+        clients[0].player.in_tempai = True
+        clients[1].player.in_tempai = True
+        clients[2].player.in_tempai = True
+        manager.process_the_end_of_the_round(None, None, None, False)
+
+        self.assertEqual(clients[0].player.scores, 26000)
+        self.assertEqual(clients[1].player.scores, 26000)
+        self.assertEqual(clients[2].player.scores, 26000)
+        self.assertEqual(clients[3].player.scores, 22000)
+
+    def test_retake_and_honba_increment(self):
+        clients = [Client() for _ in range(0, 4)]
+        manager = GameManager(clients)
+        manager.init_game()
+        manager.init_round()
+
+        # no one in tempai, so honba stick should be added
+        manager.process_the_end_of_the_round(None, None, None, False)
+        self.assertEqual(manager.honba_sticks, 1)
+
+        manager.honba_sticks = 0
+        manager.set_dealer(0)
+        clients[0].player.in_tempai = False
+        clients[1].player.in_tempai = True
+
+        # dealer NOT in tempai, no honba
+        manager.process_the_end_of_the_round(None, None, None, False)
+        self.assertEqual(manager.honba_sticks, 0)
+
+        clients[0].player.in_tempai = True
+
+        # dealer in tempai, so honba stick should be added
+        manager.process_the_end_of_the_round(None, None, None, False)
+        self.assertEqual(manager.honba_sticks, 1)
+
+    def test_win_by_ron_and_scores_calculation(self):
+        clients = [Client() for _ in range(0, 4)]
+        manager = GameManager(clients)
+        manager.init_game()
+        manager.init_round()
+
+        winner = clients[0]
+        loser = clients[1]
+
+        # only 1000 hand
+        manager.process_the_end_of_the_round(range(0, 14), winner, loser, False)
+        self.assertEqual(winner.player.scores, 26000)
+        self.assertEqual(loser.player.scores, 24000)
+
+        winner.player.scores = 25000
+        winner.player.is_dealer = False
+        loser.player.scores = 25000
+        manager.riichi_sticks = 2
+        manager.honba_sticks = 2
+
+        manager.process_the_end_of_the_round(range(0, 14), winner, loser, False)
+        self.assertEqual(winner.player.scores, 28600)
+        self.assertEqual(loser.player.scores, 21400)
+        self.assertEqual(manager.riichi_sticks, 0)
+        self.assertEqual(manager.honba_sticks, 0)
+
+        winner.player.scores = 25000
+        winner.player.is_dealer = True
+        loser.player.scores = 25000
+        manager.honba_sticks = 2
+
+        # if dealer won we need to increment honba sticks
+        manager.process_the_end_of_the_round(range(0, 14), winner, loser, False)
+        self.assertEqual(winner.player.scores, 26600)
+        self.assertEqual(loser.player.scores, 23400)
+        self.assertEqual(manager.honba_sticks, 3)
+
+    def test_win_by_tsumo_and_scores_calculation(self):
+        clients = [Client() for _ in range(0, 4)]
+        manager = GameManager(clients)
+        manager.init_game()
+        manager.init_round()
+
+        winner = clients[0]
+        manager.process_the_end_of_the_round(range(0, 14), winner, None, True)
+
+        self.assertEqual(winner.player.scores, 25900)
+        self.assertEqual(clients[1].player.scores, 24700)
+        self.assertEqual(clients[2].player.scores, 24700)
+        self.assertEqual(clients[3].player.scores, 24700)
+
+    def test_change_dealer_after_end_of_the_round(self):
+        clients = [Client() for _ in range(0, 4)]
+        manager = GameManager(clients)
+        manager.set_dealer(0)
+        manager.init_round()
+
+        # retake. dealer is NOT in tempai, let's move a dealer position
+        manager.process_the_end_of_the_round([], None, None, False)
+        self.assertEqual(manager.dealer, 1)
+
+        # retake. dealer is in tempai, don't move a dealer position
+        clients[1].player.in_tempai = True
+        manager.process_the_end_of_the_round([], None, None, False)
+        self.assertEqual(manager.dealer, 1)
+
+        # dealer win by ron, don't move a dealer position
+        manager.process_the_end_of_the_round([], clients[1], clients[0], False)
+        self.assertEqual(manager.dealer, 1)
+
+        # dealer win by tsumo, don't move a dealer position
+        manager.process_the_end_of_the_round([], clients[1], None, True)
+        self.assertEqual(manager.dealer, 1)
+
+        # NOT dealer win by ron, let's move a dealer position
+        manager.process_the_end_of_the_round([], clients[3], clients[2], False)
+        self.assertEqual(manager.dealer, 2)
+
+        # NOT dealer win by tsumo, let's move a dealer position
+        manager.process_the_end_of_the_round([], clients[1], None, True)
+        self.assertEqual(manager.dealer, 3)

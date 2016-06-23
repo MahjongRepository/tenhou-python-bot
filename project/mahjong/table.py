@@ -50,7 +50,7 @@ class Table(object):
         self.get_main_player().init_hand(tiles)
 
     def add_open_set(self, meld):
-        self.get_player(meld.who).add_open_set(meld)
+        self.get_player(meld.who).add_meld(meld)
 
     def add_dora_indicator(self, tile):
         self.dora_indicators.append(tile)

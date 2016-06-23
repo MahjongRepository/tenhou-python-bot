@@ -34,7 +34,7 @@ class Player(object):
         self.ai = self.ai_class(self)
 
     def __str__(self):
-        result = u'{0}'.format(self.name)
+        result = u'{0} |v{1}|'.format(self.name, self.ai.version)
         if self.scores:
             result += u' ({:,d})'.format(int(self.scores))
             if self.uma:

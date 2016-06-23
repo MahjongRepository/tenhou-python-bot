@@ -3,8 +3,12 @@ from mahjong.ai.agari import Agari
 from mahjong.ai.base import BaseAI
 from mahjong.ai.shanten import Shanten
 from mahjong.tile import TilesConverter
+from utils.settings_handler import settings
+
 
 class MainAI(BaseAI):
+    version = settings.AI_VERSION
+
     player = None
     shanten = None
 

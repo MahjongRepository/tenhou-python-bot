@@ -1,12 +1,22 @@
 # -*- coding: utf-8 -*-
+import logging
+from collections import deque
+
 from random import randint, shuffle, random
 
+from game.logger import set_up_logging
 from mahjong.ai.agari import Agari
 from mahjong.client import Client
 from mahjong.hand import FinishedHand
 from mahjong.tile import TilesConverter
 
-shuffle_seed = random
+# we need to have it
+# to be able repeat our tests with needed random
+seed_value = random()
+shuffle_seed = lambda : seed_value
+
+set_up_logging()
+logger = logging.getLogger('game')
 
 class GameManager(object):
     """
@@ -33,6 +43,7 @@ class GameManager(object):
         self.dead_wall = []
         self.dora_indicators = []
         self.clients = clients
+        self._set_client_names()
 
         self.agari = Agari()
 
@@ -47,11 +58,15 @@ class GameManager(object):
         self.set_dealer(dealer)
 
         for client in self.clients:
-            # 250 is tenhou format, will be converted inside table class
-            client.player.scores = 250
+            client.player.scores = 25000
+
+        self._unique_dealers = 1
 
     def init_round(self):
-        self._unique_dealers = 1
+        # each round should have personal seed
+        global seed_value
+        seed_value = random()
+
         self.tiles = [i for i in range(0, 136)]
 
         # need to change random function in future
@@ -60,14 +75,17 @@ class GameManager(object):
         self.dead_wall = self._cut_tiles(14)
         self.dora_indicators.append(self.dead_wall[8])
 
-        player_scores = [i.player.scores for i in self.clients]
-
         for x in range(0, len(self.clients)):
             client = self.clients[x]
 
-            # each client think that he is a player with position=0
+            # each client think that he is a player with position = 0
             # so, we need to move dealer position for each client
+            # and shift scores array
             client_dealer = self.dealer - x
+
+            player_scores = deque([i.player.scores / 100 for i in self.clients])
+            player_scores.rotate(x * -1)
+            player_scores = list(player_scores)
 
             client.table.init_round(
                 self.round_number,
@@ -90,6 +108,15 @@ class GameManager(object):
         for client in self.clients:
             client.player.tiles += self._cut_tiles(1)
             client.init_hand(client.player.tiles)
+
+        logger.info('Seed: {0}'.format(shuffle_seed()))
+        logger.info('Dealer: {0}'.format(self.dealer))
+        logger.info('Wind: {0}. Riichi sticks: {1}. Honba sticks: {2}'.format(
+            self._unique_dealers,
+            self.riichi_sticks,
+            self.honba_sticks
+        ))
+        logger.info('Players: {0}'.format(self.players_sorted_by_scores()))
 
     def play_round(self):
         continue_to_play = True
@@ -132,6 +159,21 @@ class GameManager(object):
         result = self.process_the_end_of_the_round(None, None, None, False)
         return result
 
+    def play_game(self):
+        logger.info('The start of the game')
+        logger.info('')
+
+        is_game_end = False
+        self.init_game()
+
+        while not is_game_end:
+            self.init_round()
+            result = self.play_round()
+            is_game_end = result['is_game_end']
+
+        logger.info('Final Scores: {0}'.format(self.players_sorted_by_scores()))
+        logger.info('The end of the game')
+
     def draw_tile(self, client):
         tile = self._cut_tiles(1)[0]
         client.draw_tile(tile)
@@ -157,6 +199,8 @@ class GameManager(object):
         client.player.scores -= 1000
         self.riichi_sticks += 1
 
+        logger.info('Riichi: {0} - 1,000'.format(client.player.name))
+
     def set_dealer(self, dealer):
         self.dealer = dealer
         self._unique_dealers += 1
@@ -173,6 +217,15 @@ class GameManager(object):
         """
         Increment a round number and do a scores calculations
         """
+
+        if win_client:
+            logger.info('{0}: {1}'.format(
+                is_tsumo and 'Tsumo' or 'Ron',
+                TilesConverter.to_one_line_string(win_tiles))
+            )
+        else:
+            logger.info('Retake')
+
         is_game_end = False
         self.round_number += 1
 
@@ -184,8 +237,10 @@ class GameManager(object):
                                                            win_client.player.in_riichi,
                                                            False)
 
-            scores_to_pay = hand_value + self.riichi_sticks * 1000 + self.honba_sticks * 300
+            scores_to_pay = hand_value + self.honba_sticks * 300
+            riichi_bonus = self.riichi_sticks * 1000
             self.riichi_sticks = 0
+
             # if dealer won we need to increment honba sticks
             if win_client.player.is_dealer:
                 self.honba_sticks += 1
@@ -196,8 +251,12 @@ class GameManager(object):
 
             # win by ron
             if lose_client:
-                win_client.player.scores += scores_to_pay
+                win_amount = scores_to_pay + riichi_bonus
+                win_client.player.scores += win_amount
                 lose_client.player.scores -= scores_to_pay
+
+                logger.info('{0} + {1:,d}'.format(win_client.player.name, win_amount))
+                logger.info('{0} - {1:,d}'.format(lose_client.player.name, scores_to_pay))
             # win by tsumo
             else:
                 scores_to_pay /= 3
@@ -205,10 +264,14 @@ class GameManager(object):
                 # round to nearest 100. 333 -> 300
                 scores_to_pay = 100 * round(float(scores_to_pay) / 100)
 
-                win_client.player.scores += scores_to_pay * 3
+                win_amount = scores_to_pay * 3 + riichi_bonus
+                win_client.player.scores += win_amount
+
                 for client in self.clients:
                     if client != win_client:
                         client.player.scores -= scores_to_pay
+
+                logger.info('{0} + {1:,d}'.format(win_client.player.name, win_amount))
         # retake
         else:
             tempai_users = 0
@@ -226,16 +289,19 @@ class GameManager(object):
                 # 1 tempai user  will get 3000
                 # 2 tempai users will get 1500 each
                 # 3 tempai users will get 1000 each
-                scores_reward = 3000 / tempai_users
+                scores_to_pay = 3000 / tempai_users
                 for client in self.clients:
                     if client.player.in_tempai:
-                        client.player.scores += scores_reward
+                        client.player.scores += scores_to_pay
+                        logger.info('{0} + {1:,d}'.format(client.player.name, int(scores_to_pay)))
 
                         # dealer was tempai, we need to add honba stick
                         if client.player.is_dealer:
                             self.honba_sticks += 1
                     else:
                         client.player.scores -= 3000 / (4 - tempai_users)
+
+
 
         # if someone has negative scores,
         # we need to end the game
@@ -247,6 +313,8 @@ class GameManager(object):
         if self._unique_dealers > 8:
             is_game_end = True
 
+        logger.info('')
+
         return {
             'win_hand': win_tiles,
             'win_client': win_client,
@@ -254,6 +322,22 @@ class GameManager(object):
             'is_tsumo': is_tsumo,
             'is_game_end': is_game_end
         }
+
+    def players_sorted_by_scores(self):
+        return sorted([i.player for i in self.clients], key=lambda x: x.scores, reverse=True)
+
+    def _set_client_names(self):
+        """
+        For better tests output
+        """
+        names = ['Sato', 'Suzuki', 'Takahashi', 'Tanaka', 'Watanabe', 'Ito',
+                 'Yamamoto', 'Nakamura', 'Kobayashi', 'Kato', 'Yoshida', 'Yamada']
+
+        for client in self.clients:
+            name = names[randint(0, len(names) - 1)]
+            names.remove(name)
+
+            client.player.name = name
 
     def _get_current_client(self) -> Client:
         return self.clients[self.current_client]

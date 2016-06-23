@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 import unittest
 
 import game.game_manager
@@ -7,6 +8,10 @@ from mahjong.client import Client
 
 
 class GameManagerTestCase(unittest.TestCase):
+
+    def setUp(self):
+        logger = logging.getLogger('game')
+        logger.disabled = True
 
     def test_init_game(self):
         clients = [Client() for _ in range(0, 4)]
@@ -68,6 +73,23 @@ class GameManagerTestCase(unittest.TestCase):
         self.assertFalse(manager.clients[0].player.is_dealer)
         self.assertFalse(manager.clients[1].player.is_dealer)
         self.assertFalse(manager.clients[2].player.is_dealer)
+
+    def test_init_scores(self):
+        clients = [Client() for _ in range(0, 4)]
+        manager = GameManager(clients)
+        manager.init_game()
+
+        clients[0].player.scores = 24000
+        clients[1].player.scores = 23000
+        clients[2].player.scores = 22000
+        clients[3].player.scores = 21000
+
+        manager.init_round()
+
+        self.assertEqual(clients[0].player.scores, 24000)
+        self.assertEqual(clients[1].player.scores, 23000)
+        self.assertEqual(clients[2].player.scores, 22000)
+        self.assertEqual(clients[3].player.scores, 21000)
 
     def test_call_riichi(self):
         game.game_manager.shuffle_seed = lambda : 0.33
@@ -235,7 +257,7 @@ class GameManagerTestCase(unittest.TestCase):
 
         manager.process_the_end_of_the_round(range(0, 14), winner, loser, False)
         self.assertEqual(winner.player.scores, 28600)
-        self.assertEqual(loser.player.scores, 21400)
+        self.assertEqual(loser.player.scores, 23400)
         self.assertEqual(manager.riichi_sticks, 0)
         self.assertEqual(manager.honba_sticks, 0)
 
@@ -255,11 +277,12 @@ class GameManagerTestCase(unittest.TestCase):
         manager = GameManager(clients)
         manager.init_game()
         manager.init_round()
+        manager.riichi_sticks = 1
 
         winner = clients[0]
         manager.process_the_end_of_the_round(range(0, 14), winner, None, True)
 
-        self.assertEqual(winner.player.scores, 25900)
+        self.assertEqual(winner.player.scores, 26900)
         self.assertEqual(clients[1].player.scores, 24700)
         self.assertEqual(clients[2].player.scores, 24700)
         self.assertEqual(clients[3].player.scores, 24700)
@@ -317,6 +340,7 @@ class GameManagerTestCase(unittest.TestCase):
         manager.init_game()
         manager.set_dealer(current_dealer)
         manager.init_round()
+        manager._unique_dealers = 1
 
         for x in range(0, 7):
             # to avoid honba

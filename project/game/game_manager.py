@@ -25,13 +25,15 @@ class GameManager(object):
     honba_sticks = 0
     riichi_sticks = 0
 
+    _unique_dealers = 0
+
 
     def __init__(self, clients):
         self.tiles = []
         self.dead_wall = []
         self.dora_indicators = []
-        self.dealer = None
         self.clients = clients
+
         self.agari = Agari()
 
     def init_game(self):
@@ -44,7 +46,12 @@ class GameManager(object):
         dealer = randint(0, 3)
         self.set_dealer(dealer)
 
+        for client in self.clients:
+            # 250 is tenhou format, will be converted inside table class
+            client.player.scores = 250
+
     def init_round(self):
+        self._unique_dealers = 1
         self.tiles = [i for i in range(0, 136)]
 
         # need to change random function in future
@@ -53,17 +60,21 @@ class GameManager(object):
         self.dead_wall = self._cut_tiles(14)
         self.dora_indicators.append(self.dead_wall[8])
 
-        for client in self.clients:
-            client.player.scores = 250
         player_scores = [i.player.scores for i in self.clients]
 
-        for client in self.clients:
+        for x in range(0, len(self.clients)):
+            client = self.clients[x]
+
+            # each client think that he is a player with position=0
+            # so, we need to move dealer position for each client
+            client_dealer = self.dealer - x
+
             client.table.init_round(
                 self.round_number,
                 self.honba_sticks,
                 self.riichi_sticks,
                 self.dora_indicators[0],
-                self.dealer,
+                client_dealer,
                 player_scores
             )
 
@@ -148,6 +159,7 @@ class GameManager(object):
 
     def set_dealer(self, dealer):
         self.dealer = dealer
+        self._unique_dealers += 1
 
         for client in self.clients:
             client.player.is_dealer = False
@@ -161,6 +173,7 @@ class GameManager(object):
         """
         Increment a round number and do a scores calculations
         """
+        is_game_end = False
         self.round_number += 1
 
         hand_value = 0
@@ -224,11 +237,22 @@ class GameManager(object):
                     else:
                         client.player.scores -= 3000 / (4 - tempai_users)
 
+        # if someone has negative scores,
+        # we need to end the game
+        for client in self.clients:
+            if client.player.scores < 0:
+                is_game_end = True
+
+        # we have played all 8 winds, let's finish the game
+        if self._unique_dealers > 8:
+            is_game_end = True
+
         return {
             'win_hand': win_tiles,
             'win_client': win_client,
             'lose_client': lose_client,
             'is_tsumo': is_tsumo,
+            'is_game_end': is_game_end
         }
 
     def _get_current_client(self) -> Client:

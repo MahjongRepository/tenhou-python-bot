@@ -34,6 +34,41 @@ class GameManagerTestCase(unittest.TestCase):
 
         self.assertEqual(len(manager.tiles), 70)
 
+    def test_init_dealer(self):
+        clients = [Client() for _ in range(0, 4)]
+        manager = GameManager(clients)
+        manager.set_dealer(0)
+        manager.init_round()
+
+        self.assertTrue(manager.clients[0].player.is_dealer)
+        self.assertFalse(manager.clients[1].player.is_dealer)
+        self.assertFalse(manager.clients[2].player.is_dealer)
+        self.assertFalse(manager.clients[3].player.is_dealer)
+
+        manager.set_dealer(1)
+        manager.init_round()
+
+        self.assertTrue(manager.clients[1].player.is_dealer)
+        self.assertFalse(manager.clients[0].player.is_dealer)
+        self.assertFalse(manager.clients[2].player.is_dealer)
+        self.assertFalse(manager.clients[3].player.is_dealer)
+
+        manager.set_dealer(2)
+        manager.init_round()
+
+        self.assertTrue(manager.clients[2].player.is_dealer)
+        self.assertFalse(manager.clients[0].player.is_dealer)
+        self.assertFalse(manager.clients[1].player.is_dealer)
+        self.assertFalse(manager.clients[3].player.is_dealer)
+
+        manager.set_dealer(3)
+        manager.init_round()
+
+        self.assertTrue(manager.clients[3].player.is_dealer)
+        self.assertFalse(manager.clients[0].player.is_dealer)
+        self.assertFalse(manager.clients[1].player.is_dealer)
+        self.assertFalse(manager.clients[2].player.is_dealer)
+
     def test_call_riichi(self):
         game.game_manager.shuffle_seed = lambda : 0.33
 
@@ -58,6 +93,7 @@ class GameManagerTestCase(unittest.TestCase):
 
         clients = [Client() for _ in range(0, 4)]
         manager = GameManager(clients)
+        manager.init_game()
         manager.set_dealer(3)
         manager.init_round()
 
@@ -65,6 +101,7 @@ class GameManagerTestCase(unittest.TestCase):
 
         self.assertEqual(manager.round_number, 1)
         self.assertEqual(result['is_tsumo'], True)
+        self.assertEqual(result['is_game_end'], False)
         self.assertNotEqual(result['win_hand'], None)
         self.assertNotEqual(result['win_client'], None)
         self.assertEqual(result['lose_client'], None)
@@ -74,6 +111,7 @@ class GameManagerTestCase(unittest.TestCase):
 
         clients = [Client() for _ in range(0, 4)]
         manager = GameManager(clients)
+        manager.init_game()
         manager.set_dealer(3)
         manager.init_round()
 
@@ -81,6 +119,7 @@ class GameManagerTestCase(unittest.TestCase):
 
         self.assertEqual(manager.round_number, 1)
         self.assertEqual(result['is_tsumo'], False)
+        self.assertEqual(result['is_game_end'], False)
         self.assertNotEqual(result['win_hand'], None)
         self.assertNotEqual(result['win_client'], None)
         self.assertNotEqual(result['lose_client'], None)
@@ -90,6 +129,7 @@ class GameManagerTestCase(unittest.TestCase):
 
         clients = [Client() for _ in range(0, 4)]
         manager = GameManager(clients)
+        manager.init_game()
         manager.set_dealer(3)
         manager.init_round()
 
@@ -97,6 +137,7 @@ class GameManagerTestCase(unittest.TestCase):
 
         self.assertEqual(manager.round_number, 1)
         self.assertEqual(result['is_tsumo'], False)
+        self.assertEqual(result['is_game_end'], False)
         self.assertEqual(result['win_hand'], None)
         self.assertEqual(result['win_client'], None)
         self.assertEqual(result['lose_client'], None)
@@ -253,3 +294,40 @@ class GameManagerTestCase(unittest.TestCase):
         # NOT dealer win by tsumo, let's move a dealer position
         manager.process_the_end_of_the_round([], clients[1], None, True)
         self.assertEqual(manager.dealer, 3)
+
+    def test_is_game_end_by_negative_scores(self):
+        clients = [Client() for _ in range(0, 4)]
+        manager = GameManager(clients)
+        manager.set_dealer(0)
+        manager.init_round()
+
+        winner = clients[0]
+        loser = clients[1]
+        loser.player.scores = 500
+
+        result = manager.process_the_end_of_the_round(range(0, 14), winner, loser, False)
+        self.assertEqual(loser.player.scores, -500)
+        self.assertEqual(result['is_game_end'], True)
+
+    def test_is_game_end_by_eight_winds(self):
+        clients = [Client() for _ in range(0, 4)]
+
+        current_dealer = 0
+        manager = GameManager(clients)
+        manager.init_game()
+        manager.set_dealer(current_dealer)
+        manager.init_round()
+
+        for x in range(0, 7):
+            # to avoid honba
+            client = current_dealer == 0 and 1 or 0
+
+            result = manager.process_the_end_of_the_round(range(0, 14), clients[client], None, True)
+            self.assertEqual(result['is_game_end'], False)
+            self.assertNotEqual(manager.dealer, current_dealer)
+            current_dealer = manager.dealer
+
+        result = manager.process_the_end_of_the_round(range(0, 14), clients[0], None, True)
+        self.assertEqual(result['is_game_end'], True)
+
+

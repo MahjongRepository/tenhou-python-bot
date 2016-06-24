@@ -166,13 +166,21 @@ class GameManager(object):
         is_game_end = False
         self.init_game()
 
+        played_rounds = 0
+
         while not is_game_end:
             self.init_round()
             result = self.play_round()
             is_game_end = result['is_game_end']
+            played_rounds += 1
+
+        for client in self.clients:
+            client.table.recalculate_players_position()
 
         logger.info('Final Scores: {0}'.format(self.players_sorted_by_scores()))
         logger.info('The end of the game')
+
+        return {'played_rounds': played_rounds}
 
     def draw_tile(self, client):
         tile = self._cut_tiles(1)[0]

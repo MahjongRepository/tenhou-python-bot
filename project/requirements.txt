@@ -1,2 +1,4 @@
 beautifulsoup4==4.4.1
 requests==2.10.0
+terminaltables==3.0.0
+tqdm==4.7.4

@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 from mahjong.stat import Statistics
 from mahjong.table import Table
+from utils.general import make_random_letters_and_digit_string
 
 
 class Client(object):
     statistics = None
+    id = ''
 
     def __init__(self):
         self.table = Table()
         self.statistics = Statistics()
         self.player = self.table.get_main_player()
+        self.id = make_random_letters_and_digit_string()
 
     def authenticate(self):
         pass

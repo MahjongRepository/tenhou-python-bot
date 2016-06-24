@@ -62,7 +62,9 @@ class Table(object):
             if uma:
                 self.get_player(i).uma = uma[i]
 
-        # recalculate player's positions
+        self.recalculate_players_position()
+
+    def recalculate_players_position(self):
         temp_players = self.get_players_sorted_by_scores()
         for i in range(0, len(temp_players)):
             temp_player = temp_players[i]

@@ -32,9 +32,9 @@ class TilesConverter(object):
         honors = [t for t in tiles if t >= 108]
         honors = [t - 108 for t in honors]
 
-        man = man and ''.join([str((i // 4) + 1) for i in man]) + 'm' or ''
+        man = man and ''.join([str((i // 4) + 1) for i in man]) + 's' or ''
         pin = pin and ''.join([str((i // 4) + 1) for i in pin]) + 'p' or ''
-        sou = sou and ''.join([str((i // 4) + 1) for i in sou]) + 's' or ''
+        sou = sou and ''.join([str((i // 4) + 1) for i in sou]) + 'm' or ''
         honors = honors and ''.join([str((i // 4) + 1) for i in honors]) + 'z' or ''
 
         return sou + pin + man + honors

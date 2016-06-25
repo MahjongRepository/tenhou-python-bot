@@ -54,9 +54,15 @@ class TenhouClient(Client):
         log_link = ''
 
         if settings.LOBBY != '0':
-            logger.info('Go to the {0} lobby'.format(settings.LOBBY))
-            self._send_message('<CHAT text="{0}" />'.format(quote('/lobby {0}'.format(settings.LOBBY))))
-            sleep(5)
+            if settings.IS_TOURNAMENT:
+                logger.info('Go to the tournament lobby: {0}'.format(settings.LOBBY))
+                self._send_message('<CS lobby="{0}" />'.format(settings.LOBBY))
+                sleep(2)
+                self._send_message('<DATE />')
+            else:
+                logger.info('Go to the lobby: {0}'.format(settings.LOBBY))
+                self._send_message('<CHAT text="{0}" />'.format(quote('/lobby {0}'.format(settings.LOBBY))))
+                sleep(2)
 
         game_type = '{0},{1}'.format(settings.LOBBY, settings.GAME_TYPE)
 
@@ -282,6 +288,9 @@ class TenhouClient(Client):
 
     def _pxr_tag(self):
         # I have no idea why we need to send it, but better to do it
+        if settings.IS_TOURNAMENT:
+            return '<PXR V="-1" />'
+
         if settings.USER_ID == 'NoName':
             return '<PXR V="1" />'
         else:

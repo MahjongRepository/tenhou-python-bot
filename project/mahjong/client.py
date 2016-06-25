@@ -8,8 +8,8 @@ class Client(object):
     statistics = None
     id = ''
 
-    def __init__(self):
-        self.table = Table()
+    def __init__(self, use_previous_ai_version=False):
+        self.table = Table(use_previous_ai_version)
         self.statistics = Statistics()
         self.player = self.table.get_main_player()
         self.id = make_random_letters_and_digit_string()

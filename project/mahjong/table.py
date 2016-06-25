@@ -14,9 +14,9 @@ class Table(object):
     count_of_remaining_tiles = 0
     count_of_players = 4
 
-    def __init__(self):
+    def __init__(self, use_previous_ai_version=False):
         self.dora_indicators = []
-        self._init_players()
+        self._init_players(use_previous_ai_version)
 
 
     def __str__(self):
@@ -84,9 +84,9 @@ class Table(object):
     def get_players_sorted_by_scores(self):
         return sorted(self.players, key=lambda x: x.scores, reverse=True)
 
-    def _init_players(self):
+    def _init_players(self, use_previous_ai_version=False):
         self.players = []
 
         for seat in range(0, self.count_of_players):
-            player = Player(seat=seat, table=self)
+            player = Player(seat=seat, table=self, use_previous_ai_version=use_previous_ai_version)
             self.players.append(player)

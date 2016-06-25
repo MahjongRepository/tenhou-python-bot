@@ -159,7 +159,11 @@ class GameManager(object):
         result = self.process_the_end_of_the_round(None, None, None, False)
         return result
 
-    def play_game(self):
+    def play_game(self, total_results):
+        """
+        :param total_results: a dictionary with keys as client ids
+        :return: game results
+        """
         logger.info('The start of the game')
         logger.info('')
 
@@ -171,7 +175,19 @@ class GameManager(object):
         while not is_game_end:
             self.init_round()
             result = self.play_round()
+
             is_game_end = result['is_game_end']
+            loser = result['lose_client']
+            winner = result['win_client']
+            if loser:
+                total_results[loser.id]['lose_rounds'] += 1
+            if winner:
+                total_results[winner.id]['win_rounds'] += 1
+
+            for client in self.clients:
+                if client.player.in_riichi:
+                    total_results[client.id]['riichi_rounds'] += 1
+
             played_rounds += 1
 
         for client in self.clients:
@@ -263,8 +279,8 @@ class GameManager(object):
                 win_client.player.scores += win_amount
                 lose_client.player.scores -= scores_to_pay
 
-                logger.info('{0} + {1:,d}'.format(win_client.player.name, win_amount))
-                logger.info('{0} - {1:,d}'.format(lose_client.player.name, scores_to_pay))
+                logger.info('Win:  {0} + {1:,d}'.format(win_client.player.name, win_amount))
+                logger.info('Lose: {0} - {1:,d}'.format(lose_client.player.name, scores_to_pay))
             # win by tsumo
             else:
                 scores_to_pay /= 3
@@ -279,7 +295,7 @@ class GameManager(object):
                     if client != win_client:
                         client.player.scores -= scores_to_pay
 
-                logger.info('{0} + {1:,d}'.format(win_client.player.name, win_amount))
+                logger.info('Win: {0} + {1:,d}'.format(win_client.player.name, win_amount))
         # retake
         else:
             tempai_users = 0

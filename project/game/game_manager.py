@@ -203,13 +203,25 @@ class GameManager(object):
 
             played_rounds += 1
 
-        for client in self.clients:
-            client.table.recalculate_players_position()
+        self.recalculate_players_position()
 
         logger.info('Final Scores: {0}'.format(self.players_sorted_by_scores()))
         logger.info('The end of the game')
 
         return {'played_rounds': played_rounds}
+
+    def recalculate_players_position(self):
+        """
+        For players with same count of scores we need
+        to set position based on their initial seat on the table
+        """
+        temp_clients = sorted(self.clients, key=lambda x: x.player.scores, reverse=True)
+        for i in range(0, len(temp_clients)):
+            temp_client = temp_clients[i]
+
+            for client in self.clients:
+                if client.id == temp_client.id:
+                    client.player.position = i + 1
 
     def can_call_ron(self, client, win_tile):
         if not client.player.in_tempai or not client.player.in_riichi:

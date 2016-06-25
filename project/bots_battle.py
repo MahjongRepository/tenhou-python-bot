@@ -7,7 +7,7 @@ from tqdm import trange
 from game.game_manager import GameManager
 from mahjong.client import Client
 
-TOTAL_HANCHANS = 3
+TOTAL_HANCHANS = 10
 
 def main():
     # enable it for manual testing
@@ -50,7 +50,8 @@ def main():
             table_data.append([player.position,
                                player.name,
                                'v{0}'.format(player.ai.version),
-                               int(player.scores)])
+                               '{0:,d}'.format(int(player.scores))
+                               ])
 
             total_result_client = total_results[client.id]
             total_result_client['positions'].append(player.position)

@@ -79,14 +79,22 @@ class TableTestCase(unittest.TestCase):
     def test_set_scores_and_recalculate_player_position(self):
         table = Table()
         table.init_round(0, 0, 0, 0, 0, [])
-        scores = [230, 110, 55, 405]
 
+        scores = [230, 110, 55, 405]
         table.set_players_scores(scores)
 
         self.assertEqual(table.get_player(0).position, 2)
         self.assertEqual(table.get_player(1).position, 3)
         self.assertEqual(table.get_player(2).position, 4)
         self.assertEqual(table.get_player(3).position, 1)
+
+        scores = [110, 110, 405, 405]
+        table.set_players_scores(scores)
+
+        self.assertEqual(table.get_player(0).position, 3)
+        self.assertEqual(table.get_player(1).position, 4)
+        self.assertEqual(table.get_player(2).position, 1)
+        self.assertEqual(table.get_player(3).position, 2)
 
     def test_set_names_and_ranks(self):
         table = Table()

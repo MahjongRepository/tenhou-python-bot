@@ -74,22 +74,43 @@ class GameManagerTestCase(unittest.TestCase):
         self.assertFalse(manager.clients[1].player.is_dealer)
         self.assertFalse(manager.clients[2].player.is_dealer)
 
-    def test_init_scores(self):
+    def test_init_scores_and_recalculate_position(self):
         clients = [Client() for _ in range(0, 4)]
         manager = GameManager(clients)
         manager.init_game()
+        manager.set_dealer(3)
 
         clients[0].player.scores = 24000
         clients[1].player.scores = 23000
         clients[2].player.scores = 22000
         clients[3].player.scores = 21000
 
-        manager.init_round()
+        manager.recalculate_players_position()
 
         self.assertEqual(clients[0].player.scores, 24000)
+        self.assertEqual(clients[0].player.position, 1)
         self.assertEqual(clients[1].player.scores, 23000)
+        self.assertEqual(clients[1].player.position, 2)
         self.assertEqual(clients[2].player.scores, 22000)
+        self.assertEqual(clients[2].player.position, 3)
         self.assertEqual(clients[3].player.scores, 21000)
+        self.assertEqual(clients[3].player.position, 4)
+
+        clients[0].player.scores = 24000
+        clients[1].player.scores = 24000
+        clients[2].player.scores = 22000
+        clients[3].player.scores = 22000
+
+        manager.recalculate_players_position()
+
+        self.assertEqual(clients[0].player.scores, 24000)
+        self.assertEqual(clients[0].player.position, 1)
+        self.assertEqual(clients[1].player.scores, 24000)
+        self.assertEqual(clients[1].player.position, 2)
+        self.assertEqual(clients[2].player.scores, 22000)
+        self.assertEqual(clients[2].player.position, 3)
+        self.assertEqual(clients[3].player.scores, 22000)
+        self.assertEqual(clients[3].player.position, 4)
 
     def test_call_riichi(self):
         game.game_manager.shuffle_seed = lambda : 0.33

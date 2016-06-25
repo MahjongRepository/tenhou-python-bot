@@ -145,9 +145,8 @@ class GameManagerTestCase(unittest.TestCase):
         self.assertEqual(manager.round_number, 1)
         self.assertEqual(result['is_tsumo'], True)
         self.assertEqual(result['is_game_end'], False)
-        self.assertNotEqual(result['win_hand'], None)
-        self.assertNotEqual(result['win_client'], None)
-        self.assertEqual(result['lose_client'], None)
+        self.assertNotEqual(result['winner'], None)
+        self.assertEqual(result['loser'], None)
 
     def test_play_round_and_win_by_ron(self):
         game.game_manager.shuffle_seed = lambda : 0.33
@@ -163,9 +162,8 @@ class GameManagerTestCase(unittest.TestCase):
         self.assertEqual(manager.round_number, 1)
         self.assertEqual(result['is_tsumo'], False)
         self.assertEqual(result['is_game_end'], False)
-        self.assertNotEqual(result['win_hand'], None)
-        self.assertNotEqual(result['win_client'], None)
-        self.assertNotEqual(result['lose_client'], None)
+        self.assertNotEqual(result['winner'], None)
+        self.assertNotEqual(result['loser'], None)
 
     def test_play_round_with_retake(self):
         game.game_manager.shuffle_seed = lambda : 0.01
@@ -181,9 +179,8 @@ class GameManagerTestCase(unittest.TestCase):
         self.assertEqual(manager.round_number, 1)
         self.assertEqual(result['is_tsumo'], False)
         self.assertEqual(result['is_game_end'], False)
-        self.assertEqual(result['win_hand'], None)
-        self.assertEqual(result['win_client'], None)
-        self.assertEqual(result['lose_client'], None)
+        self.assertEqual(result['winner'], None)
+        self.assertEqual(result['loser'], None)
 
     def test_scores_calculations_after_retake(self):
         clients = [Client() for _ in range(0, 4)]
@@ -191,7 +188,7 @@ class GameManagerTestCase(unittest.TestCase):
         manager.init_game()
         manager.init_round()
 
-        manager.process_the_end_of_the_round(None, None, None, False)
+        manager.process_the_end_of_the_round(None, None, None, None, False)
 
         self.assertEqual(clients[0].player.scores, 25000)
         self.assertEqual(clients[1].player.scores, 25000)
@@ -199,7 +196,7 @@ class GameManagerTestCase(unittest.TestCase):
         self.assertEqual(clients[3].player.scores, 25000)
 
         clients[0].player.in_tempai = True
-        manager.process_the_end_of_the_round(None, None, None, False)
+        manager.process_the_end_of_the_round(None, None, None, None, False)
 
         self.assertEqual(clients[0].player.scores, 28000)
         self.assertEqual(clients[1].player.scores, 24000)
@@ -211,7 +208,7 @@ class GameManagerTestCase(unittest.TestCase):
 
         clients[0].player.in_tempai = True
         clients[1].player.in_tempai = True
-        manager.process_the_end_of_the_round(None, None, None, False)
+        manager.process_the_end_of_the_round(None, None, None, None, False)
 
         self.assertEqual(clients[0].player.scores, 26500)
         self.assertEqual(clients[1].player.scores, 26500)
@@ -224,7 +221,7 @@ class GameManagerTestCase(unittest.TestCase):
         clients[0].player.in_tempai = True
         clients[1].player.in_tempai = True
         clients[2].player.in_tempai = True
-        manager.process_the_end_of_the_round(None, None, None, False)
+        manager.process_the_end_of_the_round(None, None, None, None, False)
 
         self.assertEqual(clients[0].player.scores, 26000)
         self.assertEqual(clients[1].player.scores, 26000)
@@ -238,7 +235,7 @@ class GameManagerTestCase(unittest.TestCase):
         manager.init_round()
 
         # no one in tempai, so honba stick should be added
-        manager.process_the_end_of_the_round(None, None, None, False)
+        manager.process_the_end_of_the_round(None, None, None, None, False)
         self.assertEqual(manager.honba_sticks, 1)
 
         manager.honba_sticks = 0
@@ -247,13 +244,13 @@ class GameManagerTestCase(unittest.TestCase):
         clients[1].player.in_tempai = True
 
         # dealer NOT in tempai, no honba
-        manager.process_the_end_of_the_round(None, None, None, False)
+        manager.process_the_end_of_the_round(None, None, None, None, False)
         self.assertEqual(manager.honba_sticks, 0)
 
         clients[0].player.in_tempai = True
 
         # dealer in tempai, so honba stick should be added
-        manager.process_the_end_of_the_round(None, None, None, False)
+        manager.process_the_end_of_the_round(None, None, None, None, False)
         self.assertEqual(manager.honba_sticks, 1)
 
     def test_win_by_ron_and_scores_calculation(self):
@@ -266,7 +263,7 @@ class GameManagerTestCase(unittest.TestCase):
         loser = clients[1]
 
         # only 1000 hand
-        manager.process_the_end_of_the_round(range(0, 14), winner, loser, False)
+        manager.process_the_end_of_the_round(range(0, 14), 0, winner, loser, False)
         self.assertEqual(winner.player.scores, 26000)
         self.assertEqual(loser.player.scores, 24000)
 
@@ -276,7 +273,7 @@ class GameManagerTestCase(unittest.TestCase):
         manager.riichi_sticks = 2
         manager.honba_sticks = 2
 
-        manager.process_the_end_of_the_round(range(0, 14), winner, loser, False)
+        manager.process_the_end_of_the_round(range(0, 14), 0, winner, loser, False)
         self.assertEqual(winner.player.scores, 28600)
         self.assertEqual(loser.player.scores, 23400)
         self.assertEqual(manager.riichi_sticks, 0)
@@ -288,7 +285,7 @@ class GameManagerTestCase(unittest.TestCase):
         manager.honba_sticks = 2
 
         # if dealer won we need to increment honba sticks
-        manager.process_the_end_of_the_round(range(0, 14), winner, loser, False)
+        manager.process_the_end_of_the_round(range(0, 14), 0, winner, loser, False)
         self.assertEqual(winner.player.scores, 26600)
         self.assertEqual(loser.player.scores, 23400)
         self.assertEqual(manager.honba_sticks, 3)
@@ -301,7 +298,7 @@ class GameManagerTestCase(unittest.TestCase):
         manager.riichi_sticks = 1
 
         winner = clients[0]
-        manager.process_the_end_of_the_round(range(0, 14), winner, None, True)
+        manager.process_the_end_of_the_round(range(0, 14), 0, winner, None, True)
 
         self.assertEqual(winner.player.scores, 26900)
         self.assertEqual(clients[1].player.scores, 24700)
@@ -315,28 +312,28 @@ class GameManagerTestCase(unittest.TestCase):
         manager.init_round()
 
         # retake. dealer is NOT in tempai, let's move a dealer position
-        manager.process_the_end_of_the_round([], None, None, False)
+        manager.process_the_end_of_the_round([], None, None, None, False)
         self.assertEqual(manager.dealer, 1)
 
         # retake. dealer is in tempai, don't move a dealer position
         clients[1].player.in_tempai = True
-        manager.process_the_end_of_the_round([], None, None, False)
+        manager.process_the_end_of_the_round([], 0, None, None, False)
         self.assertEqual(manager.dealer, 1)
 
         # dealer win by ron, don't move a dealer position
-        manager.process_the_end_of_the_round([], clients[1], clients[0], False)
+        manager.process_the_end_of_the_round([], 0, None, None, False)
         self.assertEqual(manager.dealer, 1)
 
         # dealer win by tsumo, don't move a dealer position
-        manager.process_the_end_of_the_round([], clients[1], None, True)
+        manager.process_the_end_of_the_round([], 0, None, None, False)
         self.assertEqual(manager.dealer, 1)
 
         # NOT dealer win by ron, let's move a dealer position
-        manager.process_the_end_of_the_round([], clients[3], clients[2], False)
+        manager.process_the_end_of_the_round([], 0, clients[3], clients[2], False)
         self.assertEqual(manager.dealer, 2)
 
         # NOT dealer win by tsumo, let's move a dealer position
-        manager.process_the_end_of_the_round([], clients[1], None, True)
+        manager.process_the_end_of_the_round([], 0, clients[1], None, True)
         self.assertEqual(manager.dealer, 3)
 
     def test_is_game_end_by_negative_scores(self):
@@ -349,7 +346,7 @@ class GameManagerTestCase(unittest.TestCase):
         loser = clients[1]
         loser.player.scores = 500
 
-        result = manager.process_the_end_of_the_round(range(0, 14), winner, loser, False)
+        result = manager.process_the_end_of_the_round(range(0, 14), 0, winner, loser, False)
         self.assertEqual(loser.player.scores, -500)
         self.assertEqual(result['is_game_end'], True)
 
@@ -367,12 +364,12 @@ class GameManagerTestCase(unittest.TestCase):
             # to avoid honba
             client = current_dealer == 0 and 1 or 0
 
-            result = manager.process_the_end_of_the_round(range(0, 14), clients[client], None, True)
+            result = manager.process_the_end_of_the_round(range(0, 14), 0, clients[client], None, True)
             self.assertEqual(result['is_game_end'], False)
             self.assertNotEqual(manager.dealer, current_dealer)
             current_dealer = manager.dealer
 
-        result = manager.process_the_end_of_the_round(range(0, 14), clients[0], None, True)
+        result = manager.process_the_end_of_the_round(range(0, 14), 0, clients[0], None, True)
         self.assertEqual(result['is_game_end'], True)
 
 

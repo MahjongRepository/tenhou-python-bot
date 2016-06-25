@@ -138,7 +138,11 @@ class GameManager(object):
 
             # win by tsumo after tile draw
             if is_win:
-                result = self.process_the_end_of_the_round(client.player.tiles, client, None, True)
+                result = self.process_the_end_of_the_round(tiles=client.player.tiles,
+                                                           win_tile=tile,
+                                                           winner=client,
+                                                           loser=None,
+                                                           is_tsumo=True)
                 return result
 
             # if not in riichi, let's decide what tile to discard
@@ -156,7 +160,11 @@ class GameManager(object):
                 # TODO support multiple ron
                 if self.can_call_ron(other_client, tile):
                     # the end of the round
-                    result = self.process_the_end_of_the_round(other_client.player.tiles, other_client, client, False)
+                    result = self.process_the_end_of_the_round(tiles=other_client.player.tiles,
+                                                               win_tile=tile,
+                                                               winner=other_client,
+                                                               loser=client,
+                                                               is_tsumo=False)
                     return result
 
             # if there is no challenger to ron, let's check can we call riichi with tile discard or not
@@ -169,7 +177,7 @@ class GameManager(object):
             if not len(self.tiles):
                 continue_to_play = False
 
-        result = self.process_the_end_of_the_round(None, None, None, False)
+        result = self.process_the_end_of_the_round([], 0, None, None, False)
         return result
 
     def play_game(self, total_results):
@@ -190,8 +198,8 @@ class GameManager(object):
             result = self.play_round()
 
             is_game_end = result['is_game_end']
-            loser = result['lose_client']
-            winner = result['win_client']
+            loser = result['loser']
+            winner = result['winner']
             if loser:
                 total_results[loser.id]['lose_rounds'] += 1
             if winner:
@@ -249,15 +257,16 @@ class GameManager(object):
         # first move should be dealer's move
         self.current_client = dealer
 
-    def process_the_end_of_the_round(self, win_tiles, win_client, lose_client, is_tsumo):
+    def process_the_end_of_the_round(self, tiles, win_tile, winner, loser, is_tsumo):
         """
         Increment a round number and do a scores calculations
         """
 
-        if win_client:
-            logger.info('{0}: {1}'.format(
+        if winner:
+            logger.info('{0}: {1} + {2}'.format(
                 is_tsumo and 'Tsumo' or 'Ron',
-                TilesConverter.to_one_line_string(win_tiles))
+                TilesConverter.to_one_line_string(tiles),
+                TilesConverter.to_one_line_string([win_tile])),
             )
         else:
             logger.info('Retake')
@@ -267,10 +276,12 @@ class GameManager(object):
 
         hand_value = 0
 
-        if win_client:
-            hand_value += FinishedHand.estimate_hand_value(win_tiles,
+        if winner:
+            hand_value += FinishedHand.estimate_hand_value(tiles,
+                                                           win_tile,
                                                            is_tsumo,
-                                                           win_client.player.in_riichi,
+                                                           winner.player.in_riichi,
+                                                           winner.player.is_dealer,
                                                            False)
 
             scores_to_pay = hand_value + self.honba_sticks * 300
@@ -278,7 +289,7 @@ class GameManager(object):
             self.riichi_sticks = 0
 
             # if dealer won we need to increment honba sticks
-            if win_client.player.is_dealer:
+            if winner.player.is_dealer:
                 self.honba_sticks += 1
             else:
                 self.honba_sticks = 0
@@ -286,13 +297,13 @@ class GameManager(object):
                 self.set_dealer(new_dealer)
 
             # win by ron
-            if lose_client:
+            if loser:
                 win_amount = scores_to_pay + riichi_bonus
-                win_client.player.scores += win_amount
-                lose_client.player.scores -= scores_to_pay
+                winner.player.scores += win_amount
+                loser.player.scores -= scores_to_pay
 
-                logger.info('Win:  {0} + {1:,d}'.format(win_client.player.name, win_amount))
-                logger.info('Lose: {0} - {1:,d}'.format(lose_client.player.name, scores_to_pay))
+                logger.info('Win:  {0} + {1:,d}'.format(winner.player.name, win_amount))
+                logger.info('Lose: {0} - {1:,d}'.format(loser.player.name, scores_to_pay))
             # win by tsumo
             else:
                 scores_to_pay /= 3
@@ -301,13 +312,13 @@ class GameManager(object):
                 scores_to_pay = 100 * round(float(scores_to_pay) / 100)
 
                 win_amount = scores_to_pay * 3 + riichi_bonus
-                win_client.player.scores += win_amount
+                winner.player.scores += win_amount
 
                 for client in self.clients:
-                    if client != win_client:
+                    if client != winner:
                         client.player.scores -= scores_to_pay
 
-                logger.info('Win: {0} + {1:,d}'.format(win_client.player.name, win_amount))
+                logger.info('Win: {0} + {1:,d}'.format(winner.player.name, win_amount))
         # retake
         else:
             tempai_users = 0
@@ -337,8 +348,6 @@ class GameManager(object):
                     else:
                         client.player.scores -= 3000 / (4 - tempai_users)
 
-
-
         # if someone has negative scores,
         # we need to end the game
         for client in self.clients:
@@ -352,9 +361,8 @@ class GameManager(object):
         logger.info('')
 
         return {
-            'win_hand': win_tiles,
-            'win_client': win_client,
-            'lose_client': lose_client,
+            'winner': winner,
+            'loser': loser,
             'is_tsumo': is_tsumo,
             'is_game_end': is_game_end
         }

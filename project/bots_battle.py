@@ -7,7 +7,7 @@ from tqdm import trange
 from game.game_manager import GameManager
 from mahjong.client import Client
 
-TOTAL_HANCHANS = 10
+TOTAL_HANCHANS = 100
 
 def main():
     # enable it for manual testing

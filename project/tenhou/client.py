@@ -42,12 +42,23 @@ class TenhouClient(Client):
         self._send_message('<AUTH val="{0}"/>'.format(auth_token))
         self._send_message(self._pxr_tag())
 
-        message = self._read_message()
-        if '<ln' in message:
+        # sometimes tenhou send an empty tag after authentication (in tournament mode)
+        # and bot thinks that he was not auth
+        # to prevent it lets wait a little
+        # and read a group of tags
+        sleep(3)
+        authenticated = False
+        messages = self._get_multiple_messages()
+        for message in messages:
+            if '<ln' in message:
+                authenticated = True
+
+        if authenticated:
             self._send_keep_alive_ping()
             logger.info('Successfully authenticated')
             return True
         else:
+            logger.info('Failed to authenticate')
             return False
 
     def start_the_game(self):

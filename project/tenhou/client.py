@@ -233,7 +233,6 @@ class TenhouClient(Client):
         result = self.statistics.send_statistics()
         logger.info('Statistics sent: {0}'.format(result))
 
-
     def end_the_game(self):
         self.game_is_continue = False
         self._send_message('<BYE />')

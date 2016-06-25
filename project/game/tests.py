@@ -111,7 +111,7 @@ class GameManagerTestCase(unittest.TestCase):
         self.assertEqual(client.player.in_riichi, True)
 
     def test_play_round_and_win_by_tsumo(self):
-        game.game_manager.shuffle_seed = lambda : 0.05
+        game.game_manager.shuffle_seed = lambda : 0.7662959679647414
 
         clients = [Client() for _ in range(0, 4)]
         manager = GameManager(clients)

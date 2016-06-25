@@ -20,8 +20,8 @@ logger = logging.getLogger('game')
 
 class GameManager(object):
     """
-    Draft of bots runner.
-    Is not completed yet
+    Allow to play bots between each other
+    To have a metrics how new version plays agains old versions
     """
 
     tiles = []
@@ -123,15 +123,28 @@ class GameManager(object):
 
         while continue_to_play:
             client = self._get_current_client()
+            in_tempai = client.player.in_tempai
 
-            tile, in_tempai, is_win = self.draw_tile(client)
+            tile = self._cut_tiles(1)[0]
+
+            # we don't need to add tile to the hand when we are in riichi
+            if client.player.in_riichi:
+                tiles = client.player.tiles + [tile]
+            else:
+                client.draw_tile(tile)
+                tiles = client.player.tiles
+
+            is_win = self.agari.is_agari(TilesConverter.to_34_array(tiles))
 
             # win by tsumo after tile draw
             if is_win:
                 result = self.process_the_end_of_the_round(client.player.tiles, client, None, True)
                 return result
 
-            tile = self.discard_tile(client)
+            # if not in riichi, let's decide what tile to discard
+            if not client.player.in_riichi:
+                tile = client.discard_tile()
+                in_tempai = client.player.in_tempai
 
             # after tile discard let's check all other players can they win or not
             # at this tile
@@ -197,19 +210,6 @@ class GameManager(object):
         logger.info('The end of the game')
 
         return {'played_rounds': played_rounds}
-
-    def draw_tile(self, client):
-        tile = self._cut_tiles(1)[0]
-        client.draw_tile(tile)
-
-        in_tempai = client.player.in_tempai
-        is_win = self.agari.is_agari(TilesConverter.to_34_array(client.player.tiles))
-
-        return tile, in_tempai, is_win
-
-    def discard_tile(self, client):
-        tile = client.discard_tile()
-        return tile
 
     def can_call_ron(self, client, win_tile):
         if not client.player.in_tempai or not client.player.in_riichi:

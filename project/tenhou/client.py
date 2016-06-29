@@ -42,21 +42,38 @@ class TenhouClient(Client):
         self._send_message('<AUTH val="{0}"/>'.format(auth_token))
         self._send_message(self._pxr_tag())
 
-        message = self._read_message()
-        if '<ln' in message:
+        # sometimes tenhou send an empty tag after authentication (in tournament mode)
+        # and bot thinks that he was not auth
+        # to prevent it lets wait a little
+        # and read a group of tags
+        sleep(3)
+        authenticated = False
+        messages = self._get_multiple_messages()
+        for message in messages:
+            if '<ln' in message:
+                authenticated = True
+
+        if authenticated:
             self._send_keep_alive_ping()
             logger.info('Successfully authenticated')
             return True
         else:
+            logger.info('Failed to authenticate')
             return False
 
     def start_the_game(self):
         log_link = ''
 
         if settings.LOBBY != '0':
-            logger.info('Go to the {0} lobby'.format(settings.LOBBY))
-            self._send_message('<CHAT text="{0}" />'.format(quote('/lobby {0}'.format(settings.LOBBY))))
-            sleep(5)
+            if settings.IS_TOURNAMENT:
+                logger.info('Go to the tournament lobby: {0}'.format(settings.LOBBY))
+                self._send_message('<CS lobby="{0}" />'.format(settings.LOBBY))
+                sleep(2)
+                self._send_message('<DATE />')
+            else:
+                logger.info('Go to the lobby: {0}'.format(settings.LOBBY))
+                self._send_message('<CHAT text="{0}" />'.format(quote('/lobby {0}'.format(settings.LOBBY))))
+                sleep(2)
 
         game_type = '{0},{1}'.format(settings.LOBBY, settings.GAME_TYPE)
 
@@ -281,6 +298,9 @@ class TenhouClient(Client):
 
     def _pxr_tag(self):
         # I have no idea why we need to send it, but better to do it
+        if settings.IS_TOURNAMENT:
+            return '<PXR V="-1" />'
+
         if settings.USER_ID == 'NoName':
             return '<PXR V="1" />'
         else:

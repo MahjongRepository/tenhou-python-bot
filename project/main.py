@@ -28,10 +28,9 @@ def parse_args_and_set_up_settings():
                      default=settings.WAITING_GAME_TIMEOUT_MINUTES,
                      help='How much minutes bot will looking for the game. If game is not started in timeout, script will be ended. Default is {0}'.format(settings.WAITING_GAME_TIMEOUT_MINUTES))
 
-    parser.add_option('--tournament',
-                      dest='is_tournament',
-                      action='store_true',
-                      help='If present bot will be run in tournament mode')
+    parser.add_option('-c', '--championship',
+                      type='string',
+                      help='Tournament lobby to play.')
 
     opts, _ = parser.parse_args()
 
@@ -39,7 +38,10 @@ def parse_args_and_set_up_settings():
     settings.GAME_TYPE = opts.game_type
     settings.LOBBY = opts.lobby
     settings.WAITING_GAME_TIMEOUT_MINUTES = opts.timeout
-    settings.IS_TOURNAMENT = opts.is_tournament
+
+    if opts.championship:
+        settings.IS_TOURNAMENT = True
+        settings.LOBBY = opts.championship
 
 def main():
     parse_args_and_set_up_settings()

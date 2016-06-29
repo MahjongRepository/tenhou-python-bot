@@ -25,9 +25,9 @@ class TenhouClient(Client):
 
     decoder = TenhouDecoder()
 
-    def __init__(self, socket):
+    def __init__(self, socket_object):
         super(TenhouClient, self).__init__()
-        self.socket = socket
+        self.socket = socket_object
 
     def authenticate(self):
         self._send_message('<HELO name="{0}" tid="f0" sx="M" />'.format(quote(settings.USER_ID)))
@@ -249,7 +249,6 @@ class TenhouClient(Client):
         sleep(60)
         result = self.statistics.send_statistics()
         logger.info('Statistics sent: {0}'.format(result))
-
 
     def end_the_game(self):
         self.game_is_continue = False

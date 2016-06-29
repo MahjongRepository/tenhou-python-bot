@@ -79,14 +79,22 @@ class TableTestCase(unittest.TestCase):
     def test_set_scores_and_recalculate_player_position(self):
         table = Table()
         table.init_round(0, 0, 0, 0, 0, [])
-        scores = [230, 110, 55, 405]
 
+        scores = [230, 110, 55, 405]
         table.set_players_scores(scores)
 
         self.assertEqual(table.get_player(0).position, 2)
         self.assertEqual(table.get_player(1).position, 3)
         self.assertEqual(table.get_player(2).position, 4)
         self.assertEqual(table.get_player(3).position, 1)
+
+        scores = [110, 110, 405, 405]
+        table.set_players_scores(scores)
+
+        self.assertEqual(table.get_player(0).position, 3)
+        self.assertEqual(table.get_player(1).position, 4)
+        self.assertEqual(table.get_player(2).position, 1)
+        self.assertEqual(table.get_player(3).position, 2)
 
     def test_set_names_and_ranks(self):
         table = Table()
@@ -165,7 +173,7 @@ class TileTestCase(unittest.TestCase):
     def test_convert_to_one_line_string(self):
         tiles = [0, 1, 34, 35, 36, 37, 70, 71, 72, 73, 106, 107, 108, 109, 133, 134]
         result = TilesConverter.to_one_line_string(tiles)
-        self.assertEqual('1199s1199p1199m1177z', result)
+        self.assertEqual('1199m1199p1199s1177z', result)
 
     def test_convert_to_34_array(self):
         tiles = [0, 34, 35, 36, 37, 70, 71, 72, 73, 106, 107, 108, 109, 134]

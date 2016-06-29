@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-from mahjong.ai.main import MainAI
+import logging
+
 from mahjong.ai.shanten import Shanten
 from mahjong.tile import Tile
 
+logger = logging.getLogger('tenhou')
+
 
 class Player(object):
-    ai_class = MainAI
     # the place where is player is sitting
     seat = 0
     # position based on scores
@@ -24,14 +26,25 @@ class Player(object):
     in_tempai = False
     in_riichi = False
 
-    def __init__(self, seat, table):
+    def __init__(self, seat, table, use_previous_ai_version=False):
         self.discards = []
         self.melds = []
         self.tiles = []
         self.seat = seat
         self.table = table
 
-        self.ai = self.ai_class(self)
+        if use_previous_ai_version:
+            try:
+                from mahjong.ai.old_version import MainAI
+            # project wasn't set up properly
+            # we don't have old version
+            except ImportError:
+                logger.error('Wasn\'t able to load old api version')
+                from mahjong.ai.main import MainAI
+        else:
+            from mahjong.ai.main import MainAI
+
+        self.ai = MainAI(self)
 
     def __str__(self):
         result = u'{0}'.format(self.name)
@@ -75,8 +88,6 @@ class Player(object):
         self.is_dealer = False
         self.in_tempai = False
         self.in_riichi = False
-
-        self.ai = self.ai_class(self)
 
     def can_call_riichi(self):
         return all([

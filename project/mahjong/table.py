@@ -14,9 +14,9 @@ class Table(object):
     count_of_remaining_tiles = 0
     count_of_players = 4
 
-    def __init__(self):
+    def __init__(self, use_previous_ai_version=False):
         self.dora_indicators = []
-        self._init_players()
+        self._init_players(use_previous_ai_version)
 
 
     def __str__(self):
@@ -50,7 +50,7 @@ class Table(object):
         self.get_main_player().init_hand(tiles)
 
     def add_open_set(self, meld):
-        self.get_player(meld.who).add_open_set(meld)
+        self.get_player(meld.who).add_meld(meld)
 
     def add_dora_indicator(self, tile):
         self.dora_indicators.append(tile)
@@ -62,7 +62,9 @@ class Table(object):
             if uma:
                 self.get_player(i).uma = uma[i]
 
-        # recalculate player's positions
+        self.recalculate_players_position()
+
+    def recalculate_players_position(self):
         temp_players = self.get_players_sorted_by_scores()
         for i in range(0, len(temp_players)):
             temp_player = temp_players[i]
@@ -82,9 +84,9 @@ class Table(object):
     def get_players_sorted_by_scores(self):
         return sorted(self.players, key=lambda x: x.scores, reverse=True)
 
-    def _init_players(self):
+    def _init_players(self, use_previous_ai_version=False):
         self.players = []
 
         for seat in range(0, self.count_of_players):
-            player = Player(seat=seat, table=self)
+            player = Player(seat=seat, table=self, use_previous_ai_version=use_previous_ai_version)
             self.players.append(player)

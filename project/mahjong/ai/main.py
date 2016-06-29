@@ -4,7 +4,10 @@ from mahjong.ai.base import BaseAI
 from mahjong.ai.shanten import Shanten
 from mahjong.tile import TilesConverter
 
+
 class MainAI(BaseAI):
+    version = '0.0.5'
+
     player = None
     shanten = None
 

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 TENHOU_HOST = '133.242.10.78'
 TENHOU_PORT = 10080
 

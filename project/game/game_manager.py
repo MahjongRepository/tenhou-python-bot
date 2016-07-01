@@ -46,6 +46,7 @@ class GameManager(object):
         self._set_client_names()
 
         self.agari = Agari()
+        self.finished_hand = FinishedHand()
 
     def init_game(self):
         """
@@ -274,15 +275,21 @@ class GameManager(object):
         is_game_end = False
         self.round_number += 1
 
-        hand_value = 0
-
         if winner:
-            hand_value += FinishedHand.estimate_hand_value(tiles,
-                                                           win_tile,
-                                                           is_tsumo,
-                                                           winner.player.in_riichi,
-                                                           winner.player.is_dealer,
-                                                           False)
+            hand_value = self.finished_hand.estimate_hand_value(tiles,
+                                                                win_tile,
+                                                                is_tsumo,
+                                                                winner.player.in_riichi,
+                                                                winner.player.is_dealer,
+                                                                False)
+            if hand_value['cost']:
+                hand_value = hand_value['cost']['main']
+            else:
+                logger.error('Can\'t estimate a hand: {0}. Error: {1}'.format(
+                    TilesConverter.to_one_line_string(tiles + [win_tile]),
+                    hand_value['error']
+                ))
+                hand_value = 1000
 
             scores_to_pay = hand_value + self.honba_sticks * 300
             riichi_bonus = self.riichi_sticks * 1000

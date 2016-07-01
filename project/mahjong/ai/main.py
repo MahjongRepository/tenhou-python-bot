@@ -6,7 +6,7 @@ from mahjong.tile import TilesConverter
 
 
 class MainAI(BaseAI):
-    version = '0.0.5'
+    version = '0.0.6'
 
     player = None
     shanten = None

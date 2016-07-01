@@ -167,7 +167,6 @@ class Shanten(object):
         self.run(0)
 
     def run(self, depth):
-
         if self.min_shanten == Shanten.AGARI_STATE:
             return
 

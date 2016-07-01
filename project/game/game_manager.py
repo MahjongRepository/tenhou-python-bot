@@ -334,11 +334,12 @@ class GameManager(object):
                 if client.player.in_tempai:
                     tempai_users += 1
 
-            if tempai_users == 0:
-                # no one in tempai, so honba stick should be added
+            if tempai_users == 0 or tempai_users == 4:
                 self.honba_sticks += 1
-                new_dealer = self._move_position(self.dealer)
-                self.set_dealer(new_dealer)
+                # no one in tempai, so deal should move
+                if tempai_users == 0:
+                    new_dealer = self._move_position(self.dealer)
+                    self.set_dealer(new_dealer)
             else:
                 # 1 tempai user  will get 3000
                 # 2 tempai users will get 1500 each

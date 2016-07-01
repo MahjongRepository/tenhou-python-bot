@@ -228,6 +228,20 @@ class GameManagerTestCase(unittest.TestCase):
         self.assertEqual(clients[2].player.scores, 26000)
         self.assertEqual(clients[3].player.scores, 22000)
 
+        for client in clients:
+            client.player.scores = 25000
+
+        clients[0].player.in_tempai = True
+        clients[1].player.in_tempai = True
+        clients[2].player.in_tempai = True
+        clients[3].player.in_tempai = True
+        manager.process_the_end_of_the_round(None, None, None, None, False)
+
+        self.assertEqual(clients[0].player.scores, 25000)
+        self.assertEqual(clients[1].player.scores, 25000)
+        self.assertEqual(clients[2].player.scores, 25000)
+        self.assertEqual(clients[3].player.scores, 25000)
+
     def test_retake_and_honba_increment(self):
         clients = [Client() for _ in range(0, 4)]
         manager = GameManager(clients)

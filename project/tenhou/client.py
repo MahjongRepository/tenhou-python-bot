@@ -190,6 +190,11 @@ class TenhouClient(Client):
                     self.table.add_dora_indicator(tile)
                     logger.info('New dora indicator: {0}'.format(tile))
 
+                if '<reach' in message and 'step="2"' in message:
+                    who_called_riichi = self.decoder.parse_who_called_riichi(message)
+                    self.enemy_riichi(who_called_riichi)
+                    logger.info('Riichi called by {0} player'.format(who_called_riichi))
+
                 # the end of round
                 if 'agari' in message or 'ryuukyoku' in message:
                     sleep(2)

@@ -2,7 +2,7 @@
 import unittest
 
 from mahjong.ai.agari import Agari
-from mahjong.ai.main import MainAI
+from mahjong.ai.main import MainAI, Defence
 from mahjong.ai.shanten import Shanten
 from mahjong.player import Player
 from mahjong.table import Table
@@ -14,7 +14,7 @@ class AITestCase(unittest.TestCase):
     def test_outs(self):
         table = Table()
         player = Player(0, table)
-        ai = MainAI(player)
+        ai = MainAI(table, player)
 
         tiles = TilesConverter.string_to_136_array(sou='111345677', pin='15', man='56')
         tile = TilesConverter.string_to_136_array(man='9')[0]
@@ -257,3 +257,17 @@ class ShantenTestCase(unittest.TestCase):
 
         tiles = TilesConverter.string_to_136_array(sou='129', pin='129', man='129', honors='12345')
         self.assertEqual(shanten.calculate_shanten(TilesConverter.to_34_array(tiles)), 2)
+
+
+class DefenceTestCase(unittest.TestCase):
+
+    def test_go_to_the_defence_mode(self):
+        table = Table()
+        defence = Defence(table)
+
+        self.assertFalse(defence.go_to_defence_mode())
+        table.players[1].in_riichi = True
+        self.assertTrue(defence.go_to_defence_mode())
+
+        table.players[0].in_riichi = True
+        self.assertFalse(defence.go_to_defence_mode())

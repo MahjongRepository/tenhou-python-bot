@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import random
+
 from mahjong.ai.agari import Agari
 from mahjong.ai.base import BaseAI
 from mahjong.ai.shanten import Shanten
@@ -8,13 +10,16 @@ from mahjong.tile import TilesConverter
 class MainAI(BaseAI):
     version = '0.0.6'
 
-    player = None
+    agari = None
     shanten = None
+    defence = None
 
-    def __init__(self, player):
-        super(MainAI, self).__init__(player)
-        self.shanten = Shanten()
+    def __init__(self, table, player):
+        super(MainAI, self).__init__(table, player)
+
         self.agari = Agari()
+        self.shanten = Shanten()
+        self.defence = Defence(table)
 
     def discard_tile(self):
         results, shanten = self.calculate_outs()
@@ -22,13 +27,20 @@ class MainAI(BaseAI):
         if shanten == 0:
             self.player.in_tempai = True
 
-        # win
+        # we are win!
         if shanten == Shanten.AGARI_STATE:
             return Shanten.AGARI_STATE
-        else:
-            tile34 = results[0]['discard']
-            tile_in_hand = TilesConverter.find_34_tile_in_136_array(tile34, self.player.tiles)
-            return tile_in_hand
+
+        # if self.defence.go_to_defence_mode():
+        #     self.player.in_tempai = False
+        #     tile_in_hand = self.player.tiles[random.randrange(len(self.player.tiles) - 1)]
+        # else:
+        #     tile34 = results[0]['discard']
+        #     tile_in_hand = TilesConverter.find_34_tile_in_136_array(tile34, self.player.tiles)
+        tile34 = results[0]['discard']
+        tile_in_hand = TilesConverter.find_34_tile_in_136_array(tile34, self.player.tiles)
+
+        return tile_in_hand
 
     def calculate_outs(self):
         tiles = TilesConverter.to_34_array(self.player.tiles)
@@ -88,3 +100,34 @@ class MainAI(BaseAI):
         for i in range(0, len(raw_data)):
             n += 4 - tiles[raw_data[i]]
         return n
+
+
+class Defence(object):
+    table = None
+
+    def __init__(self, table):
+        self.table = table
+
+    def go_to_defence_mode(self):
+        """
+        The method is decides should main player go to the defence mode or not
+        :return: true|false
+        """
+        main_player = self.table.get_main_player()
+        result = False
+
+        # if we are in riichi, we can't defence
+        if main_player.in_riichi:
+            return False
+
+        for player in self.table.players:
+            if player.seat == main_player.seat:
+                continue
+
+            if player.in_riichi:
+                result = True
+
+        return result
+
+    def calculate_safe_tiles_against_riichi(self):
+        pass

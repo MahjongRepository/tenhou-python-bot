@@ -54,6 +54,8 @@ class GameManager(object):
         Clients random placement and dealer selection
         """
         shuffle(self.clients, shuffle_seed)
+        for i in range(0, len(self.clients)):
+            self.clients[i].position = i
 
         dealer = randint(0, 3)
         self.set_dealer(dealer)
@@ -158,6 +160,9 @@ class GameManager(object):
                 if other_client == client:
                     continue
 
+                # let's store other players discards
+                other_client.enemy_discard(other_client.position - client.position, tile)
+
                 # TODO support multiple ron
                 if self.can_call_ron(other_client, tile):
                     # the end of the round
@@ -243,6 +248,10 @@ class GameManager(object):
         client.player.in_riichi = True
         client.player.scores -= 1000
         self.riichi_sticks += 1
+
+        who_called_riichi = client.position
+        for client in self.clients:
+            client.enemy_riichi(who_called_riichi - client.position)
 
         logger.info('Riichi: {0} - 1,000'.format(client.player.name))
 

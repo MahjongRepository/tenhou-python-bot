@@ -18,18 +18,22 @@ class Player(object):
     name = ''
     rank = ''
 
+    discards = []
+    # tiles that were discarded after player's riichi
+    safe_tiles = []
+    tiles = []
+    melds = []
     table = None
-    discards = None
-    tiles = None
-    melds = None
     is_dealer = False
     in_tempai = False
     in_riichi = False
+    in_defence_mode = False
 
     def __init__(self, seat, table, use_previous_ai_version=False):
         self.discards = []
         self.melds = []
         self.tiles = []
+        self.safe_tiles = []
         self.seat = seat
         self.table = table
 
@@ -44,7 +48,7 @@ class Player(object):
         else:
             from mahjong.ai.main import MainAI
 
-        self.ai = MainAI(self)
+        self.ai = MainAI(table, self)
 
     def __str__(self):
         result = u'{0}'.format(self.name)
@@ -85,9 +89,11 @@ class Player(object):
         self.discards = []
         self.melds = []
         self.tiles = []
+        self.safe_tiles = []
         self.is_dealer = False
         self.in_tempai = False
         self.in_riichi = False
+        self.in_defence_mode = False
 
     def can_call_riichi(self):
         return all([

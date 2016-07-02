@@ -113,8 +113,6 @@ class GameManagerTestCase(unittest.TestCase):
         self.assertEqual(clients[3].player.position, 4)
 
     def test_call_riichi(self):
-        game.game_manager.shuffle_seed = lambda : 0.33
-
         clients = [Client() for _ in range(0, 4)]
         manager = GameManager(clients)
         manager.init_game()
@@ -130,6 +128,48 @@ class GameManagerTestCase(unittest.TestCase):
         self.assertEqual(manager.riichi_sticks, 1)
         self.assertEqual(client.player.scores, 24000)
         self.assertEqual(client.player.in_riichi, True)
+
+        clients = [Client() for _ in range(0, 4)]
+        manager = GameManager(clients)
+        manager.init_game()
+        manager.init_round()
+
+        manager.call_riichi(clients[0])
+
+        self.assertEqual(clients[0].player.in_riichi, True)
+        self.assertEqual(clients[1].player.in_riichi, False)
+        self.assertEqual(clients[2].player.in_riichi, False)
+        self.assertEqual(clients[3].player.in_riichi, False)
+
+        for client in clients:
+            client.player.in_riichi = False
+
+        manager.call_riichi(clients[1])
+
+        self.assertEqual(clients[0].player.in_riichi, False)
+        self.assertEqual(clients[1].player.in_riichi, True)
+        self.assertEqual(clients[2].player.in_riichi, False)
+        self.assertEqual(clients[3].player.in_riichi, False)
+
+        for client in clients:
+            client.player.in_riichi = False
+
+        manager.call_riichi(clients[2])
+
+        self.assertEqual(clients[0].player.in_riichi, False)
+        self.assertEqual(clients[1].player.in_riichi, False)
+        self.assertEqual(clients[2].player.in_riichi, True)
+        self.assertEqual(clients[3].player.in_riichi, False)
+
+        for client in clients:
+            client.player.in_riichi = False
+
+        manager.call_riichi(clients[3])
+
+        self.assertEqual(clients[0].player.in_riichi, False)
+        self.assertEqual(clients[1].player.in_riichi, False)
+        self.assertEqual(clients[2].player.in_riichi, False)
+        self.assertEqual(clients[3].player.in_riichi, True)
 
     def test_play_round_and_win_by_tsumo(self):
         game.game_manager.shuffle_seed = lambda : 0.7662959679647414

@@ -138,3 +138,9 @@ class TenhouDecoderTestCase(unittest.TestCase):
 
         tile = decoder.parse_tile('<f23 t="4"/>')
         self.assertEqual(tile, 23)
+
+    def test_parse_who_called_riichi(self):
+        decoder = TenhouDecoder()
+
+        who = decoder.parse_who_called_riichi('<REACH who="2" ten="255,216,261,258" step="2"/>')
+        self.assertEqual(who, 2)

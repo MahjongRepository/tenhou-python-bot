@@ -10,8 +10,8 @@ class MainAI(BaseAI):
 
     version = 'random'
 
-    def __init__(self, player):
-        super(MainAI, self).__init__(player)
+    def __init__(self, table, player):
+        super(MainAI, self).__init__(table, player)
 
     def discard_tile(self):
         tile_to_discard = random.randrange(len(self.player.tiles) - 1)

@@ -185,6 +185,11 @@ class TenhouDecoder(object):
         tag = soup.find('dora')
         return int(tag.attrs['hai'])
 
+    def parse_who_called_riichi(self, message):
+        soup = BeautifulSoup(message, 'html.parser')
+        tag = soup.find('reach')
+        return int(tag.attrs['who'])
+
     def generate_auth_token(self, auth_string):
         translation_table = [63006, 9570, 49216, 45888, 9822, 23121, 59830, 51114, 54831, 4189, 580, 5203, 42174, 59972,
                              55457, 59009, 59347, 64456, 8673, 52710, 49975, 2006, 62677, 3463, 17754, 5357]

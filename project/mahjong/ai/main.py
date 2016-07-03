@@ -31,12 +31,17 @@ class MainAI(BaseAI):
         if shanten == Shanten.AGARI_STATE:
             return Shanten.AGARI_STATE
 
+        # Disable defence for now
         # if self.defence.go_to_defence_mode():
         #     self.player.in_tempai = False
-        #     tile_in_hand = self.player.tiles[random.randrange(len(self.player.tiles) - 1)]
+        #     tile_in_hand = self.defence.calculate_safe_tile_against_riichi()
+        #     if we wasn't able to find a safe tile, let's discard a random one
+        #     if not tile_in_hand:
+        #         tile_in_hand = self.player.tiles[random.randrange(len(self.player.tiles) - 1)]
         # else:
         #     tile34 = results[0]['discard']
         #     tile_in_hand = TilesConverter.find_34_tile_in_136_array(tile34, self.player.tiles)
+
         tile34 = results[0]['discard']
         tile_in_hand = TilesConverter.find_34_tile_in_136_array(tile34, self.player.tiles)
 
@@ -129,5 +134,25 @@ class Defence(object):
 
         return result
 
-    def calculate_safe_tiles_against_riichi(self):
-        pass
+    def calculate_safe_tile_against_riichi(self):
+        player_tiles = self.table.get_main_player().tiles
+        # tiles that were discarded after riichi or
+        # discarded by player in riichi
+        # for better experience we need to detect the safe tiles for different players
+        safe_tiles = []
+        for player in self.table.players:
+            safe_tiles += player.safe_tiles
+            if player.in_riichi:
+                safe_tiles += player.discards
+
+        player_tiles_34 = TilesConverter.to_34_array(player_tiles)
+        safe_tiles_34 = TilesConverter.to_34_array(safe_tiles)
+
+        safe_tile = None
+        # let's try to find a safe tile in our main player hand
+        for i in range(0, len(safe_tiles_34)):
+            if safe_tiles_34[i] > 0 and player_tiles_34[i] > 0:
+                return TilesConverter.find_34_tile_in_136_array(i, player_tiles)
+
+        return safe_tile
+

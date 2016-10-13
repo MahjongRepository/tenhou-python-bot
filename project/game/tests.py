@@ -172,7 +172,7 @@ class GameManagerTestCase(unittest.TestCase):
         self.assertEqual(clients[3].player.in_riichi, True)
 
     def test_play_round_and_win_by_tsumo(self):
-        game.game_manager.shuffle_seed = lambda : 0.7662959679647414
+        game.game_manager.shuffle_seed = lambda: 0.7662959679647414
 
         clients = [Client() for _ in range(0, 4)]
         manager = GameManager(clients)
@@ -189,7 +189,7 @@ class GameManagerTestCase(unittest.TestCase):
         self.assertEqual(result['loser'], None)
 
     def test_play_round_and_win_by_ron(self):
-        game.game_manager.shuffle_seed = lambda : 0.33
+        game.game_manager.shuffle_seed = lambda: 0.33
 
         clients = [Client() for _ in range(0, 4)]
         manager = GameManager(clients)
@@ -206,7 +206,7 @@ class GameManagerTestCase(unittest.TestCase):
         self.assertNotEqual(result['loser'], None)
 
     def test_play_round_with_retake(self):
-        game.game_manager.shuffle_seed = lambda : 0.01
+        game.game_manager.shuffle_seed = lambda: 0.01
 
         clients = [Client() for _ in range(0, 4)]
         manager = GameManager(clients)
@@ -425,5 +425,3 @@ class GameManagerTestCase(unittest.TestCase):
 
         result = manager.process_the_end_of_the_round(list(range(0, 14)), 0, clients[0], None, True)
         self.assertEqual(result['is_game_end'], True)
-
-

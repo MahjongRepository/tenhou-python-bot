@@ -242,7 +242,6 @@ class PlayerTestCase(unittest.TestCase):
 
         self.assertEqual(player.can_call_riichi(), True)
 
-
     def test_can_call_riichi_and_already_in_riichi(self):
         table = Table()
         player = Player(0, table)

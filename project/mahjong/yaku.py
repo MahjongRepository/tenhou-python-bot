@@ -73,5 +73,3 @@ chiihou = Yaku('Chiihou', None, 13)
 dora = Yaku('Dora', 1, 1)
 uradora = Yaku('Ura Dora', 1, 1)
 akadora = Yaku('Aka Dora', 1, 1)
-
-

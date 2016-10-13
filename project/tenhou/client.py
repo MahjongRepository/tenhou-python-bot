@@ -183,7 +183,6 @@ class TenhouClient(Client):
 
                         logger.info('Remaining tiles: {0}'.format(self.table.count_of_remaining_tiles))
 
-
                 # new dora indicator after kan
                 if '<dora' in message:
                     tile = self.decoder.parse_dora_indicator(message)

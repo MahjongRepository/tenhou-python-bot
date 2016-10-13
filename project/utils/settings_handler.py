@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import importlib
 
+
 class SettingsSingleton(object):
     """
     Let's load a settings in the memory one time when the app starts
@@ -18,6 +19,7 @@ class SettingsSingleton(object):
 
     def __setattr__(self, key, value):
         return setattr(self.instance, key, value)
+
 
 class Settings(object):
 

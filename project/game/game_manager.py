@@ -13,10 +13,14 @@ from mahjong.tile import TilesConverter
 # we need to have it
 # to be able repeat our tests with needed random
 seed_value = random()
-shuffle_seed = lambda : seed_value
 
 set_up_logging()
 logger = logging.getLogger('game')
+
+
+def shuffle_seed():
+    return seed_value
+
 
 class GameManager(object):
     """
@@ -36,7 +40,6 @@ class GameManager(object):
     riichi_sticks = 0
 
     _unique_dealers = 0
-
 
     def __init__(self, clients):
         self.tiles = []

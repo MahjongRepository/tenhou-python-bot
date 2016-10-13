@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import random
-
 from mahjong.ai.agari import Agari
 from mahjong.ai.base import BaseAI
 from mahjong.ai.shanten import Shanten
@@ -155,4 +153,3 @@ class Defence(object):
                 return TilesConverter.find_34_tile_in_136_array(i, player_tiles)
 
         return safe_tile
-

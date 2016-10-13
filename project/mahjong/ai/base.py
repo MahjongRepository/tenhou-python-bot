@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 class BaseAI(object):
     player = None
     table = None

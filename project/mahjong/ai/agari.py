@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 class Agari(object):
 
     def is_mentsu(self, m):
@@ -124,16 +125,20 @@ class Agari(object):
         m2 = self.to_meld(tiles, 18)
 
         if j & 4:
-            return not (n0 | nn0 | n1 | nn1 | n2 | nn2) and self.is_mentsu(m0) and self.is_mentsu(m1) and self.is_mentsu(m2)
+            return not (n0 | nn0 | n1 | nn1 | n2 | nn2) and self.is_mentsu(m0) \
+                   and self.is_mentsu(m1) and self.is_mentsu(m2)
 
         if n0 == 2:
-            return not (n1 | nn1 | n2 | nn2) and self.is_mentsu(m1) and self.is_mentsu(m2) and self.is_atama_mentsu(nn0, m0)
+            return not (n1 | nn1 | n2 | nn2) and self.is_mentsu(m1) and self.is_mentsu(m2) \
+                   and self.is_atama_mentsu(nn0, m0)
 
         if n1 == 2:
-            return not (n2 | nn2 | n0 | nn0) and self.is_mentsu(m2) and self.is_mentsu(m0) and self.is_atama_mentsu(nn1, m1)
+            return not (n2 | nn2 | n0 | nn0) and self.is_mentsu(m2) and self.is_mentsu(m0) \
+                   and self.is_atama_mentsu(nn1, m1)
 
         if n2 == 2:
-            return not (n0 | nn0 | n1 | nn1) and self.is_mentsu(m0) and self.is_mentsu(m1) and self.is_atama_mentsu(nn2, m2)
+            return not (n0 | nn0 | n1 | nn1) and self.is_mentsu(m0) and self.is_mentsu(m1) \
+                   and self.is_atama_mentsu(nn2, m2)
 
         return False
 

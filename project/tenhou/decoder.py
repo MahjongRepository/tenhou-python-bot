@@ -213,5 +213,3 @@ class TenhouDecoder(object):
         result = first_part + '-' + postfix
 
         return result
-
-

@@ -31,3 +31,7 @@ Current version played 335 games (hanchans) and achieved only first dan on the t
 | Riichi rate| 36.17% |
 
 So, even with current simple logic it can play and win.
+
+# Code checking
+
+`flake8 --config=../.flake8`

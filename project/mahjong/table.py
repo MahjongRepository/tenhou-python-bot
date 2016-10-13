@@ -18,7 +18,6 @@ class Table(object):
         self.dora_indicators = []
         self._init_players(use_previous_ai_version)
 
-
     def __str__(self):
         return 'Round: {0}, Honba: {1}, Dora Indicators: {2}'.format(self.round_number,
                                                                      self.count_of_honba_sticks,

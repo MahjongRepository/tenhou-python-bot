@@ -12,7 +12,8 @@ class FinishedHand(object):
     # dragons and winds
     honor_indices = [27, 28, 29, 30, 31, 32, 33]
 
-    def estimate_hand_value(self, tiles, win_tile, is_tsumo=False, is_riichi=False, is_dealer=False, is_open_hand=False):
+    def estimate_hand_value(self, tiles, win_tile, is_tsumo=False, is_riichi=False, is_dealer=False,
+                            is_open_hand=False):
         """
         :param tiles: array with 13 tiles in 136-tile format
         :param win_tile: tile that caused win (ron or tsumo)

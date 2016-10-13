@@ -9,6 +9,7 @@ from mahjong.client import Client
 
 TOTAL_HANCHANS = 100
 
+
 def main():
     # enable it for manual testing
     logger = logging.getLogger('game')

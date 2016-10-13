@@ -8,7 +8,8 @@ class TenhouDecoderTestCase(unittest.TestCase):
 
     def test_parse_initial_round_values(self):
         decoder = TenhouDecoder()
-        message = '<INIT seed="0,2,3,0,1,126" ten="250,250,250,250" oya="3" hai="30,67,44,21,133,123,87,69,36,34,94,4,128"/>'
+        message = '<INIT seed="0,2,3,0,1,126" ten="250,250,250,250" oya="3" ' \
+                  'hai="30,67,44,21,133,123,87,69,36,34,94,4,128"/>'
 
         values = decoder.parse_initial_values(message)
         self.assertEqual(values['round_number'], 0)
@@ -19,21 +20,25 @@ class TenhouDecoderTestCase(unittest.TestCase):
 
     def test_parse_initial_hand(self):
         decoder = TenhouDecoder()
-        message = '<INIT seed="0,2,3,0,1,126" ten="250,250,250,250" oya="3" hai="30,67,44,21,133,123,87,69,36,34,94,4,128"/>'
+        message = '<INIT seed="0,2,3,0,1,126" ten="250,250,250,250" oya="3" ' \
+                  'hai="30,67,44,21,133,123,87,69,36,34,94,4,128"/>'
         tiles = decoder.parse_initial_hand(message)
 
         self.assertEqual(len(tiles), 13)
 
     def test_parse_initial_scores(self):
         decoder = TenhouDecoder()
-        message = '<INIT seed="0,2,3,0,1,126" ten="240,260,270,280" oya="3" hai="30,67,44,21,133,123,87,69,36,34,94,4,128"/>'
+        message = '<INIT seed="0,2,3,0,1,126" ten="240,260,270,280" oya="3" ' \
+                  'hai="30,67,44,21,133,123,87,69,36,34,94,4,128"/>'
         values = decoder.parse_initial_values(message)
 
         self.assertEqual(values['scores'], [240, 260, 270, 280])
 
     def test_parse_names_and_ranks(self):
         decoder = TenhouDecoder()
-        message = '<un n0="%4e%6f%4e%61%6d%65" n1="%6f%32%6f%32" n2="%73%68%69%6d%6d%6d%6d%6d" n3="%e5%b7%9d%e6%b5%b7%e8%80%81" dan="0,7,12,1" rate="1500.00,1421.91,1790.94,1532.23" sx="m,m,m,m"/>'
+        message = '<un n0="%4e%6f%4e%61%6d%65" n1="%6f%32%6f%32" n2="%73%68%69%6d%6d%6d%6d%6d"' \
+                  ' n3="%e5%b7%9d%e6%b5%b7%e8%80%81" dan="0,7,12,1" ' \
+                  'rate="1500.00,1421.91,1790.94,1532.23" sx="m,m,m,m"/>'
         values = decoder.parse_names_and_ranks(message)
 
         self.assertEqual(values[0], {'name': 'NoName', 'rank': TenhouDecoder.RANKS[0]})
@@ -43,13 +48,16 @@ class TenhouDecoderTestCase(unittest.TestCase):
 
     def test_parse_final_scores_and_uma(self):
         decoder = TenhouDecoder()
-        message = '<agari ba="0,0" hai="12,13,41,46,51,78,80,84,98,101,105" m="51243" machi="101" ten="30,1000,0" yaku="20,1" dorahai="89" who="2" fromwho="1" sc="225,0,240,-10,378,10,157,0" owari="225,-17.0,230,3.0,388,48.0,157,-34.0" />'
+        message = '<agari ba="0,0" hai="12,13,41,46,51,78,80,84,98,101,105" m="51243" ' \
+                  'machi="101" ten="30,1000,0" yaku="20,1" dorahai="89" who="2" fromwho="1" ' \
+                  'sc="225,0,240,-10,378,10,157,0" owari="225,-17.0,230,3.0,388,48.0,157,-34.0" />'
         values = decoder.parse_final_scores_and_uma(message)
 
         self.assertEqual(values['scores'], [225, 230, 388, 157])
         self.assertEqual(values['uma'], [-17, 3, 48, -34])
 
-        message = '<ryuukyoku ten="30,1000,0" sc="225,0,240,-10,378,10,157,0" owari="225,-17.0,230,3.0,388,48.0,157,-34.0" />'
+        message = '<ryuukyoku ten="30,1000,0" sc="225,0,240,-10,378,10,157,0" ' \
+                  'owari="225,-17.0,230,3.0,388,48.0,157,-34.0" />'
         values = decoder.parse_final_scores_and_uma(message)
 
         self.assertEqual(values['scores'], [225, 230, 388, 157])

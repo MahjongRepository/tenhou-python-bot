@@ -4,7 +4,7 @@ I wanted to build a flow like this:
 We unpack code and import it.
 - We run 3 old copy vs one new copy of AI logic.
 
-But I wasn't able to accompish this with Python imports.
+But I wasn't able to accomplish this with Python imports.
 
 Maybe some day I will do it,
 but for now we will have a separate file with old ai version.

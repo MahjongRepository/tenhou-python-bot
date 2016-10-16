@@ -2,6 +2,7 @@
 import unittest
 
 from mahjong.table import Table
+from mahjong.tile import TilesConverter
 
 
 class TableTestCase(unittest.TestCase):
@@ -109,3 +110,43 @@ class TableTestCase(unittest.TestCase):
         self.assertEqual(table.get_player(0).rank, u'新人')
         self.assertEqual(table.get_player(3).name, u'川海老')
         self.assertEqual(table.get_player(3).rank, u'9級')
+
+    def test_is_dora(self):
+        table = Table()
+        table.init_round(0, 0, 0, 0, 0, [])
+
+        table.dora_indicators = [TilesConverter.string_to_136_array(sou='1')[0]]
+        self.assertTrue(table.is_dora(TilesConverter.string_to_136_array(sou='2')[0]))
+
+        table.dora_indicators = [TilesConverter.string_to_136_array(sou='9')[0]]
+        self.assertTrue(table.is_dora(TilesConverter.string_to_136_array(sou='1')[0]))
+
+        table.dora_indicators = [TilesConverter.string_to_136_array(pin='9')[0]]
+        self.assertTrue(table.is_dora(TilesConverter.string_to_136_array(pin='1')[0]))
+
+        table.dora_indicators = [TilesConverter.string_to_136_array(man='9')[0]]
+        self.assertTrue(table.is_dora(TilesConverter.string_to_136_array(man='1')[0]))
+
+        table.dora_indicators = [TilesConverter.string_to_136_array(man='5')[0]]
+        self.assertTrue(table.is_dora(TilesConverter.string_to_136_array(man='6')[0]))
+
+        table.dora_indicators = [TilesConverter.string_to_136_array(honors='1')[0]]
+        self.assertTrue(table.is_dora(TilesConverter.string_to_136_array(honors='2')[0]))
+
+        table.dora_indicators = [TilesConverter.string_to_136_array(honors='2')[0]]
+        self.assertTrue(table.is_dora(TilesConverter.string_to_136_array(honors='3')[0]))
+
+        table.dora_indicators = [TilesConverter.string_to_136_array(honors='3')[0]]
+        self.assertTrue(table.is_dora(TilesConverter.string_to_136_array(honors='4')[0]))
+
+        table.dora_indicators = [TilesConverter.string_to_136_array(honors='4')[0]]
+        self.assertTrue(table.is_dora(TilesConverter.string_to_136_array(honors='1')[0]))
+
+        table.dora_indicators = [TilesConverter.string_to_136_array(honors='5')[0]]
+        self.assertTrue(table.is_dora(TilesConverter.string_to_136_array(honors='6')[0]))
+
+        table.dora_indicators = [TilesConverter.string_to_136_array(honors='6')[0]]
+        self.assertTrue(table.is_dora(TilesConverter.string_to_136_array(honors='7')[0]))
+
+        table.dora_indicators = [TilesConverter.string_to_136_array(honors='7')[0]]
+        self.assertTrue(table.is_dora(TilesConverter.string_to_136_array(honors='5')[0]))

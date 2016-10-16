@@ -27,49 +27,49 @@ iipeiko = Yaku('Iipeiko', None, 1)
 haku = Yaku('Yakuhai (haku)', 1, 1)
 hatsu = Yaku('Yakuhai (hatsu)', 1, 1)
 chun = Yaku('Yakuhai (chun)', 1, 1)
-fanpai_place = Yaku('Fanpai (wind of place)', 1, 1)
-fanpai_round = Yaku('Fanpai (wind of round)', 1, 1)
+yakuhai_place = Yaku('Yakuhai (wind of place)', 1, 1)
+yakuhai_round = Yaku('Yakuhai (wind of round)', 1, 1)
 
 # Yaku 2 Hands
-sanshoku = Yaku('Sanshoku doujun', 1, 2)
-ittsu = Yaku('Ittsu', 1, 2)
-chanta = Yaku('Chanta', 1, 2)
-honroto = Yaku('Honroutou', 2, 2)
+sanshoku = Yaku('Sanshoku doujun', 1, 2)  #
+ittsu = Yaku('Ittsu', 1, 2)  #
+chanta = Yaku('Chanta', 1, 2)  #
+honroto = Yaku('Honroutou', 2, 2)  #
 toitoi = Yaku('Toitoi', 2, 2)
-sanankou = Yaku('San Ankou', 2, 2)
-sankantsu = Yaku('San Kantsu', 2, 2)
-sanshokudoko = Yaku('Sanshoku Doukou', 2, 2)
-chiitoitsu = Yaku('Chiitoitsu', None, 2)
-shosangen = Yaku('Shou Sangen', 2, 2)
+sanankou = Yaku('San Ankou', 2, 2)  #
+sankantsu = Yaku('San Kantsu', 2, 2)  #
+sanshokudoko = Yaku('Sanshoku Doukou', 2, 2)  #
+chiitoitsu = Yaku('Chiitoitsu', None, 2)  #
+shosangen = Yaku('Shou Sangen', 2, 2)  #
 
 # Yaku 3 Hands
-honitsu = Yaku('Honitsu', 2, 3)
-junchan = Yaku('Junchan', 2, 3)
-ryanpeiko = Yaku('Ryanpeikou', None, 3)
+honitsu = Yaku('Honitsu', 2, 3)  #
+junchan = Yaku('Junchan', 2, 3)  #
+ryanpeiko = Yaku('Ryanpeikou', None, 3)  #
 
 # Yaku 6 Hands
-chinitsu = Yaku('Chinitsu', 5, 6)
+chinitsu = Yaku('Chinitsu', 5, 6)  #
 
 # Yakuman list
-kokushi = Yaku('Kokushi musou', None, 13)
-chuuren = Yaku('Chuuren Poutou', None, 13)
-suuankou = Yaku('Suu ankou', None, 13)
-daisangen = Yaku('Daisangen', 13, 13)
-shosuushi = Yaku('Shousuushii', 13, 13)
-ryuisou = Yaku('Ryuuiisou', 13, 13)
-suukantsu = Yaku('Suu kantsu', 13, 13)
-tsuisou = Yaku('Tsuu iisou', 13, 13)
-chinroto = Yaku('Chinroutou', 13, 13)
+kokushi = Yaku('Kokushi musou', None, 13)  #
+chuuren = Yaku('Chuuren Poutou', None, 13)  #
+suuankou = Yaku('Suu ankou', None, 13)  #
+daisangen = Yaku('Daisangen', 13, 13)  #
+shosuushi = Yaku('Shousuushii', 13, 13)  #
+ryuisou = Yaku('Ryuuiisou', 13, 13)  #
+suukantsu = Yaku('Suu kantsu', 13, 13)  #
+tsuisou = Yaku('Tsuu iisou', 13, 13)  #
+chinroto = Yaku('Chinroutou', 13, 13)  #
 
 # Double yakuman
-daisuushi = Yaku('Dai Suushii', 26, 26)
+daisuushi = Yaku('Dai Suushii', 26, 26)  #
 
 # Yakuman situations
-tenhou = Yaku('Tenhou', None, 13)
-renhou = Yaku('Renhou', None, 13)
-chiihou = Yaku('Chiihou', None, 13)
+tenhou = Yaku('Tenhou', None, 13)  #
+renhou = Yaku('Renhou', None, 13)  #
+chiihou = Yaku('Chiihou', None, 13)  #
 
 # Other
-dora = Yaku('Dora', 1, 1)
-uradora = Yaku('Ura Dora', 1, 1)
-akadora = Yaku('Aka Dora', 1, 1)
+dora = Yaku('Dora', 1, 1)  #
+uradora = Yaku('Ura Dora', 1, 1)  #
+akadora = Yaku('Aka Dora', 1, 1)  #

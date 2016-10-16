@@ -9,7 +9,7 @@ class TileTestCase(unittest.TestCase):
     def test_convert_to_one_line_string(self):
         tiles = [0, 1, 34, 35, 36, 37, 70, 71, 72, 73, 106, 107, 108, 109, 133, 134]
         result = TilesConverter.to_one_line_string(tiles)
-        self.assertEqual('1199m1199p1199s1177z', result)
+        self.assertEqual('1199s1199p1199m1177z', result)
 
     def test_convert_to_34_array(self):
         tiles = [0, 34, 35, 36, 37, 70, 71, 72, 73, 106, 107, 108, 109, 134]

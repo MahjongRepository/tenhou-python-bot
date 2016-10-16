@@ -33,9 +33,9 @@ class TilesConverter(object):
         honors = [t for t in tiles if t >= 108]
         honors = [t - 108 for t in honors]
 
-        man = man and ''.join([str((i // 4) + 1) for i in man]) + 's' or ''
+        sou = sou and ''.join([str((i // 4) + 1) for i in sou]) + 's' or ''
         pin = pin and ''.join([str((i // 4) + 1) for i in pin]) + 'p' or ''
-        sou = sou and ''.join([str((i // 4) + 1) for i in sou]) + 'm' or ''
+        man = man and ''.join([str((i // 4) + 1) for i in man]) + 'm' or ''
         honors = honors and ''.join([str((i // 4) + 1) for i in honors]) + 'z' or ''
 
         return sou + pin + man + honors
@@ -74,6 +74,16 @@ class TilesConverter(object):
         results += _split_string(man, 72)
         results += _split_string(honors, 108)
 
+        return results
+
+    @staticmethod
+    def string_to_34_array(sou=None, pin=None, man=None, honors=None):
+        """
+        Method to convert one line string tiles format to the 34 array
+        We need it to increase readability of our tests
+        """
+        results = TilesConverter.string_to_136_array(sou, pin, man, honors)
+        results = TilesConverter.to_34_array(results)
         return results
 
     @staticmethod

@@ -103,7 +103,29 @@ class FinishedHand(object):
             else:
                 fu += 30
 
-            is_pinfu = self.is_pinfu(tiles, win_tile, hand, player_wind, round_wind)
+            pon_sets = [x for x in hand if is_pon(x)]
+            chi_sets = [x for x in hand if is_chi(x)]
+            additional_fu = self.calculate_additional_fu(win_tile, hand, player_wind, round_wind)
+
+            if additional_fu == 0 and len(chi_sets) == 4:
+                """
+                - A hand without pon and kan sets, so it should contains all sequences and a pair
+                - The pair should be not valued
+                - The waiting must be an open wait (on 2 different tiles)
+                """
+                is_pinfu = True
+            else:
+                fu += additional_fu
+                is_pinfu = False
+
+            if is_tsumo:
+                if not is_open_hand:
+                    hand_yaku.append(yaku.tsumo)
+
+                # pinfu + tsumo always is 20 fu
+                if not is_pinfu:
+                    fu += 2
+
             if is_pinfu:
                 hand_yaku.append(yaku.pinfu)
 
@@ -135,62 +157,56 @@ class FinishedHand(object):
             if is_houtei:
                 hand_yaku.append(yaku.houtei)
 
-            if is_tsumo:
-                if not is_open_hand:
-                    hand_yaku.append(yaku.tsumo)
-
-                # pinfu + tsumo always is 20 fu
-                if not is_pinfu:
-                    fu += 2
-
             if self.is_iipeiko(hand) and not is_open_hand:
                 hand_yaku.append(yaku.iipeiko)
-
-            if self.is_toitoi(hand):
-                hand_yaku.append(yaku.toitoi)
-
-            if self.is_shosangen(hand):
-                hand_yaku.append(yaku.shosangen)
 
             if self.is_chanta(hand):
                 hand_yaku.append(yaku.chanta)
 
-            if self.is_haku(tiles_34):
-                hand_yaku.append(yaku.haku)
+            # small optimization, let's try to detect yaku with pon sets only if we have pon sets in hand
+            if len(pon_sets):
+                if self.is_toitoi(hand):
+                    hand_yaku.append(yaku.toitoi)
 
-            if self.is_hatsu(tiles_34):
-                hand_yaku.append(yaku.hatsu)
+                if self.is_shosangen(hand):
+                    hand_yaku.append(yaku.shosangen)
 
-            if self.is_chun(tiles_34):
-                hand_yaku.append(yaku.hatsu)
+                if self.is_haku(tiles_34):
+                    hand_yaku.append(yaku.haku)
 
-            if self.is_east(tiles_34, player_wind, round_wind):
-                if player_wind == EAST:
-                    hand_yaku.append(yaku.yakuhai_place)
+                if self.is_hatsu(tiles_34):
+                    hand_yaku.append(yaku.hatsu)
 
-                if round_wind == EAST:
-                    hand_yaku.append(yaku.yakuhai_round)
+                if self.is_chun(tiles_34):
+                    hand_yaku.append(yaku.hatsu)
 
-            if self.is_south(tiles_34, player_wind, round_wind):
-                if player_wind == SOUTH:
-                    hand_yaku.append(yaku.yakuhai_place)
+                if self.is_east(tiles_34, player_wind, round_wind):
+                    if player_wind == EAST:
+                        hand_yaku.append(yaku.yakuhai_place)
 
-                if round_wind == SOUTH:
-                    hand_yaku.append(yaku.yakuhai_round)
+                    if round_wind == EAST:
+                        hand_yaku.append(yaku.yakuhai_round)
 
-            if self.is_west(tiles_34, player_wind, round_wind):
-                if player_wind == WEST:
-                    hand_yaku.append(yaku.yakuhai_place)
+                if self.is_south(tiles_34, player_wind, round_wind):
+                    if player_wind == SOUTH:
+                        hand_yaku.append(yaku.yakuhai_place)
 
-                if round_wind == WEST:
-                    hand_yaku.append(yaku.yakuhai_round)
+                    if round_wind == SOUTH:
+                        hand_yaku.append(yaku.yakuhai_round)
 
-            if self.is_north(tiles_34, player_wind, round_wind):
-                if player_wind == NORTH:
-                    hand_yaku.append(yaku.yakuhai_place)
+                if self.is_west(tiles_34, player_wind, round_wind):
+                    if player_wind == WEST:
+                        hand_yaku.append(yaku.yakuhai_place)
 
-                if round_wind == NORTH:
-                    hand_yaku.append(yaku.yakuhai_round)
+                    if round_wind == WEST:
+                        hand_yaku.append(yaku.yakuhai_round)
+
+                if self.is_north(tiles_34, player_wind, round_wind):
+                    if player_wind == NORTH:
+                        hand_yaku.append(yaku.yakuhai_place)
+
+                    if round_wind == NORTH:
+                        hand_yaku.append(yaku.yakuhai_round)
 
             # chitoitsu is always 25 fu
             if is_chitoitsu:
@@ -277,6 +293,42 @@ class FinishedHand(object):
         else:
             return {'main': is_dealer and six_rounded or four_rounded, 'additional': 0}
 
+    def calculate_additional_fu(self, win_tile, hand, player_wind, round_wind):
+        """
+        :param win_tile: "136 format" tile
+        :param hand: list of hand's sets
+        :param player_wind:
+        :param round_wind:
+        :return: int
+        """
+        win_tile //= 4
+        additional_fu = 0
+
+        chi_sets = [x for x in hand if (win_tile in x and is_chi(x))]
+        for set_item in chi_sets:
+            # penchan waiting: 1-2-...
+            if any(x in set_item for x in TERMINAL_INDICES) and set_item.index(win_tile) == 2:
+                additional_fu += 2
+
+            # kanchan waiting 5-...-7
+            if set_item.index(win_tile) == 1:
+                additional_fu += 2
+
+        pon_sets = [x for x in hand if is_pon(x)]
+        for set_item in pon_sets:
+            if set_item[0] in TERMINAL_INDICES + HONOR_INDICES:
+                additional_fu += 8
+            else:
+                additional_fu += 4
+
+        # valued pair
+        pair = [x for x in hand if len(x) == 2][0][0]
+        valued_indices = [HAKU, HATSU, CHUN, player_wind, round_wind]
+        if pair in valued_indices:
+            additional_fu += 2
+
+        return additional_fu
+
     def is_chitoitsu(self, tiles_34):
         """
         Hand contains only pairs
@@ -299,51 +351,6 @@ class FinishedHand(object):
                 count_of_terminals += 1
 
         return count_of_terminals == 0
-
-    def is_pinfu(self, tiles_34, win_tile, hand, player_wind, round_wind):
-        """
-        - A hand without pon and kan sets, so it should contains all sequences and a pair
-        - The pair should be not valued
-        - The waiting must be an open wait (on 2 different tiles)
-        :param tiles_34: "136 format" tiles array with 13 tiles
-        :param win_tile: "136 format" tile
-        :param hand: list of hand's sets
-        :param player_wind:
-        :param round_wind:
-        :return: true|false
-        """
-
-        full_hand_tiles = TilesConverter.to_34_array(tiles_34 + [win_tile])
-        tiles_34 = TilesConverter.to_34_array(tiles_34)
-        win_tile //= 4
-
-        # Syanpon (双ポン). Waiting in the two pairs 44 and 99
-        # or seven pairs (chitoitsu)
-        count_of_pairs = len([i for i in tiles_34 if i == 2])
-        if (tiles_34[win_tile] == 2 and count_of_pairs >= 2) or count_of_pairs == 6:
-            return False
-
-        pair = [x for x in hand if len(x) == 2][0][0]
-        valued_indices = [HAKU, HATSU, CHUN, player_wind, round_wind]
-        if pair in valued_indices:
-            return False
-
-        # hand contains a pon or kan
-        count_of_pon_or_kan = len([i for i in full_hand_tiles if (i == 3) or (i == 4)])
-        if count_of_pon_or_kan > 0:
-            return False
-
-        sets = [x for x in hand if (win_tile in x and len(x) == 3)]
-        for set_item in sets:
-            # penchan waiting: 1-2-...
-            if any(x in set_item for x in TERMINAL_INDICES) and set_item.index(win_tile) == 2:
-                return False
-
-            # kanchan waiting 5-...-7
-            if set_item.index(win_tile) == 1:
-                return False
-
-        return True
 
     def is_iipeiko(self, hand):
         """

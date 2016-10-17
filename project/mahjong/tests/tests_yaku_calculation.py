@@ -38,6 +38,54 @@ class YakuCalculationTestCase(unittest.TestCase):
         self.assertEqual(result[0], [[0, 1, 2], [0, 1, 2], [17, 17], [21, 22, 23], [21, 22, 23]])
         self.assertEqual(result[1], [[0, 0], [1, 1], [2, 2], [17, 17], [21, 21], [22, 22], [23, 23]])
 
+    def test_fu_calculation(self):
+        hand = FinishedHand()
+        hand_divider = HandDivider()
+        player_wind, round_wind = EAST, WEST
+
+        tiles = TilesConverter.string_to_136_array(sou='12378', man='123456', pin='22')
+        win_tile = TilesConverter.string_to_136_array(sou='6')[0]
+        result = hand.estimate_hand_value(tiles, win_tile, is_tsumo=False)
+        self.assertEqual(result['fu'], 30)
+        result = hand.estimate_hand_value(tiles, win_tile, is_tsumo=True)
+        self.assertEqual(result['fu'], 20)
+
+        # penchan waiting
+        tiles = TilesConverter.string_to_136_array(sou='12456', man='123456', pin='55')
+        win_tile = TilesConverter.string_to_136_array(sou='3')[0]
+        hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
+        self.assertEqual(2, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind))
+
+        # kanchan waiting
+        tiles = TilesConverter.string_to_136_array(sou='12357', man='123456', pin='55')
+        win_tile = TilesConverter.string_to_136_array(sou='6')[0]
+        hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
+        self.assertEqual(2, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind))
+
+        # valued pair
+        tiles = TilesConverter.string_to_136_array(sou='12378', man='123456', honors='11')
+        win_tile = TilesConverter.string_to_136_array(sou='6')[0]
+        hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
+        self.assertEqual(2, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind))
+
+        # pon
+        tiles = TilesConverter.string_to_136_array(sou='22278', man='123456', pin='11')
+        win_tile = TilesConverter.string_to_136_array(sou='6')[0]
+        hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
+        self.assertEqual(4, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind))
+
+        # terminal pon
+        tiles = TilesConverter.string_to_136_array(sou='11178', man='123456', pin='11')
+        win_tile = TilesConverter.string_to_136_array(sou='6')[0]
+        hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
+        self.assertEqual(8, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind))
+
+        # honor pon
+        tiles = TilesConverter.string_to_136_array(sou='78', man='123456', pin='11', honors='111')
+        win_tile = TilesConverter.string_to_136_array(sou='6')[0]
+        hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
+        self.assertEqual(8, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind))
+
     def test_is_riichi(self):
         hand = FinishedHand()
 
@@ -47,8 +95,7 @@ class YakuCalculationTestCase(unittest.TestCase):
         result = hand.estimate_hand_value(tiles, win_tile, is_riichi=True)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 1)
-        self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 1000, 'additional': 0})
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 1)
 
         result = hand.estimate_hand_value(tiles, win_tile, is_riichi=True, is_open_hand=True)
@@ -64,7 +111,6 @@ class YakuCalculationTestCase(unittest.TestCase):
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 1)
         self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 500, 'additional': 300})
         self.assertEqual(len(result['hand_yaku']), 1)
 
         # with open hand tsumo not giving yaku
@@ -80,8 +126,7 @@ class YakuCalculationTestCase(unittest.TestCase):
         result = hand.estimate_hand_value(tiles, win_tile, is_riichi=True, is_ippatsu=True)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 2)
-        self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 2000, 'additional': 0})
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 2)
 
         # without riichi ippatsu is not possible
@@ -97,8 +142,7 @@ class YakuCalculationTestCase(unittest.TestCase):
         result = hand.estimate_hand_value(tiles, win_tile, is_rinshan=True)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 1)
-        self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 1000, 'additional': 0})
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 1)
 
     def test_is_chankan(self):
@@ -110,8 +154,7 @@ class YakuCalculationTestCase(unittest.TestCase):
         result = hand.estimate_hand_value(tiles, win_tile, is_chankan=True)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 1)
-        self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 1000, 'additional': 0})
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 1)
 
     def test_is_haitei(self):
@@ -123,8 +166,7 @@ class YakuCalculationTestCase(unittest.TestCase):
         result = hand.estimate_hand_value(tiles, win_tile, is_haitei=True)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 1)
-        self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 1000, 'additional': 0})
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 1)
 
     def test_is_houtei(self):
@@ -136,8 +178,7 @@ class YakuCalculationTestCase(unittest.TestCase):
         result = hand.estimate_hand_value(tiles, win_tile, is_houtei=True)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 1)
-        self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 1000, 'additional': 0})
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 1)
 
     def test_is_daburu_riichi(self):
@@ -149,8 +190,7 @@ class YakuCalculationTestCase(unittest.TestCase):
         result = hand.estimate_hand_value(tiles, win_tile, is_daburu_riichi=True, is_riichi=True)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 2)
-        self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 2000, 'additional': 0})
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 1)
 
     def test_is_nagashi_mangan(self):
@@ -162,7 +202,6 @@ class YakuCalculationTestCase(unittest.TestCase):
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 5)
         self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 8000, 'additional': 0})
         self.assertEqual(len(result['hand_yaku']), 1)
 
     def test_is_chitoitsu_hand(self):
@@ -181,7 +220,6 @@ class YakuCalculationTestCase(unittest.TestCase):
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 3)
         self.assertEqual(result['fu'], 25)
-        self.assertEqual(result['cost'], {'main': 3200, 'additional': 0})
         self.assertEqual(len(result['hand_yaku']), 2)
 
     def test_is_tanyao(self):
@@ -203,54 +241,58 @@ class YakuCalculationTestCase(unittest.TestCase):
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 3)
         self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 3900, 'additional': 0})
         self.assertEqual(len(result['hand_yaku']), 3)
 
     def test_is_pinfu_hand(self):
         player_wind, round_wind = EAST, WEST
         hand = FinishedHand()
-        hand_divider = HandDivider()
 
         tiles = TilesConverter.string_to_136_array(sou='123456', man='12345', pin='55')
         win_tile = TilesConverter.string_to_136_array(man='6')[0]
-        hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
-        self.assertTrue(hand.is_pinfu(tiles, win_tile, hand_tiles[0], player_wind, round_wind))
+        result = hand.estimate_hand_value(tiles, win_tile)
+        self.assertEqual(result['error'], None)
+        self.assertEqual(result['han'], 1)
+        self.assertEqual(result['fu'], 30)
+        self.assertEqual(len(result['hand_yaku']), 1)
 
         # waiting in two pairs
         tiles = TilesConverter.string_to_136_array(sou='123456', man='12355', pin='55')
         win_tile = TilesConverter.string_to_136_array(man='5')[0]
-        hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
-        self.assertFalse(hand.is_pinfu(tiles, win_tile, hand_tiles[0], player_wind, round_wind))
+        result = hand.estimate_hand_value(tiles, win_tile)
+        self.assertNotEqual(result['error'], None)
 
         # contains pon or kan
         tiles = TilesConverter.string_to_136_array(sou='111456', man='12345', pin='55')
         win_tile = TilesConverter.string_to_136_array(man='6')[0]
-        hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
-        self.assertFalse(hand.is_pinfu(tiles, win_tile, hand_tiles[0], player_wind, round_wind))
+        result = hand.estimate_hand_value(tiles, win_tile)
+        self.assertNotEqual(result['error'], None)
 
         # penchan waiting
         tiles = TilesConverter.string_to_136_array(sou='12456', man='123456', pin='55')
         win_tile = TilesConverter.string_to_136_array(sou='3')[0]
-        hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
-        self.assertFalse(hand.is_pinfu(tiles, win_tile, hand_tiles[0], player_wind, round_wind))
+        result = hand.estimate_hand_value(tiles, win_tile)
+        self.assertNotEqual(result['error'], None)
 
         # kanchan waiting
         tiles = TilesConverter.string_to_136_array(sou='12357', man='123456', pin='55')
         win_tile = TilesConverter.string_to_136_array(sou='6')[0]
-        hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
-        self.assertFalse(hand.is_pinfu(tiles, win_tile, hand_tiles[0], player_wind, round_wind))
+        result = hand.estimate_hand_value(tiles, win_tile)
+        self.assertNotEqual(result['error'], None)
 
         # valued pair
         tiles = TilesConverter.string_to_136_array(sou='12378', man='123456', honors='11')
         win_tile = TilesConverter.string_to_136_array(sou='6')[0]
-        hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
-        self.assertFalse(hand.is_pinfu(tiles, win_tile, hand_tiles[0], player_wind, round_wind))
+        result = hand.estimate_hand_value(tiles, win_tile, player_wind=player_wind, round_wind=round_wind)
+        self.assertNotEqual(result['error'], None)
 
         # not valued pair
         tiles = TilesConverter.string_to_136_array(sou='12378', man='123456', honors='22')
         win_tile = TilesConverter.string_to_136_array(sou='6')[0]
-        hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
-        self.assertTrue(hand.is_pinfu(tiles, win_tile, hand_tiles[0], player_wind, round_wind))
+        result = hand.estimate_hand_value(tiles, win_tile)
+        self.assertEqual(result['error'], None)
+        self.assertEqual(result['han'], 1)
+        self.assertEqual(result['fu'], 30)
+        self.assertEqual(len(result['hand_yaku']), 1)
 
     def test_is_iipeiko(self):
         hand_divider = HandDivider()
@@ -266,8 +308,7 @@ class YakuCalculationTestCase(unittest.TestCase):
         result = hand.estimate_hand_value(tiles, win_tile, is_open_hand=False)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 1)
-        self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 1000, 'additional': 0})
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 1)
 
         result = hand.estimate_hand_value(tiles, win_tile, is_open_hand=True)
@@ -287,8 +328,7 @@ class YakuCalculationTestCase(unittest.TestCase):
         result = hand.estimate_hand_value(tiles, win_tile)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 2)
-        self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 2000, 'additional': 0})
+        self.assertEqual(result['fu'], 50)
         self.assertEqual(len(result['hand_yaku']), 1)
 
     def test_is_shosangen(self):
@@ -305,8 +345,7 @@ class YakuCalculationTestCase(unittest.TestCase):
         result = hand.estimate_hand_value(tiles, win_tile)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 4)
-        self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 7700, 'additional': 0})
+        self.assertEqual(result['fu'], 50)
         self.assertEqual(len(result['hand_yaku']), 3)
 
     def test_is_chanta(self):
@@ -331,11 +370,10 @@ class YakuCalculationTestCase(unittest.TestCase):
         result = hand.estimate_hand_value(tiles, win_tile, is_open_hand=False)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 2)
-        self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 2000, 'additional': 0})
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 1)
 
-        result = hand.estimate_hand_value(tiles, win_tile, is_open_hand=True, is_tsumo=True)
+        result = hand.estimate_hand_value(tiles, win_tile, is_open_hand=True)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 1)
         self.assertEqual(result['fu'], 30)
@@ -353,8 +391,7 @@ class YakuCalculationTestCase(unittest.TestCase):
         result = hand.estimate_hand_value(tiles, win_tile, is_tsumo=False, is_riichi=False)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 1)
-        self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 1000, 'additional': 0})
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 1)
 
     def test_is_hatsu(self):
@@ -369,8 +406,7 @@ class YakuCalculationTestCase(unittest.TestCase):
         result = hand.estimate_hand_value(tiles, win_tile, is_tsumo=False, is_riichi=False)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 1)
-        self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 1000, 'additional': 0})
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 1)
 
     def test_is_chun(self):
@@ -385,8 +421,7 @@ class YakuCalculationTestCase(unittest.TestCase):
         result = hand.estimate_hand_value(tiles, win_tile, is_tsumo=False, is_riichi=False)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 1)
-        self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 1000, 'additional': 0})
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 1)
 
     def test_is_east(self):
@@ -408,8 +443,7 @@ class YakuCalculationTestCase(unittest.TestCase):
                                           round_wind=round_wind)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 1)
-        self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 1000, 'additional': 0})
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 1)
 
         round_wind = EAST
@@ -421,8 +455,7 @@ class YakuCalculationTestCase(unittest.TestCase):
                                           round_wind=round_wind)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 2)
-        self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 2000, 'additional': 0})
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 2)
 
     def test_is_south(self):
@@ -444,8 +477,7 @@ class YakuCalculationTestCase(unittest.TestCase):
                                           round_wind=round_wind)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 1)
-        self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 1000, 'additional': 0})
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 1)
 
         round_wind = SOUTH
@@ -457,8 +489,7 @@ class YakuCalculationTestCase(unittest.TestCase):
                                           round_wind=round_wind)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 2)
-        self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 2000, 'additional': 0})
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 2)
 
     def test_is_west(self):
@@ -480,8 +511,7 @@ class YakuCalculationTestCase(unittest.TestCase):
                                           round_wind=round_wind)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 1)
-        self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 1000, 'additional': 0})
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 1)
 
         round_wind = WEST
@@ -493,8 +523,7 @@ class YakuCalculationTestCase(unittest.TestCase):
                                           round_wind=round_wind)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 2)
-        self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 2000, 'additional': 0})
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 2)
 
     def test_is_north(self):
@@ -516,8 +545,7 @@ class YakuCalculationTestCase(unittest.TestCase):
                                           round_wind=round_wind)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 1)
-        self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 1000, 'additional': 0})
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 1)
 
         round_wind = NORTH
@@ -529,6 +557,5 @@ class YakuCalculationTestCase(unittest.TestCase):
                                           round_wind=round_wind)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 2)
-        self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['cost'], {'main': 2000, 'additional': 0})
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 2)

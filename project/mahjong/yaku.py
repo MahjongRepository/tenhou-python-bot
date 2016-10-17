@@ -9,6 +9,10 @@ class Yaku(object):
     def __str__(self):
         return self.name
 
+    # for calls in array
+    def __repr__(self):
+        return self.__str__()
+
 # Yaku situations
 tsumo = Yaku('Menzen Tsumo', None, 1)
 riichi = Yaku('Riichi', None, 1)
@@ -31,21 +35,21 @@ yakuhai_place = Yaku('Yakuhai (wind of place)', 1, 1)
 yakuhai_round = Yaku('Yakuhai (wind of round)', 1, 1)
 
 # Yaku 2 Hands
-sanshoku = Yaku('Sanshoku doujun', 1, 2)  #
-ittsu = Yaku('Ittsu', 1, 2)  #
+sanshoku = Yaku('Sanshoku Doujun', 1, 2)
+ittsu = Yaku('Ittsu', 1, 2)
 chanta = Yaku('Chanta', 1, 2)
-honroto = Yaku('Honroutou', 2, 2)  #
+honroto = Yaku('Honroutou', 2, 2)
 toitoi = Yaku('Toitoi', 2, 2)
-sanankou = Yaku('San Ankou', 2, 2)  #
+sanankou = Yaku('San Ankou', 2, 2)
 sankantsu = Yaku('San Kantsu', 2, 2)  #
-sanshokudoko = Yaku('Sanshoku Doukou', 2, 2)  #
+sanshoku_douko = Yaku('Sanshoku Doukou', 2, 2)
 chiitoitsu = Yaku('Chiitoitsu', None, 2)
 shosangen = Yaku('Shou Sangen', 2, 2)
 
 # Yaku 3 Hands
 honitsu = Yaku('Honitsu', 2, 3)  #
-junchan = Yaku('Junchan', 2, 3)  #
-ryanpeiko = Yaku('Ryanpeikou', None, 3)  #
+junchan = Yaku('Junchan', 2, 3)
+ryanpeiko = Yaku('Ryanpeikou', None, 3)
 
 # Yaku 6 Hands
 chinitsu = Yaku('Chinitsu', 5, 6)  #

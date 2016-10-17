@@ -8,6 +8,7 @@ from mahjong.ai.agari import Agari
 from mahjong import yaku
 from mahjong.tile import TilesConverter
 from mahjong.constants import EAST, SOUTH, WEST, NORTH, CHUN, HATSU, HAKU, TERMINAL_INDICES, HONOR_INDICES
+from mahjong.utils import is_chi, is_pon
 
 
 class FinishedHand(object):
@@ -147,6 +148,12 @@ class FinishedHand(object):
 
             if self.is_toitoi(hand):
                 hand_yaku.append(yaku.toitoi)
+
+            if self.is_shosangen(hand):
+                hand_yaku.append(yaku.shosangen)
+
+            if self.is_chanta(hand):
+                hand_yaku.append(yaku.chanta)
 
             if self.is_haku(tiles_34):
                 hand_yaku.append(yaku.haku)
@@ -301,6 +308,8 @@ class FinishedHand(object):
         :param tiles_34: "136 format" tiles array with 13 tiles
         :param win_tile: "136 format" tile
         :param hand: list of hand's sets
+        :param player_wind:
+        :param round_wind:
         :return: true|false
         """
 
@@ -344,7 +353,7 @@ class FinishedHand(object):
         """
         chi = []
         for item in hand:
-            if item[0] == item[1] - 1 == item[2] - 2:
+            if is_chi(item):
                 chi.append(item)
 
         count_of_identical_chi = 0
@@ -360,12 +369,63 @@ class FinishedHand(object):
 
     def is_toitoi(self, hand):
         """
-        Hand with two identical chi
+        The hand consists of all pon sets (and of course a pair), no sequences.
         :param hand: list of hand's sets
         :return: true|false
         """
-        count_of_pon = len([i for i in hand if (len(i) == 3 and (i[0] == i[1] == i[2]))])
+        count_of_pon = len([i for i in hand if is_pon(i)])
         return count_of_pon == 4
+
+    def is_shosangen(self, hand):
+        """
+        Hand with two dragon pon sets and one dragon pair
+        :param hand: list of hand's sets
+        :return: true|false
+        """
+        dragons = [CHUN, HAKU, HATSU]
+        count_of_conditions = 0
+        for item in hand:
+            # dragon pair
+            if len(item) == 2 and item[0] in dragons:
+                count_of_conditions += 1
+
+            # dragon pon
+            if len(item) == 3 and item[0] in dragons:
+                count_of_conditions += 1
+
+        return count_of_conditions == 3
+
+    def is_chanta(self, hand):
+        """
+        Every set must have at least one terminal or honour tile, and the pair must be of
+        a terminal or honour tile. Must contain at least one sequence (123 or 789).
+        :param hand: list of hand's sets
+        :return: true|false
+        """
+
+        def tile_in_indices(item_set, indices_array):
+            for x in item_set:
+                if x in indices_array:
+                    return True
+            return False
+
+        honor_sets = 0
+        terminal_sets = 0
+        count_of_chi = 0
+        for item in hand:
+            if is_chi(item):
+                count_of_chi += 1
+
+            if tile_in_indices(item, TERMINAL_INDICES):
+                terminal_sets += 1
+
+            if tile_in_indices(item, HONOR_INDICES):
+                honor_sets += 1
+
+        if count_of_chi == 0:
+            return False
+
+        return terminal_sets + honor_sets == 5 and terminal_sets != 0 and honor_sets != 0
 
     def is_haku(self, tiles_34):
         """
@@ -491,6 +551,9 @@ class HandDivider(object):
                 if local_tiles_34[x] == 3:
                     honor.append([x] * 3)
 
+            if honor:
+                honor = [honor]
+
             arrays = [[[pair_index] * 2]]
             if sou:
                 arrays.append(sou)
@@ -511,7 +574,7 @@ class HandDivider(object):
                     else:
                         hand.append(item)
 
-                hand = sorted(hand, key=lambda x: x[0])
+                hand = sorted(hand, key=lambda a: a[0])
                 if len(hand) == 5:
                     hands.append(hand)
 
@@ -557,17 +620,11 @@ class HandDivider(object):
 
         all_possible_combinations = list(itertools.permutations(indices, 3))
 
-        def is_valid_combination(item):
-            first = item[0]
-            second = item[1]
-            third = item[2]
-
-            # chi
-            if first == second - 1 and first == third - 2:
+        def is_valid_combination(possible_set):
+            if is_chi(possible_set):
                 return True
 
-            # pon
-            if first == second == third:
+            if is_pon(possible_set):
                 return True
 
             return False
@@ -584,12 +641,12 @@ class HandDivider(object):
 
         # simple case, we have count of sets == count of tiles
         if count_of_needed_combinations == len(valid_combinations) and \
-                reduce(lambda x, y: x + y, valid_combinations) == indices:
+                reduce(lambda z, y: z + y, valid_combinations) == indices:
             return [valid_combinations]
 
         # filter and remove not possible pon sets
         for item in valid_combinations:
-            if item[0] == item[1] == item[2]:
+            if is_pon(item):
                 count_of_sets = 1
                 count_of_tiles = 0
                 while count_of_sets > count_of_tiles:
@@ -602,7 +659,7 @@ class HandDivider(object):
 
         # filter and remove not possible chi sets
         for item in valid_combinations:
-            if item[0] == item[1] - 1 == item[2] - 2:
+            if is_chi(item):
                 count_of_sets = 5
                 # TODO calculate real count of possible sets
                 count_of_possible_sets = 4
@@ -633,7 +690,7 @@ class HandDivider(object):
                 results = []
                 for item in combination:
                     results.append(valid_combinations[item])
-                results = sorted(results, key=lambda x: x[0])
+                results = sorted(results, key=lambda z: z[0])
                 if results not in combinations_results:
                     combinations_results.append(results)
 

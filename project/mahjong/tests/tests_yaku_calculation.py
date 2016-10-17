@@ -291,6 +291,56 @@ class YakuCalculationTestCase(unittest.TestCase):
         self.assertEqual(result['cost'], {'main': 2000, 'additional': 0})
         self.assertEqual(len(result['hand_yaku']), 1)
 
+    def test_is_shosangen(self):
+        hand_divider = HandDivider()
+        hand = FinishedHand()
+
+        tiles = TilesConverter.string_to_34_array(sou='123', man='345', honors='55666777')
+        hand_tiles = hand_divider.divide_hand(tiles)
+        self.assertTrue(hand.is_shosangen(hand_tiles[0]))
+
+        tiles = TilesConverter.string_to_136_array(sou='123', man='345', honors='5566677')
+        win_tile = TilesConverter.string_to_136_array(honors='7')[0]
+
+        result = hand.estimate_hand_value(tiles, win_tile)
+        self.assertEqual(result['error'], None)
+        self.assertEqual(result['han'], 4)
+        self.assertEqual(result['fu'], 30)
+        self.assertEqual(result['cost'], {'main': 7700, 'additional': 0})
+        self.assertEqual(len(result['hand_yaku']), 3)
+
+    def test_is_chanta(self):
+        hand_divider = HandDivider()
+        hand = FinishedHand()
+
+        tiles = TilesConverter.string_to_34_array(sou='123', man='123789', honors='22333')
+        hand_tiles = hand_divider.divide_hand(tiles)
+        self.assertTrue(hand.is_chanta(hand_tiles[0]))
+
+        tiles = TilesConverter.string_to_34_array(sou='111', man='111999', honors='22333')
+        hand_tiles = hand_divider.divide_hand(tiles)
+        self.assertFalse(hand.is_chanta(hand_tiles[0]))
+
+        tiles = TilesConverter.string_to_34_array(sou='111999', man='111999', pin='11999')
+        hand_tiles = hand_divider.divide_hand(tiles)
+        self.assertFalse(hand.is_chanta(hand_tiles[0]))
+
+        tiles = TilesConverter.string_to_136_array(sou='123', man='123789', honors='2233')
+        win_tile = TilesConverter.string_to_136_array(honors='3')[0]
+
+        result = hand.estimate_hand_value(tiles, win_tile, is_open_hand=False)
+        self.assertEqual(result['error'], None)
+        self.assertEqual(result['han'], 2)
+        self.assertEqual(result['fu'], 30)
+        self.assertEqual(result['cost'], {'main': 2000, 'additional': 0})
+        self.assertEqual(len(result['hand_yaku']), 1)
+
+        result = hand.estimate_hand_value(tiles, win_tile, is_open_hand=True, is_tsumo=True)
+        self.assertEqual(result['error'], None)
+        self.assertEqual(result['han'], 1)
+        self.assertEqual(result['fu'], 30)
+        self.assertEqual(len(result['hand_yaku']), 1)
+
     def test_is_haku(self):
         hand = FinishedHand()
 

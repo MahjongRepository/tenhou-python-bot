@@ -575,6 +575,64 @@ class YakuCalculationTestCase(unittest.TestCase):
         self.assertEqual(result['fu'], 30)
         self.assertEqual(len(result['hand_yaku']), 1)
 
+    def test_is_honitsu(self):
+        hand_divider = HandDivider()
+        hand = FinishedHand()
+
+        tiles = TilesConverter.string_to_34_array(man='123456789', honors='11122')
+        hand_tiles = hand_divider.divide_hand(tiles)
+        self.assertTrue(hand.is_honitsu(hand_tiles[0]))
+
+        tiles = TilesConverter.string_to_34_array(man='123456789', pin='123', honors='22')
+        hand_tiles = hand_divider.divide_hand(tiles)
+        self.assertFalse(hand.is_honitsu(hand_tiles[0]))
+
+        tiles = TilesConverter.string_to_34_array(man='12345666778899')
+        hand_tiles = hand_divider.divide_hand(tiles)
+        self.assertFalse(hand.is_honitsu(hand_tiles[0]))
+
+        tiles = TilesConverter.string_to_136_array(man='123455667', honors='1112')
+        win_tile = TilesConverter.string_to_136_array(honors='2')[0]
+
+        result = hand.estimate_hand_value(tiles, win_tile)
+        self.assertEqual(result['error'], None)
+        self.assertEqual(result['han'], 3)
+        self.assertEqual(result['fu'], 40)
+        self.assertEqual(len(result['hand_yaku']), 1)
+
+        result = hand.estimate_hand_value(tiles, win_tile, open_sets=[[0, 1, 2]])
+        self.assertEqual(result['error'], None)
+        self.assertEqual(result['han'], 2)
+        self.assertEqual(result['fu'], 30)
+        self.assertEqual(len(result['hand_yaku']), 1)
+
+    def test_is_chinitsu(self):
+        hand_divider = HandDivider()
+        hand = FinishedHand()
+
+        tiles = TilesConverter.string_to_34_array(man='12345666778899')
+        hand_tiles = hand_divider.divide_hand(tiles)
+        self.assertTrue(hand.is_chinitsu(hand_tiles[0]))
+
+        tiles = TilesConverter.string_to_34_array(man='123456778899', honors='22')
+        hand_tiles = hand_divider.divide_hand(tiles)
+        self.assertFalse(hand.is_chinitsu(hand_tiles[0]))
+
+        tiles = TilesConverter.string_to_136_array(man='1234567677889')
+        win_tile = TilesConverter.string_to_136_array(man='1')[0]
+
+        result = hand.estimate_hand_value(tiles, win_tile)
+        self.assertEqual(result['error'], None)
+        self.assertEqual(result['han'], 6)
+        self.assertEqual(result['fu'], 40)
+        self.assertEqual(len(result['hand_yaku']), 1)
+
+        result = hand.estimate_hand_value(tiles, win_tile, open_sets=[[0, 1, 2]])
+        self.assertEqual(result['error'], None)
+        self.assertEqual(result['han'], 5)
+        self.assertEqual(result['fu'], 30)
+        self.assertEqual(len(result['hand_yaku']), 1)
+
     def test_is_ittsu(self):
         hand_divider = HandDivider()
         hand = FinishedHand()

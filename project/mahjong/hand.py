@@ -167,6 +167,12 @@ class FinishedHand(object):
             if is_houtei:
                 hand_yaku.append(yaku.houtei)
 
+            if self.is_honitsu(hand):
+                hand_yaku.append(yaku.honitsu)
+
+            if self.is_chinitsu(hand):
+                hand_yaku.append(yaku.chinitsu)
+
             # small optimization, try to detect yaku with chi required sets only if we have chi sets in hand
             if len(chi_sets):
                 if self.is_chanta(hand):
@@ -658,6 +664,58 @@ class FinishedHand(object):
                     if sou_item == pin_item == man_item:
                         return True
         return False
+
+    def is_honitsu(self, hand):
+        """
+        The hand contains tiles from a single suit plus honours.
+        :param hand: list of hand's sets
+        :return: true|false
+        """
+        honor_sets = 0
+        sou_sets = 0
+        pin_sets = 0
+        man_sets = 0
+        for item in hand:
+            if item[0] in HONOR_INDICES:
+                honor_sets += 1
+
+            if item[0] < 8:
+                sou_sets += 1
+            elif 8 <= item[0] < 17:
+                pin_sets += 1
+            else:
+                man_sets += 1
+
+        sets = [sou_sets, pin_sets, man_sets]
+        only_one_suit = len([x for x in sets if x != 0]) == 1
+
+        return only_one_suit and honor_sets != 0
+
+    def is_chinitsu(self, hand):
+        """
+        The hand contains tiles from a single suit
+        :param hand: list of hand's sets
+        :return: true|false
+        """
+        honor_sets = 0
+        sou_sets = 0
+        pin_sets = 0
+        man_sets = 0
+        for item in hand:
+            if item[0] in HONOR_INDICES:
+                honor_sets += 1
+
+            if item[0] < 8:
+                sou_sets += 1
+            elif 8 <= item[0] < 17:
+                pin_sets += 1
+            else:
+                man_sets += 1
+
+        sets = [sou_sets, pin_sets, man_sets]
+        only_one_suit = len([x for x in sets if x != 0]) == 1
+
+        return only_one_suit and honor_sets == 0
 
     def is_haku(self, tiles_34):
         """

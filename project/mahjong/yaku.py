@@ -47,12 +47,12 @@ chiitoitsu = Yaku('Chiitoitsu', None, 2)
 shosangen = Yaku('Shou Sangen', 2, 2)
 
 # Yaku 3 Hands
-honitsu = Yaku('Honitsu', 2, 3)  #
+honitsu = Yaku('Honitsu', 2, 3)
 junchan = Yaku('Junchan', 2, 3)
 ryanpeiko = Yaku('Ryanpeikou', None, 3)
 
 # Yaku 6 Hands
-chinitsu = Yaku('Chinitsu', 5, 6)  #
+chinitsu = Yaku('Chinitsu', 5, 6)
 
 # Yakuman list
 kokushi = Yaku('Kokushi musou', None, 13)  #

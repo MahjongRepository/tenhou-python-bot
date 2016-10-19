@@ -8,7 +8,7 @@ from mahjong.ai.agari import Agari
 from mahjong import yaku
 from mahjong.tile import TilesConverter
 from mahjong.constants import EAST, SOUTH, WEST, NORTH, CHUN, HATSU, HAKU, TERMINAL_INDICES, HONOR_INDICES
-from mahjong.utils import is_chi, is_pon
+from mahjong.utils import is_chi, is_pon, is_pair, is_sou, is_pin, is_man
 
 
 class FinishedHand(object):
@@ -26,6 +26,9 @@ class FinishedHand(object):
                             is_houtei=False,
                             is_daburu_riichi=False,
                             is_nagashi_mangan=False,
+                            is_tenhou=False,
+                            is_renhou=False,
+                            is_chiihou=False,
                             open_sets=None,
                             player_wind=None,
                             round_wind=None):
@@ -40,6 +43,9 @@ class FinishedHand(object):
         :param is_chankan:
         :param is_haitei:
         :param is_houtei:
+        :param is_tenhou:
+        :param is_renhou:
+        :param is_chiihou:
         :param is_daburu_riichi:
         :param is_nagashi_mangan:
         :param open_sets: array of open sets in 136-tile format
@@ -167,11 +173,23 @@ class FinishedHand(object):
             if is_houtei:
                 hand_yaku.append(yaku.houtei)
 
+            if is_renhou:
+                hand_yaku.append(yaku.renhou)
+
+            if is_tenhou:
+                hand_yaku.append(yaku.tenhou)
+
+            if is_chiihou:
+                hand_yaku.append(yaku.chiihou)
+
             if self.is_honitsu(hand):
                 hand_yaku.append(yaku.honitsu)
 
             if self.is_chinitsu(hand):
                 hand_yaku.append(yaku.chinitsu)
+
+            if self.is_tsuisou(hand):
+                hand_yaku.append(yaku.tsuisou)
 
             # small optimization, try to detect yaku with chi required sets only if we have chi sets in hand
             if len(chi_sets):
@@ -241,9 +259,41 @@ class FinishedHand(object):
                     if round_wind == NORTH:
                         hand_yaku.append(yaku.yakuhai_round)
 
+                if self.is_daisangen(hand):
+                    hand_yaku.append(yaku.daisangen)
+
+                if self.is_shosuushi(hand):
+                    hand_yaku.append(yaku.shosuushi)
+
+                if self.is_daisuushi(hand):
+                    hand_yaku.append(yaku.daisuushi)
+
+                if self.is_chinroto(hand):
+                    hand_yaku.append(yaku.chinroto)
+
+                if self.is_ryuisou(hand):
+                    hand_yaku.append(yaku.ryuisou)
+
+                if not is_open_hand and self.is_chuuren_poutou(hand):
+                    if tiles_34[win_tile // 4] == 2:
+                        hand_yaku.append(yaku.daburu_chuuren_poutou)
+                    else:
+                        hand_yaku.append(yaku.chuuren_poutou)
+
+                if not is_open_hand and self.is_suuankou(win_tile, hand, is_tsumo):
+                    if tiles_34[win_tile // 4] == 2:
+                        hand_yaku.append(yaku.suuankou_tanki)
+                    else:
+                        hand_yaku.append(yaku.suuankou)
+
             # chitoitsu is always 25 fu
             if is_chitoitsu:
                 fu = 25
+
+            # yakuman is not connected with other yaku
+            yakuman_list = [x for x in hand_yaku if x.is_yakuman]
+            if yakuman_list:
+                hand_yaku = yakuman_list
 
             # calculate han
             for item in hand_yaku:
@@ -271,6 +321,22 @@ class FinishedHand(object):
             }
             calculated_hands.append(calculated_hand)
 
+        # exception hand
+        if not is_open_hand and self.is_kokushi(tiles_34):
+            if tiles_34[win_tile // 4] == 2:
+                han = yaku.daburu_kokushi.han['closed']
+            else:
+                han = yaku.kokushi.han['closed']
+            fu = 30
+            cost = self.calculate_scores(han, fu, is_tsumo, is_dealer)
+            calculated_hands.append({
+                'cost': cost,
+                'error': None,
+                'hand_yaku': [yaku.kokushi],
+                'han': han,
+                'fu': fu
+            })
+
         # let's use cost for most expensive hand
         calculated_hands = sorted(calculated_hands, key=lambda x: x['cost']['main'], reverse=True)
         calculated_hand = calculated_hands[0]
@@ -295,8 +361,11 @@ class FinishedHand(object):
         {'main': 1000, 'additional': 0}
         """
         if han >= 5:
+            # double yakuman
+            if han >= 26:
+                rounded = 16000
             # yakuman
-            if han >= 13:
+            elif han >= 13:
                 rounded = 8000
             # sanbaiman
             elif han >= 11:
@@ -494,12 +563,8 @@ class FinishedHand(object):
         dragons = [CHUN, HAKU, HATSU]
         count_of_conditions = 0
         for item in hand:
-            # dragon pair
-            if len(item) == 2 and item[0] in dragons:
-                count_of_conditions += 1
-
-            # dragon pon
-            if len(item) == 3 and item[0] in dragons:
+            # dragon pon or pair
+            if (is_pair(item) or is_pon(item)) and item[0] in dragons:
                 count_of_conditions += 1
 
         return count_of_conditions == 3
@@ -578,11 +643,11 @@ class FinishedHand(object):
         pin_chi = []
         man_chi = []
         for item in chi_sets:
-            if item[0] < 8:
+            if is_sou(item[0]):
                 sou_chi.append(item)
-            elif 8 <= item[0] < 17:
+            elif is_pin(item[0]):
                 pin_chi.append(item)
-            else:
+            elif is_man(item[0]):
                 man_chi.append(item)
 
         sets = [sou_chi, pin_chi, man_chi]
@@ -593,7 +658,7 @@ class FinishedHand(object):
 
             # cast array of arrays to simple array
             item = reduce(lambda z, y: z + y, item)
-            # cast tile indices to 1..9 representation
+            # cast tile indices to 0..8 representation
             item = [x - 9 * (x // 9) for x in item]
 
             if item == list(range(0, 9)):
@@ -615,17 +680,17 @@ class FinishedHand(object):
         pin_chi = []
         man_chi = []
         for item in chi_sets:
-            if item[0] < 8:
+            if is_sou(item[0]):
                 sou_chi.append(item)
-            elif 8 <= item[0] < 17:
+            elif is_pin(item[0]):
                 pin_chi.append(item)
-            else:
+            elif is_man(item[0]):
                 man_chi.append(item)
 
         for sou_item in sou_chi:
             for pin_item in pin_chi:
                 for man_item in man_chi:
-                    # cast tile indices to 1..9 representation
+                    # cast tile indices to 0..8 representation
                     sou_item = [x - 9 * (x // 9) for x in sou_item]
                     pin_item = [x - 9 * (x // 9) for x in pin_item]
                     man_item = [x - 9 * (x // 9) for x in man_item]
@@ -647,11 +712,11 @@ class FinishedHand(object):
         pin_pon = []
         man_pon = []
         for item in pon_sets:
-            if item[0] < 8:
+            if is_sou(item[0]):
                 sou_pon.append(item)
-            elif 8 <= item[0] < 17:
+            elif is_pin(item[0]):
                 pin_pon.append(item)
-            else:
+            elif is_man(item[0]):
                 man_pon.append(item)
 
         for sou_item in sou_pon:
@@ -679,11 +744,11 @@ class FinishedHand(object):
             if item[0] in HONOR_INDICES:
                 honor_sets += 1
 
-            if item[0] < 8:
+            if is_sou(item[0]):
                 sou_sets += 1
-            elif 8 <= item[0] < 17:
+            elif is_pin(item[0]):
                 pin_sets += 1
-            else:
+            elif is_man(item[0]):
                 man_sets += 1
 
         sets = [sou_sets, pin_sets, man_sets]
@@ -705,11 +770,11 @@ class FinishedHand(object):
             if item[0] in HONOR_INDICES:
                 honor_sets += 1
 
-            if item[0] < 8:
+            if is_sou(item[0]):
                 sou_sets += 1
-            elif 8 <= item[0] < 17:
+            elif is_pin(item[0]):
                 pin_sets += 1
-            else:
+            elif is_man(item[0]):
                 man_sets += 1
 
         sets = [sou_sets, pin_sets, man_sets]
@@ -805,6 +870,181 @@ class FinishedHand(object):
             return True
 
         if round_wind and tiles_34[round_wind] >= 3 and round_wind == NORTH:
+            return True
+
+        return False
+
+    def is_daisangen(self, hand):
+        """
+        The hand contains three sets of dragons
+        :param hand: list of hand's sets
+        :return: true|false
+        """
+        count_of_dragon_pon_sets = 0
+        for item in hand:
+            if is_pon(item) and item[0] in [CHUN, HAKU, HATSU]:
+                count_of_dragon_pon_sets += 1
+        return count_of_dragon_pon_sets == 3
+
+    def is_shosuushi(self, hand):
+        """
+        The hand contains three sets of winds and a pair of the remaining wind.
+        :param hand: list of hand's sets
+        :return: true|false
+        """
+        pon_sets = [x for x in hand if is_pon(x)]
+        if len(pon_sets) < 3:
+            return False
+
+        count_of_wind_sets = 0
+        wind_pair = 0
+        winds = [EAST, SOUTH, WEST, NORTH]
+        for item in hand:
+            if is_pon(item) and item[0] in winds:
+                count_of_wind_sets += 1
+
+            if is_pair(item) and item[0] in winds:
+                wind_pair += 1
+
+        return count_of_wind_sets == 3 and wind_pair == 1
+
+    def is_daisuushi(self, hand):
+        """
+        The hand contains four sets of winds
+        :param hand: list of hand's sets
+        :return: true|false
+        """
+        pon_sets = [x for x in hand if is_pon(x)]
+        if len(pon_sets) != 4:
+            return False
+
+        count_wind_sets = 0
+        winds = [EAST, SOUTH, WEST, NORTH]
+        for item in pon_sets:
+            if is_pon(item) and item[0] in winds:
+                count_wind_sets += 1
+
+        return count_wind_sets == 4
+
+    def is_tsuisou(self, hand):
+        """
+        Hand composed entirely of honour tiles.
+        :param hand: list of hand's sets
+        :return: true|false
+        """
+        count_of_honor_sets = 0
+        for item in hand:
+            if (is_pon(item) or is_pair(item)) and item[0] in HONOR_INDICES:
+                count_of_honor_sets += 1
+
+        return count_of_honor_sets == 5 or count_of_honor_sets == 7
+
+    def is_chinroto(self, hand):
+        """
+        Hand composed entirely of terminal tiles.
+        :param hand: list of hand's sets
+        :return: true|false
+        """
+        pon_sets = [x for x in hand if is_pon(x)]
+        if len(pon_sets) != 4:
+            return False
+
+        count_of_terminal_sets = 0
+        for item in hand:
+            if (is_pon(item) or is_pair(item)) and item[0] in TERMINAL_INDICES:
+                count_of_terminal_sets += 1
+
+        return count_of_terminal_sets == 5
+
+    def is_kokushi(self, tiles_34):
+        """
+        A hand composed of one of each of the terminals and honour tiles plus
+        any tile that matches anything else in the hand.
+        :param tiles_34:
+        :return: true|false
+        """
+        if (tiles_34[0] * tiles_34[8] * tiles_34[9] * tiles_34[17] * tiles_34[18] *
+                tiles_34[26] * tiles_34[27] * tiles_34[28] * tiles_34[29] * tiles_34[30] *
+                tiles_34[31] * tiles_34[32] * tiles_34[33] == 2):
+            return True
+
+    def is_ryuisou(self, hand):
+        """
+        Hand composed entirely of green tiles. Green tiles are: green dragons and 2, 3, 4, 6 and 8 of sou.
+        :param hand: list of hand's sets
+        :return: true|false
+        """
+        green_indices = [1, 2, 3, 5, 7, HATSU]
+        indices = reduce(lambda z, y: z + y, hand)
+        return all(x in green_indices for x in indices)
+
+    def is_suuankou(self, win_tile, hand, is_tsumo):
+        """
+        Four closed pon sets
+        :param win_tile: 136 tiles format
+        :param hand: list of hand's sets
+        :param is_tsumo:
+        :return: true|false
+        """
+        win_tile //= 4
+        closed_hand = []
+        for item in hand:
+            # if we do the ron on syanpon wait our pon will be consider as open
+            if is_pon(item) and win_tile in item and not is_tsumo:
+                continue
+
+            closed_hand.append(item)
+
+        count_of_pon = len([i for i in closed_hand if is_pon(i)])
+        return count_of_pon == 4
+
+    def is_chuuren_poutou(self, hand):
+        """
+        The hand contains 1-1-1-2-3-4-5-6-7-8-9-9-9 of one suit, plus any other tile of the same suit.
+        :param hand: list of hand's sets
+        :return: true|false
+        """
+        pon_sets = [x for x in hand if is_pon(x)]
+        if len(pon_sets) != 2:
+            return False
+
+        sou_sets = 0
+        pin_sets = 0
+        man_sets = 0
+        honor_sets = 0
+        for item in hand:
+            if is_sou(item[0]):
+                sou_sets += 1
+            elif is_pin(item[0]):
+                pin_sets += 1
+            elif is_man(item[0]):
+                man_sets += 1
+            else:
+                honor_sets += 1
+
+        sets = [sou_sets, pin_sets, man_sets]
+        only_one_suit = len([x for x in sets if x != 0]) == 1
+        if not only_one_suit or honor_sets > 0:
+            return False
+
+        indices = reduce(lambda z, y: z + y, hand)
+        # cast tile indices to 0..8 representation
+        indices = [x - 9 * (x // 9) for x in indices]
+
+        # 1-1-1
+        if not len([x for x in indices if x == 0]) == 3:
+            return False
+
+        # 9-9-9
+        if not len([x for x in indices if x == 8]) == 3:
+            return False
+
+        # 2-3-4-5-6-7-8 and one tile to any of them
+        middle_hand = [x for x in indices if (x != 0) and (x != 8)]
+        for x in range(1, 8):
+            middle_hand.remove(x)
+
+        if len(middle_hand) == 1:
             return True
 
         return False

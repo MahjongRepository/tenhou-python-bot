@@ -61,3 +61,35 @@ def is_pon(item):
         return False
 
     return item[0] == item[1] == item[2]
+
+
+def is_pair(item):
+    """
+    :param item: array of tile 34 indices
+    :return: boolean
+    """
+    return len(item) == 2
+
+
+def is_sou(tile):
+    """
+    :param tile: 34 tile format
+    :return: boolean
+    """
+    return tile <= 8
+
+
+def is_pin(tile):
+    """
+    :param tile: 34 tile format
+    :return: boolean
+    """
+    return 8 < tile <= 17
+
+
+def is_man(tile):
+    """
+    :param tile: 34 tile format
+    :return: boolean
+    """
+    return 17 < tile <= 26

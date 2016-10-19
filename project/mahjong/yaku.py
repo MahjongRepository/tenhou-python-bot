@@ -1,10 +1,12 @@
 class Yaku(object):
     name = ''
     han = {'open': None, 'closed': None}
+    is_yakuman = False
 
-    def __init__(self, name, open_value, closed_value):
+    def __init__(self, name, open_value, closed_value, is_yakuman=False):
         self.name = name
         self.han = {'open': open_value, 'closed': closed_value}
+        self.is_yakuman = is_yakuman
 
     def __str__(self):
         return self.name
@@ -23,6 +25,7 @@ houtei = Yaku('Houtei Raoyui', 1, 1)
 rinshan = Yaku('Rinshan Kaihou', 1, 1)
 chankan = Yaku('Chankan', 1, 1)
 nagashi_mangan = Yaku('Nagashi Mangan', 5, 5)
+renhou = Yaku('Renhou', None, 5)
 
 # Yaku 1 Hands
 pinfu = Yaku('Pinfu', None, 1)
@@ -55,25 +58,25 @@ ryanpeiko = Yaku('Ryanpeikou', None, 3)
 chinitsu = Yaku('Chinitsu', 5, 6)
 
 # Yakuman list
-kokushi = Yaku('Kokushi musou', None, 13)  #
-chuuren = Yaku('Chuuren Poutou', None, 13)  #
-suuankou = Yaku('Suu ankou', None, 13)  #
-daisangen = Yaku('Daisangen', 13, 13)  #
-shosuushi = Yaku('Shousuushii', 13, 13)  #
-ryuisou = Yaku('Ryuuiisou', 13, 13)  #
-suukantsu = Yaku('Suu kantsu', 13, 13)  #
-tsuisou = Yaku('Tsuu iisou', 13, 13)  #
-chinroto = Yaku('Chinroutou', 13, 13)  #
+kokushi = Yaku('Kokushi musou', None, 13, True)
+chuuren_poutou = Yaku('Chuuren Poutou', None, 13, True)
+suuankou = Yaku('Suu ankou', None, 13, True)
+daisangen = Yaku('Daisangen', 13, 13, True)
+shosuushi = Yaku('Shousuushii', 13, 13, True)
+ryuisou = Yaku('Ryuuiisou', 13, 13, True)
+suukantsu = Yaku('Suu kantsu', 13, 13, True)
+tsuisou = Yaku('Tsuu iisou', 13, 13, True)
+chinroto = Yaku('Chinroutou', 13, 13, True)
 
 # Double yakuman
-daisuushi = Yaku('Dai Suushii', 26, 26)  #
+daisuushi = Yaku('Dai Suushii', 26, 26, True)
+daburu_kokushi = Yaku('Daburu Kokushi musou', None, 26, True)
+suuankou_tanki = Yaku('Suu ankou', None, 26, True)
+daburu_chuuren_poutou = Yaku('Daburu Chuuren Poutou', None, 26, True)
 
 # Yakuman situations
-tenhou = Yaku('Tenhou', None, 13)  #
-renhou = Yaku('Renhou', None, 13)  #
-chiihou = Yaku('Chiihou', None, 13)  #
+tenhou = Yaku('Tenhou', None, 13, True)
+chiihou = Yaku('Chiihou', None, 13, True)
 
 # Other
 dora = Yaku('Dora', 1, 1)  #
-uradora = Yaku('Ura Dora', 1, 1)  #
-akadora = Yaku('Aka Dora', 1, 1)  #

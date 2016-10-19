@@ -45,6 +45,9 @@ class PointsCalculationTestCase(unittest.TestCase):
         result = hand.calculate_scores(han=13, fu=0, is_tsumo=False, is_dealer=False)
         self.assertEqual(result['main'], 32000)
 
+        result = hand.calculate_scores(han=26, fu=0, is_tsumo=False, is_dealer=False)
+        self.assertEqual(result['main'], 64000)
+
     def test_calculate_scores_and_ron_by_dealer(self):
         hand = FinishedHand()
 
@@ -74,6 +77,9 @@ class PointsCalculationTestCase(unittest.TestCase):
 
         result = hand.calculate_scores(han=13, fu=0, is_tsumo=False, is_dealer=True)
         self.assertEqual(result['main'], 48000)
+
+        result = hand.calculate_scores(han=26, fu=0, is_tsumo=False, is_dealer=True)
+        self.assertEqual(result['main'], 96000)
 
     def test_calculate_scores_and_tsumo(self):
         hand = FinishedHand()
@@ -109,3 +115,7 @@ class PointsCalculationTestCase(unittest.TestCase):
         result = hand.calculate_scores(han=13, fu=0, is_tsumo=True, is_dealer=False)
         self.assertEqual(result['main'], 16000)
         self.assertEqual(result['additional'], 8000)
+
+        result = hand.calculate_scores(han=26, fu=0, is_tsumo=True, is_dealer=False)
+        self.assertEqual(result['main'], 32000)
+        self.assertEqual(result['additional'], 16000)

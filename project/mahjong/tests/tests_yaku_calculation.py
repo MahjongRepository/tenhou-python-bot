@@ -224,6 +224,18 @@ class YakuCalculationTestCase(unittest.TestCase):
         self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 1)
 
+    def test_is_renhou(self):
+        hand = FinishedHand()
+
+        tiles = TilesConverter.string_to_136_array(sou='12344', man='234456', pin='66')
+        win_tile = TilesConverter.string_to_136_array(sou='4')[0]
+
+        result = hand.estimate_hand_value(tiles, win_tile, is_renhou=True)
+        self.assertEqual(result['error'], None)
+        self.assertEqual(result['han'], 5)
+        self.assertEqual(result['fu'], 40)
+        self.assertEqual(len(result['hand_yaku']), 1)
+
     def test_is_daburu_riichi(self):
         hand = FinishedHand()
 

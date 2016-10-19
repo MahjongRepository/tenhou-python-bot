@@ -44,7 +44,7 @@ chanta = Yaku('Chanta', 1, 2)
 honroto = Yaku('Honroutou', 2, 2)
 toitoi = Yaku('Toitoi', 2, 2)
 sanankou = Yaku('San Ankou', 2, 2)
-sankantsu = Yaku('San Kantsu', 2, 2)  #
+sankantsu = Yaku('San Kantsu', 2, 2)
 sanshoku_douko = Yaku('Sanshoku Doukou', 2, 2)
 chiitoitsu = Yaku('Chiitoitsu', None, 2)
 shosangen = Yaku('Shou Sangen', 2, 2)
@@ -79,4 +79,4 @@ tenhou = Yaku('Tenhou', None, 13, True)
 chiihou = Yaku('Chiihou', None, 13, True)
 
 # Other
-dora = Yaku('Dora', 1, 1)  #
+dora = Yaku('Dora', 1, 1)

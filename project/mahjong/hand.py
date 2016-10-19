@@ -31,6 +31,7 @@ class FinishedHand(object):
                             is_chiihou=False,
                             open_sets=None,
                             dora_indicators=None,
+                            called_kan_indices=None,
                             player_wind=None,
                             round_wind=None):
         """
@@ -51,6 +52,7 @@ class FinishedHand(object):
         :param is_nagashi_mangan:
         :param open_sets: array of array with open sets in 136-tile format
         :param dora_indicators: array of tiles in 136-tile format
+        :param called_kan_indices: array of tiles in 136-tile format
         :param player_wind: index of player wind
         :param round_wind: index of round wind
         :return: The dictionary with hand cost or error response
@@ -70,6 +72,9 @@ class FinishedHand(object):
 
         if not dora_indicators:
             dora_indicators = []
+
+        if not called_kan_indices:
+            called_kan_indices = []
 
         agari = Agari()
         cost = None
@@ -126,7 +131,12 @@ class FinishedHand(object):
 
             pon_sets = [x for x in hand if is_pon(x)]
             chi_sets = [x for x in hand if is_chi(x)]
-            additional_fu = self.calculate_additional_fu(win_tile, hand, player_wind, round_wind, open_sets)
+            additional_fu = self.calculate_additional_fu(win_tile,
+                                                         hand,
+                                                         player_wind,
+                                                         round_wind,
+                                                         open_sets,
+                                                         called_kan_indices)
 
             if additional_fu == 0 and len(chi_sets) == 4:
                 """
@@ -291,6 +301,12 @@ class FinishedHand(object):
                     else:
                         hand_yaku.append(yaku.suuankou)
 
+                if self.is_sankantsu(hand, called_kan_indices):
+                    hand_yaku.append(yaku.sankantsu)
+
+                if self.is_suukantsu(hand, called_kan_indices):
+                    hand_yaku.append(yaku.suukantsu)
+
             # chitoitsu is always 25 fu
             if is_chitoitsu:
                 fu = 25
@@ -424,12 +440,14 @@ class FinishedHand(object):
         else:
             return {'main': is_dealer and six_rounded or four_rounded, 'additional': 0}
 
-    def calculate_additional_fu(self, win_tile, hand, player_wind, round_wind, open_sets):
+    def calculate_additional_fu(self, win_tile, hand, player_wind, round_wind, open_sets, called_kan_indices):
         """
         :param win_tile: "136 format" tile
         :param hand: list of hand's sets
         :param player_wind:
         :param round_wind:
+        :param open_sets: array of array with 34 tiles format
+        :param called_kan_indices: array of 34 tiles format
         :return: int
         """
         win_tile //= 4
@@ -450,9 +468,15 @@ class FinishedHand(object):
         pon_sets = [x for x in hand if is_pon(x)]
         for set_item in pon_sets:
             if set_item[0] in TERMINAL_INDICES + HONOR_INDICES:
-                additional_fu += set_item in open_sets and 4 or 8
+                if set_item[0] in called_kan_indices:
+                    additional_fu += set_item in open_sets and 16 or 32
+                else:
+                    additional_fu += set_item in open_sets and 4 or 8
             else:
-                additional_fu += set_item in open_sets and 2 or 4
+                if set_item[0] in called_kan_indices:
+                    additional_fu += set_item in open_sets and 8 or 16
+                else:
+                    additional_fu += set_item in open_sets and 2 or 4
 
         # valued pair
         pair = [x for x in hand if len(x) == 2][0][0]
@@ -532,6 +556,24 @@ class FinishedHand(object):
         """
         count_of_pon = len([i for i in hand if is_pon(i)])
         return count_of_pon == 4
+
+    def is_sankantsu(self, hand, called_kan_indices):
+        """
+        The hand with three kan sets
+        :param hand: list of hand's sets
+        :param called_kan_indices: array of 34 tiles format
+        :return: true|false
+        """
+        if len(called_kan_indices) != 3:
+            return False
+
+        pon_sets = [i for i in hand if is_pon(i)]
+        count_of_kan_sets = 0
+        for item in pon_sets:
+            if item[0] in called_kan_indices:
+                count_of_kan_sets += 1
+
+        return count_of_kan_sets == 3
 
     def is_honroto(self, hand):
         """
@@ -1064,6 +1106,24 @@ class FinishedHand(object):
             return True
 
         return False
+
+    def is_suukantsu(self, hand, called_kan_indices):
+        """
+        The hand with four kan sets
+        :param hand: list of hand's sets
+        :param called_kan_indices: array of 34 tiles format
+        :return: true|false
+        """
+        if len(called_kan_indices) != 4:
+            return False
+
+        pon_sets = [i for i in hand if is_pon(i)]
+        count_of_kan_sets = 0
+        for item in pon_sets:
+            if item[0] in called_kan_indices:
+                count_of_kan_sets += 1
+
+        return count_of_kan_sets == 4
 
 
 class HandDivider(object):

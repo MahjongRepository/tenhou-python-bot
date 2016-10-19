@@ -15,6 +15,11 @@ class YakuCalculationTestCase(unittest.TestCase):
         open_set[2] //= 4
         return open_set
 
+    def _string_to_34_tile(self, sou='', pin='', man='', honors=''):
+        item = TilesConverter.string_to_136_array(sou=sou, pin=pin, man=man, honors=honors)
+        item[0] //= 4
+        return item[0]
+
     def test_hand_dividing(self):
         hand = HandDivider()
 
@@ -61,37 +66,37 @@ class YakuCalculationTestCase(unittest.TestCase):
         tiles = TilesConverter.string_to_136_array(sou='12456', man='123456', pin='55')
         win_tile = TilesConverter.string_to_136_array(sou='3')[0]
         hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
-        self.assertEqual(2, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind, []))
+        self.assertEqual(2, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind, [], []))
 
         # penchan ...-8-9 waiting
         tiles = TilesConverter.string_to_136_array(sou='34589', man='123456', pin='55')
         win_tile = TilesConverter.string_to_136_array(sou='7')[0]
         hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
-        self.assertEqual(2, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind, []))
+        self.assertEqual(2, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind, [], []))
 
         # kanchan waiting
         tiles = TilesConverter.string_to_136_array(sou='12357', man='123456', pin='55')
         win_tile = TilesConverter.string_to_136_array(sou='6')[0]
         hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
-        self.assertEqual(2, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind, []))
+        self.assertEqual(2, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind, [], []))
 
         # valued pair
         tiles = TilesConverter.string_to_136_array(sou='12378', man='123456', honors='11')
         win_tile = TilesConverter.string_to_136_array(sou='6')[0]
         hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
-        self.assertEqual(2, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind, []))
+        self.assertEqual(2, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind, [], []))
 
         # pair waiting
         tiles = TilesConverter.string_to_136_array(sou='123678', man='123456', pin='1')
         win_tile = TilesConverter.string_to_136_array(pin='1')[0]
         hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
-        self.assertEqual(2, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind, []))
+        self.assertEqual(2, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind, [], []))
 
         # pon
         tiles = TilesConverter.string_to_136_array(sou='22278', man='123456', pin='11')
         win_tile = TilesConverter.string_to_136_array(sou='6')[0]
         hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
-        self.assertEqual(4, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind, []))
+        self.assertEqual(4, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind, [], []))
 
         # open pon
         tiles = TilesConverter.string_to_136_array(sou='22278', man='123456', pin='11')
@@ -99,13 +104,30 @@ class YakuCalculationTestCase(unittest.TestCase):
         hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
         open_sets = [self._string_to_open_34_set(sou='222')]
         self.assertEqual(2, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind,
-                                                         open_sets))
+                                                         open_sets, []))
+
+        # kan
+        tiles = TilesConverter.string_to_136_array(sou='22278', man='123456', pin='11')
+        win_tile = TilesConverter.string_to_136_array(sou='6')[0]
+        hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
+        called_kan_indices = [self._string_to_34_tile(sou='2')]
+        self.assertEqual(16, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind, [],
+                                                          called_kan_indices))
+
+        # open kan
+        tiles = TilesConverter.string_to_136_array(sou='22278', man='123456', pin='11')
+        win_tile = TilesConverter.string_to_136_array(sou='6')[0]
+        hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
+        called_kan_indices = [self._string_to_34_tile(sou='2')]
+        open_sets = [self._string_to_open_34_set(sou='222')]
+        self.assertEqual(8, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind, open_sets,
+                                                         called_kan_indices))
 
         # terminal pon
         tiles = TilesConverter.string_to_136_array(sou='11178', man='123456', pin='11')
         win_tile = TilesConverter.string_to_136_array(sou='6')[0]
         hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
-        self.assertEqual(8, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind, []))
+        self.assertEqual(8, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind, [], []))
 
         # open terminal pon
         tiles = TilesConverter.string_to_136_array(sou='11178', man='123456', pin='11')
@@ -113,13 +135,30 @@ class YakuCalculationTestCase(unittest.TestCase):
         hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
         open_sets = [self._string_to_open_34_set(sou='111')]
         self.assertEqual(4, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind,
-                                                         open_sets))
+                                                         open_sets, []))
+
+        # terminal kan
+        tiles = TilesConverter.string_to_136_array(sou='11178', man='123456', pin='11')
+        win_tile = TilesConverter.string_to_136_array(sou='6')[0]
+        hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
+        called_kan_indices = [self._string_to_34_tile(sou='1')]
+        self.assertEqual(32, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind, [],
+                                                          called_kan_indices))
+
+        # open terminal kan
+        tiles = TilesConverter.string_to_136_array(sou='11178', man='123456', pin='11')
+        win_tile = TilesConverter.string_to_136_array(sou='6')[0]
+        hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
+        called_kan_indices = [self._string_to_34_tile(sou='1')]
+        open_sets = [self._string_to_open_34_set(sou='111')]
+        self.assertEqual(16, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind, open_sets,
+                                                          called_kan_indices))
 
         # honor pon
         tiles = TilesConverter.string_to_136_array(sou='78', man='123456', pin='11', honors='111')
         win_tile = TilesConverter.string_to_136_array(sou='6')[0]
         hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
-        self.assertEqual(8, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind, []))
+        self.assertEqual(8, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind, [], []))
 
         # open honor pon
         tiles = TilesConverter.string_to_136_array(sou='78', man='123456', pin='11', honors='111')
@@ -127,7 +166,24 @@ class YakuCalculationTestCase(unittest.TestCase):
         hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
         open_sets = [self._string_to_open_34_set(honors='111')]
         self.assertEqual(4, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind,
-                                                         open_sets))
+                                                         open_sets, []))
+
+        # honor kan
+        tiles = TilesConverter.string_to_136_array(sou='78', man='123456', pin='11', honors='111')
+        win_tile = TilesConverter.string_to_136_array(sou='6')[0]
+        hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
+        called_kan_indices = [self._string_to_34_tile(honors='1')]
+        self.assertEqual(32, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind, [],
+                                                          called_kan_indices))
+
+        # open honor kan
+        tiles = TilesConverter.string_to_136_array(sou='78', man='123456', pin='11', honors='111')
+        win_tile = TilesConverter.string_to_136_array(sou='6')[0]
+        hand_tiles = hand_divider.divide_hand(TilesConverter.to_34_array(tiles + [win_tile]))
+        called_kan_indices = [self._string_to_34_tile(honors='1')]
+        open_sets = [self._string_to_open_34_set(honors='111')]
+        self.assertEqual(16, hand.calculate_additional_fu(win_tile, hand_tiles[0], player_wind, round_wind, open_sets,
+                                                          called_kan_indices))
 
     def test_is_riichi(self):
         hand = FinishedHand()
@@ -464,6 +520,26 @@ class YakuCalculationTestCase(unittest.TestCase):
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 2)
         self.assertEqual(result['fu'], 40)
+        self.assertEqual(len(result['hand_yaku']), 1)
+
+    def test_is_sankantsu(self):
+        hand_divider = HandDivider()
+        hand = FinishedHand()
+
+        tiles = TilesConverter.string_to_34_array(sou='111333', man='123', pin='44555')
+        hand_tiles = hand_divider.divide_hand(tiles)
+        called_kan_indices = [self._string_to_34_tile(sou='1'), self._string_to_34_tile(sou='3'),
+                              self._string_to_34_tile(pin='5')]
+        self.assertTrue(hand.is_sankantsu(hand_tiles[0], called_kan_indices))
+
+        tiles = TilesConverter.string_to_136_array(sou='111333', man='12', pin='44555')
+        open_sets = [self._string_to_open_34_set(sou='111'), self._string_to_open_34_set(sou='333')]
+        win_tile = TilesConverter.string_to_136_array(man='3')[0]
+
+        result = hand.estimate_hand_value(tiles, win_tile, open_sets=open_sets, called_kan_indices=called_kan_indices)
+        self.assertEqual(result['error'], None)
+        self.assertEqual(result['han'], 2)
+        self.assertEqual(result['fu'], 70)
         self.assertEqual(len(result['hand_yaku']), 1)
 
     def test_is_honroto(self):

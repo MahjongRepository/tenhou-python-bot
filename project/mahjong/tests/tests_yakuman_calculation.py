@@ -7,6 +7,18 @@ from mahjong.tile import TilesConverter
 
 class YakumanCalculationTestCase(unittest.TestCase):
 
+    def _string_to_open_34_set(self, sou='', pin='', man='', honors=''):
+        open_set = TilesConverter.string_to_136_array(sou=sou, pin=pin, man=man, honors=honors)
+        open_set[0] //= 4
+        open_set[1] //= 4
+        open_set[2] //= 4
+        return open_set
+
+    def _string_to_34_tile(self, sou='', pin='', man='', honors=''):
+        item = TilesConverter.string_to_136_array(sou=sou, pin=pin, man=man, honors=honors)
+        item[0] //= 4
+        return item[0]
+
     def test_is_tenhou(self):
         hand = FinishedHand()
 
@@ -218,4 +230,24 @@ class YakumanCalculationTestCase(unittest.TestCase):
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 26)
         self.assertEqual(result['fu'], 50)
+        self.assertEqual(len(result['hand_yaku']), 1)
+
+    def test_is_suukantsu(self):
+        hand_divider = HandDivider()
+        hand = FinishedHand()
+
+        tiles = TilesConverter.string_to_34_array(sou='111333', man='222', pin='44555')
+        hand_tiles = hand_divider.divide_hand(tiles)
+        called_kan_indices = [self._string_to_34_tile(sou='1'), self._string_to_34_tile(sou='3'),
+                              self._string_to_34_tile(pin='5'), self._string_to_34_tile(man='2')]
+        self.assertTrue(hand.is_suukantsu(hand_tiles[0], called_kan_indices))
+
+        tiles = TilesConverter.string_to_136_array(sou='111333', man='222', pin='4555')
+        win_tile = TilesConverter.string_to_136_array(pin='4')[0]
+        open_sets = [self._string_to_open_34_set(sou='111'), self._string_to_open_34_set(sou='333')]
+
+        result = hand.estimate_hand_value(tiles, win_tile, open_sets=open_sets, called_kan_indices=called_kan_indices)
+        self.assertEqual(result['error'], None)
+        self.assertEqual(result['han'], 13)
+        self.assertEqual(result['fu'], 90)
         self.assertEqual(len(result['hand_yaku']), 1)

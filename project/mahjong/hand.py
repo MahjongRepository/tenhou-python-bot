@@ -164,7 +164,7 @@ class FinishedHand(object):
             if is_chitoitsu:
                 hand_yaku.append(yaku.chiitoitsu)
 
-            if self.is_tanyao(tiles_34):
+            if self.is_tanyao(hand):
                 hand_yaku.append(yaku.tanyao)
 
             if is_riichi and not is_daburu_riichi:
@@ -237,37 +237,37 @@ class FinishedHand(object):
                 if self.is_shosangen(hand):
                     hand_yaku.append(yaku.shosangen)
 
-                if self.is_haku(tiles_34):
+                if self.is_haku(hand):
                     hand_yaku.append(yaku.haku)
 
-                if self.is_hatsu(tiles_34):
+                if self.is_hatsu(hand):
                     hand_yaku.append(yaku.hatsu)
 
-                if self.is_chun(tiles_34):
+                if self.is_chun(hand):
                     hand_yaku.append(yaku.hatsu)
 
-                if self.is_east(tiles_34, player_wind, round_wind):
+                if self.is_east(hand, player_wind, round_wind):
                     if player_wind == EAST:
                         hand_yaku.append(yaku.yakuhai_place)
 
                     if round_wind == EAST:
                         hand_yaku.append(yaku.yakuhai_round)
 
-                if self.is_south(tiles_34, player_wind, round_wind):
+                if self.is_south(hand, player_wind, round_wind):
                     if player_wind == SOUTH:
                         hand_yaku.append(yaku.yakuhai_place)
 
                     if round_wind == SOUTH:
                         hand_yaku.append(yaku.yakuhai_round)
 
-                if self.is_west(tiles_34, player_wind, round_wind):
+                if self.is_west(hand, player_wind, round_wind):
                     if player_wind == WEST:
                         hand_yaku.append(yaku.yakuhai_place)
 
                     if round_wind == WEST:
                         hand_yaku.append(yaku.yakuhai_round)
 
-                if self.is_north(tiles_34, player_wind, round_wind):
+                if self.is_north(hand, player_wind, round_wind):
                     if player_wind == NORTH:
                         hand_yaku.append(yaku.yakuhai_place)
 
@@ -498,19 +498,15 @@ class FinishedHand(object):
         """
         return len(hand) == 7
 
-    def is_tanyao(self, tiles_34):
+    def is_tanyao(self, hand):
         """
         Hand without 1, 9, dragons and winds
-        :param tiles_34: "34 format" tiles array with 14 tiles
+        :param hand: list of hand's sets
         :return: true|false
         """
-        count_of_terminals = 0
-        indices = TERMINAL_INDICES + HONOR_INDICES
-        for i in indices:
-            if tiles_34[i] > 0:
-                count_of_terminals += 1
-
-        return count_of_terminals == 0
+        indices = reduce(lambda z, y: z + y, hand)
+        result = TERMINAL_INDICES + HONOR_INDICES
+        return not any(x in result for x in indices)
 
     def is_iipeiko(self, hand):
         """
@@ -840,94 +836,94 @@ class FinishedHand(object):
 
         return only_one_suit and honor_sets == 0
 
-    def is_haku(self, tiles_34):
+    def is_haku(self, hand):
         """
         Pon of white dragons
-        :param tiles_34: "34 format" tiles array with 14 tiles
+        :param hand: list of hand's sets
         :return: true|false
         """
-        return tiles_34[HAKU] >= 3
+        return len([x for x in hand if is_pon(x) and x[0] == HAKU]) == 1
 
-    def is_hatsu(self, tiles_34):
+    def is_hatsu(self, hand):
         """
         Pon of green dragons
-        :param tiles_34: "34 format" tiles array with 14 tiles
+        :param hand: list of hand's sets
         :return: true|false
         """
-        return tiles_34[HATSU] >= 3
+        return len([x for x in hand if is_pon(x) and x[0] == HATSU]) == 1
 
-    def is_chun(self, tiles_34):
+    def is_chun(self, hand):
         """
         Pon of red dragons
-        :param tiles_34: "34 format" tiles array with 14 tiles
+        :param hand: list of hand's sets
         :return: true|false
         """
-        return tiles_34[CHUN] >= 3
+        return len([x for x in hand if is_pon(x) and x[0] == CHUN]) == 1
 
-    def is_east(self, tiles_34, player_wind, round_wind):
+    def is_east(self, hand, player_wind, round_wind):
         """
         Pon of east winds
-        :param tiles_34: "34 format" tiles array with 14 tiles
+        :param hand: list of hand's sets
         :param player_wind: index of player wind
         :param round_wind: index of round wind
         :return: true|false
         """
 
-        if player_wind and tiles_34[player_wind] >= 3 and player_wind == EAST:
+        if len([x for x in hand if is_pon(x) and x[0] == player_wind]) == 1 and player_wind == EAST:
             return True
 
-        if round_wind and tiles_34[round_wind] >= 3 and round_wind == EAST:
+        if len([x for x in hand if is_pon(x) and x[0] == round_wind]) == 1 and round_wind == EAST:
             return True
 
         return False
 
-    def is_south(self, tiles_34, player_wind, round_wind):
+    def is_south(self, hand, player_wind, round_wind):
         """
         Pon of south winds
-        :param tiles_34: "34 format" tiles array with 14 tiles
+        :param hand: list of hand's sets
         :param player_wind: index of player wind
         :param round_wind: index of round wind
         :return: true|false
         """
 
-        if player_wind and tiles_34[player_wind] >= 3 and player_wind == SOUTH:
+        if len([x for x in hand if is_pon(x) and x[0] == player_wind]) == 1 and player_wind == SOUTH:
             return True
 
-        if round_wind and tiles_34[round_wind] >= 3 and round_wind == SOUTH:
+        if len([x for x in hand if is_pon(x) and x[0] == round_wind]) == 1 and round_wind == SOUTH:
             return True
 
         return False
 
-    def is_west(self, tiles_34, player_wind, round_wind):
+    def is_west(self, hand, player_wind, round_wind):
         """
         Pon of west winds
-        :param tiles_34: "34 format" tiles array with 14 tiles
+        :param hand: list of hand's sets
         :param player_wind: index of player wind
         :param round_wind: index of round wind
         :return: true|false
         """
 
-        if player_wind and tiles_34[player_wind] >= 3 and player_wind == WEST:
+        if len([x for x in hand if is_pon(x) and x[0] == player_wind]) == 1 and player_wind == WEST:
             return True
 
-        if round_wind and tiles_34[round_wind] >= 3 and round_wind == WEST:
+        if len([x for x in hand if is_pon(x) and x[0] == round_wind]) == 1 and round_wind == WEST:
             return True
 
         return False
 
-    def is_north(self, tiles_34, player_wind, round_wind):
+    def is_north(self, hand, player_wind, round_wind):
         """
         Pon of north winds
-        :param tiles_34: "34 format" tiles array with 14 tiles
+        :param hand: list of hand's sets
         :param player_wind: index of player wind
         :param round_wind: index of round wind
         :return: true|false
         """
 
-        if player_wind and tiles_34[player_wind] >= 3 and player_wind == NORTH:
+        if len([x for x in hand if is_pon(x) and x[0] == player_wind]) == 1 and player_wind == NORTH:
             return True
 
-        if round_wind and tiles_34[round_wind] >= 3 and round_wind == NORTH:
+        if len([x for x in hand if is_pon(x) and x[0] == round_wind]) == 1 and round_wind == NORTH:
             return True
 
         return False

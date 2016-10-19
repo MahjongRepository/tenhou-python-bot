@@ -848,3 +848,21 @@ class YakuCalculationTestCase(unittest.TestCase):
         self.assertEqual(result['han'], 2)
         self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 2)
+
+    def test_dora_in_hand(self):
+        hand = FinishedHand()
+
+        tiles = TilesConverter.string_to_136_array(sou='123456', man='12345', pin='55')
+        win_tile = TilesConverter.string_to_136_array(man='6')[0]
+        result = hand.estimate_hand_value(tiles, win_tile)
+        self.assertEqual(result['error'], None)
+        self.assertEqual(result['han'], 1)
+        self.assertEqual(result['fu'], 30)
+        self.assertEqual(len(result['hand_yaku']), 1)
+
+        dora_indicators = [TilesConverter.string_to_136_array(pin='4')[0]]
+        result = hand.estimate_hand_value(tiles, win_tile, dora_indicators=dora_indicators)
+        self.assertEqual(result['error'], None)
+        self.assertEqual(result['han'], 3)
+        self.assertEqual(result['fu'], 30)
+        self.assertEqual(len(result['hand_yaku']), 2)

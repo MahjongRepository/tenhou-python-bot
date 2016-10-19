@@ -150,3 +150,6 @@ class TableTestCase(unittest.TestCase):
 
         table.dora_indicators = [TilesConverter.string_to_136_array(honors='7')[0]]
         self.assertTrue(table.is_dora(TilesConverter.string_to_136_array(honors='5')[0]))
+
+        table.dora_indicators = [TilesConverter.string_to_136_array(pin='1')[0]]
+        self.assertFalse(table.is_dora(TilesConverter.string_to_136_array(sou='2')[0]))

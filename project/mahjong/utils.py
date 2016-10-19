@@ -14,12 +14,14 @@ def is_dora(tile, dora_indicators):
 
         # sou, pin, man
         if tile_index < EAST:
-            dora -= 9 * (dora // 9)
-            tile_index -= 9 * (tile_index // 9)
 
             # with indicator 9, dora will be 1
             if dora == 8:
                 dora = -1
+            elif dora == 17:
+                dora = 8
+            elif dora == 26:
+                dora = 17
 
             if tile_index == dora + 1:
                 return True

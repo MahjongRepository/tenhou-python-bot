@@ -8,7 +8,7 @@ from mahjong.ai.agari import Agari
 from mahjong import yaku
 from mahjong.tile import TilesConverter
 from mahjong.constants import EAST, SOUTH, WEST, NORTH, CHUN, HATSU, HAKU, TERMINAL_INDICES, HONOR_INDICES
-from mahjong.utils import is_chi, is_pon, is_pair, is_sou, is_pin, is_man
+from mahjong.utils import is_chi, is_pon, is_pair, is_sou, is_pin, is_man, is_dora
 
 
 class FinishedHand(object):
@@ -30,6 +30,7 @@ class FinishedHand(object):
                             is_renhou=False,
                             is_chiihou=False,
                             open_sets=None,
+                            dora_indicators=None,
                             player_wind=None,
                             round_wind=None):
         """
@@ -48,7 +49,8 @@ class FinishedHand(object):
         :param is_chiihou:
         :param is_daburu_riichi:
         :param is_nagashi_mangan:
-        :param open_sets: array of open sets in 136-tile format
+        :param open_sets: array of array with open sets in 136-tile format
+        :param dora_indicators: array of tiles in 136-tile format
         :param player_wind: index of player wind
         :param round_wind: index of round wind
         :return: The dictionary with hand cost or error response
@@ -65,6 +67,9 @@ class FinishedHand(object):
                 item[1] //= 4
                 item[2] //= 4
         is_open_hand = len(open_sets) > 0
+
+        if not dora_indicators:
+            dora_indicators = []
 
         agari = Agari()
         cost = None
@@ -289,6 +294,17 @@ class FinishedHand(object):
             # chitoitsu is always 25 fu
             if is_chitoitsu:
                 fu = 25
+
+            count_of_dora = 0
+            for tile in tiles:
+                if is_dora(tile, dora_indicators):
+                    count_of_dora += 1
+
+            if count_of_dora:
+                yaku_item = yaku.dora
+                yaku_item.han['open'] = count_of_dora
+                yaku_item.han['closed'] = count_of_dora
+                hand_yaku.append(yaku_item)
 
             # yakuman is not connected with other yaku
             yakuman_list = [x for x in hand_yaku if x.is_yakuman]

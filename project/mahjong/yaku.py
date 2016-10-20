@@ -9,7 +9,10 @@ class Yaku(object):
         self.is_yakuman = is_yakuman
 
     def __str__(self):
-        return self.name
+        if self.name == 'Dora':
+            return 'Dora {}'.format(self.han['open'])
+        else:
+            return self.name
 
     # for calls in array
     def __repr__(self):

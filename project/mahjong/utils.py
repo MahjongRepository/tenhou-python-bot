@@ -1,4 +1,5 @@
 from mahjong.constants import EAST
+from utils.settings_handler import settings
 
 
 def is_dora(tile, dora_indicators):
@@ -9,8 +10,9 @@ def is_dora(tile, dora_indicators):
     """
 
     # red fives
-    if tile in [52]:
-        return True
+    if settings.FIVE_REDS:
+        if tile in [16, 52, 88]:
+            return True
 
     tile_index = tile // 4
 

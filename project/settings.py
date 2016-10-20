@@ -35,6 +35,8 @@ ENABLE_AI = True
 """
 GAME_TYPE = '1'
 
+FIVE_REDS = False
+
 try:
     from settings_local import *
 except ImportError:

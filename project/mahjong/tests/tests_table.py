@@ -3,6 +3,7 @@ import unittest
 
 from mahjong.table import Table
 from utils.tests import TestMixin
+from utils.settings_handler import settings
 
 
 class TableTestCase(unittest.TestCase, TestMixin):
@@ -154,5 +155,15 @@ class TableTestCase(unittest.TestCase, TestMixin):
         table.dora_indicators = [self._string_to_136_tile(pin='1')]
         self.assertFalse(table.is_dora(self._string_to_136_tile(sou='2')))
 
+        settings.FIVE_REDS = True
+
+        # red five man
+        self.assertTrue(table.is_dora(16))
+
         # red five pin
         self.assertTrue(table.is_dora(52))
+
+        # red five sou
+        self.assertTrue(table.is_dora(88))
+
+        settings.FIVE_REDS = False

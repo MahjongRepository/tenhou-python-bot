@@ -7,6 +7,11 @@ def is_dora(tile, dora_indicators):
     :param dora_indicators: array of 136 tiles format
     :return: boolean
     """
+
+    # red fives
+    if tile in [52]:
+        return True
+
     tile_index = tile // 4
 
     for dora in dora_indicators:

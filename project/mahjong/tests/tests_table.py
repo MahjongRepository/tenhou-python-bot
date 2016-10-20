@@ -115,41 +115,44 @@ class TableTestCase(unittest.TestCase, TestMixin):
         table = Table()
         table.init_round(0, 0, 0, 0, 0, [])
 
-        table.dora_indicators = [self._string_to_136_array(sou='1')[0]]
-        self.assertTrue(table.is_dora(self._string_to_136_array(sou='2')[0]))
+        table.dora_indicators = [self._string_to_136_tile(sou='1')]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(sou='2')))
 
-        table.dora_indicators = [self._string_to_136_array(sou='9')[0]]
-        self.assertTrue(table.is_dora(self._string_to_136_array(sou='1')[0]))
+        table.dora_indicators = [self._string_to_136_tile(sou='9')]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(sou='1')))
 
-        table.dora_indicators = [self._string_to_136_array(pin='9')[0]]
-        self.assertTrue(table.is_dora(self._string_to_136_array(pin='1')[0]))
+        table.dora_indicators = [self._string_to_136_tile(pin='9')]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(pin='1')))
 
-        table.dora_indicators = [self._string_to_136_array(man='9')[0]]
-        self.assertTrue(table.is_dora(self._string_to_136_array(man='1')[0]))
+        table.dora_indicators = [self._string_to_136_tile(man='9')]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(man='1')))
 
-        table.dora_indicators = [self._string_to_136_array(man='5')[0]]
-        self.assertTrue(table.is_dora(self._string_to_136_array(man='6')[0]))
+        table.dora_indicators = [self._string_to_136_tile(man='5')]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(man='6')))
 
-        table.dora_indicators = [self._string_to_136_array(honors='1')[0]]
-        self.assertTrue(table.is_dora(self._string_to_136_array(honors='2')[0]))
+        table.dora_indicators = [self._string_to_136_tile(honors='1')]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(honors='2')))
 
-        table.dora_indicators = [self._string_to_136_array(honors='2')[0]]
-        self.assertTrue(table.is_dora(self._string_to_136_array(honors='3')[0]))
+        table.dora_indicators = [self._string_to_136_tile(honors='2')]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(honors='3')))
 
-        table.dora_indicators = [self._string_to_136_array(honors='3')[0]]
-        self.assertTrue(table.is_dora(self._string_to_136_array(honors='4')[0]))
+        table.dora_indicators = [self._string_to_136_tile(honors='3')]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(honors='4')))
 
-        table.dora_indicators = [self._string_to_136_array(honors='4')[0]]
-        self.assertTrue(table.is_dora(self._string_to_136_array(honors='1')[0]))
+        table.dora_indicators = [self._string_to_136_tile(honors='4')]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(honors='1')))
 
-        table.dora_indicators = [self._string_to_136_array(honors='5')[0]]
-        self.assertTrue(table.is_dora(self._string_to_136_array(honors='6')[0]))
+        table.dora_indicators = [self._string_to_136_tile(honors='5')]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(honors='6')))
 
-        table.dora_indicators = [self._string_to_136_array(honors='6')[0]]
-        self.assertTrue(table.is_dora(self._string_to_136_array(honors='7')[0]))
+        table.dora_indicators = [self._string_to_136_tile(honors='6')]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(honors='7')))
 
-        table.dora_indicators = [self._string_to_136_array(honors='7')[0]]
-        self.assertTrue(table.is_dora(self._string_to_136_array(honors='5')[0]))
+        table.dora_indicators = [self._string_to_136_tile(honors='7')]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(honors='5')))
 
-        table.dora_indicators = [self._string_to_136_array(pin='1')[0]]
-        self.assertFalse(table.is_dora(self._string_to_136_array(sou='2')[0]))
+        table.dora_indicators = [self._string_to_136_tile(pin='1')]
+        self.assertFalse(table.is_dora(self._string_to_136_tile(sou='2')))
+
+        # red five pin
+        self.assertTrue(table.is_dora(52))

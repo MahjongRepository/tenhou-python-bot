@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
+from utils.settings_handler import settings
 from mahjong.ai.shanten import Shanten
 from mahjong.tile import Tile
 
@@ -46,7 +47,10 @@ class Player(object):
                 logger.error('Wasn\'t able to load old api version')
                 from mahjong.ai.main import MainAI
         else:
-            from mahjong.ai.main import MainAI
+            if settings.ENABLE_AI:
+                from mahjong.ai.main import MainAI
+            else:
+                from mahjong.ai.random import MainAI
 
         self.ai = MainAI(table, self)
 

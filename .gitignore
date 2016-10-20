@@ -7,6 +7,9 @@ __pycache__
 logs
 project/settings_local.py
 old_version.py
+loader.py
+*.db
+temp
 
 # temporary files
 experiments

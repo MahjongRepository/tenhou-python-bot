@@ -15,6 +15,8 @@ IS_TOURNAMENT = False
 STAT_SERVER_URL = ''
 STAT_TOKEN = ''
 
+ENABLE_AI = True
+
 # 1 - tonpu-sen, ari, ari
 # 9 - hanchan, ari, ari
 GAME_TYPE = '1'

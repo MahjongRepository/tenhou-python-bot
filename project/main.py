@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+Endpoint to run bot. It will play a game on tenhou.net
+"""
 from optparse import OptionParser
 
 from tenhou.main import connect_and_play
@@ -35,12 +38,18 @@ def parse_args_and_set_up_settings():
                       type='string',
                       help='Tournament lobby to play.')
 
+    parser.add_option('-d', '--disable_ai',
+                      action='store_false',
+                      default=True,
+                      help='Enable AI')
+
     opts, _ = parser.parse_args()
 
     settings.USER_ID = opts.user_id
     settings.GAME_TYPE = opts.game_type
     settings.LOBBY = opts.lobby
     settings.WAITING_GAME_TIMEOUT_MINUTES = opts.timeout
+    settings.ENABLE_AI = opts.disable_ai
 
     if opts.championship:
         settings.IS_TOURNAMENT = True

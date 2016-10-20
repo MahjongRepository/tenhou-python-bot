@@ -17,8 +17,22 @@ STAT_TOKEN = ''
 
 ENABLE_AI = True
 
-# 1 - tonpu-sen, ari, ari
-# 9 - hanchan, ari, ari
+"""
+  0 - 1 - online, 0 - bots
+  1 - aka forbidden
+  2 - kuitan forbidden
+  3 - hanchan
+  4 - 3man
+  5 - dan flag
+  6 - fast game
+  7 - dan flag
+
+  Combine them as:
+  76543210
+
+  00001001 = 9 = hanchan ari-ari
+  00000001 = 1 = tonpu-sen ari-ari
+"""
 GAME_TYPE = '1'
 
 try:

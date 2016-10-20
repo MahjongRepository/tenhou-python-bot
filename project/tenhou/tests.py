@@ -127,7 +127,7 @@ class TenhouDecoderTestCase(unittest.TestCase):
 
         self.assertEqual(meld.who, 3)
         self.assertEqual(meld.type, Meld.CHI)
-        self.assertEqual(meld.tiles, (42, 44, 51))
+        self.assertEqual(meld.tiles, [42, 44, 51])
 
     def test_parse_tile(self):
         decoder = TenhouDecoder()

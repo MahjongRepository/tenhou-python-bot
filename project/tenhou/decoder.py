@@ -156,7 +156,7 @@ class TenhouDecoder(object):
         base_and_called = data >> 10
         base = base_and_called // 3
         base = (base // 7) * 9 + base % 7
-        meld.tiles = Tile(t0 + 4 * (base + 0)), Tile(t1 + 4 * (base + 1)), Tile(t2 + 4 * (base + 2))
+        meld.tiles = [Tile(t0 + 4 * (base + 0)), Tile(t1 + 4 * (base + 1)), Tile(t2 + 4 * (base + 2))]
 
     def parse_pon(self, data, meld):
         t4 = (data >> 5) & 0x3

@@ -22,13 +22,15 @@ class TilesConverter(object):
         Convert 136 tiles array to the one line string
         Example of output 123s123p123m33z
         """
-        sou = [t for t in tiles if t < 36]
+        tiles = sorted(tiles)
+
+        man = [t for t in tiles if t < 36]
 
         pin = [t for t in tiles if 36 <= t < 72]
         pin = [t - 36 for t in pin]
 
-        man = [t for t in tiles if 72 <= t < 108]
-        man = [t - 72 for t in man]
+        sou = [t for t in tiles if 72 <= t < 108]
+        sou = [t - 72 for t in sou]
 
         honors = [t for t in tiles if t >= 108]
         honors = [t - 108 for t in honors]
@@ -38,7 +40,7 @@ class TilesConverter(object):
         man = man and ''.join([str((i // 4) + 1) for i in man]) + 'm' or ''
         honors = honors and ''.join([str((i // 4) + 1) for i in honors]) + 'z' or ''
 
-        return sou + pin + man + honors
+        return man + pin + sou + honors
 
     @staticmethod
     def to_34_array(tiles):

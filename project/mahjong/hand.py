@@ -73,8 +73,12 @@ class FinishedHand(object):
         if not dora_indicators:
             dora_indicators = []
 
+        kan_indices_136 = []
         if not called_kan_indices:
             called_kan_indices = []
+        else:
+            kan_indices_136 = called_kan_indices
+            called_kan_indices = [x // 4 for x in called_kan_indices]
 
         agari = Agari()
         cost = None
@@ -318,6 +322,9 @@ class FinishedHand(object):
             count_of_dora = 0
             count_of_aka_dora = 0
             for tile in tiles:
+                count_of_dora += plus_dora(tile, dora_indicators)
+
+            for tile in kan_indices_136:
                 count_of_dora += plus_dora(tile, dora_indicators)
 
             for tile in tiles:

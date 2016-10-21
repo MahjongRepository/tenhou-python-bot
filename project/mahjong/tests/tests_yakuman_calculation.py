@@ -213,6 +213,8 @@ class YakumanCalculationTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(sou='111333', man='222', pin='44555')
         win_tile = self._string_to_136_tile(pin='4')
         open_sets = [self._string_to_136_array(sou='111'), self._string_to_136_array(sou='333')]
+        called_kan_indices = [self._string_to_136_tile(sou='1'), self._string_to_136_tile(sou='3'),
+                              self._string_to_136_tile(pin='5'), self._string_to_136_tile(man='2')]
 
         result = hand.estimate_hand_value(tiles, win_tile, open_sets=open_sets, called_kan_indices=called_kan_indices)
         self.assertEqual(result['error'], None)

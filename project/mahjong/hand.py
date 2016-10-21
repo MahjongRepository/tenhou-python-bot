@@ -436,7 +436,7 @@ class FinishedHand(object):
                 six_rounded = 11600
 
         if is_tsumo:
-            return {'main': double_rounded, 'additional': rounded}
+            return {'main': double_rounded, 'additional': is_dealer and double_rounded or rounded}
         else:
             return {'main': is_dealer and six_rounded or four_rounded, 'additional': 0}
 

@@ -119,3 +119,42 @@ class PointsCalculationTestCase(unittest.TestCase):
         result = hand.calculate_scores(han=26, fu=0, is_tsumo=True, is_dealer=False)
         self.assertEqual(result['main'], 32000)
         self.assertEqual(result['additional'], 16000)
+
+    def test_calculate_scores_and_tsumo_by_dealer(self):
+        hand = FinishedHand()
+
+        result = hand.calculate_scores(han=1, fu=30, is_tsumo=True, is_dealer=True)
+        self.assertEqual(result['main'], 500)
+        self.assertEqual(result['additional'], 500)
+
+        result = hand.calculate_scores(han=3, fu=30, is_tsumo=True, is_dealer=True)
+        self.assertEqual(result['main'], 2000)
+        self.assertEqual(result['additional'], 2000)
+
+        result = hand.calculate_scores(han=4, fu=30, is_tsumo=True, is_dealer=True)
+        self.assertEqual(result['main'], 3900)
+        self.assertEqual(result['additional'], 3900)
+
+        result = hand.calculate_scores(han=5, fu=0, is_tsumo=True, is_dealer=True)
+        self.assertEqual(result['main'], 4000)
+        self.assertEqual(result['additional'], 4000)
+
+        result = hand.calculate_scores(han=6, fu=0, is_tsumo=True, is_dealer=True)
+        self.assertEqual(result['main'], 6000)
+        self.assertEqual(result['additional'], 6000)
+
+        result = hand.calculate_scores(han=8, fu=0, is_tsumo=True, is_dealer=True)
+        self.assertEqual(result['main'], 8000)
+        self.assertEqual(result['additional'], 8000)
+
+        result = hand.calculate_scores(han=11, fu=0, is_tsumo=True, is_dealer=True)
+        self.assertEqual(result['main'], 12000)
+        self.assertEqual(result['additional'], 12000)
+
+        result = hand.calculate_scores(han=13, fu=0, is_tsumo=True, is_dealer=True)
+        self.assertEqual(result['main'], 16000)
+        self.assertEqual(result['additional'], 16000)
+
+        result = hand.calculate_scores(han=26, fu=0, is_tsumo=True, is_dealer=True)
+        self.assertEqual(result['main'], 32000)
+        self.assertEqual(result['additional'], 32000)

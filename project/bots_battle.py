@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+Script to run local bots battle
+"""
 import logging
 
 from terminaltables import AsciiTable

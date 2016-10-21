@@ -1036,7 +1036,7 @@ class FinishedHand(object):
         :param hand: list of hand's sets
         :return: true|false
         """
-        green_indices = [1, 2, 3, 5, 7, HATSU]
+        green_indices = [19, 20, 21, 23, 25, HATSU]
         indices = reduce(lambda z, y: z + y, hand)
         return all(x in green_indices for x in indices)
 

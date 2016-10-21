@@ -71,9 +71,9 @@ class TilesConverter(object):
 
             return data
 
-        results = _split_string(sou, 0)
+        results = _split_string(man, 0)
         results += _split_string(pin, 36)
-        results += _split_string(man, 72)
+        results += _split_string(sou, 72)
         results += _split_string(honors, 108)
 
         return results

@@ -212,10 +212,10 @@ class YakumanCalculationTestCase(unittest.TestCase, TestMixin):
 
         tiles = self._string_to_136_array(sou='111333', man='222', pin='44555')
         win_tile = self._string_to_136_tile(pin='4')
-        open_sets = [self._string_to_open_34_set(sou='111'), self._string_to_open_34_set(sou='333')]
+        open_sets = [self._string_to_136_array(sou='111'), self._string_to_136_array(sou='333')]
 
         result = hand.estimate_hand_value(tiles, win_tile, open_sets=open_sets, called_kan_indices=called_kan_indices)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 13)
-        self.assertEqual(result['fu'], 90)
+        self.assertEqual(result['fu'], 80)
         self.assertEqual(len(result['hand_yaku']), 1)

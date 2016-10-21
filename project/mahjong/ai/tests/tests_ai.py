@@ -23,8 +23,8 @@ class AITestCase(unittest.TestCase, TestMixin):
         outs, shanten = ai.calculate_outs()
 
         self.assertEqual(shanten, 2)
-        self.assertEqual(outs[0]['discard'], 26)
-        self.assertEqual(outs[0]['waiting'], [0, 1, 2, 3, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 21, 24])
+        self.assertEqual(outs[0]['discard'], 9)
+        self.assertEqual(outs[0]['waiting'], [3, 6, 7, 8, 11, 12, 13, 14, 15, 18, 19, 20, 21, 22, 23, 24, 25])
         self.assertEqual(outs[0]['tiles_count'], 57)
 
         tiles = self._string_to_136_array(sou='111345677', pin='45', man='56')
@@ -35,8 +35,8 @@ class AITestCase(unittest.TestCase, TestMixin):
         outs, shanten = ai.calculate_outs()
 
         self.assertEqual(shanten, 1)
-        self.assertEqual(outs[0]['discard'], 26)
-        self.assertEqual(outs[0]['waiting'], [11, 14, 21, 24])
+        self.assertEqual(outs[0]['discard'], 23)
+        self.assertEqual(outs[0]['waiting'], [3, 6, 11, 14])
         self.assertEqual(outs[0]['tiles_count'], 16)
 
         tiles = self._string_to_136_array(sou='11145677', pin='345', man='56')
@@ -47,8 +47,8 @@ class AITestCase(unittest.TestCase, TestMixin):
         outs, shanten = ai.calculate_outs()
 
         self.assertEqual(shanten, 0)
-        self.assertEqual(outs[0]['discard'], 26)
-        self.assertEqual(outs[0]['waiting'], [21, 24])
+        self.assertEqual(outs[0]['discard'], 8)
+        self.assertEqual(outs[0]['waiting'], [3, 6])
         self.assertEqual(outs[0]['tiles_count'], 8)
 
         tiles = self._string_to_136_array(sou='11145677', pin='345', man='56')
@@ -71,17 +71,17 @@ class AITestCase(unittest.TestCase, TestMixin):
         player.draw_tile(tile)
 
         discarded_tile = player.discard_tile()
-        self.assertEqual(discarded_tile, 104)
+        self.assertEqual(discarded_tile, 36)
 
         player.draw_tile(self._string_to_136_array(pin='4')[0])
 
         discarded_tile = player.discard_tile()
-        self.assertEqual(discarded_tile, 36)
+        self.assertEqual(discarded_tile, 92)
 
         player.draw_tile(self._string_to_136_array(pin='3')[0])
 
         discarded_tile = player.discard_tile()
-        self.assertEqual(discarded_tile, 20)
+        self.assertEqual(discarded_tile, 32)
 
         player.draw_tile(self._string_to_136_array(man='4')[0])
 

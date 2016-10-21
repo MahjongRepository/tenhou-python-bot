@@ -8,7 +8,7 @@ from mahjong.ai.agari import Agari
 from mahjong import yaku
 from mahjong.tile import TilesConverter
 from mahjong.constants import EAST, SOUTH, WEST, NORTH, CHUN, HATSU, HAKU, TERMINAL_INDICES, HONOR_INDICES
-from mahjong.utils import is_chi, is_pon, is_pair, is_sou, is_pin, is_man, is_dora, is_aka_dora
+from mahjong.utils import is_chi, is_pon, is_pair, is_sou, is_pin, is_man, plus_dora, is_aka_dora
 
 
 class FinishedHand(object):
@@ -312,10 +312,8 @@ class FinishedHand(object):
 
             count_of_dora = 0
             count_of_aka_dora = 0
-            for _ in dora_indicators:
-                for tile in tiles:
-                    if is_dora(tile, dora_indicators):
-                        count_of_dora += 1
+            for tile in tiles:
+                count_of_dora += plus_dora(tile, dora_indicators)
 
             for tile in tiles:
                 if is_aka_dora(tile):

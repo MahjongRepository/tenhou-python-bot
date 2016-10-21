@@ -16,13 +16,14 @@ def is_aka_dora(tile):
     return False
 
 
-def is_dora(tile, dora_indicators):
+def plus_dora(tile, dora_indicators):
     """
     :param tile: int 136 tiles format
     :param dora_indicators: array of 136 tiles format
-    :return: boolean
+    :return: int count of dora
     """
     tile_index = tile // 4
+    dora_count = 0
 
     for dora in dora_indicators:
         dora //= 4
@@ -39,7 +40,7 @@ def is_dora(tile, dora_indicators):
                 dora = 17
 
             if tile_index == dora + 1:
-                return True
+                dora_count += 1
         else:
             dora -= 9 * 3
             tile_index -= 9 * 3
@@ -53,9 +54,9 @@ def is_dora(tile, dora_indicators):
                 dora = 3
 
             if tile_index == dora + 1:
-                return True
+                return 1
 
-    return False
+    return dora_count
 
 
 def is_chi(item):

@@ -311,9 +311,10 @@ class FinishedHand(object):
                 fu = 25
 
             count_of_dora = 0
-            for tile in tiles:
-                if is_dora(tile, dora_indicators):
-                    count_of_dora += 1
+            for _ in dora_indicators:
+                for tile in tiles:
+                    if is_dora(tile, dora_indicators):
+                        count_of_dora += 1
 
             if count_of_dora:
                 yaku_item = yaku.dora

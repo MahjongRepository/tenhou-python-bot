@@ -35,7 +35,7 @@ class FinishedHand(object):
                             player_wind=None,
                             round_wind=None):
         """
-        :param tiles: array with 13 tiles in 136-tile format
+        :param tiles: array with 14 tiles in 136-tile format
         :param win_tile: tile that caused win (ron or tsumo)
         :param is_tsumo:
         :param is_riichi:
@@ -106,8 +106,7 @@ class FinishedHand(object):
             error = "Ippatsu can't be declared without riichi"
             return return_response()
 
-        total_tiles = list(tiles) + [win_tile]
-        tiles_34 = TilesConverter.to_34_array(total_tiles)
+        tiles_34 = TilesConverter.to_34_array(tiles)
         divider = HandDivider()
 
         if not agari.is_agari(tiles_34):

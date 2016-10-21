@@ -288,7 +288,7 @@ class GameManager(object):
         self.round_number += 1
 
         if winner:
-            hand_value = self.finished_hand.estimate_hand_value(tiles,
+            hand_value = self.finished_hand.estimate_hand_value(tiles + [win_tile],
                                                                 win_tile,
                                                                 is_tsumo,
                                                                 winner.player.in_riichi,

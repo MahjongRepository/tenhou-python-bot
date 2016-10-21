@@ -2,8 +2,9 @@
 import unittest
 
 from mahjong.hand import FinishedHand, HandDivider
-from mahjong.constants import EAST, SOUTH, WEST, NORTH
+from mahjong.constants import EAST, SOUTH, WEST, NORTH, FIVE_RED_SOU
 from utils.tests import TestMixin
+from utils.settings_handler import settings
 
 
 class YakuCalculationTestCase(unittest.TestCase, TestMixin):
@@ -886,3 +887,17 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(result['han'], 5)
         self.assertEqual(result['fu'], 30)
         self.assertEqual(len(result['hand_yaku']), 2)
+
+        settings.FIVE_REDS = True
+
+        # double dora indicators and red fives
+        tiles = self._string_to_136_array(sou='12346', man='123678', pin='44')
+        tiles.append(FIVE_RED_SOU)
+        dora_indicators = [self._string_to_136_tile(pin='2'), self._string_to_136_tile(pin='2')]
+        result = hand.estimate_hand_value(tiles, win_tile, dora_indicators=dora_indicators)
+        self.assertEqual(result['error'], None)
+        self.assertEqual(result['han'], 2)
+        self.assertEqual(result['fu'], 30)
+        self.assertEqual(len(result['hand_yaku']), 2)
+
+        settings.FIVE_REDS = False

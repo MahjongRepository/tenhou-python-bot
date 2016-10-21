@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from mahjong.player import Player
-from mahjong.utils import is_dora
+from mahjong.utils import is_dora, is_aka_dora
 
 
 class Table(object):
@@ -56,7 +56,7 @@ class Table(object):
         self.dora_indicators.append(tile)
 
     def is_dora(self, tile):
-        return is_dora(tile, self.dora_indicators)
+        return is_dora(tile, self.dora_indicators) or is_aka_dora(tile)
 
     def set_players_scores(self, scores, uma=None):
         for i in range(0, len(scores)):

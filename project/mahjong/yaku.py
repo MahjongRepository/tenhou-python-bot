@@ -83,3 +83,4 @@ chiihou = Yaku('Chiihou', None, 13, True)
 
 # Other
 dora = Yaku('Dora', 1, 1)
+aka_dora = Yaku('Aka Dora', 1, 1)

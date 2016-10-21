@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
+from mahjong.constants import FIVE_RED_MAN, FIVE_RED_PIN, FIVE_RED_SOU
 from mahjong.table import Table
 from utils.tests import TestMixin
 from utils.settings_handler import settings
@@ -158,12 +159,12 @@ class TableTestCase(unittest.TestCase, TestMixin):
         settings.FIVE_REDS = True
 
         # red five man
-        self.assertTrue(table.is_dora(16))
+        self.assertTrue(table.is_dora(FIVE_RED_MAN))
 
         # red five pin
-        self.assertTrue(table.is_dora(52))
+        self.assertTrue(table.is_dora(FIVE_RED_PIN))
 
         # red five sou
-        self.assertTrue(table.is_dora(88))
+        self.assertTrue(table.is_dora(FIVE_RED_SOU))
 
         settings.FIVE_REDS = False

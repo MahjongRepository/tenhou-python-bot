@@ -1,5 +1,19 @@
-from mahjong.constants import EAST
+from mahjong.constants import EAST, FIVE_RED_MAN, FIVE_RED_PIN, FIVE_RED_SOU
 from utils.settings_handler import settings
+
+
+def is_aka_dora(tile):
+    """
+    :param tile: int 136 tiles format
+    :return: boolean
+    """
+    if not settings.FIVE_REDS:
+        return False
+
+    if tile in [FIVE_RED_MAN, FIVE_RED_PIN, FIVE_RED_SOU]:
+        return True
+
+    return False
 
 
 def is_dora(tile, dora_indicators):
@@ -8,12 +22,6 @@ def is_dora(tile, dora_indicators):
     :param dora_indicators: array of 136 tiles format
     :return: boolean
     """
-
-    # red fives
-    if settings.FIVE_REDS:
-        if tile in [16, 52, 88]:
-            return True
-
     tile_index = tile // 4
 
     for dora in dora_indicators:

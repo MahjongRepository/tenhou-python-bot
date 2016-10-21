@@ -178,7 +178,7 @@ class TenhouDecoder(object):
 
     def parse_nuki(self, data, meld):
         meld.type = Meld.NUKI
-        meld.tiles = Tile(data >> 8)
+        meld.tiles = [Tile(data >> 8)]
 
     def parse_dora_indicator(self, message):
         soup = BeautifulSoup(message, 'html.parser')

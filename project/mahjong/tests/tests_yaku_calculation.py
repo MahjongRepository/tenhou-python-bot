@@ -9,6 +9,9 @@ from utils.settings_handler import settings
 
 class YakuCalculationTestCase(unittest.TestCase, TestMixin):
 
+    def tearDown(self):
+        settings.FIVE_REDS = False
+
     def test_hand_dividing(self):
         hand = HandDivider()
 
@@ -342,6 +345,15 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(result['fu'], 30)
         self.assertEqual(len(result['hand_yaku']), 3)
 
+        tiles = self._string_to_136_array(sou='234567', man='234567', pin='22')
+        win_tile = self._string_to_136_tile(man='7')
+        open_sets = [self._string_to_136_array(sou='234')]
+        result = hand.estimate_hand_value(tiles, win_tile, open_sets=open_sets)
+        self.assertEqual(result['error'], None)
+        self.assertEqual(result['han'], 1)
+        self.assertEqual(result['fu'], 30)
+        self.assertEqual(len(result['hand_yaku']), 1)
+
     def test_is_pinfu_hand(self):
         player_wind, round_wind = EAST, WEST
         hand = FinishedHand()
@@ -398,6 +410,29 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(result['han'], 1)
         self.assertEqual(result['fu'], 30)
         self.assertEqual(len(result['hand_yaku']), 1)
+
+        tiles = self._string_to_136_array(sou='123345678', man='678', pin='88')
+        win_tile = self._string_to_136_tile(sou='3')
+        result = hand.estimate_hand_value(tiles, win_tile)
+        self.assertEqual(result['error'], None)
+        self.assertEqual(result['han'], 1)
+        self.assertEqual(result['fu'], 30)
+        self.assertEqual(len(result['hand_yaku']), 1)
+
+        tiles = self._string_to_136_array(sou='12399', man='123456', pin='456')
+        win_tile = self._string_to_136_tile(sou='1')
+        result = hand.estimate_hand_value(tiles, win_tile)
+        self.assertEqual(result['error'], None)
+        self.assertEqual(result['han'], 1)
+        self.assertEqual(result['fu'], 30)
+        self.assertEqual(len(result['hand_yaku']), 1)
+
+        # open hand
+        tiles = self._string_to_136_array(sou='12399', man='123456', pin='456')
+        win_tile = self._string_to_136_tile(sou='1')
+        open_sets = [self._string_to_136_array(sou='123')]
+        result = hand.estimate_hand_value(tiles, win_tile, open_sets=open_sets)
+        self.assertNotEqual(result['error'], None)
 
     def test_is_iipeiko(self):
         hand = FinishedHand()
@@ -897,7 +932,7 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
 
         # double dora
         tiles = self._string_to_136_array(man='678', pin='34577', sou='123345')
-        win_tile = self._string_to_136_tile(sou='3')
+        win_tile = self._string_to_136_tile(pin='7')
         dora_indicators = [self._string_to_136_tile(sou='4'), self._string_to_136_tile(sou='4')]
         result = hand.estimate_hand_value(tiles, win_tile, dora_indicators=dora_indicators)
         self.assertEqual(result['error'], None)
@@ -909,6 +944,7 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
 
         # double dora indicators and red fives
         tiles = self._string_to_136_array(sou='12346', man='123678', pin='44')
+        win_tile = self._string_to_136_tile(pin='4')
         tiles.append(FIVE_RED_SOU)
         dora_indicators = [self._string_to_136_tile(pin='2'), self._string_to_136_tile(pin='2')]
         result = hand.estimate_hand_value(tiles, win_tile, dora_indicators=dora_indicators)

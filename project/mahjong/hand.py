@@ -142,8 +142,13 @@ class FinishedHand(object):
                 - A hand without pon and kan sets, so it should contains all sequences and a pair
                 - The pair should be not valued
                 - The waiting must be an open wait (on 2 different tiles)
+                - Hand should be closed
                 """
-                is_pinfu = True
+                if is_open_hand:
+                    fu += 2
+                    is_pinfu = False
+                else:
+                    is_pinfu = True
             else:
                 fu += additional_fu
                 is_pinfu = False
@@ -463,16 +468,24 @@ class FinishedHand(object):
         additional_fu = 0
 
         chi_sets = [x for x in hand if (win_tile in x and is_chi(x))]
+        chi_fu_sets = []
         for set_item in chi_sets:
-            # penchan waiting: 1-2-...
-            # or ...-8-9 waiting
-            if any(x in set_item for x in TERMINAL_INDICES) and \
-                  (set_item.index(win_tile) == 2 or set_item.index(win_tile) == 0):
-                additional_fu += 2
+            # penchan waiting
+            if any(x in set_item for x in TERMINAL_INDICES):
+                tile_number = win_tile - 9 * (win_tile // 9)
+                # 1-2-...
+                if set_item.index(win_tile) == 2 and tile_number == 2:
+                    chi_fu_sets.append(set_item)
+                # ...-8-9
+                elif set_item.index(win_tile) == 0 and tile_number == 6:
+                    chi_fu_sets.append(set_item)
 
             # kanchan waiting 5-...-7
             if set_item.index(win_tile) == 1:
-                additional_fu += 2
+                chi_fu_sets.append(set_item)
+
+        if len(chi_fu_sets) and len(chi_sets) == len(chi_fu_sets):
+            additional_fu += 2
 
         pon_sets = [x for x in hand if is_pon(x)]
         for set_item in pon_sets:

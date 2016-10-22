@@ -757,6 +757,9 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_34_array(man='123456789', sou='123', honors='22')
         self.assertTrue(hand.is_ittsu(self._hand(tiles, 0)))
 
+        tiles = self._string_to_34_array(man='112233456789', honors='22')
+        self.assertTrue(hand.is_ittsu(self._hand(tiles, 0)))
+
         tiles = self._string_to_136_array(man='123456789', sou='123', honors='22')
         win_tile = self._string_to_136_tile(sou='3')
 

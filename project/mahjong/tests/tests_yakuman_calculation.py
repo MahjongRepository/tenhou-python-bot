@@ -121,7 +121,7 @@ class YakumanCalculationTestCase(unittest.TestCase, TestMixin):
         result = hand.estimate_hand_value(tiles, win_tile)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 13)
-        self.assertEqual(result['fu'], 30)
+        self.assertEqual(result['fu'], 0)
         self.assertEqual(len(result['hand_yaku']), 1)
 
         tiles = self._string_to_136_array(sou='119', man='19', pin='19', honors='1234567')
@@ -130,7 +130,7 @@ class YakumanCalculationTestCase(unittest.TestCase, TestMixin):
         result = hand.estimate_hand_value(tiles, win_tile)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 26)
-        self.assertEqual(result['fu'], 30)
+        self.assertEqual(result['fu'], 0)
         self.assertEqual(len(result['hand_yaku']), 1)
 
     def test_is_ryuisou(self):

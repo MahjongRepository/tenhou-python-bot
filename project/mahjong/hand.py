@@ -106,7 +106,7 @@ class FinishedHand(object):
             error = "Ippatsu can't be declared with open hand"
             return return_response()
 
-        if is_ippatsu and not is_riichi:
+        if is_ippatsu and not is_riichi and not is_daburu_riichi:
             error = "Ippatsu can't be declared without riichi"
             return return_response()
 
@@ -384,7 +384,7 @@ class FinishedHand(object):
                 han = yaku.daburu_kokushi.han['closed']
             else:
                 han = yaku.kokushi.han['closed']
-            fu = 30
+            fu = 0
             cost = self.calculate_scores(han, fu, is_tsumo, is_dealer)
             calculated_hands.append({
                 'cost': cost,
@@ -751,8 +751,8 @@ class FinishedHand(object):
 
             # cast array of arrays to simple array
             item = reduce(lambda z, y: z + y, item)
-            # cast tile indices to 0..8 representation
-            item = [x - 9 * (x // 9) for x in item]
+            # cast tile indices to 0..8 representation and remove double indices
+            item = list(set([x - 9 * (x // 9) for x in item]))
 
             if item == list(range(0, 9)):
                 return True

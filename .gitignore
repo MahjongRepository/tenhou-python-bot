@@ -7,6 +7,8 @@ __pycache__
 logs
 project/settings_local.py
 old_version.py
+
+tests_validate_hand.py
 loader.py
 *.db
 temp

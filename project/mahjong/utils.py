@@ -42,6 +42,9 @@ def plus_dora(tile, dora_indicators):
             if tile_index == dora + 1:
                 dora_count += 1
         else:
+            if dora < EAST:
+                continue
+
             dora -= 9 * 3
             tile_index_temp = tile_index - 9 * 3
 

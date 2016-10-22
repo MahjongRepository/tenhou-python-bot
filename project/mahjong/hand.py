@@ -447,7 +447,7 @@ class FinishedHand(object):
             six_rounded = math.ceil(6 * base_points / 100.) * 100
 
             # mangan
-            if rounded >= 2000:
+            if rounded > 2000:
                 rounded = 2000
                 double_rounded = rounded * 2
                 four_rounded = double_rounded * 2

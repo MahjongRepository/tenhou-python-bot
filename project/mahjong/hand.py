@@ -498,10 +498,6 @@ class FinishedHand(object):
         if pair in valued_indices:
             additional_fu += 2
 
-        # pair waiting
-        if pair == win_tile:
-            additional_fu += 2
-
         chi_sets = [x for x in hand if (win_tile in x and is_chi(x))]
         chi_fu_sets = []
         for set_item in chi_sets:
@@ -518,6 +514,14 @@ class FinishedHand(object):
             # kanchan waiting 5-...-7
             if set_item.index(win_tile) == 1:
                 chi_fu_sets.append(set_item)
+
+        # separate pair waiting
+        if pair == win_tile:
+            if not len(chi_sets):
+                additional_fu += 2
+            elif additional_fu != 0:
+                # we can't count pinfu yaku here, so let's add additional fu
+                additional_fu += 2
 
         if len(chi_fu_sets) and len(chi_sets) == len(chi_fu_sets):
             additional_fu += 2

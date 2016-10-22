@@ -68,6 +68,16 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         result = hand.estimate_hand_value(tiles, win_tile, is_tsumo=True)
         self.assertEqual(result['fu'], 40)
 
+        tiles = self._string_to_136_array(man='234789', pin='12345666')
+        win_tile = self._string_to_136_tile(pin='6')
+        result = hand.estimate_hand_value(tiles, win_tile)
+        self.assertEqual(result['fu'], 30)
+
+        tiles = self._string_to_136_array(sou='678', pin='34555789', honors='555')
+        win_tile = self._string_to_136_tile(pin='5')
+        result = hand.estimate_hand_value(tiles, win_tile, is_tsumo=True)
+        self.assertEqual(result['fu'], 40)
+
         # penchan 1-2-... waiting
         tiles = self._string_to_136_array(sou='12456', man='123456', pin='55')
         win_tile = self._string_to_136_tile(sou='3')

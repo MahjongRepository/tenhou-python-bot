@@ -43,7 +43,7 @@ class YakumanCalculationTestCase(unittest.TestCase, TestMixin):
         result = hand.estimate_hand_value(tiles, win_tile)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 13)
-        self.assertEqual(result['fu'], 60)
+        self.assertEqual(result['fu'], 50)
         self.assertEqual(len(result['hand_yaku']), 1)
 
     def test_is_shosuushi(self):
@@ -73,7 +73,7 @@ class YakumanCalculationTestCase(unittest.TestCase, TestMixin):
         result = hand.estimate_hand_value(tiles, win_tile)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 26)
-        self.assertEqual(result['fu'], 70)
+        self.assertEqual(result['fu'], 60)
         self.assertEqual(len(result['hand_yaku']), 1)
 
     def test_is_tsuisou(self):
@@ -145,7 +145,7 @@ class YakumanCalculationTestCase(unittest.TestCase, TestMixin):
         result = hand.estimate_hand_value(tiles, win_tile)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 13)
-        self.assertEqual(result['fu'], 50)
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 1)
 
     def test_is_suuankou(self):

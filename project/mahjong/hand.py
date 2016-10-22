@@ -136,6 +136,7 @@ class FinishedHand(object):
             chi_sets = [x for x in hand if is_chi(x)]
             additional_fu = self.calculate_additional_fu(win_tile,
                                                          hand,
+                                                         is_tsumo,
                                                          player_wind,
                                                          round_wind,
                                                          open_sets,
@@ -464,7 +465,7 @@ class FinishedHand(object):
         else:
             return {'main': is_dealer and six_rounded or four_rounded, 'additional': 0}
 
-    def calculate_additional_fu(self, win_tile, hand, player_wind, round_wind, open_sets, called_kan_indices):
+    def calculate_additional_fu(self, win_tile, hand, is_tsumo, player_wind, round_wind, open_sets, called_kan_indices):
         """
         :param win_tile: "136 format" tile
         :param hand: list of hand's sets
@@ -476,6 +477,30 @@ class FinishedHand(object):
         """
         win_tile //= 4
         additional_fu = 0
+
+        pon_sets = [x for x in hand if is_pon(x)]
+        for set_item in pon_sets:
+            set_was_open = set_item in open_sets or (not is_tsumo and win_tile in set_item)
+            if set_item[0] in TERMINAL_INDICES + HONOR_INDICES:
+                if set_item[0] in called_kan_indices:
+                    additional_fu += set_was_open and 16 or 32
+                else:
+                    additional_fu += set_was_open and 4 or 8
+            else:
+                if set_item[0] in called_kan_indices:
+                    additional_fu += set_was_open and 8 or 16
+                else:
+                    additional_fu += set_was_open and 2 or 4
+
+        # valued pair
+        pair = [x for x in hand if len(x) == 2][0][0]
+        valued_indices = [HAKU, HATSU, CHUN, player_wind, round_wind]
+        if pair in valued_indices:
+            additional_fu += 2
+
+        # pair waiting
+        if pair == win_tile:
+            additional_fu += 2
 
         chi_sets = [x for x in hand if (win_tile in x and is_chi(x))]
         chi_fu_sets = []
@@ -496,28 +521,9 @@ class FinishedHand(object):
 
         if len(chi_fu_sets) and len(chi_sets) == len(chi_fu_sets):
             additional_fu += 2
-
-        pon_sets = [x for x in hand if is_pon(x)]
-        for set_item in pon_sets:
-            if set_item[0] in TERMINAL_INDICES + HONOR_INDICES:
-                if set_item[0] in called_kan_indices:
-                    additional_fu += set_item in open_sets and 16 or 32
-                else:
-                    additional_fu += set_item in open_sets and 4 or 8
-            else:
-                if set_item[0] in called_kan_indices:
-                    additional_fu += set_item in open_sets and 8 or 16
-                else:
-                    additional_fu += set_item in open_sets and 2 or 4
-
-        # valued pair
-        pair = [x for x in hand if len(x) == 2][0][0]
-        valued_indices = [HAKU, HATSU, CHUN, player_wind, round_wind]
-        if pair in valued_indices:
-            additional_fu += 2
-
-        # pair waiting
-        if pair == win_tile:
+        elif additional_fu != 0 and len(chi_fu_sets):
+            # Hand like 11m12345p678s666z + 3p
+            # we can't count pinfu yaku here, so let's add additional fu
             additional_fu += 2
 
         return additional_fu

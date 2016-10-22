@@ -11,6 +11,7 @@ class Meld(object):
     who = None
     tiles = []
     type = None
+    from_who = None
 
     def __str__(self):
         return 'Who: {0}, Type: {1}, Tiles: {2}'.format(self.who, self.type, self.tiles)

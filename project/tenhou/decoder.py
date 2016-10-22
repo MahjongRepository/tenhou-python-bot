@@ -138,6 +138,7 @@ class TenhouDecoder(object):
 
         meld = Meld()
         meld.who = int(soup.find('n').attrs['who'])
+        meld.from_who = data & 0x3
 
         if data & 0x4:
             self.parse_chi(data, meld)

@@ -43,7 +43,7 @@ def plus_dora(tile, dora_indicators):
                 dora_count += 1
         else:
             dora -= 9 * 3
-            tile_index -= 9 * 3
+            tile_index_temp = tile_index - 9 * 3
 
             # dora indicator is north
             if dora == 3:
@@ -53,7 +53,7 @@ def plus_dora(tile, dora_indicators):
             if dora == 6:
                 dora = 3
 
-            if tile_index == dora + 1:
+            if tile_index_temp == dora + 1:
                 return 1
 
     return dora_count

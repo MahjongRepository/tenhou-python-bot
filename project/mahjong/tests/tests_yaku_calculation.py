@@ -969,3 +969,16 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(result['han'], 4)
         self.assertEqual(result['fu'], 50)
         self.assertEqual(len(result['hand_yaku']), 1)
+
+        # we had a bug with multiple dora indicators and honor sets
+        # this test is working with this situation
+        tiles = self._string_to_136_array(pin='22244456799', honors='444')
+        win_tile = self._string_to_136_tile(pin='2')
+        dora_indicators = [self._string_to_136_tile(sou='3'), self._string_to_136_tile(honors='3')]
+        called_kan_indices = [self._string_to_136_tile(honors='4')]
+        result = hand.estimate_hand_value(tiles, win_tile, dora_indicators=dora_indicators,
+                                          called_kan_indices=called_kan_indices)
+        self.assertEqual(result['error'], None)
+        self.assertEqual(result['han'], 7)
+        self.assertEqual(result['fu'], 70)
+        self.assertEqual(len(result['hand_yaku']), 2)

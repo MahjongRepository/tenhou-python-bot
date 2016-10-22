@@ -563,11 +563,12 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
 
         tiles = self._string_to_136_array(sou='111999', man='111', honors='11222')
         win_tile = self._string_to_136_tile(honors='2')
+        open_sets = [self._string_to_136_array(sou='111')]
 
-        result = hand.estimate_hand_value(tiles, win_tile)
+        result = hand.estimate_hand_value(tiles, win_tile, open_sets=open_sets)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 4)
-        self.assertEqual(result['fu'], 70)
+        self.assertEqual(result['fu'], 50)
         self.assertEqual(len(result['hand_yaku']), 2)
 
     def test_is_sanankou(self):

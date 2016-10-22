@@ -242,6 +242,9 @@ class FinishedHand(object):
                 if self.is_sanankou(win_tile, hand, open_sets, is_tsumo):
                     hand_yaku.append(yaku.sanankou)
 
+                if self.is_honroto(hand):
+                    hand_yaku.append(yaku.honroto)
+
                 if self.is_shosangen(hand):
                     hand_yaku.append(yaku.shosangen)
 

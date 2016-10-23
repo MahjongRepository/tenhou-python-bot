@@ -8,7 +8,7 @@ from mahjong.ai.agari import Agari
 from mahjong import yaku
 from mahjong.tile import TilesConverter
 from mahjong.constants import EAST, SOUTH, WEST, NORTH, CHUN, HATSU, HAKU, TERMINAL_INDICES, HONOR_INDICES
-from mahjong.utils import is_chi, is_pon, is_pair, is_sou, is_pin, is_man, plus_dora, is_aka_dora
+from mahjong.utils import is_chi, is_pon, is_pair, is_sou, is_pin, is_man, plus_dora, is_aka_dora, simplify
 
 
 class FinishedHand(object):
@@ -479,8 +479,14 @@ class FinishedHand(object):
         additional_fu = 0
 
         pon_sets = [x for x in hand if is_pon(x)]
+        chi_sets = [x for x in hand if (win_tile in x and is_chi(x))]
+
         for set_item in pon_sets:
             set_was_open = set_item in open_sets or (not is_tsumo and win_tile in set_item)
+            # 111123 form
+            if win_tile in set_item and len(chi_sets):
+                set_was_open = False
+
             if set_item[0] in TERMINAL_INDICES + HONOR_INDICES:
                 if set_item[0] in called_kan_indices:
                     additional_fu += set_was_open and 16 or 32
@@ -498,12 +504,11 @@ class FinishedHand(object):
         if pair in valued_indices:
             additional_fu += 2
 
-        chi_sets = [x for x in hand if (win_tile in x and is_chi(x))]
         chi_fu_sets = []
         for set_item in chi_sets:
             # penchan waiting
             if any(x in set_item for x in TERMINAL_INDICES):
-                tile_number = win_tile - 9 * (win_tile // 9)
+                tile_number = simplify(win_tile)
                 # 1-2-...
                 if set_item.index(win_tile) == 2 and tile_number == 2:
                     chi_fu_sets.append(set_item)
@@ -524,10 +529,15 @@ class FinishedHand(object):
                 additional_fu += 2
 
         if len(chi_fu_sets) and len(chi_sets) == len(chi_fu_sets):
-            additional_fu += 2
+            if len(chi_fu_sets) == 1 and pair in chi_fu_sets[0] and win_tile == pair:
+                # 45556 form
+                if chi_fu_sets[0].index(pair) == 1:
+                    additional_fu += 2
+            else:
+                additional_fu += 2
         elif additional_fu != 0 and len(chi_fu_sets):
-            # Hand like 11m12345p678s666z + 3p
-            # we can't count pinfu yaku here, so let's add additional fu
+            # Hand like 123345
+            # we can't count pinfu yaku here, so let's add additional fu for 123 waiting
             additional_fu += 2
 
         return additional_fu
@@ -728,6 +738,7 @@ class FinishedHand(object):
         :param hand: list of hand's sets
         :return: true|false
         """
+
         chi_sets = [i for i in hand if is_chi(i)]
         if len(chi_sets) < 3:
             return False
@@ -745,16 +756,19 @@ class FinishedHand(object):
 
         sets = [sou_chi, pin_chi, man_chi]
 
-        for item in sets:
-            if len(item) < 3:
+        for suit_item in sets:
+            if len(suit_item) < 3:
                 continue
 
-            # cast array of arrays to simple array
-            item = reduce(lambda z, y: z + y, item)
-            # cast tile indices to 0..8 representation and remove double indices
-            item = list(set([x - 9 * (x // 9) for x in item]))
+            casted_sets = []
 
-            if item == list(range(0, 9)):
+            for set_item in suit_item:
+                # cast tiles indices to 0..8 representation
+                casted_sets.append([simplify(set_item[0]),
+                                    simplify(set_item[1]),
+                                    simplify(set_item[2])])
+
+            if [0, 1, 2] in casted_sets and [3, 4, 5] in casted_sets and [6, 7, 8] in casted_sets:
                 return True
 
         return False
@@ -784,9 +798,9 @@ class FinishedHand(object):
             for pin_item in pin_chi:
                 for man_item in man_chi:
                     # cast tile indices to 0..8 representation
-                    sou_item = [x - 9 * (x // 9) for x in sou_item]
-                    pin_item = [x - 9 * (x // 9) for x in pin_item]
-                    man_item = [x - 9 * (x // 9) for x in man_item]
+                    sou_item = [simplify(x) for x in sou_item]
+                    pin_item = [simplify(x) for x in pin_item]
+                    man_item = [simplify(x) for x in man_item]
                     if sou_item == pin_item == man_item:
                         return True
         return False
@@ -816,9 +830,9 @@ class FinishedHand(object):
             for pin_item in pin_pon:
                 for man_item in man_pon:
                     # cast tile indices to 1..9 representation
-                    sou_item = [x - 9 * (x // 9) for x in sou_item]
-                    pin_item = [x - 9 * (x // 9) for x in pin_item]
-                    man_item = [x - 9 * (x // 9) for x in man_item]
+                    sou_item = [simplify(x) for x in sou_item]
+                    pin_item = [simplify(x) for x in pin_item]
+                    man_item = [simplify(x) for x in man_item]
                     if sou_item == pin_item == man_item:
                         return True
         return False
@@ -1122,7 +1136,7 @@ class FinishedHand(object):
 
         indices = reduce(lambda z, y: z + y, hand)
         # cast tile indices to 0..8 representation
-        indices = [x - 9 * (x // 9) for x in indices]
+        indices = [simplify(x) for x in indices]
 
         # 1-1-1
         if not len([x for x in indices if x == 0]) == 3:

@@ -114,3 +114,11 @@ def is_man(tile):
     :return: boolean
     """
     return 17 < tile <= 26
+
+
+def simplify(tile):
+    """
+    :param tile: 34 tile format
+    :return: tile: 0-8 presentation
+    """
+    return tile - 9 * (tile // 9)

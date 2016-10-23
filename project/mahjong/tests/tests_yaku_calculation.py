@@ -223,14 +223,14 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(len(result['hand_yaku']), 2)
 
         # one more bug with with dora tiles
-        tiles = self._string_to_136_array(sou='123456789', honors='11555')
+        tiles = self._string_to_136_array(sou='123456678', honors='11555')
         win_tile = self._string_to_136_tile(sou='9')
         open_sets = [self._string_to_136_array(sou='456'), self._string_to_136_array(sou='555')]
         dora_indicators = [self._string_to_136_tile(sou='9')]
         result = hand.estimate_hand_value(tiles, win_tile, is_tsumo=True, open_sets=open_sets,
                                           dora_indicators=dora_indicators)
         self.assertEqual(result['fu'], 30)
-        self.assertEqual(result['han'], 5)
+        self.assertEqual(result['han'], 4)
 
         # if we can't ad pinfu to the hand hand
         # we can add 2 fu to make hand more expensive
@@ -273,6 +273,19 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
                                           dora_indicators=dora_indicators, player_wind=player_wind)
         self.assertEqual(result['fu'], 40)
         self.assertEqual(result['han'], 4)
+
+        tiles = self._string_to_136_array(pin='12333', sou='567', honors='666777')
+        win_tile = self._string_to_136_tile(pin='3')
+        open_sets = [self._string_to_136_array(honors='666'), self._string_to_136_array(honors='777')]
+        result = hand.estimate_hand_value(tiles, win_tile, open_sets=open_sets)
+        self.assertEqual(result['fu'], 30)
+        self.assertEqual(result['han'], 2)
+
+        tiles = self._string_to_136_array(pin='12367778', sou='678', man='456')
+        win_tile = self._string_to_136_tile(pin='7')
+        result = hand.estimate_hand_value(tiles, win_tile, is_riichi=True)
+        self.assertEqual(result['fu'], 40)
+        self.assertEqual(result['han'], 1)
 
     def test_is_riichi(self):
         hand = FinishedHand()
@@ -804,6 +817,9 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
 
         tiles = self._string_to_34_array(man='112233456789', honors='22')
         self.assertTrue(hand.is_ittsu(self._hand(tiles, 0)))
+
+        tiles = self._string_to_34_array(man='122334567789', honors='11')
+        self.assertFalse(hand.is_ittsu(self._hand(tiles, 0)))
 
         tiles = self._string_to_136_array(man='123456789', sou='123', honors='22')
         win_tile = self._string_to_136_tile(sou='3')

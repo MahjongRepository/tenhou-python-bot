@@ -1219,6 +1219,15 @@ class HandDivider(object):
                 if len(hand) == 5:
                     hands.append(hand)
 
+        # small optimization, let's remove hand duplicates
+        unique_hands = []
+        for hand in hands:
+            hand = sorted(hand, key=lambda x: (x[0], x[1]))
+            if hand not in unique_hands:
+                unique_hands.append(hand)
+
+        hands = unique_hands
+
         if len(pair_indices) == 7:
             hand = []
             for index in pair_indices:

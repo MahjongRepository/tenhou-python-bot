@@ -243,6 +243,9 @@ class FinishedHand(object):
                 if self.is_sanankou(win_tile, hand, open_sets, is_tsumo):
                     hand_yaku.append(yaku.sanankou)
 
+                if self.is_sanshoku_douko(hand):
+                    hand_yaku.append(yaku.sanshoku_douko)
+
                 if self.is_honroto(hand):
                     hand_yaku.append(yaku.honroto)
 
@@ -506,6 +509,9 @@ class FinishedHand(object):
 
         chi_fu_sets = []
         for set_item in chi_sets:
+            if set_item in open_sets:
+                continue
+
             # penchan waiting
             if any(x in set_item for x in TERMINAL_INDICES):
                 tile_number = simplify(win_tile)
@@ -643,19 +649,23 @@ class FinishedHand(object):
         :return: true|false
         """
         win_tile //= 4
-        closed_hand = []
-        for item in hand:
+
+        chi_sets = [x for x in hand if (is_chi(x) and win_tile in x)]
+        pon_sets = [x for x in hand if is_pon(x)]
+
+        closed_pon_sets = []
+        for item in pon_sets:
             if item in open_sets:
                 continue
 
             # if we do the ron on syanpon wait our pon will be consider as open
-            if is_pon(item) and win_tile in item and not is_tsumo:
+            # and it is not 789999 set
+            if win_tile in item and not is_tsumo and not len(chi_sets):
                 continue
 
-            closed_hand.append(item)
+            closed_pon_sets.append(item)
 
-        count_of_pon = len([i for i in closed_hand if is_pon(i)])
-        return count_of_pon == 3
+        return len(closed_pon_sets) == 3
 
     def is_shosangen(self, hand):
         """

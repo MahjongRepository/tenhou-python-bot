@@ -287,6 +287,15 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(result['fu'], 40)
         self.assertEqual(result['han'], 1)
 
+        tiles = self._string_to_136_array(man='11156677899', honors='777')
+        win_tile = self._string_to_136_tile(man='7')
+        open_sets = [self._string_to_136_array(honors='777'), self._string_to_136_array(man='111'),
+                     self._string_to_136_array(man='678')]
+        called_kan = [self._string_to_136_tile(honors='7')]
+        result = hand.estimate_hand_value(tiles, win_tile, open_sets=open_sets, called_kan_indices=called_kan)
+        self.assertEqual(result['fu'], 40)
+        self.assertEqual(result['han'], 3)
+
     def test_is_riichi(self):
         hand = FinishedHand()
 
@@ -605,12 +614,13 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         self.assertFalse(hand.is_sanshoku_douko(self._hand(tiles, 0)))
 
         tiles = self._string_to_136_array(sou='222', man='222', pin='22245699')
+        open_sets = [self._string_to_136_array(sou='222')]
         win_tile = self._string_to_136_tile(pin='9')
 
-        result = hand.estimate_hand_value(tiles, win_tile)
+        result = hand.estimate_hand_value(tiles, win_tile, open_sets=open_sets)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 2)
-        self.assertEqual(result['fu'], 50)
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 1)
 
     def test_is_toitoi(self):
@@ -672,12 +682,15 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_34_array(sou='111444', man='333', pin='44555')
         open_sets = [self._string_to_open_34_set(sou='444'), self._string_to_open_34_set(sou='111')]
         win_tile = self._string_to_136_tile(sou='4')
-
         self.assertFalse(hand.is_sanankou(win_tile, self._hand(tiles, 0), open_sets, False))
 
         open_sets = [self._string_to_open_34_set(sou='111')]
         self.assertFalse(hand.is_sanankou(win_tile, self._hand(tiles, 0), open_sets, False))
         self.assertTrue(hand.is_sanankou(win_tile, self._hand(tiles, 0), open_sets, True))
+
+        tiles = self._string_to_34_array(pin='444789999', honors='22333')
+        win_tile = self._string_to_136_tile(pin='9')
+        self.assertTrue(hand.is_sanankou(win_tile, self._hand(tiles, 0), [], False))
 
         tiles = self._string_to_136_array(sou='123444', man='333', pin='44555')
         open_sets = [self._string_to_136_array(sou='123')]

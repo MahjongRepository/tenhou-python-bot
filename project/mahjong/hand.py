@@ -481,31 +481,14 @@ class FinishedHand(object):
         win_tile //= 4
         additional_fu = 0
 
+        closed_hand = []
+        for set_item in hand:
+            if not is_pair(set_item) and set_item not in open_sets:
+                closed_hand.append(set_item)
+
         pon_sets = [x for x in hand if is_pon(x)]
         chi_sets = [x for x in hand if (win_tile in x and is_chi(x))]
-
-        for set_item in pon_sets:
-            set_was_open = set_item in open_sets or (not is_tsumo and win_tile in set_item)
-            # 111123 form
-            if win_tile in set_item and len(chi_sets):
-                set_was_open = False
-
-            if set_item[0] in TERMINAL_INDICES + HONOR_INDICES:
-                if set_item[0] in called_kan_indices:
-                    additional_fu += set_was_open and 16 or 32
-                else:
-                    additional_fu += set_was_open and 4 or 8
-            else:
-                if set_item[0] in called_kan_indices:
-                    additional_fu += set_was_open and 8 or 16
-                else:
-                    additional_fu += set_was_open and 2 or 4
-
-        # valued pair
-        pair = [x for x in hand if len(x) == 2][0][0]
-        valued_indices = [HAKU, HATSU, CHUN, player_wind, round_wind]
-        if pair in valued_indices:
-            additional_fu += 2
+        closed_hand_indices = closed_hand and reduce(lambda z, y: z + y, closed_hand) or []
 
         chi_fu_sets = []
         for set_item in chi_sets:
@@ -525,6 +508,36 @@ class FinishedHand(object):
             # kanchan waiting 5-...-7
             if set_item.index(win_tile) == 1:
                 chi_fu_sets.append(set_item)
+
+        for set_item in pon_sets:
+            set_was_open = set_item in open_sets
+            is_kan = set_item[0] in called_kan_indices
+            is_honor = set_item[0] in TERMINAL_INDICES + HONOR_INDICES
+
+            # we win on the third pon tile, our pon will be count as open
+            if not is_tsumo and win_tile in set_item:
+                # 111123 form is exception
+                if len([x for x in closed_hand_indices if x == win_tile]) != 4:
+                    set_was_open = True
+
+            if is_honor:
+                if is_kan:
+                    additional_fu += set_was_open and 16 or 32
+                else:
+                    additional_fu += set_was_open and 4 or 8
+            else:
+                if is_kan:
+                    additional_fu += set_was_open and 8 or 16
+                else:
+                    additional_fu += set_was_open and 2 or 4
+
+        # valued pair
+        pair = [x for x in hand if len(x) == 2][0][0]
+        valued_indices = [HAKU, HATSU, CHUN, player_wind, round_wind]
+        count_of_valued_pairs = [x for x in valued_indices if x == pair]
+        if len(count_of_valued_pairs):
+            # we can have 4 fu for east-east pair
+            additional_fu += 2 * len(count_of_valued_pairs)
 
         # separate pair waiting
         if pair == win_tile:

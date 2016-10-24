@@ -1081,6 +1081,16 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 1)
 
+        # double dora and honor tiles
+        tiles = self._string_to_136_array(man='678', pin='345', sou='123345', honors='66')
+        win_tile = self._string_to_136_tile(pin='7')
+        dora_indicators = [self._string_to_136_tile(honors='5'), self._string_to_136_tile(honors='5')]
+        result = hand.estimate_hand_value(tiles, win_tile, dora_indicators=dora_indicators, is_riichi=True)
+        self.assertEqual(result['error'], None)
+        self.assertEqual(result['han'], 5)
+        self.assertEqual(result['fu'], 40)
+        self.assertEqual(len(result['hand_yaku']), 2)
+
         settings.FIVE_REDS = True
 
         # double dora indicators and red fives

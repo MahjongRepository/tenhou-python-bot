@@ -57,7 +57,7 @@ def plus_dora(tile, dora_indicators):
                 dora = 3
 
             if tile_index_temp == dora + 1:
-                return 1
+                dora_count += 1
 
     return dora_count
 

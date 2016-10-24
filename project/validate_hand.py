@@ -21,9 +21,8 @@ logger = logging.getLogger('validate_hand')
 
 
 def load_content(file_name):
-    f = open(file_name, 'r')
-    content = f.read()
-    f.close()
+    with open(file_name, 'r') as f:
+        content = f.read()
 
     os.remove(file_name)
 
@@ -91,7 +90,7 @@ class TenhouLogParser(object):
                     print('0,0')
                     return
 
-                no_red_five = [11, 7, 3]
+                no_red_five = [11, 7, 3, 163, 167]
                 if game_rule_temp in no_red_five:
                     settings.FIVE_REDS = False
 

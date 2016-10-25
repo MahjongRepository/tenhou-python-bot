@@ -98,6 +98,10 @@ class FinishedHand(object):
             cost = self.calculate_scores(han, fu, is_tsumo, is_dealer)
             return return_response()
 
+        if win_tile not in tiles:
+            error = "Win tile not in the hand"
+            return return_response()
+
         if is_riichi and is_open_hand:
             error = "Riichi can't be declared with open hand"
             return return_response()
@@ -117,7 +121,7 @@ class FinishedHand(object):
             error = 'Hand is not winning'
             return return_response()
 
-        hand_options = divider.divide_hand(tiles_34)
+        hand_options = divider.divide_hand(tiles_34, open_sets)
 
         calculated_hands = []
         for hand in hand_options:
@@ -170,6 +174,10 @@ class FinishedHand(object):
                 hand_yaku.append(yaku.pinfu)
 
             is_chitoitsu = self.is_chitoitsu(hand)
+            # let's skip hand that looks like chitoitsu, but it contains open sets
+            if is_chitoitsu and is_open_hand:
+                continue
+
             if is_chitoitsu:
                 hand_yaku.append(yaku.chiitoitsu)
 
@@ -326,15 +334,13 @@ class FinishedHand(object):
             if is_chitoitsu:
                 fu = 25
 
+            tiles_for_dora = tiles + kan_indices_136
             count_of_dora = 0
             count_of_aka_dora = 0
-            for tile in tiles:
+            for tile in tiles_for_dora:
                 count_of_dora += plus_dora(tile, dora_indicators)
 
-            for tile in kan_indices_136:
-                count_of_dora += plus_dora(tile, dora_indicators)
-
-            for tile in tiles:
+            for tile in tiles_for_dora:
                 if is_aka_dora(tile):
                     count_of_aka_dora += 1
 
@@ -398,7 +404,7 @@ class FinishedHand(object):
             })
 
         # let's use cost for most expensive hand
-        calculated_hands = sorted(calculated_hands, key=lambda x: x['cost']['main'], reverse=True)
+        calculated_hands = sorted(calculated_hands, key=lambda x: (x['han'], x['fu']), reverse=True)
         calculated_hand = calculated_hands[0]
         cost = calculated_hand['cost']
         error = calculated_hand['error']
@@ -492,7 +498,9 @@ class FinishedHand(object):
 
         chi_fu_sets = []
         for set_item in chi_sets:
-            if set_item in open_sets:
+            count_of_open_sets = len([x for x in open_sets if x == set_item])
+            count_of_sets = len([x for x in chi_sets if x == set_item])
+            if count_of_open_sets == count_of_sets:
                 continue
 
             # penchan waiting
@@ -539,25 +547,25 @@ class FinishedHand(object):
             # we can have 4 fu for east-east pair
             additional_fu += 2 * len(count_of_valued_pairs)
 
-        # separate pair waiting
-        if pair == win_tile:
-            if not len(chi_sets):
-                additional_fu += 2
-            elif additional_fu != 0:
-                # we can't count pinfu yaku here, so let's add additional fu
-                additional_fu += 2
-
+        pair_was_counted = False
         if len(chi_fu_sets) and len(chi_sets) == len(chi_fu_sets):
             if len(chi_fu_sets) == 1 and pair in chi_fu_sets[0] and win_tile == pair:
-                # 45556 form
-                if chi_fu_sets[0].index(pair) == 1:
-                    additional_fu += 2
+                additional_fu += 2
+                pair_was_counted = True
             else:
                 additional_fu += 2
         elif additional_fu != 0 and len(chi_fu_sets):
             # Hand like 123345
             # we can't count pinfu yaku here, so let's add additional fu for 123 waiting
             additional_fu += 2
+
+        # separate pair waiting
+        if pair == win_tile:
+            if not len(chi_sets):
+                additional_fu += 2
+            elif additional_fu != 0 and not pair_was_counted:
+                # we can't count pinfu yaku here, so let's add additional fu
+                additional_fu += 2
 
         return additional_fu
 
@@ -1062,12 +1070,8 @@ class FinishedHand(object):
         :param hand: list of hand's sets
         :return: true|false
         """
-        count_of_honor_sets = 0
-        for item in hand:
-            if (is_pon(item) or is_pair(item)) and item[0] in HONOR_INDICES:
-                count_of_honor_sets += 1
-
-        return count_of_honor_sets == 5 or count_of_honor_sets == 7
+        indices = reduce(lambda z, y: z + y, hand)
+        return all(x in HONOR_INDICES for x in indices)
 
     def is_chinroto(self, hand):
         """
@@ -1200,13 +1204,22 @@ class FinishedHand(object):
 
 class HandDivider(object):
 
-    def divide_hand(self, tiles_34):
+    def divide_hand(self, tiles_34, open_sets):
         """
         Return a list of possible hands.
         :param tiles_34:
+        :param open_sets: list of array with 34 arrays
         :return:
         """
-        pair_indices = self.find_pairs(tiles_34)
+
+        # small optimization, we can't have a pair in open part of the hand,
+        # so we don't need to try find pairs in open sets
+        open_tile_indices = open_sets and reduce(lambda x, y: x + y, open_sets) or []
+        closed_hand_tiles_34 = tiles_34[:]
+        for open_item in open_tile_indices:
+            closed_hand_tiles_34[open_item] -= 1
+
+        pair_indices = self.find_pairs(closed_hand_tiles_34)
 
         # let's try to find all possible hand options
         hands = []

@@ -30,4 +30,4 @@ class TestMixin(object):
 
     def _hand(self, tiles, hand_index=0):
         hand_divider = HandDivider()
-        return hand_divider.divide_hand(tiles)[hand_index]
+        return hand_divider.divide_hand(tiles, [])[hand_index]

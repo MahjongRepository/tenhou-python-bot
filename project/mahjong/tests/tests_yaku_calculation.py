@@ -16,34 +16,34 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         hand = HandDivider()
 
         tiles_34 = self._string_to_34_array(man='234567', sou='23455', honors='777')
-        result = hand.divide_hand(tiles_34)
+        result = hand.divide_hand(tiles_34, [])
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0], [[1, 2, 3], [4, 5, 6], [19, 20, 21], [22, 22], [33, 33, 33]])
 
         tiles_34 = self._string_to_34_array(man='123', pin='123', sou='123', honors='11222')
-        result = hand.divide_hand(tiles_34)
+        result = hand.divide_hand(tiles_34, [])
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0], [[0, 1, 2], [9, 10, 11], [18, 19, 20], [27, 27], [28, 28, 28]])
 
         tiles_34 = self._string_to_34_array(man='23444', pin='344556', sou='333')
-        result = hand.divide_hand(tiles_34)
+        result = hand.divide_hand(tiles_34, [])
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0], [[1, 2, 3], [3, 3], [11, 12, 13], [12, 13, 14], [20, 20, 20]])
 
         tiles_34 = self._string_to_34_array(man='11122233388899')
-        result = hand.divide_hand(tiles_34)
+        result = hand.divide_hand(tiles_34, [])
         self.assertEqual(len(result), 2)
         self.assertEqual(result[0], [[0, 1, 2], [0, 1, 2], [0, 1, 2], [7, 7, 7], [8, 8]])
         self.assertEqual(result[1], [[0, 0, 0], [1, 1, 1], [2, 2, 2], [7, 7, 7], [8, 8]])
 
         tiles_34 = self._string_to_34_array(man='112233', sou='445566', pin='99')
-        result = hand.divide_hand(tiles_34)
+        result = hand.divide_hand(tiles_34, [])
         self.assertEqual(len(result), 2)
         self.assertEqual(result[0], [[0, 1, 2], [0, 1, 2], [17, 17], [21, 22, 23], [21, 22, 23]])
         self.assertEqual(result[1], [[0, 0], [1, 1], [2, 2], [17, 17], [21, 21], [22, 22], [23, 23]])
 
         tiles_34 = self._string_to_34_array(sou='111123666789', honors='11')
-        result = hand.divide_hand(tiles_34)
+        result = hand.divide_hand(tiles_34, [])
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0], [[18, 18, 18], [18, 19, 20], [23, 23, 23], [24, 25, 26], [27, 27]])
 
@@ -232,7 +232,7 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
 
         # one more bug with with dora tiles
         tiles = self._string_to_136_array(sou='123456678', honors='11555')
-        win_tile = self._string_to_136_tile(sou='9')
+        win_tile = self._string_to_136_tile(sou='6')
         open_sets = [self._string_to_136_array(sou='456'), self._string_to_136_array(sou='555')]
         dora_indicators = [self._string_to_136_tile(sou='9')]
         result = hand.estimate_hand_value(tiles, win_tile, is_tsumo=True, open_sets=open_sets,
@@ -318,6 +318,47 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         result = hand.estimate_hand_value(tiles, win_tile, open_sets=open_sets)
         self.assertEqual(result['fu'], 30)
         self.assertEqual(result['han'], 2)
+
+        tiles = self._string_to_136_array(sou='67778', man='345', pin='999', honors='222')
+        win_tile = self._string_to_136_tile(sou='7')
+        open_sets = [self._string_to_136_array(sou='123')]
+        result = hand.estimate_hand_value(tiles, win_tile, is_tsumo=True)
+        self.assertEqual(result['fu'], 40)
+        self.assertEqual(result['han'], 1)
+
+        tiles = self._string_to_136_array(sou='33445577789', man='345')
+        win_tile = self._string_to_136_tile(sou='7')
+        result = hand.estimate_hand_value(tiles, win_tile, is_tsumo=True)
+        self.assertEqual(result['fu'], 30)
+        self.assertEqual(result['han'], 2)
+
+        tiles = self._string_to_136_array(pin='112233667788', honors='22')
+        win_tile = self._string_to_136_tile(pin='3')
+        open_sets = [self._string_to_136_array(pin='123')]
+        result = hand.estimate_hand_value(tiles, win_tile, open_sets=open_sets)
+        self.assertEqual(result['fu'], 30)
+        self.assertEqual(result['han'], 2)
+
+        tiles = self._string_to_136_array(sou='345', man='12333456789')
+        win_tile = self._string_to_136_tile(man='3')
+        result = hand.estimate_hand_value(tiles, win_tile)
+        self.assertEqual(result['fu'], 40)
+        self.assertEqual(result['han'], 2)
+
+        tiles = self._string_to_136_array(sou='11123456777888')
+        open_sets = [self._string_to_136_array(sou='123'), self._string_to_136_array(sou='777'),
+                     self._string_to_136_array(sou='888')]
+        win_tile = self._string_to_136_tile(sou='4')
+        result = hand.estimate_hand_value(tiles, win_tile, is_tsumo=True, open_sets=open_sets)
+        self.assertEqual(result['fu'], 30)
+        self.assertEqual(result['han'], 5)
+
+        tiles = self._string_to_136_array(sou='112233789', honors='55777')
+        open_sets = [self._string_to_136_array(sou='123')]
+        win_tile = self._string_to_136_tile(sou='2')
+        result = hand.estimate_hand_value(tiles, win_tile, open_sets=open_sets)
+        self.assertEqual(result['fu'], 40)
+        self.assertEqual(result['han'], 4)
 
     def test_is_riichi(self):
         hand = FinishedHand()
@@ -839,7 +880,8 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 1)
 
-        result = hand.estimate_hand_value(tiles, win_tile, open_sets=[[0, 1, 2]])
+        open_sets = [self._string_to_136_array(man='678')]
+        result = hand.estimate_hand_value(tiles, win_tile, open_sets=open_sets)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 5)
         self.assertEqual(result['fu'], 30)
@@ -1083,7 +1125,7 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
 
         # double dora and honor tiles
         tiles = self._string_to_136_array(man='678', pin='345', sou='123345', honors='66')
-        win_tile = self._string_to_136_tile(pin='7')
+        win_tile = self._string_to_136_tile(pin='5')
         dora_indicators = [self._string_to_136_tile(honors='5'), self._string_to_136_tile(honors='5')]
         result = hand.estimate_hand_value(tiles, win_tile, dora_indicators=dora_indicators, is_riichi=True)
         self.assertEqual(result['error'], None)

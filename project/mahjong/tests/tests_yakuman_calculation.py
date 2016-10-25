@@ -85,6 +85,9 @@ class YakumanCalculationTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_34_array(honors='11223344556677')
         self.assertTrue(hand.is_tsuisou(self._hand(tiles, 0)))
 
+        tiles = self._string_to_34_array(honors='1133445577', pin='88', sou='11')
+        self.assertFalse(hand.is_tsuisou(self._hand(tiles, 0)))
+
         tiles = self._string_to_136_array(honors='11223344556677')
         win_tile = self._string_to_136_tile(honors='7')
 

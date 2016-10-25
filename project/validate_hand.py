@@ -144,8 +144,8 @@ class TenhouLogParser(object):
                         meld = decoder.parse_meld(message)
                         tiles = meld.tiles
                         if len(tiles) == 4:
-                            tiles = tiles[0:3]
                             called_kan_indices.append(tiles[0])
+                            tiles = tiles[1:4]
 
                         # closed kan
                         if meld.from_who == 0:

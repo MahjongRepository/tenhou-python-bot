@@ -181,6 +181,15 @@ class YakumanCalculationTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(result['fu'], 50)
         self.assertEqual(len(result['hand_yaku']), 1)
 
+        tiles = self._string_to_136_array(man='33344455577799')
+        win_tile = self._string_to_136_tile(man='9')
+
+        result = hand.estimate_hand_value(tiles, win_tile, is_tsumo=False)
+        self.assertEqual(result['error'], None)
+        self.assertEqual(result['han'], 26)
+        self.assertEqual(result['fu'], 50)
+        self.assertEqual(len(result['hand_yaku']), 1)
+
     def test_is_chuuren_poutou(self):
         hand = FinishedHand()
 

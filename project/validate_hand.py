@@ -125,6 +125,7 @@ class TenhouLogParser(object):
                     dora_indicators += [int(i) for i in tag.attrs['dorahaiura'].split(',')]
 
                 yaku_list = []
+                yakuman_list = []
                 if 'yaku' in tag.attrs:
                     yaku_temp = [int(i) for i in tag.attrs['yaku'].split(',')]
                     yaku_list = yaku_temp[::2]
@@ -169,6 +170,9 @@ class TenhouLogParser(object):
                 is_houtei = 6 in yaku_list
                 is_daburu_riichi = 21 in yaku_list
                 is_dealer = winner == dealer
+                is_renhou = 36 in yakuman_list
+                is_tenhou = 37 in yakuman_list
+                is_chiihou = 38 in yakuman_list
 
                 dif = winner - dealer
                 winds = [EAST, SOUTH, WEST, NORTH]
@@ -185,6 +189,9 @@ class TenhouLogParser(object):
                                                            is_haitei=is_haitei,
                                                            is_houtei=is_houtei,
                                                            is_daburu_riichi=is_daburu_riichi,
+                                                           is_tenhou=is_tenhou,
+                                                           is_renhou=is_renhou,
+                                                           is_chiihou=is_chiihou,
                                                            round_wind=round_wind,
                                                            player_wind=player_wind,
                                                            called_kan_indices=called_kan_indices,

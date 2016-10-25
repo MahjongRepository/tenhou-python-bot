@@ -223,6 +223,12 @@ class FinishedHand(object):
             if self.is_tsuisou(hand):
                 hand_yaku.append(yaku.tsuisou)
 
+            if self.is_honroto(hand):
+                hand_yaku.append(yaku.honroto)
+
+            if self.is_chinroto(hand):
+                hand_yaku.append(yaku.chinroto)
+
             # small optimization, try to detect yaku with chi required sets only if we have chi sets in hand
             if len(chi_sets):
                 if self.is_chanta(hand):
@@ -253,9 +259,6 @@ class FinishedHand(object):
 
                 if self.is_sanshoku_douko(hand):
                     hand_yaku.append(yaku.sanshoku_douko)
-
-                if self.is_honroto(hand):
-                    hand_yaku.append(yaku.honroto)
 
                 if self.is_shosangen(hand):
                     hand_yaku.append(yaku.shosangen)
@@ -305,9 +308,6 @@ class FinishedHand(object):
 
                 if self.is_daisuushi(hand):
                     hand_yaku.append(yaku.daisuushi)
-
-                if self.is_chinroto(hand):
-                    hand_yaku.append(yaku.chinroto)
 
                 if self.is_ryuisou(hand):
                     hand_yaku.append(yaku.ryuisou)
@@ -1079,16 +1079,8 @@ class FinishedHand(object):
         :param hand: list of hand's sets
         :return: true|false
         """
-        pon_sets = [x for x in hand if is_pon(x)]
-        if len(pon_sets) != 4:
-            return False
-
-        count_of_terminal_sets = 0
-        for item in hand:
-            if (is_pon(item) or is_pair(item)) and item[0] in TERMINAL_INDICES:
-                count_of_terminal_sets += 1
-
-        return count_of_terminal_sets == 5
+        indices = reduce(lambda z, y: z + y, hand)
+        return all(x in TERMINAL_INDICES for x in indices)
 
     def is_kokushi(self, tiles_34):
         """
@@ -1225,7 +1217,10 @@ class HandDivider(object):
         hands = []
         for pair_index in pair_indices:
             local_tiles_34 = tiles_34[:]
-            # hand = []
+            # we don't need to combine already open sets
+            for open_item in open_tile_indices:
+                local_tiles_34[open_item] -= 1
+
             local_tiles_34[pair_index] -= 2
 
             # 0 - 8 sou tiles
@@ -1254,6 +1249,9 @@ class HandDivider(object):
                 arrays.append(pin)
             if honor:
                 arrays.append(honor)
+            if open_sets:
+                for item in open_sets:
+                    arrays.append([item])
 
             # let's find all possible hand from our valid sets
             for s in itertools.product(*arrays):

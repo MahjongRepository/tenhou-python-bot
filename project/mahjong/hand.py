@@ -375,9 +375,10 @@ class FinishedHand(object):
 
             if han == 0 or (han == 1 and fu < 30):
                 error = 'Not valid han ({0}) and fu ({1})'.format(han, fu)
-                return return_response()
+                cost = None
+            else:
+                cost = self.calculate_scores(han, fu, is_tsumo, is_dealer)
 
-            cost = self.calculate_scores(han, fu, is_tsumo, is_dealer)
             calculated_hand = {
                 'cost': cost,
                 'error': error,
@@ -496,8 +497,14 @@ class FinishedHand(object):
         chi_sets = [x for x in hand if (win_tile in x and is_chi(x))]
         closed_hand_indices = closed_hand and reduce(lambda z, y: z + y, closed_hand) or []
 
+        # there is no sense to check identical sets
+        unique_chi_sets = []
+        for item in chi_sets:
+            if item not in unique_chi_sets:
+                unique_chi_sets.append(item)
+
         chi_fu_sets = []
-        for set_item in chi_sets:
+        for set_item in unique_chi_sets:
             count_of_open_sets = len([x for x in open_sets if x == set_item])
             count_of_sets = len([x for x in chi_sets if x == set_item])
             if count_of_open_sets == count_of_sets:
@@ -540,7 +547,7 @@ class FinishedHand(object):
                     additional_fu += set_was_open and 2 or 4
 
         # valued pair
-        pair = [x for x in hand if len(x) == 2][0][0]
+        pair = [x for x in hand if is_pair(x)][0][0]
         valued_indices = [HAKU, HATSU, CHUN, player_wind, round_wind]
         count_of_valued_pairs = [x for x in valued_indices if x == pair]
         if len(count_of_valued_pairs):
@@ -548,7 +555,7 @@ class FinishedHand(object):
             additional_fu += 2 * len(count_of_valued_pairs)
 
         pair_was_counted = False
-        if len(chi_fu_sets) and len(chi_sets) == len(chi_fu_sets):
+        if len(chi_fu_sets) and len(unique_chi_sets) == len(chi_fu_sets):
             if len(chi_fu_sets) == 1 and pair in chi_fu_sets[0] and win_tile == pair:
                 additional_fu += 2
                 pair_was_counted = True
@@ -557,6 +564,7 @@ class FinishedHand(object):
         elif additional_fu != 0 and len(chi_fu_sets):
             # Hand like 123345
             # we can't count pinfu yaku here, so let's add additional fu for 123 waiting
+            pair_was_counted = True
             additional_fu += 2
 
         # separate pair waiting
@@ -671,7 +679,7 @@ class FinishedHand(object):
         """
         win_tile //= 4
 
-        chi_sets = [x for x in hand if (is_chi(x) and win_tile in x)]
+        chi_sets = [x for x in hand if (is_chi(x) and win_tile in x and x not in open_sets)]
         pon_sets = [x for x in hand if is_pon(x)]
 
         closed_pon_sets = []
@@ -1168,7 +1176,8 @@ class FinishedHand(object):
         # 2-3-4-5-6-7-8 and one tile to any of them
         middle_hand = [x for x in indices if (x != 0) and (x != 8)]
         for x in range(1, 8):
-            middle_hand.remove(x)
+            if x in middle_hand:
+                middle_hand.remove(x)
 
         if len(middle_hand) == 1:
             return True

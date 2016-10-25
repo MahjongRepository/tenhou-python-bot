@@ -74,7 +74,7 @@ chinroto = Yaku('Chinroutou', 13, 13, True)
 # Double yakuman
 daisuushi = Yaku('Dai Suushii', 26, 26, True)
 daburu_kokushi = Yaku('Daburu Kokushi musou', None, 26, True)
-suuankou_tanki = Yaku('Suu ankou', None, 26, True)
+suuankou_tanki = Yaku('Suu ankou tanki', None, 26, True)
 daburu_chuuren_poutou = Yaku('Daburu Chuuren Poutou', None, 26, True)
 
 # Yakuman situations

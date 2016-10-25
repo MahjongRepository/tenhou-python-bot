@@ -373,6 +373,19 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(result['fu'], 30)
         self.assertEqual(result['han'], 2)
 
+        tiles = self._string_to_136_array(pin='77888899', honors='777', man='444')
+        open_sets = [self._string_to_136_array(honors='777'), self._string_to_136_array(man='444')]
+        win_tile = self._string_to_136_tile(pin='8')
+        result = hand.estimate_hand_value(tiles, win_tile, open_sets=open_sets, is_tsumo=True)
+        self.assertEqual(result['fu'], 30)
+        self.assertEqual(result['han'], 1)
+
+        tiles = self._string_to_136_array(pin='12333345', honors='555', man='567')
+        win_tile = self._string_to_136_tile(pin='3')
+        result = hand.estimate_hand_value(tiles, win_tile)
+        self.assertEqual(result['fu'], 40)
+        self.assertEqual(result['han'], 1)
+
     def test_is_riichi(self):
         hand = FinishedHand()
 
@@ -711,9 +724,22 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_34_array(sou='111333', man='333', pin='44555')
         self.assertTrue(hand.is_toitoi(self._hand(tiles, 0)))
 
+        tiles = self._string_to_34_array(sou='777', pin='777888999', honors='44')
+        self.assertTrue(hand.is_toitoi(self._hand(tiles, 1)))
+
         tiles = self._string_to_136_array(sou='111333', man='333', pin='44555')
         open_sets = [self._string_to_136_array(sou='111'), self._string_to_136_array(sou='333')]
         win_tile = self._string_to_136_tile(pin='5')
+
+        result = hand.estimate_hand_value(tiles, win_tile, open_sets=open_sets)
+        self.assertEqual(result['error'], None)
+        self.assertEqual(result['han'], 2)
+        self.assertEqual(result['fu'], 40)
+        self.assertEqual(len(result['hand_yaku']), 1)
+
+        tiles = self._string_to_136_array(sou='777', pin='777888999', honors='44')
+        open_sets = [self._string_to_136_array(sou='777')]
+        win_tile = self._string_to_136_tile(pin='9')
 
         result = hand.estimate_hand_value(tiles, win_tile, open_sets=open_sets)
         self.assertEqual(result['error'], None)
@@ -782,6 +808,11 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_34_array(pin='444789999', honors='22333')
         win_tile = self._string_to_136_tile(pin='9')
         self.assertTrue(hand.is_sanankou(win_tile, self._hand(tiles, 0), [], False))
+
+        open_sets = [self._string_to_open_34_set(pin='456')]
+        tiles = self._string_to_34_array(pin='222456666777', honors='77')
+        win_tile = self._string_to_136_tile(pin='6')
+        self.assertFalse(hand.is_sanankou(win_tile, self._hand(tiles, 0), open_sets, False))
 
         tiles = self._string_to_136_array(sou='123444', man='333', pin='44555')
         open_sets = [self._string_to_136_array(sou='123')]

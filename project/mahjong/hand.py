@@ -561,6 +561,7 @@ class FinishedHand(object):
                 pair_was_counted = True
             else:
                 additional_fu += 2
+                pair_was_counted = True
         elif additional_fu != 0 and len(chi_fu_sets):
             # Hand like 123345
             # we can't count pinfu yaku here, so let's add additional fu for 123 waiting
@@ -1138,9 +1139,6 @@ class FinishedHand(object):
         :param hand: list of hand's sets
         :return: true|false
         """
-        pon_sets = [x for x in hand if is_pon(x)]
-        if len(pon_sets) != 2:
-            return False
 
         sou_sets = 0
         pin_sets = 0

@@ -386,6 +386,13 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(result['fu'], 40)
         self.assertEqual(result['han'], 1)
 
+        tiles = self._string_to_136_array(pin='34567777889', honors='555')
+        win_tile = self._string_to_136_tile(pin='7')
+        open_sets = [self._string_to_136_array(pin='345')]
+        result = hand.estimate_hand_value(tiles, win_tile, open_sets=open_sets)
+        self.assertEqual(result['fu'], 30)
+        self.assertEqual(result['han'], 3)
+
     def test_is_riichi(self):
         hand = FinishedHand()
 

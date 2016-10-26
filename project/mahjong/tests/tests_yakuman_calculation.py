@@ -196,6 +196,12 @@ class YakumanCalculationTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_34_array(man='11122345678999')
         self.assertTrue(hand.is_chuuren_poutou(self._hand(tiles, 0)))
 
+        tiles = self._string_to_34_array(pin='11123345678999')
+        self.assertTrue(hand.is_chuuren_poutou(self._hand(tiles, 0)))
+
+        tiles = self._string_to_34_array(sou='11123456678999')
+        self.assertTrue(hand.is_chuuren_poutou(self._hand(tiles, 0)))
+
         tiles = self._string_to_136_array(man='11122345678999')
         win_tile = self._string_to_136_tile(man='1')
 

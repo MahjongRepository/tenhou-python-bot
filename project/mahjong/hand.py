@@ -9,6 +9,7 @@ from mahjong import yaku
 from mahjong.tile import TilesConverter
 from mahjong.constants import EAST, SOUTH, WEST, NORTH, CHUN, HATSU, HAKU, TERMINAL_INDICES, HONOR_INDICES
 from mahjong.utils import is_chi, is_pon, is_pair, is_sou, is_pin, is_man, plus_dora, is_aka_dora, simplify
+from utils.settings_handler import settings
 
 
 class FinishedHand(object):
@@ -181,7 +182,11 @@ class FinishedHand(object):
             if is_chitoitsu:
                 hand_yaku.append(yaku.chiitoitsu)
 
-            if self.is_tanyao(hand):
+            is_tanyao = self.is_tanyao(hand)
+            if is_open_hand and not settings.OPEN_TANYAO:
+                is_tanyao = False
+
+            if is_tanyao:
                 hand_yaku.append(yaku.tanyao)
 
             if is_riichi and not is_daburu_riichi:

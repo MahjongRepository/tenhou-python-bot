@@ -85,14 +85,18 @@ class TenhouLogParser(object):
                 game_rule_temp = int(tag.attrs['type'])
 
                 # let's skip hirosima games
-                hirosima = [17, 81, 25, 89, 177, 185]
+                hirosima = [177, 185]
                 if game_rule_temp in hirosima:
                     print('0,0')
                     return
 
-                no_red_five = [11, 7, 3, 163, 167, 171, 175]
+                no_red_five = [163, 167, 171, 175]
                 if game_rule_temp in no_red_five:
                     settings.FIVE_REDS = False
+
+                no_open_tanyao = [167, 175]
+                if game_rule_temp in no_open_tanyao:
+                    settings.OPEN_TANYAO = False
 
             if tag.name == 'taikyoku':
                 dealer = int(tag.attrs['oya'])

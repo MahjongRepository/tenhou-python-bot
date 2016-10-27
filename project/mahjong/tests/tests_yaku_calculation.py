@@ -11,6 +11,7 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
 
     def tearDown(self):
         settings.FIVE_REDS = False
+        settings.OPEN_TANYAO = True
 
     def test_hand_dividing(self):
         hand = HandDivider()
@@ -579,6 +580,16 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(result['han'], 1)
         self.assertEqual(result['fu'], 30)
         self.assertEqual(len(result['hand_yaku']), 1)
+
+        settings.OPEN_TANYAO = False
+
+        tiles = self._string_to_136_array(sou='234567', man='234567', pin='22')
+        win_tile = self._string_to_136_tile(man='7')
+        open_sets = [self._string_to_136_array(sou='234')]
+        result = hand.estimate_hand_value(tiles, win_tile, open_sets=open_sets)
+        self.assertNotEqual(result['error'], None)
+
+        settings.OPEN_TANYAO = True
 
     def test_is_pinfu_hand(self):
         player_wind, round_wind = EAST, WEST

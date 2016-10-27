@@ -250,9 +250,10 @@ class TenhouClient(Client):
 
         # sometimes log is not available just after the game
         # let's wait one minute before the statistics update
-        sleep(60)
-        result = self.statistics.send_statistics()
-        logger.info('Statistics sent: {0}'.format(result))
+        if settings.STAT_SERVER_URL:
+            sleep(60)
+            result = self.statistics.send_statistics()
+            logger.info('Statistics sent: {0}'.format(result))
 
     def end_game(self):
         self.game_is_continue = False

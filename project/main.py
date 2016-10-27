@@ -40,7 +40,7 @@ def parse_args_and_set_up_settings():
 
     parser.add_option('-d', '--disable_ai',
                       action='store_false',
-                      default=True,
+                      default=settings.ENABLE_AI,
                       help='Enable AI')
 
     opts, _ = parser.parse_args()

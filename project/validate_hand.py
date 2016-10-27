@@ -90,7 +90,7 @@ class TenhouLogParser(object):
                     print('0,0')
                     return
 
-                no_red_five = [11, 7, 3, 163, 167, 171]
+                no_red_five = [11, 7, 3, 163, 167, 171, 175]
                 if game_rule_temp in no_red_five:
                     settings.FIVE_REDS = False
 

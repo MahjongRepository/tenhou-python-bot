@@ -1273,20 +1273,20 @@ class HandDivider(object):
             if honor:
                 arrays.append(honor)
             if open_sets:
-                for kan_item in open_sets:
-                    arrays.append([kan_item])
+                for item in open_sets:
+                    arrays.append([item])
             if closed_kan_sets:
                 arrays.append(closed_kan_sets)
 
             # let's find all possible hand from our valid sets
             for s in itertools.product(*arrays):
                 hand = []
-                for kan_item in list(s):
-                    if isinstance(kan_item[0], list):
-                        for x in kan_item:
+                for item in list(s):
+                    if isinstance(item[0], list):
+                        for x in item:
                             hand.append(x)
                     else:
-                        hand.append(kan_item)
+                        hand.append(item)
 
                 hand = sorted(hand, key=lambda a: a[0])
                 if len(hand) == 5:

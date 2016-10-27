@@ -121,7 +121,7 @@ class FinishedHand(object):
             error = 'Hand is not winning'
             return return_response()
 
-        hand_options = divider.divide_hand(tiles_34, open_sets)
+        hand_options = divider.divide_hand(tiles_34, open_sets, called_kan_indices)
 
         calculated_hands = []
         for hand in hand_options:
@@ -1164,20 +1164,23 @@ class FinishedHand(object):
         indices = [simplify(x) for x in indices]
 
         # 1-1-1
-        if not len([x for x in indices if x == 0]) == 3:
+        if len([x for x in indices if x == 0]) < 3:
             return False
 
         # 9-9-9
-        if not len([x for x in indices if x == 8]) == 3:
+        if len([x for x in indices if x == 8]) < 3:
             return False
 
-        # 2-3-4-5-6-7-8 and one tile to any of them
-        middle_hand = [x for x in indices if (x != 0) and (x != 8)]
-        for x in range(1, 8):
-            if x in middle_hand:
-                middle_hand.remove(x)
+        # 1-2-3-4-5-6-7-8-9 and one tile to any of them
+        indices.remove(0)
+        indices.remove(0)
+        indices.remove(8)
+        indices.remove(8)
+        for x in range(0, 9):
+            if x in indices:
+                indices.remove(x)
 
-        if len(middle_hand) == 1:
+        if len(indices) == 1:
             return True
 
         return False
@@ -1203,11 +1206,12 @@ class FinishedHand(object):
 
 class HandDivider(object):
 
-    def divide_hand(self, tiles_34, open_sets):
+    def divide_hand(self, tiles_34, open_sets, called_kan_indices):
         """
         Return a list of possible hands.
         :param tiles_34:
         :param open_sets: list of array with 34 arrays
+        :param called_kan_indices: list of array with 34 tiles
         :return:
         """
 
@@ -1218,12 +1222,24 @@ class HandDivider(object):
         for open_item in open_tile_indices:
             closed_hand_tiles_34[open_item] -= 1
 
+        # let's remove closed kan sets from hand
+        closed_kan_sets = []
+        for kan_item in called_kan_indices:
+            open_tiles = len([x for x in open_tile_indices if x == kan_item])
+            if open_tiles != 3:
+                closed_hand_tiles_34[kan_item] -= 3
+                tiles_34[kan_item] -= 3
+                closed_kan_sets.append([kan_item] * 3)
+        if closed_kan_sets:
+            closed_kan_sets = [closed_kan_sets]
+
         pair_indices = self.find_pairs(closed_hand_tiles_34)
 
         # let's try to find all possible hand options
         hands = []
         for pair_index in pair_indices:
             local_tiles_34 = tiles_34[:]
+
             # we don't need to combine already open sets
             for open_item in open_tile_indices:
                 local_tiles_34[open_item] -= 1
@@ -1257,18 +1273,20 @@ class HandDivider(object):
             if honor:
                 arrays.append(honor)
             if open_sets:
-                for item in open_sets:
-                    arrays.append([item])
+                for kan_item in open_sets:
+                    arrays.append([kan_item])
+            if closed_kan_sets:
+                arrays.append(closed_kan_sets)
 
             # let's find all possible hand from our valid sets
             for s in itertools.product(*arrays):
                 hand = []
-                for item in list(s):
-                    if isinstance(item[0], list):
-                        for x in item:
+                for kan_item in list(s):
+                    if isinstance(kan_item[0], list):
+                        for x in kan_item:
                             hand.append(x)
                     else:
-                        hand.append(item)
+                        hand.append(kan_item)
 
                 hand = sorted(hand, key=lambda a: a[0])
                 if len(hand) == 5:

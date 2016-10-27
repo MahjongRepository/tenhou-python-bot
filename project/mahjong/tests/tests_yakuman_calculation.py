@@ -202,13 +202,22 @@ class YakumanCalculationTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_34_array(sou='11123456678999')
         self.assertTrue(hand.is_chuuren_poutou(self._hand(tiles, 0)))
 
-        tiles = self._string_to_136_array(man='11122345678999')
+        tiles = self._string_to_34_array(sou='11123456678999')
+        self.assertTrue(hand.is_chuuren_poutou(self._hand(tiles, 0)))
+
+        tiles = self._string_to_34_array(sou='11123456678999')
+        self.assertTrue(hand.is_chuuren_poutou(self._hand(tiles, 0)))
+
+        tiles = self._string_to_34_array(sou='11123456789999')
+        self.assertTrue(hand.is_chuuren_poutou(self._hand(tiles, 0)))
+
+        tiles = self._string_to_136_array(man='11123456789999')
         win_tile = self._string_to_136_tile(man='1')
 
         result = hand.estimate_hand_value(tiles, win_tile)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 13)
-        self.assertEqual(result['fu'], 50)
+        self.assertEqual(result['fu'], 40)
         self.assertEqual(len(result['hand_yaku']), 1)
 
         tiles = self._string_to_136_array(man='11122345678999')

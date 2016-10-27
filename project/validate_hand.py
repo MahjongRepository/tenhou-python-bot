@@ -85,12 +85,12 @@ class TenhouLogParser(object):
                 game_rule_temp = int(tag.attrs['type'])
 
                 # let's skip hirosima games
-                hirosima = [17, 81, 25, 89]
+                hirosima = [17, 81, 25, 89, 177, 185]
                 if game_rule_temp in hirosima:
                     print('0,0')
                     return
 
-                no_red_five = [11, 7, 3, 163, 167]
+                no_red_five = [11, 7, 3, 163, 167, 171]
                 if game_rule_temp in no_red_five:
                     settings.FIVE_REDS = False
 
@@ -219,6 +219,7 @@ class TenhouLogParser(object):
                         success = False
 
                 if not success:
+                    logger.error('http://e.mjv.jp/0/log/?{}'.format(log_id))
                     logger.error('http://tenhou.net/0/?log={}&tw={}&ts={}'.format(log_id, winner, played_rounds - 1))
                     logger.error('Winner: {}, Dealer: {}'.format(winner, dealer))
                     logger.error('Hand: {}'.format(TilesConverter.to_one_line_string(hand)))

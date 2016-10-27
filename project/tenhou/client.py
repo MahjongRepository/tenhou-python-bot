@@ -61,7 +61,7 @@ class TenhouClient(Client):
             logger.info('Failed to authenticate')
             return False
 
-    def start_the_game(self):
+    def start_game(self):
         log_link = ''
 
         if settings.LOBBY != '0':
@@ -122,7 +122,7 @@ class TenhouClient(Client):
         # and try again later
         if self.looking_for_game:
             logger.error('Game is not started. Can\'t find the game')
-            self.end_the_game()
+            self.end_game()
             return
 
         logger.info('Game started')
@@ -246,7 +246,7 @@ class TenhouClient(Client):
 
         # we need to finish the game, and only after this try to send statistics
         # if order will be different, tenhou will return 404 on log download endpoint
-        self.end_the_game()
+        self.end_game()
 
         # sometimes log is not available just after the game
         # let's wait one minute before the statistics update
@@ -254,7 +254,7 @@ class TenhouClient(Client):
         result = self.statistics.send_statistics()
         logger.info('Statistics sent: {0}'.format(result))
 
-    def end_the_game(self):
+    def end_game(self):
         self.game_is_continue = False
         self._send_message('<BYE />')
 

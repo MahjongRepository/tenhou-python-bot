@@ -16,9 +16,14 @@ def connect_and_play():
     logger.info('Bot AI enabled: {}'.format(settings.ENABLE_AI))
 
     client = TenhouClient(s)
-    was_auth = client.authenticate()
 
-    if was_auth:
-        client.start_the_game()
-    else:
-        client.end_the_game()
+    try:
+        was_auth = client.authenticate()
+
+        if was_auth:
+            client.start_game()
+        else:
+            client.end_game()
+    except KeyboardInterrupt:
+        logger.info('Ending the game... can take 15 seconds')
+        client.end_game()

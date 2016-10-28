@@ -90,6 +90,12 @@ class TenhouLogParser(object):
                     print('0,0')
                     return
 
+                # one round games
+                skip_games = [2113]
+                if game_rule_temp in skip_games:
+                    print('0,0')
+                    return
+
                 no_red_five = [163, 167, 171, 175]
                 if game_rule_temp in no_red_five:
                     settings.FIVE_REDS = False

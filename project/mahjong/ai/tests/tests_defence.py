@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from mahjong.ai.main import Defence
+from mahjong.ai.defence import Defence
 from mahjong.table import Table
 
 

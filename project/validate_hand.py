@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 Load tenhou replay and validate tenhou hand score with our own system score
-Input attribute is file name with tenhou.net log content
+Input attribute is file name with tenhou.net log content.
+
+Validation working correctly only for phoenix replays, for kyu, first dan and second dan lobbys
+you need to set ids for hirosima, no red fives and no open tanyao games.
 """
 import logging
 import sys

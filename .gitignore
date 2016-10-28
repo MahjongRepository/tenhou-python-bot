@@ -13,5 +13,7 @@ loader.py
 *.db
 temp
 
+replays/data/*
+
 # temporary files
 experiments

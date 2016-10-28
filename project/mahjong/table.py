@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from mahjong.constants import EAST, SOUTH, WEST, NORTH
 from mahjong.player import Player
 from mahjong.utils import plus_dora, is_aka_dora
 
@@ -8,6 +9,7 @@ class Table(object):
 
     dora_indicators = []
 
+    dealer_seat = 0
     round_number = 0
     count_of_riichi_sticks = 0
     count_of_honba_sticks = 0
@@ -25,7 +27,7 @@ class Table(object):
                                                                      self.dora_indicators)
 
     def init_round(self, round_number, count_of_honba_sticks, count_of_riichi_sticks,
-                   dora_indicator, dealer, scores):
+                   dora_indicator, dealer_seat, scores):
 
         self.round_number = round_number
         self.count_of_honba_sticks = count_of_honba_sticks
@@ -35,9 +37,9 @@ class Table(object):
         self.add_dora_indicator(dora_indicator)
 
         # erase players state
-        [i.erase_state() for i in self.players]
-
-        self.get_player(dealer).is_dealer = True
+        for player in self.players:
+            player.erase_state()
+            player.dealer_seat = dealer_seat
 
         self.set_players_scores(scores)
 
@@ -91,5 +93,19 @@ class Table(object):
         self.players = []
 
         for seat in range(0, self.count_of_players):
-            player = Player(seat=seat, table=self, use_previous_ai_version=use_previous_ai_version)
+            player = Player(seat=seat,
+                            dealer_seat=0,
+                            table=self,
+                            use_previous_ai_version=use_previous_ai_version)
             self.players.append(player)
+
+    @property
+    def round_wind(self):
+        if self.round_number < 4:
+            return EAST
+        elif 4 <= self.round_number < 8:
+            return SOUTH
+        elif 8 <= self.round_number < 12:
+            return WEST
+        else:
+            return NORTH

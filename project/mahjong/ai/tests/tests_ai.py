@@ -12,7 +12,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
     def test_outs(self):
         table = Table()
-        player = Player(0, table)
+        player = Player(0, 0, table)
         ai = MainAI(table, player)
 
         tiles = self._string_to_136_array(sou='111345677', pin='15', man='56')
@@ -63,7 +63,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
     def test_discard_tile(self):
         table = Table()
-        player = Player(0, table)
+        player = Player(0, 0, table)
 
         tiles = self._string_to_136_array(sou='111345677', pin='15', man='56')
         tile = self._string_to_136_array(man='9')[0]
@@ -90,7 +90,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
     def test_discard_isolated_honor_tiles_first(self):
         table = Table()
-        player = Player(0, table)
+        player = Player(0, 0, table)
 
         tiles = self._string_to_136_array(sou='8', pin='56688', man='11323', honors='36')
         tile = self._string_to_136_array(man='9')[0]
@@ -107,7 +107,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
     def test_set_is_tempai_flag_to_the_player(self):
         table = Table()
-        player = Player(0, table)
+        player = Player(0, 0, table)
 
         tiles = self._string_to_136_array(sou='111345677', pin='45', man='56')
         tile = self._string_to_136_array(man='9')[0]

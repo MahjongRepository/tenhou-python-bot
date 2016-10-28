@@ -262,10 +262,13 @@ class GameManager(object):
         self.dealer = dealer
         self._unique_dealers += 1
 
-        for client in self.clients:
-            client.player.is_dealer = False
+        for x in range(0, len(self.clients)):
+            client = self.clients[x]
 
-        self.clients[dealer].player.is_dealer = True
+            # each client think that he is a player with position = 0
+            # so, we need to move dealer position for each client
+            # and shift scores array
+            client.player.dealer_seat = dealer - x
 
         # first move should be dealer's move
         self.current_client = dealer

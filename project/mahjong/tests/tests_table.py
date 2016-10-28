@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from mahjong.constants import FIVE_RED_MAN, FIVE_RED_PIN, FIVE_RED_SOU
+from mahjong.constants import FIVE_RED_MAN, FIVE_RED_PIN, FIVE_RED_SOU, EAST, SOUTH, WEST, NORTH
 from mahjong.table import Table
 from utils.tests import TestMixin
 from utils.settings_handler import settings
@@ -168,3 +168,21 @@ class TableTestCase(unittest.TestCase, TestMixin):
         self.assertTrue(table.is_dora(FIVE_RED_SOU))
 
         settings.FIVE_REDS = False
+
+    def test_round_wind(self):
+        table = Table()
+
+        table.init_round(0, 0, 0, 0, 0, [])
+        self.assertEqual(table.round_wind, EAST)
+
+        table.init_round(3, 0, 0, 0, 0, [])
+        self.assertEqual(table.round_wind, EAST)
+
+        table.init_round(7, 0, 0, 0, 0, [])
+        self.assertEqual(table.round_wind, SOUTH)
+
+        table.init_round(11, 0, 0, 0, 0, [])
+        self.assertEqual(table.round_wind, WEST)
+
+        table.init_round(12, 0, 0, 0, 0, [])
+        self.assertEqual(table.round_wind, NORTH)

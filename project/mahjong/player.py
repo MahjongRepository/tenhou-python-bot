@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
+from mahjong.constants import EAST, SOUTH, WEST, NORTH
 from utils.settings_handler import settings
 from mahjong.ai.shanten import Shanten
 from mahjong.tile import Tile
@@ -10,7 +11,10 @@ logger = logging.getLogger('tenhou')
 
 class Player(object):
     # the place where is player is sitting
+    # always = 0 for our player
     seat = 0
+    # where is sitting dealer, based on this information we can calculate player wind
+    dealer_seat = 0
     # position based on scores
     position = 0
     scores = 0
@@ -25,18 +29,18 @@ class Player(object):
     tiles = []
     melds = []
     table = None
-    is_dealer = False
     in_tempai = False
     in_riichi = False
     in_defence_mode = False
 
-    def __init__(self, seat, table, use_previous_ai_version=False):
+    def __init__(self, seat, dealer_seat, table, use_previous_ai_version=False):
         self.discards = []
         self.melds = []
         self.tiles = []
         self.safe_tiles = []
         self.seat = seat
         self.table = table
+        self.dealer_seat = dealer_seat
 
         if use_previous_ai_version:
             try:
@@ -94,10 +98,10 @@ class Player(object):
         self.melds = []
         self.tiles = []
         self.safe_tiles = []
-        self.is_dealer = False
         self.in_tempai = False
         self.in_riichi = False
         self.in_defence_mode = False
+        self.dealer_seat = 0
 
     def can_call_riichi(self):
         return all([
@@ -106,3 +110,19 @@ class Player(object):
             self.scores >= 1000,
             self.table.count_of_remaining_tiles > 4
         ])
+
+    @property
+    def player_wind(self):
+        position = self.dealer_seat
+        if position == 0:
+            return EAST
+        elif position == 1:
+            return NORTH
+        elif position == 2:
+            return WEST
+        else:
+            return SOUTH
+
+    @property
+    def is_dealer(self):
+        return self.seat == self.dealer_seat

@@ -322,7 +322,7 @@ class GameManagerTestCase(unittest.TestCase):
         self.assertEqual(loser.player.scores, 24000)
 
         winner.player.scores = 25000
-        winner.player.is_dealer = False
+        winner.player.dealer_seat = 1
         loser.player.scores = 25000
         manager.riichi_sticks = 2
         manager.honba_sticks = 2
@@ -334,7 +334,7 @@ class GameManagerTestCase(unittest.TestCase):
         self.assertEqual(manager.honba_sticks, 0)
 
         winner.player.scores = 25000
-        winner.player.is_dealer = True
+        winner.player.dealer_seat = 0
         loser.player.scores = 25000
         manager.honba_sticks = 2
 

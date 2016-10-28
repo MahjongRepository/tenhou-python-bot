@@ -15,3 +15,10 @@ HONOR_INDICES = [EAST, SOUTH, WEST, NORTH, HAKU, HATSU, CHUN]
 FIVE_RED_MAN = 16
 FIVE_RED_PIN = 52
 FIVE_RED_SOU = 88
+
+DISPLAY_WINDS = {
+    EAST: 'East',
+    SOUTH: 'South',
+    WEST: 'West',
+    NORTH: 'North'
+}

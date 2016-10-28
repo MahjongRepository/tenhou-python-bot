@@ -8,6 +8,7 @@ from urllib.parse import quote
 
 import re
 
+from mahjong.constants import DISPLAY_WINDS
 from utils.settings_handler import settings
 from mahjong.client import Client
 from mahjong.meld import Meld
@@ -153,8 +154,10 @@ class TenhouClient(Client):
                     self.table.init_main_player_hand(tiles)
 
                     logger.info(self.table.__str__())
-                    logger.info('Players: {0}'.format(self.table.get_players_sorted_by_scores()))
-                    logger.info('Dealer: {0}'.format(self.table.get_player(values['dealer'])))
+                    logger.info('Players: {}'.format(self.table.get_players_sorted_by_scores()))
+                    logger.info('Dealer: {}'.format(self.table.get_player(values['dealer'])))
+                    logger.info('Round  wind: {}'.format(DISPLAY_WINDS[self.table.round_wind]))
+                    logger.info('Player wind: {}'.format(DISPLAY_WINDS[main_player.player_wind]))
 
                 # draw and discard
                 if '<t' in message:

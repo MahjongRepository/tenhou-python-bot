@@ -85,7 +85,7 @@ class TenhouLogParser(object):
                 game_rule_temp = int(tag.attrs['type'])
 
                 # let's skip hirosima games
-                hirosima = [177, 185]
+                hirosima = [177, 185, 241, 249]
                 if game_rule_temp in hirosima:
                     print('0,0')
                     return

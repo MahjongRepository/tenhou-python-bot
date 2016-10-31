@@ -1,10 +1,18 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
+    <title>Replays viewer</title>
+    <meta name="viewport" content="width=1260, initial-scale=1, maximum-scale=1">
 
     <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"> -->
+
+    <link rel="apple-touch-icon" sizes="192x192" href="/static/img/favicons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="favicon.ico">
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/main.css">
 
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
@@ -13,14 +21,40 @@
         var replay_id = '1.json';
     </script>
 
-    <title>Replays viewer</title>
 </head>
+
 <body class="page">
-
-    
-
     <div class="board">
         <div class="game">
+
+            <!-- If you want show this modal, just add class "open"-->
+            <div class="game__modal">
+                <table class="table-m">
+                    <tbody>
+                        <tr>
+                            <td>Riichi (declaring tenpai)</td>
+                            <td>1 fan</td>
+                        </tr>
+                        <tr>
+                            <td>Tsumo (self pick fully concealed)</td>
+                            <td>1 fan</td>
+                        </tr>
+                        <tr>
+                            <td>Dora (special tile)</td>
+                            <td>1 fan</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2">
+                                30 fu 3 fan
+                                <br>
+                                1000 ten 2000 ten
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
 
             <!--top line-->
             <div class="game__row">
@@ -29,7 +63,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__m1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#m1"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#m1"></use>
             </svg>
         
                     </div>
@@ -37,7 +71,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__m2" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#m2"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#m2"></use>
             </svg>
         
                     </div>
@@ -45,7 +79,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__m3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#m3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#m3"></use>
             </svg>
         
                     </div>
@@ -53,7 +87,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__m4" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#m4"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#m4"></use>
             </svg>
         
                     </div>
@@ -61,7 +95,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__m5" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#m5"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#m5"></use>
             </svg>
         
                     </div>
@@ -69,7 +103,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__m6" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#m6"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#m6"></use>
             </svg>
         
                     </div>
@@ -77,7 +111,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__m7" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#m7"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#m7"></use>
             </svg>
         
                     </div>
@@ -85,7 +119,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__m8" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#m8"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#m8"></use>
             </svg>
         
                     </div>
@@ -93,7 +127,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__m9" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#m9"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#m9"></use>
             </svg>
         
                     </div>
@@ -101,7 +135,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__m9" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#m9"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#m9"></use>
             </svg>
         
                     </div>
@@ -111,7 +145,7 @@
                         <div class="box__icon lieDown">
                             
             <svg class="icon__dg" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#dg"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#dg"></use>
             </svg>
         
                         </div>
@@ -119,7 +153,7 @@
                         <div class="box__icon">
                             
             <svg class="icon__dr" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#dr"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#dr"></use>
             </svg>
         
                         </div>
@@ -127,7 +161,7 @@
                         <div class="box__icon">
                             
             <svg class="icon__dw" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#dw"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#dw"></use>
             </svg>
         
                         </div>
@@ -146,7 +180,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__s1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s1"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s1"></use>
             </svg>
         
                     </div>
@@ -154,7 +188,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__s2" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s2"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s2"></use>
             </svg>
         
                     </div>
@@ -162,7 +196,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__s3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s3"></use>
             </svg>
         
                     </div>
@@ -170,7 +204,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__s4" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s4"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s4"></use>
             </svg>
         
                     </div>
@@ -178,7 +212,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__s5" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s5"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s5"></use>
             </svg>
         
                     </div>
@@ -186,7 +220,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__s5r" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s5r"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s5r"></use>
             </svg>
         
                     </div>
@@ -194,7 +228,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__s6" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s6"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s6"></use>
             </svg>
         
                     </div>
@@ -202,7 +236,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__s7" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s7"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s7"></use>
             </svg>
         
                     </div>
@@ -210,7 +244,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__s8" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s8"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s8"></use>
             </svg>
         
                     </div>
@@ -218,7 +252,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__s8" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s8"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s8"></use>
             </svg>
         
                     </div>
@@ -228,7 +262,7 @@
                         <div class="box__icon lieDown">
                             
             <svg class="icon__dr" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#dr"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#dr"></use>
             </svg>
         
                         </div>
@@ -236,7 +270,7 @@
                         <div class="box__icon">
                             
             <svg class="icon__dg" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#dg"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#dg"></use>
             </svg>
         
                         </div>
@@ -244,7 +278,7 @@
                         <div class="box__icon">
                             
             <svg class="icon__dw" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#dw"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#dw"></use>
             </svg>
         
                         </div>
@@ -258,46 +292,56 @@
                     <div class="game__row">
                         <div class="game__top">
                             <div class="game__flex">
+
+                                <div class="game__flex__title">
+                                    <span>Any Text</span>
+                                </div>
+
+                                <!-- If you want show this popup, just add class "open"-->
+                                <div class="game__flex__popup open">
+                                    <span>Any Text</span>
+                                </div>
+
                                 <div class="game__flex__column">
                                     <div class="box__icon">
                                         
             <svg class="icon__s1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s1"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s1"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__s2" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s2"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s2"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__s3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s3"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon lieDown">
                                         
             <svg class="icon__s4" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s4"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s4"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__s5" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s5"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s5"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__s5r" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s5r"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s5r"></use>
             </svg>
         
                                     </div>
@@ -306,42 +350,42 @@
                                     <div class="box__icon lieDown">
                                         
             <svg class="icon__s3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s3"></use>
             </svg>
         
                                     </div>
                                         <div class="box__icon">
                                             
             <svg class="icon__s3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s3"></use>
             </svg>
         
                                         </div>
                                         <div class="box__icon">
                                             
             <svg class="icon__s3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s3"></use>
             </svg>
         
                                         </div>
                                         <div class="box__icon">
                                             
             <svg class="icon__s3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s3"></use>
             </svg>
         
                                         </div>
                                         <div class="box__icon">
                                             
             <svg class="icon__s3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s3"></use>
             </svg>
         
                                         </div>
                                         <div class="box__icon">
                                             
             <svg class="icon__s3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s3"></use>
             </svg>
         
                                         </div>
@@ -350,42 +394,42 @@
                                         <div class="box__icon">
                                             
             <svg class="icon__s3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s3"></use>
             </svg>
         
                                         </div>
                                         <div class="box__icon">
                                             
             <svg class="icon__s3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s3"></use>
             </svg>
         
                                         </div>
                                         <div class="box__icon">
                                             
             <svg class="icon__s3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s3"></use>
             </svg>
         
                                         </div>
                                         <div class="box__icon">
                                             
             <svg class="icon__s3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s3"></use>
             </svg>
         
                                         </div>
                                         <div class="box__icon">
                                             
             <svg class="icon__s3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s3"></use>
             </svg>
         
                                         </div>
                                     <div class="box__icon lieDown">
                                         
             <svg class="icon__s3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s3"></use>
             </svg>
         
                                     </div>
@@ -398,46 +442,56 @@
 
                         <div class="game__left">
                             <div class="game__flex">
+
+                                <div class="game__flex__title">
+                                    <span>Any Text</span>
+                                </div>
+
+                                <!-- If you want show this popup, just add class "open"-->
+                                <div class="game__flex__popup open">
+                                    <span>Any Text</span>
+                                </div>
+
                                 <div class="game__flex__column">
                                     <div class="box__icon">
                                         
             <svg class="icon__p1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p1"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p1"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p2" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p2"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p2"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p3"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p4" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p4"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p4"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p5" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p5"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p5"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p5r" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p5r"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p5r"></use>
             </svg>
         
                                     </div>
@@ -446,42 +500,42 @@
                                     <div class="box__icon">
                                         
             <svg class="icon__p6" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p6"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p6"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p7" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p7"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p7"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p8" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p8"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p8"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p9" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p9"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p9"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p5" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p5"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p5"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon lieDown">
                                         
             <svg class="icon__p5r" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p5r"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p5r"></use>
             </svg>
         
                                     </div>
@@ -490,42 +544,42 @@
                                     <div class="box__icon">
                                         
             <svg class="icon__p9" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p9"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p9"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p9" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p9"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p9"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p9" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p9"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p9"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p9" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p9"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p9"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p9" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p9"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p9"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon lieDown">
                                         
             <svg class="icon__p9" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p9"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p9"></use>
             </svg>
         
                                     </div>
@@ -535,96 +589,106 @@
 
                         <div class="game__center">
                             <div class="game__flex">
-                                <div class="box__icon">
-                                    
+                                <div class="game__flex__column">
+                                    <div class="box__icon">
+                                        
             <svg class="icon__m1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#m1"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#m1"></use>
             </svg>
         
-                                </div>
-                                <div class="box__icon back">
-                                    
+                                    </div>
+                                    <div class="box__icon back">
+                                        
             <svg class="icon__back" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#back"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#back"></use>
             </svg>
         
-                                </div>
-                                <div class="box__icon back">
-                                    
+                                    </div>
+                                    <div class="box__icon back">
+                                        
             <svg class="icon__back" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#back"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#back"></use>
             </svg>
         
-                                </div>
-                                <div class="box__icon back">
-                                    
+                                    </div>
+                                    <div class="box__icon back">
+                                        
             <svg class="icon__back" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#back"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#back"></use>
             </svg>
         
-                                </div>
-                                <div class="box__icon back">
-                                    
+                                    </div>
+                                    <div class="box__icon back">
+                                        
             <svg class="icon__back" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#back"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#back"></use>
             </svg>
         
-                                </div>
-                                <div class="box__icon back">
-                                    
+                                    </div>
+                                    <div class="box__icon back">
+                                        
             <svg class="icon__back" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#back"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#back"></use>
             </svg>
         
-                                </div>
-                                <div class="center__num">
-                                    <span>21</span>
+                                    </div>
+                                    <div class="center__num">21</div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="game__right">
                             <div class="game__flex">
+
+                                <div class="game__flex__title">
+                                    <span>Any Text</span>
+                                </div>
+
+                                <!-- If you want show this popup, just add class "open"-->
+                                <div class="game__flex__popup open">
+                                    <span>Any Text</span>
+                                </div>
+
                                 <div class="game__flex__column">
                                     <div class="box__icon">
                                         
             <svg class="icon__p1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p1"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p1"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p2" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p2"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p2"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p3"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon lieDown">
                                         
             <svg class="icon__p4" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p4"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p4"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p5" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p5"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p5"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p5r" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p5r"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p5r"></use>
             </svg>
         
                                     </div>
@@ -633,42 +697,42 @@
                                     <div class="box__icon">
                                         
             <svg class="icon__p6" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p6"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p6"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p7" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p7"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p7"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p8" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p8"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p8"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p9" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p9"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p9"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p9" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p9"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p9"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon lieDown">
                                         
             <svg class="icon__p9" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p9"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p9"></use>
             </svg>
         
                                     </div>
@@ -677,42 +741,42 @@
                                     <div class="box__icon">
                                         
             <svg class="icon__p9" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p9"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p9"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p9" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p9"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p9"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p9" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p9"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p9"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p9" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p9"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p9"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon">
                                         
             <svg class="icon__p9" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p9"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p9"></use>
             </svg>
         
                                     </div>
                                     <div class="box__icon lieDown">
                                         
             <svg class="icon__p9" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p9"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p9"></use>
             </svg>
         
                                     </div>
@@ -725,134 +789,148 @@
                     <div class="game__row">
                         <div class="game__bottom">
                             <div class="game__flex">
-                                <div class="box__icon">
-                                    
+
+                                <div class="game__flex__title">
+                                    <span>Any Text</span>
+                                </div>
+
+                                <!-- If you want show this popup, just add class "open"-->
+                                <div class="game__flex__popup open">
+                                    <span>Any Text</span>
+                                </div>
+
+                                <div class="game__flex__column">
+                                    <div class="box__icon">
+                                        
             <svg class="icon__s1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s1"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s1"></use>
             </svg>
         
-                                </div>
-                                <div class="box__icon">
-                                    
+                                    </div>
+                                    <div class="box__icon">
+                                        
             <svg class="icon__s2" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s2"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s2"></use>
             </svg>
         
-                                </div>
-                                <div class="box__icon">
-                                    
+                                    </div>
+                                    <div class="box__icon">
+                                        
             <svg class="icon__s3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s3"></use>
             </svg>
         
-                                </div>
-                                <div class="box__icon">
-                                    
+                                    </div>
+                                    <div class="box__icon">
+                                        
             <svg class="icon__s4" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s4"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s4"></use>
             </svg>
         
+                                    </div>
+                                    <div class="box__icon lieDown">
+                                        
+            <svg class="icon__s1" width="76px" height="100px">
+                <use xlink:href="static/img/general/svg-symbols.svg#s1"></use>
+            </svg>
+        
+                                    </div>
+                                    <div class="box__icon">
+                                        
+            <svg class="icon__s1" width="76px" height="100px">
+                <use xlink:href="static/img/general/svg-symbols.svg#s1"></use>
+            </svg>
+        
+                                    </div>
                                 </div>
-                                <div class="box__icon lieDown">
-                                    
+                                <div class="game__flex__column">
+                                        <div class="box__icon">
+                                            
             <svg class="icon__s1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s1"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s1"></use>
             </svg>
         
+                                        </div>
+                                        <div class="box__icon">
+                                            
+            <svg class="icon__s1" width="76px" height="100px">
+                <use xlink:href="static/img/general/svg-symbols.svg#s1"></use>
+            </svg>
+        
+                                        </div>
+                                        <div class="box__icon">
+                                            
+            <svg class="icon__s1" width="76px" height="100px">
+                <use xlink:href="static/img/general/svg-symbols.svg#s1"></use>
+            </svg>
+        
+                                        </div>
+                                        <div class="box__icon">
+                                            
+            <svg class="icon__s1" width="76px" height="100px">
+                <use xlink:href="static/img/general/svg-symbols.svg#s1"></use>
+            </svg>
+        
+                                        </div>
+                                        <div class="box__icon">
+                                            
+            <svg class="icon__s1" width="76px" height="100px">
+                <use xlink:href="static/img/general/svg-symbols.svg#s1"></use>
+            </svg>
+        
+                                        </div>
+                                        <div class="box__icon">
+                                            
+            <svg class="icon__s1" width="76px" height="100px">
+                <use xlink:href="static/img/general/svg-symbols.svg#s1"></use>
+            </svg>
+        
+                                        </div>
                                 </div>
-                                <div class="box__icon">
-                                    
+                                <div class="game__flex__column">
+                                    <div class="box__icon lieDown">
+                                        
             <svg class="icon__s1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s1"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#s1"></use>
             </svg>
         
+                                    </div>
+                                        <div class="box__icon">
+                                            
+            <svg class="icon__s1" width="76px" height="100px">
+                <use xlink:href="static/img/general/svg-symbols.svg#s1"></use>
+            </svg>
+        
+                                        </div>
+                                        <div class="box__icon">
+                                            
+            <svg class="icon__s1" width="76px" height="100px">
+                <use xlink:href="static/img/general/svg-symbols.svg#s1"></use>
+            </svg>
+        
+                                        </div>
+                                        <div class="box__icon">
+                                            
+            <svg class="icon__s1" width="76px" height="100px">
+                <use xlink:href="static/img/general/svg-symbols.svg#s1"></use>
+            </svg>
+        
+                                        </div>
+                                        <div class="box__icon">
+                                            
+            <svg class="icon__s1" width="76px" height="100px">
+                <use xlink:href="static/img/general/svg-symbols.svg#s1"></use>
+            </svg>
+        
+                                        </div>
+                                        <div class="box__icon">
+                                            
+            <svg class="icon__s1" width="76px" height="100px">
+                <use xlink:href="static/img/general/svg-symbols.svg#s1"></use>
+            </svg>
+        
+                                        </div>
                                 </div>
-                                <div class="break-line"></div>
-                                    <div class="box__icon">
-                                        
-            <svg class="icon__s1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s1"></use>
-            </svg>
-        
-                                    </div>
-                                    <div class="box__icon">
-                                        
-            <svg class="icon__s1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s1"></use>
-            </svg>
-        
-                                    </div>
-                                    <div class="box__icon">
-                                        
-            <svg class="icon__s1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s1"></use>
-            </svg>
-        
-                                    </div>
-                                    <div class="box__icon">
-                                        
-            <svg class="icon__s1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s1"></use>
-            </svg>
-        
-                                    </div>
-                                    <div class="box__icon">
-                                        
-            <svg class="icon__s1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s1"></use>
-            </svg>
-        
-                                    </div>
-                                    <div class="box__icon">
-                                        
-            <svg class="icon__s1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s1"></use>
-            </svg>
-        
-                                    </div>
-                                <div class="break-line"></div>
-                                <div class="box__icon lieDown">
-                                    
-            <svg class="icon__s1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s1"></use>
-            </svg>
-        
-                                </div>
-                                    <div class="box__icon">
-                                        
-            <svg class="icon__s1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s1"></use>
-            </svg>
-        
-                                    </div>
-                                    <div class="box__icon">
-                                        
-            <svg class="icon__s1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s1"></use>
-            </svg>
-        
-                                    </div>
-                                    <div class="box__icon">
-                                        
-            <svg class="icon__s1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s1"></use>
-            </svg>
-        
-                                    </div>
-                                    <div class="box__icon">
-                                        
-            <svg class="icon__s1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s1"></use>
-            </svg>
-        
-                                    </div>
-                                    <div class="box__icon">
-                                        
-            <svg class="icon__s1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#s1"></use>
-            </svg>
-        
-                                    </div>
                             </div>
                         </div>
                     </div>
@@ -865,7 +943,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__p1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p1"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p1"></use>
             </svg>
         
                     </div>
@@ -873,7 +951,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__p2" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p2"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p2"></use>
             </svg>
         
                     </div>
@@ -881,7 +959,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__p3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p3"></use>
             </svg>
         
                     </div>
@@ -889,7 +967,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__p4" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p4"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p4"></use>
             </svg>
         
                     </div>
@@ -897,7 +975,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__p5" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p5"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p5"></use>
             </svg>
         
                     </div>
@@ -905,7 +983,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__p5r" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p5r"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p5r"></use>
             </svg>
         
                     </div>
@@ -913,7 +991,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__p5r" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p5r"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p5r"></use>
             </svg>
         
                     </div>
@@ -921,7 +999,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__dg" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#dg"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#dg"></use>
             </svg>
         
                     </div>
@@ -931,7 +1009,7 @@
                         <div class="box__icon">
                             
             <svg class="icon__p1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p1"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p1"></use>
             </svg>
         
                         </div>
@@ -939,7 +1017,7 @@
                         <div class="box__icon lieDown">
                             
             <svg class="icon__p2" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p2"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p2"></use>
             </svg>
         
                         </div>
@@ -947,7 +1025,7 @@
                         <div class="box__icon">
                             
             <svg class="icon__p3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p3"></use>
             </svg>
         
                         </div>
@@ -955,7 +1033,7 @@
                         <div class="box__icon">
                             
             <svg class="icon__p4" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p4"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p4"></use>
             </svg>
         
                         </div>
@@ -963,7 +1041,7 @@
                         <div class="box__icon">
                             
             <svg class="icon__p5" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p5"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p5"></use>
             </svg>
         
                         </div>
@@ -971,7 +1049,7 @@
                         <div class="box__icon">
                             
             <svg class="icon__p6" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p6"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p6"></use>
             </svg>
         
                         </div>
@@ -989,7 +1067,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__m1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#m1"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#m1"></use>
             </svg>
         
                     </div>
@@ -997,7 +1075,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__p2" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p2"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p2"></use>
             </svg>
         
                     </div>
@@ -1005,7 +1083,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__p3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p3"></use>
             </svg>
         
                     </div>
@@ -1013,7 +1091,7 @@
                     <div class="box__icon">
                         
             <svg class="icon__p3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p3"></use>
             </svg>
         
                     </div>
@@ -1021,7 +1099,7 @@
                     <div class="box__icon single">
                         
             <svg class="icon__p1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p1"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p1"></use>
             </svg>
         
                     </div>
@@ -1031,7 +1109,7 @@
                         <div class="box__icon">
                             
             <svg class="icon__p6" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p6"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p6"></use>
             </svg>
         
                         </div>
@@ -1039,7 +1117,7 @@
                         <div class="box__icon lieDown">
                             
             <svg class="icon__p3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p3"></use>
             </svg>
         
                         </div>
@@ -1047,7 +1125,7 @@
                         <div class="box__icon">
                             
             <svg class="icon__p9" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p9"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p9"></use>
             </svg>
         
                         </div>
@@ -1055,7 +1133,7 @@
                         <div class="box__icon lieDown">
                             
             <svg class="icon__p1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p1"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p1"></use>
             </svg>
         
                         </div>
@@ -1063,7 +1141,7 @@
                         <div class="box__icon">
                             
             <svg class="icon__p2" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p2"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p2"></use>
             </svg>
         
                         </div>
@@ -1071,7 +1149,7 @@
                         <div class="box__icon">
                             
             <svg class="icon__p3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p3"></use>
             </svg>
         
                         </div>
@@ -1079,7 +1157,7 @@
                         <div class="box__icon">
                             
             <svg class="icon__p1" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p1"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p1"></use>
             </svg>
         
                         </div>
@@ -1087,7 +1165,7 @@
                         <div class="box__icon">
                             
             <svg class="icon__p2" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p2"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p2"></use>
             </svg>
         
                         </div>
@@ -1095,7 +1173,7 @@
                         <div class="box__icon">
                             
             <svg class="icon__p3" width="76px" height="100px">
-                <use xlink:href="/static/img/general/svg-symbols.svg#p3"></use>
+                <use xlink:href="static/img/general/svg-symbols.svg#p3"></use>
             </svg>
         
                         </div>
@@ -1106,17 +1184,77 @@
             </div>
 
         </div>
-        <div class="stats">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Magni odio quo quos reiciendis vitae. Asperiores deleniti ducimus esse eum, ex iste molestias natus non praesentium quam sapiente sequi sint voluptas.
+        <div class="sidebar">
+            <div class="stats">
+                <div class="stats__row">
+                    <div class="player">
+                        <div class="player__head">
+                            <div class="player__name">NoName</div>
+                        </div>
+                        <div class="player__body">
+                            <div class="player__score">
+                                <div class="player__score-line plus">+13,000</div>
+                                <div class="player__score-line">49,500</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stats__row">
+                    <div class="player">
+                        <div class="player__head">
+                            <div class="player__name">NoName</div>
+                        </div>
+                        <div class="player__body">
+                            <div class="player__score">
+                                <div class="player__score-line minus">-6,500</div>
+                                <div class="player__score-line">23,500</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="player">
+                        <div class="player__head">
+                            <div class="player__name">NoName</div>
+                        </div>
+                        <div class="player__body">
+                            <div class="player__score">
+                                <div class="player__score-line">30,000</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stats__row">
+                    <div class="player">
+                        <div class="player__head">
+                            <div class="player__name">Asapin</div>
+                        </div>
+                        <div class="player__body">
+                            <div class="player__score">
+                                <div class="player__score-line minus">-6,500</div>
+                                <div class="player__score-line">23,500</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar__bottom">
+                    <p>Lorem impsum line</p>
+                    <p>Word</p>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Architecto asperiores atque beatae delectus deleniti deserunt distinctio doloribus est excepturi fugiat id ipsum iste libero magnam officiis quam quasi sunt, voluptatem.</p>
+                    <p>Lorem impsum line</p>
+                    <p>Word</p>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Architecto asperiores atque beatae delectus deleniti deserunt distinctio doloribus est excepturi fugiat id ipsum iste libero magnam officiis quam quasi sunt, voluptatem.</p>
+                    <p>Lorem impsum line</p>
+                    <p>Word</p>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Architecto asperiores atque beatae delectus deleniti deserunt distinctio doloribus est excepturi fugiat id ipsum iste libero magnam officiis quam quasi sunt, voluptatem.</p>
+            </div>
         </div>
     </div>
 
-
-
-
+    <script src="/static/js/separate-js/svg4everybody.min.js"></script>
+    <script>svg4everybody();</script>
 
     <script src="/static/js/main.js"></script>
 
-
 </body>
+
 </html>

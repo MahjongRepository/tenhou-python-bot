@@ -1,0 +1,25 @@
+// stickyFooter
+@mixin stickyFooter($heightPx) {
+  html, body, .page__wrapper {
+    height:   100%;
+    position: relative;
+    z-index:  0;
+  }
+  .page__wrapper {
+    min-height:    100%;
+    height:        auto;
+    margin-bottom: -#{$heightPx} !important;
+    position:      relative;
+    z-index:       1;
+    &:after {
+      content: "";
+      display: block;
+      height:  $heightPx;
+    }
+  }
+  .page__footer {
+    height:   #{$heightPx};
+    position: relative;
+    z-index:  2;
+  }
+}

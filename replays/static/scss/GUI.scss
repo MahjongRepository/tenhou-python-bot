@@ -1,0 +1,56 @@
+// GUI stylies of the project
+// For example, styles of the links, buttons and so on.
+
+a, a:before, a:after, a svg, button, button svg, input {
+    transition-duration: $transition-duration;
+    transition-property: color, background-color, opacity, fill, border;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="url"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+textarea {
+    @if $my-classes {
+        opacity:    1;
+        transition: opacity .3s;
+        &:focus {
+            @include placeholder {
+                opacity:    0;
+                transition: opacity .3s;
+            }
+        }
+        &:focus {
+            color: #000;
+        }
+    }
+}
+
+textarea {
+    @if $my-classes {
+        width:  100%;
+        resize: vertical;
+    }
+}
+
+select {
+    @if $my-classes {
+        width: 100%;
+    }
+}
+
+fieldset, iframe {
+    @if $my-classes {
+        border:  none;
+        margin:  0;
+        padding: 0;
+    }
+}
+
+table {
+    @if $my-classes {
+        width: 100%;
+    }
+}

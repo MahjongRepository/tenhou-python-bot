@@ -1,0 +1,131 @@
+// Common styles of the project
+
+html, body {
+    min-width: map-get($breakpoints, xs);
+    height: 100%;
+    text-decoration-skip: ink; // todo: ink skip tdu
+}
+
+html {
+    box-sizing: border-box;
+    @if $font-fluid {
+        font-size: .833333vw;
+        line-height: $size__line-height-html;
+        @include respond-to($page__width) {
+            font-size: 62.5%;
+        }
+    }
+}
+
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
+/* body.page */
+.page {
+    @if $my-classes {
+        // need add vars in vars.scss
+        //background: $color__background-body;
+        //color: $color__text-main;
+        //font-size: $font__size;
+        //font-family: $font__family-main;
+        //line-height: $font__line-height;
+    }
+    display: flex;
+    flex-direction: column;
+
+    @include respond-to(lg) {
+        // background: #fff url(http://griddle.it/1170-12-30) repeat-y center top;
+        //height: 2348px;
+    }
+}
+
+ set up fix width
+ .container, .container-fluid, .row, html, .page, .header, .content, .footer {
+     min-width: map-get($breakpoints, lg);
+ }
+
+// todo: add func/mix/extend
+// .valign {
+//   display:        table;
+//   width:          100%;
+//   height:         100%;
+//   vertical-align: middle;
+//   &__cell {
+//     display:        table-cell;
+//     vertical-align: middle;
+//   }
+// }
+
+//== pseudo reset
+%pseudo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    display: block;
+    content: " ";
+}
+
+//== list reset
+%mlp {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+//== clearfix
+%cf {
+    &:before,
+    &:after {
+        display: table;
+        content: " ";
+    }
+    &:after {
+        clear: both;
+    }
+}
+
+//== clearfix disable
+%cf-off {
+    &:before, &:after {
+        display: none;
+        clear: none;
+    }
+}
+
+//== text-decoration:none
+%tdn {
+    text-decoration: none !important;
+}
+
+//== text-decoration:underline
+%tdu {
+    text-decoration: underline !important;
+}
+
+//== text-decoration:underline :hover:none
+%tduhn {
+    text-decoration: underline;
+    @include hover-focus {
+        text-decoration: none;
+    }
+}
+
+//== text-decoration:none :hover:underline
+%tdnhu {
+    text-decoration: none;
+    @include hover-focus {
+        text-decoration: underline;
+    }
+}
+
+//== box-shadow forTests
+%bsh {
+    box-shadow: 0 0 0 1px #000 inset;
+}
+
+//== innerColorCell forTests
+%inner {
+    background-color: rgba(green, .3);
+}

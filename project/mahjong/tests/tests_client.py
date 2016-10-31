@@ -41,7 +41,7 @@ class ClientTestCase(unittest.TestCase):
         meld = Meld()
         meld.who = 3
 
-        client.call_meld(meld)
+        client.add_called_meld(meld)
 
         self.assertEqual(len(client.table.get_player(3).melds), 1)
         self.assertEqual(client.table.count_of_remaining_tiles, 71)
@@ -52,7 +52,7 @@ class ClientTestCase(unittest.TestCase):
 
         self.assertEqual(client.table.count_of_remaining_tiles, 70)
 
-        client.enemy_discard(1, 10)
+        client.enemy_discard(10, 1)
 
         self.assertEqual(len(client.table.get_player(1).discards), 1)
         self.assertEqual(client.table.count_of_remaining_tiles, 69)
@@ -62,7 +62,7 @@ class ClientTestCase(unittest.TestCase):
         client.table.init_round(0, 0, 0, 0, 0, [0, 0, 0, 0])
 
         client.table.players[0].in_riichi = True
-        client.enemy_discard(1, 10)
+        client.enemy_discard(10, 1)
 
         self.assertEqual(len(client.table.players[0].safe_tiles), 1)
 

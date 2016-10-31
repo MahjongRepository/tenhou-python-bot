@@ -116,6 +116,14 @@ def is_man(tile):
     return 17 < tile <= 26
 
 
+def is_honor(tile):
+    """
+    :param tile: 34 tile format
+    :return: boolean
+    """
+    return tile >= 27
+
+
 def simplify(tile):
     """
     :param tile: 34 tile format

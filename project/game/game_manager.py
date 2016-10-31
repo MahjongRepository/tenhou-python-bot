@@ -25,7 +25,7 @@ def shuffle_seed():
 class GameManager(object):
     """
     Allow to play bots between each other
-    To have a metrics how new version plays agains old versions
+    To have a metrics how new version plays against old versions
     """
 
     tiles = []
@@ -164,7 +164,7 @@ class GameManager(object):
                     continue
 
                 # let's store other players discards
-                other_client.enemy_discard(other_client.position - client.position, tile)
+                other_client.enemy_discard(tile, other_client.position - client.position)
 
                 # TODO support multiple ron
                 if self.can_call_ron(other_client, tile):
@@ -179,6 +179,14 @@ class GameManager(object):
             # if there is no challenger to ron, let's check can we call riichi with tile discard or not
             if in_tempai and client.player.can_call_riichi():
                 self.call_riichi(client)
+
+            # let's check other players hand to possibility open sets
+            # for other_client in self.clients:
+                # there is no need to check the current client
+                # if other_client == client:
+                #     continue
+
+                # meld, discard_tile = other_client.player.try_to_call_meld(tile, other_client.position - client.position)
 
             self.current_client = self._move_position(self.current_client)
 

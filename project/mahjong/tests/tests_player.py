@@ -2,11 +2,13 @@
 import unittest
 
 from mahjong.constants import EAST, SOUTH, WEST, NORTH
+from mahjong.meld import Meld
 from mahjong.player import Player
 from mahjong.table import Table
+from utils.tests import TestMixin
 
 
-class PlayerTestCase(unittest.TestCase):
+class PlayerTestCase(unittest.TestCase, TestMixin):
 
     def test_can_call_riichi_and_tempai(self):
         table = Table()
@@ -82,3 +84,16 @@ class PlayerTestCase(unittest.TestCase):
 
         player = Player(0, 3, table)
         self.assertEqual(player.player_wind, SOUTH)
+
+    def test_player_called_meld_and_closed_hand(self):
+        table = Table()
+        player = Player(0, 0, table)
+
+        tiles = self._string_to_136_array(sou='123678', pin='3599', honors='555')
+        player.init_hand(tiles)
+        meld_tiles = [self._string_to_136_tile(honors='5'), self._string_to_136_tile(honors='5'),
+                      self._string_to_136_tile(honors='5')]
+
+        self.assertEqual(len(player.closed_hand), 13)
+        player.add_called_meld(self._make_meld(Meld.PON, meld_tiles))
+        self.assertEqual(len(player.closed_hand), 10)

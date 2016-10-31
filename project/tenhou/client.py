@@ -211,7 +211,7 @@ class TenhouClient(Client):
                 # set call
                 if '<n who=' in message:
                     meld = self.decoder.parse_meld(message)
-                    self.call_meld(meld)
+                    self.add_called_meld(meld)
                     logger.info('Meld: {0}, who {1}'.format(meld.type, meld.who))
 
                     # other player upgraded pon to kan, and it is our winning tile
@@ -236,7 +236,7 @@ class TenhouClient(Client):
                     else:
                         player_seat = 3
 
-                    self.enemy_discard(player_seat, tile)
+                    self.enemy_discard(tile, player_seat)
 
                 if 'owari' in message:
                     values = self.decoder.parse_final_scores_and_uma(message)

@@ -1330,12 +1330,13 @@ class HandDivider(object):
 
         return pair_indices
 
-    def find_valid_combinations(self, tiles_34, first_index, second_index):
+    def find_valid_combinations(self, tiles_34, first_index, second_index, hand_not_completed=False):
         """
         Find and return all valid set combinations in given suit
         :param tiles_34:
         :param first_index:
         :param second_index:
+        :param hand_not_completed: in that mode we can return just possible shi\pon sets
         :return: list of valid combinations
         """
         indices = []
@@ -1397,6 +1398,10 @@ class HandDivider(object):
 
                     if count_of_sets > count_of_possible_sets:
                         valid_combinations.remove(item)
+
+        # lit of chi\pon sets for not completed hand
+        if hand_not_completed:
+            return valid_combinations
 
         # hard case - we can build a lot of sets from our tiles
         # for example we have 123456 tiles and we can build sets:

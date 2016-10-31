@@ -27,6 +27,7 @@ class Player(object):
     # tiles that were discarded after player's riichi
     safe_tiles = []
     tiles = []
+    closed_hand = []
     melds = []
     table = None
     in_tempai = False
@@ -38,6 +39,7 @@ class Player(object):
         self.melds = []
         self.tiles = []
         self.safe_tiles = []
+        self.closed_hand = []
         self.seat = seat
         self.table = table
         self.dealer_seat = dealer_seat
@@ -72,14 +74,29 @@ class Player(object):
     def __repr__(self):
         return self.__str__()
 
-    def add_meld(self, meld):
+    def erase_state(self):
+        self.discards = []
+        self.melds = []
+        self.tiles = []
+        self.safe_tiles = []
+        self.in_tempai = False
+        self.in_riichi = False
+        self.in_defence_mode = False
+        self.dealer_seat = 0
+
+    def add_called_meld(self, meld):
         self.melds.append(meld)
+
+        for tile in meld.tiles:
+            if tile in self.closed_hand:
+                self.closed_hand.remove(tile)
 
     def add_discarded_tile(self, tile):
         self.discards.append(Tile(tile))
 
     def init_hand(self, tiles):
         self.tiles = [Tile(i) for i in tiles]
+        self.closed_hand = self.tiles[:]
 
     def draw_tile(self, tile):
         self.tiles.append(Tile(tile))
@@ -93,16 +110,6 @@ class Player(object):
             self.tiles.remove(tile_to_discard)
         return tile_to_discard
 
-    def erase_state(self):
-        self.discards = []
-        self.melds = []
-        self.tiles = []
-        self.safe_tiles = []
-        self.in_tempai = False
-        self.in_riichi = False
-        self.in_defence_mode = False
-        self.dealer_seat = 0
-
     def can_call_riichi(self):
         return all([
             self.in_tempai,
@@ -110,6 +117,16 @@ class Player(object):
             self.scores >= 1000,
             self.table.count_of_remaining_tiles > 4
         ])
+
+    def try_to_call_meld(self, tile, enemy_seat):
+        """
+        Determine should we call a meld or not.
+        If yes, it will add tile to the player's hand and will return Meld object
+        :param tile: 136 format tile
+        :param enemy_seat: 1, 2, 3
+        :return: meld and tile to discard after called open set
+        """
+        return self.ai.try_to_call_meld(tile, enemy_seat)
 
     @property
     def player_wind(self):
@@ -126,3 +143,7 @@ class Player(object):
     @property
     def is_dealer(self):
         return self.seat == self.dealer_seat
+
+    @property
+    def is_open_hand(self):
+        return len(self.melds) > 0

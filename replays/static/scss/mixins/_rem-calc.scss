@@ -1,0 +1,8 @@
+@function rem-calc($value, $base-size: $font-size-base) {
+  $value: strip-unit($value);
+  $base-size: strip-unit($base-size);
+
+  $value: $value / $base-size * 1rem;
+
+  @return $value;
+}

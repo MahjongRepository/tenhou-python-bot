@@ -1,0 +1,58 @@
+/**
+* Sass CSS triangle mixin, create any kind of triangles with ease
+
+* Use:
+* @include triangle(direction,width,height,color);
+
+* Example:
+* $square: 50px;
+* $color: red;
+* selector {
+*	 @include triangle(bottomright,$square,$square,$color);
+* }
+
+* Forked from https://github.com/juanbrujo/triangle-mixin.less
+*/
+
+@mixin triangle($direction, $sizeH, $sizeV, $color) {
+    content: '';
+    display: block;
+    width: 0;
+    height: 0;
+    position: absolute;
+    border-style: solid;
+    -moz-transform: scale(.9999);
+
+    @if $direction == top {
+        border-width: 0 $sizeV $sizeH $sizeV;
+        border-color: transparent transparent $color transparent;
+    }
+    @if $direction == bottom {
+        border-width: $sizeV/2 $sizeH 0 $sizeV/2;
+        border-color: $color transparent transparent transparent;
+    }
+    @if $direction == left {
+        border-width: $sizeV $sizeH $sizeV 0;
+        border-color: transparent $color transparent transparent;
+    }
+    @if $direction == right {
+        border-width: $sizeV 0 $sizeV $sizeH;
+        border-color: transparent transparent transparent $color;
+    }
+    @if $direction == topright {
+        border-width: 0 $sizeH $sizeV 0;
+        border-color: transparent $color transparent transparent;
+    }
+    @if $direction == bottomright {
+        border-width: 0 0 $sizeH $sizeV;
+        border-color: transparent transparent $color transparent;
+    }
+    @if $direction == bottomleft {
+        border-width: $sizeH 0 0 $sizeV;
+        border-color: transparent transparent transparent $color;
+    }
+    @if $direction == topleft {
+        border-width: $sizeH $sizeV 0 0;
+        border-color: $color transparent transparent transparent;
+    }
+}

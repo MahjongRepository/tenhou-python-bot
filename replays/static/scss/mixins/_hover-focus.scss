@@ -1,0 +1,6 @@
+//== &:hover, &:focus insert
+@mixin hover-focus {
+    &:hover, &:focus {
+        @content;
+    }
+}

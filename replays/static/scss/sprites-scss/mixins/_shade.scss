@@ -1,0 +1,23 @@
+// shade (flat)
+@mixin shade($type, $color: #3498db, $depth: 20, $angle: 135deg, $long: false, $fade: false) {
+  $angle: ($angle - 90);
+  $x: 1.5 * cos($angle) + 0px;
+  $y: 1.5 * sin($angle) + 0px;
+  $darken: (lightness($color)/$depth)/2;
+  $opacify: 0;
+  $shadow: ();
+
+  @if $long == true {
+    $darken: 0;
+  }
+
+  @if $fade == true {
+    $opacify: (opacity($color)/$depth);
+    @include translateZ(0);
+  }
+
+  @for $i from 1 through $depth {
+    $shadow: $shadow, $i*$x $i*$y 0 hsla(hue($color), saturation($color), (lightness($color) - ($i * $darken)), 1 - ($i * $opacify));
+  }
+  #{$type}-shadow: $shadow;
+}

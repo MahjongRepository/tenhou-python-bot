@@ -1,0 +1,24 @@
+// http://engageinteractive.co.uk/blog/top-10-scss-mixins
+
+//== see libraries/bootstrap/variables.scss
+//@import "libraries/bootstrap/variables";
+
+// $base-bg: #fff url(http://griddle.it/820-10-0) repeat-y center top;
+
+$my-classes: true !default;
+//== Auto-resize font
+$font-fluid: false !default;
+
+$transition-duration: .25s;
+
+//== Breakpoints
+
+$breakpoints: (
+    xs: 320px,
+    //ms: $screen-ms-min,
+    sm: $screen-sm-min,
+    md: $screen-md-min,
+    lg: $screen-lg-min
+);
+
+//@debug map-get($breakpoints, xs);

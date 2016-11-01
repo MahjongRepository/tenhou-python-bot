@@ -63,11 +63,11 @@ and run `bots_battle.py`.
 
 We are building a viewer for local played games. It will allow to find places to improve bot's logic easily.
 
-To be able to run it you need to run these commands in your host system (not inside a Vagrant):
+To be able to run it you need to run these commands inside a Vagrant system (`vagrant ssh` to go into it):
 
-1. `cd replays`
-2. `python -m SimpleHTTPServer 8000`
-3. Open http://localhost:8000/ in your browser
+1. `cd ../replays`
+2. `python -m http.server 8080`
+3. Open [http://localhost:8080/](http://localhost:8080/) in your browser
 
 # For developers
 

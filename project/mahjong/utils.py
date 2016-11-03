@@ -92,7 +92,7 @@ def is_pair(item):
     return len(item) == 2
 
 
-def is_sou(tile):
+def is_man(tile):
     """
     :param tile: 34 tile format
     :return: boolean
@@ -108,7 +108,7 @@ def is_pin(tile):
     return 8 < tile <= 17
 
 
-def is_man(tile):
+def is_sou(tile):
     """
     :param tile: 34 tile format
     :return: boolean

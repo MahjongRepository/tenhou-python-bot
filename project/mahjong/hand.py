@@ -1251,14 +1251,14 @@ class HandDivider(object):
 
             local_tiles_34[pair_index] -= 2
 
-            # 0 - 8 sou tiles
-            sou = self.find_valid_combinations(local_tiles_34, 0, 8)
+            # 0 - 8 man tiles
+            man = self.find_valid_combinations(local_tiles_34, 0, 8)
 
             # 9 - 17 pin tiles
             pin = self.find_valid_combinations(local_tiles_34, 9, 17)
 
-            # 18 - 26 man tiles
-            man = self.find_valid_combinations(local_tiles_34, 18, 26)
+            # 18 - 26 sou tiles
+            sou = self.find_valid_combinations(local_tiles_34, 18, 26)
 
             honor = []
             for x in HONOR_INDICES:
@@ -1401,7 +1401,7 @@ class HandDivider(object):
 
         # lit of chi\pon sets for not completed hand
         if hand_not_completed:
-            return valid_combinations
+            return [valid_combinations]
 
         # hard case - we can build a lot of sets from our tiles
         # for example we have 123456 tiles and we can build sets:

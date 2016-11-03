@@ -7,7 +7,7 @@ from utils.general import make_random_letters_and_digit_string
 class Client(object):
     statistics = None
     id = ''
-    position = 0
+    seat = 0
 
     def __init__(self, use_previous_ai_version=False):
         self.table = Table(use_previous_ai_version)
@@ -31,8 +31,8 @@ class Client(object):
         self.table.count_of_remaining_tiles -= 1
         self.player.draw_tile(tile)
 
-    def discard_tile(self):
-        return self.player.discard_tile()
+    def discard_tile(self, tile=None):
+        return self.player.discard_tile(tile)
 
     def add_called_meld(self, meld):
         # when opponent called meld it is means

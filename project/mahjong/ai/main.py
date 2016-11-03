@@ -7,11 +7,11 @@ from mahjong.constants import HAKU, CHUN, HATSU
 from mahjong.hand import HandDivider
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_sou, is_pin, is_honor, is_chi, is_pon
+from mahjong.utils import is_pin, is_honor, is_chi, is_pon, is_man
 
 
 class MainAI(BaseAI):
-    version = '0.0.6'
+    version = '0.1.0'
 
     agari = None
     shanten = None
@@ -31,8 +31,11 @@ class MainAI(BaseAI):
         self.previous_shanten = 7
         self.yakuhai_strategy = False
 
+    def erase_state(self):
+        self.yakuhai_strategy = False
+
     def discard_tile(self):
-        results, shanten = self.calculate_outs(self.player.tiles)
+        results, shanten = self.calculate_outs(self.player.tiles, self.player.closed_hand)
         self.previous_shanten = shanten
 
         if shanten == 0:
@@ -58,12 +61,14 @@ class MainAI(BaseAI):
 
         return tile_in_hand
 
-    def calculate_outs(self, tiles):
+    def calculate_outs(self, tiles, closed_hand):
         """
         :param tiles: array of tiles in 136 format
+        :param closed_hand: array of tiles in 136 format
         :return:
         """
         tiles_34 = TilesConverter.to_34_array(tiles)
+        closed_tiles_34 = TilesConverter.to_34_array(closed_hand)
         shanten = self.shanten.calculate_shanten(tiles_34)
 
         # win
@@ -73,6 +78,9 @@ class MainAI(BaseAI):
         raw_data = {}
         for i in range(0, 34):
             if not tiles_34[i]:
+                continue
+
+            if not closed_tiles_34[i]:
                 continue
 
             tiles_34[i] -= 1
@@ -90,7 +98,11 @@ class MainAI(BaseAI):
             tiles_34[i] += 1
 
             if raw_data[i]:
-                raw_data[i] = {'tile': i, 'tiles_count': self.count_tiles(raw_data[i], tiles_34), 'waiting': raw_data[i]}
+                raw_data[i] = {
+                    'tile': i,
+                    'tiles_count': self.count_tiles(raw_data[i], tiles_34),
+                    'waiting': raw_data[i]
+                }
 
         results = []
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
@@ -129,51 +141,29 @@ class MainAI(BaseAI):
         :param enemy_seat: 1, 2, 3
         :return: meld and tile to discard after called open set
         """
-        player_tiles = self.player.closed_hand[:]
+        closed_hand = self.player.closed_hand[:]
 
-        valued_tiles = [CHUN, HAKU, HATSU, self.player.table.round_wind, self.player.player_wind]
+        # we opened all our hand
+        if len(closed_hand) == 1:
+            return None, None
 
-        tiles_34 = TilesConverter.to_34_array(player_tiles)
+        self.determine_open_hand_strategy()
+
+        tiles_34 = TilesConverter.to_34_array(closed_hand)
         discarded_tile = tile // 4
-        is_kamicha_discard = enemy_seat == 3
+        # previous player
+        is_kamicha_discard = self.player.seat - 1 == enemy_seat or self.player.seat == 0 and enemy_seat == 3
 
         new_tiles = self.player.tiles[:] + [tile]
-        outs_results, shanten = self.calculate_outs(new_tiles)
+        outs_results, shanten = self.calculate_outs(new_tiles, closed_hand)
 
-        # let's go for yakuhai
-        if discarded_tile in valued_tiles and tiles_34[discarded_tile] == 2:
-            first_tile = TilesConverter.find_34_tile_in_136_array(discarded_tile, player_tiles)
-            # we need to remove tile from array, to not find it again for second tile
-            player_tiles.remove(first_tile)
-            second_tile = TilesConverter.find_34_tile_in_136_array(discarded_tile, player_tiles)
-            tiles = [
-                first_tile,
-                second_tile,
-                tile
-            ]
-
-            meld = Meld()
-            meld.who = self.player.seat
-            meld.from_who = enemy_seat
-            meld.type = Meld.PON
-            meld.tiles = tiles
-
-            tile_34 = outs_results[0]['discard']
-            tile_to_discard = TilesConverter.find_34_tile_in_136_array(tile_34, self.player.tiles)
-
-            self.player.tiles.append(tile)
-
-            self.yakuhai_strategy = True
-
-            return meld, tile_to_discard
-
-        if self.player.is_open_hand:
-            # once hand was opened for yakuhai, we can open not our winds
-            if self.yakuhai_strategy and is_honor(discarded_tile) and tiles_34[discarded_tile] == 2:
-                first_tile = TilesConverter.find_34_tile_in_136_array(discarded_tile, player_tiles)
+        if self.yakuhai_strategy:
+            # pon of honor tiles
+            if is_honor(discarded_tile) and tiles_34[discarded_tile] == 2:
+                first_tile = TilesConverter.find_34_tile_in_136_array(discarded_tile, closed_hand)
                 # we need to remove tile from array, to not find it again for second tile
-                player_tiles.remove(first_tile)
-                second_tile = TilesConverter.find_34_tile_in_136_array(discarded_tile, player_tiles)
+                closed_hand.remove(first_tile)
+                second_tile = TilesConverter.find_34_tile_in_136_array(discarded_tile, closed_hand)
                 tiles = [
                     first_tile,
                     second_tile,
@@ -189,31 +179,34 @@ class MainAI(BaseAI):
                 tile_34 = outs_results[0]['discard']
                 tile_to_discard = TilesConverter.find_34_tile_in_136_array(tile_34, self.player.tiles)
 
-                self.player.tiles.append(tile)
-
                 return meld, tile_to_discard
 
             # tile will decrease the count of shanten in hand
             # so let's call opened set with it
             if shanten < self.previous_shanten:
-                new_tiles_34 = TilesConverter.to_34_array(new_tiles)
+                closed_hand_34 = TilesConverter.to_34_array(closed_hand + [tile])
 
-                if is_sou(discarded_tile):
-                    combinations = self.hand_divider.find_valid_combinations(new_tiles_34, 0, 8, True)
+                if is_man(discarded_tile):
+                    combinations = self.hand_divider.find_valid_combinations(closed_hand_34, 0, 8, True)
                 elif is_pin(discarded_tile):
-                    combinations = self.hand_divider.find_valid_combinations(new_tiles_34, 9, 17, True)
+                    combinations = self.hand_divider.find_valid_combinations(closed_hand_34, 9, 17, True)
                 else:
-                    combinations = self.hand_divider.find_valid_combinations(new_tiles_34, 18, 26, True)
+                    combinations = self.hand_divider.find_valid_combinations(closed_hand_34, 18, 26, True)
+
+                if combinations:
+                    combinations = combinations[0]
 
                 possible_melds = []
                 for combination in combinations:
                     # we can call pon from everyone
-                    if is_pon(combination):
-                        possible_melds.append(combination)
+                    if is_pon(combination) and discarded_tile in combination:
+                        if combination not in possible_melds:
+                            possible_melds.append(combination)
 
                     # we can call chi only from left player
-                    if is_chi(combination) and is_kamicha_discard:
-                        possible_melds.append(combination)
+                    if is_chi(combination) and is_kamicha_discard and discarded_tile in combination:
+                        if combination not in possible_melds:
+                            possible_melds.append(combination)
 
                 if len(possible_melds):
                     # TODO add logic to find best meld
@@ -221,10 +214,10 @@ class MainAI(BaseAI):
                     meld_type = is_chi(combination) and Meld.CHI or Meld.PON
 
                     combination.remove(discarded_tile)
-                    first_tile = TilesConverter.find_34_tile_in_136_array(combination[0], player_tiles)
+                    first_tile = TilesConverter.find_34_tile_in_136_array(combination[0], closed_hand)
                     # we need to remove tile from array, to not find it again for second tile
-                    player_tiles.remove(first_tile)
-                    second_tile = TilesConverter.find_34_tile_in_136_array(combination[1], player_tiles)
+                    closed_hand.remove(first_tile)
+                    second_tile = TilesConverter.find_34_tile_in_136_array(combination[1], closed_hand)
                     tiles = [
                         first_tile,
                         second_tile,
@@ -240,8 +233,20 @@ class MainAI(BaseAI):
                     tile_34 = outs_results[0]['discard']
                     tile_to_discard = TilesConverter.find_34_tile_in_136_array(tile_34, self.player.tiles)
 
-                    self.player.tiles.append(tile)
-
                     return meld, tile_to_discard
 
         return None, None
+
+    def determine_open_hand_strategy(self):
+        if self._switch_to_yakuhai_strategy():
+            self.yakuhai_strategy = True
+
+    def _switch_to_yakuhai_strategy(self):
+        """
+        Determine can we switch to yakuhai strategy or not
+        We can do it if we have valued pair in hand
+        :return: boolean
+        """
+        valued_tiles = [CHUN, HAKU, HATSU, self.player.table.round_wind, self.player.player_wind]
+        tiles_34 = TilesConverter.to_34_array(self.player.tiles)
+        return any([tiles_34[x] == 2 for x in valued_tiles])

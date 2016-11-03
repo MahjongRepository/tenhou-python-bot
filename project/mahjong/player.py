@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+from functools import reduce
 
 from mahjong.constants import EAST, SOUTH, WEST, NORTH
 from utils.settings_handler import settings
@@ -27,7 +28,6 @@ class Player(object):
     # tiles that were discarded after player's riichi
     safe_tiles = []
     tiles = []
-    closed_hand = []
     melds = []
     table = None
     in_tempai = False
@@ -39,7 +39,6 @@ class Player(object):
         self.melds = []
         self.tiles = []
         self.safe_tiles = []
-        self.closed_hand = []
         self.seat = seat
         self.table = table
         self.dealer_seat = dealer_seat
@@ -79,32 +78,37 @@ class Player(object):
         self.melds = []
         self.tiles = []
         self.safe_tiles = []
+
         self.in_tempai = False
         self.in_riichi = False
         self.in_defence_mode = False
+
         self.dealer_seat = 0
+
+        self.ai.erase_state()
 
     def add_called_meld(self, meld):
         self.melds.append(meld)
-
-        for tile in meld.tiles:
-            if tile in self.closed_hand:
-                self.closed_hand.remove(tile)
 
     def add_discarded_tile(self, tile):
         self.discards.append(Tile(tile))
 
     def init_hand(self, tiles):
         self.tiles = [Tile(i) for i in tiles]
-        self.closed_hand = self.tiles[:]
 
     def draw_tile(self, tile):
         self.tiles.append(Tile(tile))
         # we need sort it to have a better string presentation
         self.tiles = sorted(self.tiles)
 
-    def discard_tile(self):
-        tile_to_discard = self.ai.discard_tile()
+    def discard_tile(self, tile=None):
+        """
+        We can say what tile to discard
+        input tile = None we will discard tile based on AI logic
+        :param tile: 136 tiles format
+        :return:
+        """
+        tile_to_discard = tile or self.ai.discard_tile()
         if tile_to_discard != Shanten.AGARI_STATE:
             self.add_discarded_tile(tile_to_discard)
             self.tiles.remove(tile_to_discard)
@@ -113,7 +117,10 @@ class Player(object):
     def can_call_riichi(self):
         return all([
             self.in_tempai,
+
             not self.in_riichi,
+            not self.is_open_hand,
+
             self.scores >= 1000,
             self.table.count_of_remaining_tiles > 4
         ])
@@ -147,3 +154,11 @@ class Player(object):
     @property
     def is_open_hand(self):
         return len(self.melds) > 0
+
+    @property
+    def closed_hand(self):
+        tiles = self.tiles[:]
+        meld_tiles = [x.tiles for x in self.melds]
+        if meld_tiles:
+            meld_tiles = reduce(lambda z, y: z + y, [x.tiles for x in self.melds])
+        return [item for item in tiles if item not in meld_tiles]

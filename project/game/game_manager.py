@@ -8,6 +8,7 @@ from game.logger import set_up_logging
 from mahjong.ai.agari import Agari
 from mahjong.client import Client
 from mahjong.hand import FinishedHand
+from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
 
 # we need to have it
@@ -32,9 +33,10 @@ class GameManager(object):
     dead_wall = []
     clients = []
     dora_indicators = []
+    players_with_open_hands = []
 
     dealer = None
-    current_client = None
+    current_client_seat = None
     round_number = 0
     honba_sticks = 0
     riichi_sticks = 0
@@ -58,7 +60,7 @@ class GameManager(object):
         """
         shuffle(self.clients, shuffle_seed)
         for i in range(0, len(self.clients)):
-            self.clients[i].position = i
+            self.clients[i].seat = i
 
         dealer = randint(0, 3)
         self.set_dealer(dealer)
@@ -72,6 +74,8 @@ class GameManager(object):
         # each round should have personal seed
         global seed_value
         seed_value = random()
+
+        self.players_with_open_hands = []
 
         self.tiles = [i for i in range(0, 136)]
 
@@ -128,67 +132,83 @@ class GameManager(object):
         continue_to_play = True
 
         while continue_to_play:
-            client = self._get_current_client()
-            in_tempai = client.player.in_tempai
+            current_client = self._get_current_client()
+            in_tempai = current_client.player.in_tempai
 
             tile = self._cut_tiles(1)[0]
 
             # we don't need to add tile to the hand when we are in riichi
-            if client.player.in_riichi:
-                tiles = client.player.tiles + [tile]
+            if current_client.player.in_riichi:
+                tiles = current_client.player.tiles + [tile]
             else:
-                client.draw_tile(tile)
-                tiles = client.player.tiles
+                current_client.draw_tile(tile)
+                tiles = current_client.player.tiles
 
             is_win = self.agari.is_agari(TilesConverter.to_34_array(tiles))
 
             # win by tsumo after tile draw
             if is_win:
-                result = self.process_the_end_of_the_round(tiles=client.player.tiles,
+                tiles.remove(tile)
+                result = self.process_the_end_of_the_round(tiles=tiles,
                                                            win_tile=tile,
-                                                           winner=client,
+                                                           winner=current_client,
                                                            loser=None,
                                                            is_tsumo=True)
                 return result
 
             # if not in riichi, let's decide what tile to discard
-            if not client.player.in_riichi:
-                tile = client.discard_tile()
-                in_tempai = client.player.in_tempai
+            if not current_client.player.in_riichi:
+                tile = current_client.discard_tile()
+                in_tempai = current_client.player.in_tempai
 
-            # after tile discard let's check all other players can they win or not
-            # at this tile
-            for other_client in self.clients:
-                # there is no need to check the current client
-                if other_client == client:
-                    continue
-
-                # let's store other players discards
-                other_client.enemy_discard(tile, other_client.position - client.position)
-
-                # TODO support multiple ron
-                if self.can_call_ron(other_client, tile):
-                    # the end of the round
-                    result = self.process_the_end_of_the_round(tiles=other_client.player.tiles,
-                                                               win_tile=tile,
-                                                               winner=other_client,
-                                                               loser=client,
-                                                               is_tsumo=False)
-                    return result
+            result = self.check_clients_possible_ron(current_client, tile)
+            # the end of the round
+            if result:
+                return result
 
             # if there is no challenger to ron, let's check can we call riichi with tile discard or not
-            if in_tempai and client.player.can_call_riichi():
-                self.call_riichi(client)
+            if in_tempai and current_client.player.can_call_riichi():
+                self.call_riichi(current_client)
 
             # let's check other players hand to possibility open sets
-            # for other_client in self.clients:
+            possible_melds = []
+            for other_client in self.clients:
                 # there is no need to check the current client
-                # if other_client == client:
-                #     continue
+                if other_client == current_client:
+                    continue
 
-                # meld, discard_tile = other_client.player.try_to_call_meld(tile, other_client.position - client.position)
+                meld, discarded_tile = other_client.player.try_to_call_meld(tile,
+                                                                            other_client.seat - current_client.seat)
 
-            self.current_client = self._move_position(self.current_client)
+                if meld:
+                    possible_melds.append({
+                        'meld': meld,
+                        'discarded_tile': discarded_tile,
+                        'who': other_client.seat
+                    })
+
+            if possible_melds:
+                # pon is more important than chi
+                possible_melds = sorted(possible_melds, key=lambda x: x['meld'].type == Meld.PON)
+                tile_to_discard = possible_melds[0]['discarded_tile']
+                # if tile_to_discard:
+                meld = possible_melds[0]['meld']
+
+                # we changed current client with called open set
+                self.current_client_seat = possible_melds[0]['who']
+                current_client = self._get_current_client()
+                self.players_with_open_hands.append(self.current_client_seat)
+
+                current_client.add_called_meld(meld)
+                current_client.player.tiles.append(tile)
+
+                current_client.discard_tile(tile_to_discard)
+
+                self.check_clients_possible_ron(current_client, tile_to_discard)
+
+                logger.info('Called meld: {} by {}'.format(meld, current_client.player.name))
+            else:
+                self.current_client_seat = self._move_position(self.current_client_seat)
 
             # retake
             if not len(self.tiles):
@@ -196,6 +216,34 @@ class GameManager(object):
 
         result = self.process_the_end_of_the_round([], 0, None, None, False)
         return result
+
+    def check_clients_possible_ron(self, current_client, tile):
+        """
+        After tile discard let's check all other players can they win or not
+        at this tile
+        :param current_client:
+        :param tile:
+        :return: None or ron result
+        """
+        for other_client in self.clients:
+            # there is no need to check the current client
+            if other_client == current_client:
+                continue
+
+            # let's store other players discards
+            other_client.enemy_discard(tile, other_client.seat - current_client.seat)
+
+            # TODO support multiple ron
+            if self.can_call_ron(other_client, tile):
+                # the end of the round
+                result = self.process_the_end_of_the_round(tiles=other_client.player.tiles,
+                                                           win_tile=tile,
+                                                           winner=other_client,
+                                                           loser=current_client,
+                                                           is_tsumo=False)
+                return result
+
+        return None
 
     def play_game(self, total_results):
         """
@@ -226,6 +274,10 @@ class GameManager(object):
                 if client.player.in_riichi:
                     total_results[client.id]['riichi_rounds'] += 1
 
+                called_melds = [x for x in self.players_with_open_hands if x == client.seat]
+                if called_melds:
+                    total_results[client.id]['called_rounds'] += 1
+
             played_rounds += 1
 
         self.recalculate_players_position()
@@ -249,8 +301,9 @@ class GameManager(object):
                     client.player.position = i + 1
 
     def can_call_ron(self, client, win_tile):
-        if not client.player.in_tempai or not client.player.in_riichi:
+        if not client.player.in_tempai:
             return False
+
         tiles = client.player.tiles
         is_ron = self.agari.is_agari(TilesConverter.to_34_array(tiles + [win_tile]))
         return is_ron
@@ -260,11 +313,11 @@ class GameManager(object):
         client.player.scores -= 1000
         self.riichi_sticks += 1
 
-        who_called_riichi = client.position
+        who_called_riichi = client.seat
         for client in self.clients:
-            client.enemy_riichi(who_called_riichi - client.position)
+            client.enemy_riichi(who_called_riichi - client.seat)
 
-        logger.info('Riichi: {0} - 1,000'.format(client.player.name))
+        logger.info('Riichi: {0} -1,000'.format(self.clients[who_called_riichi].player.name))
 
     def set_dealer(self, dealer):
         self.dealer = dealer
@@ -279,12 +332,16 @@ class GameManager(object):
             client.player.dealer_seat = dealer - x
 
         # first move should be dealer's move
-        self.current_client = dealer
+        self.current_client_seat = dealer
 
     def process_the_end_of_the_round(self, tiles, win_tile, winner, loser, is_tsumo):
         """
         Increment a round number and do a scores calculations
         """
+        count_of_tiles = len(tiles)
+        # retake or win
+        if count_of_tiles and count_of_tiles != 13:
+            raise ValueError('Wrong tiles count: {}'.format(len(tiles)))
 
         if winner:
             logger.info('{0}: {1} + {2}'.format(
@@ -299,24 +356,23 @@ class GameManager(object):
         self.round_number += 1
 
         if winner:
-            hand_value = self.finished_hand.estimate_hand_value(tiles + [win_tile],
-                                                                win_tile,
-                                                                is_tsumo,
-                                                                winner.player.in_riichi,
-                                                                winner.player.is_dealer,
-                                                                False)
-            if hand_value['cost']:
-                hand_value = hand_value['cost']['main']
-            else:
-                logger.error('Can\'t estimate a hand: {0}. Error: {1}'.format(
+            hand_value = self.finished_hand.estimate_hand_value(tiles=tiles + [win_tile],
+                                                                win_tile=win_tile,
+                                                                is_tsumo=is_tsumo,
+                                                                is_riichi=winner.player.in_riichi,
+                                                                is_dealer=winner.player.is_dealer,
+                                                                )
+
+            if hand_value['error']:
+                logger.error("Can't estimate a hand: {}. Error: {}".format(
                     TilesConverter.to_one_line_string(tiles + [win_tile]),
                     hand_value['error']
                 ))
-                hand_value = 1000
+                raise ValueError('Not correct hand')
 
-            scores_to_pay = hand_value + self.honba_sticks * 300
             riichi_bonus = self.riichi_sticks * 1000
             self.riichi_sticks = 0
+            honba_bonus = self.honba_sticks * 300
 
             # if dealer won we need to increment honba sticks
             if winner.player.is_dealer:
@@ -328,27 +384,32 @@ class GameManager(object):
 
             # win by ron
             if loser:
+                scores_to_pay = hand_value['cost']['main'] + honba_bonus
                 win_amount = scores_to_pay + riichi_bonus
                 winner.player.scores += win_amount
                 loser.player.scores -= scores_to_pay
 
-                logger.info('Win:  {0} + {1:,d}'.format(winner.player.name, win_amount))
-                logger.info('Lose: {0} - {1:,d}'.format(loser.player.name, scores_to_pay))
+                logger.info('Win:  {0} +{1:,d} +{2:,d}'.format(winner.player.name, scores_to_pay, riichi_bonus))
+                logger.info('Lose: {0} -{1:,d}'.format(loser.player.name, scores_to_pay))
             # win by tsumo
             else:
-                scores_to_pay /= 3
-                # will be changed when real hand calculation will be implemented
-                # round to nearest 100. 333 -> 300
-                scores_to_pay = 100 * round(float(scores_to_pay) / 100)
-
-                win_amount = scores_to_pay * 3 + riichi_bonus
+                calculated_cost = hand_value['cost']['main'] + hand_value['cost']['additional'] * 2
+                win_amount = calculated_cost + riichi_bonus + honba_bonus
                 winner.player.scores += win_amount
+
+                logger.info('Win:  {0} +{1:,d}'.format(winner.player.name, win_amount))
 
                 for client in self.clients:
                     if client != winner:
-                        client.player.scores -= scores_to_pay
+                        if client.player.is_dealer:
+                            scores_to_pay = hand_value['cost']['main']
+                        else:
+                            scores_to_pay = hand_value['cost']['additional']
+                        scores_to_pay += (honba_bonus / 3)
 
-                logger.info('Win: {0} + {1:,d}'.format(winner.player.name, win_amount))
+                        client.player.scores -= scores_to_pay
+                        logger.info('Lose: {0} -{1:,d}'.format(client.player.name, int(scores_to_pay)))
+
         # retake
         else:
             tempai_users = 0
@@ -395,7 +456,8 @@ class GameManager(object):
             'winner': winner,
             'loser': loser,
             'is_tsumo': is_tsumo,
-            'is_game_end': is_game_end
+            'is_game_end': is_game_end,
+            'players_with_open_hands': self.players_with_open_hands
         }
 
     def players_sorted_by_scores(self):
@@ -415,7 +477,7 @@ class GameManager(object):
             client.player.name = name
 
     def _get_current_client(self) -> Client:
-        return self.clients[self.current_client]
+        return self.clients[self.current_client_seat]
 
     def _cut_tiles(self, count_of_tiles) -> []:
         """
@@ -430,7 +492,7 @@ class GameManager(object):
 
     def _move_position(self, current_position):
         """
-        loop 0 -> 1 -> 2 -> 3 -> 0
+        Loop 0 -> 1 -> 2 -> 3 -> 0
         """
         current_position += 1
         if current_position > 3:

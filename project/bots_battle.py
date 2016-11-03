@@ -10,13 +10,13 @@ from tqdm import trange
 from game.game_manager import GameManager
 from mahjong.client import Client
 
-TOTAL_HANCHANS = 100
+TOTAL_HANCHANS = 20
 
 
 def main():
     # enable it for manual testing
     logger = logging.getLogger('game')
-    logger.disabled = True
+    logger.disabled = False
 
     # let's load three bots with old logic
     # and one copy with new logic
@@ -28,12 +28,13 @@ def main():
     for client in clients:
         total_results[client.id] = {
             'name': client.player.name,
-            'version': client.player.ai.version,
+            'version': 'v{}'.format(client.player.ai.version),
             'positions': [],
             'played_rounds': 0,
             'lose_rounds': 0,
             'win_rounds': 0,
             'riichi_rounds': 0,
+            'called_rounds': 0,
         }
 
     for x in trange(TOTAL_HANCHANS):
@@ -51,11 +52,12 @@ def main():
         clients = sorted(clients, key=lambda i: i.player.scores, reverse=True)
         for client in clients:
             player = client.player
-            table_data.append([player.position,
-                               player.name,
-                               'v{0}'.format(player.ai.version),
-                               '{0:,d}'.format(int(player.scores))
-                               ])
+            table_data.append([
+                player.position,
+                player.name,
+                'v{0}'.format(player.ai.version),
+                '{0:,d}'.format(int(player.scores))
+            ])
 
             total_result_client = total_results[client.id]
             total_result_client['positions'].append(player.position)
@@ -68,7 +70,7 @@ def main():
     print('\n')
 
     table_data = [
-        ['Player', 'AI', 'Played rounds', 'Average place', 'Win rate', 'Feed rate', 'Riichi rate'],
+        ['Player', 'AI', 'Average place', 'Win rate', 'Feed rate', 'Riichi rate', 'Call rate'],
     ]
 
     # recalculate stat values
@@ -77,11 +79,13 @@ def main():
         lose_rounds = item['lose_rounds']
         win_rounds = item['win_rounds']
         riichi_rounds = item['riichi_rounds']
+        called_rounds = item['called_rounds']
 
         item['average_place'] = sum(item['positions']) / len(item['positions'])
         item['feed_rate'] = (lose_rounds / played_rounds) * 100
         item['win_rate'] = (win_rounds / played_rounds) * 100
         item['riichi_rate'] = (riichi_rounds / played_rounds) * 100
+        item['call_rate'] = (called_rounds / played_rounds) * 100
 
     calculated_clients = sorted(total_results.values(), key=lambda i: i['average_place'])
 
@@ -89,11 +93,11 @@ def main():
         table_data.append([
             item['name'],
             item['version'],
-            '{0:,d}'.format(item['played_rounds']),
             format(item['average_place'], '.2f'),
             format(item['win_rate'], '.2f') + '%',
             format(item['feed_rate'], '.2f') + '%',
             format(item['riichi_rate'], '.2f') + '%',
+            format(item['call_rate'], '.2f') + '%',
         ])
 
     print('Final results:')

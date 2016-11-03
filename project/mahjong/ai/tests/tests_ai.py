@@ -17,7 +17,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         ai = MainAI(table, player)
 
         tiles = self._string_to_136_array(sou='111345677', pin='15', man='569')
-        outs, shanten = ai.calculate_outs(tiles)
+        outs, shanten = ai.calculate_outs(tiles, tiles)
 
         self.assertEqual(shanten, 2)
         self.assertEqual(outs[0]['discard'], 9)
@@ -25,7 +25,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         self.assertEqual(outs[0]['tiles_count'], 57)
 
         tiles = self._string_to_136_array(sou='111345677', pin='45', man='569')
-        outs, shanten = ai.calculate_outs(tiles)
+        outs, shanten = ai.calculate_outs(tiles, tiles)
 
         self.assertEqual(shanten, 1)
         self.assertEqual(outs[0]['discard'], 23)
@@ -33,7 +33,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         self.assertEqual(outs[0]['tiles_count'], 16)
 
         tiles = self._string_to_136_array(sou='11145677', pin='345', man='569')
-        outs, shanten = ai.calculate_outs(tiles)
+        outs, shanten = ai.calculate_outs(tiles, tiles)
 
         self.assertEqual(shanten, 0)
         self.assertEqual(outs[0]['discard'], 8)
@@ -41,7 +41,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         self.assertEqual(outs[0]['tiles_count'], 8)
 
         tiles = self._string_to_136_array(sou='11145677', pin='345', man='456')
-        outs, shanten = ai.calculate_outs(tiles)
+        outs, shanten = ai.calculate_outs(tiles, tiles)
 
         self.assertEqual(shanten, Shanten.AGARI_STATE)
         self.assertEqual(len(outs), 0)
@@ -114,59 +114,57 @@ class AITestCase(unittest.TestCase, TestMixin):
         table = Table()
         player = Player(0, 0, table)
 
-        tiles = self._string_to_136_array(sou='123678', pin='258', honors='4455')
-        tile = self._string_to_136_array(honors='4')[0]
+        tiles = self._string_to_136_array(sou='123678', pin='25899', honors='44')
+        # 4 honor
+        tile = 122
         player.init_hand(tiles)
 
         # we don't need to open hand with not our wind
         meld, _ = player.try_to_call_meld(tile, 3)
         self.assertEqual(meld, None)
 
-        # with dragon let's open our hand
-        tile = self._string_to_136_array(honors='5')[0]
+        # with dragon pair in hand let's open our hand
+        tiles = self._string_to_136_array(sou='12368', pin='2358', honors='4455')
+        tile = 122
+        player.init_hand(tiles)
         meld, _ = player.try_to_call_meld(tile, 3)
-
         self.assertNotEqual(meld, None)
         player.add_called_meld(meld)
+        player.tiles.append(tile)
+
         self.assertEqual(meld.type, Meld.PON)
-        self.assertEqual(meld.tiles, [124, 124, 124])
+        self.assertEqual(meld.tiles, [120, 121, 122])
         self.assertEqual(len(player.closed_hand), 11)
         self.assertEqual(len(player.tiles), 14)
         player.discard_tile()
 
-        # once hand was opened, we can open set of not our winds
-        tile = self._string_to_136_array(honors='4')[0]
+        tile = 126
         meld, _ = player.try_to_call_meld(tile, 3)
         self.assertNotEqual(meld, None)
         player.add_called_meld(meld)
+        player.tiles.append(tile)
+
         self.assertEqual(meld.type, Meld.PON)
-        self.assertEqual(meld.tiles, [120, 120, 120])
-        self.assertEqual(len(player.closed_hand), 9)
+        self.assertEqual(meld.tiles, [124, 125, 126])
+        self.assertEqual(len(player.closed_hand), 8)
         self.assertEqual(len(player.tiles), 14)
+        player.discard_tile()
 
-    def test_continue_to_call_melds_with_already_opened_hand(self):
-        table = Table()
-        player = Player(0, 0, table)
-
-        tiles = self._string_to_136_array(sou='123678', pin='25899', honors='55')
-        tile = self._string_to_136_array(pin='7')[0]
-        player.init_hand(tiles)
-
-        meld, _ = player.try_to_call_meld(tile, 3)
+        tile = self._string_to_136_tile(sou='7')
+        # we can call chi only from left player
+        meld, _ = player.try_to_call_meld(tile, 2)
         self.assertEqual(meld, None)
 
-        tiles = self._string_to_136_array(sou='123678', pin='2589')
-        player.init_hand(tiles)
-        meld_tiles = [self._string_to_136_tile(honors='5'), self._string_to_136_tile(honors='5'),
-                      self._string_to_136_tile(honors='5')]
-        player.add_called_meld(self._make_meld(Meld.PON, meld_tiles))
-
-        # we have already opened yakuhai pon,
-        # so we can continue to open hand
-        # if it will improve our shanten
-        tile = self._string_to_136_array(pin='7')[0]
-        meld, tile_to_discard = player.try_to_call_meld(tile, 3)
+        meld, _ = player.try_to_call_meld(tile, 3)
         self.assertNotEqual(meld, None)
+        player.add_called_meld(meld)
+        player.tiles.append(tile)
+
         self.assertEqual(meld.type, Meld.CHI)
-        self.assertEqual(meld.tiles, [60, 64, 68])
-        self.assertEqual(tile_to_discard, 52)
+        self.assertEqual(meld.tiles, [92, 96, 100])
+        self.assertEqual(len(player.closed_hand), 5)
+        self.assertEqual(len(player.tiles), 14)
+
+        self.assertEqual(player.in_tempai, False)
+        player.discard_tile()
+        self.assertEqual(player.in_tempai, True)

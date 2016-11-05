@@ -172,17 +172,6 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(clients[2].player.in_riichi, False)
         self.assertEqual(clients[3].player.in_riichi, True)
 
-    # def test_debug(self):
-    #     game.game_manager.shuffle_seed = lambda: 0.39144288381776615
-    #
-    #     clients = [Client() for _ in range(0, 4)]
-    #     manager = GameManager(clients)
-    #     manager.init_game()
-    #     manager.set_dealer(1)
-    #     manager.init_round()
-    #
-    #     manager.play_round()
-
     def test_play_round_and_win_by_tsumo(self):
         game.game_manager.shuffle_seed = lambda: 0.7662959679647414
 
@@ -386,25 +375,27 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
 
         winner = clients[0]
         manager.set_dealer(0)
-        winner.player.in_riichi = True
+        manager.dora_indicators = [100]
+        # to avoid ura-dora, because of this test can fail
+        winner.player.in_riichi = False
 
         tiles = self._string_to_136_array(sou='123567', pin='12345', man='11')
         win_tile = self._string_to_136_tile(pin='6')
         manager.process_the_end_of_the_round(tiles, win_tile, winner, None, True)
 
-        # 3900 + riichi stick (1000) + honba stick (300) = 5200
-        # 1400 from each other player
-        self.assertEqual(winner.player.scores, 30200)
-        self.assertEqual(clients[1].player.scores, 23600)
-        self.assertEqual(clients[2].player.scores, 23600)
-        self.assertEqual(clients[3].player.scores, 23600)
+        # 2400 + riichi stick (1000) = 3400
+        # 700 from each other player + 100 honba payment
+        self.assertEqual(winner.player.scores, 28400)
+        self.assertEqual(clients[1].player.scores, 24200)
+        self.assertEqual(clients[2].player.scores, 24200)
+        self.assertEqual(clients[3].player.scores, 24200)
 
         for client in clients:
             client.player.scores = 25000
 
         winner = clients[0]
         manager.set_dealer(1)
-        winner.player.in_riichi = True
+        winner.player.in_riichi = False
         manager.riichi_sticks = 0
         manager.honba_sticks = 0
 
@@ -412,11 +403,11 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         win_tile = self._string_to_136_tile(pin='6')
         manager.process_the_end_of_the_round(tiles, win_tile, winner, None, True)
 
-        # 1300 from dealer and 700 from other players
-        self.assertEqual(winner.player.scores, 27700)
-        self.assertEqual(clients[1].player.scores, 24300)
-        self.assertEqual(clients[2].player.scores, 23700)
-        self.assertEqual(clients[3].player.scores, 24300)
+        # 700 from dealer and 400 from other players
+        self.assertEqual(winner.player.scores, 26500)
+        self.assertEqual(clients[1].player.scores, 24600)
+        self.assertEqual(clients[2].player.scores, 24300)
+        self.assertEqual(clients[3].player.scores, 24600)
 
     def test_change_dealer_after_end_of_the_round(self):
         clients = [Client() for _ in range(0, 4)]
@@ -457,6 +448,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
 
         winner = clients[0]
         loser = clients[1]
+        manager.dora_indicators = [100]
         loser.player.scores = 0
 
         tiles = self._string_to_136_array(sou='123567', pin='12345', man='11')
@@ -484,3 +476,39 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
 
         result = manager.process_the_end_of_the_round(list(range(0, 13)), 0, clients[0], None, True)
         self.assertEqual(result['is_game_end'], True)
+
+    def test_ron_with_not_correct_hand(self):
+        """
+        With open for yakuhai strategy we can have situation like this
+        234567m67s66z + 8s + [444z]
+        We have open hand and we don't have yaku in the hand
+        In that case we can't call ron.
+        Round should be ended without exceptions
+        """
+        game.game_manager.shuffle_seed = lambda: 0.5082102963203375
+
+        clients = [Client() for _ in range(0, 4)]
+        manager = GameManager(clients)
+        manager.init_game()
+        manager.set_dealer(1)
+        manager.init_round()
+
+        manager.play_round()
+
+    def test_tsumo_with_not_correct_hand(self):
+        """
+        With open for yakuhai strategy we can have situation like this
+        234567m67s66z + 8s + [444z]
+        We have open hand and we don't have yaku in the hand
+        In that case we can't call tsumo.
+        Round should be ended without exceptions
+        """
+        game.game_manager.shuffle_seed = lambda: 0.26483054978923926
+
+        clients = [Client() for _ in range(0, 4)]
+        manager = GameManager(clients)
+        manager.init_game()
+        manager.set_dealer(1)
+        manager.init_round()
+
+        manager.play_round()

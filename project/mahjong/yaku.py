@@ -9,8 +9,8 @@ class Yaku(object):
         self.is_yakuman = is_yakuman
 
     def __str__(self):
-        if self.name == 'Dora':
-            return 'Dora {}'.format(self.han['open'])
+        if self.name == 'Dora' or self.name == 'Aka Dora':
+            return '{} {}'.format(self.name, self.han['open'])
         else:
             return self.name
 

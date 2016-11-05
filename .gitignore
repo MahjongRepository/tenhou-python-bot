@@ -12,6 +12,7 @@ tests_validate_hand.py
 loader.py
 *.db
 temp
+*.log
 
 replays/data/*
 

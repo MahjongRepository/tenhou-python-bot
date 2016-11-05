@@ -14,10 +14,11 @@ class Shanten(object):
     number_isolated_tiles = 0
     min_shanten = 0
 
-    def calculate_shanten(self, tiles):
+    def calculate_shanten(self, tiles, is_open_hand=False):
         """
         Return the count of tiles before tempai
         :param tiles: 34 tiles format array
+        :param is_open_hand:
         :return: int
         """
         self._init(tiles)
@@ -27,7 +28,9 @@ class Shanten(object):
         if count_of_tiles > 14:
             return -2
 
-        self.min_shanten = self._scan_chitoitsu_and_kokushi()
+        if not is_open_hand:
+            self.min_shanten = self._scan_chitoitsu_and_kokushi()
+
         self._remove_character_tiles(count_of_tiles)
 
         init_mentsu = math.floor((14 - count_of_tiles) / 3)

@@ -2,6 +2,7 @@
 import math
 import itertools
 
+import copy
 from functools import reduce
 
 from mahjong.ai.agari import Agari
@@ -64,6 +65,8 @@ class FinishedHand(object):
         if not open_sets:
             open_sets = []
         else:
+            # it is important to work with copy of list
+            open_sets = copy.deepcopy(open_sets)
             # cast 136 format to 34 format
             for item in open_sets:
                 item[0] //= 4
@@ -78,6 +81,8 @@ class FinishedHand(object):
         if not called_kan_indices:
             called_kan_indices = []
         else:
+            # it is important to work with copy of list
+            called_kan_indices = copy.deepcopy(called_kan_indices)
             kan_indices_136 = called_kan_indices
             called_kan_indices = [x // 4 for x in called_kan_indices]
 
@@ -339,28 +344,6 @@ class FinishedHand(object):
             if is_chitoitsu:
                 fu = 25
 
-            tiles_for_dora = tiles + kan_indices_136
-            count_of_dora = 0
-            count_of_aka_dora = 0
-            for tile in tiles_for_dora:
-                count_of_dora += plus_dora(tile, dora_indicators)
-
-            for tile in tiles_for_dora:
-                if is_aka_dora(tile):
-                    count_of_aka_dora += 1
-
-            if count_of_dora:
-                yaku_item = yaku.dora
-                yaku_item.han['open'] = count_of_dora
-                yaku_item.han['closed'] = count_of_dora
-                hand_yaku.append(yaku_item)
-
-            if count_of_aka_dora:
-                yaku_item = yaku.aka_dora
-                yaku_item.han['open'] = count_of_aka_dora
-                yaku_item.han['closed'] = count_of_aka_dora
-                hand_yaku.append(yaku_item)
-
             # yakuman is not connected with other yaku
             yakuman_list = [x for x in hand_yaku if x.is_yakuman]
             if yakuman_list:
@@ -381,7 +364,36 @@ class FinishedHand(object):
             if han == 0 or (han == 1 and fu < 30):
                 error = 'Not valid han ({0}) and fu ({1})'.format(han, fu)
                 cost = None
-            else:
+            # else:
+
+            # we can add dora han only if we have other yaku in hand
+            # and if we don't have yakuman
+            if not yakuman_list:
+                tiles_for_dora = tiles + kan_indices_136
+                count_of_dora = 0
+                count_of_aka_dora = 0
+                for tile in tiles_for_dora:
+                    count_of_dora += plus_dora(tile, dora_indicators)
+
+                for tile in tiles_for_dora:
+                    if is_aka_dora(tile):
+                        count_of_aka_dora += 1
+
+                if count_of_dora:
+                    yaku_item = yaku.dora
+                    yaku_item.han['open'] = count_of_dora
+                    yaku_item.han['closed'] = count_of_dora
+                    hand_yaku.append(yaku_item)
+                    han += count_of_dora
+
+                if count_of_aka_dora:
+                    yaku_item = yaku.aka_dora
+                    yaku_item.han['open'] = count_of_aka_dora
+                    yaku_item.han['closed'] = count_of_aka_dora
+                    hand_yaku.append(yaku_item)
+                    han += count_of_aka_dora
+
+            if not error:
                 cost = self.calculate_scores(han, fu, is_tsumo, is_dealer)
 
             calculated_hand = {

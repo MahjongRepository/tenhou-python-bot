@@ -4,7 +4,6 @@ from urllib.parse import unquote
 from bs4 import BeautifulSoup
 
 from mahjong.meld import Meld
-from mahjong.tile import Tile
 
 
 class TenhouDecoder(object):
@@ -157,7 +156,7 @@ class TenhouDecoder(object):
         base_and_called = data >> 10
         base = base_and_called // 3
         base = (base // 7) * 9 + base % 7
-        meld.tiles = [Tile(t0 + 4 * (base + 0)), Tile(t1 + 4 * (base + 1)), Tile(t2 + 4 * (base + 2))]
+        meld.tiles = [t0 + 4 * (base + 0), t1 + 4 * (base + 1), t2 + 4 * (base + 2)]
 
     def parse_pon(self, data, meld):
         t4 = (data >> 5) & 0x3
@@ -166,20 +165,20 @@ class TenhouDecoder(object):
         base = base_and_called // 3
         if data & 0x8:
             meld.type = Meld.PON
-            meld.tiles = [Tile(t0 + 4 * base), Tile(t1 + 4 * base), Tile(t2 + 4 * base)]
+            meld.tiles = [t0 + 4 * base, t1 + 4 * base, t2 + 4 * base]
         else:
             meld.type = Meld.CHAKAN
-            meld.tiles = [Tile(t0 + 4 * base), Tile(t1 + 4 * base), Tile(t2 + 4 * base), Tile(t4 + 4 * base)]
+            meld.tiles = [t0 + 4 * base, t1 + 4 * base, t2 + 4 * base, t4 + 4 * base]
 
     def parse_kan(self, data, meld):
         base_and_called = data >> 8
         base = base_and_called // 4
         meld.type = Meld.KAN
-        meld.tiles = [Tile(4 * base), Tile(1 + 4 * base), Tile(2 + 4 * base), Tile(3 + 4 * base)]
+        meld.tiles = [4 * base, 1 + 4 * base, 2 + 4 * base, 3 + 4 * base]
 
     def parse_nuki(self, data, meld):
         meld.type = Meld.NUKI
-        meld.tiles = [Tile(data >> 8)]
+        meld.tiles = [data >> 8]
 
     def parse_dora_indicator(self, message):
         soup = BeautifulSoup(message, 'html.parser')

@@ -76,6 +76,7 @@ class GameManager(object):
         seed_value = random()
 
         self.players_with_open_hands = []
+        self.dora_indicators = []
 
         self.tiles = [i for i in range(0, 136)]
 
@@ -98,7 +99,7 @@ class GameManager(object):
             player_scores = list(player_scores)
 
             client.table.init_round(
-                self.round_number,
+                self._unique_dealers,
                 self.honba_sticks,
                 self.riichi_sticks,
                 self.dora_indicators[0],
@@ -149,12 +150,34 @@ class GameManager(object):
             # win by tsumo after tile draw
             if is_win:
                 tiles.remove(tile)
-                result = self.process_the_end_of_the_round(tiles=tiles,
-                                                           win_tile=tile,
-                                                           winner=current_client,
-                                                           loser=None,
-                                                           is_tsumo=True)
-                return result
+                can_win = True
+
+                # with open hand it can be situation when we in the tempai
+                # but our hand doesn't contain any yaku
+                # in that case we can't call ron
+                if not current_client.player.in_riichi:
+                    result = self.finished_hand.estimate_hand_value(tiles=tiles + [tile],
+                                                                    win_tile=tile,
+                                                                    is_tsumo=True,
+                                                                    is_riichi=False,
+                                                                    open_sets=current_client.player.meld_tiles,
+                                                                    dora_indicators=self.dora_indicators,
+                                                                    player_wind=current_client.player.player_wind,
+                                                                    round_wind=current_client.player.table.round_wind)
+                    can_win = result['error'] is None
+
+                if can_win:
+                    result = self.process_the_end_of_the_round(tiles=tiles,
+                                                               win_tile=tile,
+                                                               winner=current_client,
+                                                               loser=None,
+                                                               is_tsumo=True)
+                    return result
+                else:
+                    # we can't win
+                    # so let's add tile back to hand
+                    # and discard it later
+                    tiles.append(tile)
 
             # if not in riichi, let's decide what tile to discard
             if not current_client.player.in_riichi:
@@ -174,7 +197,8 @@ class GameManager(object):
             possible_melds = []
             for other_client in self.clients:
                 # there is no need to check the current client
-                if other_client == current_client:
+                # or check client in riichi
+                if other_client == current_client or other_client.player.in_riichi:
                     continue
 
                 meld, discarded_tile = other_client.player.try_to_call_meld(tile,
@@ -202,11 +226,14 @@ class GameManager(object):
                 current_client.add_called_meld(meld)
                 current_client.player.tiles.append(tile)
 
-                current_client.discard_tile(tile_to_discard)
-
-                self.check_clients_possible_ron(current_client, tile_to_discard)
-
                 logger.info('Called meld: {} by {}'.format(meld, current_client.player.name))
+
+                # we need to double validate that we are doing fine
+                if tile_to_discard not in current_client.player.closed_hand:
+                    raise ValueError("We can't discard a tile from the opened part of the hand")
+
+                current_client.discard_tile(tile_to_discard)
+                self.check_clients_possible_ron(current_client, tile_to_discard)
             else:
                 self.current_client_seat = self._move_position(self.current_client_seat)
 
@@ -305,6 +332,21 @@ class GameManager(object):
             return False
 
         tiles = client.player.tiles
+
+        # with open hand it can be situation when we in the tempai
+        # but our hand doesn't contain any yaku
+        # in that case we can't call ron
+        if not client.player.in_riichi:
+            result = self.finished_hand.estimate_hand_value(tiles=tiles + [win_tile],
+                                                            win_tile=win_tile,
+                                                            is_tsumo=False,
+                                                            is_riichi=False,
+                                                            open_sets=client.player.meld_tiles,
+                                                            dora_indicators=self.dora_indicators,
+                                                            player_wind=client.player.player_wind,
+                                                            round_wind=client.player.table.round_wind)
+            return result['error'] is None
+
         is_ron = self.agari.is_agari(TilesConverter.to_34_array(tiles + [win_tile]))
         return is_ron
 
@@ -356,12 +398,19 @@ class GameManager(object):
         self.round_number += 1
 
         if winner:
+            # add one more dora for riichi win
+            if winner.player.in_riichi:
+                self.dora_indicators.append(self.dead_wall[9])
+
             hand_value = self.finished_hand.estimate_hand_value(tiles=tiles + [win_tile],
                                                                 win_tile=win_tile,
                                                                 is_tsumo=is_tsumo,
                                                                 is_riichi=winner.player.in_riichi,
                                                                 is_dealer=winner.player.is_dealer,
-                                                                )
+                                                                open_sets=winner.player.meld_tiles,
+                                                                dora_indicators=self.dora_indicators,
+                                                                player_wind=winner.player.player_wind,
+                                                                round_wind=winner.player.table.round_wind)
 
             if hand_value['error']:
                 logger.error("Can't estimate a hand: {}. Error: {}".format(
@@ -369,6 +418,9 @@ class GameManager(object):
                     hand_value['error']
                 ))
                 raise ValueError('Not correct hand')
+
+            logger.info('Dora indicators: {}'.format(TilesConverter.to_one_line_string(self.dora_indicators)))
+            logger.info('Hand yaku: {}'.format(', '.join(str(x) for x in hand_value['hand_yaku'])))
 
             riichi_bonus = self.riichi_sticks * 1000
             self.riichi_sticks = 0
@@ -397,7 +449,8 @@ class GameManager(object):
                 win_amount = calculated_cost + riichi_bonus + honba_bonus
                 winner.player.scores += win_amount
 
-                logger.info('Win:  {0} +{1:,d}'.format(winner.player.name, win_amount))
+                logger.info('Win:  {0} +{1:,d} +{2:,d}'.format(winner.player.name, calculated_cost,
+                                                               riichi_bonus + honba_bonus))
 
                 for client in self.clients:
                     if client != winner:

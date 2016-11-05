@@ -5,7 +5,6 @@ from functools import reduce
 from mahjong.constants import EAST, SOUTH, WEST, NORTH
 from utils.settings_handler import settings
 from mahjong.ai.shanten import Shanten
-from mahjong.tile import Tile
 
 logger = logging.getLogger('tenhou')
 
@@ -30,6 +29,7 @@ class Player(object):
     tiles = []
     melds = []
     table = None
+    last_draw = None
     in_tempai = False
     in_riichi = False
     in_defence_mode = False
@@ -79,6 +79,7 @@ class Player(object):
         self.tiles = []
         self.safe_tiles = []
 
+        self.last_draw = None
         self.in_tempai = False
         self.in_riichi = False
         self.in_defence_mode = False
@@ -91,15 +92,20 @@ class Player(object):
         self.melds.append(meld)
 
     def add_discarded_tile(self, tile):
-        self.discards.append(Tile(tile))
+        self.discards.append(tile)
 
     def init_hand(self, tiles):
-        self.tiles = [Tile(i) for i in tiles]
+        self.tiles = tiles
+
+        self.ai.determine_strategy()
 
     def draw_tile(self, tile):
-        self.tiles.append(Tile(tile))
+        self.last_draw = tile
+        self.tiles.append(tile)
         # we need sort it to have a better string presentation
         self.tiles = sorted(self.tiles)
+
+        self.ai.determine_strategy()
 
     def discard_tile(self, tile=None):
         """
@@ -109,9 +115,11 @@ class Player(object):
         :return:
         """
         tile_to_discard = tile or self.ai.discard_tile()
+
         if tile_to_discard != Shanten.AGARI_STATE:
             self.add_discarded_tile(tile_to_discard)
             self.tiles.remove(tile_to_discard)
+
         return tile_to_discard
 
     def can_call_riichi(self):
@@ -126,13 +134,6 @@ class Player(object):
         ])
 
     def try_to_call_meld(self, tile, enemy_seat):
-        """
-        Determine should we call a meld or not.
-        If yes, it will add tile to the player's hand and will return Meld object
-        :param tile: 136 format tile
-        :param enemy_seat: 1, 2, 3
-        :return: meld and tile to discard after called open set
-        """
         return self.ai.try_to_call_meld(tile, enemy_seat)
 
     @property
@@ -162,3 +163,7 @@ class Player(object):
         if meld_tiles:
             meld_tiles = reduce(lambda z, y: z + y, [x.tiles for x in self.melds])
         return [item for item in tiles if item not in meld_tiles]
+
+    @property
+    def meld_tiles(self):
+        return [x.tiles for x in self.melds][:]

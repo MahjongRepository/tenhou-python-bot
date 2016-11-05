@@ -110,61 +110,14 @@ class AITestCase(unittest.TestCase, TestMixin):
         player.discard_tile()
         self.assertEqual(player.in_tempai, True)
 
-    def test_open_hand_with_yakuhai_pair_in_hand(self):
+    def test_not_open_hand_in_riichi(self):
         table = Table()
         player = Player(0, 0, table)
 
-        tiles = self._string_to_136_array(sou='123678', pin='25899', honors='44')
-        # 4 honor
-        tile = 122
-        player.init_hand(tiles)
+        player.in_riichi = True
 
-        # we don't need to open hand with not our wind
-        meld, _ = player.try_to_call_meld(tile, 3)
-        self.assertEqual(meld, None)
-
-        # with dragon pair in hand let's open our hand
         tiles = self._string_to_136_array(sou='12368', pin='2358', honors='4455')
-        tile = 122
+        tile = self._string_to_136_tile(honors='5')
         player.init_hand(tiles)
         meld, _ = player.try_to_call_meld(tile, 3)
-        self.assertNotEqual(meld, None)
-        player.add_called_meld(meld)
-        player.tiles.append(tile)
-
-        self.assertEqual(meld.type, Meld.PON)
-        self.assertEqual(meld.tiles, [120, 121, 122])
-        self.assertEqual(len(player.closed_hand), 11)
-        self.assertEqual(len(player.tiles), 14)
-        player.discard_tile()
-
-        tile = 126
-        meld, _ = player.try_to_call_meld(tile, 3)
-        self.assertNotEqual(meld, None)
-        player.add_called_meld(meld)
-        player.tiles.append(tile)
-
-        self.assertEqual(meld.type, Meld.PON)
-        self.assertEqual(meld.tiles, [124, 125, 126])
-        self.assertEqual(len(player.closed_hand), 8)
-        self.assertEqual(len(player.tiles), 14)
-        player.discard_tile()
-
-        tile = self._string_to_136_tile(sou='7')
-        # we can call chi only from left player
-        meld, _ = player.try_to_call_meld(tile, 2)
         self.assertEqual(meld, None)
-
-        meld, _ = player.try_to_call_meld(tile, 3)
-        self.assertNotEqual(meld, None)
-        player.add_called_meld(meld)
-        player.tiles.append(tile)
-
-        self.assertEqual(meld.type, Meld.CHI)
-        self.assertEqual(meld.tiles, [92, 96, 100])
-        self.assertEqual(len(player.closed_hand), 5)
-        self.assertEqual(len(player.tiles), 14)
-
-        self.assertEqual(player.in_tempai, False)
-        player.discard_tile()
-        self.assertEqual(player.in_tempai, True)

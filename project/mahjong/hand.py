@@ -1326,13 +1326,13 @@ class HandDivider(object):
 
         return hands
 
-    def find_pairs(self, tiles_34):
+    def find_pairs(self, tiles_34, first_index=0, second_index=33):
         """
         Find all possible pairs in the hand and return their indices
         :return: array of pair indices
         """
         pair_indices = []
-        for x in range(0, 34):
+        for x in range(first_index, second_index + 1):
             # ignore pon of honor tiles, because it can't be a part of pair
             if x in HONOR_INDICES and tiles_34[x] != 2:
                 continue

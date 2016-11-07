@@ -68,16 +68,37 @@ class BaseStrategy(object):
             closed_hand_34 = TilesConverter.to_34_array(closed_hand + [tile])
 
             combinations = []
+            first_index = 0
+            second_index = 0
+            first_limit = 0
+            second_limit = 0
             if is_man(discarded_tile):
-                combinations = self.player.ai.hand_divider.find_valid_combinations(closed_hand_34, 0, 8, True)
+                first_index = 0
+                second_index = 8
             elif is_pin(discarded_tile):
-                combinations = self.player.ai.hand_divider.find_valid_combinations(closed_hand_34, 9, 17, True)
+                first_index = 9
+                second_index = 17
             elif is_sou(discarded_tile):
-                combinations = self.player.ai.hand_divider.find_valid_combinations(closed_hand_34, 18, 26, True)
-            else:
+                first_index = 18
+                second_index = 26
+
+            if second_index == 0:
                 # honor tiles
                 if closed_hand_34[discarded_tile] == 3:
                     combinations = [[[discarded_tile] * 3]]
+            else:
+                # to avoid not necessary calculations
+                # we can check only tiles around +-2 discarded tile
+                first_limit = discarded_tile - 2
+                if first_limit < first_index:
+                    first_limit = 0
+                second_limit = discarded_tile + 2
+                if second_limit > second_index:
+                    second_limit = second_index
+
+                combinations = self.player.ai.hand_divider.find_valid_combinations(closed_hand_34,
+                                                                                   first_limit,
+                                                                                   second_limit, True)
 
             if combinations:
                 combinations = combinations[0]
@@ -95,8 +116,7 @@ class BaseStrategy(object):
                         possible_melds.append(combination)
 
             if len(possible_melds):
-                # TODO add logic to find best meld
-                combination = possible_melds[0]
+                combination = self._find_best_meld_to_open(possible_melds, closed_hand_34, first_limit, second_limit)
                 meld_type = is_chi(combination) and Meld.CHI or Meld.PON
                 combination.remove(discarded_tile)
 
@@ -130,3 +150,67 @@ class BaseStrategy(object):
                 return meld, tile_to_discard
 
         return None, None
+
+    def _find_best_meld_to_open(self, possible_melds, closed_hand_34, first_limit, second_limit):
+        """
+        For now best meld will be the meld with higher count of remaining sets in the hand
+        :param possible_melds:
+        :param closed_hand_34:
+        :param first_limit:
+        :param second_limit:
+        :return:
+        """
+
+        if len(possible_melds) == 1:
+            return possible_melds[0]
+
+        best_meld = None
+        best_option = -2
+
+        for combination in possible_melds:
+            remaining_hand = []
+            local_closed_hand_34 = closed_hand_34[:]
+
+            # remove combination from hand and let's see what we will hand in the end
+            local_closed_hand_34[combination[0]] -= 1
+            local_closed_hand_34[combination[1]] -= 1
+            local_closed_hand_34[combination[2]] -= 1
+
+            pair_indices = self.player.ai.hand_divider.find_pairs(local_closed_hand_34,
+                                                                  first_limit,
+                                                                  second_limit)
+
+            if pair_indices:
+                for pair_index in pair_indices:
+                    pair_34 = local_closed_hand_34[:]
+                    pair_34[pair_index] -= 2
+
+                    hand = [[[pair_index] * 2]]
+
+                    pair_combinations = self.player.ai.hand_divider.find_valid_combinations(pair_34,
+                                                                                            first_limit,
+                                                                                            second_limit, True)
+                    if pair_combinations:
+                        hand.append(pair_combinations)
+
+                    remaining_hand.append(hand)
+
+            local_combinations = self.player.ai.hand_divider.find_valid_combinations(local_closed_hand_34,
+                                                                                     first_limit,
+                                                                                     second_limit, True)
+
+            if local_combinations:
+                for pair_index in pair_indices:
+                    local_combinations.append([[pair_index] * 2])
+                remaining_hand.append(local_combinations)
+
+            most_long_hand = -1
+            for item in remaining_hand:
+                if len(item) > most_long_hand:
+                    most_long_hand = len(item)
+
+            if most_long_hand > best_option:
+                best_option = most_long_hand
+                best_meld = combination
+
+        return best_meld

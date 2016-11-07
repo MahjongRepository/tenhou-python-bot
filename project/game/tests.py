@@ -172,6 +172,29 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(clients[2].player.in_riichi, False)
         self.assertEqual(clients[3].player.in_riichi, True)
 
+    def test_debug(self):
+        game.game_manager.shuffle_seed = lambda: 0.5559848260363641
+
+        # # '33456m456p345s555z'
+        # tiles_34 = self._string_to_34_array(man='33456', pin='456', sou='345', honors='555')
+        # open_sets = [self._string_to_open_34_set(man='345'), self._string_to_open_34_set(pin='456')]
+        # result = hand.divide_hand(tiles_34, open_sets, [])
+        # self.assertEqual(len(result), 1)
+
+        clients = [Client() for _ in range(0, 4)]
+        manager = GameManager(clients)
+
+        # clients = [Client(use_previous_ai_version=True) for _ in range(0, 3)]
+        # clients += [Client(use_previous_ai_version=False)]
+        # manager = GameManager(clients)
+
+        manager.init_game()
+        manager.set_dealer(3)
+        manager._unique_dealers = 1
+        manager.init_round()
+
+        manager.play_round()
+
     def test_play_round_and_win_by_tsumo(self):
         game.game_manager.shuffle_seed = lambda: 0.7662959679647414
 

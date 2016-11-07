@@ -121,3 +121,25 @@ class AITestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
         meld, _ = player.try_to_call_meld(tile, 3)
         self.assertEqual(meld, None)
+
+    def test_chose_right_set_to_open_hand(self):
+        table = Table()
+        player = Player(0, 0, table)
+
+        tiles = self._string_to_136_array(man='335688', pin='22', sou='345', honors='55')
+        tile = self._string_to_136_tile(man='4')
+        player.init_hand(tiles)
+        meld, _ = player.try_to_call_meld(tile, 3)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(meld.type, Meld.CHI)
+        # we should open hand with 456m, not with 345m
+        self.assertEqual(meld.tiles, [12, 16, 20])
+
+        tiles = self._string_to_136_array(man='335666', pin='22', sou='345', honors='55')
+        tile = self._string_to_136_tile(man='4')
+        player.init_hand(tiles)
+        meld, _ = player.try_to_call_meld(tile, 3)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(meld.type, Meld.CHI)
+        # we should open hand with 345m, not with 456m
+        self.assertEqual(meld.tiles, [8, 12, 16])

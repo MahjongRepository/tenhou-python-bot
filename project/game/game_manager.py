@@ -223,6 +223,11 @@ class GameManager(object):
                 current_client = self._get_current_client()
                 self.players_with_open_hands.append(self.current_client_seat)
 
+                logger.info('Hand: {} + {}'.format(
+                    TilesConverter.to_one_line_string(current_client.player.tiles),
+                    TilesConverter.to_one_line_string([tile])
+                ))
+
                 current_client.add_called_meld(meld)
                 current_client.player.tiles.append(tile)
 

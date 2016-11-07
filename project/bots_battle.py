@@ -10,7 +10,7 @@ from tqdm import trange
 from game.game_manager import GameManager
 from mahjong.client import Client
 
-TOTAL_HANCHANS = 30
+TOTAL_HANCHANS = 10
 
 
 def main():

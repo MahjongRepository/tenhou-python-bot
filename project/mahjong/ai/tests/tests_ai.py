@@ -50,26 +50,27 @@ class AITestCase(unittest.TestCase, TestMixin):
         table = Table()
         player = Player(0, 0, table)
 
-        tiles = self._string_to_136_array(sou='111345677', pin='15', man='56')
-        tile = self._string_to_136_array(man='9')[0]
+        tiles = self._string_to_136_array(sou='11134567', pin='159', man='45')
+        tile = self._string_to_136_tile(man='9')
         player.init_hand(tiles)
         player.draw_tile(tile)
 
         discarded_tile = player.discard_tile()
+        self.assertEqual(discarded_tile, 68)
+
+        player.draw_tile(self._string_to_136_tile(pin='4'))
+        discarded_tile = player.discard_tile()
         self.assertEqual(discarded_tile, 36)
 
-        player.draw_tile(self._string_to_136_array(pin='4')[0])
-
-        discarded_tile = player.discard_tile()
-        self.assertEqual(discarded_tile, 92)
-
-        player.draw_tile(self._string_to_136_array(pin='3')[0])
-
+        player.draw_tile(self._string_to_136_tile(pin='3'))
         discarded_tile = player.discard_tile()
         self.assertEqual(discarded_tile, 32)
 
-        player.draw_tile(self._string_to_136_array(man='4')[0])
+        player.draw_tile(self._string_to_136_tile(man='4'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(discarded_tile, 16)
 
+        player.draw_tile(self._string_to_136_tile(sou='8'))
         discarded_tile = player.discard_tile()
         self.assertEqual(discarded_tile, Shanten.AGARI_STATE)
 

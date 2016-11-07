@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from mahjong.ai.main import MainAI
-from mahjong.ai.shanten import Shanten
+from mahjong.ai.strategies.honitsu import HonitsuStrategy
 from mahjong.ai.strategies.main import BaseStrategy
 from mahjong.ai.strategies.yakuhai import YakuhaiStrategy
 from mahjong.meld import Meld
@@ -94,3 +93,66 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(meld.tiles, [92, 96, 100])
         self.assertEqual(len(player.closed_hand), 5)
         self.assertEqual(len(player.tiles), 14)
+
+
+class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
+
+    def test_should_activate_strategy(self):
+        table = Table()
+        player = Player(0, 0, table)
+        strategy = HonitsuStrategy(BaseStrategy.HONITSU, player)
+
+        tiles = self._string_to_136_array(sou='12355', man='12389', honors='123')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(), False)
+
+        tiles = self._string_to_136_array(sou='12355', man='2389', honors='1123')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(), True)
+
+    def test_suitable_tiles(self):
+        table = Table()
+        player = Player(0, 0, table)
+        strategy = HonitsuStrategy(BaseStrategy.HONITSU, player)
+
+        tiles = self._string_to_136_array(sou='12355', man='2389', honors='1123')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(), True)
+
+        tile = self._string_to_136_tile(man='1')
+        self.assertEqual(strategy.is_tile_suitable(tile), False)
+
+        tile = self._string_to_136_tile(pin='1')
+        self.assertEqual(strategy.is_tile_suitable(tile), False)
+
+        tile = self._string_to_136_tile(sou='1')
+        self.assertEqual(strategy.is_tile_suitable(tile), True)
+
+        tile = self._string_to_136_tile(honors='1')
+        self.assertEqual(strategy.is_tile_suitable(tile), True)
+
+    def test_open_hand_and_discard_tiles_logic(self):
+        table = Table()
+        player = Player(0, 0, table)
+
+        tiles = self._string_to_136_array(sou='112235589', man='23', honors='22')
+        player.init_hand(tiles)
+
+        # we don't need to call meld even if it improves our hand,
+        # because we are collecting honitsu
+        tile = self._string_to_136_tile(man='1')
+        meld, _ = player.try_to_call_meld(tile, 3)
+        self.assertEqual(meld, None)
+
+        # any honor tile is suitable
+        tile = self._string_to_136_tile(honors='2')
+        meld, _ = player.try_to_call_meld(tile, 3)
+        self.assertNotEqual(meld, None)
+
+        tile = self._string_to_136_tile(man='1')
+        player.draw_tile(tile)
+        tile_to_discard = player.discard_tile()
+
+        # we are in honitsu mode, so we should discard man suits
+        # 8 == 3m
+        self.assertEqual(tile_to_discard, 8)

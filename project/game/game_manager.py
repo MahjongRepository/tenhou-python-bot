@@ -238,7 +238,11 @@ class GameManager(object):
                     raise ValueError("We can't discard a tile from the opened part of the hand")
 
                 current_client.discard_tile(tile_to_discard)
-                self.check_clients_possible_ron(current_client, tile_to_discard)
+
+                # the end of the round
+                result = self.check_clients_possible_ron(current_client, tile_to_discard)
+                if result:
+                    return result
             else:
                 self.current_client_seat = self._move_position(self.current_client_seat)
 

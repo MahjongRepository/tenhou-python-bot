@@ -3,6 +3,7 @@ from mahjong.ai.agari import Agari
 from mahjong.ai.base import BaseAI
 from mahjong.ai.defence import Defence
 from mahjong.ai.shanten import Shanten
+from mahjong.ai.strategies.honitsu import HonitsuStrategy
 from mahjong.ai.strategies.main import BaseStrategy
 from mahjong.ai.strategies.yakuhai import YakuhaiStrategy
 from mahjong.constants import HAKU, CHUN, HATSU
@@ -115,6 +116,22 @@ class MainAI(BaseAI):
                     'waiting': raw_data[i]
                 }
 
+        # in honitsu mode we should discard tiles from other suit, even if it is better to save them
+        if self.current_strategy and self.current_strategy.type == BaseStrategy.HONITSU:
+            for i in range(0, 34):
+                if not tiles_34[i]:
+                    continue
+
+                if not closed_tiles_34[i]:
+                    continue
+
+                if not self.current_strategy.is_tile_suitable(i * 4):
+                    raw_data[i] = {
+                        'tile': i,
+                        'tiles_count': 1,
+                        'waiting': []
+                    }
+
         results = []
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
         for tile in range(0, len(tiles_34)):
@@ -136,6 +153,10 @@ class MainAI(BaseAI):
         # we need to discard honor tile first
         results = sorted(results, key=lambda x: (x['tiles_count'], x['discard']), reverse=True)
 
+        # in honitsu mode we should discard tiles from other suit, even if it is better to save them
+        if self.current_strategy and self.current_strategy.type == BaseStrategy.HONITSU:
+            results = sorted(results, key=lambda x: self.current_strategy.is_tile_suitable(x['discard'] * 4), reverse=False)
+
         return results, shanten
 
     def count_tiles(self, raw_data, tiles):
@@ -154,12 +175,17 @@ class MainAI(BaseAI):
         if self.current_strategy:
             return False
 
-        strategies = [YakuhaiStrategy(BaseStrategy.YAKUHAI, self.player)]
+        # order is important
+        strategies = [
+            YakuhaiStrategy(BaseStrategy.YAKUHAI, self.player),
+            HonitsuStrategy(BaseStrategy.HONITSU, self.player),
+        ]
 
         for strategy in strategies:
             if strategy.should_activate_strategy():
                 self.current_strategy = strategy
-                return True
+
+        return self.current_strategy and True or False
 
     @property
     def valued_honors(self):

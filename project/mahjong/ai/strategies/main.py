@@ -6,6 +6,7 @@ from mahjong.utils import is_man, is_pin, is_sou, is_chi, is_pon
 
 class BaseStrategy(object):
     YAKUHAI = 0
+    HONITSU = 1
 
     player = None
     type = None

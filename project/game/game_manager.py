@@ -5,6 +5,7 @@ from collections import deque
 from random import randint, shuffle, random
 
 from game.logger import set_up_logging
+from game.replay import Replay
 from mahjong.ai.agari import Agari
 from mahjong.client import Client
 from mahjong.hand import FinishedHand
@@ -44,6 +45,7 @@ class GameManager(object):
     _unique_dealers = 0
 
     def __init__(self, clients):
+
         self.tiles = []
         self.dead_wall = []
         self.dora_indicators = []
@@ -52,11 +54,12 @@ class GameManager(object):
 
         self.agari = Agari()
         self.finished_hand = FinishedHand()
+        self.replay = Replay()
 
     def init_game(self):
         """
-        Initial of the game.
-        Clients random placement and dealer selection
+        Beginning of the game.
+        Clients random placement and dealer selection.
         """
         shuffle(self.clients, shuffle_seed)
         for i in range(0, len(self.clients)):
@@ -71,6 +74,10 @@ class GameManager(object):
         self._unique_dealers = 1
 
     def init_round(self):
+        """
+        Generate players hands, dead wall and dora indicators
+        """
+
         # each round should have personal seed
         global seed_value
         seed_value = random()
@@ -129,6 +136,8 @@ class GameManager(object):
         ))
         logger.info('Players: {0}'.format(self.players_sorted_by_scores()))
 
+        self.replay.init_round(self.clients, seed_value, self.dora_indicators[:], self.dealer)
+
     def play_round(self):
         continue_to_play = True
 
@@ -137,6 +146,7 @@ class GameManager(object):
             in_tempai = current_client.player.in_tempai
 
             tile = self._cut_tiles(1)[0]
+            self.replay.draw(current_client.seat, tile)
 
             # we don't need to add tile to the hand when we are in riichi
             if current_client.player.in_riichi:
@@ -184,6 +194,10 @@ class GameManager(object):
                 tile = current_client.discard_tile()
                 in_tempai = current_client.player.in_tempai
 
+            if in_tempai and current_client.player.can_call_riichi():
+                self.replay.riichi(current_client.seat, 1)
+
+            self.replay.discard(current_client.seat, tile)
             result = self.check_clients_possible_ron(current_client, tile)
             # the end of the round
             if result:
@@ -192,6 +206,7 @@ class GameManager(object):
             # if there is no challenger to ron, let's check can we call riichi with tile discard or not
             if in_tempai and current_client.player.can_call_riichi():
                 self.call_riichi(current_client)
+                self.replay.riichi(current_client.seat, 2)
 
             # let's check other players hand to possibility open sets
             possible_melds = []
@@ -232,12 +247,14 @@ class GameManager(object):
                 current_client.player.tiles.append(tile)
 
                 logger.info('Called meld: {} by {}'.format(meld, current_client.player.name))
+                self.replay.open_meld(current_client.seat, meld.type, meld.tiles)
 
                 # we need to double validate that we are doing fine
                 if tile_to_discard not in current_client.player.closed_hand:
                     raise ValueError("We can't discard a tile from the opened part of the hand")
 
                 current_client.discard_tile(tile_to_discard)
+                self.replay.discard(current_client.seat, tile)
 
                 # the end of the round
                 result = self.check_clients_possible_ron(current_client, tile_to_discard)
@@ -291,6 +308,7 @@ class GameManager(object):
 
         is_game_end = False
         self.init_game()
+        self.replay.init_game()
 
         played_rounds = 0
 
@@ -317,6 +335,7 @@ class GameManager(object):
             played_rounds += 1
 
         self.recalculate_players_position()
+        self.replay.end_game(self.clients)
 
         logger.info('Final Scores: {0}'.format(self.players_sorted_by_scores()))
         logger.info('The end of the game')
@@ -431,6 +450,14 @@ class GameManager(object):
             logger.info('Dora indicators: {}'.format(TilesConverter.to_one_line_string(self.dora_indicators)))
             logger.info('Hand yaku: {}'.format(', '.join(str(x) for x in hand_value['hand_yaku'])))
 
+            self.replay.win(winner.seat,
+                            loser and loser.seat or winner.seat,
+                            hand_value['han'],
+                            hand_value['fu'],
+                            hand_value['cost'],
+                            ', '.join(str(x) for x in hand_value['hand_yaku'])
+                            )
+
             riichi_bonus = self.riichi_sticks * 1000
             self.riichi_sticks = 0
             honba_bonus = self.honba_sticks * 300
@@ -474,23 +501,24 @@ class GameManager(object):
 
         # retake
         else:
-            tempai_users = 0
+            tempai_users = []
 
             for client in self.clients:
                 if client.player.in_tempai:
-                    tempai_users += 1
+                    tempai_users.append(client.seat)
 
-            if tempai_users == 0 or tempai_users == 4:
+            tempai_users_count = len(tempai_users)
+            if tempai_users_count == 0 or tempai_users_count == 4:
                 self.honba_sticks += 1
                 # no one in tempai, so deal should move
-                if tempai_users == 0:
+                if tempai_users_count == 0:
                     new_dealer = self._move_position(self.dealer)
                     self.set_dealer(new_dealer)
             else:
                 # 1 tempai user  will get 3000
                 # 2 tempai users will get 1500 each
                 # 3 tempai users will get 1000 each
-                scores_to_pay = 3000 / tempai_users
+                scores_to_pay = 3000 / tempai_users_count
                 for client in self.clients:
                     if client.player.in_tempai:
                         client.player.scores += scores_to_pay
@@ -500,7 +528,9 @@ class GameManager(object):
                         if client.player.is_dealer:
                             self.honba_sticks += 1
                     else:
-                        client.player.scores -= 3000 / (4 - tempai_users)
+                        client.player.scores -= 3000 / (4 - tempai_users_count)
+
+            self.replay.retake(tempai_users)
 
         # if someone has negative scores,
         # we need to end the game

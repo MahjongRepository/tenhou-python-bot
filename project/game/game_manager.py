@@ -260,8 +260,8 @@ class GameManager(object):
                 result = self.check_clients_possible_ron(current_client, tile_to_discard)
                 if result:
                     return result
-            else:
-                self.current_client_seat = self._move_position(self.current_client_seat)
+
+            self.current_client_seat = self._move_position(self.current_client_seat)
 
             # retake
             if not len(self.tiles):

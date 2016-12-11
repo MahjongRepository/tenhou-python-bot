@@ -106,16 +106,22 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
         self.assertEqual(strategy.should_activate_strategy(), False)
 
-        tiles = self._string_to_136_array(sou='12355', man='2389', honors='1123')
+        tiles = self._string_to_136_array(sou='12355', man='238', honors='11234')
         player.init_hand(tiles)
         self.assertEqual(strategy.should_activate_strategy(), True)
+
+        # with hand without pairs we not should go for honitsu,
+        # because it is far away from tempai
+        tiles = self._string_to_136_array(sou='12358', man='238', honors='12345')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(), False)
 
     def test_suitable_tiles(self):
         table = Table()
         player = Player(0, 0, table)
         strategy = HonitsuStrategy(BaseStrategy.HONITSU, player)
 
-        tiles = self._string_to_136_array(sou='12355', man='2389', honors='1123')
+        tiles = self._string_to_136_array(sou='12355', man='238', honors='11234')
         player.init_hand(tiles)
         self.assertEqual(strategy.should_activate_strategy(), True)
 

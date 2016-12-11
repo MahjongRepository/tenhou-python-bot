@@ -5,6 +5,8 @@ from mahjong.utils import is_sou, is_pin, is_man, is_honor
 
 
 class HonitsuStrategy(BaseStrategy):
+    REQUIRED_TILES = 10
+
     chosen_suit = None
 
     def should_activate_strategy(self):
@@ -35,10 +37,14 @@ class HonitsuStrategy(BaseStrategy):
         suits = sorted(suits, key=lambda x: x['count'], reverse=True)
 
         suit = suits[0]
+        count_of_pairs = 0
+        for x in range(0, 34):
+            if tiles[x] >= 2:
+                count_of_pairs += 1
 
-        if suit['count'] + honor['count'] >= 9:
+        if suit['count'] + honor['count'] >= HonitsuStrategy.REQUIRED_TILES:
             self.chosen_suit = suit['function']
-            return True
+            return count_of_pairs > 0
         else:
             return False
 

@@ -20,7 +20,7 @@ def set_up_logging():
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
 
-    file_name = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + '.log'
+    file_name = datetime.datetime.now().strftime('%Y-%m-%d %H_%M_%S') + '.log'
     fh = logging.FileHandler(os.path.join(logs_directory, file_name))
     fh.setLevel(logging.DEBUG)
 

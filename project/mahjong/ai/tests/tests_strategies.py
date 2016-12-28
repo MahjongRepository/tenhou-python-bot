@@ -3,6 +3,7 @@ import unittest
 
 from mahjong.ai.strategies.honitsu import HonitsuStrategy
 from mahjong.ai.strategies.main import BaseStrategy
+from mahjong.ai.strategies.tanyao import TanyaoStrategy
 from mahjong.ai.strategies.yakuhai import YakuhaiStrategy
 from mahjong.meld import Meld
 from mahjong.player import Player
@@ -162,3 +163,116 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         # we are in honitsu mode, so we should discard man suits
         # 8 == 3m
         self.assertEqual(tile_to_discard, 8)
+
+
+class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
+
+    def test_should_activate_strategy_and_terminal_pon_sets(self):
+        table = Table()
+        player = Player(0, 0, table)
+        strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
+
+        tiles = self._string_to_136_array(sou='234', man='3459', pin='233', honors='111')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(), False)
+
+        tiles = self._string_to_136_array(sou='234', man='3459', pin='233999')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(), False)
+
+        tiles = self._string_to_136_array(sou='234', man='3459', pin='233444')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(), True)
+
+    def test_should_activate_strategy_and_terminal_pairs(self):
+        table = Table()
+        player = Player(0, 0, table)
+        strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
+
+        tiles = self._string_to_136_array(sou='234', man='3459', pin='2399', honors='11')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(), False)
+
+        tiles = self._string_to_136_array(sou='234', man='345669', pin='2399')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(), True)
+
+    def test_should_activate_strategy_and_already_completed_sided_set(self):
+        table = Table()
+        player = Player(0, 0, table)
+        strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
+
+        tiles = self._string_to_136_array(sou='123234', man='3459', pin='234')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(), False)
+
+        tiles = self._string_to_136_array(sou='234789', man='3459', pin='234')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(), False)
+
+        tiles = self._string_to_136_array(sou='234', man='1233459', pin='234')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(), False)
+
+        tiles = self._string_to_136_array(sou='234', man='3457899', pin='234')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(), False)
+
+        tiles = self._string_to_136_array(sou='234', man='3459', pin='122334')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(), False)
+
+        tiles = self._string_to_136_array(sou='234', man='3459', pin='234789')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(), False)
+
+        tiles = self._string_to_136_array(sou='223344', man='3459', pin='234')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(), True)
+
+    def test_suitable_tiles(self):
+        table = Table()
+        player = Player(0, 0, table)
+        strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
+
+        tile = self._string_to_136_tile(man='1')
+        self.assertEqual(strategy.is_tile_suitable(tile), False)
+
+        tile = self._string_to_136_tile(pin='1')
+        self.assertEqual(strategy.is_tile_suitable(tile), False)
+
+        tile = self._string_to_136_tile(sou='9')
+        self.assertEqual(strategy.is_tile_suitable(tile), False)
+
+        tile = self._string_to_136_tile(honors='1')
+        self.assertEqual(strategy.is_tile_suitable(tile), False)
+
+        tile = self._string_to_136_tile(honors='6')
+        self.assertEqual(strategy.is_tile_suitable(tile), False)
+
+        tile = self._string_to_136_tile(man='2')
+        self.assertEqual(strategy.is_tile_suitable(tile), True)
+
+        tile = self._string_to_136_tile(pin='5')
+        self.assertEqual(strategy.is_tile_suitable(tile), True)
+
+        tile = self._string_to_136_tile(sou='8')
+        self.assertEqual(strategy.is_tile_suitable(tile), True)
+
+    def test_dont_open_hand_with_high_shanten(self):
+        table = Table()
+        player = Player(0, 0, table)
+
+        # with 4 shanten we don't need to aim for open tanyao
+        tiles = self._string_to_136_array(man='369', pin='378', sou='3488', honors='123')
+        tile = self._string_to_136_tile(sou='2')
+        player.init_hand(tiles)
+        meld, _ = player.try_to_call_meld(tile, 3)
+        self.assertEqual(meld, None)
+
+        # with 3 shanten we can open a hand
+        tiles = self._string_to_136_array(man='236', pin='378', sou='3488', honors='123')
+        tile = self._string_to_136_tile(sou='2')
+        player.init_hand(tiles)
+        meld, _ = player.try_to_call_meld(tile, 3)
+        self.assertNotEqual(meld, None)

@@ -5,6 +5,7 @@ from mahjong.ai.defence import Defence
 from mahjong.ai.shanten import Shanten
 from mahjong.ai.strategies.honitsu import HonitsuStrategy
 from mahjong.ai.strategies.main import BaseStrategy
+from mahjong.ai.strategies.tanyao import TanyaoStrategy
 from mahjong.ai.strategies.yakuhai import YakuhaiStrategy
 from mahjong.constants import HAKU, CHUN, HATSU
 from mahjong.hand import HandDivider
@@ -179,6 +180,7 @@ class MainAI(BaseAI):
         strategies = [
             YakuhaiStrategy(BaseStrategy.YAKUHAI, self.player),
             HonitsuStrategy(BaseStrategy.HONITSU, self.player),
+            TanyaoStrategy(BaseStrategy.TANYAO, self.player),
         ]
 
         for strategy in strategies:

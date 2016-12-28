@@ -7,12 +7,15 @@ from mahjong.utils import is_man, is_pin, is_sou, is_chi, is_pon
 class BaseStrategy(object):
     YAKUHAI = 0
     HONITSU = 1
+    TANYAO = 2
 
     player = None
     type = None
+    # number of shanten where we can start to open hand
+    min_shanten = 7
 
-    def __init__(self, type, player):
-        self.type = type
+    def __init__(self, strategy_type, player):
+        self.type = strategy_type
         self.player = player
 
     def should_activate_strategy(self):
@@ -58,6 +61,10 @@ class BaseStrategy(object):
 
         new_tiles = self.player.tiles[:] + [tile]
         outs_results, shanten = self.player.ai.calculate_outs(new_tiles, closed_hand)
+
+        # each strategy can use their own value to min shanten number
+        if shanten > self.min_shanten:
+            return None, None
 
         # we can't improve hand, so we don't need to open it
         if not outs_results:

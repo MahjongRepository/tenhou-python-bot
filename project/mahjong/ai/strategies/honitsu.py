@@ -42,6 +42,9 @@ class HonitsuStrategy(BaseStrategy):
             if tiles[x] >= 2:
                 count_of_pairs += 1
 
+        # we need to have prevalence of one suit and completed forms in the hand
+        # for now let's check only pairs in the hand
+        # TODO check ryanmen forms as well and honor tiles count
         if suit['count'] + honor['count'] >= HonitsuStrategy.REQUIRED_TILES:
             self.chosen_suit = suit['function']
             return count_of_pairs > 0
@@ -54,4 +57,5 @@ class HonitsuStrategy(BaseStrategy):
         :param tile: 136 tiles format
         :return: True
         """
-        return self.chosen_suit(tile // 4) or is_honor(tile // 4)
+        tile //= 4
+        return self.chosen_suit(tile) or is_honor(tile)

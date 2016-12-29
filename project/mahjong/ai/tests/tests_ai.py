@@ -128,14 +128,14 @@ class AITestCase(unittest.TestCase, TestMixin):
         table = Table()
         player = Player(0, 0, table)
 
-        tiles = self._string_to_136_array(man='335688', pin='22', sou='345', honors='55')
-        tile = self._string_to_136_tile(man='4')
+        tiles = self._string_to_136_array(man='23455', pin='3445678', honors='1')
+        tile = self._string_to_136_tile(man='5')
         player.init_hand(tiles)
         meld, _ = player.try_to_call_meld(tile, 3)
         self.assertNotEqual(meld, None)
-        self.assertEqual(meld.type, Meld.CHI)
-        # we should open hand with 456m, not with 345m
-        self.assertEqual(meld.tiles, [12, 16, 20])
+        self.assertEqual(meld.type, Meld.PON)
+        # 555m
+        self.assertEqual(meld.tiles, [16, 16, 17])
 
         tiles = self._string_to_136_array(man='335666', pin='22', sou='345', honors='55')
         tile = self._string_to_136_tile(man='4')
@@ -143,7 +143,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         meld, _ = player.try_to_call_meld(tile, 3)
         self.assertNotEqual(meld, None)
         self.assertEqual(meld.type, Meld.CHI)
-        # we should open hand with 345m, not with 456m
+        # 345m
         self.assertEqual(meld.tiles, [8, 12, 16])
 
     def test_chose_strategy_and_reset_strategy(self):

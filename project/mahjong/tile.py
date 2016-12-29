@@ -41,6 +41,28 @@ class TilesConverter(object):
         return results
 
     @staticmethod
+    def to_136_array(tiles):
+        """
+        Convert 34 array to the 136 tiles array
+        """
+        temp = []
+        results = []
+        for x in range(0, 34):
+            if tiles[x]:
+                temp_value = [x * 4] * tiles[x]
+                for tile in temp_value:
+                    if tile in results:
+                        count_of_tiles = len([x for x in temp if x == tile])
+                        new_tile = tile + count_of_tiles
+                        results.append(new_tile)
+
+                        temp.append(tile)
+                    else:
+                        results.append(tile)
+                        temp.append(tile)
+        return results
+
+    @staticmethod
     def string_to_136_array(sou=None, pin=None, man=None, honors=None):
         """
         Method to convert one line string tiles format to the 136 array

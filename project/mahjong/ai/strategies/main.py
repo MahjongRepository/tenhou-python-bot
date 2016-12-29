@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from mahjong.constants import HONOR_INDICES
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_man, is_pin, is_sou, is_chi, is_pon
@@ -142,7 +143,8 @@ class BaseStrategy(object):
             possible_melds = validated_melds
 
             if len(possible_melds):
-                combination = self._find_best_meld_to_open(possible_melds, closed_hand_34, first_limit, second_limit)
+                combination = self._find_best_meld_to_open(possible_melds, closed_hand_34, first_limit, second_limit,
+                                                           new_tiles)
                 meld_type = is_chi(combination) and Meld.CHI or Meld.PON
                 combination.remove(discarded_tile)
 
@@ -177,7 +179,7 @@ class BaseStrategy(object):
 
         return None, None
 
-    def _find_best_meld_to_open(self, possible_melds, closed_hand_34, first_limit, second_limit):
+    def _find_best_meld_to_open(self, possible_melds, closed_hand_34, first_limit, second_limit, completed_hand):
         """
         For now best meld will be the meld with higher count of remaining sets in the hand
         :param possible_melds:
@@ -190,53 +192,79 @@ class BaseStrategy(object):
         if len(possible_melds) == 1:
             return possible_melds[0]
 
-        best_meld = None
-        best_option = -2
+        completed_hand_34 = TilesConverter.to_34_array(completed_hand)
+        tile_to_replace = None
+        for tile in HONOR_INDICES:
+            if tile not in completed_hand:
+                tile_to_replace = tile
+                break
 
-        for combination in possible_melds:
-            remaining_hand = []
-            local_closed_hand_34 = closed_hand_34[:]
+        # For now we will replace possible set with one completed pon set
+        # and we will calculate remaining shanten in the hand
+        # and chose the hand with min shanten count
+        if not tile_to_replace:
+            return possible_melds[0]
 
-            # remove combination from hand and let's see what we will hand in the end
-            local_closed_hand_34[combination[0]] -= 1
-            local_closed_hand_34[combination[1]] -= 1
-            local_closed_hand_34[combination[2]] -= 1
+        results = []
+        for meld in possible_melds:
+            temp_hand_34 = completed_hand_34[:]
+            temp_hand_34[meld[0]] -= 1
+            temp_hand_34[meld[1]] -= 1
+            temp_hand_34[meld[2]] -= 1
+            temp_hand_34[tile_to_replace] = 3
+            shanten = self.player.ai.shanten.calculate_shanten(temp_hand_34, self.player.is_open_hand)
+            results.append({'shanten': shanten, 'meld': meld})
 
-            pair_indices = self.player.ai.hand_divider.find_pairs(local_closed_hand_34,
-                                                                  first_limit,
-                                                                  second_limit)
+        results = sorted(results, key=lambda i: i['shanten'])
+        return results[0]['meld']
 
-            if pair_indices:
-                for pair_index in pair_indices:
-                    pair_34 = local_closed_hand_34[:]
-                    pair_34[pair_index] -= 2
-
-                    hand = [[[pair_index] * 2]]
-
-                    pair_combinations = self.player.ai.hand_divider.find_valid_combinations(pair_34,
-                                                                                            first_limit,
-                                                                                            second_limit, True)
-                    if pair_combinations:
-                        hand.append(pair_combinations)
-
-                    remaining_hand.append(hand)
-
-            local_combinations = self.player.ai.hand_divider.find_valid_combinations(local_closed_hand_34,
-                                                                                     first_limit,
-                                                                                     second_limit, True)
-
-            if local_combinations:
-                for pair_index in pair_indices:
-                    local_combinations.append([[pair_index] * 2])
-                remaining_hand.append(local_combinations)
-
-            most_long_hand = -1
-            for item in remaining_hand:
-                if len(item) > most_long_hand:
-                    most_long_hand = len(item)
-
-            if most_long_hand > best_option:
-                best_option = most_long_hand
-                best_meld = combination
-
-        return best_meld
+        # best_meld = None
+        # best_option = -2
+        #
+        # for combination in possible_melds:
+        #     remaining_hand = []
+        #     local_closed_hand_34 = closed_hand_34[:]
+        #
+        #     # remove combination from hand and let's see what we will hand in the end
+        #     local_closed_hand_34[combination[0]] -= 1
+        #     local_closed_hand_34[combination[1]] -= 1
+        #     local_closed_hand_34[combination[2]] -= 1
+        #
+        #     pair_indices = self.player.ai.hand_divider.find_pairs(local_closed_hand_34,
+        #                                                           first_limit,
+        #                                                           second_limit)
+        #
+        #     if pair_indices:
+        #         for pair_index in pair_indices:
+        #             pair_34 = local_closed_hand_34[:]
+        #             pair_34[pair_index] -= 2
+        #
+        #             hand = [[[pair_index] * 2]]
+        #
+        #             pair_combinations = self.player.ai.hand_divider.find_valid_combinations(pair_34,
+        #                                                                                     first_limit,
+        #                                                                                     second_limit, True)
+        #             if pair_combinations:
+        #                 hand.append(pair_combinations)
+        #
+        #             remaining_hand.append(hand)
+        #
+        #     local_combinations = self.player.ai.hand_divider.find_valid_combinations(local_closed_hand_34,
+        #                                                                              first_limit,
+        #                                                                              second_limit, True)
+        #
+        #     if local_combinations:
+        #         for pair_index in pair_indices:
+        #             local_combinations.append([[pair_index] * 2])
+        #         remaining_hand.append(local_combinations)
+        #
+        #     most_long_hand = -1
+        #     for item in remaining_hand:
+        #         if len(item) > most_long_hand:
+        #             most_long_hand = len(item)
+        #
+        #     if most_long_hand > best_option:
+        #         best_option = most_long_hand
+        #         best_meld = combination
+        #
+        # return best_meld

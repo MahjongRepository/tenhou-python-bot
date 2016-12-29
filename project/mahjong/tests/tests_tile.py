@@ -24,6 +24,12 @@ class TileTestCase(unittest.TestCase):
         self.assertEqual(result[33], 1)
         self.assertEqual(sum(result), 14)
 
+    def test_convert_to_136_array(self):
+        tiles = [0, 32, 33, 36, 37, 68, 69, 72, 73, 104, 105, 108, 109, 132]
+        result = TilesConverter.to_34_array(tiles)
+        result = TilesConverter.to_136_array(result)
+        self.assertEqual(result, tiles)
+
     def test_convert_string_to_136_array(self):
         tiles = TilesConverter.string_to_136_array(sou='19', pin='19', man='19', honors='1234567')
 

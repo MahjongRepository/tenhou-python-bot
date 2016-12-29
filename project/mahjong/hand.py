@@ -423,6 +423,16 @@ class FinishedHand(object):
 
         # let's use cost for most expensive hand
         calculated_hands = sorted(calculated_hands, key=lambda x: (x['han'], x['fu']), reverse=True)
+
+        # debug lines
+        # if not calculated_hands:
+        #     print(TilesConverter.to_one_line_string(tiles))
+        #     for open_set in open_sets:
+        #         open_set[0] *= 4
+        #         open_set[1] *= 4
+        #         open_set[2] *= 4
+        #         print(TilesConverter.to_one_line_string(open_set))
+
         calculated_hand = calculated_hands[0]
         cost = calculated_hand['cost']
         error = calculated_hand['error']

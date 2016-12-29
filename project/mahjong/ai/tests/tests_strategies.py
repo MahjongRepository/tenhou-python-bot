@@ -276,3 +276,13 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
         meld, _ = player.try_to_call_meld(tile, 3)
         self.assertNotEqual(meld, None)
+
+    def test_dont_open_hand_with_not_suitable_melds(self):
+        table = Table()
+        player = Player(0, 0, table)
+
+        tiles = self._string_to_136_array(man='33355788', sou='3479', honors='3')
+        tile = self._string_to_136_tile(sou='8')
+        player.init_hand(tiles)
+        meld, _ = player.try_to_call_meld(tile, 3)
+        self.assertEqual(meld, None)

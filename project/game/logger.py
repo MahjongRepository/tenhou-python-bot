@@ -26,3 +26,8 @@ def set_up_logging():
 
     logger.addHandler(ch)
     logger.addHandler(fh)
+
+    logger = logging.getLogger('ai')
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(ch)
+    logger.addHandler(fh)

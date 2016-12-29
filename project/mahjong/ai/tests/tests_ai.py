@@ -3,6 +3,7 @@ import unittest
 
 from mahjong.ai.main import MainAI
 from mahjong.ai.shanten import Shanten
+from mahjong.ai.strategies.main import BaseStrategy
 from mahjong.meld import Meld
 from mahjong.player import Player
 from mahjong.table import Table
@@ -144,3 +145,28 @@ class AITestCase(unittest.TestCase, TestMixin):
         self.assertEqual(meld.type, Meld.CHI)
         # we should open hand with 345m, not with 456m
         self.assertEqual(meld.tiles, [8, 12, 16])
+
+    def test_chose_strategy_and_reset_strategy(self):
+        table = Table()
+        player = Player(0, 0, table)
+
+        tiles = self._string_to_136_array(man='33355788', sou='3479', honors='3')
+        player.init_hand(tiles)
+        self.assertEqual(player.ai.current_strategy.type, BaseStrategy.TANYAO)
+
+        # we draw a tile that will change our selected strategy
+        tile = self._string_to_136_tile(sou='8')
+        player.draw_tile(tile)
+        self.assertEqual(player.ai.current_strategy, None)
+
+        tiles = self._string_to_136_array(man='33355788', sou='3479', honors='3')
+        player.init_hand(tiles)
+        self.assertEqual(player.ai.current_strategy.type, BaseStrategy.TANYAO)
+
+        # for already opened hand we don't need to give up on selected strategy
+        meld = Meld()
+        meld.tiles = [1, 2, 3]
+        player.add_called_meld(meld)
+        tile = self._string_to_136_tile(sou='8')
+        player.draw_tile(tile)
+        self.assertEqual(player.ai.current_strategy.type, BaseStrategy.TANYAO)

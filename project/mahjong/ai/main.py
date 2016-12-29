@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from mahjong.ai.agari import Agari
 from mahjong.ai.base import BaseAI
 from mahjong.ai.defence import Defence
@@ -9,9 +11,9 @@ from mahjong.ai.strategies.tanyao import TanyaoStrategy
 from mahjong.ai.strategies.yakuhai import YakuhaiStrategy
 from mahjong.constants import HAKU, CHUN, HATSU
 from mahjong.hand import HandDivider
-from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_pin, is_honor, is_chi, is_pon, is_man
+
+logger = logging.getLogger('ai')
 
 
 class MainAI(BaseAI):
@@ -173,8 +175,12 @@ class MainAI(BaseAI):
         return self.current_strategy.try_to_call_meld(tile, enemy_seat)
 
     def determine_strategy(self):
-        if self.current_strategy:
+        # for already opened hand we don't need to give up on selected strategy
+        if self.player.is_open_hand:
             return False
+
+        old_strategy = self.current_strategy
+        self.current_strategy = None
 
         # order is important
         strategies = [
@@ -186,6 +192,17 @@ class MainAI(BaseAI):
         for strategy in strategies:
             if strategy.should_activate_strategy():
                 self.current_strategy = strategy
+
+        if self.current_strategy:
+            if not old_strategy or self.current_strategy.type != old_strategy.type:
+                message = '{} switched to {} strategy'.format(self.player.name, self.current_strategy)
+                if old_strategy:
+                    message += ' from {}'.format(old_strategy)
+                logger.debug(message)
+                logger.debug('With hand: {}'.format(TilesConverter.to_one_line_string(self.player.tiles)))
+
+        if not self.current_strategy and old_strategy:
+            logger.debug('{} gave up on {}'.format(self.player.name, old_strategy))
 
         return self.current_strategy and True or False
 

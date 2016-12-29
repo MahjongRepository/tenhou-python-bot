@@ -9,6 +9,12 @@ class BaseStrategy(object):
     HONITSU = 1
     TANYAO = 2
 
+    TYPES = {
+        YAKUHAI: 'Yakuhai',
+        HONITSU: 'Honitsu',
+        TANYAO: 'Tanyao',
+    }
+
     player = None
     type = None
     # number of shanten where we can start to open hand
@@ -17,6 +23,9 @@ class BaseStrategy(object):
     def __init__(self, strategy_type, player):
         self.type = strategy_type
         self.player = player
+
+    def __str__(self):
+        return self.TYPES[self.type]
 
     def should_activate_strategy(self):
         """
@@ -122,6 +131,15 @@ class BaseStrategy(object):
                 if is_chi(combination) and is_kamicha_discard and discarded_tile in combination:
                     if combination not in possible_melds:
                         possible_melds.append(combination)
+
+            # we can call melds only with allowed tiles
+            validated_melds = []
+            for meld in possible_melds:
+                if (self.is_tile_suitable(meld[0] * 4) and
+                        self.is_tile_suitable(meld[1] * 4) and
+                        self.is_tile_suitable(meld[2] * 4)):
+                    validated_melds.append(meld)
+            possible_melds = validated_melds
 
             if len(possible_melds):
                 combination = self._find_best_meld_to_open(possible_melds, closed_hand_34, first_limit, second_limit)

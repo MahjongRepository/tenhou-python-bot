@@ -41,7 +41,9 @@ class MainAI(BaseAI):
         self.current_strategy = None
 
     def discard_tile(self):
-        results, shanten = self.calculate_outs(self.player.tiles, self.player.closed_hand)
+        results, shanten = self.calculate_outs(self.player.tiles,
+                                               self.player.closed_hand,
+                                               self.player.is_open_hand)
         self.previous_shanten = shanten
 
         if shanten == 0:
@@ -72,15 +74,16 @@ class MainAI(BaseAI):
 
             return tile_in_hand
 
-    def calculate_outs(self, tiles, closed_hand):
+    def calculate_outs(self, tiles, closed_hand, is_open_hand=False):
         """
         :param tiles: array of tiles in 136 format
         :param closed_hand: array of tiles in 136 format
+        :param is_open_hand: boolean flag
         :return:
         """
         tiles_34 = TilesConverter.to_34_array(tiles)
         closed_tiles_34 = TilesConverter.to_34_array(closed_hand)
-        shanten = self.shanten.calculate_shanten(tiles_34, self.player.is_open_hand)
+        shanten = self.shanten.calculate_shanten(tiles_34, is_open_hand)
 
         # win
         if shanten == Shanten.AGARI_STATE:
@@ -106,7 +109,7 @@ class MainAI(BaseAI):
                     continue
 
                 tiles_34[j] += 1
-                if self.shanten.calculate_shanten(tiles_34, self.player.is_open_hand) == shanten - 1:
+                if self.shanten.calculate_shanten(tiles_34, is_open_hand) == shanten - 1:
                     raw_data[i].append(j)
                 tiles_34[j] -= 1
 

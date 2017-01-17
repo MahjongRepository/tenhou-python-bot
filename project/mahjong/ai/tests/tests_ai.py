@@ -18,7 +18,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         ai = MainAI(table, player)
 
         tiles = self._string_to_136_array(sou='111345677', pin='15', man='569')
-        outs, shanten = ai.calculate_outs(tiles, tiles)
+        outs, shanten = ai.calculate_outs(tiles, tiles, False)
 
         self.assertEqual(shanten, 2)
         self.assertEqual(outs[0]['discard'], 9)
@@ -26,7 +26,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         self.assertEqual(outs[0]['tiles_count'], 57)
 
         tiles = self._string_to_136_array(sou='111345677', pin='45', man='569')
-        outs, shanten = ai.calculate_outs(tiles, tiles)
+        outs, shanten = ai.calculate_outs(tiles, tiles, False)
 
         self.assertEqual(shanten, 1)
         self.assertEqual(outs[0]['discard'], 23)
@@ -34,7 +34,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         self.assertEqual(outs[0]['tiles_count'], 16)
 
         tiles = self._string_to_136_array(sou='11145677', pin='345', man='569')
-        outs, shanten = ai.calculate_outs(tiles, tiles)
+        outs, shanten = ai.calculate_outs(tiles, tiles, False)
 
         self.assertEqual(shanten, 0)
         self.assertEqual(outs[0]['discard'], 8)
@@ -42,7 +42,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         self.assertEqual(outs[0]['tiles_count'], 8)
 
         tiles = self._string_to_136_array(sou='11145677', pin='345', man='456')
-        outs, shanten = ai.calculate_outs(tiles, tiles)
+        outs, shanten = ai.calculate_outs(tiles, tiles, False)
 
         self.assertEqual(shanten, Shanten.AGARI_STATE)
         self.assertEqual(len(outs), 0)
@@ -125,6 +125,10 @@ class AITestCase(unittest.TestCase, TestMixin):
         self.assertEqual(meld, None)
 
     def test_chose_right_set_to_open_hand(self):
+        """
+        Different test cases to open hand and chose correct set to open hand.
+        Based on real examples of incorrect opened hands
+        """
         table = Table()
         player = Player(0, 0, table)
 
@@ -134,8 +138,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         meld, _ = player.try_to_call_meld(tile, 3)
         self.assertNotEqual(meld, None)
         self.assertEqual(meld.type, Meld.PON)
-        # 555m
-        self.assertEqual(meld.tiles, [16, 16, 17])
+        self.assertEqual(self._to_string(meld.tiles), '555m')
 
         tiles = self._string_to_136_array(man='335666', pin='22', sou='345', honors='55')
         tile = self._string_to_136_tile(man='4')
@@ -143,8 +146,15 @@ class AITestCase(unittest.TestCase, TestMixin):
         meld, _ = player.try_to_call_meld(tile, 3)
         self.assertNotEqual(meld, None)
         self.assertEqual(meld.type, Meld.CHI)
-        # 345m
-        self.assertEqual(meld.tiles, [8, 12, 16])
+        self.assertEqual(self._to_string(meld.tiles), '345m')
+
+        tiles = self._string_to_136_array(man='23557', pin='556788', honors='22')
+        tile = self._string_to_136_tile(pin='5')
+        player.init_hand(tiles)
+        meld, _ = player.try_to_call_meld(tile, 3)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(meld.type, Meld.PON)
+        self.assertEqual(self._to_string(meld.tiles), '555p')
 
     def test_chose_strategy_and_reset_strategy(self):
         table = Table()

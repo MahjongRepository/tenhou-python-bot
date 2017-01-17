@@ -29,6 +29,9 @@ class TestMixin(object):
     def _to_34_array(self, tiles):
         return TilesConverter.to_34_array(tiles)
 
+    def _to_string(self, tiles_136):
+        return TilesConverter.to_one_line_string(tiles_136)
+
     def _hand(self, tiles, hand_index=0):
         hand_divider = HandDivider()
         return hand_divider.divide_hand(tiles, [], [])[hand_index]

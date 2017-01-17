@@ -70,7 +70,9 @@ class BaseStrategy(object):
         is_kamicha_discard = self.player.seat - 1 == enemy_seat or self.player.seat == 0 and enemy_seat == 3
 
         new_tiles = self.player.tiles[:] + [tile]
-        outs_results, shanten = self.player.ai.calculate_outs(new_tiles, closed_hand)
+        # we need to calculate count of shanten with open hand condition
+        # to exclude chitoitsu from the calculation
+        outs_results, shanten = self.player.ai.calculate_outs(new_tiles, closed_hand, is_open_hand=True)
 
         # each strategy can use their own value to min shanten number
         if shanten > self.min_shanten:
@@ -212,7 +214,8 @@ class BaseStrategy(object):
             temp_hand_34[meld[1]] -= 1
             temp_hand_34[meld[2]] -= 1
             temp_hand_34[tile_to_replace] = 3
-            shanten = self.player.ai.shanten.calculate_shanten(temp_hand_34, self.player.is_open_hand)
+            # open hand always should be true to exclude chitoitsu hands from calculations
+            shanten = self.player.ai.shanten.calculate_shanten(temp_hand_34, is_open_hand=True)
             results.append({'shanten': shanten, 'meld': meld})
 
         results = sorted(results, key=lambda i: i['shanten'])

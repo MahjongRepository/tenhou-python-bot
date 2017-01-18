@@ -57,18 +57,6 @@ It will allow to determine was a new version improved or not.
 To be able to run it you need to copy an old ai version to the `mahjong/ai/old_version.py` 
 and run `bots_battle.py`.
 
-## Replays viewer
-
-(Work in progress)
-
-We are building a viewer for local played games. It will allow to find places to improve bot's logic easily.
-
-To be able to run it you need to run these commands inside a Vagrant system (`vagrant ssh` to go into it):
-
-1. `cd ../replays`
-2. `python -m http.server 8080`
-3. Open [http://localhost:8080/](http://localhost:8080/) in your browser
-
 # For developers
 
 ## How to run it?

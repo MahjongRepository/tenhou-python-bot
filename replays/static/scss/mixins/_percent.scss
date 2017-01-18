@@ -1,6 +1,0 @@
-// Calculate block width percent by the formula: target / context
-// Book: Responsive Web Design by Ethan Marcotte
-
-@function perc($target, $context: 0) {
-  @return strip-unit($target) / strip-unit($context) * 100%;
-}

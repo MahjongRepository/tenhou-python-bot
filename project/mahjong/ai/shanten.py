@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 import math
 
+import copy
+
+from mahjong.utils import find_isolated_tile_indices
+
 
 class Shanten(object):
     AGARI_STATE = -1
@@ -14,19 +18,44 @@ class Shanten(object):
     number_isolated_tiles = 0
     min_shanten = 0
 
-    def calculate_shanten(self, tiles, is_open_hand=False):
+    def calculate_shanten(self, tiles, is_open_hand=False, melds=None):
         """
         Return the count of tiles before tempai
         :param tiles: 34 tiles format array
         :param is_open_hand:
+        :param melds: array of array of 136 tiles format
         :return: int
         """
+
+        # we will modify them later, so we need to use a copy
+        melds = copy.deepcopy(melds)
+        tiles = copy.deepcopy(tiles)
+
         self._init(tiles)
 
-        count_of_tiles = sum(self.tiles)
+        count_of_tiles = sum(tiles)
 
         if count_of_tiles > 14:
             return -2
+
+        # With open hand we need to remove open sets from hand and replace them with isolated pon sets
+        # it will allow to calculate count of shanten correctly
+        if melds:
+            isolated_tiles = find_isolated_tile_indices(tiles)
+            for meld in melds:
+                if not isolated_tiles:
+                    break
+
+                isolated_tile = isolated_tiles.pop()
+
+                meld[0] //= 4
+                meld[1] //= 4
+                meld[2] //= 4
+
+                tiles[meld[0]] -= 1
+                tiles[meld[1]] -= 1
+                tiles[meld[2]] -= 1
+                tiles[isolated_tile] = 3
 
         if not is_open_hand:
             self.min_shanten = self._scan_chitoitsu_and_kokushi()

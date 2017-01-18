@@ -83,7 +83,7 @@ class MainAI(BaseAI):
         """
         tiles_34 = TilesConverter.to_34_array(tiles)
         closed_tiles_34 = TilesConverter.to_34_array(closed_hand)
-        shanten = self.shanten.calculate_shanten(tiles_34, is_open_hand)
+        shanten = self.shanten.calculate_shanten(tiles_34, is_open_hand, self.player.meld_tiles)
 
         # win
         if shanten == Shanten.AGARI_STATE:
@@ -109,7 +109,7 @@ class MainAI(BaseAI):
                     continue
 
                 tiles_34[j] += 1
-                if self.shanten.calculate_shanten(tiles_34, is_open_hand) == shanten - 1:
+                if self.shanten.calculate_shanten(tiles_34, is_open_hand, self.player.meld_tiles) == shanten - 1:
                     raw_data[i].append(j)
                 tiles_34[j] -= 1
 

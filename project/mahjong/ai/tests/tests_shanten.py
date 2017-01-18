@@ -69,3 +69,13 @@ class ShantenTestCase(unittest.TestCase, TestMixin):
 
         tiles = self._string_to_136_array(sou='129', pin='129', man='129', honors='12345')
         self.assertEqual(shanten.calculate_shanten(self._to_34_array(tiles)), 2)
+
+    def test_shanten_number_and_open_sets(self):
+        shanten = Shanten()
+
+        tiles = self._string_to_136_array(sou='44467778', pin='222567')
+        open_sets = []
+        self.assertEqual(shanten.calculate_shanten(self._to_34_array(tiles), melds=open_sets), Shanten.AGARI_STATE)
+
+        open_sets = [self._string_to_open_34_set(sou='777')]
+        self.assertEqual(shanten.calculate_shanten(self._to_34_array(tiles), melds=open_sets), 2)

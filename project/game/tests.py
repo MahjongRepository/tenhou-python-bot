@@ -15,15 +15,15 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         logger.disabled = False
 
     # def test_debug(self):
-    #     game.game_manager.shuffle_seed = lambda: 0.5910323486646264
+    #     game.game_manager.shuffle_seed = lambda: 0.8442731992460081
     #
     #     clients = [Client() for _ in range(0, 4)]
     #     # clients = [Client(use_previous_ai_version=True) for _ in range(0, 3)]
     #     # clients += [Client(use_previous_ai_version=False)]
     #     manager = GameManager(clients)
     #     manager.init_game()
-    #     manager.set_dealer(1)
-    #     manager._unique_dealers = 1
+    #     manager.set_dealer(0)
+    #     manager._unique_dealers = 4
     #     manager.init_round()
     #
     #     result = manager.play_round()
@@ -248,7 +248,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
 
         result = manager.play_round()
 
-        self.assertEqual(len(result['players_with_open_hands']), 1)
+        self.assertEqual(len(result['players_with_open_hands']), 2)
 
     def test_scores_calculations_after_retake(self):
         clients = [Client() for _ in range(0, 4)]

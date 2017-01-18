@@ -238,15 +238,15 @@ class GameManager(object):
                 current_client = self._get_current_client()
                 self.players_with_open_hands.append(self.current_client_seat)
 
-                logger.info('Hand: {} + {}'.format(
-                    TilesConverter.to_one_line_string(current_client.player.tiles),
-                    TilesConverter.to_one_line_string([tile])
-                ))
-
                 current_client.add_called_meld(meld)
                 current_client.player.tiles.append(tile)
 
                 logger.info('Called meld: {} by {}'.format(meld, current_client.player.name))
+                logger.info('With hand: {} + {}'.format(
+                    TilesConverter.to_one_line_string(current_client.player.tiles),
+                    TilesConverter.to_one_line_string([tile])
+                ))
+
                 self.replay.open_meld(current_client.seat, meld.type, meld.tiles)
 
                 # we need to double validate that we are doing fine

@@ -1,5 +1,5 @@
 .idea
-.vagrant
+env
 
 *.py[cod]
 __pycache__

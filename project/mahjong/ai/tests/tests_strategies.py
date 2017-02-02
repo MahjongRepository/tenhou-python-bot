@@ -31,6 +31,11 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
         self.assertEqual(strategy.should_activate_strategy(), True)
 
+        # with chitoitsu-like hand we don't need to go for yakuhai
+        tiles = self._string_to_136_array(sou='1235566', man='8899', honors='66')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(), False)
+
     def test_suitable_tiles(self):
         table = Table()
         player = Player(0, 0, table)

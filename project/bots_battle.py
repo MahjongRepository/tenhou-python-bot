@@ -10,7 +10,7 @@ from tqdm import trange
 from game.game_manager import GameManager
 from mahjong.client import Client
 
-TOTAL_HANCHANS = 10
+TOTAL_HANCHANS = 20
 
 
 def main():
@@ -20,8 +20,9 @@ def main():
 
     # let's load three bots with old logic
     # and one copy with new logic
-    clients = [Client(use_previous_ai_version=True) for _ in range(0, 3)]
-    clients += [Client(use_previous_ai_version=False)]
+    # clients = [Client(use_previous_ai_version=True) for _ in range(0, 3)]
+    # clients += [Client(use_previous_ai_version=False)]
+    clients = [Client(use_previous_ai_version=False) for _ in range(0, 4)]
     manager = GameManager(clients)
 
     total_results = {}

@@ -15,14 +15,14 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         logger.disabled = False
 
     # def test_debug(self):
-    #     game.game_manager.shuffle_seed = lambda: 0.34296402629849
+    #     game.game_manager.shuffle_seed = lambda: 0.4803161863382872
     #
     #     clients = [Client(use_previous_ai_version=False) for _ in range(0, 4)]
     #     # clients = [Client(use_previous_ai_version=True) for _ in range(0, 3)]
     #     # clients += [Client(use_previous_ai_version=False)]
     #     manager = GameManager(clients)
     #     manager.init_game()
-    #     manager.set_dealer(1)
+    #     manager.set_dealer(0)
     #     manager._unique_dealers = 1
     #     manager.init_round()
     #

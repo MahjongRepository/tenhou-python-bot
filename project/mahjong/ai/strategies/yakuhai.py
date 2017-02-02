@@ -20,3 +20,18 @@ class YakuhaiStrategy(BaseStrategy):
         :return: True
         """
         return True
+
+    def determine_what_to_discard(self, closed_hand, outs_results, shanten):
+        tiles_34 = TilesConverter.to_34_array(self.player.tiles)
+        valued_pairs = [x for x in self.player.ai.valued_honors if tiles_34[x] == 2]
+
+        if shanten == 0 and valued_pairs:
+            valued_pair = valued_pairs[0]
+            tile_to_discard = None
+            for item in outs_results:
+                if valued_pair in item['waiting']:
+                    tile_to_discard = item['discard']
+            tile_to_discard = TilesConverter.find_34_tile_in_136_array(tile_to_discard, closed_hand)
+            return tile_to_discard
+        else:
+            return super(YakuhaiStrategy, self).determine_what_to_discard(closed_hand, outs_results, shanten)

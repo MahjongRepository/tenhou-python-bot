@@ -44,6 +44,21 @@ class BaseStrategy(object):
         """
         raise NotImplemented()
 
+    def determine_what_to_discard(self, closed_hand, outs_results, shanten):
+        """
+        :param closed_hand: array of 136 tiles format
+        :param outs_results: dict
+        :param shanten: number of shanten
+        :return: tile in 136 format or none
+        """
+        tile_to_discard = None
+        for out_result in outs_results:
+            tile_34 = out_result['discard']
+            tile_to_discard = TilesConverter.find_34_tile_in_136_array(tile_34, closed_hand)
+            if tile_to_discard:
+                break
+        return tile_to_discard
+
     def try_to_call_meld(self, tile, enemy_seat):
         """
         Determine should we call a meld or not.
@@ -168,16 +183,9 @@ class BaseStrategy(object):
                 meld.type = meld_type
                 meld.tiles = sorted(tiles)
 
-                tile_to_discard = None
-                # we need to find possible tile to discard
-                # it can be that first result already on our set
-                for out_result in outs_results:
-                    tile_34 = out_result['discard']
-                    tile_to_discard = TilesConverter.find_34_tile_in_136_array(tile_34, closed_hand)
-                    if tile_to_discard:
-                        break
-
-                return meld, tile_to_discard
+                tile_to_discard = self.determine_what_to_discard(closed_hand, outs_results, shanten)
+                if tile_to_discard:
+                    return meld, tile_to_discard
 
         return None, None
 

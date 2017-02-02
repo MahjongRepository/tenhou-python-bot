@@ -45,8 +45,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         player = Player(0, 0, table)
 
         tiles = self._string_to_136_array(sou='123678', pin='25899', honors='44')
-        # 4 honor
-        tile = 122
+        tile = self._string_to_136_tile(honors='4')
         player.init_hand(tiles)
 
         # we don't need to open hand with not our wind
@@ -55,7 +54,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
 
         # with dragon pair in hand let's open our hand
         tiles = self._string_to_136_array(sou='1689', pin='2358', man='1', honors='4455')
-        tile = 122
+        tile = self._string_to_136_tile(honors='4')
         player.init_hand(tiles)
         meld, _ = player.try_to_call_meld(tile, 3)
         self.assertNotEqual(meld, None)
@@ -63,19 +62,19 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         player.tiles.append(tile)
 
         self.assertEqual(meld.type, Meld.PON)
-        self.assertEqual(meld.tiles, [120, 121, 122])
+        self.assertEqual(self._to_string(meld.tiles), '444z')
         self.assertEqual(len(player.closed_hand), 11)
         self.assertEqual(len(player.tiles), 14)
         player.discard_tile()
 
-        tile = 126
+        tile = self._string_to_136_tile(honors='5')
         meld, _ = player.try_to_call_meld(tile, 3)
         self.assertNotEqual(meld, None)
         player.add_called_meld(meld)
         player.tiles.append(tile)
 
         self.assertEqual(meld.type, Meld.PON)
-        self.assertEqual(meld.tiles, [124, 125, 126])
+        self.assertEqual(self._to_string(meld.tiles), '555z')
         self.assertEqual(len(player.closed_hand), 8)
         self.assertEqual(len(player.tiles), 14)
         player.discard_tile()
@@ -91,9 +90,31 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         player.tiles.append(tile)
 
         self.assertEqual(meld.type, Meld.CHI)
-        self.assertEqual(meld.tiles, [92, 96, 100])
+        self.assertEqual(self._to_string(meld.tiles), '678s')
         self.assertEqual(len(player.closed_hand), 5)
         self.assertEqual(len(player.tiles), 14)
+
+    def test_force_yakuhai_pair_waiting_for_tempai_hand(self):
+        """
+        If hand shanten = 1 don't open hand except the situation where is
+        we have tempai on yakuhai tile after open set
+        """
+        table = Table()
+        player = Player(0, 0, table)
+
+        tiles = self._string_to_136_array(sou='123', pin='678', man='34468', honors='66')
+        tile = self._string_to_136_tile(man='5')
+        player.init_hand(tiles)
+
+        # we will not get tempai on yakuhai pair with this hand, so let's skip this call
+        meld, _ = player.try_to_call_meld(tile, 3)
+        self.assertEqual(meld, None)
+
+        tile = self._string_to_136_tile(man='7')
+        meld, tile_to_discard = player.try_to_call_meld(tile, 3)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(meld.type, Meld.CHI)
+        self.assertEqual(self._to_string(meld.tiles), '678m')
 
 
 class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
@@ -161,8 +182,7 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         tile_to_discard = player.discard_tile()
 
         # we are in honitsu mode, so we should discard man suits
-        # 8 == 3m
-        self.assertEqual(tile_to_discard, 8)
+        self.assertEqual(self._to_string([tile_to_discard]), '2m')
 
 
 class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):

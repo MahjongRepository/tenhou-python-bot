@@ -68,11 +68,14 @@ class MainAI(BaseAI):
         # in that case let's do tsumogiri
         if not results:
             return self.player.last_draw
+
+        if self.current_strategy:
+            tile_to_discard = self.current_strategy.determine_what_to_discard(self.player.closed_hand, results, shanten)
         else:
             tile34 = results[0]['discard']
-            tile_in_hand = TilesConverter.find_34_tile_in_136_array(tile34, self.player.tiles)
+            tile_to_discard = TilesConverter.find_34_tile_in_136_array(tile34, self.player.tiles)
 
-            return tile_in_hand
+        return tile_to_discard
 
     def calculate_outs(self, tiles, closed_hand, is_open_hand=False):
         """
@@ -122,22 +125,6 @@ class MainAI(BaseAI):
                     'waiting': raw_data[i]
                 }
 
-        # in honitsu mode we should discard tiles from other suit, even if it is better to save them
-        if self.current_strategy and self.current_strategy.type == BaseStrategy.HONITSU:
-            for i in range(0, 34):
-                if not tiles_34[i]:
-                    continue
-
-                if not closed_tiles_34[i]:
-                    continue
-
-                if not self.current_strategy.is_tile_suitable(i * 4):
-                    raw_data[i] = {
-                        'tile': i,
-                        'tiles_count': 1,
-                        'waiting': []
-                    }
-
         results = []
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
         for tile in range(0, len(tiles_34)):
@@ -158,10 +145,6 @@ class MainAI(BaseAI):
         # if we have character and honor candidates to discard with same tiles count,
         # we need to discard honor tile first
         results = sorted(results, key=lambda x: (x['tiles_count'], x['discard']), reverse=True)
-
-        # in honitsu mode we should discard tiles from other suit, even if it is better to save them
-        if self.current_strategy and self.current_strategy.type == BaseStrategy.HONITSU:
-            results = sorted(results, key=lambda x: self.current_strategy.is_tile_suitable(x['discard'] * 4), reverse=False)
 
         return results, shanten
 

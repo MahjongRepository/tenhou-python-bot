@@ -238,14 +238,14 @@ class GameManager(object):
                 current_client = self._get_current_client()
                 self.players_with_open_hands.append(self.current_client_seat)
 
-                current_client.add_called_meld(meld)
-                current_client.player.tiles.append(tile)
-
                 logger.info('Called meld: {} by {}'.format(meld, current_client.player.name))
                 logger.info('With hand: {} + {}'.format(
                     TilesConverter.to_one_line_string(current_client.player.tiles),
                     TilesConverter.to_one_line_string([tile])
                 ))
+
+                current_client.add_called_meld(meld)
+                current_client.player.tiles.append(tile)
 
                 self.replay.open_meld(current_client.seat, meld.type, meld.tiles)
 
@@ -255,6 +255,7 @@ class GameManager(object):
 
                 current_client.discard_tile(tile_to_discard)
                 self.replay.discard(current_client.seat, tile)
+                logger.info('Discard tile: {}'.format(TilesConverter.to_one_line_string([tile_to_discard])))
 
                 # the end of the round
                 result = self.check_clients_possible_ron(current_client, tile_to_discard)

@@ -116,7 +116,7 @@ class TilesConverter(object):
         For example we had 0 tile from 34 array
         in 136 array it can be present as 0, 1, 2, 3
         """
-        if tile34 > 33:
+        if tile34 is None or tile34 > 33:
             return None
 
         tile = tile34 * 4

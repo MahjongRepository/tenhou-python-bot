@@ -23,12 +23,10 @@ class Shanten(object):
         Return the count of tiles before tempai
         :param tiles: 34 tiles format array
         :param is_open_hand:
-        :param melds: array of array of 136 tiles format
+        :param melds: array of array of 34 tiles format
         :return: int
         """
-
         # we will modify them later, so we need to use a copy
-        melds = copy.deepcopy(melds)
         tiles = copy.deepcopy(tiles)
 
         self._init(tiles)
@@ -47,10 +45,6 @@ class Shanten(object):
                     break
 
                 isolated_tile = isolated_tiles.pop()
-
-                meld[0] //= 4
-                meld[1] //= 4
-                meld[2] //= 4
 
                 tiles[meld[0]] -= 1
                 tiles[meld[1]] -= 1

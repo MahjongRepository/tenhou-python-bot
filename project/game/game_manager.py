@@ -155,7 +155,7 @@ class GameManager(object):
                 current_client.draw_tile(tile)
                 tiles = current_client.player.tiles
 
-            is_win = self.agari.is_agari(TilesConverter.to_34_array(tiles))
+            is_win = self.agari.is_agari(TilesConverter.to_34_array(tiles), current_client.player.meld_tiles)
 
             # win by tsumo after tile draw
             if is_win:
@@ -376,7 +376,7 @@ class GameManager(object):
                                                             round_wind=client.player.table.round_wind)
             return result['error'] is None
 
-        is_ron = self.agari.is_agari(TilesConverter.to_34_array(tiles + [win_tile]))
+        is_ron = self.agari.is_agari(TilesConverter.to_34_array(tiles + [win_tile]), client.player.meld_tiles)
         return is_ron
 
     def call_riichi(self, client):

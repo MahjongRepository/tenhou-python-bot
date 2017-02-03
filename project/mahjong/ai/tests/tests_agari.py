@@ -69,3 +69,10 @@ class AgariTestCase(unittest.TestCase, TestMixin):
 
         tiles = self._string_to_136_array(sou='19', pin='19', man='19', honors='11134567')
         self.assertFalse(agari.is_agari(self._to_34_array(tiles)))
+
+    def test_is_agari_and_open_hand(self):
+        agari = Agari()
+
+        tiles = self._string_to_136_array(sou='23455567', pin='222', man='345')
+        open_sets = [self._string_to_open_34_set(man='345'), self._string_to_open_34_set(sou='555')]
+        self.assertFalse(agari.is_agari(self._to_34_array(tiles), open_sets))

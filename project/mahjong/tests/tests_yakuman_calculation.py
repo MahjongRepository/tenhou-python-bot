@@ -239,7 +239,7 @@ class YakumanCalculationTestCase(unittest.TestCase, TestMixin):
 
         tiles = self._string_to_136_array(sou='111333', man='222', pin='44555')
         win_tile = self._string_to_136_tile(pin='4')
-        open_sets = [self._string_to_136_array(sou='111'), self._string_to_136_array(sou='333')]
+        open_sets = [self._string_to_open_34_set(sou='111'), self._string_to_open_34_set(sou='333')]
         called_kan_indices = [self._string_to_136_tile(sou='1'), self._string_to_136_tile(sou='3'),
                               self._string_to_136_tile(pin='5'), self._string_to_136_tile(man='2')]
 

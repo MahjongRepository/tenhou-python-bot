@@ -52,7 +52,7 @@ class FinishedHand(object):
         :param is_chiihou:
         :param is_daburu_riichi:
         :param is_nagashi_mangan:
-        :param open_sets: array of array with open sets in 136-tile format
+        :param open_sets: array of array with open sets in 34-tile format
         :param dora_indicators: array of tiles in 136-tile format
         :param called_kan_indices: array of tiles in 136-tile format
         :param player_wind: index of player wind
@@ -64,14 +64,6 @@ class FinishedHand(object):
         """
         if not open_sets:
             open_sets = []
-        else:
-            # it is important to work with copy of list
-            open_sets = copy.deepcopy(open_sets)
-            # cast 136 format to 34 format
-            for item in open_sets:
-                item[0] //= 4
-                item[1] //= 4
-                item[2] //= 4
         is_open_hand = len(open_sets) > 0
 
         if not dora_indicators:
@@ -123,7 +115,7 @@ class FinishedHand(object):
         tiles_34 = TilesConverter.to_34_array(tiles)
         divider = HandDivider()
 
-        if not agari.is_agari(tiles_34):
+        if not agari.is_agari(tiles_34, open_sets):
             error = 'Hand is not winning'
             return return_response()
 

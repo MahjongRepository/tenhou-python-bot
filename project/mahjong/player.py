@@ -2,6 +2,8 @@
 import logging
 from functools import reduce
 
+import copy
+
 from mahjong.constants import EAST, SOUTH, WEST, NORTH
 from utils.settings_handler import settings
 from mahjong.ai.shanten import Shanten
@@ -166,4 +168,14 @@ class Player(object):
 
     @property
     def meld_tiles(self):
-        return [x.tiles for x in self.melds][:]
+        """
+        Array of array with 34 tiles indices
+        :return: array
+        """
+        melds = [x.tiles for x in self.melds]
+        melds = copy.deepcopy(melds)
+        for meld in melds:
+            meld[0] //= 4
+            meld[1] //= 4
+            meld[2] //= 4
+        return melds

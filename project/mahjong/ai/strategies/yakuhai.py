@@ -18,17 +18,18 @@ class YakuhaiStrategy(BaseStrategy):
 
     def is_tile_suitable(self, tile):
         """
-        For yakuhai we don't have limits
+        For yakuhai we don't have any limits
         :param tile: 136 tiles format
         :return: True
         """
         return True
 
-    def determine_what_to_discard(self, closed_hand, outs_results, shanten):
+    def determine_what_to_discard(self, closed_hand, outs_results, shanten, for_open_hand):
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
         valued_pairs = [x for x in self.player.ai.valued_honors if tiles_34[x] == 2]
 
-        if shanten == 0 and valued_pairs:
+        # when we trying to open hand with tempai state, we need to chose a valued pair waiting
+        if shanten == 0 and valued_pairs and for_open_hand:
             valued_pair = valued_pairs[0]
 
             tile_to_discard = None
@@ -38,4 +39,7 @@ class YakuhaiStrategy(BaseStrategy):
             tile_to_discard = TilesConverter.find_34_tile_in_136_array(tile_to_discard, closed_hand)
             return tile_to_discard
         else:
-            return super(YakuhaiStrategy, self).determine_what_to_discard(closed_hand, outs_results, shanten)
+            return super(YakuhaiStrategy, self).determine_what_to_discard(closed_hand,
+                                                                          outs_results,
+                                                                          shanten,
+                                                                          for_open_hand)

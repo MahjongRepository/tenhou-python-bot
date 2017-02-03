@@ -44,11 +44,12 @@ class BaseStrategy(object):
         """
         raise NotImplemented()
 
-    def determine_what_to_discard(self, closed_hand, outs_results, shanten):
+    def determine_what_to_discard(self, closed_hand, outs_results, shanten, for_open_hand):
         """
         :param closed_hand: array of 136 tiles format
         :param outs_results: dict
         :param shanten: number of shanten
+        :param for_open_hand: boolean
         :return: tile in 136 format or none
         """
         tile_to_discard = None
@@ -183,7 +184,7 @@ class BaseStrategy(object):
                 meld.type = meld_type
                 meld.tiles = sorted(tiles)
 
-                tile_to_discard = self.determine_what_to_discard(closed_hand, outs_results, shanten)
+                tile_to_discard = self.determine_what_to_discard(closed_hand, outs_results, shanten, True)
                 if tile_to_discard:
                     return meld, tile_to_discard
 

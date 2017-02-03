@@ -60,7 +60,7 @@ class HonitsuStrategy(BaseStrategy):
         tile //= 4
         return self.chosen_suit(tile) or is_honor(tile)
 
-    def determine_what_to_discard(self, closed_hand, outs_results, shanten):
+    def determine_what_to_discard(self, closed_hand, outs_results, shanten, for_open_hand):
         """
         In honitsu mode we should discard tiles from other suit,
         even if it is better to save them
@@ -86,4 +86,4 @@ class HonitsuStrategy(BaseStrategy):
         outs_results = sorted(outs_results, key=lambda x: x['tiles_count'], reverse=True)
         outs_results = sorted(outs_results, key=lambda x: self.is_tile_suitable(x['discard'] * 4), reverse=False)
 
-        return super(HonitsuStrategy, self).determine_what_to_discard(closed_hand, outs_results, shanten)
+        return super(HonitsuStrategy, self).determine_what_to_discard(closed_hand, outs_results, shanten, for_open_hand)

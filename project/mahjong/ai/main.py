@@ -70,7 +70,10 @@ class MainAI(BaseAI):
             return self.player.last_draw
 
         if self.current_strategy:
-            tile_to_discard = self.current_strategy.determine_what_to_discard(self.player.closed_hand, results, shanten)
+            tile_to_discard = self.current_strategy.determine_what_to_discard(self.player.closed_hand,
+                                                                              results,
+                                                                              shanten,
+                                                                              False)
         else:
             tile34 = results[0]['discard']
             tile_to_discard = TilesConverter.find_34_tile_in_136_array(tile34, self.player.tiles)

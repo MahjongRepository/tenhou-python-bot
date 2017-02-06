@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 import logging
 from collections import deque
-
 from random import randint, shuffle, random
 
 from game.logger import set_up_logging
-from game.replay import Replay
+from game.replays.tenhou import TenhouReplay as Replay
 from mahjong.ai.agari import Agari
 from mahjong.client import Client
 from mahjong.hand import FinishedHand
@@ -54,7 +53,7 @@ class GameManager(object):
 
         self.agari = Agari()
         self.finished_hand = FinishedHand()
-        self.replay = Replay()
+        self.replay = Replay(self.clients)
 
     def init_game(self):
         """
@@ -136,7 +135,11 @@ class GameManager(object):
         ))
         logger.info('Players: {0}'.format(self.players_sorted_by_scores()))
 
-        self.replay.init_round(self.clients, seed_value, self.dora_indicators[:], self.dealer)
+        self.replay.init_round(self.dealer,
+                               self.round_number,
+                               self.honba_sticks,
+                               self.riichi_sticks,
+                               self.dora_indicators[0])
 
     def play_round(self):
         continue_to_play = True
@@ -427,9 +430,10 @@ class GameManager(object):
         self.round_number += 1
 
         if winner:
+            ura_dora = []
             # add one more dora for riichi win
             if winner.player.in_riichi:
-                self.dora_indicators.append(self.dead_wall[9])
+                ura_dora.append(self.dead_wall[9])
 
             hand_value = self.finished_hand.estimate_hand_value(tiles=tiles + [win_tile],
                                                                 win_tile=win_tile,
@@ -437,7 +441,7 @@ class GameManager(object):
                                                                 is_riichi=winner.player.in_riichi,
                                                                 is_dealer=winner.player.is_dealer,
                                                                 open_sets=winner.player.meld_tiles,
-                                                                dora_indicators=self.dora_indicators,
+                                                                dora_indicators=self.dora_indicators + ura_dora,
                                                                 player_wind=winner.player.player_wind,
                                                                 round_wind=winner.player.table.round_wind)
 
@@ -453,11 +457,15 @@ class GameManager(object):
 
             self.replay.win(winner.seat,
                             loser and loser.seat or winner.seat,
+                            win_tile,
+                            self.honba_sticks,
+                            self.riichi_sticks,
                             hand_value['han'],
                             hand_value['fu'],
                             hand_value['cost'],
-                            ', '.join(str(x) for x in hand_value['hand_yaku'])
-                            )
+                            hand_value['hand_yaku'],
+                            self.dora_indicators,
+                            ura_dora)
 
             riichi_bonus = self.riichi_sticks * 1000
             self.riichi_sticks = 0
@@ -531,7 +539,7 @@ class GameManager(object):
                     else:
                         client.player.scores -= 3000 / (4 - tempai_users_count)
 
-            self.replay.retake(tempai_users)
+            self.replay.retake(tempai_users, self.honba_sticks, self.riichi_sticks)
 
         # if someone has negative scores,
         # we need to end the game

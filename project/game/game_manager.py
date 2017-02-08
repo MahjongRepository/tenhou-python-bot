@@ -340,7 +340,7 @@ class GameManager(object):
             played_rounds += 1
 
         self.recalculate_players_position()
-        self.replay.end_game(self.clients)
+        self.replay.end_game()
 
         logger.info('Final Scores: {0}'.format(self.players_sorted_by_scores()))
         logger.info('The end of the game')
@@ -456,8 +456,13 @@ class GameManager(object):
             logger.info('Dora indicators: {}'.format(TilesConverter.to_one_line_string(self.dora_indicators)))
             logger.info('Hand yaku: {}'.format(', '.join(str(x) for x in hand_value['hand_yaku'])))
 
+            if loser is not None:
+                loser_seat = loser.seat
+            else:
+                # tsumo
+                loser_seat = winner.seat
             self.replay.win(winner.seat,
-                            loser and loser.seat or winner.seat,
+                            loser_seat,
                             win_tile,
                             self.honba_sticks,
                             self.riichi_sticks,

@@ -24,7 +24,7 @@ class TenhouReplay(Replay):
 
         self.tags.append('<TAIKYOKU oya="0"/>')
 
-    def end_game(self, players):
+    def end_game(self):
         self.tags.append('</mjloggm>')
 
         with open(os.path.join(self.replays_directory, self.replay_name), 'w') as f:

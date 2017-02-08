@@ -19,7 +19,7 @@ class Replay(object):
     def init_game(self):
         raise NotImplemented()
 
-    def end_game(self, clients):
+    def end_game(self):
         raise NotImplemented()
 
     def init_round(self, dealer, round_number, honba_sticks, riichi_sticks, dora):

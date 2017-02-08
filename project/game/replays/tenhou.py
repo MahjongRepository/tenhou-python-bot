@@ -3,6 +3,7 @@ import os
 import time
 
 from game.replays.base import Replay
+from mahjong.meld import Meld
 
 
 class TenhouReplay(Replay):
@@ -57,8 +58,8 @@ class TenhouReplay(Replay):
         else:
             self.tags.append('<REACH who="{}" ten="{}" step="2"/>'.format(who, self._players_scores()))
 
-    def open_meld(self, who, meld_type, tiles):
-        pass
+    def open_meld(self, who, meld):
+        self.tags.append('<N who="{}" m="{}" />'.format(who, self._encode_meld(meld)))
 
     def retake(self, tempai_players, honba_sticks, riichi_sticks):
         hands = ''
@@ -123,3 +124,71 @@ class TenhouReplay(Replay):
                                     int(self.clients[1].player.scores // 100),
                                     int(self.clients[2].player.scores // 100),
                                     int(self.clients[3].player.scores // 100))
+
+    def _encode_meld(self, meld):
+        if meld.type == Meld.CHI:
+            return self._encode_chi(meld)
+        if meld.type == Meld.PON:
+            return self._encode_pon(meld)
+        return ''
+
+    def _encode_chi(self, meld):
+        result = []
+        result.insert(0, self._to_binary_string(meld.from_who, 2))
+        # it was a chi
+        result.insert(0, '1')
+
+        tiles = sorted(meld.tiles[:])
+        base = int(tiles[0] / 4)
+
+        t0 = tiles[0] - base * 4
+        t1 = tiles[1] - 4 - base * 4
+        t2 = tiles[2] - 8 - base * 4
+
+        result.insert(0, self._to_binary_string(t0, 2))
+        result.insert(0, self._to_binary_string(t1, 2))
+        result.insert(0, self._to_binary_string(t2, 2))
+
+        # chi format
+        result.insert(0, '0')
+
+        base_and_called = int(((base / 9) * 7 + base % 9) * 3)
+        result.insert(0, self._to_binary_string(base_and_called))
+
+        # convert bytes to int
+        result = int(''.join(result), 2)
+        return str(result)
+
+    def _encode_pon(self, meld):
+        result = []
+        result.insert(0, self._to_binary_string(meld.from_who, 2))
+        # not a chi
+        result.insert(0, '0')
+        # pon
+        result.insert(0, '1')
+        # not a chankan
+        result.insert(0, '0')
+        # tile for chankan
+        result.insert(0, '00')
+        # just zero for format
+        result.insert(0, '00')
+
+        tiles = sorted(meld.tiles[:])
+        base = int(tiles[0] / 4)
+
+        # for us it is not important what tile was called for now
+        called = 1
+        base_and_called = base * 3 + called
+        result.insert(0, self._to_binary_string(base_and_called))
+
+        # convert bytes to int
+        result = int(''.join(result), 2)
+        return str(result)
+
+    def _to_binary_string(self, number, size=None):
+        result = bin(number).replace('0b', '')
+        # some bytes had to be with a fixed size
+        if size and len(result) < size:
+            while len(result) < size:
+                result = '0' + result
+        return result

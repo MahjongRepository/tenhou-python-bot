@@ -223,6 +223,7 @@ class GameManager(object):
                                                                             other_client.seat - current_client.seat)
 
                 if meld:
+                    meld.from_who = other_client.seat
                     possible_melds.append({
                         'meld': meld,
                         'discarded_tile': discarded_tile,
@@ -250,7 +251,7 @@ class GameManager(object):
                 current_client.add_called_meld(meld)
                 current_client.player.tiles.append(tile)
 
-                self.replay.open_meld(current_client.seat, meld.type, meld.tiles)
+                self.replay.open_meld(current_client.seat, meld)
 
                 # we need to double validate that we are doing fine
                 if tile_to_discard not in current_client.player.closed_hand:

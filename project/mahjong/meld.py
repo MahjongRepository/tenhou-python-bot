@@ -13,6 +13,7 @@ class Meld(object):
     tiles = []
     type = None
     from_who = None
+    called_tile = None
 
     def __str__(self):
         return 'Type: {}, Tiles: {} {}'.format(self.type, TilesConverter.to_one_line_string(self.tiles), self.tiles)

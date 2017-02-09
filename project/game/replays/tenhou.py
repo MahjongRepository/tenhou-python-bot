@@ -58,8 +58,8 @@ class TenhouReplay(Replay):
         else:
             self.tags.append('<REACH who="{}" ten="{}" step="2"/>'.format(who, self._players_scores()))
 
-    def open_meld(self, who, meld):
-        self.tags.append('<N who="{}" m="{}" />'.format(who, self._encode_meld(meld)))
+    def open_meld(self, meld):
+        self.tags.append('<N who="{}" m="{}" />'.format(meld.who, self._encode_meld(meld)))
 
     def retake(self, tempai_players, honba_sticks, riichi_sticks):
         hands = ''
@@ -92,13 +92,29 @@ class TenhouReplay(Replay):
         han_key = self.clients[who].player.closed_hand and 'closed' or 'open'
         scores = []
         for client in self.clients:
-            if client.seat == who:
-                scores.append('{},+{}'.format(int(client.player.scores // 100), int(cost['main'] // 100)))
-            elif client.seat == from_who and client.seat == who:
-                payment = int((cost['main'] + cost['additional'] * 2) // 100)
-                scores.append('{},+{}'.format(int(client.player.scores // 100), payment))
+            # tsumo lose
+            if from_who == who and client.seat != who:
+                if client.player.is_dealer:
+                    payment = cost['main'] + honba_sticks * 100
+                else:
+                    payment = cost['additional'] + honba_sticks * 100
+                scores.append('{},-{}'.format(int(client.player.scores // 100), int(payment // 100)))
+            # tsumo win
+            elif client.seat == who and client.seat == from_who:
+                if client.player.is_dealer:
+                    payment = cost['main'] * 3
+                else:
+                    payment = cost['main'] + cost['additional'] * 2
+                payment += honba_sticks * 300 + riichi_sticks * 1000
+                scores.append('{},+{}'.format(int(client.player.scores // 100), int(payment // 100)))
+            # ron win
+            elif client.seat == who:
+                payment = cost['main'] + honba_sticks * 300 + riichi_sticks * 1000
+                scores.append('{},+{}'.format(int(client.player.scores // 100), int(payment // 100)))
+            # ron lose
             elif client.seat == from_who:
-                scores.append('{},-{}'.format(int(client.player.scores // 100), int(cost['main'] // 100)))
+                payment = cost['main'] + honba_sticks * 300
+                scores.append('{},-{}'.format(int(client.player.scores // 100), int(payment // 100)))
             else:
                 scores.append('{},0'.format(int(client.player.scores // 100)))
 
@@ -134,52 +150,67 @@ class TenhouReplay(Replay):
 
     def _encode_chi(self, meld):
         result = []
-        result.insert(0, self._to_binary_string(meld.from_who, 2))
-        # it was a chi
-        result.insert(0, '1')
 
         tiles = sorted(meld.tiles[:])
         base = int(tiles[0] / 4)
+
+        called = tiles.index(meld.called_tile)
+        base_and_called = int(((base // 9) * 7 + base % 9) * 3) + called
+        result.append(self._to_binary_string(base_and_called))
+
+        # chi format
+        result.append('0')
 
         t0 = tiles[0] - base * 4
         t1 = tiles[1] - 4 - base * 4
         t2 = tiles[2] - 8 - base * 4
 
-        result.insert(0, self._to_binary_string(t0, 2))
-        result.insert(0, self._to_binary_string(t1, 2))
-        result.insert(0, self._to_binary_string(t2, 2))
+        result.append(self._to_binary_string(t2, 2))
+        result.append(self._to_binary_string(t1, 2))
+        result.append(self._to_binary_string(t0, 2))
 
-        # chi format
-        result.insert(0, '0')
+        # it was a chi
+        result.append('1')
 
-        base_and_called = int(((base / 9) * 7 + base % 9) * 3)
-        result.insert(0, self._to_binary_string(base_and_called))
+        offset = self._from_who_offset(meld.who, meld.from_who)
+        result.append(self._to_binary_string(offset, 2))
 
         # convert bytes to int
         result = int(''.join(result), 2)
+
         return str(result)
 
     def _encode_pon(self, meld):
         result = []
-        result.insert(0, self._to_binary_string(meld.from_who, 2))
-        # not a chi
-        result.insert(0, '0')
-        # pon
-        result.insert(0, '1')
-        # not a chankan
-        result.insert(0, '0')
-        # tile for chankan
-        result.insert(0, '00')
-        # just zero for format
-        result.insert(0, '00')
 
         tiles = sorted(meld.tiles[:])
         base = int(tiles[0] / 4)
 
-        # for us it is not important what tile was called for now
-        called = 1
+        called = tiles.index(meld.called_tile)
         base_and_called = base * 3 + called
-        result.insert(0, self._to_binary_string(base_and_called))
+        result.append(self._to_binary_string(base_and_called))
+
+        # just zero for format
+        result.append('00')
+
+        delta_array = [[1, 2, 3], [0, 2, 3], [0, 1, 3], [0, 1, 2]]
+        delta = []
+        for x in range(0, 3):
+            delta.append(tiles[x] - base * 4)
+        delta_index = delta_array.index(delta)
+        result.append(self._to_binary_string(delta_index, 2))
+
+        # not a chankan
+        result.append('0')
+
+        # pon
+        result.append('1')
+
+        # not a chi
+        result.append('0')
+
+        offset = self._from_who_offset(meld.who, meld.from_who)
+        result.append(self._to_binary_string(offset, 2))
 
         # convert bytes to int
         result = int(''.join(result), 2)
@@ -191,4 +222,10 @@ class TenhouReplay(Replay):
         if size and len(result) < size:
             while len(result) < size:
                 result = '0' + result
+        return result
+
+    def _from_who_offset(self, who, from_who):
+        result = from_who - who
+        if result < 0:
+            result += 4
         return result

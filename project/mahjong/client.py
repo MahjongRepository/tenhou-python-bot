@@ -39,7 +39,7 @@ class Client(object):
         # that he discards tile from hand, not from wall
         self.table.count_of_remaining_tiles += 1
 
-        return self.table.get_player(meld.who).add_called_meld(meld)
+        return self.player.add_called_meld(meld)
 
     def enemy_discard(self, tile, player_seat):
         """

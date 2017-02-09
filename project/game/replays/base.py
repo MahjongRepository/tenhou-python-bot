@@ -34,7 +34,7 @@ class Replay(object):
     def riichi(self, who, step):
         raise NotImplemented()
 
-    def open_meld(self, who, meld):
+    def open_meld(self, meld):
         raise NotImplemented()
 
     def retake(self, tempai_players, honba_sticks, riichi_sticks):

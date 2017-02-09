@@ -124,6 +124,7 @@ class GameManager(object):
 
         for client in self.clients:
             client.player.tiles += self._cut_tiles(1)
+            client.player.tiles = sorted(client.player.tiles)
             client.init_hand(client.player.tiles)
 
         logger.info('Seed: {0}'.format(shuffle_seed()))
@@ -219,15 +220,21 @@ class GameManager(object):
                 if other_client == current_client or other_client.player.in_riichi:
                     continue
 
-                meld, discarded_tile = other_client.player.try_to_call_meld(tile,
-                                                                            other_client.seat - current_client.seat)
+                # was a tile discarded by the left player or not
+                if other_client.seat == 0:
+                    is_kamicha_discard = current_client.seat == 3
+                else:
+                    is_kamicha_discard = other_client.seat - current_client.seat == 1
+
+                meld, discarded_tile = other_client.player.try_to_call_meld(tile, is_kamicha_discard)
 
                 if meld:
-                    meld.from_who = other_client.seat
+                    meld.from_who = current_client.seat
+                    meld.who = other_client.seat
+                    meld.called_tile = tile
                     possible_melds.append({
                         'meld': meld,
                         'discarded_tile': discarded_tile,
-                        'who': other_client.seat
                     })
 
             if possible_melds:
@@ -238,7 +245,7 @@ class GameManager(object):
                 meld = possible_melds[0]['meld']
 
                 # we changed current client with called open set
-                self.current_client_seat = possible_melds[0]['who']
+                self.current_client_seat = meld.who
                 current_client = self._get_current_client()
                 self.players_with_open_hands.append(self.current_client_seat)
 
@@ -251,14 +258,14 @@ class GameManager(object):
                 current_client.add_called_meld(meld)
                 current_client.player.tiles.append(tile)
 
-                self.replay.open_meld(current_client.seat, meld)
+                self.replay.open_meld(meld)
 
                 # we need to double validate that we are doing fine
                 if tile_to_discard not in current_client.player.closed_hand:
                     raise ValueError("We can't discard a tile from the opened part of the hand")
 
                 current_client.discard_tile(tile_to_discard)
-                self.replay.discard(current_client.seat, tile)
+                self.replay.discard(current_client.seat, tile_to_discard)
                 logger.info('Discard tile: {}'.format(TilesConverter.to_one_line_string([tile_to_discard])))
 
                 # the end of the round

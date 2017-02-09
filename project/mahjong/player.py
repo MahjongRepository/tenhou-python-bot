@@ -135,8 +135,8 @@ class Player(object):
             self.table.count_of_remaining_tiles > 4
         ])
 
-    def try_to_call_meld(self, tile, enemy_seat):
-        return self.ai.try_to_call_meld(tile, enemy_seat)
+    def try_to_call_meld(self, tile, is_kamicha_discard):
+        return self.ai.try_to_call_meld(tile, is_kamicha_discard)
 
     @property
     def player_wind(self):

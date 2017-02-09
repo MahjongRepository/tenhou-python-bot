@@ -60,7 +60,7 @@ class BaseStrategy(object):
                 break
         return tile_to_discard
 
-    def try_to_call_meld(self, tile, enemy_seat):
+    def try_to_call_meld(self, tile, is_kamicha_discard):
         """
         Determine should we call a meld or not.
         If yes, it will return Meld object and tile to discard
@@ -82,8 +82,6 @@ class BaseStrategy(object):
             return None, None
 
         discarded_tile = tile // 4
-        # previous player
-        is_kamicha_discard = self.player.seat - 1 == enemy_seat or self.player.seat == 0 and enemy_seat == 3
 
         new_tiles = self.player.tiles[:] + [tile]
         # we need to calculate count of shanten with open hand condition
@@ -179,8 +177,6 @@ class BaseStrategy(object):
                 ]
 
                 meld = Meld()
-                meld.who = self.player.seat
-                meld.from_who = enemy_seat
                 meld.type = meld_type
                 meld.tiles = sorted(tiles)
 

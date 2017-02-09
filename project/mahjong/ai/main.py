@@ -157,11 +157,11 @@ class MainAI(BaseAI):
             n += 4 - tiles[raw_data[i]]
         return n
 
-    def try_to_call_meld(self, tile, enemy_seat):
+    def try_to_call_meld(self, tile, is_kamicha_discard):
         if not self.current_strategy:
             return None, None
 
-        return self.current_strategy.try_to_call_meld(tile, enemy_seat)
+        return self.current_strategy.try_to_call_meld(tile, is_kamicha_discard)
 
     def determine_strategy(self):
         # for already opened hand we don't need to give up on selected strategy

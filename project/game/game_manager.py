@@ -226,7 +226,7 @@ class GameManager(object):
                 else:
                     is_kamicha_discard = other_client.seat - current_client.seat == 1
 
-                meld, discarded_tile = other_client.player.try_to_call_meld(tile, is_kamicha_discard)
+                meld, discarded_tile, shanten = other_client.player.try_to_call_meld(tile, is_kamicha_discard)
 
                 if meld:
                     meld.from_who = current_client.seat
@@ -235,6 +235,7 @@ class GameManager(object):
                     possible_melds.append({
                         'meld': meld,
                         'discarded_tile': discarded_tile,
+                        'shanten': shanten
                     })
 
             if possible_melds:
@@ -263,6 +264,7 @@ class GameManager(object):
 
                 current_client.add_called_meld(meld)
                 current_client.player.tiles.append(tile)
+                current_client.player.ai.previous_shanten = possible_melds[0]['shanten']
 
                 self.replay.open_meld(meld)
 

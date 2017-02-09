@@ -121,7 +121,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(sou='12368', pin='2358', honors='4455')
         tile = self._string_to_136_tile(honors='5')
         player.init_hand(tiles)
-        meld, _ = player.try_to_call_meld(tile, False)
+        meld, _, _ = player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 
     def test_chose_right_set_to_open_hand(self):
@@ -135,7 +135,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='23455', pin='3445678', honors='1')
         tile = self._string_to_136_tile(man='5')
         player.init_hand(tiles)
-        meld, _ = player.try_to_call_meld(tile, True)
+        meld, _, _ = player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)
         self.assertEqual(meld.type, Meld.PON)
         self.assertEqual(self._to_string(meld.tiles), '555m')
@@ -143,7 +143,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='335666', pin='22', sou='345', honors='55')
         tile = self._string_to_136_tile(man='4')
         player.init_hand(tiles)
-        meld, _ = player.try_to_call_meld(tile, True)
+        meld, _, _ = player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)
         self.assertEqual(meld.type, Meld.CHI)
         self.assertEqual(self._to_string(meld.tiles), '345m')
@@ -151,10 +151,31 @@ class AITestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='23557', pin='556788', honors='22')
         tile = self._string_to_136_tile(pin='5')
         player.init_hand(tiles)
-        meld, _ = player.try_to_call_meld(tile, True)
+        meld, _, _ = player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)
         self.assertEqual(meld.type, Meld.PON)
         self.assertEqual(self._to_string(meld.tiles), '555p')
+
+    def test_not_open_hand_for_not_needed_set(self):
+        """
+        We don't need to open hand if it is not improve the hand.
+        It was a bug related to it
+        """
+        table = Table()
+        player = Player(0, 0, table)
+
+        tiles = self._string_to_136_array(man='22457', sou='12234', pin='9', honors='55')
+        tile = self._string_to_136_tile(sou='3')
+        player.init_hand(tiles)
+        meld, tile_to_discard, shanten = player.try_to_call_meld(tile, True)
+        self.assertEqual(self._to_string(meld.tiles), '123s')
+        player.add_called_meld(meld)
+        player.discard_tile(tile_to_discard)
+        player.ai.previous_shanten = shanten
+
+        tile = self._string_to_136_tile(sou='3')
+        meld, tile_to_discard, shanten = player.try_to_call_meld(tile, True)
+        self.assertIsNone(meld)
 
     def test_chose_strategy_and_reset_strategy(self):
         table = Table()

@@ -54,14 +54,14 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
 
         # we don't need to open hand with not our wind
-        meld, _ = player.try_to_call_meld(tile, False)
+        meld, _, _ = player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 
         # with dragon pair in hand let's open our hand
         tiles = self._string_to_136_array(sou='1689', pin='2358', man='1', honors='4455')
         tile = self._string_to_136_tile(honors='4')
         player.init_hand(tiles)
-        meld, _ = player.try_to_call_meld(tile, False)
+        meld, _, _ = player.try_to_call_meld(tile, False)
         self.assertNotEqual(meld, None)
         player.add_called_meld(meld)
         player.tiles.append(tile)
@@ -73,7 +73,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         player.discard_tile()
 
         tile = self._string_to_136_tile(honors='5')
-        meld, _ = player.try_to_call_meld(tile, False)
+        meld, _, _ = player.try_to_call_meld(tile, False)
         self.assertNotEqual(meld, None)
         player.add_called_meld(meld)
         player.tiles.append(tile)
@@ -86,10 +86,10 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
 
         tile = self._string_to_136_tile(sou='7')
         # we can call chi only from left player
-        meld, _ = player.try_to_call_meld(tile, False)
+        meld, _, _ = player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 
-        meld, _ = player.try_to_call_meld(tile, True)
+        meld, _, _ = player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)
         player.add_called_meld(meld)
         player.tiles.append(tile)
@@ -112,11 +112,11 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
 
         # we will not get tempai on yakuhai pair with this hand, so let's skip this call
-        meld, _ = player.try_to_call_meld(tile, False)
+        meld, _, _ = player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 
         tile = self._string_to_136_tile(man='7')
-        meld, tile_to_discard = player.try_to_call_meld(tile, True)
+        meld, tile_to_discard, _ = player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)
         self.assertEqual(meld.type, Meld.CHI)
         self.assertEqual(self._to_string(meld.tiles), '678m')
@@ -179,12 +179,12 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         # we don't need to call meld even if it improves our hand,
         # because we are collecting honitsu
         tile = self._string_to_136_tile(man='1')
-        meld, _ = player.try_to_call_meld(tile, False)
+        meld, _, _ = player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 
         # any honor tile is suitable
         tile = self._string_to_136_tile(honors='2')
-        meld, _ = player.try_to_call_meld(tile, False)
+        meld, _, _ = player.try_to_call_meld(tile, False)
         self.assertNotEqual(meld, None)
 
         tile = self._string_to_136_tile(man='1')
@@ -306,14 +306,14 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='369', pin='378', sou='3488', honors='123')
         tile = self._string_to_136_tile(sou='2')
         player.init_hand(tiles)
-        meld, _ = player.try_to_call_meld(tile, False)
+        meld, _, _ = player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 
         # with 3 shanten we can open a hand
         tiles = self._string_to_136_array(man='236', pin='378', sou='3488', honors='123')
         tile = self._string_to_136_tile(sou='2')
         player.init_hand(tiles)
-        meld, _ = player.try_to_call_meld(tile, True)
+        meld, _, _ = player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)
 
     def test_dont_open_hand_with_not_suitable_melds(self):
@@ -323,5 +323,5 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='33355788', sou='3479', honors='3')
         tile = self._string_to_136_tile(sou='8')
         player.init_hand(tiles)
-        meld, _ = player.try_to_call_meld(tile, False)
+        meld, _, _ = player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)

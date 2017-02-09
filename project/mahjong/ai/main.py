@@ -159,7 +159,7 @@ class MainAI(BaseAI):
 
     def try_to_call_meld(self, tile, is_kamicha_discard):
         if not self.current_strategy:
-            return None, None
+            return None, None, None
 
         return self.current_strategy.try_to_call_meld(tile, is_kamicha_discard)
 

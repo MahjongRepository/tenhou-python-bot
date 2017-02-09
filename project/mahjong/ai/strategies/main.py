@@ -69,20 +69,20 @@ class BaseStrategy(object):
         If yes, it will return Meld object and tile to discard
         :param tile: 136 format tile
         :param enemy_seat: 1, 2, 3
-        :return: meld and tile to discard after called open set
+        :return: meld and tile to discard after called open set, and new shanten count
         """
         if self.player.in_riichi:
-            return None, None
+            return None, None, None
 
         closed_hand = self.player.closed_hand[:]
 
         # we opened all our hand
         if len(closed_hand) == 1:
-            return None, None
+            return None, None, None
 
         # we can't use this tile for our chosen strategy
         if not self.is_tile_suitable(tile):
-            return None, None
+            return None, None, None
 
         discarded_tile = tile // 4
 
@@ -93,11 +93,11 @@ class BaseStrategy(object):
 
         # each strategy can use their own value to min shanten number
         if shanten > self.min_shanten:
-            return None, None
+            return None, None, None
 
         # we can't improve hand, so we don't need to open it
         if not outs_results:
-            return None, None
+            return None, None, None
 
         # tile will decrease the count of shanten in hand
         # so let's call opened set with it
@@ -185,9 +185,9 @@ class BaseStrategy(object):
 
                 tile_to_discard = self.determine_what_to_discard(closed_hand, outs_results, shanten, True)
                 if tile_to_discard:
-                    return meld, tile_to_discard
+                    return meld, tile_to_discard, shanten
 
-        return None, None
+        return None, None, None
 
     def _find_best_meld_to_open(self, possible_melds, closed_hand_34, first_limit, second_limit, completed_hand):
         """

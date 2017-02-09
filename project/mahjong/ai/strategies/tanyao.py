@@ -16,6 +16,10 @@ class TanyaoStrategy(BaseStrategy):
         :return: boolean
         """
 
+        result = super(TanyaoStrategy, self).should_activate_strategy()
+        if not result:
+            return False
+
         tiles = TilesConverter.to_34_array(self.player.tiles)
         count_of_terminal_pon_sets = 0
         count_of_terminal_pairs = 0

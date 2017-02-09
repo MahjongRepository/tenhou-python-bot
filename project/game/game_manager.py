@@ -250,10 +250,16 @@ class GameManager(object):
                 self.players_with_open_hands.append(self.current_client_seat)
 
                 logger.info('Called meld: {} by {}'.format(meld, current_client.player.name))
-                logger.info('With hand: {} + {}'.format(
-                    TilesConverter.to_one_line_string(current_client.player.tiles),
+                hand_string = 'With hand: {} + {}'.format(
+                    TilesConverter.to_one_line_string(current_client.player.closed_hand),
                     TilesConverter.to_one_line_string([tile])
-                ))
+                )
+                if current_client.player.is_open_hand:
+                    melds = []
+                    for meld in current_client.player.melds:
+                        melds.append('{}'.format(TilesConverter.to_one_line_string(meld.tiles)))
+                    hand_string += ' [{}]'.format(', '.join(melds))
+                logger.info(hand_string)
 
                 current_client.add_called_meld(meld)
                 current_client.player.tiles.append(tile)
@@ -400,6 +406,9 @@ class GameManager(object):
             client.enemy_riichi(who_called_riichi - client.seat)
 
         logger.info('Riichi: {0} -1,000'.format(self.clients[who_called_riichi].player.name))
+        logger.info('With hand: {}'.format(
+            TilesConverter.to_one_line_string(client.player.closed_hand)
+        ))
 
     def set_dealer(self, dealer):
         self.dealer = dealer

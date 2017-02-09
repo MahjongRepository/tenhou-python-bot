@@ -15,6 +15,10 @@ class HonitsuStrategy(BaseStrategy):
         :return: boolean
         """
 
+        result = super(HonitsuStrategy, self).should_activate_strategy()
+        if not result:
+            return False
+
         suits = [
             {'count': 0, 'name': 'sou', 'function': is_sou},
             {'count': 0, 'name': 'man', 'function': is_man},

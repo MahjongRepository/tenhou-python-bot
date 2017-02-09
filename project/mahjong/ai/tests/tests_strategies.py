@@ -143,6 +143,11 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
         self.assertEqual(strategy.should_activate_strategy(), False)
 
+        # with chitoitsu-like hand we don't need to go for honitsu
+        tiles = self._string_to_136_array(pin='77', man='3355677899', sou='11')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(), False)
+
     def test_suitable_tiles(self):
         table = Table()
         player = Player(0, 0, table)
@@ -221,6 +226,15 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(sou='234', man='345669', pin='2399')
         player.init_hand(tiles)
         self.assertEqual(strategy.should_activate_strategy(), True)
+
+    def test_should_activate_strategy_and_chitoitsu_like_hand(self):
+        table = Table()
+        player = Player(0, 0, table)
+        strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
+
+        tiles = self._string_to_136_array(sou='223388', man='3344', pin='6687')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(), False)
 
     def test_should_activate_strategy_and_already_completed_sided_set(self):
         table = Table()

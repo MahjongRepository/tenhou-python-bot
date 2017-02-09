@@ -7,14 +7,16 @@ class YakuhaiStrategy(BaseStrategy):
 
     def should_activate_strategy(self):
         """
-        We can go for yakuhai strategy if we have at least one yakuhai pair in the hand,
-        but with 5+ pairs in hand we don't need to go for yakuhai
+        We can go for yakuhai strategy if we have at least one yakuhai pair in the hand
         :return: boolean
         """
+        result = super(YakuhaiStrategy, self).should_activate_strategy()
+        if not result:
+            return False
+
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
-        count_of_pairs = len([x for x in range(0, 34) if tiles_34[x] >= 2])
         has_valued_pairs = any([tiles_34[x] >= 2 for x in self.player.ai.valued_honors])
-        return has_valued_pairs and count_of_pairs < 4
+        return has_valued_pairs
 
     def is_tile_suitable(self, tile):
         """

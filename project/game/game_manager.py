@@ -10,6 +10,9 @@ from mahjong.client import Client
 from mahjong.hand import FinishedHand
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
+from utils.settings_handler import settings
+
+settings.FIVE_REDS = True
 
 # we need to have it
 # to be able repeat our tests with needed random

@@ -6,6 +6,7 @@ import game.game_manager
 from game.game_manager import GameManager
 from mahjong.client import Client
 from utils.tests import TestMixin
+from utils.settings_handler import settings
 
 
 class GameManagerTestCase(unittest.TestCase, TestMixin):
@@ -339,6 +340,8 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(manager.honba_sticks, 1)
 
     def test_win_by_ron_and_scores_calculation(self):
+        settings.FIVE_REDS = False
+
         clients = [Client() for _ in range(0, 4)]
         manager = GameManager(clients)
         manager.init_game()
@@ -348,7 +351,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         winner = clients[0]
         loser = clients[1]
 
-        # only 1500 hand
+        # 1500 hand
         tiles = self._string_to_136_array(sou='123567', pin='12345', man='11')
         win_tile = self._string_to_136_tile(pin='6')
         manager.process_the_end_of_the_round(tiles, win_tile, winner, loser, False)
@@ -382,6 +385,8 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(loser.player.scores, 22900)
         self.assertEqual(manager.honba_sticks, 3)
 
+        settings.FIVE_REDS = True
+
     def test_win_by_tsumo_and_scores_calculation(self):
         clients = [Client() for _ in range(0, 4)]
         manager = GameManager(clients)
@@ -400,12 +405,12 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         win_tile = self._string_to_136_tile(pin='6')
         manager.process_the_end_of_the_round(tiles, win_tile, winner, None, True)
 
-        # 2400 + riichi stick (1000) = 3400
-        # 700 from each other player + 100 honba payment
-        self.assertEqual(winner.player.scores, 28400)
-        self.assertEqual(clients[1].player.scores, 24200)
-        self.assertEqual(clients[2].player.scores, 24200)
-        self.assertEqual(clients[3].player.scores, 24200)
+        # 8100 + riichi stick (1000) = 9100
+        # 2600 from each other player + 100 honba payment
+        self.assertEqual(winner.player.scores, 34100)
+        self.assertEqual(clients[1].player.scores, 22300)
+        self.assertEqual(clients[2].player.scores, 22300)
+        self.assertEqual(clients[3].player.scores, 22300)
 
         for client in clients:
             client.player.scores = 25000
@@ -420,11 +425,11 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         win_tile = self._string_to_136_tile(pin='6')
         manager.process_the_end_of_the_round(tiles, win_tile, winner, None, True)
 
-        # 700 from dealer and 400 from other players
-        self.assertEqual(winner.player.scores, 26500)
-        self.assertEqual(clients[1].player.scores, 24600)
-        self.assertEqual(clients[2].player.scores, 24300)
-        self.assertEqual(clients[3].player.scores, 24600)
+        # 2600 from dealer and 1300 from other players
+        self.assertEqual(winner.player.scores, 30200)
+        self.assertEqual(clients[1].player.scores, 23700)
+        self.assertEqual(clients[2].player.scores, 22400)
+        self.assertEqual(clients[3].player.scores, 23700)
 
     def test_change_dealer_after_end_of_the_round(self):
         clients = [Client() for _ in range(0, 4)]
@@ -471,7 +476,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(sou='123567', pin='12345', man='11')
         win_tile = self._string_to_136_tile(pin='6')
         result = manager.process_the_end_of_the_round(tiles, win_tile, winner, loser, False)
-        self.assertEqual(loser.player.scores, -1500)
+        self.assertEqual(loser.player.scores, -5800)
         self.assertEqual(result['is_game_end'], True)
 
     def test_is_game_end_by_eight_winds(self):

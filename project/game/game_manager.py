@@ -196,6 +196,9 @@ class GameManager(object):
                     # and discard it later
                     tiles.append(tile)
 
+            # we had to clear ippatsu, after tile draw
+            current_client.player._is_ippatsu = False
+
             # if not in riichi, let's decide what tile to discard
             if not current_client.player.in_riichi:
                 tile = current_client.discard_tile()
@@ -247,6 +250,10 @@ class GameManager(object):
                 tile_to_discard = possible_melds[0]['discarded_tile']
                 # if tile_to_discard:
                 meld = possible_melds[0]['meld']
+
+                # clear ippatsu after called meld
+                for client_item in self.clients:
+                    client_item.player._is_ippatsu = False
 
                 # we changed current client with called open set
                 self.current_client_seat = meld.who
@@ -406,6 +413,12 @@ class GameManager(object):
         client.player.scores -= 1000
         self.riichi_sticks += 1
 
+        if client.player.discards:
+            client.player._is_daburi = True
+            # we will set it to False after next draw
+            # or called meld
+            client.player._is_ippatsu = True
+
         who_called_riichi = client.seat
         for client in self.clients:
             client.enemy_riichi(who_called_riichi - client.seat)
@@ -457,6 +470,29 @@ class GameManager(object):
             if winner.player.in_riichi:
                 ura_dora.append(self.dead_wall[9])
 
+            is_tenhou = False
+            is_renhou = False
+            is_chiihou = False
+            # win on the first draw\discard
+            # we can win after daburi riichi in that case we will have one tile in discard
+            # that's why we have < 2 condition (not == 0)
+            if not self.players_with_open_hands and len(winner.player.discards) < 2:
+                if is_tsumo:
+                    if winner.player.is_dealer:
+                        is_tenhou = True
+                    else:
+                        is_chiihou = True
+                else:
+                    is_renhou = True
+
+            is_haitei = False
+            is_houtei = False
+            if not self.tiles:
+                if is_tsumo:
+                    is_haitei = True
+                else:
+                    is_houtei = True
+
             hand_value = self.finished_hand.estimate_hand_value(tiles=tiles + [win_tile],
                                                                 win_tile=win_tile,
                                                                 is_tsumo=is_tsumo,
@@ -465,7 +501,14 @@ class GameManager(object):
                                                                 open_sets=winner.player.meld_tiles,
                                                                 dora_indicators=self.dora_indicators + ura_dora,
                                                                 player_wind=winner.player.player_wind,
-                                                                round_wind=winner.player.table.round_wind)
+                                                                round_wind=winner.player.table.round_wind,
+                                                                is_tenhou=is_tenhou,
+                                                                is_renhou=is_renhou,
+                                                                is_chiihou=is_chiihou,
+                                                                is_daburu_riichi=winner.player._is_daburi,
+                                                                is_ippatsu=winner.player._is_ippatsu,
+                                                                is_haitei=is_haitei,
+                                                                is_houtei=is_houtei)
 
             if hand_value['error']:
                 logger.error("Can't estimate a hand: {}. Error: {}".format(
@@ -482,6 +525,7 @@ class GameManager(object):
             else:
                 # tsumo
                 loser_seat = winner.seat
+
             self.replay.win(winner.seat,
                             loser_seat,
                             win_tile,

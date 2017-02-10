@@ -16,7 +16,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         logger.disabled = False
 
     # def test_debug(self):
-    #     game.game_manager.shuffle_seed = lambda: 0.39152594264879603
+    #     game.game_manager.shuffle_seed = lambda: 0.9974277798778228
     #
     #     clients = [Client(use_previous_ai_version=False) for _ in range(0, 4)]
     #     # clients = [Client(use_previous_ai_version=True) for _ in range(0, 3)]
@@ -24,7 +24,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
     #     manager = GameManager(clients)
     #     manager.replay.init_game()
     #     manager.init_game()
-    #     manager.set_dealer(2)
+    #     manager.set_dealer(1)
     #     manager._unique_dealers = 1
     #     manager.init_round()
     #
@@ -349,6 +349,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         manager.set_dealer(0)
 
         winner = clients[0]
+        winner.player.discards = [1, 2]
         loser = clients[1]
 
         # 1500 hand
@@ -400,6 +401,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         manager.dora_indicators = [100]
         # to avoid ura-dora, because of this test can fail
         winner.player.in_riichi = False
+        winner.player.discards = [1, 2]
 
         tiles = self._string_to_136_array(sou='123567', pin='12345', man='11')
         win_tile = self._string_to_136_tile(pin='6')
@@ -475,6 +477,9 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
 
         tiles = self._string_to_136_array(sou='123567', pin='12345', man='11')
         win_tile = self._string_to_136_tile(pin='6')
+        # discards to erase renhou
+        winner.player.discards = [1, 2]
+
         result = manager.process_the_end_of_the_round(tiles, win_tile, winner, loser, False)
         self.assertEqual(loser.player.scores, -5800)
         self.assertEqual(result['is_game_end'], True)

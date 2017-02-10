@@ -36,6 +36,11 @@ class Player(object):
     in_riichi = False
     in_defence_mode = False
 
+    # system fields
+    # for local games emulation
+    _is_daburi = False
+    _is_ippatsu = False
+
     def __init__(self, seat, dealer_seat, table, use_previous_ai_version=False):
         self.discards = []
         self.melds = []

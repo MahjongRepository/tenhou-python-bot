@@ -23,20 +23,29 @@ class TanyaoStrategy(BaseStrategy):
         tiles = TilesConverter.to_34_array(self.player.tiles)
         count_of_terminal_pon_sets = 0
         count_of_terminal_pairs = 0
+        count_of_valued_pairs = 0
         for x in range(0, 34):
             tile = tiles[x]
             if not tile:
                 continue
 
-            if x in self.not_suitable_tiles and tile >= 3:
+            if x in self.not_suitable_tiles and tile == 3:
                 count_of_terminal_pon_sets += 1
 
-            if x in self.not_suitable_tiles and tile >= 2:
+            if x in self.not_suitable_tiles and tile == 2:
                 count_of_terminal_pairs += 1
+
+                if x in self.player.ai.valued_honors:
+                    count_of_valued_pairs += 1
 
         # if we already have pon of honor\terminal tiles
         # we don't need to open hand for tanyao
         if count_of_terminal_pon_sets > 0:
+            return False
+
+        # with valued pair (yakuhai wind or dragon)
+        # we don't need to go for tanyao
+        if count_of_valued_pairs > 0:
             return False
 
         # one pair is ok in tanyao pair

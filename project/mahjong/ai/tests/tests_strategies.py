@@ -227,6 +227,19 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
         self.assertEqual(strategy.should_activate_strategy(), True)
 
+    def test_should_activate_strategy_and_valued_pair(self):
+        table = Table()
+        player = Player(0, 0, table)
+        strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
+
+        tiles = self._string_to_136_array(man='23446679', sou='345', honors='55')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(), False)
+
+        tiles = self._string_to_136_array(man='23446679', sou='345', honors='22')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(), True)
+
     def test_should_activate_strategy_and_chitoitsu_like_hand(self):
         table = Table()
         player = Player(0, 0, table)

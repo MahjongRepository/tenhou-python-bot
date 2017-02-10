@@ -413,11 +413,11 @@ class GameManager(object):
         client.player.scores -= 1000
         self.riichi_sticks += 1
 
-        if client.player.discards:
+        if not client.player.discards:
             client.player._is_daburi = True
-            # we will set it to False after next draw
-            # or called meld
-            client.player._is_ippatsu = True
+        # we will set it to False after next draw
+        # or called meld
+        client.player._is_ippatsu = True
 
         who_called_riichi = client.seat
         for client in self.clients:

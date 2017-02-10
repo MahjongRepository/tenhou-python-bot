@@ -260,8 +260,8 @@ class GameManager(object):
                 )
                 if current_client.player.is_open_hand:
                     melds = []
-                    for meld in current_client.player.melds:
-                        melds.append('{}'.format(TilesConverter.to_one_line_string(meld.tiles)))
+                    for item in current_client.player.melds:
+                        melds.append('{}'.format(TilesConverter.to_one_line_string(item.tiles)))
                     hand_string += ' [{}]'.format(', '.join(melds))
                 logger.info(hand_string)
 

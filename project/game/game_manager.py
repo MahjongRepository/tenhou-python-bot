@@ -139,7 +139,7 @@ class GameManager(object):
         ))
         logger.info('Players: {0}'.format(self.players_sorted_by_scores()))
 
-        self.replay.init_round(self.dealer,
+        self.replay.init_round(self._unique_dealers,
                                self.round_number,
                                self.honba_sticks,
                                self.riichi_sticks,

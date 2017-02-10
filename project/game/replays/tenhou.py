@@ -28,7 +28,7 @@ class TenhouReplay(Replay):
         self.tags.append('</mjloggm>')
 
         with open(os.path.join(self.replays_directory, self.replay_name), 'w') as f:
-            f.write('\n'.join(self.tags))
+            f.write(''.join(self.tags))
 
     def init_round(self, dealer, round_number, honba_sticks, riichi_sticks, dora):
         self.tags.append('<INIT seed="{},{},{},0,0,{}" ten="{}" oya="{}" '

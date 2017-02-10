@@ -89,7 +89,8 @@ class TenhouReplay(Replay):
             hands))
 
     def win(self, who, from_who, win_tile, honba_sticks, riichi_sticks, han, fu, cost, yaku_list, dora, ura_dora):
-        han_key = self.clients[who].player.closed_hand and 'closed' or 'open'
+        winner = self.clients[who].player
+        han_key = winner.is_open_hand and 'open' or 'closed'
         scores = []
         for client in self.clients:
             # tsumo lose
@@ -120,7 +121,7 @@ class TenhouReplay(Replay):
 
         # tsumo
         if who == from_who:
-            if self.clients[who].player.is_dealer:
+            if winner.is_dealer:
                 payment = cost['main'] * 3
             else:
                 payment = cost['main'] + cost['additional'] * 2
@@ -128,13 +129,20 @@ class TenhouReplay(Replay):
         else:
             payment = cost['main']
 
+        melds = []
+        if winner.is_open_hand:
+            for meld in winner.melds:
+                melds.append(self._encode_meld(meld))
+        melds = ','.join(melds)
+
         yaku_string = ','.join(['{},{}'.format(x.id, x.han[han_key]) for x in yaku_list])
-        self.tags.append('<AGARI ba="{},{}" hai="{}" machi="{}" ten="{},{},0" yaku="{}" doraHai="{}" '
+        self.tags.append('<AGARI ba="{},{}" hai="{}" machi="{}" m="{}" ten="{},{},0" yaku="{}" doraHai="{}" '
                          'doraHaiUra="{}" who="{}" fromWho="{}" sc="{}" />'
                          .format(honba_sticks,
                                  riichi_sticks,
-                                 ','.join([str(x) for x in self.clients[who].player.tiles]),
+                                 ','.join([str(x) for x in winner.tiles]),
                                  win_tile,
+                                 melds,
                                  fu,
                                  payment,
                                  yaku_string,

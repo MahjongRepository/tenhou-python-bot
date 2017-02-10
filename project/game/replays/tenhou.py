@@ -118,6 +118,16 @@ class TenhouReplay(Replay):
             else:
                 scores.append('{},0'.format(int(client.player.scores // 100)))
 
+        # tsumo
+        if who == from_who:
+            if self.clients[who].player.is_dealer:
+                payment = cost['main'] * 3
+            else:
+                payment = cost['main'] + cost['additional'] * 2
+        # ron
+        else:
+            payment = cost['main']
+
         yaku_string = ','.join(['{},{}'.format(x.id, x.han[han_key]) for x in yaku_list])
         self.tags.append('<AGARI ba="{},{}" hai="{}" machi="{}" ten="{},{},0" yaku="{}" doraHai="{}" '
                          'doraHaiUra="{}" who="{}" fromWho="{}" sc="{}" />'
@@ -126,7 +136,7 @@ class TenhouReplay(Replay):
                                  ','.join([str(x) for x in self.clients[who].player.tiles]),
                                  win_tile,
                                  fu,
-                                 cost['main'],
+                                 payment,
                                  yaku_string,
                                  ','.join([str(x) for x in dora]),
                                  ','.join([str(x) for x in ura_dora]),

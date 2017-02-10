@@ -338,3 +338,25 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
         meld, _, _ = player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
+
+    def test_open_hand_and_discard_tiles_logic(self):
+        table = Table()
+        player = Player(0, 0, table)
+
+        # 2345779m1p256s44z
+        tiles = self._string_to_136_array(man='22345777', sou='238', honors='44')
+        player.init_hand(tiles)
+
+        # if we are in tanyao
+        # we need to discard terminals and honors
+        tile = self._string_to_136_tile(sou='4')
+        meld, tile_to_discard, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(self._to_string([tile_to_discard]), '4z')
+
+        tile = self._string_to_136_tile(pin='5')
+        player.draw_tile(tile)
+        tile_to_discard = player.discard_tile()
+
+        # we are in tanyao, so we should discard honors and terminals
+        self.assertEqual(self._to_string([tile_to_discard]), '4z')

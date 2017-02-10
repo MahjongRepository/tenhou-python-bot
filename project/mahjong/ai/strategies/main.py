@@ -55,12 +55,37 @@ class BaseStrategy(object):
         :param for_open_hand: boolean
         :return: tile in 136 format or none
         """
+
+        # mark all not suitable tiles as ready to discard
+        # even if they not should be discarded by uke-ire
+        for i in closed_hand:
+            i //= 4
+
+            if not self.is_tile_suitable(i * 4):
+                item_was_found = False
+                for j in outs_results:
+                    if j['discard'] == i:
+                        item_was_found = True
+                        j['tiles_count'] = 0
+                        j['waiting'] = []
+
+                if not item_was_found:
+                    outs_results.append({
+                        'discard': i,
+                        'tiles_count': 1,
+                        'waiting': []
+                    })
+
+        outs_results = sorted(outs_results, key=lambda x: x['tiles_count'], reverse=True)
+        outs_results = sorted(outs_results, key=lambda x: self.is_tile_suitable(x['discard'] * 4), reverse=False)
+
         tile_to_discard = None
         for out_result in outs_results:
             tile_34 = out_result['discard']
             tile_to_discard = TilesConverter.find_34_tile_in_136_array(tile_34, closed_hand)
             if tile_to_discard:
                 break
+
         return tile_to_discard
 
     def try_to_call_meld(self, tile, is_kamicha_discard):

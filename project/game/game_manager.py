@@ -67,8 +67,9 @@ class GameManager(object):
         for i in range(0, len(self.clients)):
             self.clients[i].seat = i
 
-        dealer = randint(0, 3)
-        self.set_dealer(dealer)
+        # oya should be always first player
+        # to have compatibility with tenhou format
+        self.set_dealer(0)
 
         for client in self.clients:
             client.player.scores = 25000
@@ -130,17 +131,17 @@ class GameManager(object):
             client.player.tiles = sorted(client.player.tiles)
             client.init_hand(client.player.tiles)
 
-        logger.info('Seed: {0}'.format(shuffle_seed()))
-        logger.info('Dealer: {0}'.format(self.dealer))
-        logger.info('Wind: {0}. Riichi sticks: {1}. Honba sticks: {2}'.format(
+        logger.info('Seed: {}'.format(shuffle_seed()))
+        logger.info('Dealer: {}, {}'.format(self.dealer, self.clients[self.dealer].player.name))
+        logger.info('Wind: {}. Riichi sticks: {}. Honba sticks: {}'.format(
             self._unique_dealers,
             self.riichi_sticks,
             self.honba_sticks
         ))
         logger.info('Players: {0}'.format(self.players_sorted_by_scores()))
 
-        self.replay.init_round(self._unique_dealers,
-                               self.round_number,
+        self.replay.init_round(self.dealer,
+                               self._unique_dealers - 1,
                                self.honba_sticks,
                                self.riichi_sticks,
                                self.dora_indicators[0])

@@ -16,7 +16,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         logger.disabled = False
 
     # def test_debug(self):
-    #     game.game_manager.shuffle_seed = lambda: 0.9974277798778228
+    #     game.game_manager.shuffle_seed = lambda: 0.11872145794515754
     #
     #     clients = [Client(use_previous_ai_version=False) for _ in range(0, 4)]
     #     # clients = [Client(use_previous_ai_version=True) for _ in range(0, 3)]
@@ -24,8 +24,8 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
     #     manager = GameManager(clients)
     #     manager.replay.init_game()
     #     manager.init_game()
-    #     manager.set_dealer(1)
-    #     manager._unique_dealers = 1
+    #     manager.set_dealer(2)
+    #     manager._unique_dealers = 3
     #     manager.init_round()
     #
     #     result = manager.play_round()
@@ -329,15 +329,19 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         clients[0].player.in_tempai = False
         clients[1].player.in_tempai = True
 
-        # dealer NOT in tempai, no honba
+        self.assertEqual(manager._unique_dealers, 3)
+        # dealer NOT in tempai
+        # dealer should be moved and honba should be added
         manager.process_the_end_of_the_round([], None, None, None, False)
-        self.assertEqual(manager.honba_sticks, 0)
+        self.assertEqual(manager.honba_sticks, 1)
+        self.assertEqual(manager._unique_dealers, 4)
 
         clients[0].player.in_tempai = True
+        manager.set_dealer(0)
 
         # dealer in tempai, so honba stick should be added
         manager.process_the_end_of_the_round([], None, None, None, False)
-        self.assertEqual(manager.honba_sticks, 1)
+        self.assertEqual(manager.honba_sticks, 2)
 
     def test_win_by_ron_and_scores_calculation(self):
         settings.FIVE_REDS = False

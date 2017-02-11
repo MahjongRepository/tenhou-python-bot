@@ -584,17 +584,17 @@ class GameManager(object):
         else:
             tempai_users = []
 
+            dealer_was_tempai = False
             for client in self.clients:
                 if client.player.in_tempai:
                     tempai_users.append(client.seat)
 
+                    if client.player.is_dealer:
+                        dealer_was_tempai = True
+
             tempai_users_count = len(tempai_users)
             if tempai_users_count == 0 or tempai_users_count == 4:
                 self.honba_sticks += 1
-                # no one in tempai, so deal should move
-                if tempai_users_count == 0:
-                    new_dealer = self._move_position(self.dealer)
-                    self.set_dealer(new_dealer)
             else:
                 # 1 tempai user  will get 3000
                 # 2 tempai users will get 1500 each
@@ -603,13 +603,22 @@ class GameManager(object):
                 for client in self.clients:
                     if client.player.in_tempai:
                         client.player.scores += scores_to_pay
-                        logger.info('{0} + {1:,d}'.format(client.player.name, int(scores_to_pay)))
+                        logger.info('{0} +{1:,d}'.format(client.player.name, int(scores_to_pay)))
 
                         # dealer was tempai, we need to add honba stick
                         if client.player.is_dealer:
                             self.honba_sticks += 1
                     else:
                         client.player.scores -= 3000 / (4 - tempai_users_count)
+
+            # dealer not in tempai, so round should move
+            if not dealer_was_tempai:
+                new_dealer = self._move_position(self.dealer)
+                self.set_dealer(new_dealer)
+
+                # someone was in tempai, we need to add honba here
+                if tempai_users_count != 0 and tempai_users_count != 4:
+                    self.honba_sticks += 1
 
             self.replay.retake(tempai_users, self.honba_sticks, self.riichi_sticks)
 

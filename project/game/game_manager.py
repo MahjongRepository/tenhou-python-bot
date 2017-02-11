@@ -413,7 +413,7 @@ class GameManager(object):
         client.player.scores -= 1000
         self.riichi_sticks += 1
 
-        if not client.player.discards:
+        if len(client.player.discards) == 1:
             client.player._is_daburi = True
         # we will set it to False after next draw
         # or called meld

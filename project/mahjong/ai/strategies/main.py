@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from mahjong.constants import HONOR_INDICES
+from mahjong.ai.discard import DiscardOption
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_man, is_pin, is_sou, is_chi, is_pon, find_isolated_tile_indices
@@ -53,7 +53,7 @@ class BaseStrategy(object):
         :param outs_results: dict
         :param shanten: number of shanten
         :param for_open_hand: boolean
-        :return: tile in 136 format or none
+        :return: array of DiscardOption
         """
 
         # mark all not suitable tiles as ready to discard
@@ -64,29 +64,18 @@ class BaseStrategy(object):
             if not self.is_tile_suitable(i * 4):
                 item_was_found = False
                 for j in outs_results:
-                    if j['discard'] == i:
+                    if j.tile_to_discard == i:
                         item_was_found = True
-                        j['tiles_count'] = 0
-                        j['waiting'] = []
+                        j.tiles_count = 1000
+                        j.waiting = []
 
                 if not item_was_found:
-                    outs_results.append({
-                        'discard': i,
-                        'tiles_count': 1,
-                        'waiting': []
-                    })
+                    outs_results.append(DiscardOption(player=self.player,
+                                                      tile_to_discard=i,
+                                                      waiting=[],
+                                                      tiles_count=1000))
 
-        outs_results = sorted(outs_results, key=lambda x: x['tiles_count'], reverse=True)
-        outs_results = sorted(outs_results, key=lambda x: self.is_tile_suitable(x['discard'] * 4), reverse=False)
-
-        tile_to_discard = None
-        for out_result in outs_results:
-            tile_34 = out_result['discard']
-            tile_to_discard = TilesConverter.find_34_tile_in_136_array(tile_34, closed_hand)
-            if tile_to_discard:
-                break
-
-        return tile_to_discard
+        return outs_results
 
     def try_to_call_meld(self, tile, is_kamicha_discard):
         """
@@ -208,8 +197,15 @@ class BaseStrategy(object):
                 meld.type = meld_type
                 meld.tiles = sorted(tiles)
 
-                tile_to_discard = self.determine_what_to_discard(closed_hand, outs_results, shanten, True)
-                if tile_to_discard:
+                results = self.determine_what_to_discard(closed_hand, outs_results, shanten, True)
+                # we don't have tiles to discard after hand opening
+                # so, we don't need to open hand
+                if not results:
+                    return None, None, None
+
+                tile_to_discard = self.player.ai.chose_tile_to_discard(results, closed_hand)
+                # 0 tile is possible, so we can't just use "if tile_to_discard"
+                if tile_to_discard is not None:
                     return meld, tile_to_discard, shanten
 
         return None, None, None

@@ -34,12 +34,11 @@ class YakuhaiStrategy(BaseStrategy):
         if shanten == 0 and valued_pairs and for_open_hand:
             valued_pair = valued_pairs[0]
 
-            tile_to_discard = None
+            results = []
             for item in outs_results:
-                if valued_pair in item['waiting']:
-                    tile_to_discard = item['discard']
-            tile_to_discard = TilesConverter.find_34_tile_in_136_array(tile_to_discard, closed_hand)
-            return tile_to_discard
+                if valued_pair in item.waiting:
+                    results.append(item)
+            return results
         else:
             return super(YakuhaiStrategy, self).determine_what_to_discard(closed_hand,
                                                                           outs_results,

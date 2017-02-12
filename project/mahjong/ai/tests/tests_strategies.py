@@ -192,7 +192,7 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         tile_to_discard = player.discard_tile()
 
         # we are in honitsu mode, so we should discard man suits
-        self.assertEqual(self._to_string([tile_to_discard]), '2m')
+        self.assertEqual(self._to_string([tile_to_discard]), '1m')
 
 
 class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):

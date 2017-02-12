@@ -16,7 +16,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         logger.disabled = False
 
     # def test_debug(self):
-    #     game.game_manager.shuffle_seed = lambda: 0.11872145794515754
+    #     game.game_manager.shuffle_seed = lambda: 0.4141604442053938
     #
     #     clients = [Client(use_previous_ai_version=False) for _ in range(0, 4)]
     #     # clients = [Client(use_previous_ai_version=True) for _ in range(0, 3)]
@@ -191,12 +191,12 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(clients[3].player.in_riichi, True)
 
     def test_play_round_and_win_by_tsumo(self):
-        game.game_manager.shuffle_seed = lambda: 0.6718028503751606
+        game.game_manager.shuffle_seed = lambda: 0.49336094054688884
 
         clients = [Client() for _ in range(0, 4)]
         manager = GameManager(clients)
         manager.init_game()
-        manager.set_dealer(3)
+        manager.set_dealer(0)
         manager.init_round()
 
         result = manager.play_round()
@@ -225,12 +225,12 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         self.assertNotEqual(result['loser'], None)
 
     def test_play_round_with_retake(self):
-        game.game_manager.shuffle_seed = lambda: 0.5859797343777
+        game.game_manager.shuffle_seed = lambda: 0.3939281197763548
 
         clients = [Client() for _ in range(0, 4)]
         manager = GameManager(clients)
         manager.init_game()
-        manager.set_dealer(3)
+        manager.set_dealer(0)
         manager.init_round()
 
         result = manager.play_round()

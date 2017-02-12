@@ -4,6 +4,7 @@ import logging
 from mahjong.ai.agari import Agari
 from mahjong.ai.base import BaseAI
 from mahjong.ai.defence import Defence
+from mahjong.ai.discard import DiscardOption
 from mahjong.ai.shanten import Shanten
 from mahjong.ai.strategies.honitsu import HonitsuStrategy
 from mahjong.ai.strategies.main import BaseStrategy
@@ -53,32 +54,19 @@ class MainAI(BaseAI):
         if shanten == Shanten.AGARI_STATE:
             return Shanten.AGARI_STATE
 
-        # Disable defence for now
-        # if self.defence.go_to_defence_mode():
-        #     self.player.in_tempai = False
-        #     tile_in_hand = self.defence.calculate_safe_tile_against_riichi()
-        #     if we wasn't able to find a safe tile, let's discard a random one
-        #     if not tile_in_hand:
-        #         tile_in_hand = self.player.tiles[random.randrange(len(self.player.tiles) - 1)]
-        # else:
-        #     tile34 = results[0]['discard']
-        #     tile_in_hand = TilesConverter.find_34_tile_in_136_array(tile34, self.player.tiles)
-
         # we are in agari state, but we can't win because we don't have yaku
         # in that case let's do tsumogiri
         if not results:
             return self.player.last_draw
 
+        # current strategy can affect on our discard options
         if self.current_strategy:
-            tile_to_discard = self.current_strategy.determine_what_to_discard(self.player.closed_hand,
-                                                                              results,
-                                                                              shanten,
-                                                                              False)
-        else:
-            tile34 = results[0]['discard']
-            tile_to_discard = TilesConverter.find_34_tile_in_136_array(tile34, self.player.tiles)
+            results = self.current_strategy.determine_what_to_discard(self.player.closed_hand,
+                                                                      results,
+                                                                      shanten,
+                                                                      False)
 
-        return tile_to_discard
+        return self.chose_tile_to_discard(results, self.player.closed_hand)
 
     def calculate_outs(self, tiles, closed_hand, is_open_hand=False):
         """
@@ -95,7 +83,8 @@ class MainAI(BaseAI):
         if shanten == Shanten.AGARI_STATE:
             return [], shanten
 
-        raw_data = {}
+        results = []
+
         for i in range(0, 34):
             if not tiles_34[i]:
                 continue
@@ -103,51 +92,25 @@ class MainAI(BaseAI):
             if not closed_tiles_34[i]:
                 continue
 
-            # let's keep valued pair of tiles for later game
-            if closed_tiles_34[i] >= 2 and i in self.valued_honors:
-                continue
-
             tiles_34[i] -= 1
 
-            raw_data[i] = []
+            waiting = []
             for j in range(0, 34):
-                if i == j or tiles_34[j] >= 4:
+                if i == j or tiles_34[j] == 4:
                     continue
 
                 tiles_34[j] += 1
                 if self.shanten.calculate_shanten(tiles_34, is_open_hand, self.player.meld_tiles) == shanten - 1:
-                    raw_data[i].append(j)
+                    waiting.append(j)
                 tiles_34[j] -= 1
 
             tiles_34[i] += 1
 
-            if raw_data[i]:
-                raw_data[i] = {
-                    'tile': i,
-                    'tiles_count': self.count_tiles(raw_data[i], tiles_34),
-                    'waiting': raw_data[i]
-                }
-
-        results = []
-        tiles_34 = TilesConverter.to_34_array(self.player.tiles)
-        for tile in range(0, len(tiles_34)):
-            if tile in raw_data and raw_data[tile] and raw_data[tile]['tiles_count']:
-                item = raw_data[tile]
-
-                waiting = []
-
-                for item2 in item['waiting']:
-                    waiting.append(item2)
-
-                results.append({
-                    'discard': item['tile'],
-                    'waiting': waiting,
-                    'tiles_count': item['tiles_count']
-                })
-
-        # if we have character and honor candidates to discard with same tiles count,
-        # we need to discard honor tile first
-        results = sorted(results, key=lambda x: (x['tiles_count'], x['discard']), reverse=True)
+            if waiting:
+                results.append(DiscardOption(player=self.player,
+                                             tile_to_discard=i,
+                                             waiting=waiting,
+                                             tiles_count=self.count_tiles(waiting, tiles_34)))
 
         return results, shanten
 
@@ -194,6 +157,10 @@ class MainAI(BaseAI):
             logger.debug('{} gave up on {}'.format(self.player.name, old_strategy))
 
         return self.current_strategy and True or False
+
+    def chose_tile_to_discard(self, results, closed_hand):
+        results = sorted(results, key=lambda x: x.tiles_count, reverse=True)
+        return results[0].find_tile_in_hand(closed_hand)
 
     @property
     def valued_honors(self):

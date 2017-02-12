@@ -249,8 +249,8 @@ class GameManager(object):
                 # pon is more important than chi
                 possible_melds = sorted(possible_melds, key=lambda x: x['meld'].type == Meld.PON)
                 tile_to_discard = possible_melds[0]['discarded_tile']
-                # if tile_to_discard:
                 meld = possible_melds[0]['meld']
+                shanten = possible_melds[0]['shanten']
 
                 # clear ippatsu after called meld
                 for client_item in self.clients:
@@ -275,7 +275,10 @@ class GameManager(object):
 
                 current_client.add_called_meld(meld)
                 current_client.player.tiles.append(tile)
-                current_client.player.ai.previous_shanten = possible_melds[0]['shanten']
+                current_client.player.ai.previous_shanten = shanten
+
+                if shanten == 0:
+                    current_client.player.in_tempai = True
 
                 self.replay.open_meld(meld)
 

@@ -191,7 +191,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(clients[3].player.in_riichi, True)
 
     def test_play_round_and_win_by_tsumo(self):
-        game.game_manager.shuffle_seed = lambda: 0.49336094054688884
+        game.game_manager.shuffle_seed = lambda: 0.6633511249314604
 
         clients = [Client() for _ in range(0, 4)]
         manager = GameManager(clients)
@@ -252,7 +252,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
 
         result = manager.play_round()
 
-        self.assertEqual(len(result['players_with_open_hands']), 1)
+        self.assertEqual(len(result['players_with_open_hands']), 2)
 
     def test_scores_calculations_after_retake(self):
         clients = [Client() for _ in range(0, 4)]

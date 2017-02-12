@@ -159,7 +159,10 @@ class MainAI(BaseAI):
         return self.current_strategy and True or False
 
     def chose_tile_to_discard(self, results, closed_hand):
-        results = sorted(results, key=lambda x: x.tiles_count, reverse=True)
+        # - is important for x.tiles_count
+        # in that case we will discard tile that will give for us more tiles
+        # to complete a hand
+        results = sorted(results, key=lambda x: (-x.tiles_count, x.value))
         return results[0].find_tile_in_hand(closed_hand)
 
     @property

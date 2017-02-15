@@ -114,10 +114,11 @@ class MainAI(BaseAI):
 
         return results, shanten
 
-    def count_tiles(self, raw_data, tiles):
+    def count_tiles(self, waiting, tiles):
         n = 0
-        for i in range(0, len(raw_data)):
-            n += 4 - tiles[raw_data[i]]
+        for item in waiting:
+            n += 4 - tiles[item]
+            n -= self.player.table.revealed_tiles[item]
         return n
 
     def try_to_call_meld(self, tile, is_kamicha_discard):

@@ -273,7 +273,10 @@ class GameManager(object):
                     hand_string += ' [{}]'.format(', '.join(melds))
                 logger.info(hand_string)
 
-                current_client.add_called_meld(meld)
+                # we need to notify each client about discard
+                for _client in self.clients:
+                    _client.table.add_called_meld(meld, current_client.seat - _client.seat)
+
                 current_client.player.tiles.append(tile)
                 current_client.player.ai.previous_shanten = shanten
 
@@ -318,7 +321,7 @@ class GameManager(object):
                 continue
 
             # let's store other players discards
-            other_client.enemy_discard(tile, other_client.seat - current_client.seat)
+            other_client.table.enemy_discard(tile, other_client.seat - current_client.seat)
 
             # TODO support multiple ron
             if self.can_call_ron(other_client, tile):
@@ -425,7 +428,7 @@ class GameManager(object):
 
         who_called_riichi = client.seat
         for client in self.clients:
-            client.enemy_riichi(who_called_riichi - client.seat)
+            client.enemy_riichi(client.seat - who_called_riichi)
 
         logger.info('Riichi: {0} -1,000'.format(self.clients[who_called_riichi].player.name))
         logger.info('With hand: {}'.format(

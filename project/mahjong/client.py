@@ -34,25 +34,5 @@ class Client(object):
     def discard_tile(self, tile=None):
         return self.player.discard_tile(tile)
 
-    def add_called_meld(self, meld):
-        # when opponent called meld it is means
-        # that he discards tile from hand, not from wall
-        self.table.count_of_remaining_tiles += 1
-
-        return self.player.add_called_meld(meld)
-
-    def enemy_discard(self, tile, player_seat):
-        """
-        :param player_seat:
-        :param tile: 136 format tile
-        :return:
-        """
-        self.table.get_player(player_seat).add_discarded_tile(tile)
-        self.table.count_of_remaining_tiles -= 1
-
-        for player in self.table.players:
-            if player.in_riichi:
-                player.safe_tiles.append(tile)
-
     def enemy_riichi(self, player_seat):
         self.table.get_player(player_seat).in_riichi = True

@@ -17,9 +17,13 @@ class Table(object):
     count_of_remaining_tiles = 0
     count_of_players = 4
 
+    # array of tiles in 34 format
+    revealed_tiles = []
+
     def __init__(self, use_previous_ai_version=False):
         self.dora_indicators = []
         self._init_players(use_previous_ai_version)
+        self.revealed_tiles = [0] * 34
 
     def __str__(self):
         return 'Round: {0}, Honba: {1}, Dora Indicators: {2}'.format(self.round_number,
@@ -36,6 +40,8 @@ class Table(object):
         self.dora_indicators = []
         self.add_dora_indicator(dora_indicator)
 
+        self.revealed_tiles = [0] * 34
+
         # erase players state
         for player in self.players:
             player.erase_state()
@@ -51,11 +57,26 @@ class Table(object):
     def init_main_player_hand(self, tiles):
         self.get_main_player().init_hand(tiles)
 
-    def add_open_set(self, meld):
-        self.get_player(meld.who).add_called_meld(meld)
+    def add_called_meld(self, meld, player_seat):
+        # when opponent called meld it is means
+        # that he discards tile from hand, not from wall
+        self.count_of_remaining_tiles += 1
+
+        self.get_player(player_seat).add_called_meld(meld)
+
+        tiles = meld.tiles[:]
+        # called tile was already added to revealed array
+        # because of discard
+        # for closed kan we will not have called_tile
+        if meld.called_tile:
+            tiles.remove(meld.called_tile)
+
+        for tile in tiles:
+            self._add_revealed_tile(tile)
 
     def add_dora_indicator(self, tile):
         self.dora_indicators.append(tile)
+        self._add_revealed_tile(tile)
 
     def is_dora(self, tile):
         return plus_dora(tile, self.dora_indicators) or is_aka_dora(tile)
@@ -89,6 +110,22 @@ class Table(object):
     def get_players_sorted_by_scores(self):
         return sorted(self.players, key=lambda x: x.scores, reverse=True)
 
+    def enemy_discard(self, tile, player_seat):
+        """
+        :param player_seat:
+        :param tile: 136 format tile
+        :return:
+        """
+        self.get_player(player_seat).add_discarded_tile(tile)
+        self.count_of_remaining_tiles -= 1
+
+        for player in self.players:
+            if player.in_riichi:
+                player.safe_tiles.append(tile)
+
+        # cache already revealed tiles
+        self._add_revealed_tile(tile)
+
     def _init_players(self, use_previous_ai_version=False):
         self.players = []
 
@@ -109,3 +146,7 @@ class Table(object):
             return WEST
         else:
             return NORTH
+
+    def _add_revealed_tile(self, tile):
+        tile //= 4
+        self.revealed_tiles[tile] += 1

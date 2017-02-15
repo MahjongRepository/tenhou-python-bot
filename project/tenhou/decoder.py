@@ -155,26 +155,33 @@ class TenhouDecoder(object):
         t0, t1, t2 = (data >> 3) & 0x3, (data >> 5) & 0x3, (data >> 7) & 0x3
         base_and_called = data >> 10
         base = base_and_called // 3
+        called = base_and_called % 3
         base = (base // 7) * 9 + base % 7
         meld.tiles = [t0 + 4 * (base + 0), t1 + 4 * (base + 1), t2 + 4 * (base + 2)]
+        meld.called_tile = meld.tiles[called]
 
     def parse_pon(self, data, meld):
         t4 = (data >> 5) & 0x3
         t0, t1, t2 = ((1, 2, 3), (0, 2, 3), (0, 1, 3), (0, 1, 2))[t4]
         base_and_called = data >> 9
         base = base_and_called // 3
+        called = base_and_called % 3
         if data & 0x8:
             meld.type = Meld.PON
             meld.tiles = [t0 + 4 * base, t1 + 4 * base, t2 + 4 * base]
         else:
             meld.type = Meld.CHAKAN
             meld.tiles = [t0 + 4 * base, t1 + 4 * base, t2 + 4 * base, t4 + 4 * base]
+        meld.called_tile = meld.tiles[called]
 
     def parse_kan(self, data, meld):
         base_and_called = data >> 8
         base = base_and_called // 4
         meld.type = Meld.KAN
         meld.tiles = [4 * base, 1 + 4 * base, 2 + 4 * base, 3 + 4 * base]
+        if meld.from_who:
+            called = base_and_called % 4
+            meld.called_tile = meld.tiles[called]
 
     def parse_nuki(self, data, meld):
         meld.type = Meld.NUKI

@@ -236,7 +236,7 @@ class TenhouClient(Client):
                     else:
                         player_seat = 3
 
-                    self.enemy_discard(tile, player_seat)
+                    self.table.enemy_discard(tile, player_seat)
 
                 if 'owari' in message:
                     values = self.decoder.parse_final_scores_and_uma(message)

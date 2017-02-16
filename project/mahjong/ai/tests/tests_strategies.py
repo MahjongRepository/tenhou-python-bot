@@ -360,3 +360,18 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 
         # we are in tanyao, so we should discard honors and terminals
         self.assertEqual(self._to_string([tile_to_discard]), '4z')
+
+    def test_dont_count_pairs_in_already_opened_hand(self):
+        table = Table()
+        player = Player(0, 0, table)
+
+        meld = self._make_meld(Meld.PON, self._string_to_136_array(sou='222'))
+        player.add_called_meld(meld)
+
+        tiles = self._string_to_136_array(man='33556788', sou='22266')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(sou='6')
+        meld, _, _ = player.try_to_call_meld(tile, False)
+        # even if it looks like chitoitsu we can open hand and get tempai here
+        self.assertNotEqual(meld, None)

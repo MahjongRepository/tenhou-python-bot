@@ -129,7 +129,7 @@ class MainAI(BaseAI):
 
     def determine_strategy(self):
         # for already opened hand we don't need to give up on selected strategy
-        if self.player.is_open_hand:
+        if self.player.is_open_hand and self.current_strategy:
             return False
 
         old_strategy = self.current_strategy

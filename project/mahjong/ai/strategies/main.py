@@ -35,8 +35,12 @@ class BaseStrategy(object):
         For now default rule for all strategies: don't open hand with 5+ pairs
         :return: boolean
         """
+        if self.player.is_open_hand:
+            return True
+
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
         count_of_pairs = len([x for x in range(0, 34) if tiles_34[x] >= 2])
+
         return count_of_pairs < 5
 
     def is_tile_suitable(self, tile):

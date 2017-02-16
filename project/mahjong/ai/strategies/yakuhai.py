@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from mahjong.ai.strategies.main import BaseStrategy
+from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
 
 
@@ -44,3 +45,26 @@ class YakuhaiStrategy(BaseStrategy):
                                                                           outs_results,
                                                                           shanten,
                                                                           for_open_hand)
+
+    def meld_had_to_be_called(self, tile):
+        # for closed hand we don't need to open hand with special conditions
+        if not self.player.is_open_hand:
+            return False
+
+        tile //= 4
+        tiles_34 = TilesConverter.to_34_array(self.player.tiles)
+        valued_pairs = [x for x in self.player.ai.valued_honors if tiles_34[x] == 2]
+
+        for meld in self.player.melds:
+            # we have already opened yakuhai pon
+            # so we don't need to open hand without shanten improvement
+            if meld.type == Meld.PON and meld.tiles[0] // 4 in self.player.ai.valued_honors:
+                return False
+
+        # open hand for valued pon
+        for valued_pair in valued_pairs:
+            if valued_pair == tile:
+                return True
+
+        return False
+

@@ -119,7 +119,7 @@ class BaseStrategy(object):
 
         # tile will decrease the count of shanten in hand
         # so let's call opened set with it
-        if shanten < self.player.ai.previous_shanten:
+        if shanten < self.player.ai.previous_shanten or self.meld_had_to_be_called(tile):
             closed_hand_34 = TilesConverter.to_34_array(closed_hand + [tile])
 
             combinations = []
@@ -213,6 +213,14 @@ class BaseStrategy(object):
                     return meld, tile_to_discard, shanten
 
         return None, None, None
+
+    def meld_had_to_be_called(self, tile):
+        """
+        For special cases meld had to be called even if shanten number will not be increased
+        :param tile: in 136 tiles format
+        :return: boolean
+        """
+        return False
 
     def _find_best_meld_to_open(self, possible_melds, closed_hand_34, first_limit, second_limit, completed_hand):
         """

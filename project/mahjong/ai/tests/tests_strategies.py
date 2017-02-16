@@ -121,6 +121,41 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(meld.type, Meld.CHI)
         self.assertEqual(self._to_string(meld.tiles), '678m')
 
+    def test_call_yakuhai_pair_and_special_conditions(self):
+        table = Table()
+        player = Player(0, 0, table)
+
+        tiles = self._string_to_136_array(man='56', sou='1235', pin='12888', honors='11')
+        player.init_hand(tiles)
+
+        meld = self._make_meld(Meld.PON, self._string_to_136_array(pin='888'))
+        player.add_called_meld(meld)
+
+        # to update previous_shanten attribute
+        player.draw_tile(self._string_to_136_tile(honors='3'))
+        player.discard_tile()
+
+        tile = self._string_to_136_tile(honors='1')
+        meld, tile_to_discard, shanten = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+
+        table = Table()
+        player = Player(0, 0, table)
+
+        tiles = self._string_to_136_array(man='56', sou='1235', pin='12', honors='11777')
+        player.init_hand(tiles)
+
+        meld = self._make_meld(Meld.PON, self._string_to_136_array(honors='777'))
+        player.add_called_meld(meld)
+        # to update previous_shanten attribute
+        player.draw_tile(self._string_to_136_tile(honors='3'))
+        player.discard_tile()
+
+        # we don't need to open hand with already opened yakuhai set
+        tile = self._string_to_136_tile(honors='1')
+        meld, tile_to_discard, shanten = player.try_to_call_meld(tile, True)
+        self.assertEqual(meld, None)
+
 
 class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
 

@@ -102,7 +102,7 @@ class GameManager(object):
             # each client think that he is a player with position = 0
             # so, we need to move dealer position for each client
             # and shift scores array
-            client_dealer = self.dealer - x
+            client_dealer = self._enemy_position(self.dealer, x)
 
             player_scores = deque([i.player.scores / 100 for i in self.clients])
             player_scores.rotate(x * -1)
@@ -273,9 +273,9 @@ class GameManager(object):
                     hand_string += ' [{}]'.format(', '.join(melds))
                 logger.info(hand_string)
 
-                # we need to notify each client about discard
+                # we need to notify each client about called meld
                 for _client in self.clients:
-                    _client.table.add_called_meld(meld, current_client.seat - _client.seat)
+                    _client.table.add_called_meld(meld, self._enemy_position(current_client.seat, _client.seat))
 
                 current_client.player.tiles.append(tile)
                 current_client.player.ai.previous_shanten = shanten
@@ -321,7 +321,7 @@ class GameManager(object):
                 continue
 
             # let's store other players discards
-            other_client.table.enemy_discard(tile, other_client.seat - current_client.seat)
+            other_client.table.enemy_discard(tile, self._enemy_position(current_client.seat, other_client.seat))
 
             # TODO support multiple ron
             if self.can_call_ron(other_client, tile):
@@ -428,7 +428,7 @@ class GameManager(object):
 
         who_called_riichi = client.seat
         for client in self.clients:
-            client.enemy_riichi(client.seat - who_called_riichi)
+            client.enemy_riichi(self._enemy_position(who_called_riichi, client.seat))
 
         logger.info('Riichi: {0} -1,000'.format(self.clients[who_called_riichi].player.name))
         logger.info('With hand: {}'.format(
@@ -445,7 +445,7 @@ class GameManager(object):
             # each client think that he is a player with position = 0
             # so, we need to move dealer position for each client
             # and shift scores array
-            client.player.dealer_seat = dealer - x
+            client.player.dealer_seat = self._enemy_position(self.dealer, x)
 
         # first move should be dealer's move
         self.current_client_seat = dealer
@@ -686,3 +686,7 @@ class GameManager(object):
         if current_position > 3:
             current_position = 0
         return current_position
+
+    def _enemy_position(self, who, from_who):
+        positions = [0, 1, 2, 3]
+        return positions[who - from_who]

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 from collections import deque
-from random import randint, shuffle, random
+from random import randint, shuffle, random, seed
 
 from game.logger import set_up_logging
 from game.replays.tenhou import TenhouReplay as Replay
@@ -63,6 +63,9 @@ class GameManager(object):
         Beginning of the game.
         Clients random placement and dealer selection.
         """
+
+        logger.info('Seed: {}'.format(shuffle_seed()))
+
         shuffle(self.clients, shuffle_seed)
         for i in range(0, len(self.clients)):
             self.clients[i].seat = i
@@ -81,17 +84,10 @@ class GameManager(object):
         Generate players hands, dead wall and dora indicators
         """
 
-        # each round should have personal seed
-        global seed_value
-        seed_value = random()
-
         self.players_with_open_hands = []
         self.dora_indicators = []
 
-        self.tiles = [i for i in range(0, 136)]
-
-        # need to change random function in future
-        shuffle(self.tiles, shuffle_seed)
+        self.tiles = self._generate_wall()
 
         self.dead_wall = self._cut_tiles(14)
         self.dora_indicators.append(self.dead_wall[8])
@@ -131,7 +127,7 @@ class GameManager(object):
             client.player.tiles = sorted(client.player.tiles)
             client.init_hand(client.player.tiles)
 
-        logger.info('Seed: {}'.format(shuffle_seed()))
+        logger.info('Round number: {}'.format(self.round_number))
         logger.info('Dealer: {}, {}'.format(self.dealer, self.clients[self.dealer].player.name))
         logger.info('Wind: {}. Riichi sticks: {}. Honba sticks: {}'.format(
             self._unique_dealers,
@@ -460,7 +456,7 @@ class GameManager(object):
             raise ValueError('Wrong tiles count: {}'.format(len(tiles)))
 
         if winner:
-            logger.info('{0}: {1} + {2}'.format(
+            logger.info('{}: {} + {}'.format(
                 is_tsumo and 'Tsumo' or 'Ron',
                 TilesConverter.to_one_line_string(tiles),
                 TilesConverter.to_one_line_string([win_tile])),
@@ -690,3 +686,21 @@ class GameManager(object):
     def _enemy_position(self, who, from_who):
         positions = [0, 1, 2, 3]
         return positions[who - from_who]
+
+    def _generate_wall(self):
+        seed(shuffle_seed() + self.round_number)
+
+        wall = [i for i in range(0, 136)]
+        rand_seeds = [randint(0, 135) for i in range(0, 136)]
+
+        # for better wall shuffling we had to do it manually
+        # shuffle() didn't make wall to be really random
+        for x in range(0, 136):
+            src = x
+            dst = rand_seeds[x]
+
+            swap = wall[x]
+            wall[src] = wall[dst]
+            wall[dst] = swap
+
+        return wall

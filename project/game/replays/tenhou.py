@@ -25,6 +25,9 @@ class TenhouReplay(Replay):
         self.tags.append('<TAIKYOKU oya="0"/>')
 
     def end_game(self):
+        self.tags[-1] = self.tags[-1].replace('/>', '')
+        self.tags[-1] += 'owari="{}" />'.format(self._calculate_final_scores_and_uma())
+
         self.tags.append('</mjloggm>')
 
         with open(os.path.join(self.replays_directory, self.replay_name), 'w') as f:
@@ -247,3 +250,35 @@ class TenhouReplay(Replay):
         if result < 0:
             result += 4
         return result
+
+    def _calculate_final_scores_and_uma(self):
+        data = []
+        for client in self.clients:
+            data.append({
+                'position': None,
+                'seat': client.seat,
+                'uma': 0,
+                'scores': client.player.scores
+            })
+
+        data = sorted(data, key=lambda x: (-x['scores'], x['seat']))
+        for x in range(0, len(data)):
+            data[x]['position'] = x + 1
+
+        uma_list = [20000, 10000, -10000, -20000]
+        for item in data:
+            x = item['scores'] - 30000 + uma_list[item['position'] - 1]
+
+            # 10000 oka bonus for the first place
+            if item['position'] == 1:
+                x += 10000
+
+            item['uma'] = round(x / 1000)
+            item['scores'] = round(item['scores'] / 100)
+
+        data = sorted(data, key=lambda x: x['seat'])
+        results = []
+        for item in data:
+            results.append('{},{}'.format(item['scores'], item['uma']))
+
+        return ','.join(results)

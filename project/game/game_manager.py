@@ -428,7 +428,7 @@ class GameManager(object):
 
         logger.info('Riichi: {0} -1,000'.format(self.clients[who_called_riichi].player.name))
         logger.info('With hand: {}'.format(
-            TilesConverter.to_one_line_string(client.player.closed_hand)
+            TilesConverter.to_one_line_string(self.clients[who_called_riichi].player.closed_hand)
         ))
 
     def set_dealer(self, dealer):

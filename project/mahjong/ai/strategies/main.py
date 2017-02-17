@@ -51,12 +51,13 @@ class BaseStrategy(object):
         """
         raise NotImplemented()
 
-    def determine_what_to_discard(self, closed_hand, outs_results, shanten, for_open_hand):
+    def determine_what_to_discard(self, closed_hand, outs_results, shanten, for_open_hand, tile_for_open_hand):
         """
         :param closed_hand: array of 136 tiles format
         :param outs_results: dict
         :param shanten: number of shanten
         :param for_open_hand: boolean
+        :param tile_for_open_hand: 136 tile format
         :return: array of DiscardOption
         """
 
@@ -201,7 +202,7 @@ class BaseStrategy(object):
                 meld.type = meld_type
                 meld.tiles = sorted(tiles)
 
-                results = self.determine_what_to_discard(closed_hand, outs_results, shanten, True)
+                results = self.determine_what_to_discard(closed_hand, outs_results, shanten, True, tile)
                 # we don't have tiles to discard after hand opening
                 # so, we don't need to open hand
                 if not results:

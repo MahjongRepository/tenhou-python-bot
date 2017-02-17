@@ -121,6 +121,13 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(meld.type, Meld.CHI)
         self.assertEqual(self._to_string(meld.tiles), '678m')
 
+        # we can open hand in that case
+        tiles = self._string_to_136_array(man='44556', sou='366789', honors='77')
+        tile = self._string_to_136_tile(honors='7')
+        player.init_hand(tiles)
+        meld, tile_to_discard, shanten = player.try_to_call_meld(tile, True)
+        self.assertEqual(self._to_string(meld.tiles), '777z')
+
     def test_call_yakuhai_pair_and_special_conditions(self):
         table = Table()
         player = Player(0, 0, table)

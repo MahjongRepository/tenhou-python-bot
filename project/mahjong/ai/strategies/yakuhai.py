@@ -27,12 +27,15 @@ class YakuhaiStrategy(BaseStrategy):
         """
         return True
 
-    def determine_what_to_discard(self, closed_hand, outs_results, shanten, for_open_hand):
+    def determine_what_to_discard(self, closed_hand, outs_results, shanten, for_open_hand, tile_for_open_hand):
+        if tile_for_open_hand:
+            tile_for_open_hand //= 4
+
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
         valued_pairs = [x for x in self.player.ai.valued_honors if tiles_34[x] == 2]
 
         # when we trying to open hand with tempai state, we need to chose a valued pair waiting
-        if shanten == 0 and valued_pairs and for_open_hand:
+        if shanten == 0 and valued_pairs and for_open_hand and tile_for_open_hand not in valued_pairs:
             valued_pair = valued_pairs[0]
 
             results = []
@@ -44,7 +47,8 @@ class YakuhaiStrategy(BaseStrategy):
             return super(YakuhaiStrategy, self).determine_what_to_discard(closed_hand,
                                                                           outs_results,
                                                                           shanten,
-                                                                          for_open_hand)
+                                                                          for_open_hand,
+                                                                          tile_for_open_hand)
 
     def meld_had_to_be_called(self, tile):
         # for closed hand we don't need to open hand with special conditions

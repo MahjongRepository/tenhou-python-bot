@@ -64,7 +64,8 @@ class MainAI(BaseAI):
             results = self.current_strategy.determine_what_to_discard(self.player.closed_hand,
                                                                       results,
                                                                       shanten,
-                                                                      False)
+                                                                      False,
+                                                                      None)
 
         return self.chose_tile_to_discard(results, self.player.closed_hand)
 

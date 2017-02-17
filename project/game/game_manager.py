@@ -690,17 +690,23 @@ class GameManager(object):
     def _generate_wall(self):
         seed(shuffle_seed() + self.round_number)
 
+        def shuffle_wall(rand_seeds):
+            # for better wall shuffling we had to do it manually
+            # shuffle() didn't make wall to be really random
+            for x in range(0, 136):
+                src = x
+                dst = rand_seeds[x]
+
+                swap = wall[x]
+                wall[src] = wall[dst]
+                wall[dst] = swap
+
         wall = [i for i in range(0, 136)]
-        rand_seeds = [randint(0, 135) for i in range(0, 136)]
+        rand_one = [randint(0, 135) for i in range(0, 136)]
+        rand_two = [randint(0, 135) for i in range(0, 136)]
 
-        # for better wall shuffling we had to do it manually
-        # shuffle() didn't make wall to be really random
-        for x in range(0, 136):
-            src = x
-            dst = rand_seeds[x]
-
-            swap = wall[x]
-            wall[src] = wall[dst]
-            wall[dst] = swap
+        # let's shuffle wall two times just in case
+        shuffle_wall(rand_one)
+        shuffle_wall(rand_two)
 
         return wall

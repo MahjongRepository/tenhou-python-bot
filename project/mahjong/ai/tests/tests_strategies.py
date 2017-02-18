@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
+from mahjong.ai.shanten import Shanten
 from mahjong.ai.strategies.honitsu import HonitsuStrategy
 from mahjong.ai.strategies.main import BaseStrategy
 from mahjong.ai.strategies.tanyao import TanyaoStrategy
@@ -417,3 +418,25 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         meld, _, _ = player.try_to_call_meld(tile, False)
         # even if it looks like chitoitsu we can open hand and get tempai here
         self.assertNotEqual(meld, None)
+
+    def test_we_cant_win_with_this_hand(self):
+        table = Table()
+        player = Player(0, 0, table)
+
+        tiles = self._string_to_136_array(man='34577', sou='23', pin='233445')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(sou='1'))
+        player.ai.current_strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
+        # print(player.ai.current_strategy)
+
+        discard = player.discard_tile()
+        # hand was closed and we have won!
+        self.assertEqual(discard, Shanten.AGARI_STATE)
+
+        meld = self._make_meld(Meld.CHI, self._string_to_136_array(pin='234'))
+        player.add_called_meld(meld)
+
+        discard = player.discard_tile()
+        # but for already open hand we cant do tsumo
+        # because we don't have a yaku here
+        self.assertEqual(self._to_string([discard]), '1s')

@@ -52,7 +52,15 @@ class MainAI(BaseAI):
 
         # we are win!
         if shanten == Shanten.AGARI_STATE:
-            return Shanten.AGARI_STATE
+            # we draw a tile that complete our four sets and pair
+            # but we can't win with it, because we don't have a yaku
+            # so let's discard it
+            if (self.current_strategy and
+                    not self.current_strategy.is_tile_suitable(self.player.last_draw) and
+                    self.player.is_open_hand):
+                return self.player.last_draw
+            else:
+                return Shanten.AGARI_STATE
 
         # we are in agari state, but we can't win because we don't have yaku
         # in that case let's do tsumogiri

@@ -37,6 +37,22 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
         self.assertEqual(strategy.should_activate_strategy(), False)
 
+    def test_dont_activate_strategy_if_we_dont_have_enough_tiles_in_the_wall(self):
+        table = Table()
+        player = Player(0, 0, table)
+        strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
+
+        tiles = self._string_to_136_array(sou='12355689', man='89', honors='44')
+        player.init_hand(tiles)
+        player.dealer_seat = 1
+        self.assertEqual(strategy.should_activate_strategy(), True)
+
+        table.enemy_discard(self._string_to_136_tile(honors='4'), 3)
+        table.enemy_discard(self._string_to_136_tile(honors='4'), 3)
+
+        # we can't complete yakuhai, because there is not enough honor tiles
+        self.assertEqual(strategy.should_activate_strategy(), False)
+
     def test_suitable_tiles(self):
         table = Table()
         player = Player(0, 0, table)

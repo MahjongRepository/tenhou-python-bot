@@ -16,8 +16,15 @@ class YakuhaiStrategy(BaseStrategy):
             return False
 
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
-        has_valued_pairs = any([tiles_34[x] >= 2 for x in self.player.ai.valued_honors])
-        return has_valued_pairs
+        valued_pairs = [x for x in self.player.ai.valued_honors if tiles_34[x] >= 2]
+
+        for pair in valued_pairs:
+            # we have valued pair in the hand and there is enough tiles
+            # in the wall
+            if tiles_34[pair] + self.player.table.revealed_tiles[pair] < 4:
+                return True
+
+        return False
 
     def is_tile_suitable(self, tile):
         """

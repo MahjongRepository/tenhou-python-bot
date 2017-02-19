@@ -87,7 +87,7 @@ class BaseStrategy(object):
         Determine should we call a meld or not.
         If yes, it will return Meld object and tile to discard
         :param tile: 136 format tile
-        :param enemy_seat: 1, 2, 3
+        :param is_kamicha_discard: boolean
         :return: meld and tile to discard after called open set, and new shanten count
         """
         if self.player.in_riichi:

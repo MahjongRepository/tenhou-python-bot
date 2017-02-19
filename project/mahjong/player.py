@@ -5,6 +5,7 @@ from functools import reduce
 import copy
 
 from mahjong.constants import EAST, SOUTH, WEST, NORTH
+from mahjong.tile import TilesConverter
 from utils.settings_handler import settings
 from mahjong.ai.shanten import Shanten
 
@@ -187,3 +188,15 @@ class Player(object):
             meld[1] //= 4
             meld[2] //= 4
         return melds
+
+    def format_hand_for_print(self, tile):
+        hand_string = '{} + {}'.format(
+            TilesConverter.to_one_line_string(self.closed_hand),
+            TilesConverter.to_one_line_string([tile])
+        )
+        if self.is_open_hand:
+            melds = []
+            for item in self.melds:
+                melds.append('{}'.format(TilesConverter.to_one_line_string(item.tiles)))
+            hand_string += ' [{}]'.format(', '.join(melds))
+        return hand_string

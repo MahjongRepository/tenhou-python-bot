@@ -258,16 +258,7 @@ class GameManager(object):
                 self.players_with_open_hands.append(self.current_client_seat)
 
                 logger.info('Called meld: {} by {}'.format(meld, current_client.player.name))
-                hand_string = 'With hand: {} + {}'.format(
-                    TilesConverter.to_one_line_string(current_client.player.closed_hand),
-                    TilesConverter.to_one_line_string([tile])
-                )
-                if current_client.player.is_open_hand:
-                    melds = []
-                    for item in current_client.player.melds:
-                        melds.append('{}'.format(TilesConverter.to_one_line_string(item.tiles)))
-                    hand_string += ' [{}]'.format(', '.join(melds))
-                logger.info(hand_string)
+                logger.info('With hand: {}'.format(current_client.player.format_hand_for_print(tile)))
 
                 # we need to notify each client about called meld
                 for _client in self.clients:

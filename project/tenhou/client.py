@@ -241,7 +241,7 @@ class TenhouClient(Client):
 
                     self.table.add_called_meld(meld, meld.who)
 
-                win_suggestions = ['t="8"', 't="9"', 't="13"']
+                win_suggestions = ['t="8"', 't="9"', 't="12"', 't="13"']
                 # we win by other player's discard
                 if any(i in message for i in win_suggestions):
                     sleep(1)

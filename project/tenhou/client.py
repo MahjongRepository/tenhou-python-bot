@@ -26,6 +26,8 @@ class TenhouClient(Client):
 
     decoder = TenhouDecoder()
 
+    _count_of_empty_messages = 0
+
     def __init__(self, socket_object):
         super(TenhouClient, self).__init__()
         self.socket = socket_object
@@ -90,7 +92,6 @@ class TenhouClient(Client):
             messages = self._get_multiple_messages()
 
             for message in messages:
-
                 if '<rejoin' in message:
                     # game wasn't found, continue to wait
                     self._send_message('<JOIN t="{},r" />'.format(game_type))
@@ -142,8 +143,13 @@ class TenhouClient(Client):
 
             messages = self._get_multiple_messages()
 
-            for message in messages:
+            if not messages:
+                self._count_of_empty_messages += 1
+            else:
+                # we had set to zero counter
+                self._count_of_empty_messages = 0
 
+            for message in messages:
                 if '<init' in message:
                     values = self.decoder.parse_initial_values(message)
                     self.table.init_round(
@@ -291,6 +297,9 @@ class TenhouClient(Client):
 
                 if '<prof' in message:
                     self.game_is_continue = False
+
+            if self._count_of_empty_messages:
+                logger.debug('Empty messages: {}'.format(self._count_of_empty_messages))
 
         logger.info('Final results: {}'.format(self.table.get_players_sorted_by_scores()))
 

@@ -253,6 +253,22 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         # we are in honitsu mode, so we should discard man suits
         self.assertEqual(self._to_string([tile_to_discard]), '1m')
 
+    def test_riichi_and_tiles_from_another_suit_in_the_hand(self):
+        table = Table()
+        player = Player(0, 0, table)
+        player.scores = 25000
+        table.count_of_remaining_tiles = 100
+
+        tiles = self._string_to_136_array(man='3335689', pin='456', honors='155')
+        player.init_hand(tiles)
+
+        player.draw_tile(self._string_to_136_tile(man='4'))
+        tile_to_discard = player.discard_tile()
+
+        # we don't need to go for honitsu here
+        # we already in tempai
+        self.assertEqual(self._to_string([tile_to_discard]), '1z')
+
 
 class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 

@@ -67,8 +67,10 @@ class MainAI(BaseAI):
         if not results:
             return self.player.last_draw
 
+        we_can_call_riichi = shanten == 0 and self.player.can_call_riichi()
         # current strategy can affect on our discard options
-        if self.current_strategy:
+        # and don't use strategy specific choices for calling riichi
+        if self.current_strategy and not we_can_call_riichi:
             results = self.current_strategy.determine_what_to_discard(self.player.closed_hand,
                                                                       results,
                                                                       shanten,

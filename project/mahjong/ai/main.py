@@ -11,7 +11,7 @@ from mahjong.ai.strategies.main import BaseStrategy
 from mahjong.ai.strategies.tanyao import TanyaoStrategy
 from mahjong.ai.strategies.yakuhai import YakuhaiStrategy
 from mahjong.constants import HAKU, CHUN, HATSU
-from mahjong.hand import HandDivider
+from mahjong.hand import HandDivider, FinishedHand
 from mahjong.tile import TilesConverter
 
 logger = logging.getLogger('ai')
@@ -52,15 +52,24 @@ class MainAI(BaseAI):
 
         # we are win!
         if shanten == Shanten.AGARI_STATE:
-            # we draw a tile that complete our four sets and pair
-            # but we can't win with it, because we don't have a yaku
-            # so let's discard it
-            if (self.current_strategy and
-                    not self.current_strategy.is_tile_suitable(self.player.last_draw) and
-                    self.player.is_open_hand):
-                return self.player.last_draw
-            else:
-                return Shanten.AGARI_STATE
+            # special conditions for open hands
+            if self.player.is_open_hand:
+                # sometimes we can draw a tile that gave us agari,
+                # but didn't give us a yaku
+                # in that case we had to do last draw discard
+                finished_hand = FinishedHand()
+                result = finished_hand.estimate_hand_value(tiles=self.player.tiles,
+                                                           win_tile=self.player.last_draw,
+                                                           is_tsumo=True,
+                                                           is_riichi=False,
+                                                           is_dealer=self.player.is_dealer,
+                                                           open_sets=self.player.meld_tiles,
+                                                           player_wind=self.player.player_wind,
+                                                           round_wind=self.player.table.round_wind)
+                if result['error'] is not None:
+                    return self.player.last_draw
+
+            return Shanten.AGARI_STATE
 
         # we are in agari state, but we can't win because we don't have yaku
         # in that case let's do tsumogiri

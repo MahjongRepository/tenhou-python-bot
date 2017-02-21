@@ -180,6 +180,22 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         meld, tile_to_discard, shanten = player.try_to_call_meld(tile, True)
         self.assertEqual(meld, None)
 
+    def test_tempai_without_yaku(self):
+        table = Table()
+        player = Player(0, 0, table)
+
+        # 456m12355p22z + 5p [678s]
+        tiles = self._string_to_136_array(sou='678', pin='12355', man='456', honors='77')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(pin='5')
+        player.draw_tile(tile)
+        meld = self._make_meld(Meld.CHI, self._string_to_136_array(sou='678'))
+        player.add_called_meld(meld)
+
+        discard = player.discard_tile()
+        self.assertEqual(self._to_string([discard]), '5p')
+
 
 class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
 

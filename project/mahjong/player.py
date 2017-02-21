@@ -125,7 +125,11 @@ class Player(object):
         :param tile: 136 tiles format
         :return:
         """
-        tile_to_discard = tile or self.ai.discard_tile()
+        # we can't use if tile, because of 0 tile
+        if tile is not None:
+            tile_to_discard = tile
+        else:
+            tile_to_discard = self.ai.discard_tile()
 
         if tile_to_discard != Shanten.AGARI_STATE:
             self.add_discarded_tile(tile_to_discard)

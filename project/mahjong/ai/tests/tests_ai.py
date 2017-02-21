@@ -185,3 +185,19 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         results, shanten = player.ai.calculate_outs(tiles, tiles)
         self.assertEqual(results[0].tiles_count, 7)
+
+    def test_using_tiles_of_different_suit_for_chi(self):
+        """
+        It was a bug related to it, when bot wanted to call 9p12s chi :(
+        """
+        table = Table()
+        player = Player(0, 0, table)
+
+        # 16m2679p1348s111z
+        tiles = [0, 21, 41, 56, 61, 70, 74, 80, 84, 102, 108, 110, 111]
+        player.init_hand(tiles)
+
+        # 2s
+        tile = 77
+        meld, tile_to_discard, shanten = player.try_to_call_meld(tile, True)
+        self.assertIsNotNone(meld)

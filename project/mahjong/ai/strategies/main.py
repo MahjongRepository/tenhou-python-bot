@@ -147,7 +147,8 @@ class BaseStrategy(object):
                 # we can check only tiles around +-2 discarded tile
                 first_limit = discarded_tile - 2
                 if first_limit < first_index:
-                    first_limit = 0
+                    first_limit = first_index
+
                 second_limit = discarded_tile + 2
                 if second_limit > second_index:
                     second_limit = second_index

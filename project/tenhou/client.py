@@ -298,8 +298,10 @@ class TenhouClient(Client):
                 if '<prof' in message:
                     self.game_is_continue = False
 
-            if self._count_of_empty_messages:
-                logger.debug('Empty messages: {}'.format(self._count_of_empty_messages))
+            if self._count_of_empty_messages > 10:
+                logger.error('Tenhou send empty messages to us. Probably we did something wrong with protocol')
+                self.end_game(False)
+                return
 
         logger.info('Final results: {}'.format(self.table.get_players_sorted_by_scores()))
 
@@ -314,7 +316,7 @@ class TenhouClient(Client):
             result = self.statistics.send_statistics()
             logger.info('Statistics sent: {}'.format(result))
 
-    def end_game(self):
+    def end_game(self, success=True):
         self.game_is_continue = False
         self._send_message('<BYE />')
 
@@ -324,7 +326,10 @@ class TenhouClient(Client):
         self.socket.shutdown(socket.SHUT_RDWR)
         self.socket.close()
 
-        logger.info('End of the game')
+        if success:
+            logger.info('End of the game')
+        else:
+            logger.error('Game was ended without of success')
 
     def _send_message(self, message):
         # tenhou requires an empty byte in the end of each sending message

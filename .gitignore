@@ -15,6 +15,7 @@ temp
 *.log
 
 project/game/data/*
+project/analytics/data/*
 
 # temporary files
 experiments

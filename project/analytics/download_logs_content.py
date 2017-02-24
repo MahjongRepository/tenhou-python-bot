@@ -83,6 +83,8 @@ def download_log_content(log_id):
         )
         cursor.execute(sql)
 
+        print('Was errors: {}'.format(was_error))
+
 
 def load_not_processed_logs(limit):
     connection = sqlite3.connect(db_file)

@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
+# ==================
+# dirty fix of siblings imports
+from sys import path
+from os.path import dirname as directory
 
-# d e f g t u v w
+path.append(directory(path[0]))
+__package__ = "tenhou"
+# =====================
+from tenhou.decoder import TenhouDecoder
+
 GAME_TYPE = 'z'
 MELD_TAG = 'm'
 RIICHI_TAG = 'r'
@@ -9,7 +17,33 @@ INIT_TAG = 'i'
 AGARI_TAG = 'o'
 
 DELIMITER = ';'
-TAGS_DELIMITER = '\n'
+TAGS_DELIMITER = '&'
+
+decoder = TenhouDecoder()
+
+
+def decode_tag(raw_tag):
+    values = raw_tag.split(DELIMITER)
+
+    if values[0] == GAME_TYPE:
+        return GameTypeTag(*values[1:])
+
+    if values[0] == MELD_TAG:
+        return MeldTag(*values[1:])
+
+    if values[0] == RIICHI_TAG:
+        return RiichiTag(*values[1:])
+
+    if values[0] == DORA_TAG:
+        return DoraTag(*values[1:])
+
+    if values[0] == INIT_TAG:
+        return InitTag(*values[1:])
+
+    if values[0] == AGARI_TAG:
+        return AgariTag(*values[1:])
+
+    return DiscardAndDrawTag(*values)
 
 
 class BaseTag(object):
@@ -128,6 +162,9 @@ class AgariTag(BaseTag):
     yaku_list = ''
     fu = ''
 
+    parsed_yaku = None
+    parsed_melds = None
+
     def __init__(self, who, from_who, ura_dora, closed_hand, open_melds, win_scores, win_tile, yaku_list, fu):
         self.who = who
         self.from_who = from_who
@@ -139,6 +176,21 @@ class AgariTag(BaseTag):
         self.yaku_list = yaku_list
         self.fu = fu
 
+        self._parse_yaku()
+        self._parse_melds()
+
     def _values(self):
         return [self.tag_name, self.who, self.from_who, self.ura_dora, self.closed_hand,
                 self.open_melds, self.win_scores, self.win_tile, self.yaku_list, self.fu]
+
+    def _parse_yaku(self):
+        data = self.yaku_list.split(',')
+        self.parsed_yaku = [int(x) for x in data[::2]]
+
+    def _parse_melds(self):
+        self.parsed_melds = []
+        if self.open_melds:
+            open_melds = self.open_melds.split(',')
+            for meld in open_melds:
+                message = '<N who="{}" m="{}" />'.format(self.who, meld)
+                self.parsed_melds.append(decoder.parse_meld(message))

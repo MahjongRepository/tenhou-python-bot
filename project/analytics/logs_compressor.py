@@ -4,7 +4,9 @@ import os
 import re
 from bs4 import BeautifulSoup
 
-from analytics.tags import *
+# need to find out better way to do relative imports
+# noinspection PyUnresolvedReferences
+from tags import GameTypeTag, DiscardAndDrawTag, AgariTag, DoraTag, MeldTag, InitTag, RiichiTag, TAGS_DELIMITER
 
 data_directory = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
@@ -46,7 +48,7 @@ class TenhouLogCompressor(object):
             if tag.name == 'agari':
                 self.tags.append(self.parse_agari_round(tag))
 
-        self._save_results()
+        return self._save_results()
 
     def parse_draw_and_discard(self, tag):
         tile = re.findall(r'\d+', tag.name)[0]
@@ -114,6 +116,7 @@ class TenhouLogCompressor(object):
         log_name = os.path.join(data_directory, 'results', self.log_name.split('/')[-1])
         with open(log_name, 'w') as f:
             f.write('{}'.format(TAGS_DELIMITER).join([str(tag) for tag in self.tags]))
+        return True
 
     def _get_log_content(self, log_name):
         self.log_name = log_name
@@ -121,3 +124,17 @@ class TenhouLogCompressor(object):
         log_name = os.path.join(data_directory, log_name)
         with open(log_name, 'r') as f:
             return f.read()
+
+
+class TenhouLogCompressorNoFile(TenhouLogCompressor):
+    content = ''
+
+    def __init__(self, content):
+        self.content = content
+        self.tags = []
+
+    def _get_log_content(self, log_name):
+        return self.content
+
+    def _save_results(self):
+        return '{}'.format(TAGS_DELIMITER).join([str(tag) for tag in self.tags])

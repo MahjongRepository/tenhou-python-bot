@@ -14,12 +14,18 @@ from distutils.dir_util import mkpath
 
 import requests
 
+YEAR = '2017'
+
 current_directory = os.path.dirname(os.path.realpath(__file__))
 logs_directory = os.path.join(current_directory, 'data', 'logs')
-db_file = os.path.join(current_directory, 'data.db')
+db_folder = os.path.join(current_directory, 'db')
+db_file = os.path.join(db_folder, '{}.db'.format(YEAR))
 
 if not os.path.exists(logs_directory):
     mkpath(logs_directory)
+
+if not os.path.exists(db_folder):
+    mkpath(db_folder)
 
 
 def main():
@@ -110,7 +116,7 @@ def download_game_ids():
         unix_time = calendar.timegm(datetime.utcnow().utctimetuple())
         with connection:
             cursor = connection.cursor()
-            cursor.execute('INSERT INTO last_downloads VALUES ("{}", {});'.format(last_name, unix_time))
+            cursor.execute('INSERT INTO last_downloads VALUES (?, ?);', [last_name, unix_time])
 
 
 def _process_log_line(line, results):
@@ -131,9 +137,8 @@ def _process_log_line(line, results):
 
     # example: 四鳳東喰赤
     is_tonpusen = game_type[2] == '東'
-    year = int(game_id[:4])
 
-    results.append([game_id, year, is_tonpusen])
+    results.append([game_id, is_tonpusen])
 
 
 def set_up_database():
@@ -152,11 +157,10 @@ def set_up_database():
         cursor = connection.cursor()
         cursor.execute("""
         CREATE TABLE logs(log_id text primary key,
-                          year int,
                           is_tonpusen int,
                           is_processed int,
                           was_error int,
-                          log text);
+                          log_content text);
         """)
         cursor.execute("CREATE INDEX is_tonpusen_index ON logs (is_tonpusen);")
         cursor.execute("CREATE INDEX is_processed_index ON logs (is_processed);")
@@ -178,9 +182,8 @@ def add_logs_to_database(results):
         cursor = connection.cursor()
 
         for item in results:
-            cursor.execute('INSERT INTO logs VALUES ("{}", {}, {}, 0, 0, "");'.format(item[0],
-                                                                                      item[1],
-                                                                                      item[2] and 1 or 0))
+            cursor.execute('INSERT INTO logs VALUES (?, ?, 0, 0, "");', [item[0],
+                                                                         item[1] and 1 or 0])
 
 
 if __name__ == '__main__':

@@ -13,13 +13,12 @@ import sqlite3
 from distutils.dir_util import mkpath
 
 import requests
-
-YEAR = '2017'
+import sys
 
 current_directory = os.path.dirname(os.path.realpath(__file__))
 logs_directory = os.path.join(current_directory, 'data', 'logs')
 db_folder = os.path.join(current_directory, 'db')
-db_file = os.path.join(db_folder, '{}.db'.format(YEAR))
+db_file = ''
 
 if not os.path.exists(logs_directory):
     mkpath(logs_directory)
@@ -29,6 +28,8 @@ if not os.path.exists(db_folder):
 
 
 def main():
+    parse_command_line_arguments()
+
     # for the initial set up
     # set_up_database()
 
@@ -184,6 +185,16 @@ def add_logs_to_database(results):
         for item in results:
             cursor.execute('INSERT INTO logs VALUES (?, ?, 0, 0, "");', [item[0],
                                                                          item[1] and 1 or 0])
+
+
+def parse_command_line_arguments():
+    if len(sys.argv) > 1:
+        year = sys.argv[1]
+    else:
+        year = '2017'
+
+    global db_file
+    db_file = os.path.join(db_folder, '{}.db'.format(year))
 
 
 if __name__ == '__main__':

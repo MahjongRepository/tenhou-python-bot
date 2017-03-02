@@ -5,14 +5,12 @@ Script will load log ids from the database and will download log content
 import bz2
 import os
 import sqlite3
-from distutils.dir_util import mkpath
 
 import requests
-
-YEAR = '2017'
+import sys
 
 db_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'db')
-db_file = os.path.join(db_folder, '{}.db'.format(YEAR))
+db_file = ''
 
 
 def main():
@@ -77,6 +75,16 @@ def load_not_processed_logs(limit):
         results = [x[0] for x in data]
 
     return results
+
+
+def parse_command_line_arguments():
+    if len(sys.argv) > 1:
+        year = sys.argv[1]
+    else:
+        year = '2017'
+
+    global db_file
+    db_file = os.path.join(db_folder, '{}.db'.format(year))
 
 if __name__ == '__main__':
     main()

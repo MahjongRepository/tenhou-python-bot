@@ -9,7 +9,7 @@ from distutils.dir_util import mkpath
 
 import requests
 
-YEAR = '2016'
+YEAR = '2017'
 
 db_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'db')
 db_file = os.path.join(db_folder, '{}.db'.format(YEAR))

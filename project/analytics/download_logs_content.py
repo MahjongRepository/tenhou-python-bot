@@ -14,6 +14,8 @@ db_file = ''
 
 
 def main():
+    parse_command_line_arguments()
+
     should_continue = True
     while should_continue:
         try:

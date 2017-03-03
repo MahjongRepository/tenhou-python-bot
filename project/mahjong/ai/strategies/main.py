@@ -71,8 +71,8 @@ class BaseStrategy(object):
                 for j in outs_results:
                     if j.tile_to_discard == i:
                         item_was_found = True
-                        j.tiles_count = 1000
-                        j.waiting = []
+                        if j.tiles_count < 1000:
+                            j.tiles_count += 1000
 
                 if not item_was_found:
                     outs_results.append(DiscardOption(player=self.player,

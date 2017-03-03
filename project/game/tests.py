@@ -230,19 +230,19 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         self.assertNotEqual(result['loser'], None)
 
     def test_play_round_with_retake(self):
-        game.game_manager.shuffle_seed = lambda: 0.1096086064947076
+        game.game_manager.shuffle_seed = lambda: 0.4257050015767606
 
         clients = [Client() for _ in range(0, 4)]
         manager = GameManager(clients)
         manager.init_game()
-        manager.set_dealer(2)
-        manager._unique_dealers = 3
-        manager.round_number = 2
+        manager.set_dealer(0)
+        manager._unique_dealers = 0
+        manager.round_number = 0
         manager.init_round()
 
         result = manager.play_round()
 
-        self.assertEqual(manager.round_number, 3)
+        self.assertEqual(manager.round_number, 1)
         self.assertEqual(result['is_tsumo'], False)
         self.assertEqual(result['is_game_end'], False)
         self.assertEqual(result['winner'], None)
@@ -260,7 +260,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
 
         result = manager.play_round()
 
-        self.assertEqual(len(result['players_with_open_hands']), 4)
+        self.assertEqual(len(result['players_with_open_hands']), 3)
 
     def test_scores_calculations_after_retake(self):
         clients = [Client() for _ in range(0, 4)]
@@ -359,6 +359,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         manager.init_game()
         manager.init_round()
         manager.set_dealer(0)
+        manager.dora_indicators = [0]
 
         winner = clients[0]
         winner.player.discards = [1, 2]

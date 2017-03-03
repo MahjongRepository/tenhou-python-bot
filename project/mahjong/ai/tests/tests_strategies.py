@@ -304,6 +304,20 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         # west was discarded three times, we don't need it
         self.assertEqual(self._to_string([tile_to_discard]), '3z')
 
+    def test_discard_not_effective_tiles_first(self):
+        table = Table()
+        player = Player(0, 0, table)
+        player.scores = 25000
+        table.count_of_remaining_tiles = 100
+
+        tiles = self._string_to_136_array(man='33', pin='12788999', sou='5', honors='23')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(honors='6'))
+        tile_to_discard = player.discard_tile()
+
+        # west was discarded three times, we don't need it
+        self.assertEqual(self._to_string([tile_to_discard]), '5s')
+
 
 class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 

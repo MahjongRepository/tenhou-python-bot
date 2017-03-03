@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from mahjong.constants import EAST, SOUTH, WEST, NORTH
+from mahjong.meld import Meld
 from mahjong.player import Player
 from mahjong.utils import plus_dora, is_aka_dora
 
@@ -70,6 +71,10 @@ class Table(object):
         # for closed kan we will not have called_tile
         if meld.called_tile:
             tiles.remove(meld.called_tile)
+
+        # for chankan we already added 3 tiles
+        if meld.type == Meld.CHAKAN:
+            tiles = tiles[0]
 
         for tile in tiles:
             self._add_revealed_tile(tile)

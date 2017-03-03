@@ -2,7 +2,6 @@
 from mahjong.ai.strategies.main import BaseStrategy
 from mahjong.constants import TERMINAL_INDICES, HONOR_INDICES
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_sou, is_pin, is_man, is_honor
 
 
 class TanyaoStrategy(BaseStrategy):
@@ -68,6 +67,31 @@ class TanyaoStrategy(BaseStrategy):
                 return False
 
         return True
+
+    def determine_what_to_discard(self, closed_hand, outs_results, shanten, for_open_hand, tile_for_open_hand):
+        if tile_for_open_hand:
+            tile_for_open_hand //= 4
+
+        if shanten == 0 and self.player.is_open_hand:
+            results = []
+            # there is no sense to wait 1-4 if we have open hand
+            for item in outs_results:
+                all_waiting_are_fine = all([self.is_tile_suitable(x * 4) for x in item.waiting])
+                if all_waiting_are_fine:
+                    results.append(item)
+
+            # we don't have a choice
+            # we had to have on bad wait
+            if not results:
+                return outs_results
+
+            return results
+        else:
+            return super(TanyaoStrategy, self).determine_what_to_discard(closed_hand,
+                                                                         outs_results,
+                                                                         shanten,
+                                                                         for_open_hand,
+                                                                         tile_for_open_hand)
 
     def is_tile_suitable(self, tile):
         """

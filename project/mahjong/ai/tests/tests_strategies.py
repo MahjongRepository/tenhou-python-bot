@@ -508,7 +508,6 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
         player.draw_tile(self._string_to_136_tile(sou='1'))
         player.ai.current_strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
-        # print(player.ai.current_strategy)
 
         discard = player.discard_tile()
         # hand was closed and we have won!
@@ -521,3 +520,44 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         # but for already open hand we cant do tsumo
         # because we don't have a yaku here
         self.assertEqual(self._to_string([discard]), '1s')
+
+    def test_choose_correct_waiting(self):
+        table = Table()
+        player = Player(0, 0, table)
+
+        tiles = self._string_to_136_array(man='234678', sou='234', pin='3588')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(pin='2'))
+
+        # discard 5p and riichi
+        discard = player.discard_tile()
+        self.assertEqual(self._to_string([discard]), '5p')
+
+        table = Table()
+        player = Player(0, 0, table)
+
+        meld = self._make_meld(Meld.CHI, self._string_to_136_array(man='234'))
+        player.add_called_meld(meld)
+
+        tiles = self._string_to_136_array(man='234678', sou='234', pin='3588')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(pin='2'))
+
+        # it is not a good idea to wait on 1-4, since we can't win on 1 with open hand
+        # so let's continue to wait on 4 only
+        discard = player.discard_tile()
+        self.assertEqual(self._to_string([discard]), '2p')
+
+        table = Table()
+        player = Player(0, 0, table)
+
+        meld = self._make_meld(Meld.CHI, self._string_to_136_array(man='234'))
+        player.add_called_meld(meld)
+
+        tiles = self._string_to_136_array(man='234678', sou='234', pin='2388')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(sou='7'))
+
+        # we can wait only on 1-4, so let's do it even if we can't get yaku on 1
+        discard = player.discard_tile()
+        self.assertEqual(self._to_string([discard]), '7s')

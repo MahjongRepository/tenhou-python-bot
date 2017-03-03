@@ -285,6 +285,25 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         # we already in tempai
         self.assertEqual(self._to_string([tile_to_discard]), '1z')
 
+    def test_discard_not_needed_winds(self):
+        table = Table()
+        player = Player(0, 0, table)
+        player.scores = 25000
+        table.count_of_remaining_tiles = 100
+
+        tiles = self._string_to_136_array(man='24', pin='4', sou='12344668', honors='36')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(sou='5'))
+
+        table.enemy_discard(self._string_to_136_tile(honors='3'), 1)
+        table.enemy_discard(self._string_to_136_tile(honors='3'), 1)
+        table.enemy_discard(self._string_to_136_tile(honors='3'), 1)
+
+        tile_to_discard = player.discard_tile()
+
+        # west was discarded three times, we don't need it
+        self.assertEqual(self._to_string([tile_to_discard]), '3z')
+
 
 class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 

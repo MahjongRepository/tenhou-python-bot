@@ -13,6 +13,7 @@ from mahjong.ai.strategies.yakuhai import YakuhaiStrategy
 from mahjong.constants import HAKU, CHUN, HATSU
 from mahjong.hand import HandDivider, FinishedHand
 from mahjong.tile import TilesConverter
+from mahjong.utils import is_honor
 
 logger = logging.getLogger('ai')
 
@@ -85,6 +86,11 @@ class MainAI(BaseAI):
                                                                       shanten,
                                                                       False,
                                                                       None)
+
+        # we had to discard dead waits first (last honor tile)
+        for result in results:
+            if is_honor(result.tile_to_discard) and self.table.revealed_tiles[result.tile_to_discard] == 3:
+                result.tiles_count = 2000
 
         return self.chose_tile_to_discard(results, self.player.closed_hand)
 

@@ -248,7 +248,7 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         table = Table()
         player = Player(0, 0, table)
 
-        tiles = self._string_to_136_array(sou='112235589', man='23', honors='22')
+        tiles = self._string_to_136_array(sou='112235589', man='24', honors='22')
         player.init_hand(tiles)
 
         # we don't need to call meld even if it improves our hand,
@@ -317,6 +317,16 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
 
         # west was discarded three times, we don't need it
         self.assertEqual(self._to_string([tile_to_discard]), '5s')
+
+    def test_dont_go_for_honitsu_with_ryanmen_in_other_suit(self):
+        table = Table()
+        player = Player(0, 0, table)
+        strategy = HonitsuStrategy(BaseStrategy.HONITSU, player)
+
+        tiles = self._string_to_136_array(man='14489', sou='45', pin='67', honors='44456')
+        player.init_hand(tiles)
+
+        self.assertEqual(strategy.should_activate_strategy(), False)
 
 
 class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):

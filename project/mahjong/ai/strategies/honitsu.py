@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from mahjong.ai.strategies.main import BaseStrategy
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_sou, is_pin, is_man, is_honor
+from mahjong.utils import is_sou, is_pin, is_man, is_honor, simplify
 
 
 class HonitsuStrategy(BaseStrategy):
@@ -46,6 +46,14 @@ class HonitsuStrategy(BaseStrategy):
             if tiles[x] >= 2:
                 count_of_pairs += 1
 
+        suits.remove(suit)
+        count_of_ryanmens = self._find_ryanmen_waits(tiles, suits[0]['function'])
+        count_of_ryanmens += self._find_ryanmen_waits(tiles, suits[1]['function'])
+
+        # it is a bad idea go for honitsu with ryanmen in other suit
+        if count_of_ryanmens > 0 and not self.player.is_open_hand:
+            return False
+
         # we need to have prevalence of one suit and completed forms in the hand
         # for now let's check only pairs in the hand
         # TODO check ryanmen forms as well and honor tiles count
@@ -63,3 +71,30 @@ class HonitsuStrategy(BaseStrategy):
         """
         tile //= 4
         return self.chosen_suit(tile) or is_honor(tile)
+
+    def _find_ryanmen_waits(self, tiles, suit):
+        suit_tiles = []
+        for x in range(0, 34):
+            tile = tiles[x]
+            if not tile:
+                continue
+
+            if suit(x):
+                suit_tiles.append(x)
+
+        count_of_ryanmen_waits = 0
+        simple_tiles = [simplify(x) for x in suit_tiles]
+        for x in range(0, len(simple_tiles)):
+            tile = simple_tiles[x]
+            # we cant build ryanmen with 1 and 9
+            if tile == 1 or tile == 9:
+                continue
+
+            # bordered tile
+            if x + 1 == len(simple_tiles):
+                continue
+
+            if tile + 1 == simple_tiles[x + 1]:
+                count_of_ryanmen_waits += 1
+
+        return count_of_ryanmen_waits

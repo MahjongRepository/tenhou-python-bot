@@ -260,7 +260,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
 
         result = manager.play_round()
 
-        self.assertEqual(len(result['players_with_open_hands']), 3)
+        self.assertEqual(len(result['players_with_open_hands']), 2)
 
     def test_scores_calculations_after_retake(self):
         clients = [Client() for _ in range(0, 4)]

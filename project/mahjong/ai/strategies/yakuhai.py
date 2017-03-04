@@ -78,4 +78,3 @@ class YakuhaiStrategy(BaseStrategy):
                 return True
 
         return False
-

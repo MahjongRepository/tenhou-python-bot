@@ -19,7 +19,7 @@ ENABLE_AI = True
 
 """
   0 - 1 - online, 0 - bots
-  1 - aka forbidden
+  1 - has aka
   2 - kuitan forbidden
   3 - hanchan
   4 - 3man
@@ -30,8 +30,9 @@ ENABLE_AI = True
   Combine them as:
   76543210
 
-  00001001 = 9 = hanchan ari-ari
-  00000001 = 1 = tonpu-sen ari-ari
+  00001001 = 9 = kyu, hanchan ari-ari
+  00000001 = 1 = kyu, tonpusen ari-ari
+  10001001 = 137 = dan, hanchan ari-ari
 """
 GAME_TYPE = '1'
 

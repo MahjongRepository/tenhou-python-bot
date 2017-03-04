@@ -1,19 +1,6 @@
 # -*- coding: utf-8 -*-
 
 
-class Tile(int):
-    TILES = '''
-        1s 2s 3s 4s 5s 6s 7s 8s 9s
-        1p 2p 3p 4p 5p 6p 7p 8p 9p
-        1m 2m 3m 4m 5m 6m 7m 8m 9m
-        ew sw ww nw
-        wd gd rd
-    '''.split()
-
-    def as_data(self):
-        return self.TILES[self // 4]
-
-
 class TilesConverter(object):
 
     @staticmethod
@@ -54,6 +41,28 @@ class TilesConverter(object):
         return results
 
     @staticmethod
+    def to_136_array(tiles):
+        """
+        Convert 34 array to the 136 tiles array
+        """
+        temp = []
+        results = []
+        for x in range(0, 34):
+            if tiles[x]:
+                temp_value = [x * 4] * tiles[x]
+                for tile in temp_value:
+                    if tile in results:
+                        count_of_tiles = len([x for x in temp if x == tile])
+                        new_tile = tile + count_of_tiles
+                        results.append(new_tile)
+
+                        temp.append(tile)
+                    else:
+                        results.append(tile)
+                        temp.append(tile)
+        return results
+
+    @staticmethod
     def string_to_136_array(sou=None, pin=None, man=None, honors=None):
         """
         Method to convert one line string tiles format to the 136 array
@@ -61,13 +70,22 @@ class TilesConverter(object):
         """
         def _split_string(string, offset):
             data = []
+            temp = []
 
             if not string:
                 return []
 
             for i in string:
                 tile = offset + (int(i) - 1) * 4
-                data.append(tile)
+                if tile in data:
+                    count_of_tiles = len([x for x in temp if x == tile])
+                    new_tile = tile + count_of_tiles
+                    data.append(new_tile)
+
+                    temp.append(tile)
+                else:
+                    data.append(tile)
+                    temp.append(tile)
 
             return data
 
@@ -98,7 +116,7 @@ class TilesConverter(object):
         For example we had 0 tile from 34 array
         in 136 array it can be present as 0, 1, 2, 3
         """
-        if tile34 > 33:
+        if tile34 is None or tile34 > 33:
             return None
 
         tile = tile34 * 4

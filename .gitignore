@@ -1,5 +1,5 @@
 .idea
-.vagrant
+env
 
 *.py[cod]
 __pycache__
@@ -12,8 +12,10 @@ tests_validate_hand.py
 loader.py
 *.db
 temp
+*.log
 
-replays/data/*
+project/game/data/*
+project/analytics/data/*
 
 # temporary files
 experiments

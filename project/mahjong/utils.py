@@ -1,4 +1,4 @@
-from mahjong.constants import EAST, FIVE_RED_MAN, FIVE_RED_PIN, FIVE_RED_SOU
+from mahjong.constants import EAST, FIVE_RED_MAN, FIVE_RED_PIN, FIVE_RED_SOU, HONOR_INDICES
 from utils.settings_handler import settings
 
 
@@ -92,7 +92,7 @@ def is_pair(item):
     return len(item) == 2
 
 
-def is_sou(tile):
+def is_man(tile):
     """
     :param tile: 34 tile format
     :return: boolean
@@ -108,12 +108,20 @@ def is_pin(tile):
     return 8 < tile <= 17
 
 
-def is_man(tile):
+def is_sou(tile):
     """
     :param tile: 34 tile format
     :return: boolean
     """
     return 17 < tile <= 26
+
+
+def is_honor(tile):
+    """
+    :param tile: 34 tile format
+    :return: boolean
+    """
+    return tile >= 27
 
 
 def simplify(tile):
@@ -122,3 +130,22 @@ def simplify(tile):
     :return: tile: 0-8 presentation
     """
     return tile - 9 * (tile // 9)
+
+
+def find_isolated_tile_indices(hand_34):
+    """
+    :param hand_34: array of tiles in 34 tile format
+    :return: array of isolated tiles indices
+    """
+    isolated_indices = []
+    for x in range(1, 27):
+        # TODO handle 1-9 tiles situation to have more isolated tiles
+        if hand_34[x] == 0 and hand_34[x - 1] == 0 and hand_34[x + 1] == 0:
+            isolated_indices.append(x)
+
+    # for honor tiles we don't need to check nearby tiles
+    for x in HONOR_INDICES:
+        if hand_34[x] == 0:
+            isolated_indices.append(x)
+
+    return isolated_indices

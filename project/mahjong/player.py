@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 import logging
+from functools import reduce
+
+import copy
 
 from mahjong.constants import EAST, SOUTH, WEST, NORTH
+from mahjong.tile import TilesConverter
 from utils.settings_handler import settings
 from mahjong.ai.shanten import Shanten
-from mahjong.tile import Tile
 
 logger = logging.getLogger('tenhou')
 
@@ -29,9 +32,15 @@ class Player(object):
     tiles = []
     melds = []
     table = None
+    last_draw = None
     in_tempai = False
     in_riichi = False
     in_defence_mode = False
+
+    # system fields
+    # for local games emulation
+    _is_daburi = False
+    _is_ippatsu = False
 
     def __init__(self, seat, dealer_seat, table, use_previous_ai_version=False):
         self.discards = []
@@ -72,44 +81,75 @@ class Player(object):
     def __repr__(self):
         return self.__str__()
 
-    def add_meld(self, meld):
-        self.melds.append(meld)
-
-    def add_discarded_tile(self, tile):
-        self.discards.append(Tile(tile))
-
-    def init_hand(self, tiles):
-        self.tiles = [Tile(i) for i in tiles]
-
-    def draw_tile(self, tile):
-        self.tiles.append(Tile(tile))
-        # we need sort it to have a better string presentation
-        self.tiles = sorted(self.tiles)
-
-    def discard_tile(self):
-        tile_to_discard = self.ai.discard_tile()
-        if tile_to_discard != Shanten.AGARI_STATE:
-            self.add_discarded_tile(tile_to_discard)
-            self.tiles.remove(tile_to_discard)
-        return tile_to_discard
-
     def erase_state(self):
         self.discards = []
         self.melds = []
         self.tiles = []
         self.safe_tiles = []
+
+        self.last_draw = None
         self.in_tempai = False
         self.in_riichi = False
         self.in_defence_mode = False
+
         self.dealer_seat = 0
+
+        self.ai.erase_state()
+
+        self._is_daburi = False
+        self._is_ippatsu = False
+
+    def add_called_meld(self, meld):
+        self.melds.append(meld)
+
+    def add_discarded_tile(self, tile):
+        self.discards.append(tile)
+
+    def init_hand(self, tiles):
+        self.tiles = tiles
+
+        self.ai.determine_strategy()
+
+    def draw_tile(self, tile):
+        self.last_draw = tile
+        self.tiles.append(tile)
+        # we need sort it to have a better string presentation
+        self.tiles = sorted(self.tiles)
+
+        self.ai.determine_strategy()
+
+    def discard_tile(self, tile=None):
+        """
+        We can say what tile to discard
+        input tile = None we will discard tile based on AI logic
+        :param tile: 136 tiles format
+        :return:
+        """
+        # we can't use if tile, because of 0 tile
+        if tile is not None:
+            tile_to_discard = tile
+        else:
+            tile_to_discard = self.ai.discard_tile()
+
+        if tile_to_discard != Shanten.AGARI_STATE:
+            self.add_discarded_tile(tile_to_discard)
+            self.tiles.remove(tile_to_discard)
+
+        return tile_to_discard
 
     def can_call_riichi(self):
         return all([
             self.in_tempai,
+
             not self.in_riichi,
+            not self.is_open_hand,
+
             self.scores >= 1000,
             self.table.count_of_remaining_tiles > 4
         ])
+
+    def try_to_call_meld(self, tile, is_kamicha_discard):
+        return self.ai.try_to_call_meld(tile, is_kamicha_discard)
 
     @property
     def player_wind(self):
@@ -126,3 +166,41 @@ class Player(object):
     @property
     def is_dealer(self):
         return self.seat == self.dealer_seat
+
+    @property
+    def is_open_hand(self):
+        return len(self.melds) > 0
+
+    @property
+    def closed_hand(self):
+        tiles = self.tiles[:]
+        meld_tiles = [x.tiles for x in self.melds]
+        if meld_tiles:
+            meld_tiles = reduce(lambda z, y: z + y, [x.tiles for x in self.melds])
+        return [item for item in tiles if item not in meld_tiles]
+
+    @property
+    def meld_tiles(self):
+        """
+        Array of array with 34 tiles indices
+        :return: array
+        """
+        melds = [x.tiles for x in self.melds]
+        melds = copy.deepcopy(melds)
+        for meld in melds:
+            meld[0] //= 4
+            meld[1] //= 4
+            meld[2] //= 4
+        return melds
+
+    def format_hand_for_print(self, tile):
+        hand_string = '{} + {}'.format(
+            TilesConverter.to_one_line_string(self.closed_hand),
+            TilesConverter.to_one_line_string([tile])
+        )
+        if self.is_open_hand:
+            melds = []
+            for item in self.melds:
+                melds.append('{}'.format(TilesConverter.to_one_line_string(item.tiles)))
+            hand_string += ' [{}]'.format(', '.join(melds))
+        return hand_string

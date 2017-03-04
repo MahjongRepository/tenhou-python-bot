@@ -1,14 +1,36 @@
 # -*- coding: utf-8 -*-
+import copy
+
+from mahjong.utils import find_isolated_tile_indices
 
 
 class Agari(object):
 
-    def is_agari(self, tiles):
+    def is_agari(self, tiles, melds=None):
         """
         Determine was it win or not
         :param tiles: 34 tiles format array
+        :param melds: array of array of 34 tiles format
         :return: boolean
         """
+        # we will modify them later, so we need to use a copy
+        tiles = copy.deepcopy(tiles)
+
+        # With open hand we need to remove open sets from hand and replace them with isolated pon sets
+        # it will allow to determine agari state correctly
+        if melds:
+            isolated_tiles = find_isolated_tile_indices(tiles)
+            for meld in melds:
+                if not isolated_tiles:
+                    break
+
+                isolated_tile = isolated_tiles.pop()
+
+                tiles[meld[0]] -= 1
+                tiles[meld[1]] -= 1
+                tiles[meld[2]] -= 1
+                tiles[isolated_tile] = 3
+
         j = (1 << tiles[27]) | (1 << tiles[28]) | (1 << tiles[29]) | (1 << tiles[30]) | \
             (1 << tiles[31]) | (1 << tiles[32]) | (1 << tiles[33])
 

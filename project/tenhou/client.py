@@ -26,12 +26,14 @@ class TenhouClient(Client):
 
     decoder = TenhouDecoder()
 
+    _count_of_empty_messages = 0
+
     def __init__(self, socket_object):
         super(TenhouClient, self).__init__()
         self.socket = socket_object
 
     def authenticate(self):
-        self._send_message('<HELO name="{0}" tid="f0" sx="M" />'.format(quote(settings.USER_ID)))
+        self._send_message('<HELO name="{}" tid="f0" sx="M" />'.format(quote(settings.USER_ID)))
         auth_message = self._read_message()
 
         auth_string = self.decoder.parse_auth_string(auth_message)
@@ -40,7 +42,7 @@ class TenhouClient(Client):
 
         auth_token = self.decoder.generate_auth_token(auth_string)
 
-        self._send_message('<AUTH val="{0}"/>'.format(auth_token))
+        self._send_message('<AUTH val="{}"/>'.format(auth_token))
         self._send_message(self._pxr_tag())
 
         # sometimes tenhou send an empty tag after authentication (in tournament mode)
@@ -67,19 +69,19 @@ class TenhouClient(Client):
 
         if settings.LOBBY != '0':
             if settings.IS_TOURNAMENT:
-                logger.info('Go to the tournament lobby: {0}'.format(settings.LOBBY))
-                self._send_message('<CS lobby="{0}" />'.format(settings.LOBBY))
+                logger.info('Go to the tournament lobby: {}'.format(settings.LOBBY))
+                self._send_message('<CS lobby="{}" />'.format(settings.LOBBY))
                 sleep(2)
                 self._send_message('<DATE />')
             else:
-                logger.info('Go to the lobby: {0}'.format(settings.LOBBY))
-                self._send_message('<CHAT text="{0}" />'.format(quote('/lobby {0}'.format(settings.LOBBY))))
+                logger.info('Go to the lobby: {}'.format(settings.LOBBY))
+                self._send_message('<CHAT text="{}" />'.format(quote('/lobby {}'.format(settings.LOBBY))))
                 sleep(2)
 
-        game_type = '{0},{1}'.format(settings.LOBBY, settings.GAME_TYPE)
+        game_type = '{},{}'.format(settings.LOBBY, settings.GAME_TYPE)
 
         if not settings.IS_TOURNAMENT:
-            self._send_message('<JOIN t="{0}" />'.format(game_type))
+            self._send_message('<JOIN t="{}" />'.format(game_type))
             logger.info('Looking for the game...')
 
         start_time = datetime.datetime.now()
@@ -90,10 +92,9 @@ class TenhouClient(Client):
             messages = self._get_multiple_messages()
 
             for message in messages:
-
                 if '<rejoin' in message:
                     # game wasn't found, continue to wait
-                    self._send_message('<JOIN t="{0},r" />'.format(game_type))
+                    self._send_message('<JOIN t="{},r" />'.format(game_type))
 
                 if '<go' in message:
                     self._send_message('<GOK />')
@@ -102,7 +103,7 @@ class TenhouClient(Client):
                 if '<taikyoku' in message:
                     self.looking_for_game = False
                     game_id, seat = self.decoder.parse_log_link(message)
-                    log_link = 'http://tenhou.net/0/?log={0}&tw={1}'.format(game_id, seat)
+                    log_link = 'http://tenhou.net/0/?log={}&tw={}'.format(game_id, seat)
                     self.statistics.game_id = game_id
 
                 if '<un' in message:
@@ -127,18 +128,28 @@ class TenhouClient(Client):
             return
 
         logger.info('Game started')
-        logger.info('Log: {0}'.format(log_link))
-        logger.info('Players: {0}'.format(self.table.players))
+        logger.info('Log: {}'.format(log_link))
+        logger.info('Players: {}'.format(self.table.players))
 
         main_player = self.table.get_main_player()
+
+        # tiles to work with meld calling
+        tile_to_discard = None
+        meld_tile = None
+        shanten = 7
 
         while self.game_is_continue:
             sleep(1)
 
             messages = self._get_multiple_messages()
 
-            for message in messages:
+            if not messages:
+                self._count_of_empty_messages += 1
+            else:
+                # we had set to zero counter
+                self._count_of_empty_messages = 0
 
+            for message in messages:
                 if '<init' in message:
                     values = self.decoder.parse_initial_values(message)
                     self.table.init_round(
@@ -164,12 +175,14 @@ class TenhouClient(Client):
                     tile = self.decoder.parse_tile(message)
 
                     if not main_player.in_riichi:
+                        logger.info('Hand: {}'.format(main_player.format_hand_for_print(tile)))
+
                         self.draw_tile(tile)
                         sleep(1)
 
-                        logger.info('Hand: {0}'.format(TilesConverter.to_one_line_string(main_player.tiles)))
-
                         tile = self.discard_tile()
+
+                        logger.info('Discard: {}'.format(TilesConverter.to_one_line_string([tile])))
 
                     if 't="16"' in message:
                         # we win by self draw (tsumo)
@@ -177,56 +190,66 @@ class TenhouClient(Client):
                     else:
                         # let's call riichi and after this discard tile
                         if main_player.can_call_riichi():
-                            self._send_message('<REACH hai="{0}" />'.format(tile))
+                            self._send_message('<REACH hai="{}" />'.format(tile))
                             sleep(2)
                             main_player.in_riichi = True
 
                         # tenhou format: <D p="133" />
-                        self._send_message('<D p="{0}"/>'.format(tile))
+                        self._send_message('<D p="{}"/>'.format(tile))
 
-                        logger.info('Remaining tiles: {0}'.format(self.table.count_of_remaining_tiles))
+                        logger.info('Remaining tiles: {}'.format(self.table.count_of_remaining_tiles))
 
                 # new dora indicator after kan
                 if '<dora' in message:
                     tile = self.decoder.parse_dora_indicator(message)
                     self.table.add_dora_indicator(tile)
-                    logger.info('New dora indicator: {0}'.format(tile))
+                    logger.info('New dora indicator: {}'.format(TilesConverter.to_one_line_string([tile])))
 
                 if '<reach' in message and 'step="2"' in message:
                     who_called_riichi = self.decoder.parse_who_called_riichi(message)
                     self.enemy_riichi(who_called_riichi)
-                    logger.info('Riichi called by {0} player'.format(who_called_riichi))
+                    logger.info('Riichi called by {} player'.format(who_called_riichi))
 
                 # the end of round
                 if 'agari' in message or 'ryuukyoku' in message:
                     sleep(2)
                     self._send_message('<NEXTREADY />')
 
-                # t="7" - suggest to open kan
-                open_sets = ['t="1"', 't="2"', 't="3"', 't="4"', 't="5"', 't="7"']
-                if any(i in message for i in open_sets):
+                # for now I'm not sure about what sets was suggested to call with this numbers
+                # will find it out later
+                not_allowed_open_sets = ['t="2"', 't="3"', 't="5"', 't="7"']
+                if any(i in message for i in not_allowed_open_sets):
                     sleep(1)
                     self._send_message('<N />')
 
-                # set call
+                # set was called
                 if '<n who=' in message:
                     meld = self.decoder.parse_meld(message)
-                    self.call_meld(meld)
-                    logger.info('Meld: {0}, who {1}'.format(meld.type, meld.who))
+                    logger.info('Meld: {} by {}'.format(meld, meld.who))
 
-                    # other player upgraded pon to kan, and it is our winning tile
-                    if meld.type == Meld.CHAKAN and 't="8"' in message:
-                        # actually I don't know what exactly client response should be
-                        # let's try usual ron response
-                        self._send_message('<N type="6" />')
+                    # tenhou confirmed that we called a meld
+                    # we had to do discard after this
+                    if meld.who == 0:
+                        logger.info('With hand: {}'.format(main_player.format_hand_for_print(meld_tile)))
+                        logger.info('Discard tile after called meld: {}'.format(
+                            TilesConverter.to_one_line_string([tile_to_discard])))
+                        self._send_message('<D p="{}"/>'.format(tile_to_discard))
+                        self.player.discard_tile(tile_to_discard)
+
+                        self.player.tiles.append(meld_tile)
+                        self.player.ai.previous_shanten = shanten
+
+                    self.table.add_called_meld(meld, meld.who)
+
+                win_suggestions = ['t="8"', 't="9"', 't="12"', 't="13"']
+                # we win by other player's discard
+                if any(i in message for i in win_suggestions):
+                    sleep(1)
+                    self._send_message('<N type="6" />')
 
                 # other players discards: <e, <f, <g + tile number
                 match_discard = re.match(r"^<[efg]+\d.*", message)
                 if match_discard:
-                    # we win by other player's discard
-                    if 't="8"' in message:
-                        self._send_message('<N type="6" />')
-
                     tile = self.decoder.parse_tile(message)
 
                     if '<e' in message:
@@ -236,7 +259,37 @@ class TenhouClient(Client):
                     else:
                         player_seat = 3
 
-                    self.enemy_discard(player_seat, tile)
+                    self.table.enemy_discard(tile, player_seat)
+
+                    if 't="1"' in message or 't="4"' in message:
+                        is_kamicha_discard = False
+                        # t="1" - call pon set
+                        # t="4" - call chi set
+                        if 't="4"' in message:
+                            is_kamicha_discard = True
+
+                        meld, tile_to_discard, shanten = self.player.try_to_call_meld(tile, is_kamicha_discard)
+                        if meld:
+                            meld_tile = tile
+
+                            meld_type = '1'
+                            if meld.type == Meld.CHI:
+                                # yeah it is 3, not 4
+                                # because of tenhou protocol
+                                meld_type = '3'
+
+                            tiles = meld.tiles
+                            tiles.remove(meld_tile)
+
+                            # try to call a meld
+                            self._send_message('<N type="{}" hai0="{}" hai1="{}" />'.format(
+                                meld_type,
+                                tiles[0],
+                                tiles[1]
+                            ))
+                        else:
+                            sleep(1)
+                            self._send_message('<N />')
 
                 if 'owari' in message:
                     values = self.decoder.parse_final_scores_and_uma(message)
@@ -245,7 +298,12 @@ class TenhouClient(Client):
                 if '<prof' in message:
                     self.game_is_continue = False
 
-        logger.info('Final results: {0}'.format(self.table.get_players_sorted_by_scores()))
+            if self._count_of_empty_messages > 10:
+                logger.error('Tenhou send empty messages to us. Probably we did something wrong with protocol')
+                self.end_game(False)
+                return
+
+        logger.info('Final results: {}'.format(self.table.get_players_sorted_by_scores()))
 
         # we need to finish the game, and only after this try to send statistics
         # if order will be different, tenhou will return 404 on log download endpoint
@@ -256,9 +314,9 @@ class TenhouClient(Client):
         if settings.STAT_SERVER_URL:
             sleep(60)
             result = self.statistics.send_statistics()
-            logger.info('Statistics sent: {0}'.format(result))
+            logger.info('Statistics sent: {}'.format(result))
 
-    def end_game(self):
+    def end_game(self, success=True):
         self.game_is_continue = False
         self._send_message('<BYE />')
 
@@ -268,17 +326,20 @@ class TenhouClient(Client):
         self.socket.shutdown(socket.SHUT_RDWR)
         self.socket.close()
 
-        logger.info('End of the game')
+        if success:
+            logger.info('End of the game')
+        else:
+            logger.error('Game was ended without of success')
 
     def _send_message(self, message):
-        # tenhou required the empty byte in the end of each sending message
-        logger.debug('Send: {0}'.format(message))
+        # tenhou requires an empty byte in the end of each sending message
+        logger.debug('Send: {}'.format(message))
         message += '\0'
         self.socket.sendall(message.encode())
 
     def _read_message(self):
         message = self.socket.recv(1024)
-        logger.debug('Get: {0}'.format(message.decode('utf-8').replace('\x00', ' ')))
+        logger.debug('Get: {}'.format(message.decode('utf-8').replace('\x00', ' ')))
 
         message = message.decode('utf-8')
         # sometimes tenhou send messages in lower case, sometime in upper case, let's unify the behaviour

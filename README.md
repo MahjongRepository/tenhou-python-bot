@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/MahjongRepository/tenhou-python-bot.svg?branch=master)](https://travis-ci.org/MahjongRepository/tenhou-python-bot)
 
-For now only **Python 3.5** is supported.
+For now only **Python 3.5+** is supported.
 
 # What do we have here?
 
@@ -61,11 +61,7 @@ and run `bots_battle.py`.
 
 ## How to run it?
 
-1. Install [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
-2. Install [Vagrant](https://www.vagrantup.com/downloads.html)
-3. Run `vagrant up`. It will take a while, also it will ask your system root password to setup NFS
-4. Run `vagrant ssh`
-5. Run `python main.py` it will connect to the tenhou.net and will play a match. 
+Run `pythone main.py` it will connect to the tenhou.net and will play a match. 
 After the end of the match it will close connection to the server
 
 ## Configuration instructions

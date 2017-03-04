@@ -28,7 +28,7 @@ class DiscardOption(object):
         self.waiting = waiting
         self.tiles_count = tiles_count
 
-        self._calculate_value()
+        self.calculate_value()
 
     def find_tile_in_hand(self, closed_hand):
         """
@@ -54,15 +54,20 @@ class DiscardOption(object):
 
         return TilesConverter.find_34_tile_in_136_array(self.tile_to_discard, closed_hand)
 
-    def _calculate_value(self):
+    def calculate_value(self):
         # base is 100 for ability to mark tiles as not needed (like set value to 50)
         value = 100
+        honored_value = 20
+
+        # we don't need to keep honor tiles in almost completed hand
+        if self.player.ai.previous_shanten <= 2:
+            honored_value = 0
 
         if is_honor(self.tile_to_discard):
             if self.tile_to_discard in self.player.ai.valued_honors:
                 count_of_winds = [x for x in self.player.ai.valued_honors if x == self.tile_to_discard]
                 # for west-west, east-east we had to double tile value
-                value += 20 * len(count_of_winds)
+                value += honored_value * len(count_of_winds)
         else:
             # suits
             suit_tile_grades = [10, 20, 30, 40, 50, 40, 30, 20, 10]

@@ -198,3 +198,14 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         # we had to keep red five and discard just 5s
         discarded_tile = player.discard_tile()
         self.assertNotEqual(discarded_tile, FIVE_RED_SOU)
+
+    def test_dont_keep_honor_with_small_number_of_shanten(self):
+        table = Table()
+        player = Player(0, 0, table)
+
+        tiles = self._string_to_136_array(sou='11445', pin='55699', man='246')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(honors='7'))
+
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '7z')

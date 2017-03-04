@@ -46,7 +46,11 @@ class MainAI(BaseAI):
         results, shanten = self.calculate_outs(self.player.tiles,
                                                self.player.closed_hand,
                                                self.player.is_open_hand)
+        # we had to update tiles value
+        # because it is related with shanten number
         self.previous_shanten = shanten
+        for result in results:
+            result.calculate_value()
 
         if shanten == 0:
             self.player.in_tempai = True

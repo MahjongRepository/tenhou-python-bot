@@ -57,7 +57,7 @@ class TenhouClient(Client):
 
         auth_string = self.decoder.parse_auth_string(auth_message)
         if not auth_string:
-            logger.info('We obtain auth string')
+            logger.info("We didn't obtain auth string")
             return False
 
         auth_token = self.decoder.generate_auth_token(auth_string)

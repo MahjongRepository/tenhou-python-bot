@@ -12,6 +12,7 @@ from mahjong.constants import DISPLAY_WINDS
 from utils.settings_handler import settings
 from mahjong.client import Client
 from mahjong.meld import Meld
+from mahjong.table import Table
 from mahjong.tile import TilesConverter
 from tenhou.decoder import TenhouDecoder
 
@@ -28,8 +29,10 @@ class TenhouClient(Client):
 
     _count_of_empty_messages = 0
 
-    def __init__(self, socket_object):
-        super(TenhouClient, self).__init__()
+    def __init__(self):
+        super(TenhouClient, self).__init__(Table(False))
+
+    def setSocketObject(self, socket_object):
         self.socket = socket_object
 
     def authenticate(self):

@@ -34,10 +34,30 @@ class TenhouClient(Client):
 
     def authenticate(self):
         self._send_message('<HELO name="{}" tid="f0" sx="M" />'.format(quote(settings.USER_ID)))
-        auth_message = self._read_message()
+        auth_message = ''
+
+        # we need to wait to get auth message
+        # sometimes it can be a couple of empty messages before real auth message
+        continue_reading = True
+        counter = 0
+        while continue_reading:
+            auth_message = self._read_message()
+            if auth_message:
+                continue_reading = False
+            else:
+                counter += 1
+
+            # to avoid infinity loop
+            if counter > 20:
+                continue_reading = False
+
+        if not auth_message:
+            logger.info("Auth message wasn't received")
+            return False
 
         auth_string = self.decoder.parse_auth_string(auth_message)
         if not auth_string:
+            logger.info('We obtain auth string')
             return False
 
         auth_token = self.decoder.generate_auth_token(auth_string)
@@ -47,14 +67,21 @@ class TenhouClient(Client):
 
         # sometimes tenhou send an empty tag after authentication (in tournament mode)
         # and bot thinks that he was not auth
-        # to prevent it lets wait a little
-        # and read a group of tags
-        sleep(3)
+        # to prevent it lets wait a little bit
+        # and lets read a group of tags
+        continue_reading = True
+        counter = 0
         authenticated = False
-        messages = self._get_multiple_messages()
-        for message in messages:
-            if '<ln' in message:
-                authenticated = True
+        while continue_reading:
+            messages = self._get_multiple_messages()
+            for message in messages:
+                if '<ln' in message:
+                    authenticated = True
+                    continue_reading = False
+
+            # to avoid infinity loop
+            if counter > 20:
+                continue_reading = False
 
         if authenticated:
             self._send_keep_alive_ping()

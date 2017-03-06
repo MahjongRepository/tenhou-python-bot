@@ -10,12 +10,13 @@ logger = logging.getLogger('tenhou')
 
 
 def connect_and_play():
+    logger.info('Bot AI enabled: {}'.format(settings.ENABLE_AI))
+    client = TenhouClient()
+    
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((settings.TENHOU_HOST, settings.TENHOU_PORT))
 
-    logger.info('Bot AI enabled: {}'.format(settings.ENABLE_AI))
-
-    client = TenhouClient(s)
+    client.setSocketObject(s)
 
     try:
         was_auth = client.authenticate()

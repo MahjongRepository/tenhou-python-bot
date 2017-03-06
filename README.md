@@ -17,6 +17,7 @@ Daburu Chuuren Poutou). Later I plan to have a disabling option in settings for 
 
 The code was validated on tenhou.net phoenix replays in total on **8'527'296 hands**, and 
 results were the same in 100% cases.
+
 So, we can say that our own hand calculator works the same way that tenhou.net hand calculation.
 
 The example of usage you can find here: https://github.com/MahjongRepository/tenhou-python-bot/blob/master/project/validate_hand.py#L194
@@ -56,6 +57,14 @@ It will allow to determine was a new version improved or not.
 
 To be able to run it you need to copy an old ai version to the `mahjong/ai/old_version.py` 
 and run `bots_battle.py`.
+
+## Tenhou logs analytics
+
+We have an analytics package. It contains: 
+
+- `analytics/download_game_ids.py` - script to load phoenix game ids from the last 7 days
+- `analytics/download_logs_content.py` - script to download logs content for ids that were obtained from the previous script
+- `analytics/cases/*` - package for different analytics scripts (like % of suji traps) that will be written later
 
 # For developers
 

@@ -25,5 +25,5 @@ def connect_and_play():
         else:
             client.end_game()
     except KeyboardInterrupt:
-        logger.info('Ending the game... can take 15 seconds')
+        logger.info('Ending the game...')
         client.end_game()

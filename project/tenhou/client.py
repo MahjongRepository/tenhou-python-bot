@@ -377,7 +377,13 @@ class TenhouClient(Client):
         def send_request():
             while self.game_is_continue:
                 self._send_message('<Z />')
-                sleep(15)
+
+                # we can't use sleep(15), because we want to be able
+                # end thread in the middle of running
+                seconds_to_sleep = 15
+                for x in range(0, seconds_to_sleep * 2):
+                    if self.game_is_continue:
+                        sleep(0.5)
 
         self.keep_alive_thread = Thread(target=send_request)
         self.keep_alive_thread.start()

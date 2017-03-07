@@ -29,28 +29,15 @@ class TenhouClient(Client):
     _count_of_empty_messages = 0
     _rating_string = None
 
-    def __init__(self, socket_object):
+    def __init__(self):
         super(TenhouClient, self).__init__()
+
+    def set_socket(self, socket_object):
         self.socket = socket_object
 
     def authenticate(self):
         self._send_message('<HELO name="{}" tid="f0" sx="M" />'.format(quote(settings.USER_ID)))
-        auth_message = ''
-
-        # we need to wait to get auth message
-        # sometimes it can be a couple of empty messages before real auth message
-        continue_reading = True
-        counter = 0
-        while continue_reading:
-            auth_message = self._read_message()
-            if auth_message:
-                continue_reading = False
-            else:
-                counter += 1
-
-            # to avoid infinity loop
-            if counter > 20:
-                continue_reading = False
+        auth_message = self._read_message()
 
         if not auth_message:
             logger.info("Auth message wasn't received")

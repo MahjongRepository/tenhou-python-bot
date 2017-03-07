@@ -76,9 +76,9 @@ class TenhouDecoderTestCase(unittest.TestCase):
         decoder = TenhouDecoder()
         message = '<HELO uname="%4E%6F%4E%61%6D%65" auth="20160318-54ebe070" ratingscale=""/>'
 
-        result = decoder.parse_auth_string(message)
+        auth_string, _ = decoder.parse_hello_string(message)
 
-        self.assertEqual(result, '20160318-54ebe070')
+        self.assertEqual(auth_string, '20160318-54ebe070')
 
     def test_generate_auth_token(self):
         client = TenhouDecoder()

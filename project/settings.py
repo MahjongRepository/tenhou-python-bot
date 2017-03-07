@@ -18,8 +18,10 @@ STAT_TOKEN = ''
 ENABLE_AI = True
 
 """
+  Game type decoding:
+
   0 - 1 - online, 0 - bots
-  1 - has aka
+  1 - aka forbiden
   2 - kuitan forbidden
   3 - hanchan
   4 - 3man
@@ -30,12 +32,20 @@ ENABLE_AI = True
   Combine them as:
   76543210
 
-  00001001 = 9 = kyu, hanchan ari-ari
-  00000001 = 1 = kyu, tonpusen ari-ari
-  10001001 = 137 = dan, hanchan ari-ari
-"""
-GAME_TYPE = '1'
+  # hanchan, ari-ari examples
+  00001001 = 9   - kyu
+  10001001 = 137 - dan
+  00101001 = 41  - upperdan
+  10101001 = 169 - phoenix
 
+  00001001 = 9 - kyu, hanchan ari-ari
+  00000001 = 1 - kyu, tonpusen ari-ari
+"""
+
+# for dynamic game type selection (based on the bot rank and rate)
+# you can use:
+# GAME_TYPE = None
+GAME_TYPE = '1'
 
 # game related settings
 # TODO put them to the separate settings files

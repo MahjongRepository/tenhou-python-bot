@@ -31,13 +31,19 @@ class TenhouDecoder(object):
         u'天鳳位'
     ]
 
-    def parse_auth_string(self, message):
+    def parse_hello_string(self, message):
         soup = BeautifulSoup(message, 'html.parser')
         soup = soup.find('helo')
+
+        rating_string = ''
         if soup and 'auth' in soup.attrs:
-            return soup.attrs['auth']
+            auth_message = soup.attrs['auth']
+            # for NoName we don't have rating attribute
+            if 'pf4' in soup.attrs:
+                rating_string = soup.attrs['pf4']
+            return auth_message, rating_string
         else:
-            return None
+            return '', ''
 
     def parse_initial_values(self, message):
         """

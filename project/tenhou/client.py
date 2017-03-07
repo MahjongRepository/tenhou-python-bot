@@ -27,6 +27,7 @@ class TenhouClient(Client):
     decoder = TenhouDecoder()
 
     _count_of_empty_messages = 0
+    _rating_string = None
 
     def __init__(self, socket_object):
         super(TenhouClient, self).__init__()
@@ -55,7 +56,8 @@ class TenhouClient(Client):
             logger.info("Auth message wasn't received")
             return False
 
-        auth_string = self.decoder.parse_auth_string(auth_message)
+        auth_string, rating_string = self.decoder.parse_hello_string(auth_message)
+        self._rating_string = rating_string
         if not auth_string:
             logger.info("We didn't obtain auth string")
             return False
@@ -94,6 +96,7 @@ class TenhouClient(Client):
     def start_game(self):
         log_link = ''
 
+        # play in private or tournament lobby
         if settings.LOBBY != '0':
             if settings.IS_TOURNAMENT:
                 logger.info('Go to the tournament lobby: {}'.format(settings.LOBBY))
@@ -105,7 +108,7 @@ class TenhouClient(Client):
                 self._send_message('<CHAT text="{}" />'.format(quote('/lobby {}'.format(settings.LOBBY))))
                 sleep(2)
 
-        game_type = '{},{}'.format(settings.LOBBY, settings.GAME_TYPE)
+        game_type = self._build_game_type()
 
         if not settings.IS_TOURNAMENT:
             self._send_message('<JOIN t="{}" />'.format(game_type))
@@ -401,3 +404,39 @@ class TenhouClient(Client):
             return '<PXR V="1" />'
         else:
             return '<PXR V="9" />'
+
+    def _build_game_type(self):
+        # usual case, we specified game type to play
+        if settings.GAME_TYPE is not None:
+            return '{},{}'.format(settings.LOBBY, settings.GAME_TYPE)
+
+        # kyu lobby, hanchan ari-ari
+        default_game_type = '9'
+
+        if settings.LOBBY != '0':
+            logger.error("We can't use dynamic game type and custom lobby. Default game type was set")
+            return '{},{}'.format(settings.LOBBY, default_game_type)
+
+        if not self._rating_string:
+            logger.error("For NoName dynamic game type is not available. Default game type was set")
+            return '{},{}'.format(settings.LOBBY, default_game_type)
+
+        temp = self._rating_string.split(',')
+        dan = int(temp[0])
+        rate = float(temp[2])
+        logger.info('Player has {} rank and {} rate'.format(TenhouDecoder.RANKS[dan], rate))
+
+        game_type = default_game_type
+        # dan lobby, we can play here from 1 kyu
+        if dan >= 9:
+            game_type = '137'
+
+        # upperdan lobby, we can play here from 4 dan and with 1800+ rate
+        if dan >= 13 and rate >= 1800:
+            game_type = '41'
+
+        # phoenix lobby, we can play here from 7 dan and with 2000+ rate
+        if dan >= 16 and rate >= 2000:
+            game_type = '169'
+
+        return '{},{}'.format(settings.LOBBY, game_type)

@@ -152,3 +152,23 @@ class TenhouDecoderTestCase(unittest.TestCase):
 
         who = decoder.parse_who_called_riichi('<REACH who="2" ten="255,216,261,258" step="2"/>')
         self.assertEqual(who, 2)
+
+    def test_reconnection_information(self):
+        message = '<REINIT seed="0,0,1,4,3,59" ten="250,250,250,240" oya="0" ' \
+                  'hai="1,2,4,13,17,20,46,47,53,71,76,81,85" ' \
+                  'm2="41513" ' \
+                  'kawa0="120,28,128,131,18,75,74,27,69,130,64" ' \
+                  'kawa1="117,121,123,129,103,72,83,125,62,84" ' \
+                  'kawa2="33,114,122,107,31,105,78,9,68,73,38" ' \
+                  'kawa3="115,0,126,87,24,25,106,255,70,3,119"/>'
+        decoder = TenhouDecoder()
+        result = decoder.parse_table_state_after_reconnection(message)
+        self.assertEqual(len(result), 4)
+
+        self.assertEqual(len(result[0]['discards']), 11)
+        # one additional tile from meld
+        self.assertEqual(len(result[1]['discards']), 11)
+        self.assertEqual(len(result[2]['discards']), 11)
+        self.assertEqual(len(result[3]['discards']), 10)
+
+        self.assertEqual(len(result[2]['melds']), 1)

@@ -23,25 +23,34 @@ class TenhouClient(Client):
     game_is_continue = True
     looking_for_game = True
     keep_alive_thread = None
+    reconnected_messages = None
 
     decoder = TenhouDecoder()
 
     _count_of_empty_messages = 0
     _rating_string = None
 
-    def __init__(self):
-        super(TenhouClient, self).__init__()
-
     def set_socket(self, socket_object):
         self.socket = socket_object
 
     def authenticate(self):
         self._send_message('<HELO name="{}" tid="f0" sx="M" />'.format(quote(settings.USER_ID)))
-        auth_message = self._read_message()
+        messages = self._get_multiple_messages()
+        auth_message = messages[0]
 
         if not auth_message:
             logger.info("Auth message wasn't received")
             return False
+
+        # we reconnected to the game
+        if '<go' in auth_message:
+            logger.info('Successfully reconnected')
+            self.reconnected_messages = messages
+
+            values = self.decoder.parse_names_and_ranks(messages[1])
+            self.table.set_players_names_and_ranks(values)
+
+            return True
 
         auth_string, rating_string = self.decoder.parse_hello_string(auth_message)
         self._rating_string = rating_string
@@ -95,48 +104,54 @@ class TenhouClient(Client):
                 self._send_message('<CHAT text="{}" />'.format(quote('/lobby {}'.format(settings.LOBBY))))
                 sleep(2)
 
-        game_type = self._build_game_type()
-
-        if not settings.IS_TOURNAMENT:
-            self._send_message('<JOIN t="{}" />'.format(game_type))
-            logger.info('Looking for the game...')
-
-        start_time = datetime.datetime.now()
-
-        while self.looking_for_game:
+        if self.reconnected_messages:
+            # we already in the game
+            self.looking_for_game = False
+            self._send_message('<GOK />')
             sleep(1)
+        else:
+            game_type = self._build_game_type()
 
-            messages = self._get_multiple_messages()
+            if not settings.IS_TOURNAMENT:
+                self._send_message('<JOIN t="{}" />'.format(game_type))
+                logger.info('Looking for the game...')
 
-            for message in messages:
-                if '<rejoin' in message:
-                    # game wasn't found, continue to wait
-                    self._send_message('<JOIN t="{},r" />'.format(game_type))
+            start_time = datetime.datetime.now()
 
-                if '<go' in message:
-                    self._send_message('<GOK />')
-                    self._send_message('<NEXTREADY />')
+            while self.looking_for_game:
+                sleep(1)
 
-                if '<taikyoku' in message:
-                    self.looking_for_game = False
-                    game_id, seat = self.decoder.parse_log_link(message)
-                    log_link = 'http://tenhou.net/0/?log={}&tw={}'.format(game_id, seat)
-                    self.statistics.game_id = game_id
+                messages = self._get_multiple_messages()
 
-                if '<un' in message:
-                    values = self.decoder.parse_names_and_ranks(message)
-                    self.table.set_players_names_and_ranks(values)
+                for message in messages:
+                    if '<rejoin' in message:
+                        # game wasn't found, continue to wait
+                        self._send_message('<JOIN t="{},r" />'.format(game_type))
 
-                if '<ln' in message:
-                    self._send_message(self._pxr_tag())
+                    if '<go' in message:
+                        self._send_message('<GOK />')
+                        self._send_message('<NEXTREADY />')
 
-            current_time = datetime.datetime.now()
-            time_difference = current_time - start_time
+                    if '<taikyoku' in message:
+                        self.looking_for_game = False
+                        game_id, seat = self.decoder.parse_log_link(message)
+                        log_link = 'http://tenhou.net/0/?log={}&tw={}'.format(game_id, seat)
+                        self.statistics.game_id = game_id
 
-            if time_difference.seconds > 60 * settings.WAITING_GAME_TIMEOUT_MINUTES:
-                break
+                    if '<un' in message:
+                        values = self.decoder.parse_names_and_ranks(message)
+                        self.table.set_players_names_and_ranks(values)
 
-        # we wasn't able to find the game in timeout minutes
+                    if '<ln' in message:
+                        self._send_message(self._pxr_tag())
+
+                current_time = datetime.datetime.now()
+                time_difference = current_time - start_time
+
+                if time_difference.seconds > 60 * settings.WAITING_GAME_TIMEOUT_MINUTES:
+                    break
+
+        # we wasn't able to find the game in specified time range
         # sometimes it happens and we need to end process
         # and try again later
         if self.looking_for_game:
@@ -157,8 +172,11 @@ class TenhouClient(Client):
 
         while self.game_is_continue:
             sleep(1)
-
             messages = self._get_multiple_messages()
+
+            if self.reconnected_messages:
+                messages = self.reconnected_messages + messages
+                self.reconnected_messages = None
 
             if not messages:
                 self._count_of_empty_messages += 1
@@ -167,7 +185,7 @@ class TenhouClient(Client):
                 self._count_of_empty_messages = 0
 
             for message in messages:
-                if '<init' in message:
+                if '<init' in message or '<reinit' in message:
                     values = self.decoder.parse_initial_values(message)
                     self.table.init_round(
                         values['round_number'],
@@ -186,6 +204,19 @@ class TenhouClient(Client):
                     logger.info('Dealer: {}'.format(self.table.get_player(values['dealer'])))
                     logger.info('Round  wind: {}'.format(DISPLAY_WINDS[self.table.round_wind]))
                     logger.info('Player wind: {}'.format(DISPLAY_WINDS[main_player.player_wind]))
+
+                if '<reinit' in message:
+                    players = self.decoder.parse_table_state_after_reconnection(message)
+                    for x in range(0, 4):
+                        player = players[x]
+                        for item in player['discards']:
+                            self.table.enemy_discard(item, x)
+
+                        for item in player['melds']:
+                            self.table.add_called_meld(item, x)
+                            if x == 0:
+                                tiles = item.tiles
+                                main_player.tiles.extend(tiles)
 
                 # draw and discard
                 if '<t' in message:
@@ -315,8 +346,8 @@ class TenhouClient(Client):
                 if '<prof' in message:
                     self.game_is_continue = False
 
-            if self._count_of_empty_messages > 10:
-                logger.error('Tenhou send empty messages to us. Probably we did something wrong with protocol')
+            if self._count_of_empty_messages >= 5:
+                logger.error('We are getting empty messages from socket. Probably socket connection was closed')
                 self.end_game(False)
                 return
 
@@ -335,13 +366,17 @@ class TenhouClient(Client):
 
     def end_game(self, success=True):
         self.game_is_continue = False
-        self._send_message('<BYE />')
+        if success:
+            self._send_message('<BYE />')
 
         if self.keep_alive_thread:
             self.keep_alive_thread.join()
 
-        self.socket.shutdown(socket.SHUT_RDWR)
-        self.socket.close()
+        try:
+            self.socket.shutdown(socket.SHUT_RDWR)
+            self.socket.close()
+        except OSError:
+            pass
 
         if success:
             logger.info('End of the game')

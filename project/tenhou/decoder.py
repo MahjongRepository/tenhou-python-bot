@@ -58,6 +58,9 @@ class TenhouDecoder(object):
 
         soup = BeautifulSoup(message, 'html.parser')
         tag = soup.find('init')
+        # for reconnection
+        if not tag:
+            tag = soup.find('reinit')
 
         seed = tag.attrs['seed'].split(',')
         seed = [int(i) for i in seed]
@@ -83,6 +86,9 @@ class TenhouDecoder(object):
     def parse_initial_hand(self, message):
         soup = BeautifulSoup(message, 'html.parser')
         tag = soup.find('init')
+        # for reconnection
+        if not tag:
+            tag = soup.find('reinit')
 
         tiles = tag.attrs['hai']
         tiles = [int(i) for i in tiles.split(',')]
@@ -135,6 +141,45 @@ class TenhouDecoder(object):
         tag = soup.findChildren()[0].name
         tile = tag.replace('t', '').replace('e', '').replace('f', '').replace('g', '')
         return int(tile)
+
+    def parse_table_state_after_reconnection(self, message):
+        soup = BeautifulSoup(message, 'html.parser')
+        tag = soup.find('reinit')
+
+        players = []
+        for x in range(0, 4):
+            player = {
+                'discards': [],
+                'melds': []
+            }
+
+            discard_attr = 'kawa{}'.format(x)
+            if discard_attr in tag.attrs:
+                discards = tag.attrs[discard_attr]
+                discards = [int(x) for x in discards.split(',')]
+
+                was_riichi = 255 in discards
+                if was_riichi:
+                    discards.remove(255)
+
+                player['discards'] = discards
+
+            melds_attr = 'm{}'.format(x)
+            if melds_attr in tag.attrs:
+                melds = tag.attrs[melds_attr]
+                melds = [int(x) for x in melds.split(',')]
+                for item in melds:
+                    message = '<N who="{}" m="{}" />'.format(x, item)
+                    meld = self.parse_meld(message)
+                    player['melds'].append(meld)
+
+            players.append(player)
+
+        for player in players:
+            for meld in player['melds']:
+                players[meld.from_who]['discards'].append(meld.called_tile)
+
+        return players
 
     def parse_meld(self, message):
         soup = BeautifulSoup(message, 'html.parser')

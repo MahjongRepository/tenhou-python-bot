@@ -78,6 +78,7 @@ class GameManager(object):
             client.player.scores = 25000
 
         self._unique_dealers = 1
+        self.round_number = 0
 
     def init_round(self):
         """

@@ -8,12 +8,12 @@ from mahjong.meld import Meld
 
 class TenhouReplay(Replay):
 
-    def init_game(self):
+    def init_game(self, seed):
         self.tags = []
         self.replay_name = '{}.log'.format(int(time.time()))
 
         self.tags.append('<mjloggm ver="2.3">')
-        self.tags.append('<SHUFFLE seed="test" ref=""/>')
+        self.tags.append('<SHUFFLE seed="{}" ref=""/>'.format(seed))
         self.tags.append('<GO type="1" lobby="0"/>')
 
         self.tags.append('<UN n0="{}" n1="{}" n2="{}" n3="{}" dan="20,20,20,20" '

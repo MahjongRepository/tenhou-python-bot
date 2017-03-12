@@ -2,11 +2,12 @@
 """
 Script to run local bots battle
 """
-import logging
+from random import random
 
 from terminaltables import AsciiTable
 from tqdm import trange
 
+import game.game_manager
 from game.game_manager import GameManager
 from mahjong.client import Client
 
@@ -14,10 +15,6 @@ TOTAL_HANCHANS = 100
 
 
 def main():
-    # enable it for manual testing
-    logger = logging.getLogger('game')
-    logger.disabled = False
-
     # let's load three bots with old logic
     # and one copy with new logic
     clients = [Client(use_previous_ai_version=True) for _ in range(0, 3)]
@@ -39,6 +36,7 @@ def main():
         }
 
     for x in trange(TOTAL_HANCHANS):
+        game.game_manager.shuffle_seed = lambda: random()
         # yes, I know about tqdm.write
         # but it didn't work properly for our case
         print('\n')

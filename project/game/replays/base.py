@@ -16,7 +16,7 @@ class Replay(object):
         self.replays_directory = replays_directory
         self.clients = clients
 
-    def init_game(self):
+    def init_game(self, seed):
         raise NotImplemented()
 
     def end_game(self):

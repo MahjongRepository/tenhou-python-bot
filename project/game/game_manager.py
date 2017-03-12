@@ -333,7 +333,7 @@ class GameManager(object):
 
         is_game_end = False
         self.init_game()
-        self.replay.init_game()
+        self.replay.init_game(seed_value)
 
         played_rounds = 0
 

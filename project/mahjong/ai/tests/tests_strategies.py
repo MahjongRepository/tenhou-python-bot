@@ -47,8 +47,8 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         player.dealer_seat = 1
         self.assertEqual(strategy.should_activate_strategy(), True)
 
-        table.enemy_discard(self._string_to_136_tile(honors='4'), 3)
-        table.enemy_discard(self._string_to_136_tile(honors='4'), 3)
+        table.enemy_discard(3, self._string_to_136_tile(honors='4'), False)
+        table.enemy_discard(3, self._string_to_136_tile(honors='4'), False)
 
         # we can't complete yakuhai, because there is not enough honor tiles
         self.assertEqual(strategy.should_activate_strategy(), False)
@@ -295,9 +295,9 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
         player.draw_tile(self._string_to_136_tile(sou='5'))
 
-        table.enemy_discard(self._string_to_136_tile(honors='3'), 1)
-        table.enemy_discard(self._string_to_136_tile(honors='3'), 1)
-        table.enemy_discard(self._string_to_136_tile(honors='3'), 1)
+        table.enemy_discard(1, self._string_to_136_tile(honors='3'), False)
+        table.enemy_discard(1, self._string_to_136_tile(honors='3'), False)
+        table.enemy_discard(1, self._string_to_136_tile(honors='3'), False)
 
         tile_to_discard = player.discard_tile()
 

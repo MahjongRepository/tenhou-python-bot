@@ -2,6 +2,7 @@
 from mahjong.constants import EAST, SOUTH, WEST, NORTH
 from mahjong.meld import Meld
 from mahjong.player import Player
+from mahjong.tile import Tile
 from mahjong.utils import plus_dora, is_aka_dora
 
 
@@ -58,7 +59,7 @@ class Table(object):
     def init_main_player_hand(self, tiles):
         self.get_main_player().init_hand(tiles)
 
-    def add_called_meld(self, meld, player_seat):
+    def add_called_meld(self, player_seat, meld):
         # when opponent called meld it is means
         # that he discards tile from hand, not from wall
         self.count_of_remaining_tiles += 1
@@ -115,13 +116,14 @@ class Table(object):
     def get_players_sorted_by_scores(self):
         return sorted(self.players, key=lambda x: x.scores, reverse=True)
 
-    def enemy_discard(self, tile, player_seat):
+    def enemy_discard(self, player_seat, tile, is_tsumogiri):
         """
         :param player_seat:
         :param tile: 136 format tile
+        :param is_tsumogiri: was tile discarded from hand or not
         :return:
         """
-        self.get_player(player_seat).add_discarded_tile(tile)
+        self.get_player(player_seat).add_discarded_tile(Tile(tile, is_tsumogiri))
         self.count_of_remaining_tiles -= 1
 
         for player in self.players:

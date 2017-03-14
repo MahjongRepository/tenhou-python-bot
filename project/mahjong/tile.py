@@ -1,6 +1,15 @@
 # -*- coding: utf-8 -*-
 
 
+class Tile(object):
+    value = None
+    is_tsumogiri = None
+
+    def __init__(self, value, is_tsumogiri):
+        self.value = value
+        self.is_tsumogiri = is_tsumogiri
+
+
 class TilesConverter(object):
 
     @staticmethod

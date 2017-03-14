@@ -130,13 +130,13 @@ class AITestCase(unittest.TestCase, TestMixin):
         results, shanten = player.ai.calculate_outs(tiles, tiles)
         self.assertEqual(results[0].tiles_count, 8)
 
-        player.table.enemy_discard(self._string_to_136_tile(sou='5'), 1)
+        player.table.enemy_discard(1, self._string_to_136_tile(sou='5'), False)
 
         results, shanten = player.ai.calculate_outs(tiles, tiles)
         self.assertEqual(results[0].tiles_count, 7)
 
-        player.table.enemy_discard(self._string_to_136_tile(sou='5'), 2)
-        player.table.enemy_discard(self._string_to_136_tile(sou='8'), 3)
+        player.table.enemy_discard(2, self._string_to_136_tile(sou='5'), False)
+        player.table.enemy_discard(3, self._string_to_136_tile(sou='8'), False)
 
         results, shanten = player.ai.calculate_outs(tiles, tiles)
         self.assertEqual(results[0].tiles_count, 5)
@@ -153,20 +153,20 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         # was discard and set was opened
         tile = self._string_to_136_tile(sou='8')
-        player.table.enemy_discard(tile, 3)
+        player.table.enemy_discard(3, tile, False)
         meld = self._make_meld(Meld.PON, self._string_to_136_array(sou='888'))
         meld.called_tile = tile
-        player.table.add_called_meld(meld, 3)
+        player.table.add_called_meld(3, meld)
 
         results, shanten = player.ai.calculate_outs(tiles, tiles)
         self.assertEqual(results[0].tiles_count, 5)
 
         # was discard and set was opened
         tile = self._string_to_136_tile(sou='3')
-        player.table.enemy_discard(tile, 2)
+        player.table.enemy_discard(2, tile, False)
         meld = self._make_meld(Meld.PON, self._string_to_136_array(sou='345'))
         meld.called_tile = tile
-        player.table.add_called_meld(meld, 2)
+        player.table.add_called_meld(2, meld)
 
         results, shanten = player.ai.calculate_outs(tiles, tiles)
         self.assertEqual(results[0].tiles_count, 4)

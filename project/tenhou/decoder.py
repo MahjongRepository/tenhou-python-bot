@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from urllib.parse import unquote
 
+import re
 from bs4 import BeautifulSoup
 
 from mahjong.meld import Meld
@@ -137,10 +138,8 @@ class TenhouDecoder(object):
 
     def parse_tile(self, message):
         # tenhou format: <t23/>, <e23/>, <f23 t="4"/>, <f23/>, <g23/>
-        soup = BeautifulSoup(message, 'html.parser')
-        tag = soup.findChildren()[0].name
-        tile = tag.replace('t', '').replace('e', '').replace('f', '').replace('g', '')
-        return int(tile)
+        result = re.match(r'^<[tefgEFGT]+\d*', message).group()
+        return int(result[2:])
 
     def parse_table_state_after_reconnection(self, message):
         soup = BeautifulSoup(message, 'html.parser')

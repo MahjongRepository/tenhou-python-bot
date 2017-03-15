@@ -3,8 +3,8 @@ import logging
 import unittest
 
 import game.game_manager
+from game.client import LocalClient
 from game.game_manager import GameManager
-from mahjong.client import Client
 from utils.tests import TestMixin
 from utils.settings_handler import settings
 
@@ -21,9 +21,9 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
     # def test_debug(self):
     #     game.game_manager.shuffle_seed = lambda: 0.09764471694361732
     #
-    #     clients = [Client(use_previous_ai_version=False) for _ in range(0, 4)]
-    #     # clients = [Client(use_previous_ai_version=True) for _ in range(0, 3)]
-    #     # clients += [Client(use_previous_ai_version=False)]
+    #     clients = [LocalClient(use_previous_ai_version=False) for _ in range(0, 4)]
+    #     # clients = [LocalClient(use_previous_ai_version=True) for _ in range(0, 3)]
+    #     # clients += [LocalClient(use_previous_ai_version=False)]
     #     manager = GameManager(clients)
     #     manager.replay.init_game()
     #     manager.init_game()
@@ -37,14 +37,14 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
     #     manager.replay.end_game()
 
     def test_init_game(self):
-        clients = [Client() for _ in range(0, 4)]
+        clients = [LocalClient() for _ in range(0, 4)]
         manager = GameManager(clients)
         manager.init_game()
 
         self.assertTrue(manager.dealer in [0, 1, 2, 3])
 
     def test_init_round(self):
-        clients = [Client() for _ in range(0, 4)]
+        clients = [LocalClient() for _ in range(0, 4)]
         manager = GameManager(clients)
         manager.init_game()
         manager.init_round()
@@ -63,7 +63,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(len(manager.tiles), 70)
 
     def test_init_dealer(self):
-        clients = [Client() for _ in range(0, 4)]
+        clients = [LocalClient() for _ in range(0, 4)]
         manager = GameManager(clients)
         manager.set_dealer(0)
         manager.init_round()
@@ -98,7 +98,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         self.assertFalse(manager.clients[2].player.is_dealer)
 
     def test_init_scores_and_recalculate_position(self):
-        clients = [Client() for _ in range(0, 4)]
+        clients = [LocalClient() for _ in range(0, 4)]
         manager = GameManager(clients)
         manager.init_game()
         manager.set_dealer(3)
@@ -136,7 +136,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(clients[3].player.position, 4)
 
     def test_call_riichi(self):
-        clients = [Client() for _ in range(0, 4)]
+        clients = [LocalClient() for _ in range(0, 4)]
         manager = GameManager(clients)
         manager.init_game()
         manager.init_round()
@@ -152,7 +152,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(client.player.scores, 24000)
         self.assertEqual(client.player.in_riichi, True)
 
-        clients = [Client() for _ in range(0, 4)]
+        clients = [LocalClient() for _ in range(0, 4)]
         manager = GameManager(clients)
         manager.init_game()
         manager.init_round()
@@ -197,7 +197,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
     def test_play_round(self):
         game.game_manager.shuffle_seed = lambda: 0.8689851662263914
 
-        clients = [Client() for _ in range(0, 4)]
+        clients = [LocalClient() for _ in range(0, 4)]
         manager = GameManager(clients)
         manager.init_game()
         manager.init_round()
@@ -210,7 +210,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         self.assertNotEqual(manager.round_number, 0)
 
     def test_scores_calculations_after_retake(self):
-        clients = [Client() for _ in range(0, 4)]
+        clients = [LocalClient() for _ in range(0, 4)]
         manager = GameManager(clients)
         manager.init_game()
         manager.init_round()
@@ -270,7 +270,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(clients[3].player.scores, 25000)
 
     def test_retake_and_honba_increment(self):
-        clients = [Client() for _ in range(0, 4)]
+        clients = [LocalClient() for _ in range(0, 4)]
         manager = GameManager(clients)
         manager.init_game()
         manager.init_round()
@@ -301,7 +301,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
     def test_win_by_ron_and_scores_calculation(self):
         settings.FIVE_REDS = False
 
-        clients = [Client() for _ in range(0, 4)]
+        clients = [LocalClient() for _ in range(0, 4)]
         manager = GameManager(clients)
         manager.init_game()
         manager.init_round()
@@ -351,7 +351,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
     def test_win_by_tsumo_and_scores_calculation(self):
         settings.FIVE_REDS = True
 
-        clients = [Client() for _ in range(0, 4)]
+        clients = [LocalClient() for _ in range(0, 4)]
         manager = GameManager(clients)
         manager.init_game()
         manager.init_round()
@@ -398,7 +398,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         settings.FIVE_REDS = False
 
     def test_change_dealer_after_end_of_the_round(self):
-        clients = [Client() for _ in range(0, 4)]
+        clients = [LocalClient() for _ in range(0, 4)]
         manager = GameManager(clients)
         manager.set_dealer(0)
         manager.init_round()
@@ -429,7 +429,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(manager.dealer, 3)
 
     def test_is_game_end_by_negative_scores(self):
-        clients = [Client() for _ in range(0, 4)]
+        clients = [LocalClient() for _ in range(0, 4)]
         manager = GameManager(clients)
         manager.set_dealer(0)
         manager.init_round()
@@ -449,7 +449,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(result['is_game_end'], True)
 
     def test_is_game_end_by_eight_winds(self):
-        clients = [Client() for _ in range(0, 4)]
+        clients = [LocalClient() for _ in range(0, 4)]
 
         current_dealer = 0
         manager = GameManager(clients)

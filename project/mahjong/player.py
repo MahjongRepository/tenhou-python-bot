@@ -35,11 +35,6 @@ class Player(object):
     in_riichi = False
     in_defence_mode = False
 
-    # system fields
-    # for local games emulation
-    _is_daburi = False
-    _is_ippatsu = False
-
     def __init__(self, seat, dealer_seat, table, use_previous_ai_version=False):
         self.discards = []
         self.melds = []
@@ -93,9 +88,6 @@ class Player(object):
 
         self.ai.erase_state()
 
-        self._is_daburi = False
-        self._is_ippatsu = False
-
     def add_called_meld(self, meld):
         self.melds.append(meld)
 
@@ -118,6 +110,8 @@ class Player(object):
         self.ai.determine_strategy()
 
     def draw_tile(self, tile):
+        self.table.count_of_remaining_tiles -= 1
+
         self.last_draw = tile
         self.tiles.append(tile)
         # we need sort it to have a better string presentation

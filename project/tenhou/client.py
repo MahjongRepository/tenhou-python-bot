@@ -9,6 +9,7 @@ from urllib.parse import quote
 import re
 
 from mahjong.constants import DISPLAY_WINDS
+from mahjong.stat import Statistics
 from utils.settings_handler import settings
 from mahjong.client import Client
 from mahjong.meld import Meld
@@ -19,6 +20,7 @@ logger = logging.getLogger('tenhou')
 
 
 class TenhouClient(Client):
+    statistics = None
     socket = None
     game_is_continue = True
     looking_for_game = True
@@ -30,8 +32,13 @@ class TenhouClient(Client):
     _count_of_empty_messages = 0
     _rating_string = None
 
-    def set_socket(self, socket_object):
-        self.socket = socket_object
+    def __init__(self):
+        super().__init__()
+        self.statistics = Statistics()
+
+    def connect(self):
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.connect((settings.TENHOU_HOST, settings.TENHOU_PORT))
 
     def authenticate(self):
         self._send_message('<HELO name="{}" tid="f0" sx="M" />'.format(quote(settings.USER_ID)))
@@ -226,10 +233,10 @@ class TenhouClient(Client):
                     if not main_player.in_riichi:
                         logger.info('Hand: {}'.format(main_player.format_hand_for_print(tile)))
 
-                        self.draw_tile(tile)
+                        self.player.draw_tile(tile)
                         sleep(1)
 
-                        tile = self.discard_tile()
+                        tile = self.player.discard_tile()
 
                         logger.info('Discard: {}'.format(TilesConverter.to_one_line_string([tile])))
 

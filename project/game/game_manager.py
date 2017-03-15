@@ -3,6 +3,7 @@ import logging
 from collections import deque
 from random import randint, shuffle, random, seed
 
+from game.client import LocalClient
 from game.logger import set_up_logging
 from game.replays.tenhou import TenhouReplay as Replay
 from mahjong.ai.agari import Agari
@@ -113,6 +114,7 @@ class GameManager(object):
                 client_dealer,
                 player_scores
             )
+            client.erase_state()
 
         # each player by rotation draw 4 tiles until they have 12
         # after this each player draw one more tile
@@ -126,7 +128,7 @@ class GameManager(object):
         for client in self.clients:
             client.player.tiles += self._cut_tiles(1)
             client.player.tiles = sorted(client.player.tiles)
-            client.init_hand(client.player.tiles)
+            client.player.init_hand(client.player.tiles)
 
         logger.info('Round number: {}'.format(self.round_number))
         logger.info('Dealer: {}, {}'.format(self.dealer, self.clients[self.dealer].player.name))
@@ -143,7 +145,7 @@ class GameManager(object):
                                self.riichi_sticks,
                                self.dora_indicators[0])
 
-    def play_round(self):
+    def play_round(self) -> dict:
         continue_to_play = True
 
         while continue_to_play:
@@ -157,7 +159,7 @@ class GameManager(object):
             if current_client.player.in_riichi:
                 tiles = current_client.player.tiles + [draw_tile]
             else:
-                current_client.draw_tile(draw_tile)
+                current_client.player.draw_tile(draw_tile)
                 tiles = current_client.player.tiles
 
             is_win = self.agari.is_agari(TilesConverter.to_34_array(tiles), current_client.player.meld_tiles)
@@ -195,11 +197,11 @@ class GameManager(object):
                     tiles.append(draw_tile)
 
             # we had to clear ippatsu, after tile draw
-            current_client.player._is_ippatsu = False
+            current_client.is_ippatsu = False
 
             # if not in riichi, let's decide what tile to discard
             if not current_client.player.in_riichi:
-                tile = current_client.discard_tile()
+                tile = current_client.player.discard_tile()
                 in_tempai = current_client.player.in_tempai
             else:
                 tile = draw_tile
@@ -254,7 +256,7 @@ class GameManager(object):
 
                 # clear ippatsu after called meld
                 for client_item in self.clients:
-                    client_item.player._is_ippatsu = False
+                    client_item.is_ippatsu = False
 
                 # we changed current client with called open set
                 self.current_client_seat = meld.who
@@ -280,7 +282,7 @@ class GameManager(object):
                 if tile_to_discard not in current_client.player.closed_hand:
                     raise ValueError("We can't discard a tile from the opened part of the hand")
 
-                current_client.discard_tile(tile_to_discard)
+                current_client.player.discard_tile(tile_to_discard)
                 self.replay.discard(current_client.seat, tile_to_discard)
                 logger.info('Discard tile: {}'.format(TilesConverter.to_one_line_string([tile_to_discard])))
 
@@ -415,11 +417,12 @@ class GameManager(object):
         client.player.scores -= 1000
         self.riichi_sticks += 1
 
-        if len(client.player.discards) == 1:
-            client.player._is_daburi = True
+        if len(client.player.discards) == 1 and not self.players_with_open_hands:
+            client.is_daburi = True
+
         # we will set it to False after next draw
         # or called meld
-        client.player._is_ippatsu = True
+        client.is_ippatsu = True
 
         who_called_riichi = client.seat
         for client in self.clients:
@@ -507,8 +510,8 @@ class GameManager(object):
                                                                 is_tenhou=is_tenhou,
                                                                 is_renhou=is_renhou,
                                                                 is_chiihou=is_chiihou,
-                                                                is_daburu_riichi=winner.player._is_daburi,
-                                                                is_ippatsu=winner.player._is_ippatsu,
+                                                                is_daburu_riichi=winner.is_daburi,
+                                                                is_ippatsu=winner.is_ippatsu,
                                                                 is_haitei=is_haitei,
                                                                 is_houtei=is_houtei)
 
@@ -659,7 +662,7 @@ class GameManager(object):
 
             client.player.name = name
 
-    def _get_current_client(self) -> Client:
+    def _get_current_client(self) -> LocalClient:
         return self.clients[self.current_client_seat]
 
     def _cut_tiles(self, count_of_tiles) -> []:
@@ -701,8 +704,8 @@ class GameManager(object):
                 wall[dst] = swap
 
         wall = [i for i in range(0, 136)]
-        rand_one = [randint(0, 135) for i in range(0, 136)]
-        rand_two = [randint(0, 135) for i in range(0, 136)]
+        rand_one = [randint(0, 135) for _ in range(0, 136)]
+        rand_two = [randint(0, 135) for _ in range(0, 136)]
 
         # let's shuffle wall two times just in case
         shuffle_wall(rand_one)

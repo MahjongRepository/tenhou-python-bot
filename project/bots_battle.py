@@ -8,18 +8,18 @@ from terminaltables import AsciiTable
 from tqdm import trange
 
 import game.game_manager
+from game.client import LocalClient
 from game.game_manager import GameManager
-from mahjong.client import Client
 
-TOTAL_HANCHANS = 100
+TOTAL_HANCHANS = 1
 
 
 def main():
     # let's load three bots with old logic
     # and one copy with new logic
-    clients = [Client(use_previous_ai_version=True) for _ in range(0, 3)]
-    clients += [Client(use_previous_ai_version=False)]
-    # clients = [Client(use_previous_ai_version=False) for _ in range(0, 4)]
+    clients = [LocalClient(use_previous_ai_version=True) for _ in range(0, 3)]
+    clients += [LocalClient(use_previous_ai_version=False)]
+    # clients = [LocalClient(use_previous_ai_version=False) for _ in range(0, 4)]
     manager = GameManager(clients)
 
     total_results = {}

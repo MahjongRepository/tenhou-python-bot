@@ -25,22 +25,29 @@ class MainAI(BaseAI):
     shanten = None
     defence = None
     hand_divider = None
+    finished_hand = None
     previous_shanten = 7
+    in_defence = False
+    waiting = []
 
     current_strategy = None
 
-    def __init__(self, table, player):
-        super(MainAI, self).__init__(table, player)
+    def __init__(self, player):
+        super(MainAI, self).__init__(player)
 
         self.agari = Agari()
         self.shanten = Shanten()
-        self.defence = Defence(table)
+        self.defence = Defence(player.table)
         self.hand_divider = HandDivider()
+        self.finished_hand = FinishedHand()
         self.previous_shanten = 7
         self.current_strategy = None
+        self.waiting = []
+        self.in_defence = False
 
     def erase_state(self):
         self.current_strategy = None
+        self.defence = Defence(self.player.table)
 
     def discard_tile(self):
         results, shanten = self.calculate_outs(self.player.tiles,
@@ -52,6 +59,18 @@ class MainAI(BaseAI):
         for result in results:
             result.calculate_value()
 
+        # bot think that there is a threat on the table
+        # and better to fold
+        # if we can't find safe tiles, let's continue to build our hand
+        if self.defence.should_go_to_defence_mode():
+            if not self.in_defence:
+                logger.info('We decided to fold against other players')
+                self.in_defence = True
+
+            tile = self.defence.try_to_find_safe_tile_to_discard()
+            if tile is not None:
+                return tile
+
         if shanten == 0:
             self.player.in_tempai = True
 
@@ -62,15 +81,14 @@ class MainAI(BaseAI):
                 # sometimes we can draw a tile that gave us agari,
                 # but didn't give us a yaku
                 # in that case we had to do last draw discard
-                finished_hand = FinishedHand()
-                result = finished_hand.estimate_hand_value(tiles=self.player.tiles,
-                                                           win_tile=self.player.last_draw,
-                                                           is_tsumo=True,
-                                                           is_riichi=False,
-                                                           is_dealer=self.player.is_dealer,
-                                                           open_sets=self.player.meld_tiles,
-                                                           player_wind=self.player.player_wind,
-                                                           round_wind=self.player.table.round_wind)
+                result = self.finished_hand.estimate_hand_value(tiles=self.player.tiles,
+                                                                win_tile=self.player.last_draw,
+                                                                is_tsumo=True,
+                                                                is_riichi=False,
+                                                                is_dealer=self.player.is_dealer,
+                                                                open_sets=self.player.meld_tiles,
+                                                                player_wind=self.player.player_wind,
+                                                                round_wind=self.player.table.round_wind)
                 if result['error'] is not None:
                     return self.player.last_draw
 
@@ -93,7 +111,7 @@ class MainAI(BaseAI):
 
         # we had to discard dead waits first (last honor tile)
         for result in results:
-            if is_honor(result.tile_to_discard) and self.table.revealed_tiles[result.tile_to_discard] == 3:
+            if is_honor(result.tile_to_discard) and self.player.table.revealed_tiles[result.tile_to_discard] == 3:
                 result.tiles_count = 2000
 
         return self.chose_tile_to_discard(results, self.player.closed_hand)
@@ -194,7 +212,27 @@ class MainAI(BaseAI):
         # in that case we will discard tile that will give for us more tiles
         # to complete a hand
         results = sorted(results, key=lambda x: (-x.tiles_count, x.value))
-        return results[0].find_tile_in_hand(closed_hand)
+        selected_tile = results[0]
+        self.waiting = selected_tile.waiting
+        return selected_tile.find_tile_in_hand(closed_hand)
+
+    def estimate_hand_value(self, win_tile):
+        """
+        :param win_tile: 36 tile format
+        :return:
+        """
+        win_tile *= 4
+        tiles = self.player.tiles + [win_tile]
+        result = self.finished_hand.estimate_hand_value(tiles=tiles,
+                                                        win_tile=win_tile,
+                                                        is_tsumo=False,
+                                                        is_riichi=False,
+                                                        is_dealer=self.player.is_dealer,
+                                                        open_sets=self.player.meld_tiles,
+                                                        player_wind=self.player.player_wind,
+                                                        round_wind=self.player.table.round_wind,
+                                                        dora_indicators=self.player.table.dora_indicators)
+        return result
 
     @property
     def valued_honors(self):

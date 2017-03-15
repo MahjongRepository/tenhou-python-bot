@@ -256,7 +256,7 @@ class TenhouClient(Client):
 
                 if '<REACH' in message and 'step="2"' in message:
                     who_called_riichi = self.decoder.parse_who_called_riichi(message)
-                    self.enemy_riichi(who_called_riichi)
+                    self.table.enemy_riichi(who_called_riichi)
                     logger.info('Riichi called by {} player'.format(who_called_riichi))
 
                 # the end of round

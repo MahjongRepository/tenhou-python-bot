@@ -423,7 +423,7 @@ class GameManager(object):
 
         who_called_riichi = client.seat
         for client in self.clients:
-            client.enemy_riichi(self._enemy_position(who_called_riichi, client.seat))
+            client.table.enemy_riichi(self._enemy_position(who_called_riichi, client.seat))
 
         logger.info('Riichi: {0} -1,000'.format(self.clients[who_called_riichi].player.name))
         logger.info('With hand: {}'.format(

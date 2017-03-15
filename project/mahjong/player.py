@@ -5,7 +5,7 @@ from functools import reduce
 import copy
 
 from mahjong.constants import EAST, SOUTH, WEST, NORTH
-from mahjong.tile import TilesConverter
+from mahjong.tile import TilesConverter, Tile
 from utils.settings_handler import settings
 from mahjong.ai.shanten import Shanten
 
@@ -27,8 +27,6 @@ class Player(object):
     rank = ''
 
     discards = []
-    # tiles that were discarded after player's riichi
-    safe_tiles = []
     tiles = []
     melds = []
     table = None
@@ -65,7 +63,7 @@ class Player(object):
             else:
                 from mahjong.ai.random import MainAI
 
-        self.ai = MainAI(table, self)
+        self.ai = MainAI(self)
 
     def __str__(self):
         result = u'{0}'.format(self.name)
@@ -85,7 +83,6 @@ class Player(object):
         self.discards = []
         self.melds = []
         self.tiles = []
-        self.safe_tiles = []
 
         self.last_draw = None
         self.in_tempai = False
@@ -104,6 +101,16 @@ class Player(object):
 
     def add_discarded_tile(self, tile):
         self.discards.append(tile)
+
+    def enemy_discard(self, player_seat, tile: Tile):
+        """
+        :param player_seat:
+        :param tile:
+        """
+        self.ai.defence.add_discarded_tile(player_seat, tile)
+
+    def enemy_riichi(self, player_seat):
+        self.ai.defence.called_riichi(player_seat)
 
     def init_hand(self, tiles):
         self.tiles = tiles

@@ -35,6 +35,7 @@ class Table(object):
     def init_round(self, round_number, count_of_honba_sticks, count_of_riichi_sticks,
                    dora_indicator, dealer_seat, scores):
 
+        self.dealer_seat = dealer_seat
         self.round_number = round_number
         self.count_of_honba_sticks = count_of_honba_sticks
         self.count_of_riichi_sticks = count_of_riichi_sticks
@@ -121,17 +122,18 @@ class Table(object):
         :param player_seat:
         :param tile: 136 format tile
         :param is_tsumogiri: was tile discarded from hand or not
-        :return:
         """
-        self.get_player(player_seat).add_discarded_tile(Tile(tile, is_tsumogiri))
         self.count_of_remaining_tiles -= 1
-
-        for player in self.players:
-            if player.in_riichi:
-                player.safe_tiles.append(tile)
+        self.get_main_player().enemy_discard(player_seat, Tile(tile, is_tsumogiri))
 
         # cache already revealed tiles
         self._add_revealed_tile(tile)
+
+    def enemy_riichi(self, player_seat):
+        if player_seat == 0:
+            self.get_main_player().in_riichi = True
+        else:
+            self.get_main_player().enemy_riichi(player_seat)
 
     def _init_players(self, use_previous_ai_version=False):
         self.players = []

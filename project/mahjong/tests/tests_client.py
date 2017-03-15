@@ -52,25 +52,4 @@ class ClientTestCase(unittest.TestCase):
 
         client.table.enemy_discard(1, 10, False)
 
-        self.assertEqual(len(client.table.get_player(1).discards), 1)
         self.assertEqual(client.table.count_of_remaining_tiles, 69)
-
-    def test_enemy_discard_and_safe_tiles(self):
-        client = Client()
-        client.table.init_round(0, 0, 0, 0, 0, [0, 0, 0, 0])
-
-        client.table.players[0].in_riichi = True
-        client.table.enemy_discard(1, 10, False)
-
-        self.assertEqual(len(client.table.players[0].safe_tiles), 1)
-
-    def test_enemy_in_riichi(self):
-        client = Client()
-        client.table.init_round(0, 0, 0, 0, 0, [0, 0, 0, 0])
-        player_seat = 1
-
-        self.assertEqual(client.table.get_player(player_seat).in_riichi, False)
-
-        client.enemy_riichi(player_seat)
-
-        self.assertEqual(client.table.get_player(player_seat).in_riichi, True)

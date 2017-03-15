@@ -33,6 +33,3 @@ class Client(object):
 
     def discard_tile(self, tile=None):
         return self.player.discard_tile(tile)
-
-    def enemy_riichi(self, player_seat):
-        self.table.get_player(player_seat).in_riichi = True

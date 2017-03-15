@@ -15,7 +15,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
     def test_outs(self):
         table = Table()
         player = Player(0, 0, table)
-        ai = MainAI(table, player)
+        ai = MainAI(player)
 
         tiles = self._string_to_136_array(sou='111345677', pin='15', man='569')
         player.init_hand(tiles)

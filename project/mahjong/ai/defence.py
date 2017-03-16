@@ -54,31 +54,50 @@ class Defence(object):
 
         return False
 
-    def try_to_find_safe_tile_to_discard(self):
-        closed_hand = self.player.closed_hand
-        closed_hand_34 = TilesConverter.to_34_array(closed_hand)
+    def try_to_find_safe_tile_to_discard(self, discard_results):
         threatening_players = self._get_threatening_players()
 
-        safe_tiles = [x.all_safe_tiles for x in threatening_players]
-        common_safe_tiles = list(set.intersection(*map(set, safe_tiles)))
-        # we found a tile that is safe and common for all threatening players
-        if common_safe_tiles:
-            for safe_tile in common_safe_tiles:
-                for i in range(0, len(closed_hand_34)):
-                    if closed_hand_34[i] > 0 and i == safe_tile:
-                        return TilesConverter.find_34_tile_in_136_array(safe_tile, closed_hand)
+        if len(threatening_players) > 1:
+            safe_tiles = [x.all_safe_tiles for x in threatening_players]
+            common_safe_tiles = list(set.intersection(*map(set, safe_tiles)))
+            # we found a tile that is safe and common for all threatening players
+            if common_safe_tiles:
+                result = self._find_tile_to_discard(common_safe_tiles, discard_results)
+                if result:
+                    return result
 
         # there are no common safe tiles for all threatening players
         # so let's find most dangerous enemy and let's fold against him
         most_threatening_player = self._get_most_threatening_player(threatening_players)
         safe_tiles = most_threatening_player.all_safe_tiles
+        result = self._find_tile_to_discard(safe_tiles, discard_results)
+        if result:
+            return result
+
+        # we wasn't able to find gembutsu
+        return None
+
+    def _find_tile_to_discard(self, safe_tiles, discard_results):
+        """
+        Try to find most effective tile to discard.
+        :param safe_tiles:
+        :param discard_results:
+        :return: tile in 136 format
+        """
+        closed_hand = self.player.closed_hand
+        closed_hand_34 = TilesConverter.to_34_array(closed_hand)
+
+        # let's check our discard candidates first, maybe we can discard safe tile
+        # without ruining our hand
+        for safe_tile in safe_tiles:
+            for item in discard_results:
+                if item.tile_to_discard == safe_tile:
+                    return TilesConverter.find_34_tile_in_136_array(safe_tile, closed_hand)
+
         for safe_tile in safe_tiles:
             for i in range(0, len(closed_hand_34)):
                 if closed_hand_34[i] > 0 and i == safe_tile:
                     return TilesConverter.find_34_tile_in_136_array(safe_tile, closed_hand)
-
-        # we wasn't able to find gembutsu
-        return None
 
     def _get_threatening_players(self):
         """

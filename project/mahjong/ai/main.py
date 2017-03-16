@@ -68,7 +68,7 @@ class MainAI(BaseAI):
                 logger.info('We decided to fold against other players')
                 self.in_defence = True
 
-            tile = self.defence.try_to_find_safe_tile_to_discard()
+            tile = self.defence.try_to_find_safe_tile_to_discard(results)
             if tile is not None:
                 return tile
         else:

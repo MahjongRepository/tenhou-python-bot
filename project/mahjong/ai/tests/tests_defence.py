@@ -109,7 +109,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         table.get_player(1).temporary_safe_tiles = []
         table.get_player(2).temporary_safe_tiles = []
 
-        result = table.player.ai.defence.try_to_find_safe_tile_to_discard()
+        result = table.player.discard_tile()
 
         self.assertEqual(self._to_string([result]), '5m')
 
@@ -134,7 +134,22 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         table.get_player(1).temporary_safe_tiles = []
         table.get_player(2).temporary_safe_tiles = []
 
-        result = table.player.ai.defence.try_to_find_safe_tile_to_discard()
+        result = table.player.discard_tile()
 
         # second player is a dealer, let's fold against him
         self.assertEqual(self._to_string([result]), '8m')
+
+    def test_try_to_discard_not_needed_tiles_first_in_defence_mode(self):
+        table = Table()
+
+        tiles = self._string_to_136_array(sou='2345678', pin='789', man='55', honors='12')
+        table.player.init_hand(tiles)
+
+        table.add_discarded_tile(1, self._string_to_136_tile(man='5'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(honors='1'), False)
+
+        table.add_called_riichi(1)
+
+        result = table.player.discard_tile()
+
+        self.assertEqual(self._to_string([result]), '1z')

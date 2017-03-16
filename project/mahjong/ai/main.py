@@ -19,16 +19,17 @@ logger = logging.getLogger('ai')
 
 
 class MainAI(BaseAI):
-    version = '0.1.0'
+    version = '0.3.0'
 
     agari = None
     shanten = None
     defence = None
     hand_divider = None
     finished_hand = None
+
     previous_shanten = 7
     in_defence = False
-    waiting = []
+    waiting = None
 
     current_strategy = None
 
@@ -37,7 +38,7 @@ class MainAI(BaseAI):
 
         self.agari = Agari()
         self.shanten = Shanten()
-        self.defence = Defence(player.table)
+        self.defence = Defence(player)
         self.hand_divider = HandDivider()
         self.finished_hand = FinishedHand()
         self.previous_shanten = 7
@@ -47,7 +48,7 @@ class MainAI(BaseAI):
 
     def erase_state(self):
         self.current_strategy = None
-        self.defence = Defence(self.player.table)
+        self.in_defence = False
 
     def discard_tile(self):
         results, shanten = self.calculate_outs(self.player.tiles,
@@ -70,6 +71,8 @@ class MainAI(BaseAI):
             tile = self.defence.try_to_find_safe_tile_to_discard()
             if tile is not None:
                 return tile
+        else:
+            self.in_defence = False
 
         if shanten == 0:
             self.player.in_tempai = True

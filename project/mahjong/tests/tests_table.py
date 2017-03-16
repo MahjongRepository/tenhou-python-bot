@@ -12,9 +12,9 @@ class TableTestCase(unittest.TestCase, TestMixin):
     def test_init_hand(self):
         table = Table()
         tiles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
-        table.init_main_player_hand(tiles)
+        table.player.init_hand(tiles)
 
-        self.assertEqual(len(table.get_main_player().tiles), 13)
+        self.assertEqual(len(table.player.tiles), 13)
 
     def test_init_round(self):
         table = Table()
@@ -36,14 +36,14 @@ class TableTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(table.get_player(dealer).scores, 25000)
 
         dealer = 2
-        table.get_main_player().in_tempai = True
-        table.get_main_player().in_riichi = True
+        table.player.in_tempai = True
+        table.player.in_riichi = True
         table.init_round(round_number, count_of_honba_sticks, count_of_riichi_sticks, dora_indicator, dealer, scores)
 
         # test that we reinit round properly
         self.assertEqual(table.get_player(3).is_dealer, False)
-        self.assertEqual(table.get_main_player().in_tempai, False)
-        self.assertEqual(table.get_main_player().in_riichi, False)
+        self.assertEqual(table.player.in_tempai, False)
+        self.assertEqual(table.player.in_riichi, False)
         self.assertEqual(table.get_player(dealer).is_dealer, True)
 
     def test_set_scores(self):

@@ -21,11 +21,11 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
     # def test_debug(self):
     #     game.game_manager.shuffle_seed = lambda: 0.09764471694361732
     #
-    #     clients = [LocalClient(use_previous_ai_version=False) for _ in range(0, 4)]
+    #     clients = [LocalClient(previous_ai=False) for _ in range(0, 4)]
     #     # clients = [LocalClient(use_previous_ai_version=True) for _ in range(0, 3)]
     #     # clients += [LocalClient(use_previous_ai_version=False)]
     #     manager = GameManager(clients)
-    #     manager.replay.init_game()
+    #     manager.replay.init_game('123')
     #     manager.init_game()
     #     manager.set_dealer(2)
     #     manager._unique_dealers = 3
@@ -205,7 +205,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         manager._unique_dealers = 4
         manager.round_number = 5
 
-        result = manager.play_round()
+        manager.play_round()
 
         self.assertNotEqual(manager.round_number, 0)
 

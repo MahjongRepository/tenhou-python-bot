@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import logging
-import socket
 
 from tenhou.client import TenhouClient
 from utils.settings_handler import settings

@@ -8,8 +8,8 @@ class LocalClient(Client):
     is_daburi = False
     is_ippatsu = False
 
-    def __init__(self, use_previous_ai_version=False):
-        super().__init__(use_previous_ai_version)
+    def __init__(self, previous_ai=False):
+        super().__init__(previous_ai)
         self.id = make_random_letters_and_digit_string()
 
     def connect(self):

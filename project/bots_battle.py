@@ -11,15 +11,15 @@ import game.game_manager
 from game.client import LocalClient
 from game.game_manager import GameManager
 
-TOTAL_HANCHANS = 1
+TOTAL_HANCHANS = 100
 
 
 def main():
     # let's load three bots with old logic
     # and one copy with new logic
-    clients = [LocalClient(use_previous_ai_version=True) for _ in range(0, 3)]
-    clients += [LocalClient(use_previous_ai_version=False)]
-    # clients = [LocalClient(use_previous_ai_version=False) for _ in range(0, 4)]
+    clients = [LocalClient(previous_ai=True) for _ in range(0, 3)]
+    clients += [LocalClient(previous_ai=False)]
+    # clients = [LocalClient(previous_ai=False) for _ in range(0, 4)]
     manager = GameManager(clients)
 
     total_results = {}

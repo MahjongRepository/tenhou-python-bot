@@ -7,7 +7,6 @@ from game.client import LocalClient
 from game.logger import set_up_logging
 from game.replays.tenhou import TenhouReplay as Replay
 from mahjong.ai.agari import Agari
-from mahjong.client import Client
 from mahjong.hand import FinishedHand
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
@@ -316,9 +315,9 @@ class GameManager(object):
                 continue
 
             # let's store other players discards
-            other_client.table.enemy_discard(self._enemy_position(current_client.seat, other_client.seat),
-                                             tile,
-                                             is_tsumogiri)
+            other_client.table.add_discarded_tile(self._enemy_position(current_client.seat, other_client.seat),
+                                                  tile,
+                                                  is_tsumogiri)
 
             # TODO support multiple ron
             if self.can_call_ron(other_client, tile):
@@ -426,7 +425,7 @@ class GameManager(object):
 
         who_called_riichi = client.seat
         for client in self.clients:
-            client.table.enemy_riichi(self._enemy_position(who_called_riichi, client.seat))
+            client.table.add_called_riichi(self._enemy_position(who_called_riichi, client.seat))
 
         logger.info('Riichi: {0} -1,000'.format(self.clients[who_called_riichi].player.name))
         logger.info('With hand: {}'.format(
@@ -653,6 +652,8 @@ class GameManager(object):
         """
         For better tests output
         """
+        seed(shuffle_seed())
+
         names = ['Sato', 'Suzuki', 'Takahashi', 'Tanaka', 'Watanabe', 'Ito',
                  'Yamamoto', 'Nakamura', 'Kobayashi', 'Kato', 'Yoshida', 'Yamada']
 

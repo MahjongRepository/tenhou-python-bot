@@ -12,7 +12,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
     def test_set_is_tempai_flag_to_the_player(self):
         table = Table()
-        player = Player(0, 0, table)
+        player = Player(table, 0, 0, False)
 
         tiles = self._string_to_136_array(sou='111345677', pin='45', man='56')
         tile = self._string_to_136_array(man='9')[0]
@@ -32,9 +32,21 @@ class AITestCase(unittest.TestCase, TestMixin):
 
     def test_not_open_hand_in_riichi(self):
         table = Table()
-        player = Player(0, 0, table)
+        player = Player(table, 0, 0, False)
 
         player.in_riichi = True
+
+        tiles = self._string_to_136_array(sou='12368', pin='2358', honors='4455')
+        tile = self._string_to_136_tile(honors='5')
+        player.init_hand(tiles)
+        meld, _, _ = player.try_to_call_meld(tile, False)
+        self.assertEqual(meld, None)
+
+    def test_not_open_hand_in_defence_mode(self):
+        table = Table()
+        player = Player(table, 0, 0, False)
+
+        player.ai.in_defence = True
 
         tiles = self._string_to_136_array(sou='12368', pin='2358', honors='4455')
         tile = self._string_to_136_tile(honors='5')
@@ -48,11 +60,12 @@ class AITestCase(unittest.TestCase, TestMixin):
         Based on real examples of incorrect opened hands
         """
         table = Table()
-        player = Player(0, 0, table)
+        player = Player(table, 0, 0, False)
 
         tiles = self._string_to_136_array(man='23455', pin='3445678', honors='1')
         tile = self._string_to_136_tile(man='5')
         player.init_hand(tiles)
+
         meld, _, _ = player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)
         self.assertEqual(meld.type, Meld.PON)
@@ -80,7 +93,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         It was a bug related to it
         """
         table = Table()
-        player = Player(0, 0, table)
+        player = Player(table, 0, 0, False)
 
         tiles = self._string_to_136_array(man='22457', sou='12234', pin='9', honors='55')
         tile = self._string_to_136_tile(sou='3')
@@ -97,7 +110,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
     def test_chose_strategy_and_reset_strategy(self):
         table = Table()
-        player = Player(0, 0, table)
+        player = Player(table, 0, 0, False)
 
         tiles = self._string_to_136_array(man='33355788', sou='3479', honors='3')
         player.init_hand(tiles)
@@ -122,7 +135,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
     def test_remaining_tiles_and_enemy_discard(self):
         table = Table()
-        player = Player(0, 0, table)
+        player = Player(table, 0, 0, False)
 
         tiles = self._string_to_136_array(man='123456789', sou='167', honors='77')
         player.init_hand(tiles)
@@ -130,20 +143,20 @@ class AITestCase(unittest.TestCase, TestMixin):
         results, shanten = player.ai.calculate_outs(tiles, tiles)
         self.assertEqual(results[0].tiles_count, 8)
 
-        player.table.enemy_discard(1, self._string_to_136_tile(sou='5'), False)
+        player.table.add_discarded_tile(1, self._string_to_136_tile(sou='5'), False)
 
         results, shanten = player.ai.calculate_outs(tiles, tiles)
         self.assertEqual(results[0].tiles_count, 7)
 
-        player.table.enemy_discard(2, self._string_to_136_tile(sou='5'), False)
-        player.table.enemy_discard(3, self._string_to_136_tile(sou='8'), False)
+        player.table.add_discarded_tile(2, self._string_to_136_tile(sou='5'), False)
+        player.table.add_discarded_tile(3, self._string_to_136_tile(sou='8'), False)
 
         results, shanten = player.ai.calculate_outs(tiles, tiles)
         self.assertEqual(results[0].tiles_count, 5)
 
     def test_remaining_tiles_and_opened_meld(self):
         table = Table()
-        player = Player(0, 0, table)
+        player = Player(table, 0, 0, False)
 
         tiles = self._string_to_136_array(man='123456789', sou='167', honors='77')
         player.init_hand(tiles)
@@ -153,7 +166,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         # was discard and set was opened
         tile = self._string_to_136_tile(sou='8')
-        player.table.enemy_discard(3, tile, False)
+        player.table.add_discarded_tile(3, tile, False)
         meld = self._make_meld(Meld.PON, self._string_to_136_array(sou='888'))
         meld.called_tile = tile
         player.table.add_called_meld(3, meld)
@@ -163,7 +176,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         # was discard and set was opened
         tile = self._string_to_136_tile(sou='3')
-        player.table.enemy_discard(2, tile, False)
+        player.table.add_discarded_tile(2, tile, False)
         meld = self._make_meld(Meld.PON, self._string_to_136_array(sou='345'))
         meld.called_tile = tile
         player.table.add_called_meld(2, meld)
@@ -173,7 +186,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
     def test_remaining_tiles_and_dora_indicators(self):
         table = Table()
-        player = Player(0, 0, table)
+        player = Player(table, 0, 0, False)
 
         tiles = self._string_to_136_array(man='123456789', sou='167', honors='77')
         player.init_hand(tiles)
@@ -191,7 +204,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         It was a bug related to it, when bot wanted to call 9p12s chi :(
         """
         table = Table()
-        player = Player(0, 0, table)
+        player = Player(table, 0, 0, False)
 
         # 16m2679p1348s111z
         tiles = [0, 21, 41, 56, 61, 70, 74, 80, 84, 102, 108, 110, 111]

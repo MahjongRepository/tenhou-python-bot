@@ -171,7 +171,7 @@ class TenhouClient(Client):
         logger.info('Log: {}'.format(log_link))
         logger.info('Players: {}'.format(self.table.players))
 
-        main_player = self.table.get_main_player()
+        main_player = self.table.player
 
         # tiles to work with meld calling
         tile_to_discard = None
@@ -205,7 +205,7 @@ class TenhouClient(Client):
                     )
 
                     tiles = self.decoder.parse_initial_hand(message)
-                    self.table.init_main_player_hand(tiles)
+                    self.table.player.init_hand(tiles)
 
                     logger.info(self.table.__str__())
                     logger.info('Players: {}'.format(self.table.get_players_sorted_by_scores()))
@@ -218,7 +218,7 @@ class TenhouClient(Client):
                     for x in range(0, 4):
                         player = players[x]
                         for item in player['discards']:
-                            self.table.enemy_discard(x, item, False)
+                            self.table.add_discarded_tile(x, item, False)
 
                         for item in player['melds']:
                             self.table.add_called_meld(x, item)
@@ -263,7 +263,7 @@ class TenhouClient(Client):
 
                 if '<REACH' in message and 'step="2"' in message:
                     who_called_riichi = self.decoder.parse_who_called_riichi(message)
-                    self.table.enemy_riichi(who_called_riichi)
+                    self.table.add_called_riichi(who_called_riichi)
                     logger.info('Riichi called by {} player'.format(who_called_riichi))
 
                 # the end of round
@@ -305,7 +305,7 @@ class TenhouClient(Client):
 
                 # other players discards: <e, <f, <g + tile number
                 match_discard = re.match(r"^<[efgEFG]+\d*", message)
-                if match_discard:
+                if match_discard and '<GO' not in message:
                     tile = self.decoder.parse_tile(message)
 
                     # <e21/> - is tsumogiri
@@ -319,7 +319,7 @@ class TenhouClient(Client):
                     else:
                         player_seat = 3
 
-                    self.table.enemy_discard(player_seat, tile, if_tsumogiri)
+                    self.table.add_discarded_tile(player_seat, tile, if_tsumogiri)
 
                     if 't="1"' in message or 't="4"' in message:
                         is_kamicha_discard = False
@@ -393,7 +393,7 @@ class TenhouClient(Client):
         if success:
             logger.info('End of the game')
         else:
-            logger.error('Game was ended without of success')
+            logger.error('Game was ended without success')
 
     def _send_message(self, message):
         # tenhou requires an empty byte in the end of each sending message

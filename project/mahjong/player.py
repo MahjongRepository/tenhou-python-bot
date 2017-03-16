@@ -5,6 +5,7 @@ from functools import reduce
 import copy
 
 from mahjong.constants import EAST, SOUTH, WEST, NORTH
+from mahjong.meld import Meld
 from mahjong.tile import TilesConverter, Tile
 from utils.settings_handler import settings
 from mahjong.ai.shanten import Shanten
@@ -12,9 +13,11 @@ from mahjong.ai.shanten import Shanten
 logger = logging.getLogger('tenhou')
 
 
-class Player(object):
-    # the place where is player is sitting
-    # always = 0 for our player
+class PlayerInterface(object):
+    table = None
+    discards = None
+    melds = None
+    in_riichi = None
     seat = 0
     # where is sitting dealer, based on this information we can calculate player wind
     dealer_seat = 0
@@ -26,39 +29,15 @@ class Player(object):
     name = ''
     rank = ''
 
-    discards = []
-    tiles = []
-    melds = []
-    table = None
-    last_draw = None
-    in_tempai = False
-    in_riichi = False
-    in_defence_mode = False
+    previous_ai = False
 
-    def __init__(self, seat, dealer_seat, table, use_previous_ai_version=False):
-        self.discards = []
-        self.melds = []
-        self.tiles = []
-        self.safe_tiles = []
-        self.seat = seat
+    def __init__(self, table, seat, dealer_seat, previous_ai):
         self.table = table
+        self.seat = seat
         self.dealer_seat = dealer_seat
+        self.previous_ai = previous_ai
 
-        if use_previous_ai_version:
-            try:
-                from mahjong.ai.old_version import MainAI
-            # project wasn't set up properly
-            # we don't have old version
-            except ImportError:
-                logger.error('Wasn\'t able to load old api version')
-                from mahjong.ai.main import MainAI
-        else:
-            if settings.ENABLE_AI:
-                from mahjong.ai.main import MainAI
-            else:
-                from mahjong.ai.random import MainAI
-
-        self.ai = MainAI(self)
+        self.erase_state()
 
     def __str__(self):
         result = u'{0}'.format(self.name)
@@ -70,39 +49,65 @@ class Player(object):
             result += u' ({0})'.format(self.rank)
         return result
 
-    # for calls in array
     def __repr__(self):
         return self.__str__()
 
     def erase_state(self):
         self.discards = []
         self.melds = []
-        self.tiles = []
-
-        self.last_draw = None
-        self.in_tempai = False
         self.in_riichi = False
-        self.in_defence_mode = False
+        self.position = 0
+        self.scores = 0
+        self.uma = 0
 
-        self.dealer_seat = 0
-
-        self.ai.erase_state()
-
-    def add_called_meld(self, meld):
+    def add_called_meld(self, meld: Meld):
         self.melds.append(meld)
 
-    def add_discarded_tile(self, tile):
+    def add_discarded_tile(self, tile: Tile):
         self.discards.append(tile)
 
-    def enemy_discard(self, player_seat, tile: Tile):
-        """
-        :param player_seat:
-        :param tile:
-        """
-        self.ai.defence.add_discarded_tile(player_seat, tile)
+    @property
+    def player_wind(self):
+        position = self.dealer_seat
+        if position == 0:
+            return EAST
+        elif position == 1:
+            return NORTH
+        elif position == 2:
+            return WEST
+        else:
+            return SOUTH
 
-    def enemy_riichi(self, player_seat):
-        self.ai.defence.called_riichi(player_seat)
+    @property
+    def is_dealer(self):
+        return self.seat == self.dealer_seat
+
+    @property
+    def is_open_hand(self):
+        return len(self.melds) > 0
+
+
+class Player(PlayerInterface):
+    ai = None
+    tiles = None
+    last_draw = None
+    in_tempai = False
+    in_defence_mode = False
+
+    def __init__(self, table, seat, dealer_seat, previous_ai):
+        super().__init__(table, seat, dealer_seat, previous_ai)
+        self._load_ai()
+
+    def erase_state(self):
+        super().erase_state()
+
+        self.tiles = []
+        self.last_draw = None
+        self.in_tempai = False
+        self.in_defence_mode = False
+
+        if self.ai:
+            self.ai.erase_state()
 
     def init_hand(self, tiles):
         self.tiles = tiles
@@ -133,7 +138,8 @@ class Player(object):
             tile_to_discard = self.ai.discard_tile()
 
         if tile_to_discard != Shanten.AGARI_STATE:
-            self.add_discarded_tile(tile_to_discard)
+            is_tsumogiri = tile_to_discard == self.last_draw
+            self.add_discarded_tile(Tile(tile_to_discard, is_tsumogiri))
             self.tiles.remove(tile_to_discard)
 
         return tile_to_discard
@@ -152,25 +158,17 @@ class Player(object):
     def try_to_call_meld(self, tile, is_kamicha_discard):
         return self.ai.try_to_call_meld(tile, is_kamicha_discard)
 
-    @property
-    def player_wind(self):
-        position = self.dealer_seat
-        if position == 0:
-            return EAST
-        elif position == 1:
-            return NORTH
-        elif position == 2:
-            return WEST
-        else:
-            return SOUTH
-
-    @property
-    def is_dealer(self):
-        return self.seat == self.dealer_seat
-
-    @property
-    def is_open_hand(self):
-        return len(self.melds) > 0
+    def format_hand_for_print(self, tile):
+        hand_string = '{} + {}'.format(
+            TilesConverter.to_one_line_string(self.closed_hand),
+            TilesConverter.to_one_line_string([tile])
+        )
+        if self.is_open_hand:
+            melds = []
+            for item in self.melds:
+                melds.append('{}'.format(TilesConverter.to_one_line_string(item.tiles)))
+            hand_string += ' [{}]'.format(', '.join(melds))
+        return hand_string
 
     @property
     def closed_hand(self):
@@ -178,6 +176,7 @@ class Player(object):
         meld_tiles = [x.tiles for x in self.melds]
         if meld_tiles:
             meld_tiles = reduce(lambda z, y: z + y, [x.tiles for x in self.melds])
+
         return [item for item in tiles if item not in meld_tiles]
 
     @property
@@ -194,14 +193,59 @@ class Player(object):
             meld[2] //= 4
         return melds
 
-    def format_hand_for_print(self, tile):
-        hand_string = '{} + {}'.format(
-            TilesConverter.to_one_line_string(self.closed_hand),
-            TilesConverter.to_one_line_string([tile])
-        )
-        if self.is_open_hand:
-            melds = []
-            for item in self.melds:
-                melds.append('{}'.format(TilesConverter.to_one_line_string(item.tiles)))
-            hand_string += ' [{}]'.format(', '.join(melds))
-        return hand_string
+    def _load_ai(self):
+        if self.previous_ai:
+            try:
+                from mahjong.ai.old_version import MainAI
+            # project wasn't set up properly
+            # we don't have old version
+            except ImportError:
+                logger.error('Wasn\'t able to load old api version')
+                from mahjong.ai.main import MainAI
+        else:
+            if settings.ENABLE_AI:
+                from mahjong.ai.main import MainAI
+            else:
+                from mahjong.ai.random import MainAI
+
+        self.ai = MainAI(self)
+
+
+class EnemyPlayer(PlayerInterface):
+    # array of tiles in 34 tile format
+    safe_tiles = None
+    # tiles that were discarded in the current "step"
+    # so, for example kamicha discard will be a safe tile for all players
+    temporary_safe_tiles = None
+
+    def erase_state(self):
+        super().erase_state()
+
+        self.safe_tiles = []
+        self.temporary_safe_tiles = []
+
+    @property
+    def all_safe_tiles(self):
+        return self.temporary_safe_tiles + self.safe_tiles
+
+    def add_discarded_tile(self, tile: Tile):
+        super().add_discarded_tile(tile)
+
+        tile = tile.value // 4
+        if tile not in self.safe_tiles:
+            self.safe_tiles.append(tile)
+
+        # all tiles that were discarded after player riichi will be safe against him
+        # because of furiten
+        for player in self.table.enemy_players:
+            if player.in_riichi and tile not in player.safe_tiles:
+                player.safe_tiles.append(tile)
+
+        # erase temporary furiten after tile draw
+        self.temporary_safe_tiles = []
+        affected_players = [1, 2, 3]
+        affected_players.remove(self.seat)
+        # temporary furiten, for one "step"
+        for x in affected_players:
+            if tile not in self.table.get_player(x).temporary_safe_tiles:
+                self.table.get_player(x).temporary_safe_tiles.append(tile)

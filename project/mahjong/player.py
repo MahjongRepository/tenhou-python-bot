@@ -5,16 +5,19 @@ from functools import reduce
 import copy
 
 from mahjong.constants import EAST, SOUTH, WEST, NORTH
-from mahjong.tile import TilesConverter
+from mahjong.meld import Meld
+from mahjong.tile import TilesConverter, Tile
 from utils.settings_handler import settings
 from mahjong.ai.shanten import Shanten
 
 logger = logging.getLogger('tenhou')
 
 
-class Player(object):
-    # the place where is player is sitting
-    # always = 0 for our player
+class PlayerInterface(object):
+    table = None
+    discards = None
+    melds = None
+    in_riichi = None
     seat = 0
     # where is sitting dealer, based on this information we can calculate player wind
     dealer_seat = 0
@@ -26,46 +29,15 @@ class Player(object):
     name = ''
     rank = ''
 
-    discards = []
-    # tiles that were discarded after player's riichi
-    safe_tiles = []
-    tiles = []
-    melds = []
-    table = None
-    last_draw = None
-    in_tempai = False
-    in_riichi = False
-    in_defence_mode = False
+    previous_ai = False
 
-    # system fields
-    # for local games emulation
-    _is_daburi = False
-    _is_ippatsu = False
-
-    def __init__(self, seat, dealer_seat, table, use_previous_ai_version=False):
-        self.discards = []
-        self.melds = []
-        self.tiles = []
-        self.safe_tiles = []
-        self.seat = seat
+    def __init__(self, table, seat, dealer_seat, previous_ai):
         self.table = table
+        self.seat = seat
         self.dealer_seat = dealer_seat
+        self.previous_ai = previous_ai
 
-        if use_previous_ai_version:
-            try:
-                from mahjong.ai.old_version import MainAI
-            # project wasn't set up properly
-            # we don't have old version
-            except ImportError:
-                logger.error('Wasn\'t able to load old api version')
-                from mahjong.ai.main import MainAI
-        else:
-            if settings.ENABLE_AI:
-                from mahjong.ai.main import MainAI
-            else:
-                from mahjong.ai.random import MainAI
-
-        self.ai = MainAI(table, self)
+        self.erase_state()
 
     def __str__(self):
         result = u'{0}'.format(self.name)
@@ -77,79 +49,22 @@ class Player(object):
             result += u' ({0})'.format(self.rank)
         return result
 
-    # for calls in array
     def __repr__(self):
         return self.__str__()
 
     def erase_state(self):
         self.discards = []
         self.melds = []
-        self.tiles = []
-        self.safe_tiles = []
-
-        self.last_draw = None
-        self.in_tempai = False
         self.in_riichi = False
-        self.in_defence_mode = False
+        self.position = 0
+        self.scores = 0
+        self.uma = 0
 
-        self.dealer_seat = 0
-
-        self.ai.erase_state()
-
-        self._is_daburi = False
-        self._is_ippatsu = False
-
-    def add_called_meld(self, meld):
+    def add_called_meld(self, meld: Meld):
         self.melds.append(meld)
 
-    def add_discarded_tile(self, tile):
+    def add_discarded_tile(self, tile: Tile):
         self.discards.append(tile)
-
-    def init_hand(self, tiles):
-        self.tiles = tiles
-
-        self.ai.determine_strategy()
-
-    def draw_tile(self, tile):
-        self.last_draw = tile
-        self.tiles.append(tile)
-        # we need sort it to have a better string presentation
-        self.tiles = sorted(self.tiles)
-
-        self.ai.determine_strategy()
-
-    def discard_tile(self, tile=None):
-        """
-        We can say what tile to discard
-        input tile = None we will discard tile based on AI logic
-        :param tile: 136 tiles format
-        :return:
-        """
-        # we can't use if tile, because of 0 tile
-        if tile is not None:
-            tile_to_discard = tile
-        else:
-            tile_to_discard = self.ai.discard_tile()
-
-        if tile_to_discard != Shanten.AGARI_STATE:
-            self.add_discarded_tile(tile_to_discard)
-            self.tiles.remove(tile_to_discard)
-
-        return tile_to_discard
-
-    def can_call_riichi(self):
-        return all([
-            self.in_tempai,
-
-            not self.in_riichi,
-            not self.is_open_hand,
-
-            self.scores >= 1000,
-            self.table.count_of_remaining_tiles > 4
-        ])
-
-    def try_to_call_meld(self, tile, is_kamicha_discard):
-        return self.ai.try_to_call_meld(tile, is_kamicha_discard)
 
     @property
     def player_wind(self):
@@ -171,12 +86,97 @@ class Player(object):
     def is_open_hand(self):
         return len(self.melds) > 0
 
+
+class Player(PlayerInterface):
+    ai = None
+    tiles = None
+    last_draw = None
+    in_tempai = False
+    in_defence_mode = False
+
+    def __init__(self, table, seat, dealer_seat, previous_ai):
+        super().__init__(table, seat, dealer_seat, previous_ai)
+        self._load_ai()
+
+    def erase_state(self):
+        super().erase_state()
+
+        self.tiles = []
+        self.last_draw = None
+        self.in_tempai = False
+        self.in_defence_mode = False
+
+        if self.ai:
+            self.ai.erase_state()
+
+    def init_hand(self, tiles):
+        self.tiles = tiles
+
+        self.ai.determine_strategy()
+
+    def draw_tile(self, tile):
+        self.table.count_of_remaining_tiles -= 1
+
+        self.last_draw = tile
+        self.tiles.append(tile)
+        # we need sort it to have a better string presentation
+        self.tiles = sorted(self.tiles)
+
+        self.ai.determine_strategy()
+
+    def discard_tile(self, tile=None):
+        """
+        We can say what tile to discard
+        input tile = None we will discard tile based on AI logic
+        :param tile: 136 tiles format
+        :return:
+        """
+        # we can't use if tile, because of 0 tile
+        if tile is not None:
+            tile_to_discard = tile
+        else:
+            tile_to_discard = self.ai.discard_tile()
+
+        if tile_to_discard != Shanten.AGARI_STATE:
+            is_tsumogiri = tile_to_discard == self.last_draw
+            self.add_discarded_tile(Tile(tile_to_discard, is_tsumogiri))
+            self.tiles.remove(tile_to_discard)
+
+        return tile_to_discard
+
+    def can_call_riichi(self):
+        return all([
+            self.in_tempai,
+
+            not self.in_riichi,
+            not self.is_open_hand,
+
+            self.scores >= 1000,
+            self.table.count_of_remaining_tiles > 4
+        ])
+
+    def try_to_call_meld(self, tile, is_kamicha_discard):
+        return self.ai.try_to_call_meld(tile, is_kamicha_discard)
+
+    def format_hand_for_print(self, tile):
+        hand_string = '{} + {}'.format(
+            TilesConverter.to_one_line_string(self.closed_hand),
+            TilesConverter.to_one_line_string([tile])
+        )
+        if self.is_open_hand:
+            melds = []
+            for item in self.melds:
+                melds.append('{}'.format(TilesConverter.to_one_line_string(item.tiles)))
+            hand_string += ' [{}]'.format(', '.join(melds))
+        return hand_string
+
     @property
     def closed_hand(self):
         tiles = self.tiles[:]
         meld_tiles = [x.tiles for x in self.melds]
         if meld_tiles:
             meld_tiles = reduce(lambda z, y: z + y, [x.tiles for x in self.melds])
+
         return [item for item in tiles if item not in meld_tiles]
 
     @property
@@ -193,14 +193,59 @@ class Player(object):
             meld[2] //= 4
         return melds
 
-    def format_hand_for_print(self, tile):
-        hand_string = '{} + {}'.format(
-            TilesConverter.to_one_line_string(self.closed_hand),
-            TilesConverter.to_one_line_string([tile])
-        )
-        if self.is_open_hand:
-            melds = []
-            for item in self.melds:
-                melds.append('{}'.format(TilesConverter.to_one_line_string(item.tiles)))
-            hand_string += ' [{}]'.format(', '.join(melds))
-        return hand_string
+    def _load_ai(self):
+        if self.previous_ai:
+            try:
+                from mahjong.ai.old_version import MainAI
+            # project wasn't set up properly
+            # we don't have old version
+            except ImportError:
+                logger.error('Wasn\'t able to load old api version')
+                from mahjong.ai.main import MainAI
+        else:
+            if settings.ENABLE_AI:
+                from mahjong.ai.main import MainAI
+            else:
+                from mahjong.ai.random import MainAI
+
+        self.ai = MainAI(self)
+
+
+class EnemyPlayer(PlayerInterface):
+    # array of tiles in 34 tile format
+    safe_tiles = None
+    # tiles that were discarded in the current "step"
+    # so, for example kamicha discard will be a safe tile for all players
+    temporary_safe_tiles = None
+
+    def erase_state(self):
+        super().erase_state()
+
+        self.safe_tiles = []
+        self.temporary_safe_tiles = []
+
+    @property
+    def all_safe_tiles(self):
+        return self.temporary_safe_tiles + self.safe_tiles
+
+    def add_discarded_tile(self, tile: Tile):
+        super().add_discarded_tile(tile)
+
+        tile = tile.value // 4
+        if tile not in self.safe_tiles:
+            self.safe_tiles.append(tile)
+
+        # all tiles that were discarded after player riichi will be safe against him
+        # because of furiten
+        for player in self.table.enemy_players:
+            if player.in_riichi and tile not in player.safe_tiles:
+                player.safe_tiles.append(tile)
+
+        # erase temporary furiten after tile draw
+        self.temporary_safe_tiles = []
+        affected_players = [1, 2, 3]
+        affected_players.remove(self.seat)
+        # temporary furiten, for one "step"
+        for x in affected_players:
+            if tile not in self.table.get_player(x).temporary_safe_tiles:
+                self.table.get_player(x).temporary_safe_tiles.append(tile)

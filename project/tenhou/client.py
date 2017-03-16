@@ -9,6 +9,7 @@ from urllib.parse import quote
 import re
 
 from mahjong.constants import DISPLAY_WINDS
+from mahjong.stat import Statistics
 from utils.settings_handler import settings
 from mahjong.client import Client
 from mahjong.meld import Meld
@@ -19,6 +20,7 @@ logger = logging.getLogger('tenhou')
 
 
 class TenhouClient(Client):
+    statistics = None
     socket = None
     game_is_continue = True
     looking_for_game = True
@@ -30,8 +32,13 @@ class TenhouClient(Client):
     _count_of_empty_messages = 0
     _rating_string = None
 
-    def set_socket(self, socket_object):
-        self.socket = socket_object
+    def __init__(self):
+        super().__init__()
+        self.statistics = Statistics()
+
+    def connect(self):
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.connect((settings.TENHOU_HOST, settings.TENHOU_PORT))
 
     def authenticate(self):
         self._send_message('<HELO name="{}" tid="f0" sx="M" />'.format(quote(settings.USER_ID)))
@@ -43,7 +50,7 @@ class TenhouClient(Client):
             return False
 
         # we reconnected to the game
-        if '<go' in auth_message:
+        if '<GO' in auth_message:
             logger.info('Successfully reconnected')
             self.reconnected_messages = messages
 
@@ -73,12 +80,13 @@ class TenhouClient(Client):
         while continue_reading:
             messages = self._get_multiple_messages()
             for message in messages:
-                if '<ln' in message:
+                if '<LN' in message:
                     authenticated = True
                     continue_reading = False
 
+            counter += 1
             # to avoid infinity loop
-            if counter > 20:
+            if counter > 10:
                 continue_reading = False
 
         if authenticated:
@@ -124,25 +132,25 @@ class TenhouClient(Client):
                 messages = self._get_multiple_messages()
 
                 for message in messages:
-                    if '<rejoin' in message:
+                    if '<REJOIN' in message:
                         # game wasn't found, continue to wait
                         self._send_message('<JOIN t="{},r" />'.format(game_type))
 
-                    if '<go' in message:
+                    if '<GO' in message:
                         self._send_message('<GOK />')
                         self._send_message('<NEXTREADY />')
 
-                    if '<taikyoku' in message:
+                    if '<TAIKYOKU' in message:
                         self.looking_for_game = False
                         game_id, seat = self.decoder.parse_log_link(message)
                         log_link = 'http://tenhou.net/0/?log={}&tw={}'.format(game_id, seat)
                         self.statistics.game_id = game_id
 
-                    if '<un' in message:
+                    if '<UN' in message:
                         values = self.decoder.parse_names_and_ranks(message)
                         self.table.set_players_names_and_ranks(values)
 
-                    if '<ln' in message:
+                    if '<LN' in message:
                         self._send_message(self._pxr_tag())
 
                 current_time = datetime.datetime.now()
@@ -163,7 +171,7 @@ class TenhouClient(Client):
         logger.info('Log: {}'.format(log_link))
         logger.info('Players: {}'.format(self.table.players))
 
-        main_player = self.table.get_main_player()
+        main_player = self.table.player
 
         # tiles to work with meld calling
         tile_to_discard = None
@@ -185,7 +193,7 @@ class TenhouClient(Client):
                 self._count_of_empty_messages = 0
 
             for message in messages:
-                if '<init' in message or '<reinit' in message:
+                if '<INIT' in message or '<REINIT' in message:
                     values = self.decoder.parse_initial_values(message)
                     self.table.init_round(
                         values['round_number'],
@@ -197,7 +205,7 @@ class TenhouClient(Client):
                     )
 
                     tiles = self.decoder.parse_initial_hand(message)
-                    self.table.init_main_player_hand(tiles)
+                    self.table.player.init_hand(tiles)
 
                     logger.info(self.table.__str__())
                     logger.info('Players: {}'.format(self.table.get_players_sorted_by_scores()))
@@ -205,30 +213,30 @@ class TenhouClient(Client):
                     logger.info('Round  wind: {}'.format(DISPLAY_WINDS[self.table.round_wind]))
                     logger.info('Player wind: {}'.format(DISPLAY_WINDS[main_player.player_wind]))
 
-                if '<reinit' in message:
+                if '<REINIT' in message:
                     players = self.decoder.parse_table_state_after_reconnection(message)
                     for x in range(0, 4):
                         player = players[x]
                         for item in player['discards']:
-                            self.table.enemy_discard(item, x)
+                            self.table.add_discarded_tile(x, item, False)
 
                         for item in player['melds']:
-                            self.table.add_called_meld(item, x)
+                            self.table.add_called_meld(x, item)
                             if x == 0:
                                 tiles = item.tiles
                                 main_player.tiles.extend(tiles)
 
                 # draw and discard
-                if '<t' in message:
+                if '<T' in message:
                     tile = self.decoder.parse_tile(message)
 
                     if not main_player.in_riichi:
                         logger.info('Hand: {}'.format(main_player.format_hand_for_print(tile)))
 
-                        self.draw_tile(tile)
+                        self.player.draw_tile(tile)
                         sleep(1)
 
-                        tile = self.discard_tile()
+                        tile = self.player.discard_tile()
 
                         logger.info('Discard: {}'.format(TilesConverter.to_one_line_string([tile])))
 
@@ -248,18 +256,18 @@ class TenhouClient(Client):
                         logger.info('Remaining tiles: {}'.format(self.table.count_of_remaining_tiles))
 
                 # new dora indicator after kan
-                if '<dora' in message:
+                if '<DORA' in message:
                     tile = self.decoder.parse_dora_indicator(message)
                     self.table.add_dora_indicator(tile)
                     logger.info('New dora indicator: {}'.format(TilesConverter.to_one_line_string([tile])))
 
-                if '<reach' in message and 'step="2"' in message:
+                if '<REACH' in message and 'step="2"' in message:
                     who_called_riichi = self.decoder.parse_who_called_riichi(message)
-                    self.enemy_riichi(who_called_riichi)
+                    self.table.add_called_riichi(who_called_riichi)
                     logger.info('Riichi called by {} player'.format(who_called_riichi))
 
                 # the end of round
-                if 'agari' in message or 'ryuukyoku' in message:
+                if '<AGARI' in message or '<RYUUKYOKU' in message:
                     sleep(2)
                     self._send_message('<NEXTREADY />')
 
@@ -271,7 +279,7 @@ class TenhouClient(Client):
                     self._send_message('<N />')
 
                 # set was called
-                if '<n who=' in message:
+                if '<N who=' in message:
                     meld = self.decoder.parse_meld(message)
                     logger.info('Meld: {} by {}'.format(meld, meld.who))
 
@@ -287,7 +295,7 @@ class TenhouClient(Client):
                         self.player.tiles.append(meld_tile)
                         self.player.ai.previous_shanten = shanten
 
-                    self.table.add_called_meld(meld, meld.who)
+                    self.table.add_called_meld(meld.who, meld)
 
                 win_suggestions = ['t="8"', 't="9"', 't="12"', 't="13"']
                 # we win by other player's discard
@@ -296,18 +304,22 @@ class TenhouClient(Client):
                     self._send_message('<N type="6" />')
 
                 # other players discards: <e, <f, <g + tile number
-                match_discard = re.match(r"^<[efg]+\d.*", message)
-                if match_discard:
+                match_discard = re.match(r"^<[efgEFG]+\d*", message)
+                if match_discard and '<GO' not in message:
                     tile = self.decoder.parse_tile(message)
 
-                    if '<e' in message:
+                    # <e21/> - is tsumogiri
+                    # <E21/> - discard from the hand
+                    if_tsumogiri = message[1].islower()
+                    player_sign = message.lower()[1]
+                    if player_sign == 'e':
                         player_seat = 1
-                    elif '<f' in message:
+                    elif player_sign == 'f':
                         player_seat = 2
                     else:
                         player_seat = 3
 
-                    self.table.enemy_discard(tile, player_seat)
+                    self.table.add_discarded_tile(player_seat, tile, if_tsumogiri)
 
                     if 't="1"' in message or 't="4"' in message:
                         is_kamicha_discard = False
@@ -343,7 +355,7 @@ class TenhouClient(Client):
                     values = self.decoder.parse_final_scores_and_uma(message)
                     self.table.set_players_scores(values['scores'], values['uma'])
 
-                if '<prof' in message:
+                if '<PROF' in message:
                     self.game_is_continue = False
 
             if self._count_of_empty_messages >= 5:
@@ -381,7 +393,7 @@ class TenhouClient(Client):
         if success:
             logger.info('End of the game')
         else:
-            logger.error('Game was ended without of success')
+            logger.error('Game was ended without success')
 
     def _send_message(self, message):
         # tenhou requires an empty byte in the end of each sending message
@@ -392,12 +404,7 @@ class TenhouClient(Client):
     def _read_message(self):
         message = self.socket.recv(1024)
         logger.debug('Get: {}'.format(message.decode('utf-8').replace('\x00', ' ')))
-
-        message = message.decode('utf-8')
-        # sometimes tenhou send messages in lower case, sometime in upper case, let's unify the behaviour
-        message = message.lower()
-
-        return message
+        return message.decode('utf-8')
 
     def _get_multiple_messages(self):
         # tenhou can send multiple messages in one request

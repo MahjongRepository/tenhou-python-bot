@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 from mahjong.constants import EAST, SOUTH, WEST, NORTH
 from mahjong.meld import Meld
-from mahjong.player import Player
+from mahjong.player import Player, EnemyPlayer
+from mahjong.tile import Tile
 from mahjong.utils import plus_dora, is_aka_dora
 
 
 class Table(object):
-    players = []
+    # our bot
+    player = None
+    # main bot + all other players
+    players = None
 
-    dora_indicators = []
+    dora_indicators = None
 
     dealer_seat = 0
     round_number = 0
@@ -19,11 +23,15 @@ class Table(object):
     count_of_players = 4
 
     # array of tiles in 34 format
-    revealed_tiles = []
+    revealed_tiles = None
 
-    def __init__(self, use_previous_ai_version=False):
+    previous_ai = False
+
+    def __init__(self, previous_ai=False):
+        self.previous_ai = previous_ai
+
+        self._init_players()
         self.dora_indicators = []
-        self._init_players(use_previous_ai_version)
         self.revealed_tiles = [0] * 34
 
     def __str__(self):
@@ -33,21 +41,20 @@ class Table(object):
 
     def init_round(self, round_number, count_of_honba_sticks, count_of_riichi_sticks,
                    dora_indicator, dealer_seat, scores):
-
+        self.dealer_seat = dealer_seat
         self.round_number = round_number
         self.count_of_honba_sticks = count_of_honba_sticks
         self.count_of_riichi_sticks = count_of_riichi_sticks
 
+        self.revealed_tiles = [0] * 34
+
         self.dora_indicators = []
         self.add_dora_indicator(dora_indicator)
-
-        self.revealed_tiles = [0] * 34
 
         # erase players state
         for player in self.players:
             player.erase_state()
             player.dealer_seat = dealer_seat
-
         self.set_players_scores(scores)
 
         # 136 - total count of tiles
@@ -55,10 +62,7 @@ class Table(object):
         # 13 - tiles in each player hand
         self.count_of_remaining_tiles = 136 - 14 - self.count_of_players * 13
 
-    def init_main_player_hand(self, tiles):
-        self.get_main_player().init_hand(tiles)
-
-    def add_called_meld(self, meld, player_seat):
+    def add_called_meld(self, player_seat, meld):
         # when opponent called meld it is means
         # that he discards tile from hand, not from wall
         self.count_of_remaining_tiles += 1
@@ -78,6 +82,23 @@ class Table(object):
 
         for tile in tiles:
             self._add_revealed_tile(tile)
+
+    def add_called_riichi(self, player_seat):
+        self.get_player(player_seat).in_riichi = True
+
+    def add_discarded_tile(self, player_seat, tile, is_tsumogiri):
+        """
+        :param player_seat:
+        :param tile: 136 format tile
+        :param is_tsumogiri: was tile discarded from hand or not
+        """
+        self.count_of_remaining_tiles -= 1
+
+        tile = Tile(tile, is_tsumogiri)
+        self.get_player(player_seat).add_discarded_tile(tile)
+
+        # cache already revealed tiles
+        self._add_revealed_tile(tile.value)
 
     def add_dora_indicator(self, tile):
         self.dora_indicators.append(tile)
@@ -106,40 +127,11 @@ class Table(object):
             self.get_player(x).name = values[x]['name']
             self.get_player(x).rank = values[x]['rank']
 
-    def get_player(self, player_seat) -> Player:
+    def get_player(self, player_seat):
         return self.players[player_seat]
-
-    def get_main_player(self) -> Player:
-        return self.players[0]
 
     def get_players_sorted_by_scores(self):
         return sorted(self.players, key=lambda x: x.scores, reverse=True)
-
-    def enemy_discard(self, tile, player_seat):
-        """
-        :param player_seat:
-        :param tile: 136 format tile
-        :return:
-        """
-        self.get_player(player_seat).add_discarded_tile(tile)
-        self.count_of_remaining_tiles -= 1
-
-        for player in self.players:
-            if player.in_riichi:
-                player.safe_tiles.append(tile)
-
-        # cache already revealed tiles
-        self._add_revealed_tile(tile)
-
-    def _init_players(self, use_previous_ai_version=False):
-        self.players = []
-
-        for seat in range(0, self.count_of_players):
-            player = Player(seat=seat,
-                            dealer_seat=0,
-                            table=self,
-                            use_previous_ai_version=use_previous_ai_version)
-            self.players.append(player)
 
     @property
     def round_wind(self):
@@ -152,6 +144,21 @@ class Table(object):
         else:
             return NORTH
 
+    @property
+    def enemy_players(self):
+        """
+        Return list of players except our bot
+        """
+        return self.players[1:]
+
     def _add_revealed_tile(self, tile):
         tile //= 4
         self.revealed_tiles[tile] += 1
+
+    def _init_players(self,):
+        self.player = Player(self, 0, self.dealer_seat, self.previous_ai)
+
+        self.players = [self.player]
+        for seat in range(1, self.count_of_players):
+            player = EnemyPlayer(self, seat, self.dealer_seat, self.previous_ai)
+            self.players.append(player)

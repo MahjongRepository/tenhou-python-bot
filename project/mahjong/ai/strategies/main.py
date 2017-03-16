@@ -93,6 +93,9 @@ class BaseStrategy(object):
         if self.player.in_riichi:
             return None, None, None
 
+        if self.player.ai.in_defence:
+            return None, None, None
+
         closed_hand = self.player.closed_hand[:]
 
         # we opened all our hand

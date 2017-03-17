@@ -64,6 +64,7 @@ class GameManager(AbortiveDraw):
 
         self.agari = Agari()
         self.finished_hand = FinishedHand()
+        self.replay = Replay('', self.clients)
 
     def init_game(self):
         """

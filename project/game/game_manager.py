@@ -3,10 +3,14 @@ import logging
 from collections import deque
 from random import randint, shuffle, random, seed
 
+import time
+
 from game.client import LocalClient
+from game.constants import AbortiveDraw
 from game.logger import set_up_logging
 from game.replays.tenhou import TenhouReplay as Replay
 from mahjong.ai.agari import Agari
+from mahjong.constants import WINDS
 from mahjong.hand import FinishedHand
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
@@ -26,17 +30,19 @@ def shuffle_seed():
     return seed_value
 
 
-class GameManager(object):
+class GameManager(AbortiveDraw):
     """
     Allow to play bots between each other
     To have a metrics how new version plays against old versions
     """
 
-    tiles = []
-    dead_wall = []
-    clients = []
-    dora_indicators = []
-    players_with_open_hands = []
+    tiles = None
+    dead_wall = None
+    clients = None
+    dora_indicators = None
+    players_with_open_hands = None
+    discards = None
+    replay = None
 
     dealer = None
     current_client_seat = None
@@ -45,24 +51,29 @@ class GameManager(object):
     riichi_sticks = 0
 
     _unique_dealers = 0
+    _need_to_check_same_winds = None
 
     def __init__(self, clients):
-
+        self._need_to_check_same_winds = True
         self.tiles = []
         self.dead_wall = []
         self.dora_indicators = []
+        self.discards = []
         self.clients = clients
         self._set_client_names()
 
         self.agari = Agari()
         self.finished_hand = FinishedHand()
-        self.replay = Replay(self.clients)
 
     def init_game(self):
         """
         Beginning of the game.
         Clients random placement and dealer selection.
         """
+
+        replay_name = '{}.log'.format(int(time.time()))
+        logger.info('Replay name: {}'.format(replay_name))
+        self.replay = Replay(replay_name, self.clients)
 
         logger.info('Seed: {}'.format(shuffle_seed()))
 
@@ -221,6 +232,19 @@ class GameManager(object):
                 self.call_riichi(current_client)
                 self.replay.riichi(current_client.seat, 2)
 
+                count_of_riichi_players = 0
+                for client in self.clients:
+                    if client.player.in_riichi:
+                        count_of_riichi_players += 1
+
+                if count_of_riichi_players == 4:
+                    self.abortive_retake(self.FOUR_RIICHI)
+
+            # abortive retake
+            result = self._check_same_winds()
+            if result:
+                return [result]
+
             # let's check other players hand to possibility open sets
             possible_melds = []
             for other_client in self.clients:
@@ -326,7 +350,7 @@ class GameManager(object):
                 possible_win_client.append(other_client)
 
         if len(possible_win_client) == 3:
-            return self.abortive_retake('ron3')
+            return [self.abortive_retake(self.TRIPLE_RON)]
 
         # check multiple ron
         results = []
@@ -655,6 +679,8 @@ class GameManager(object):
         self.honba_sticks += 1
         is_game_end = self._check_the_end_of_game()
 
+        self.replay.abortive_retake(reason, self.honba_sticks, self.riichi_sticks)
+
         return {
             'winner': None,
             'loser': None,
@@ -664,6 +690,39 @@ class GameManager(object):
 
     def players_sorted_by_scores(self):
         return sorted([i.player for i in self.clients], key=lambda x: x.scores, reverse=True)
+
+    def _check_same_winds(self):
+        if not self._need_to_check_same_winds:
+            return None
+
+        # with called melds this abortive retake is not possible
+        if self.players_with_open_hands:
+            self._need_to_check_same_winds = False
+            return None
+
+        # it is possible only for the first 4 discards
+        if len(self.discards) > 4:
+            self._need_to_check_same_winds = False
+            return None
+
+        # it is too early
+        if len(self.discards) != 4:
+            return None
+
+        tiles = [x // 4 for x in self.discards]
+        unique_tiles = list(set(tiles))
+
+        # first 4 discards wasn't same tiles
+        if len(unique_tiles) != 1:
+            self._need_to_check_same_winds = False
+            return None
+
+        tile = unique_tiles[1]
+        if tile in WINDS:
+            return self.abortive_retake(self.SAME_FIRST_WIND)
+        else:
+            self._need_to_check_same_winds = False
+            return None
 
     def _check_the_end_of_game(self):
         is_game_end = False

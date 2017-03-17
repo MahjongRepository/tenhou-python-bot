@@ -12,7 +12,7 @@ class TenhouReplayTestCase(unittest.TestCase, TestMixin):
         meld.who = 3
         meld.from_who = 2
         meld.called_tile = 29
-        replay = TenhouReplay([])
+        replay = TenhouReplay('', [])
 
         result = replay._encode_meld(meld)
         self.assertEqual(result, '19895')
@@ -21,7 +21,7 @@ class TenhouReplayTestCase(unittest.TestCase, TestMixin):
         meld.who = 1
         meld.from_who = 0
         meld.called_tile = 4
-        replay = TenhouReplay([])
+        replay = TenhouReplay('', [])
 
         result = replay._encode_meld(meld)
         self.assertEqual(result, '3303')
@@ -31,7 +31,7 @@ class TenhouReplayTestCase(unittest.TestCase, TestMixin):
         meld.who = 0
         meld.from_who = 1
         meld.called_tile = 105
-        replay = TenhouReplay([])
+        replay = TenhouReplay('', [])
 
         result = replay._encode_meld(meld)
         self.assertEqual(result, '40521')
@@ -40,7 +40,7 @@ class TenhouReplayTestCase(unittest.TestCase, TestMixin):
         meld.who = 0
         meld.from_who = 2
         meld.called_tile = 124
-        replay = TenhouReplay([])
+        replay = TenhouReplay('', [])
 
         result = replay._encode_meld(meld)
         self.assertEqual(result, '47658')

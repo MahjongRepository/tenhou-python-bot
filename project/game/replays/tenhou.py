@@ -10,7 +10,6 @@ class TenhouReplay(Replay):
 
     def init_game(self, seed):
         self.tags = []
-        self.replay_name = '{}.log'.format(int(time.time()))
 
         self.tags.append('<mjloggm ver="2.3">')
         self.tags.append('<SHUFFLE seed="{}" ref=""/>'.format(seed))
@@ -89,7 +88,21 @@ class TenhouReplay(Replay):
             honba_sticks,
             riichi_sticks,
             ','.join(scores_results),
-            hands))
+            hands
+        ))
+
+    def abortive_retake(self, reason, honba_sticks, riichi_sticks):
+        scores = '{},0,{},0,{},0,{},0'.format(int(self.clients[0].player.scores // 100),
+                                              int(self.clients[1].player.scores // 100),
+                                              int(self.clients[2].player.scores // 100),
+                                              int(self.clients[3].player.scores // 100))
+
+        self.tags.append('<RYUUKYOKU type="{}" ba="{},{}" sc="{}"/>'.format(
+            reason,
+            honba_sticks,
+            riichi_sticks,
+            scores
+        ))
 
     def win(self, who, from_who, win_tile, honba_sticks, riichi_sticks, han, fu, cost, yaku_list, dora, ura_dora):
         winner = self.clients[who].player

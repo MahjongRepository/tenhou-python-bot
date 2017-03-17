@@ -12,8 +12,9 @@ class Replay(object):
     tags = []
     clients = []
 
-    def __init__(self, clients):
+    def __init__(self, replay_name, clients):
         self.replays_directory = replays_directory
+        self.replay_name = replay_name
         self.clients = clients
 
     def init_game(self, seed):

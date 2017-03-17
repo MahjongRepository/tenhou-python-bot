@@ -144,7 +144,7 @@ class GameManager(object):
                                self.riichi_sticks,
                                self.dora_indicators[0])
 
-    def play_round(self) -> dict:
+    def play_round(self) -> []:
         continue_to_play = True
 
         while continue_to_play:
@@ -188,7 +188,7 @@ class GameManager(object):
                                                                winner=current_client,
                                                                loser=None,
                                                                is_tsumo=True)
-                    return result
+                    return [result]
                 else:
                     # we can't win
                     # so let's add tile back to hand
@@ -213,6 +213,7 @@ class GameManager(object):
             result = self.check_clients_possible_ron(current_client, tile, is_tsumogiri)
             # the end of the round
             if result:
+                # check_clients_possible_ron already returns array
                 return result
 
             # if there is no challenger to ron, let's check can we call riichi with tile discard or not
@@ -288,6 +289,7 @@ class GameManager(object):
                 # the end of the round
                 result = self.check_clients_possible_ron(current_client, tile_to_discard, False)
                 if result:
+                    # check_clients_possible_ron already returns array
                     return result
 
             self.current_client_seat = self._move_position(self.current_client_seat)
@@ -297,9 +299,9 @@ class GameManager(object):
                 continue_to_play = False
 
         result = self.process_the_end_of_the_round([], 0, None, None, False)
-        return result
+        return [result]
 
-    def check_clients_possible_ron(self, current_client, tile, is_tsumogiri):
+    def check_clients_possible_ron(self, current_client, tile, is_tsumogiri) -> []:
         """
         After tile discard let's check all other players can they win or not
         at this tile
@@ -309,6 +311,7 @@ class GameManager(object):
         :param is_tsumogiri:
         :return: None or ron result
         """
+        possible_win_client = []
         for other_client in self.clients:
             # there is no need to check the current client
             if other_client == current_client:
@@ -319,17 +322,23 @@ class GameManager(object):
                                                   tile,
                                                   is_tsumogiri)
 
-            # TODO support multiple ron
             if self.can_call_ron(other_client, tile):
-                # the end of the round
-                result = self.process_the_end_of_the_round(tiles=other_client.player.tiles,
-                                                           win_tile=tile,
-                                                           winner=other_client,
-                                                           loser=current_client,
-                                                           is_tsumo=False)
-                return result
+                possible_win_client.append(other_client)
 
-        return None
+        if len(possible_win_client) == 3:
+            return self.abortive_retake('ron3')
+
+        # check multiple ron
+        results = []
+        for client in possible_win_client:
+            result = self.process_the_end_of_the_round(tiles=client.player.tiles,
+                                                       win_tile=tile,
+                                                       winner=client,
+                                                       loser=current_client,
+                                                       is_tsumo=False)
+            results.append(result)
+
+        return results
 
     def play_game(self, total_results):
         """
@@ -349,13 +358,14 @@ class GameManager(object):
             self.init_round()
             result = self.play_round()
 
-            is_game_end = result['is_game_end']
-            loser = result['loser']
-            winner = result['winner']
-            if loser:
-                total_results[loser.id]['lose_rounds'] += 1
-            if winner:
-                total_results[winner.id]['win_rounds'] += 1
+            for item in result:
+                is_game_end = item['is_game_end']
+                loser = item['loser']
+                winner = item['winner']
+                if loser:
+                    total_results[loser.id]['lose_rounds'] += 1
+                if winner:
+                    total_results[winner.id]['win_rounds'] += 1
 
             for client in self.clients:
                 if client.player.in_riichi:
@@ -470,7 +480,6 @@ class GameManager(object):
         else:
             logger.info('Retake')
 
-        is_game_end = False
         self.round_number += 1
 
         if winner:
@@ -630,6 +639,35 @@ class GameManager(object):
 
             self.replay.retake(tempai_users, self.honba_sticks, self.riichi_sticks)
 
+        is_game_end = self._check_the_end_of_game()
+        logger.info('')
+
+        return {
+            'winner': winner,
+            'loser': loser,
+            'is_tsumo': is_tsumo,
+            'is_game_end': is_game_end,
+        }
+
+    def abortive_retake(self, reason):
+        logger.info('Abortive retake. Reason: {}'.format(reason))
+
+        self.honba_sticks += 1
+        is_game_end = self._check_the_end_of_game()
+
+        return {
+            'winner': None,
+            'loser': None,
+            'is_tsumo': False,
+            'is_game_end': is_game_end,
+        }
+
+    def players_sorted_by_scores(self):
+        return sorted([i.player for i in self.clients], key=lambda x: x.scores, reverse=True)
+
+    def _check_the_end_of_game(self):
+        is_game_end = False
+
         # if someone has negative scores,
         # we need to end the game
         for client in self.clients:
@@ -640,18 +678,7 @@ class GameManager(object):
         if self._unique_dealers > 8:
             is_game_end = True
 
-        logger.info('')
-
-        return {
-            'winner': winner,
-            'loser': loser,
-            'is_tsumo': is_tsumo,
-            'is_game_end': is_game_end,
-            'players_with_open_hands': self.players_with_open_hands
-        }
-
-    def players_sorted_by_scores(self):
-        return sorted([i.player for i in self.clients], key=lambda x: x.scores, reverse=True)
+        return is_game_end
 
     def _set_client_names(self):
         """

@@ -397,6 +397,26 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
 
         settings.FIVE_REDS = False
 
+    def test_ron_and_furiten(self):
+        clients = [LocalClient() for _ in range(0, 4)]
+        client = clients[0]
+        manager = GameManager(clients)
+
+        client.player.init_hand(self._string_to_136_array(pin='12345677', sou='23456'))
+
+        # to make furiten
+        tile = self._string_to_136_tile(sou='1')
+        client.player.draw_tile(tile)
+        client.player.discard_tile(tile)
+
+        # to set in_tempai flag
+        client.player.draw_tile(self._string_to_136_tile(honors='1'))
+        client.player.discard_tile()
+
+        win_tile = self._string_to_136_tile(sou='1')
+        result = manager.can_call_ron(client, win_tile)
+        self.assertEqual(result, False)
+
     def test_change_dealer_after_end_of_the_round(self):
         clients = [LocalClient() for _ in range(0, 4)]
         manager = GameManager(clients)

@@ -392,9 +392,14 @@ class GameManager(object):
         if not client.player.in_tempai:
             return False
 
-        tiles = client.player.tiles
+        # check for furiten
+        for item in client.player.discards:
+            discarded_tile = item.value // 4
+            if discarded_tile in client.player.ai.waiting:
+                return False
 
-        # with open hand it can be situation when we in the tempai
+        tiles = client.player.tiles
+        # it can be situation when we are in the tempai
         # but our hand doesn't contain any yaku
         # in that case we can't call ron
         if not client.player.in_riichi:

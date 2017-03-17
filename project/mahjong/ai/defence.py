@@ -1,4 +1,6 @@
+from mahjong.constants import HONOR_INDICES, EAST
 from mahjong.tile import TilesConverter
+from mahjong.utils import is_man, simplify, is_pin, is_sou, plus_dora
 
 
 class Defence(object):
@@ -57,10 +59,14 @@ class Defence(object):
     def try_to_find_safe_tile_to_discard(self, discard_results):
         threatening_players = self._get_threatening_players()
 
+        # safe tiles that can be safe based on the table situation
+        safe_tiles = self.find_impossible_and_only_pair_waits()
+
         # first try to check common safe tiles to discard
         if len(threatening_players) > 1:
-            safe_tiles = [x.all_safe_tiles for x in threatening_players]
-            common_safe_tiles = list(set.intersection(*map(set, safe_tiles)))
+            common_safe_tiles = [x.all_safe_tiles for x in threatening_players]
+            common_safe_tiles = list(set.intersection(*map(set, common_safe_tiles)))
+            common_safe_tiles += safe_tiles
             result = self._find_tile_to_discard(common_safe_tiles, discard_results)
             if result:
                 return result
@@ -68,12 +74,34 @@ class Defence(object):
         # let's find safe tiles for most dangerous player first
         # and than for all other players if we failed find tile for dangerous player
         for player in threatening_players:
-            result = self._find_tile_to_discard(player.all_safe_tiles, discard_results)
+            player_safe_tiles = player.all_safe_tiles + safe_tiles
+            result = self._find_tile_to_discard(player_safe_tiles, discard_results)
             if result:
                 return result
 
         # we wasn't able to find gembutsu
         return None
+
+    def find_impossible_and_only_pair_waits(self):
+        """
+        Impossible waits: fourth honor, fourth 1 man when all 2 man on the table and etc.
+        Pair waits: third honor, third 1 man when all 2 man on the table and etc.
+        """
+        # TODO cache it somehow
+        tiles_34 = TilesConverter.to_34_array(self.player.tiles)
+
+        honors = self._find_not_possible_honor_waits(tiles_34)
+        kabe = self._find_blocked_by_kabe_waits(tiles_34)
+
+        dead_wait = honors['dead_wait'] + kabe['dead_wait']
+        pair_wait = honors['pair_wait'] + kabe['pair_wait']
+
+        # dora is not safe for pair wait, so let's exclude it
+        for x in pair_wait:
+            if plus_dora(x * 4, self.table.dora_indicators) > 0:
+                pair_wait.remove(x)
+
+        return dead_wait + pair_wait
 
     def _find_tile_to_discard(self, safe_tiles, discard_results):
         """
@@ -150,3 +178,101 @@ class Defence(object):
         result = sorted(result, key=lambda x: x.is_dealer, reverse=True)
 
         return result
+
+    def _suits_tiles(self, tiles_34):
+        """
+        Return tiles separated by suits
+        :param tiles_34:
+        :return:
+        """
+        suits = [
+            [0] * 9,
+            [0] * 9,
+            [0] * 9,
+        ]
+
+        for tile in range(0, EAST):
+            total_tiles = self.player.total_tiles(tile, tiles_34)
+            if not total_tiles:
+                continue
+
+            suit_index = None
+            simplified_tile = simplify(tile)
+            if is_man(tile):
+                suit_index = 0
+            if is_pin(tile):
+                suit_index = 1
+            if is_sou(tile):
+                suit_index = 2
+
+            suits[suit_index][simplified_tile] += total_tiles
+
+        return suits
+
+    def _find_not_possible_honor_waits(self, tiles_34):
+        results = {
+            'dead_wait': [],
+            'pair_wait': []
+        }
+
+        for x in HONOR_INDICES:
+            if self.player.total_tiles(x, tiles_34) == 4:
+                results['dead_wait'].append(x)
+
+            if self.player.total_tiles(x, tiles_34) == 3:
+                results['pair_wait'].append(x)
+
+        return results
+
+    def _find_blocked_by_kabe_waits(self, tiles_34):
+        results = {
+            'dead_wait': [],
+            'pair_wait': []
+        }
+
+        # all indices shifted to -1
+        kabe_matrix = [
+            {'indices': [1], 'blocked_tiles': [0]},
+            {'indices': [2], 'blocked_tiles': [0, 1]},
+            {'indices': [3], 'blocked_tiles': [1, 2]},
+            {'indices': [4], 'blocked_tiles': [2, 6]},
+            {'indices': [5], 'blocked_tiles': [6, 7]},
+            {'indices': [6], 'blocked_tiles': [7, 8]},
+            {'indices': [7], 'blocked_tiles': [8]},
+            {'indices': [1, 5], 'blocked_tiles': [3]},
+            {'indices': [2, 6], 'blocked_tiles': [4]},
+            {'indices': [3, 7], 'blocked_tiles': [5]},
+            {'indices': [1, 4], 'blocked_tiles': [2, 3]},
+            {'indices': [2, 5], 'blocked_tiles': [3, 4]},
+            {'indices': [3, 6], 'blocked_tiles': [4, 5]},
+            {'indices': [4, 7], 'blocked_tiles': [5, 6]},
+        ]
+
+        # results = []
+        suits = self._suits_tiles(tiles_34)
+        for x in range(0, 3):
+            suit = suits[x]
+            # "kabe" - 4 revealed tiles
+            kabe_tiles = []
+            for y in range(0, 9):
+                suit_tile = suit[y]
+                if suit_tile == 4:
+                    kabe_tiles.append(y)
+
+            blocked_indices = []
+            for matrix_item in kabe_matrix:
+                all_indices = len(list(set(matrix_item['indices']) - set(kabe_tiles))) == 0
+                if all_indices:
+                    blocked_indices.extend(matrix_item['blocked_tiles'])
+
+            blocked_indices = list(set(blocked_indices))
+            for index in blocked_indices:
+                # let's find 34 tile index
+                tile = index + x * 9
+                if self.player.total_tiles(tile, tiles_34) == 4:
+                    results['dead_wait'].append(tile)
+
+                if self.player.total_tiles(tile, tiles_34) == 3:
+                    results['pair_wait'].append(tile)
+
+        return results

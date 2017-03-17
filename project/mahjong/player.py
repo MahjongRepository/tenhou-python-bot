@@ -160,6 +160,15 @@ class Player(PlayerInterface):
     def try_to_call_meld(self, tile, is_kamicha_discard):
         return self.ai.try_to_call_meld(tile, is_kamicha_discard)
 
+    def total_tiles(self, tile, tiles_34):
+        """
+        Return sum of all tiles (discarded + from melds + our hand)
+        :param tile: 36 tile format
+        :param tiles_34: cached list of tiles (to not build it for each iteration)
+        :return: int
+        """
+        return tiles_34[tile] + self.table.revealed_tiles[tile]
+
     def format_hand_for_print(self, tile):
         hand_string = '{} + {}'.format(
             TilesConverter.to_one_line_string(self.closed_hand),
@@ -226,10 +235,6 @@ class EnemyPlayer(PlayerInterface):
         self.safe_tiles = []
         self.temporary_safe_tiles = []
 
-    @property
-    def all_safe_tiles(self):
-        return self.temporary_safe_tiles + self.safe_tiles
-
     def add_discarded_tile(self, tile: Tile):
         super().add_discarded_tile(tile)
 
@@ -251,3 +256,7 @@ class EnemyPlayer(PlayerInterface):
         for x in affected_players:
             if tile not in self.table.get_player(x).temporary_safe_tiles:
                 self.table.get_player(x).temporary_safe_tiles.append(tile)
+
+    @property
+    def all_safe_tiles(self):
+        return self.temporary_safe_tiles + self.safe_tiles

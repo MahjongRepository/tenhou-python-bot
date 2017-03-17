@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
+from mahjong.constants import EAST, SOUTH
 from mahjong.table import Table
 from utils.tests import TestMixin
 
@@ -175,3 +176,64 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         # discard of 2s will do less damage to our hand shape than 7s discard
         self.assertEqual(self._to_string([result]), '2s')
+
+    def test_find_impossible_waits_and_honor_tiles(self):
+        table = Table()
+
+        tiles = self._string_to_136_array(honors='112233')
+        table.player.init_hand(tiles)
+        table.add_dora_indicator(self._string_to_136_tile(honors='2'))
+
+        table.add_discarded_tile(1, self._string_to_136_tile(honors='1'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(honors='2'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(honors='3'), False)
+
+        table.add_called_riichi(2)
+
+        result = table.player.ai.defence.find_impossible_and_only_pair_waits()
+
+        # dora is not safe against tanki wait, so let's hold it
+        self.assertEqual(result, [SOUTH, EAST])
+
+    def test_find_impossible_waits_and_kabe_technique(self):
+        table = Table()
+        tiles = self._string_to_136_array(pin='11122777799')
+        table.player.init_hand(tiles)
+
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='2'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='2'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='9'), False)
+
+        table.add_called_riichi(2)
+
+        result = table.player.ai.defence.find_impossible_and_only_pair_waits()
+
+        self.assertEqual(self._to_string([x * 4 for x in result]), '19p')
+
+        table = Table()
+        tiles = self._string_to_136_array(pin='33337777')
+        table.player.init_hand(tiles)
+
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='5'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='5'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='5'), False)
+
+        table.add_called_riichi(2)
+
+        result = table.player.ai.defence.find_impossible_and_only_pair_waits()
+
+        self.assertEqual(self._to_string([x * 4 for x in result]), '5p')
+
+        table = Table()
+        tiles = self._string_to_136_array(pin='33334446666')
+        table.player.init_hand(tiles)
+
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='5'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='5'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='5'), False)
+
+        table.add_called_riichi(2)
+
+        result = table.player.ai.defence.find_impossible_and_only_pair_waits()
+
+        self.assertEqual(self._to_string([x * 4 for x in result]), '45p')

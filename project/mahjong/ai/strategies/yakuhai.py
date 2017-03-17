@@ -21,7 +21,7 @@ class YakuhaiStrategy(BaseStrategy):
         for pair in valued_pairs:
             # we have valued pair in the hand and there is enough tiles
             # in the wall
-            if tiles_34[pair] + self.player.table.revealed_tiles[pair] < 4:
+            if self.player.total_tiles(pair, tiles_34) < 4:
                 return True
 
         return False

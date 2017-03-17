@@ -145,7 +145,7 @@ class Player(PlayerInterface):
         return tile_to_discard
 
     def can_call_riichi(self):
-        return all([
+        result = all([
             self.in_tempai,
 
             not self.in_riichi,
@@ -154,6 +154,8 @@ class Player(PlayerInterface):
             self.scores >= 1000,
             self.table.count_of_remaining_tiles > 4
         ])
+
+        return result and self.ai.should_call_riichi()
 
     def try_to_call_meld(self, tile, is_kamicha_discard):
         return self.ai.try_to_call_meld(tile, is_kamicha_discard)

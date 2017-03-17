@@ -104,7 +104,7 @@ class MainAI(BaseAI):
 
         we_can_call_riichi = shanten == 0 and self.player.can_call_riichi()
         # current strategy can affect on our discard options
-        # and don't use strategy specific choices for calling riichi
+        # so, don't use strategy specific choices for calling riichi
         if self.current_strategy and not we_can_call_riichi:
             results = self.current_strategy.determine_what_to_discard(self.player.closed_hand,
                                                                       results,
@@ -233,6 +233,28 @@ class MainAI(BaseAI):
                                                         round_wind=self.player.table.round_wind,
                                                         dora_indicators=self.player.table.dora_indicators)
         return result
+
+    def should_call_riichi(self):
+        # empty waiting can be found in some cases
+        if not self.waiting:
+            return False
+
+        # we have a good wait, let's riichi
+        if len(self.waiting) > 1:
+            return True
+
+        waiting = self.waiting[0]
+        tiles_34 = TilesConverter.to_34_array(self.player.closed_hand)
+        count_of_pairs = len([x for x in range(0, 34) if tiles_34[x] == 2])
+
+        # pair wait is really easy to improve,
+        # so let's not riichi it
+        # but for chitoitsu we can call a riichi
+        is_pair_wait = tiles_34[waiting] == 1
+        if is_pair_wait and count_of_pairs != 6:
+            return False
+
+        return True
 
     @property
     def valued_honors(self):

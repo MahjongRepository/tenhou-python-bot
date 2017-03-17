@@ -18,6 +18,7 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
         player.in_riichi = False
         player.scores = 2000
         player.table.count_of_remaining_tiles = 40
+        player.ai.waiting = [1, 2]
 
         self.assertEqual(player.can_call_riichi(), False)
 
@@ -33,6 +34,7 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
         player.in_riichi = True
         player.scores = 2000
         player.table.count_of_remaining_tiles = 40
+        player.ai.waiting = [1, 2]
 
         self.assertEqual(player.can_call_riichi(), False)
 
@@ -48,6 +50,7 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
         player.in_riichi = False
         player.scores = 0
         player.table.count_of_remaining_tiles = 40
+        player.ai.waiting = [1, 2]
 
         self.assertEqual(player.can_call_riichi(), False)
 
@@ -63,6 +66,7 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
         player.in_riichi = False
         player.scores = 2000
         player.table.count_of_remaining_tiles = 3
+        player.ai.waiting = [1, 2]
 
         self.assertEqual(player.can_call_riichi(), False)
 
@@ -79,6 +83,7 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
         player.scores = 2000
         player.melds = [1]
         player.table.count_of_remaining_tiles = 40
+        player.ai.waiting = [1, 2]
 
         self.assertEqual(player.can_call_riichi(), False)
 

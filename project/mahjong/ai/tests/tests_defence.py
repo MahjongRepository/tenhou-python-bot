@@ -118,7 +118,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         table = Table()
         table.init_round(0, 0, 0, 0, dealer, [])
 
-        tiles = self._string_to_136_array(sou='2345678', pin='34', man='55789')
+        tiles = self._string_to_136_array(sou='2345678', pin='34', man='45789')
         table.player.init_hand(tiles)
 
         table.add_discarded_tile(1, self._string_to_136_tile(man='4'), False)
@@ -135,9 +135,15 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         table.get_player(2).temporary_safe_tiles = []
 
         result = table.player.discard_tile()
-
         # second player is a dealer, let's fold against him
         self.assertEqual(self._to_string([result]), '8m')
+
+        tiles = self._string_to_136_array(sou='2345678', pin='34', man='456', honors='22')
+        table.player.init_hand(tiles)
+
+        result = table.player.discard_tile()
+        # there is no safe tiles against dealer, so let's fold against other players
+        self.assertEqual(self._to_string([result]), '4m')
 
     def test_try_to_discard_not_needed_tiles_first_in_defence_mode(self):
         table = Table()
@@ -153,3 +159,19 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         result = table.player.discard_tile()
 
         self.assertEqual(self._to_string([result]), '1z')
+
+    def test_try_to_discard_less_valuable_tiles_first_in_defence_mode(self):
+        table = Table()
+
+        tiles = self._string_to_136_array(sou='234567', pin='556789', man='55')
+        table.player.init_hand(tiles)
+
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='7'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(sou='2'), False)
+
+        table.add_called_riichi(1)
+
+        result = table.player.discard_tile()
+
+        # discard of 2s will do less damage to our hand shape than 7s discard
+        self.assertEqual(self._to_string([result]), '2s')

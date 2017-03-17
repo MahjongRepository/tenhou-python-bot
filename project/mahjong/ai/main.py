@@ -137,9 +137,6 @@ class MainAI(BaseAI):
         results = []
 
         for i in range(0, 34):
-            if not tiles_34[i]:
-                continue
-
             if not closed_tiles_34[i]:
                 continue
 

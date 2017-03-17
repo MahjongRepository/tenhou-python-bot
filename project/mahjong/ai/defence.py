@@ -57,22 +57,20 @@ class Defence(object):
     def try_to_find_safe_tile_to_discard(self, discard_results):
         threatening_players = self._get_threatening_players()
 
+        # first try to check common safe tiles to discard
         if len(threatening_players) > 1:
             safe_tiles = [x.all_safe_tiles for x in threatening_players]
             common_safe_tiles = list(set.intersection(*map(set, safe_tiles)))
-            # we found a tile that is safe and common for all threatening players
-            if common_safe_tiles:
-                result = self._find_tile_to_discard(common_safe_tiles, discard_results)
-                if result:
-                    return result
+            result = self._find_tile_to_discard(common_safe_tiles, discard_results)
+            if result:
+                return result
 
-        # there are no common safe tiles for all threatening players
-        # so let's find most dangerous enemy and let's fold against him
-        most_threatening_player = self._get_most_threatening_player(threatening_players)
-        safe_tiles = most_threatening_player.all_safe_tiles
-        result = self._find_tile_to_discard(safe_tiles, discard_results)
-        if result:
-            return result
+        # let's find safe tiles for most dangerous player first
+        # and than for all other players if we failed find tile for dangerous player
+        for player in threatening_players:
+            result = self._find_tile_to_discard(player.all_safe_tiles, discard_results)
+            if result:
+                return result
 
         # we wasn't able to find gembutsu
         return None
@@ -94,30 +92,61 @@ class Defence(object):
                 if item.tile_to_discard == safe_tile:
                     return TilesConverter.find_34_tile_in_136_array(safe_tile, closed_hand)
 
+        discard_candidates = []
         for safe_tile in safe_tiles:
             for i in range(0, len(closed_hand_34)):
                 if closed_hand_34[i] > 0 and i == safe_tile:
-                    return TilesConverter.find_34_tile_in_136_array(safe_tile, closed_hand)
+                    discard_candidates.append(safe_tile)
+
+        # we wasn't able to find safe tile in our hand
+        if not discard_candidates:
+            return None
+
+        # results
+        final_results = []
+        for tile in discard_candidates:
+            tiles_34 = TilesConverter.to_34_array(self.player.tiles)
+            tiles_34[tile] -= 1
+            shanten = self.player.ai.shanten.calculate_shanten(tiles_34,
+                                                               self.player.is_open_hand,
+                                                               self.player.meld_tiles)
+            # tiles_34[tile] += 1
+            # print(shanten)
+
+            waiting = []
+            for j in range(0, 34):
+                tiles_34[j] += 1
+                if self.player.ai.shanten.calculate_shanten(tiles_34,
+                                                            self.player.is_open_hand,
+                                                            self.player.meld_tiles) == shanten - 1:
+                    waiting.append(j)
+                tiles_34[j] -= 1
+
+            tiles_count = self.player.ai.count_tiles(waiting, tiles_34)
+
+            final_results.append({
+                'tile': tile,
+                'tiles_count': tiles_count
+            })
+
+        # let's find tile that will do less harm to our hand
+        final_results = sorted(final_results, key=lambda x: x['tiles_count'], reverse=True)
+        tile = final_results[0]['tile']
+
+        return TilesConverter.find_34_tile_in_136_array(tile, closed_hand)
 
     def _get_threatening_players(self):
         """
         For now it is just players in riichi,
-        later I will add players with opened valuable hands
+        later I will add players with opened valuable hands.
+        Sorted by threat level. Most threatening on the top
         """
         result = []
         for player in self.table.enemy_players:
             if player.in_riichi:
                 result.append(player)
+
+        # dealer is most threatening player
+        result = sorted(result, key=lambda x: x.is_dealer, reverse=True)
+
         return result
-
-    def _get_most_threatening_player(self, threatening_players):
-        """
-        For now it will be just a dealer.
-        Later I will add discard analyze to find a player with most expensive hand
-        """
-        for player in threatening_players:
-            if player.is_dealer:
-                return player
-
-        # dealer is not in threatening players list
-        return threatening_players[0]

@@ -115,8 +115,6 @@ class Player(PlayerInterface):
         self.ai.determine_strategy()
 
     def draw_tile(self, tile):
-        self.table.count_of_remaining_tiles -= 1
-
         self.last_draw = tile
         self.tiles.append(tile)
         # we need sort it to have a better string presentation
@@ -139,7 +137,9 @@ class Player(PlayerInterface):
 
         if tile_to_discard != Shanten.AGARI_STATE:
             is_tsumogiri = tile_to_discard == self.last_draw
-            self.add_discarded_tile(Tile(tile_to_discard, is_tsumogiri))
+            # it is important to use table method,
+            # to recalculate revealed tiles and etc.
+            self.table.add_discarded_tile(0, tile_to_discard, is_tsumogiri)
             self.tiles.remove(tile_to_discard)
 
         return tile_to_discard

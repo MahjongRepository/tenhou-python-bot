@@ -8,4 +8,3 @@ class AbortiveDraw(object):
     TRIPLE_RON = 'ron3'
     FOUR_KANS = 'kan4'
     SAME_FIRST_WIND = 'kaze4'
-

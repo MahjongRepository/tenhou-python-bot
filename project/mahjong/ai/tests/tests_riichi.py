@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from mahjong.ai.discard import DiscardOption
-from mahjong.ai.main import MainAI
-from mahjong.ai.shanten import Shanten
-from mahjong.constants import EAST, SOUTH, WEST, NORTH, HAKU, HATSU, CHUN, FIVE_RED_SOU
 from mahjong.player import Player
 from mahjong.table import Table
 from utils.tests import TestMixin

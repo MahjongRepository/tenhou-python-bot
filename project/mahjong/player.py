@@ -228,6 +228,8 @@ class EnemyPlayer(PlayerInterface):
     # tiles that were discarded in the current "step"
     # so, for example kamicha discard will be a safe tile for all players
     temporary_safe_tiles = None
+    # calculated suji for this player
+    suji = []
 
     def erase_state(self):
         super().erase_state()
@@ -259,4 +261,4 @@ class EnemyPlayer(PlayerInterface):
 
     @property
     def all_safe_tiles(self):
-        return self.temporary_safe_tiles + self.safe_tiles
+        return list(set(self.temporary_safe_tiles + self.safe_tiles))

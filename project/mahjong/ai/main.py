@@ -3,7 +3,7 @@ import logging
 
 from mahjong.ai.agari import Agari
 from mahjong.ai.base import BaseAI
-from mahjong.ai.defence import Defence
+from mahjong.ai.defence.main import DefenceHandler
 from mahjong.ai.discard import DiscardOption
 from mahjong.ai.shanten import Shanten
 from mahjong.ai.strategies.honitsu import HonitsuStrategy
@@ -19,7 +19,7 @@ logger = logging.getLogger('ai')
 
 
 class MainAI(BaseAI):
-    version = '0.2.0'
+    version = '0.2.2'
 
     agari = None
     shanten = None
@@ -38,7 +38,7 @@ class MainAI(BaseAI):
 
         self.agari = Agari()
         self.shanten = Shanten()
-        self.defence = Defence(player)
+        self.defence = DefenceHandler(player)
         self.hand_divider = HandDivider()
         self.finished_hand = FinishedHand()
         self.previous_shanten = 7

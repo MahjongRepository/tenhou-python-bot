@@ -15,8 +15,10 @@ class DiscardOption(object):
     tiles_count = None
     # calculated tile value, for sorting
     value = None
+    # how danger this tile is
+    danger = None
 
-    def __init__(self, player, tile_to_discard, waiting, tiles_count):
+    def __init__(self, player, tile_to_discard, waiting, tiles_count, danger=0):
         """
         :param player:
         :param tile_to_discard: tile in 34 format
@@ -27,6 +29,7 @@ class DiscardOption(object):
         self.tile_to_discard = tile_to_discard
         self.waiting = waiting
         self.tiles_count = tiles_count
+        self.danger = danger
 
         self.calculate_value()
 

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import os
-import time
 
 from game.replays.base import Replay
 from mahjong.meld import Meld

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from mahjong.constants import EAST, SOUTH
+from mahjong.constants import EAST, WEST
 from mahjong.table import Table
 from utils.tests import TestMixin
 
@@ -137,7 +137,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         result = table.player.discard_tile()
         # second player is a dealer, let's fold against him
-        self.assertEqual(self._to_string([result]), '8m')
+        self.assertEqual(self._to_string([result]), '9m')
 
         tiles = self._string_to_136_array(sou='2345678', pin='34', man='456', honors='22')
         table.player.init_hand(tiles)
@@ -180,20 +180,19 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
     def test_find_impossible_waits_and_honor_tiles(self):
         table = Table()
 
-        tiles = self._string_to_136_array(honors='112233')
+        tiles = self._string_to_136_array(honors='1133')
         table.player.init_hand(tiles)
-        table.add_dora_indicator(self._string_to_136_tile(honors='2'))
 
         table.add_discarded_tile(1, self._string_to_136_tile(honors='1'), False)
-        table.add_discarded_tile(1, self._string_to_136_tile(honors='2'), False)
         table.add_discarded_tile(1, self._string_to_136_tile(honors='3'), False)
 
         table.add_called_riichi(2)
 
-        result = table.player.ai.defence.find_impossible_and_only_pair_waits()
+        table.player.ai.defence.try_to_find_safe_tile_to_discard([])
+        result = table.player.ai.defence.impossible_wait.find_tiles_to_discard([])
 
         # dora is not safe against tanki wait, so let's hold it
-        self.assertEqual(result, [SOUTH, EAST])
+        self.assertEqual([x.value for x in result], [EAST, WEST])
 
     def test_find_impossible_waits_and_kabe_technique(self):
         table = Table()
@@ -206,9 +205,10 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         table.add_called_riichi(2)
 
-        result = table.player.ai.defence.find_impossible_and_only_pair_waits()
+        table.player.ai.defence.try_to_find_safe_tile_to_discard([])
+        result = table.player.ai.defence.kabe.find_tiles_to_discard([])
 
-        self.assertEqual(self._to_string([x * 4 for x in result]), '19p')
+        self.assertEqual(self._to_string([x.value * 4 for x in result]), '19p')
 
         table = Table()
         tiles = self._string_to_136_array(pin='33337777')
@@ -220,9 +220,10 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         table.add_called_riichi(2)
 
-        result = table.player.ai.defence.find_impossible_and_only_pair_waits()
+        table.player.ai.defence.try_to_find_safe_tile_to_discard([])
+        result = table.player.ai.defence.kabe.find_tiles_to_discard([])
 
-        self.assertEqual(self._to_string([x * 4 for x in result]), '5p')
+        self.assertEqual(self._to_string([x.value * 4 for x in result]), '5p')
 
         table = Table()
         tiles = self._string_to_136_array(pin='33334446666')
@@ -234,6 +235,38 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         table.add_called_riichi(2)
 
-        result = table.player.ai.defence.find_impossible_and_only_pair_waits()
+        table.player.ai.defence.try_to_find_safe_tile_to_discard([])
+        result = table.player.ai.defence.kabe.find_tiles_to_discard([])
 
-        self.assertEqual(self._to_string([x * 4 for x in result]), '45p')
+        self.assertEqual(self._to_string([x.value * 4 for x in result]), '45p')
+
+    def test_find_common_suji_tiles_to_discard_for_multiple_players(self):
+        table = Table()
+
+        tiles = self._string_to_136_array(sou='2345678', pin='12789', man='55')
+        table.player.init_hand(tiles)
+
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='4'), False)
+        table.add_discarded_tile(2, self._string_to_136_tile(pin='4'), False)
+
+        table.add_called_riichi(1)
+        table.add_called_riichi(2)
+
+        result = table.player.discard_tile()
+
+        self.assertEqual(self._to_string([result]), '1p')
+
+    def test_find_common_suji_tiles_to_discard_for_one_player(self):
+        table = Table()
+
+        tiles = self._string_to_136_array(sou='2345678', pin='12789', man='55')
+        table.player.init_hand(tiles)
+
+        table.add_discarded_tile(1, self._string_to_136_tile(man='2'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(man='8'), False)
+
+        table.add_called_riichi(1)
+
+        result = table.player.discard_tile()
+
+        self.assertEqual(self._to_string([result]), '5m')

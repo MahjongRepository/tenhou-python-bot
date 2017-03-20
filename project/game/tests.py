@@ -19,7 +19,9 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         settings.FIVE_REDS = False
 
     # def test_debug(self):
-    #     game.game_manager.shuffle_seed = lambda: 0.09764471694361732
+    #     settings.FIVE_REDS = True
+    #
+    #     game.game_manager.shuffle_seed = lambda: 0.806656791974764
     #
     #     clients = [LocalClient(previous_ai=False) for _ in range(0, 4)]
     #     # clients = [LocalClient(use_previous_ai_version=True) for _ in range(0, 3)]
@@ -27,9 +29,9 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
     #     manager = GameManager(clients)
     #     manager.replay.init_game('123')
     #     manager.init_game()
-    #     manager.set_dealer(2)
-    #     manager._unique_dealers = 3
-    #     manager.round_number = 2
+    #     manager.set_dealer(1)
+    #     manager._unique_dealers = 6
+    #     manager.round_number = 6
     #     manager.init_round()
     #
     #     result = manager.play_round()

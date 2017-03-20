@@ -26,6 +26,7 @@ set_up_logging()
 logger = logging.getLogger('game')
 
 
+# to be able repeat our games
 def shuffle_seed():
     return seed_value
 
@@ -77,6 +78,8 @@ class GameManager(AbortiveDraw):
         self.replay = Replay(replay_name, self.clients)
 
         logger.info('Seed: {}'.format(shuffle_seed()))
+        logger.info('Aka dora: {}'.format(settings.FIVE_REDS))
+        logger.info('Open tanyao: {}'.format(settings.FIVE_REDS))
 
         shuffle(self.clients, shuffle_seed)
         for i in range(0, len(self.clients)):
@@ -141,13 +144,14 @@ class GameManager(AbortiveDraw):
             client.player.tiles = sorted(client.player.tiles)
             client.player.init_hand(client.player.tiles)
 
-        logger.info('Round number: {}'.format(self.round_number))
+        logger.info('Seed: {}'.format(shuffle_seed()))
         logger.info('Dealer: {}, {}'.format(self.dealer, self.clients[self.dealer].player.name))
         logger.info('Wind: {}. Riichi sticks: {}. Honba sticks: {}'.format(
             self._unique_dealers,
             self.riichi_sticks,
             self.honba_sticks
         ))
+        logger.info('Round number: {}'.format(self.round_number))
         logger.info('Players: {0}'.format(self.players_sorted_by_scores()))
 
         self.replay.init_round(self.dealer,
@@ -375,7 +379,7 @@ class GameManager(AbortiveDraw):
 
         is_game_end = False
         self.init_game()
-        self.replay.init_game(seed_value)
+        self.replay.init_game(shuffle_seed())
 
         played_rounds = 0
 
@@ -783,7 +787,9 @@ class GameManager(AbortiveDraw):
         return positions[who - from_who]
 
     def _generate_wall(self):
-        seed(shuffle_seed() + self.round_number)
+        wall_seed = shuffle_seed() + self.round_number
+        # init seed for random generator
+        seed(wall_seed)
 
         def shuffle_wall(rand_seeds):
             # for better wall shuffling we had to do it manually

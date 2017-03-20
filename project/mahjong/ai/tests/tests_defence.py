@@ -270,3 +270,22 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         result = table.player.discard_tile()
 
         self.assertEqual(self._to_string([result]), '5m')
+
+    def test_dont_discard_safe_tiles_when_call_riichi(self):
+        table = Table()
+        table.count_of_remaining_tiles = 70
+        table.player.scores = 2000
+
+        tiles = self._string_to_136_array(sou='12356789', pin='22678')
+        table.player.init_hand(tiles)
+        table.player.draw_tile(self._string_to_136_tile(honors='1'))
+        table.player.discard_tile()
+        table.player.draw_tile(self._string_to_136_tile(honors='1'))
+
+        table.add_discarded_tile(1, self._string_to_136_tile(sou='1'), False)
+        table.add_called_riichi(1)
+
+        result = table.player.discard_tile()
+
+        self.assertEqual(table.player.can_call_riichi(), True)
+        self.assertEqual(self._to_string([result]), '1z')

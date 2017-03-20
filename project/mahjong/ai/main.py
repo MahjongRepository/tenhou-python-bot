@@ -60,10 +60,12 @@ class MainAI(BaseAI):
         for result in results:
             result.calculate_value()
 
+        we_can_call_riichi = shanten == 0 and self.player.can_call_riichi()
+
         # bot think that there is a threat on the table
         # and better to fold
         # if we can't find safe tiles, let's continue to build our hand
-        if self.defence.should_go_to_defence_mode():
+        if self.defence.should_go_to_defence_mode() and not we_can_call_riichi:
             if not self.in_defence:
                 logger.info('We decided to fold against other players')
                 self.in_defence = True
@@ -102,7 +104,7 @@ class MainAI(BaseAI):
         if not results:
             return self.player.last_draw
 
-        we_can_call_riichi = shanten == 0 and self.player.can_call_riichi()
+
         # current strategy can affect on our discard options
         # so, don't use strategy specific choices for calling riichi
         if self.current_strategy and not we_can_call_riichi:

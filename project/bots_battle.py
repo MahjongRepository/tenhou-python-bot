@@ -15,8 +15,10 @@ TOTAL_HANCHANS = 100
 
 
 def main():
-    # let's load three bots with old logic
-    # and one copy with new logic
+    # initial seed
+    random_value = random()
+    game.game_manager.shuffle_seed = lambda: random_value
+
     clients = [LocalClient(previous_ai=True) for _ in range(0, 3)]
     clients += [LocalClient(previous_ai=False)]
     # clients = [LocalClient(previous_ai=False) for _ in range(0, 4)]
@@ -36,7 +38,6 @@ def main():
         }
 
     for x in trange(TOTAL_HANCHANS):
-        game.game_manager.shuffle_seed = lambda: random()
         # yes, I know about tqdm.write
         # but it didn't work properly for our case
         print('\n')
@@ -65,6 +66,10 @@ def main():
         table = AsciiTable(table_data)
         print(table.table)
         print('')
+
+        # rebuild seed value
+        random_value = random()
+        game.game_manager.shuffle_seed = lambda: random_value
 
     print('\n')
 

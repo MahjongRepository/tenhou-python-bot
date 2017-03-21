@@ -2,8 +2,6 @@
 from urllib.parse import unquote
 
 import re
-from bs4 import BeautifulSoup
-
 from mahjong.meld import Meld
 
 
@@ -33,15 +31,12 @@ class TenhouDecoder(object):
     ]
 
     def parse_hello_string(self, message):
-        soup = BeautifulSoup(message, 'html.parser')
-        soup = soup.find('helo')
-
         rating_string = ''
-        if soup and 'auth' in soup.attrs:
-            auth_message = soup.attrs['auth']
+        if 'auth=' in message:
+            auth_message = self._get_attribute_content(message, 'auth')
             # for NoName we don't have rating attribute
-            if 'pf4' in soup.attrs:
-                rating_string = soup.attrs['pf4']
+            if 'pf4=' in message:
+                rating_string = self._get_attribute_content(message, 'pf4')
             return auth_message, rating_string
         else:
             return '', ''
@@ -57,22 +52,16 @@ class TenhouDecoder(object):
             - Dora indicator.
         """
 
-        soup = BeautifulSoup(message, 'html.parser')
-        tag = soup.find('init')
-        # for reconnection
-        if not tag:
-            tag = soup.find('reinit')
-
-        seed = tag.attrs['seed'].split(',')
+        seed = self._get_attribute_content(message, 'seed').split(',')
         seed = [int(i) for i in seed]
 
         round_number = seed[0]
         count_of_honba_sticks = seed[1]
         count_of_riichi_sticks = seed[2]
         dora_indicator = seed[5]
-        dealer = int(tag.attrs['oya'])
+        dealer = int(self._get_attribute_content(message, 'oya'))
 
-        scores = tag.attrs['ten'].split(',')
+        scores = self._get_attribute_content(message, 'ten').split(',')
         scores = [int(i) for i in scores]
 
         return {
@@ -85,24 +74,12 @@ class TenhouDecoder(object):
         }
 
     def parse_initial_hand(self, message):
-        soup = BeautifulSoup(message, 'html.parser')
-        tag = soup.find('init')
-        # for reconnection
-        if not tag:
-            tag = soup.find('reinit')
-
-        tiles = tag.attrs['hai']
+        tiles = self._get_attribute_content(message, 'hai')
         tiles = [int(i) for i in tiles.split(',')]
-
         return tiles
 
     def parse_final_scores_and_uma(self, message):
-        soup = BeautifulSoup(message, 'html.parser')
-        tag = soup.find('agari')
-        if not tag:
-            tag = soup.find('ryuukyoku')
-
-        data = tag.attrs['owari']
+        data = self._get_attribute_content(message, 'owari')
         data = [float(i) for i in data.split(',')]
 
         # start at the beginning at take every second item (even)
@@ -113,27 +90,20 @@ class TenhouDecoder(object):
         return {'scores': scores, 'uma': uma}
 
     def parse_names_and_ranks(self, message):
-        soup = BeautifulSoup(message, 'html.parser')
-        tag = soup.find('un')
-
-        ranks = tag.attrs['dan']
+        ranks = self._get_attribute_content(message, 'dan')
         ranks = [int(i) for i in ranks.split(',')]
 
         return [
-            {'name': unquote(tag.attrs['n0']), 'rank': TenhouDecoder.RANKS[ranks[0]]},
-            {'name': unquote(tag.attrs['n1']), 'rank': TenhouDecoder.RANKS[ranks[1]]},
-            {'name': unquote(tag.attrs['n2']), 'rank': TenhouDecoder.RANKS[ranks[2]]},
-            {'name': unquote(tag.attrs['n3']), 'rank': TenhouDecoder.RANKS[ranks[3]]},
+            {'name': unquote(self._get_attribute_content(message, 'n0')), 'rank': TenhouDecoder.RANKS[ranks[0]]},
+            {'name': unquote(self._get_attribute_content(message, 'n1')), 'rank': TenhouDecoder.RANKS[ranks[1]]},
+            {'name': unquote(self._get_attribute_content(message, 'n2')), 'rank': TenhouDecoder.RANKS[ranks[2]]},
+            {'name': unquote(self._get_attribute_content(message, 'n3')), 'rank': TenhouDecoder.RANKS[ranks[3]]},
         ]
 
     def parse_log_link(self, message):
-        soup = BeautifulSoup(message, 'html.parser')
-        tag = soup.find('taikyoku')
-
-        seat = int(tag.attrs['oya'])
+        seat = int(self._get_attribute_content(message, 'oya'))
         seat = (4 - seat) % 4
-        game_id = tag.attrs['log']
-
+        game_id = self._get_attribute_content(message, 'log')
         return game_id, seat
 
     def parse_tile(self, message):
@@ -142,9 +112,6 @@ class TenhouDecoder(object):
         return int(result[2:])
 
     def parse_table_state_after_reconnection(self, message):
-        soup = BeautifulSoup(message, 'html.parser')
-        tag = soup.find('reinit')
-
         players = []
         for x in range(0, 4):
             player = {
@@ -153,8 +120,8 @@ class TenhouDecoder(object):
             }
 
             discard_attr = 'kawa{}'.format(x)
-            if discard_attr in tag.attrs:
-                discards = tag.attrs[discard_attr]
+            if discard_attr in message:
+                discards = self._get_attribute_content(message, discard_attr)
                 discards = [int(x) for x in discards.split(',')]
 
                 was_riichi = 255 in discards
@@ -164,12 +131,12 @@ class TenhouDecoder(object):
                 player['discards'] = discards
 
             melds_attr = 'm{}'.format(x)
-            if melds_attr in tag.attrs:
-                melds = tag.attrs[melds_attr]
+            if melds_attr in message:
+                melds = self._get_attribute_content(message, melds_attr)
                 melds = [int(x) for x in melds.split(',')]
                 for item in melds:
-                    message = '<N who="{}" m="{}" />'.format(x, item)
-                    meld = self.parse_meld(message)
+                    meld_message = '<N who="{}" m="{}" />'.format(x, item)
+                    meld = self.parse_meld(meld_message)
                     player['melds'].append(meld)
 
             players.append(player)
@@ -180,13 +147,17 @@ class TenhouDecoder(object):
 
         return players
 
+    def parse_dora_indicator(self, message):
+        return int(self._get_attribute_content(message, 'hai'))
+
+    def parse_who_called_riichi(self, message):
+        return int(self._get_attribute_content(message, 'who'))
+
     def parse_meld(self, message):
-        soup = BeautifulSoup(message, 'html.parser')
-        data = soup.find('n').attrs['m']
-        data = int(data)
+        data = int(self._get_attribute_content(message, 'm'))
 
         meld = Meld()
-        meld.who = int(soup.find('n').attrs['who'])
+        meld.who = int(self._get_attribute_content(message, 'who'))
         meld.from_who = data & 0x3
 
         if data & 0x4:
@@ -237,16 +208,6 @@ class TenhouDecoder(object):
         meld.type = Meld.NUKI
         meld.tiles = [data >> 8]
 
-    def parse_dora_indicator(self, message):
-        soup = BeautifulSoup(message, 'html.parser')
-        tag = soup.find('dora')
-        return int(tag.attrs['hai'])
-
-    def parse_who_called_riichi(self, message):
-        soup = BeautifulSoup(message, 'html.parser')
-        tag = soup.find('reach')
-        return int(tag.attrs['who'])
-
     def generate_auth_token(self, auth_string):
         translation_table = [63006, 9570, 49216, 45888, 9822, 23121, 59830, 51114, 54831, 4189, 580, 5203, 42174, 59972,
                              55457, 59009, 59347, 64456, 8673, 52710, 49975, 2006, 62677, 3463, 17754, 5357]
@@ -270,3 +231,7 @@ class TenhouDecoder(object):
         result = first_part + '-' + postfix
 
         return result
+
+    def _get_attribute_content(self, message, attribute_name):
+        result = re.findall(r'{}="([^"]*)"'.format(attribute_name), message)
+        return result[0]

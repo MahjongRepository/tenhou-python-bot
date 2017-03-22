@@ -78,7 +78,7 @@ class Table(object):
 
         # for chankan we already added 3 tiles
         if meld.type == Meld.CHAKAN:
-            tiles = tiles[0]
+            tiles = [tiles[0]]
 
         for tile in tiles:
             self._add_revealed_tile(tile)

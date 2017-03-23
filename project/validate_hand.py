@@ -75,6 +75,7 @@ class TenhouLogParser(object):
         elements = soup.find_all()
 
         settings.FIVE_REDS = True
+        settings.OPEN_TANYAO = True
 
         total_hand = 0
         successful_hand = 0

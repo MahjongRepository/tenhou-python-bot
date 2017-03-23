@@ -153,6 +153,9 @@ class TenhouDecoder(object):
     def parse_who_called_riichi(self, message):
         return int(self._get_attribute_content(message, 'who'))
 
+    def parse_go_tag(self, message):
+        return int(self._get_attribute_content(message, 'type'))
+
     def parse_meld(self, message):
         data = int(self._get_attribute_content(message, 'm'))
 

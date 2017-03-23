@@ -54,6 +54,9 @@ class TenhouClient(Client):
             logger.info('Successfully reconnected')
             self.reconnected_messages = messages
 
+            selected_game_type = self.decoder.parse_go_tag(auth_message)
+            self._set_game_rules(selected_game_type)
+
             values = self.decoder.parse_names_and_ranks(messages[1])
             self.table.set_players_names_and_ranks(values)
 
@@ -118,7 +121,8 @@ class TenhouClient(Client):
             self._send_message('<GOK />')
             sleep(1)
         else:
-            game_type = self._build_game_type()
+            selected_game_type = self._build_game_type()
+            game_type = '{},{}'.format(settings.LOBBY, selected_game_type)
 
             if not settings.IS_TOURNAMENT:
                 self._send_message('<JOIN t="{}" />'.format(game_type))
@@ -139,6 +143,16 @@ class TenhouClient(Client):
                     if '<GO' in message:
                         self._send_message('<GOK />')
                         self._send_message('<NEXTREADY />')
+
+                        # we had to have it there
+                        # because for tournaments we don't know
+                        # what exactly game type was set
+                        selected_game_type = self.decoder.parse_go_tag(message)
+                        process_rules = self._set_game_rules(selected_game_type)
+                        if not process_rules:
+                            logger.error('Hirosima (3 man) is not supported at the moment')
+                            self.end_game(success=False)
+                            return
 
                     if '<TAIKYOKU' in message:
                         self.looking_for_game = False
@@ -443,18 +457,18 @@ class TenhouClient(Client):
     def _build_game_type(self):
         # usual case, we specified game type to play
         if settings.GAME_TYPE is not None:
-            return '{},{}'.format(settings.LOBBY, settings.GAME_TYPE)
+            return settings.GAME_TYPE
 
         # kyu lobby, hanchan ari-ari
         default_game_type = '9'
 
         if settings.LOBBY != '0':
             logger.error("We can't use dynamic game type and custom lobby. Default game type was set")
-            return '{},{}'.format(settings.LOBBY, default_game_type)
+            return default_game_type
 
         if not self._rating_string:
             logger.error("For NoName dynamic game type is not available. Default game type was set")
-            return '{},{}'.format(settings.LOBBY, default_game_type)
+            return default_game_type
 
         temp = self._rating_string.split(',')
         dan = int(temp[0])
@@ -474,4 +488,34 @@ class TenhouClient(Client):
         if dan >= 16 and rate >= 2000:
             game_type = '169'
 
-        return '{},{}'.format(settings.LOBBY, game_type)
+        return game_type
+
+    def _set_game_rules(self, game_type):
+        """
+        Set game related settings and
+        return false, if we are trying to play 3 man game
+        """
+        # need to find a better way to do it
+        rules = bin(int(game_type)).replace('0b', '')
+        while len(rules) != 8:
+            rules = '0' + rules
+
+        print(rules)
+
+        is_hanchan = rules[4] == '1'
+        is_open_tanyao = rules[5] == '0'
+        is_aka = rules[6] == '0'
+        is_hirosima = rules[3] == '1'
+
+        if is_hirosima:
+            return False
+
+        settings.FIVE_REDS = is_aka
+        settings.OPEN_TANYAO = is_open_tanyao
+
+        logger.info('Game settings:')
+        logger.info('Aka dora: {}'.format(settings.FIVE_REDS))
+        logger.info('Open tanyao: {}'.format(settings.OPEN_TANYAO))
+        logger.info('Game type: {}'.format(is_hanchan and 'hanchan' or 'tonpusen'))
+
+        return True

@@ -72,7 +72,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
     def test_should_go_for_defence_and_good_hand(self):
         table = Table()
 
-        tiles = self._string_to_136_array(sou='234567', pin='34789', man='55')
+        tiles = self._string_to_136_array(sou='234678', pin='34789', man='55')
         table.player.init_hand(tiles)
         table.player.draw_tile(self._string_to_136_tile(man='6'))
         # discard here to reinit shanten number in AI

@@ -17,6 +17,7 @@ from mahjong.tile import TilesConverter
 from utils.settings_handler import settings
 
 settings.FIVE_REDS = True
+settings.OPEN_TANYAO = True
 
 # we need to have it
 # to be able repeat our tests with needed random

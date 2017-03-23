@@ -38,6 +38,8 @@ ENABLE_AI = True
   00101001 = 41  - upperdan
   10101001 = 169 - phoenix
 
+  00001011 = 11 - hanchan no red five, but with open tanyao
+
   00001001 = 9 - kyu, hanchan ari-ari
   00000001 = 1 - kyu, tonpusen ari-ari
 """
@@ -49,7 +51,7 @@ GAME_TYPE = '1'
 
 # game related settings
 # TODO put them to the separate settings files
-FIVE_REDS = False
+FIVE_REDS = True
 OPEN_TANYAO = True
 
 try:

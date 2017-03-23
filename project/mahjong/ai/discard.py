@@ -2,6 +2,7 @@
 from mahjong.constants import AKA_DORA_LIST
 from mahjong.tile import TilesConverter
 from mahjong.utils import simplify, is_honor, plus_dora
+from utils.settings_handler import settings
 
 
 class DiscardOption(object):
@@ -38,22 +39,23 @@ class DiscardOption(object):
         Find and return 136 tile in closed player hand
         """
 
-        # special case, to keep aka dora in hand
-        if self.tile_to_discard in [4, 13, 22]:
-            aka_closed_hand = closed_hand[:]
-            while True:
-                tile = TilesConverter.find_34_tile_in_136_array(self.tile_to_discard, aka_closed_hand)
-                # we have only aka dora in the hand
-                if not tile:
-                    break
+        if settings.FIVE_REDS:
+            # special case, to keep aka dora in hand
+            if self.tile_to_discard in [4, 13, 22]:
+                aka_closed_hand = closed_hand[:]
+                while True:
+                    tile = TilesConverter.find_34_tile_in_136_array(self.tile_to_discard, aka_closed_hand)
+                    # we have only aka dora in the hand
+                    if not tile:
+                        break
 
-                # we found aka in the hand,
-                # let's try to search another five tile
-                # to keep aka dora
-                if tile in AKA_DORA_LIST:
-                    aka_closed_hand.remove(tile)
-                else:
-                    return tile
+                    # we found aka in the hand,
+                    # let's try to search another five tile
+                    # to keep aka dora
+                    if tile in AKA_DORA_LIST:
+                        aka_closed_hand.remove(tile)
+                    else:
+                        return tile
 
         return TilesConverter.find_34_tile_in_136_array(self.tile_to_discard, closed_hand)
 

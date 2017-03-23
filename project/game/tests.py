@@ -11,12 +11,9 @@ from utils.settings_handler import settings
 
 class GameManagerTestCase(unittest.TestCase, TestMixin):
 
-    def setUp(self):
-        logger = logging.getLogger('game')
-        logger.disabled = False
-
     def tearDown(self):
-        settings.FIVE_REDS = False
+        settings.FIVE_REDS = True
+        settings.OPEN_TANYAO = True
 
     # def test_debug(self):
     #     settings.FIVE_REDS = True
@@ -451,6 +448,8 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(manager.dealer, 3)
 
     def test_is_game_end_by_negative_scores(self):
+        settings.FIVE_REDS = False
+
         clients = [LocalClient() for _ in range(0, 4)]
         manager = GameManager(clients)
         manager.set_dealer(0)
@@ -469,6 +468,8 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         result = manager.process_the_end_of_the_round(tiles, win_tile, winner, loser, False)
         self.assertEqual(loser.player.scores, -1500)
         self.assertEqual(result['is_game_end'], True)
+
+        settings.FIVE_REDS = True
 
     def test_is_game_end_by_eight_winds(self):
         clients = [LocalClient() for _ in range(0, 4)]

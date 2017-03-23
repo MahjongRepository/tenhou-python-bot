@@ -14,12 +14,13 @@ from mahjong.constants import HAKU, CHUN, HATSU
 from mahjong.hand import HandDivider, FinishedHand
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_honor
+from utils.settings_handler import settings
 
 logger = logging.getLogger('ai')
 
 
 class MainAI(BaseAI):
-    version = '0.2.2'
+    version = '0.2.3'
 
     agari = None
     shanten = None
@@ -104,7 +105,6 @@ class MainAI(BaseAI):
         if not results:
             return self.player.last_draw
 
-
         # current strategy can affect on our discard options
         # so, don't use strategy specific choices for calling riichi
         if self.current_strategy and not we_can_call_riichi:
@@ -188,8 +188,10 @@ class MainAI(BaseAI):
         strategies = [
             YakuhaiStrategy(BaseStrategy.YAKUHAI, self.player),
             HonitsuStrategy(BaseStrategy.HONITSU, self.player),
-            TanyaoStrategy(BaseStrategy.TANYAO, self.player),
         ]
+
+        if settings.OPEN_TANYAO:
+            strategies.append(TanyaoStrategy(BaseStrategy.TANYAO, self.player))
 
         for strategy in strategies:
             if strategy.should_activate_strategy():

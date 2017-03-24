@@ -67,6 +67,11 @@ class Table(object):
         # that he discards tile from hand, not from wall
         self.count_of_remaining_tiles += 1
 
+        # we will decrease count of remaining tiles after called kan
+        # because we had to complement dead wall
+        if meld.type == Meld.KAN or meld.type == Meld.CHAKAN:
+            self.count_of_remaining_tiles -= 1
+
         self.get_player(player_seat).add_called_meld(meld)
 
         tiles = meld.tiles[:]

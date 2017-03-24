@@ -221,6 +221,7 @@ class GameManager(AbortiveDraw):
                 in_tempai = current_client.player.in_tempai
             else:
                 tile = draw_tile
+                current_client.table.add_discarded_tile(0, tile, True)
 
             if in_tempai and current_client.player.can_call_riichi():
                 self.replay.riichi(current_client.seat, 1)

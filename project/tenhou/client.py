@@ -253,6 +253,9 @@ class TenhouClient(Client):
                         tile = self.player.discard_tile()
 
                         logger.info('Discard: {}'.format(TilesConverter.to_one_line_string([tile])))
+                    else:
+                        # we had to add it to discards, to calculate remaining tiles correctly
+                        self.table.add_discarded_tile(0, tile, True)
 
                     if 't="16"' in message:
                         # we win by self draw (tsumo)

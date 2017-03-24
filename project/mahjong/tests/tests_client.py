@@ -36,6 +36,15 @@ class ClientTestCase(unittest.TestCase):
         self.assertEqual(len(client.player.melds), 1)
         self.assertEqual(client.table.count_of_remaining_tiles, 71)
 
+        meld = Meld()
+        meld.type = Meld.KAN
+        client.table.add_called_meld(0, meld)
+
+        self.assertEqual(len(client.player.melds), 2)
+        # +1 for called meld
+        # -1 for called kan
+        self.assertEqual(client.table.count_of_remaining_tiles, 71)
+
     def test_enemy_discard(self):
         client = Client()
         client.table.init_round(0, 0, 0, 0, 0, [0, 0, 0, 0])

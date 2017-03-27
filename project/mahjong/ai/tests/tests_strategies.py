@@ -315,7 +315,6 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         player.draw_tile(self._string_to_136_tile(honors='6'))
         tile_to_discard = player.discard_tile()
 
-        # west was discarded three times, we don't need it
         self.assertEqual(self._to_string([tile_to_discard]), '5s')
 
     def test_dont_go_for_honitsu_with_ryanmen_in_other_suit(self):

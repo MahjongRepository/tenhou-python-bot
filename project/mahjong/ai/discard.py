@@ -14,12 +14,16 @@ class DiscardOption(object):
     waiting = None
     # how much tiles will improve our hand
     tiles_count = None
+    # number of shanten for that tile
+    shanten = None
+    # sometimes we had to force tile to be discarded
+    had_to_be_discarded = False
     # calculated tile value, for sorting
     value = None
     # how danger this tile is
     danger = None
 
-    def __init__(self, player, tile_to_discard, waiting, tiles_count, danger=0):
+    def __init__(self, player, tile_to_discard, shanten, waiting, tiles_count, danger=100):
         """
         :param player:
         :param tile_to_discard: tile in 34 format
@@ -28,6 +32,7 @@ class DiscardOption(object):
         """
         self.player = player
         self.tile_to_discard = tile_to_discard
+        self.shanten = shanten
         self.waiting = waiting
         self.tiles_count = tiles_count
         self.danger = danger
@@ -60,6 +65,7 @@ class DiscardOption(object):
         return TilesConverter.find_34_tile_in_136_array(self.tile_to_discard, closed_hand)
 
     def calculate_value(self):
+        tiles_34 = TilesConverter.to_34_array(self.player.tiles)
         # base is 100 for ability to mark tiles as not needed (like set value to 50)
         value = 100
         honored_value = 20
@@ -81,5 +87,18 @@ class DiscardOption(object):
 
         count_of_dora = plus_dora(self.tile_to_discard * 4, self.player.table.dora_indicators)
         value += 50 * count_of_dora
+
+        if is_honor(self.tile_to_discard):
+            # depends on how much honor tiles were discarded
+            # we will decrease tile value
+            discard_percentage = [100, 75, 20, 0]
+            discarded_tiles = self.player.table.revealed_tiles[self.tile_to_discard]
+
+            value = (value * discard_percentage[discarded_tiles]) / 100
+
+            # three honor tiles were discarded,
+            # so we don't need this tile anymore
+            if value == 0:
+                self.had_to_be_discarded = True
 
         self.value = value

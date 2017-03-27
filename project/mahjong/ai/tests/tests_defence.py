@@ -188,7 +188,8 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         table.add_called_riichi(2)
 
-        table.player.ai.defence.try_to_find_safe_tile_to_discard([])
+        table.player.ai.defence.hand_34 = self._to_34_array(table.player.tiles)
+        table.player.ai.defence.closed_hand_34 = self._to_34_array(table.player.closed_hand)
         result = table.player.ai.defence.impossible_wait.find_tiles_to_discard([])
 
         # dora is not safe against tanki wait, so let's hold it
@@ -205,7 +206,8 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         table.add_called_riichi(2)
 
-        table.player.ai.defence.try_to_find_safe_tile_to_discard([])
+        table.player.ai.defence.hand_34 = self._to_34_array(table.player.tiles)
+        table.player.ai.defence.closed_hand_34 = self._to_34_array(table.player.closed_hand)
         result = table.player.ai.defence.kabe.find_tiles_to_discard([])
 
         self.assertEqual(self._to_string([x.value * 4 for x in result]), '19p')
@@ -220,7 +222,8 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         table.add_called_riichi(2)
 
-        table.player.ai.defence.try_to_find_safe_tile_to_discard([])
+        table.player.ai.defence.hand_34 = self._to_34_array(table.player.tiles)
+        table.player.ai.defence.closed_hand_34 = self._to_34_array(table.player.closed_hand)
         result = table.player.ai.defence.kabe.find_tiles_to_discard([])
 
         self.assertEqual(self._to_string([x.value * 4 for x in result]), '5p')
@@ -235,7 +238,8 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         table.add_called_riichi(2)
 
-        table.player.ai.defence.try_to_find_safe_tile_to_discard([])
+        table.player.ai.defence.hand_34 = self._to_34_array(table.player.tiles)
+        table.player.ai.defence.closed_hand_34 = self._to_34_array(table.player.closed_hand)
         result = table.player.ai.defence.kabe.find_tiles_to_discard([])
 
         self.assertEqual(self._to_string([x.value * 4 for x in result]), '45p')
@@ -256,7 +260,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         self.assertEqual(self._to_string([result]), '1p')
 
-    def test_find_common_suji_tiles_to_discard_for_one_player(self):
+    def test_find_suji_tiles_to_discard_for_one_player(self):
         table = Table()
 
         tiles = self._string_to_136_array(sou='2345678', pin='12789', man='55')

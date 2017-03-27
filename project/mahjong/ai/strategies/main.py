@@ -63,22 +63,9 @@ class BaseStrategy(object):
 
         # mark all not suitable tiles as ready to discard
         # even if they not should be discarded by uke-ire
-        for i in closed_hand:
-            i //= 4
-
-            if not self.is_tile_suitable(i * 4):
-                item_was_found = False
-                for j in outs_results:
-                    if j.tile_to_discard == i:
-                        item_was_found = True
-                        if j.tiles_count < 1000:
-                            j.tiles_count += 1000
-
-                if not item_was_found:
-                    outs_results.append(DiscardOption(player=self.player,
-                                                      tile_to_discard=i,
-                                                      waiting=[],
-                                                      tiles_count=1000))
+        for j in outs_results:
+            if not self.is_tile_suitable(j.tile_to_discard * 4):
+                j.had_to_be_discarded = True
 
         return outs_results
 

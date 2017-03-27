@@ -503,8 +503,6 @@ class TenhouClient(Client):
         while len(rules) != 8:
             rules = '0' + rules
 
-        print(rules)
-
         is_hanchan = rules[4] == '1'
         is_open_tanyao = rules[5] == '0'
         is_aka = rules[6] == '0'

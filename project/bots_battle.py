@@ -11,7 +11,7 @@ import game.game_manager
 from game.client import LocalClient
 from game.game_manager import GameManager
 
-TOTAL_HANCHANS = 100
+TOTAL_HANCHANS = 1
 
 
 def main():
@@ -19,9 +19,9 @@ def main():
     random_value = random()
     game.game_manager.shuffle_seed = lambda: random_value
 
-    clients = [LocalClient(previous_ai=True) for _ in range(0, 3)]
-    clients += [LocalClient(previous_ai=False)]
-    # clients = [LocalClient(previous_ai=False) for _ in range(0, 4)]
+    # clients = [LocalClient(previous_ai=True) for _ in range(0, 3)]
+    # clients += [LocalClient(previous_ai=False)]
+    clients = [LocalClient(previous_ai=False) for _ in range(0, 4)]
     manager = GameManager(clients)
 
     total_results = {}

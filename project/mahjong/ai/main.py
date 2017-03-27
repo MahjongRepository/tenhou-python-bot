@@ -52,14 +52,18 @@ class MainAI(BaseAI):
         self.in_defence = False
 
     def discard_tile(self):
+        tiles_34 = TilesConverter.to_34_array(self.player.tiles)
+
         results, shanten = self.calculate_outs(self.player.tiles,
                                                self.player.closed_hand,
                                                self.player.is_open_hand)
+        self.discards = results
         # we had to update tiles value
         # because it is related with shanten number
         self.previous_shanten = shanten
         for result in results:
             result.calculate_value()
+            result.tiles_count = self.count_tiles(result.waiting, tiles_34)
 
         we_can_call_riichi = shanten == 0 and self.player.can_call_riichi()
 
@@ -114,11 +118,6 @@ class MainAI(BaseAI):
                                                                       False,
                                                                       None)
 
-        # we had to discard dead waits first (last honor tile)
-        for result in results:
-            if is_honor(result.tile_to_discard) and self.player.table.revealed_tiles[result.tile_to_discard] == 3:
-                result.tiles_count = 2000
-
         return self.chose_tile_to_discard(results, self.player.closed_hand)
 
     def calculate_outs(self, tiles, closed_hand, is_open_hand=False):
@@ -130,23 +129,25 @@ class MainAI(BaseAI):
         """
         tiles_34 = TilesConverter.to_34_array(tiles)
         closed_tiles_34 = TilesConverter.to_34_array(closed_hand)
-        shanten = self.shanten.calculate_shanten(tiles_34, is_open_hand, self.player.meld_tiles)
+        is_agari = self.agari.is_agari(tiles_34, self.player.meld_tiles)
 
         # win
-        if shanten == Shanten.AGARI_STATE:
-            return [], shanten
+        if is_agari:
+            return [], Shanten.AGARI_STATE
 
         results = []
 
-        for i in range(0, 34):
-            if not closed_tiles_34[i]:
+        for hand_tile in range(0, 34):
+            if not closed_tiles_34[hand_tile]:
                 continue
 
-            tiles_34[i] -= 1
+            tiles_34[hand_tile] -= 1
+
+            shanten = self.shanten.calculate_shanten(tiles_34, is_open_hand, self.player.meld_tiles)
 
             waiting = []
             for j in range(0, 34):
-                if i == j or tiles_34[j] == 4:
+                if hand_tile == j or tiles_34[j] == 4:
                     continue
 
                 tiles_34[j] += 1
@@ -154,13 +155,16 @@ class MainAI(BaseAI):
                     waiting.append(j)
                 tiles_34[j] -= 1
 
-            tiles_34[i] += 1
+            tiles_34[hand_tile] += 1
 
             if waiting:
                 results.append(DiscardOption(player=self.player,
-                                             tile_to_discard=i,
+                                             shanten=shanten,
+                                             tile_to_discard=hand_tile,
                                              waiting=waiting,
                                              tiles_count=self.count_tiles(waiting, tiles_34)))
+
+        shanten = self.shanten.calculate_shanten(tiles_34, is_open_hand, self.player.meld_tiles)
 
         return results, shanten
 
@@ -211,11 +215,20 @@ class MainAI(BaseAI):
         return self.current_strategy and True or False
 
     def chose_tile_to_discard(self, results, closed_hand):
-        # - is important for x.tiles_count
-        # in that case we will discard tile that will give for us more tiles
-        # to complete a hand
-        results = sorted(results, key=lambda x: (-x.tiles_count, x.value))
-        selected_tile = results[0]
+        def sorting(x):
+            # - is important for x.tiles_count
+            # in that case we will discard tile that will give for us more tiles
+            # to complete a hand
+            return x.shanten, -x.tiles_count, x.value
+
+        had_to_be_discarded_tiles = [x for x in results if x.had_to_be_discarded]
+        if had_to_be_discarded_tiles:
+            had_to_be_discarded_tiles = sorted(had_to_be_discarded_tiles, key=sorting)
+            selected_tile = had_to_be_discarded_tiles[0]
+        else:
+            results = sorted(results, key=sorting)
+            selected_tile = results[0]
+
         self.waiting = selected_tile.waiting
         return selected_tile.find_tile_in_hand(closed_hand)
 

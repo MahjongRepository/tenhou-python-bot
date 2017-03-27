@@ -27,6 +27,7 @@ class DefenceHandler(object):
         self.kabe = Kabe(self)
         self.suji = Suji(self)
 
+        self.hand_34 = None
         self.closed_hand_34 = None
 
     def should_go_to_defence_mode(self):
@@ -75,11 +76,9 @@ class DefenceHandler(object):
         return False
 
     def try_to_find_safe_tile_to_discard(self, discard_results):
-        discard_tiles_34 = [x.tile_to_discard for x in discard_results]
-        closed_hand_tiles_34 = [x // 4 for x in self.player.closed_hand]
-
         self.hand_34 = TilesConverter.to_34_array(self.player.tiles)
         self.closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
+
         threatening_players = self._get_threatening_players()
 
         # safe tiles that can be safe based on the table situation
@@ -93,20 +92,9 @@ class DefenceHandler(object):
             if common_safe_tiles:
                 common_safe_tiles = [DefenceTile(x, DefenceTile.SAFE) for x in common_safe_tiles]
                 common_safe_tiles += safe_tiles
+                common_safe_tiles += common_suji_tiles
 
-                # let's check our discard candidates first, maybe we can discard safe tile
-                # without ruining our hand
-                result = self._find_tile_to_discard(common_safe_tiles, discard_tiles_34)
-                if result:
-                    return result
-
-                # there are no safe tiles in discard tiles, so let's try to find safe tiles in our hand
-                result = self._find_tile_to_discard(common_safe_tiles, closed_hand_tiles_34)
-                if result:
-                    return result
-
-                # after this lets try to find suji tiles to discard
-                result = self._find_tile_to_discard(common_suji_tiles, discard_tiles_34 + closed_hand_tiles_34)
+                result = self._find_tile_to_discard(common_safe_tiles, discard_results)
                 if result:
                     return result
 
@@ -115,86 +103,42 @@ class DefenceHandler(object):
         # and than for all other players if we failed find tile for dangerous player
         for player in threatening_players:
             player_safe_tiles = [DefenceTile(x, DefenceTile.SAFE) for x in player.all_safe_tiles]
-            player_safe_tiles += safe_tiles
             player_suji_tiles = self.suji.find_tiles_to_discard([player])
+            player_safe_tiles += safe_tiles
+            player_safe_tiles += player_suji_tiles
 
-            # check discard candidates tiles first
-            result = self._find_tile_to_discard(player_safe_tiles, discard_tiles_34)
-            if result:
-                return result
-
-            # check discard candidates and suji tiles
-            result = self._find_tile_to_discard(player_suji_tiles, discard_tiles_34)
-            if result:
-                return result
-
-            # we wasn't able find safe tiles in our discard candidates,
-            # so let's check our hand
-            result = self._find_tile_to_discard(player_safe_tiles, closed_hand_tiles_34)
-            if result:
-                return result
-
-            result = self._find_tile_to_discard(player_suji_tiles, closed_hand_tiles_34)
+            # check 100% safe tiles
+            result = self._find_tile_to_discard(player_safe_tiles, discard_results)
             if result:
                 return result
 
         # we wasn't able to find safe tile to discard
         return None
 
-    def _find_tile_to_discard(self, safe_tiles, tiles):
+    def _find_tile_to_discard(self, safe_tiles, discard_tiles):
         """
-        Try to find most effective tile to discard.
+        Try to find most effective safe tile to discard
         :param safe_tiles:
-        :param tiles:
+        :param discard_tiles:
         :return: tile in 136 format
         """
-
-        discard_candidates = []
-        for safe_tile in safe_tiles:
-            for tile in tiles:
-                if tile == safe_tile.value:
-                    discard_candidates.append(safe_tile)
-
-        # we wasn't able to find safe tile in our hand
-        if not discard_candidates:
+        was_safe_tiles = self._mark_tiles_safety(safe_tiles, discard_tiles)
+        if not was_safe_tiles:
             return None
 
-        # results
-        final_results = []
-        for discard_tile in discard_candidates:
-            tile = discard_tile.value
-            tiles_34 = TilesConverter.to_34_array(self.player.tiles)
-            tiles_34[tile] -= 1
+        final_results = sorted(discard_tiles, key=lambda x: (x.danger, x.shanten, -x.tiles_count, x.value))
+        discard_tile = final_results[0].tile_to_discard
 
-            shanten = self.player.ai.shanten.calculate_shanten(tiles_34,
-                                                               self.player.is_open_hand,
-                                                               self.player.meld_tiles)
+        return TilesConverter.find_34_tile_in_136_array(discard_tile, self.player.closed_hand)
 
-            waiting = []
-            for j in range(0, 34):
-                tiles_34[j] += 1
-
-                if self.player.ai.shanten.calculate_shanten(tiles_34,
-                                                            self.player.is_open_hand,
-                                                            self.player.meld_tiles) == shanten - 1:
-                    waiting.append(j)
-                tiles_34[j] -= 1
-
-            tiles_34[tile] += 1
-
-            tiles_count = self.player.ai.count_tiles(waiting, tiles_34)
-            final_results.append(DiscardOption(player=self.player,
-                                               tile_to_discard=tile,
-                                               waiting=waiting,
-                                               tiles_count=tiles_count,
-                                               danger=discard_tile.danger))
-
-        # let's find tile that will do less harm to our hand
-        # and tile that will be maximum safe
-        final_results = sorted(final_results, key=lambda x: (-x.danger, x.tiles_count), reverse=True)
-        tile = final_results[0].tile_to_discard
-
-        return TilesConverter.find_34_tile_in_136_array(tile, self.player.closed_hand)
+    def _mark_tiles_safety(self, safe_tiles, discard_tiles):
+        was_safe_tiles = False
+        for safe_tile in safe_tiles:
+            for discard_tile in discard_tiles:
+                if discard_tile.tile_to_discard == safe_tile.value:
+                    was_safe_tiles = True
+                    discard_tile.danger = safe_tile.danger
+        return was_safe_tiles
 
     def _get_threatening_players(self):
         """

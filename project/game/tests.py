@@ -18,7 +18,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
     # def test_debug(self):
     #     settings.FIVE_REDS = True
     #
-    #     game.game_manager.shuffle_seed = lambda: 0.806656791974764
+    #     game.game_manager.shuffle_seed = lambda: 0.36533953824308185
     #
     #     clients = [LocalClient(previous_ai=False) for _ in range(0, 4)]
     #     # clients = [LocalClient(use_previous_ai_version=True) for _ in range(0, 3)]

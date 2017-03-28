@@ -120,16 +120,15 @@ class DefenceHandler(object):
         Try to find most effective safe tile to discard
         :param safe_tiles:
         :param discard_tiles:
-        :return: tile in 136 format
+        :return: DiscardOption
         """
         was_safe_tiles = self._mark_tiles_safety(safe_tiles, discard_tiles)
         if not was_safe_tiles:
             return None
 
         final_results = sorted(discard_tiles, key=lambda x: (x.danger, x.shanten, -x.tiles_count, x.value))
-        discard_tile = final_results[0].tile_to_discard
 
-        return TilesConverter.find_34_tile_in_136_array(discard_tile, self.player.closed_hand)
+        return final_results[0]
 
     def _mark_tiles_safety(self, safe_tiles, discard_tiles):
         was_safe_tiles = False

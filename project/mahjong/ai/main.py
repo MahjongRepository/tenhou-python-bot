@@ -75,9 +75,9 @@ class MainAI(BaseAI):
                 logger.info('We decided to fold against other players')
                 self.in_defence = True
 
-            tile = self.defence.try_to_find_safe_tile_to_discard(results)
-            if tile is not None:
-                return tile
+            selected_tile = self.defence.try_to_find_safe_tile_to_discard(results)
+            if selected_tile:
+                return self._process_discard_option(selected_tile, self.player.closed_hand)
         else:
             self.in_defence = False
 
@@ -229,7 +229,11 @@ class MainAI(BaseAI):
             results = sorted(results, key=sorting)
             selected_tile = results[0]
 
+        return self._process_discard_option(selected_tile, closed_hand)
+
+    def _process_discard_option(self, selected_tile, closed_hand):
         self.waiting = selected_tile.waiting
+        self.player.in_tempai = selected_tile.shanten == 0
         return selected_tile.find_tile_in_hand(closed_hand)
 
     def estimate_hand_value(self, win_tile):

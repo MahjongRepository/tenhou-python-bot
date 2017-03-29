@@ -21,15 +21,18 @@ def main():
     set_up_logging()
 
     if len(sys.argv) == 1:
-        logger.error('Cant find db files. Set db files folder as command line argument')
+        logger.error('Cant find db file. Set db file location as command line argument')
         return
 
-    db_folder = sys.argv[1]
-    for db_file in os.listdir(db_folder):
-        logger.info(db_file)
-        case = ANALYTICS_CLASS(os.path.join(db_folder, db_file))
-        case.process()
-        break
+    db_file = sys.argv[1]
+    if not os.path.exists(db_file):
+        logger.error('Db file is not exists')
+
+    db_name = os.path.split(db_file)[-1]
+    logger.info(db_name)
+
+    case = ANALYTICS_CLASS(db_file)
+    case.process()
 
 
 def set_up_logging():

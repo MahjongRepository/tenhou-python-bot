@@ -1,24 +1,32 @@
 # -*- coding: utf-8 -*-
 import bz2
+import os
 import sqlite3
 import logging
 
 import re
 
+from tenhou.decoder import TenhouDecoder
+
 logger = logging.getLogger('process')
 
 
-class Hanchan(object):
+class Game(object):
+    year = None
     log_id = None
     is_tonpusen = False
     content = None
     rounds = []
 
+    total_rounds = 0
+
     def __init__(self, log_id, is_tonpusen, compressed_content):
         self.log_id = log_id
-        self.is_tonpusen = is_tonpusen,
-        self.content = bz2.decompress(compressed_content)
+        self.year = int(log_id[0:4])
+        self.is_tonpusen = is_tonpusen
+        self.content = str(bz2.decompress(compressed_content))
         self.rounds = []
+        self.total_rounds = 0
 
         self._parse_rounds()
 
@@ -40,6 +48,7 @@ class Hanchan(object):
             if tag and 'INIT' in tag:
                 self.rounds.append(game_round)
                 game_round = []
+                self.total_rounds += 1
 
             # the end of the game
             if tag and 'owari' in tag:
@@ -50,11 +59,6 @@ class Hanchan(object):
                 if 'INIT' in tag:
                     # we dont need seed information
                     find = re.compile(r'shuffle="[^"]*"')
-                    tag = find.sub('', tag)
-
-                if 'sc' in tag:
-                    # and we don't need points deltas
-                    find = re.compile(r'sc="[^"]*" ')
                     tag = find.sub('', tag)
 
                 # add processed tag to the round
@@ -68,19 +72,23 @@ class Hanchan(object):
 
 
 class ProcessDataCase(object):
-    db_file = ''
-    hanchans = []
+    decoder = None
+    db_file = None
+    games = None
 
     def __init__(self, db_file):
         self.db_file = db_file
+        self.decoder = TenhouDecoder()
+        self.current_directory = os.path.dirname(os.path.realpath(__file__))
 
-        self.hanchans = []
+        self.games = []
 
     def process(self):
         raise NotImplemented()
 
     def load_all_records(self):
-        limit = 60000
+        # useful for debugging
+        limit = None
         logger.info('Loading data...')
 
         connection = sqlite3.connect(self.db_file)
@@ -88,18 +96,23 @@ class ProcessDataCase(object):
         with connection:
             cursor = connection.cursor()
 
-            cursor.execute("""SELECT log_id, is_tonpusen, log_content FROM logs
-                              WHERE is_processed = 1 and was_error = 0 LIMIT ?;""", [limit])
+            if limit:
+                cursor.execute("""SELECT log_id, is_tonpusen, log_content FROM logs
+                                  WHERE is_processed = 1 and was_error = 0 LIMIT ?;""", [limit])
+            else:
+                cursor.execute("""SELECT log_id, is_tonpusen, log_content FROM logs
+                                  WHERE is_processed = 1 and was_error = 0;""")
+
             data = cursor.fetchall()
 
-        logger.info('Found {} records'.format(len(data)))
+        logger.info('Found {} games records'.format(len(data)))
 
         logger.info('Unzipping and processing games data...')
         for item in data:
-            self.hanchans.append(Hanchan(item[0], item[1] == 1, item[2]))
+            self.games.append(Game(item[0], item[1] == 1, item[2]))
 
         total_rounds = 0
-        for hanchan in self.hanchans:
-            total_rounds += len(hanchan.rounds)
+        for hanchan in self.games:
+            total_rounds += hanchan.total_rounds
 
         logger.info('Found {} rounds'.format(total_rounds))

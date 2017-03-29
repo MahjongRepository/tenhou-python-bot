@@ -33,10 +33,10 @@ class TenhouDecoder(object):
     def parse_hello_string(self, message):
         rating_string = ''
         if 'auth=' in message:
-            auth_message = self._get_attribute_content(message, 'auth')
+            auth_message = self.get_attribute_content(message, 'auth')
             # for NoName we don't have rating attribute
             if 'pf4=' in message:
-                rating_string = self._get_attribute_content(message, 'pf4')
+                rating_string = self.get_attribute_content(message, 'pf4')
             return auth_message, rating_string
         else:
             return '', ''
@@ -52,16 +52,16 @@ class TenhouDecoder(object):
             - Dora indicator.
         """
 
-        seed = self._get_attribute_content(message, 'seed').split(',')
+        seed = self.get_attribute_content(message, 'seed').split(',')
         seed = [int(i) for i in seed]
 
         round_number = seed[0]
         count_of_honba_sticks = seed[1]
         count_of_riichi_sticks = seed[2]
         dora_indicator = seed[5]
-        dealer = int(self._get_attribute_content(message, 'oya'))
+        dealer = int(self.get_attribute_content(message, 'oya'))
 
-        scores = self._get_attribute_content(message, 'ten').split(',')
+        scores = self.get_attribute_content(message, 'ten').split(',')
         scores = [int(i) for i in scores]
 
         return {
@@ -74,12 +74,12 @@ class TenhouDecoder(object):
         }
 
     def parse_initial_hand(self, message):
-        tiles = self._get_attribute_content(message, 'hai')
+        tiles = self.get_attribute_content(message, 'hai')
         tiles = [int(i) for i in tiles.split(',')]
         return tiles
 
     def parse_final_scores_and_uma(self, message):
-        data = self._get_attribute_content(message, 'owari')
+        data = self.get_attribute_content(message, 'owari')
         data = [float(i) for i in data.split(',')]
 
         # start at the beginning at take every second item (even)
@@ -90,25 +90,25 @@ class TenhouDecoder(object):
         return {'scores': scores, 'uma': uma}
 
     def parse_names_and_ranks(self, message):
-        ranks = self._get_attribute_content(message, 'dan')
+        ranks = self.get_attribute_content(message, 'dan')
         ranks = [int(i) for i in ranks.split(',')]
 
         return [
-            {'name': unquote(self._get_attribute_content(message, 'n0')), 'rank': TenhouDecoder.RANKS[ranks[0]]},
-            {'name': unquote(self._get_attribute_content(message, 'n1')), 'rank': TenhouDecoder.RANKS[ranks[1]]},
-            {'name': unquote(self._get_attribute_content(message, 'n2')), 'rank': TenhouDecoder.RANKS[ranks[2]]},
-            {'name': unquote(self._get_attribute_content(message, 'n3')), 'rank': TenhouDecoder.RANKS[ranks[3]]},
+            {'name': unquote(self.get_attribute_content(message, 'n0')), 'rank': TenhouDecoder.RANKS[ranks[0]]},
+            {'name': unquote(self.get_attribute_content(message, 'n1')), 'rank': TenhouDecoder.RANKS[ranks[1]]},
+            {'name': unquote(self.get_attribute_content(message, 'n2')), 'rank': TenhouDecoder.RANKS[ranks[2]]},
+            {'name': unquote(self.get_attribute_content(message, 'n3')), 'rank': TenhouDecoder.RANKS[ranks[3]]},
         ]
 
     def parse_log_link(self, message):
-        seat = int(self._get_attribute_content(message, 'oya'))
+        seat = int(self.get_attribute_content(message, 'oya'))
         seat = (4 - seat) % 4
-        game_id = self._get_attribute_content(message, 'log')
+        game_id = self.get_attribute_content(message, 'log')
         return game_id, seat
 
     def parse_tile(self, message):
         # tenhou format: <t23/>, <e23/>, <f23 t="4"/>, <f23/>, <g23/>
-        result = re.match(r'^<[tefgEFGT]+\d*', message).group()
+        result = re.match(r'^<[tefgEFGTUVWD]+\d*', message).group()
         return int(result[2:])
 
     def parse_table_state_after_reconnection(self, message):
@@ -121,7 +121,7 @@ class TenhouDecoder(object):
 
             discard_attr = 'kawa{}'.format(x)
             if discard_attr in message:
-                discards = self._get_attribute_content(message, discard_attr)
+                discards = self.get_attribute_content(message, discard_attr)
                 discards = [int(x) for x in discards.split(',')]
 
                 was_riichi = 255 in discards
@@ -132,7 +132,7 @@ class TenhouDecoder(object):
 
             melds_attr = 'm{}'.format(x)
             if melds_attr in message:
-                melds = self._get_attribute_content(message, melds_attr)
+                melds = self.get_attribute_content(message, melds_attr)
                 melds = [int(x) for x in melds.split(',')]
                 for item in melds:
                     meld_message = '<N who="{}" m="{}" />'.format(x, item)
@@ -148,19 +148,19 @@ class TenhouDecoder(object):
         return players
 
     def parse_dora_indicator(self, message):
-        return int(self._get_attribute_content(message, 'hai'))
+        return int(self.get_attribute_content(message, 'hai'))
 
     def parse_who_called_riichi(self, message):
-        return int(self._get_attribute_content(message, 'who'))
+        return int(self.get_attribute_content(message, 'who'))
 
     def parse_go_tag(self, message):
-        return int(self._get_attribute_content(message, 'type'))
+        return int(self.get_attribute_content(message, 'type'))
 
     def parse_meld(self, message):
-        data = int(self._get_attribute_content(message, 'm'))
+        data = int(self.get_attribute_content(message, 'm'))
 
         meld = Meld()
-        meld.who = int(self._get_attribute_content(message, 'who'))
+        meld.who = int(self.get_attribute_content(message, 'who'))
         meld.from_who = data & 0x3
 
         if data & 0x4:
@@ -235,6 +235,6 @@ class TenhouDecoder(object):
 
         return result
 
-    def _get_attribute_content(self, message, attribute_name):
+    def get_attribute_content(self, message, attribute_name):
         result = re.findall(r'{}="([^"]*)"'.format(attribute_name), message)
-        return result[0]
+        return result and result[0] or None

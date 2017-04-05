@@ -2,6 +2,7 @@
 import unittest
 
 from mahjong.constants import EAST, WEST
+from mahjong.meld import Meld
 from mahjong.table import Table
 from utils.tests import TestMixin
 
@@ -293,3 +294,26 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         self.assertEqual(table.player.can_call_riichi(), True)
         self.assertEqual(self._to_string([result]), '1z')
+
+    def test_fold_against_player_honitsu(self):
+        table = Table()
+
+        tiles = self._string_to_136_array(sou='22', pin='222367899', man='45', honors='1')
+        table.player.init_hand(tiles)
+
+        table.add_called_meld(1, self._make_meld(Meld.CHI, self._string_to_136_array(pin='567')))
+        table.add_called_meld(1, self._make_meld(Meld.CHI, self._string_to_136_array(pin='123')))
+        table.add_called_meld(1, self._make_meld(Meld.CHI, self._string_to_136_array(pin='345')))
+
+        table.add_discarded_tile(1, self._string_to_136_tile(sou='6'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(sou='6'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(sou='8'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(sou='9'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(man='1'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(man='1'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='5'), False)
+
+        result = table.player.discard_tile()
+
+        # we can't discard pin and honor tiles against honitsu
+        self.assertEqual(self._to_string([result]), '2s')

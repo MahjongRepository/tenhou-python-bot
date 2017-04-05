@@ -23,6 +23,7 @@ class DefenceTile(object):
     # 100% safe tile
     SAFE = 0
     ALMOST_SAFE_TILE = 10
+    DANGER = 200
 
     # how danger this tile is
     danger = None

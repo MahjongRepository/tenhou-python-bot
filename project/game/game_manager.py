@@ -178,7 +178,7 @@ class GameManager(AbortiveDraw):
                 current_client.player.draw_tile(draw_tile)
                 tiles = current_client.player.tiles
 
-            is_win = self.agari.is_agari(TilesConverter.to_34_array(tiles), current_client.player.meld_tiles)
+            is_win = self.agari.is_agari(TilesConverter.to_34_array(tiles), current_client.player.open_hand_34_tiles)
 
             # win by tsumo after tile draw
             if is_win:
@@ -193,7 +193,7 @@ class GameManager(AbortiveDraw):
                                                                     win_tile=draw_tile,
                                                                     is_tsumo=True,
                                                                     is_riichi=False,
-                                                                    open_sets=current_client.player.meld_tiles,
+                                                                    open_sets=current_client.player.open_hand_34_tiles,
                                                                     dora_indicators=self.dora_indicators,
                                                                     player_wind=current_client.player.player_wind,
                                                                     round_wind=current_client.player.table.round_wind)
@@ -448,13 +448,13 @@ class GameManager(AbortiveDraw):
                                                             win_tile=win_tile,
                                                             is_tsumo=False,
                                                             is_riichi=False,
-                                                            open_sets=client.player.meld_tiles,
+                                                            open_sets=client.player.open_hand_34_tiles,
                                                             dora_indicators=self.dora_indicators,
                                                             player_wind=client.player.player_wind,
                                                             round_wind=client.player.table.round_wind)
             return result['error'] is None
 
-        is_ron = self.agari.is_agari(TilesConverter.to_34_array(tiles + [win_tile]), client.player.meld_tiles)
+        is_ron = self.agari.is_agari(TilesConverter.to_34_array(tiles + [win_tile]), client.player.open_hand_34_tiles)
         return is_ron
 
     def call_riichi(self, client):
@@ -547,7 +547,7 @@ class GameManager(AbortiveDraw):
                                                                 is_tsumo=is_tsumo,
                                                                 is_riichi=winner.player.in_riichi,
                                                                 is_dealer=winner.player.is_dealer,
-                                                                open_sets=winner.player.meld_tiles,
+                                                                open_sets=winner.player.open_hand_34_tiles,
                                                                 dora_indicators=self.dora_indicators + ura_dora,
                                                                 player_wind=winner.player.player_wind,
                                                                 round_wind=winner.player.table.round_wind,

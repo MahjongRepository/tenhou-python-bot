@@ -11,8 +11,8 @@ import datetime
 
 # from analytics.cases.count_of_games import CountOfGames
 # ANALYTICS_CLASS = CountOfGames
-from analytics.cases.honitsu_hands import HonitsuHands
-ANALYTICS_CLASS = HonitsuHands
+from analytics.cases.fold_against_honitsu_hands import AnalyzeHonitsuHands
+ANALYTICS_CLASS = AnalyzeHonitsuHands
 
 logger = logging.getLogger('process')
 

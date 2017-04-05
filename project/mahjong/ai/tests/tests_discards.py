@@ -2,12 +2,12 @@
 import unittest
 
 from mahjong.ai.discard import DiscardOption
-from mahjong.ai.main import MainAI
 from mahjong.ai.shanten import Shanten
 from mahjong.constants import EAST, SOUTH, WEST, NORTH, HAKU, HATSU, CHUN, FIVE_RED_SOU
 from mahjong.player import Player
 from mahjong.table import Table
 from utils.tests import TestMixin
+from utils.settings_handler import settings
 
 
 class DiscardLogicTestCase(unittest.TestCase, TestMixin):
@@ -41,6 +41,8 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(discarded_tile, Shanten.AGARI_STATE)
 
     def test_calculate_suit_tiles_value(self):
+        settings.FIVE_REDS = False
+
         table = Table()
         player = Player(table, 0, 0, False)
 
@@ -64,6 +66,8 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
             value = item[1]
             option = DiscardOption(player, tile, 0, [], 0)
             self.assertEqual(option.value, value)
+
+        settings.FIVE_REDS = True
 
     def test_calculate_honor_tiles_value(self):
         table = Table()
@@ -131,17 +135,17 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
     def test_slide_set_to_keep_dora_in_hand(self):
         table = Table()
-        table.dora_indicators = [self._string_to_136_tile(pin='1')]
+        table.dora_indicators = [self._string_to_136_tile(pin='9')]
         player = Player(table, 0, 0, False)
 
-        tiles = self._string_to_136_array(sou='123456', pin='34578', man='99')
-        tile = self._string_to_136_tile(pin='2')
+        tiles = self._string_to_136_array(sou='123456', pin='23478', man='99')
+        tile = self._string_to_136_tile(pin='1')
         player.init_hand(tiles)
         player.draw_tile(tile)
 
         # 2p is a dora, we had to keep it
         discarded_tile = player.discard_tile()
-        self.assertEqual(self._to_string([discarded_tile]), '5p')
+        self.assertEqual(self._to_string([discarded_tile]), '4p')
 
     def test_keep_aka_dora_in_hand(self):
         table = Table()

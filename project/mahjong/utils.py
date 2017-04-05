@@ -25,6 +25,9 @@ def plus_dora(tile, dora_indicators):
     tile_index = tile // 4
     dora_count = 0
 
+    if is_aka_dora(tile):
+        dora_count += 1
+
     for dora in dora_indicators:
         dora //= 4
 
@@ -149,3 +152,28 @@ def find_isolated_tile_indices(hand_34):
             isolated_indices.append(x)
 
     return isolated_indices
+
+
+def count_tiles_by_suits(tiles_34):
+    """
+    Separate tiles by suits and count them
+    :param tiles_34: array of tiles to count
+    :return: dict
+    """
+    suits = [
+        {'count': 0, 'name': 'sou',   'function': is_sou},
+        {'count': 0, 'name': 'man',   'function': is_man},
+        {'count': 0, 'name': 'pin',   'function': is_pin},
+        {'count': 0, 'name': 'honor', 'function': is_honor}
+    ]
+
+    for x in range(0, 34):
+        tile = tiles_34[x]
+        if not tile:
+            continue
+
+        for item in suits:
+            if item['function'](x):
+                item['count'] += tile
+
+    return suits

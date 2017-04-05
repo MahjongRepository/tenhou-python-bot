@@ -65,7 +65,6 @@ class DiscardOption(object):
         return TilesConverter.find_34_tile_in_136_array(self.tile_to_discard, closed_hand)
 
     def calculate_value(self):
-        tiles_34 = TilesConverter.to_34_array(self.player.tiles)
         # base is 100 for ability to mark tiles as not needed (like set value to 50)
         value = 100
         honored_value = 20

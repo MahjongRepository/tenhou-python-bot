@@ -2,8 +2,8 @@ from mahjong.ai.defence.defence import DefenceTile
 from mahjong.ai.defence.impossible_wait import ImpossibleWait
 from mahjong.ai.defence.kabe import Kabe
 from mahjong.ai.defence.suji import Suji
-from mahjong.ai.discard import DiscardOption
 from mahjong.tile import TilesConverter
+from mahjong.utils import is_honor
 
 
 class DefenceHandler(object):
@@ -42,13 +42,10 @@ class DefenceHandler(object):
         if self.player.in_riichi:
             return False
 
-        count_of_riichi_players = 0
-        for enemy_player in self.table.enemy_players:
-            if enemy_player.in_riichi:
-                count_of_riichi_players += 1
+        threatening_players = self._get_threatening_players()
 
-        # no one in riichi, we can build our hand
-        if count_of_riichi_players == 0:
+        # no one is threatening, so we can build our hand
+        if len(threatening_players) == 0:
             return False
 
         # our hand is far away from tempai, so better to fold
@@ -105,10 +102,26 @@ class DefenceHandler(object):
             player_safe_tiles = [DefenceTile(x, DefenceTile.SAFE) for x in player.all_safe_tiles]
             player_suji_tiles = self.suji.find_tiles_to_discard([player])
             player_safe_tiles += safe_tiles
-            player_safe_tiles += player_suji_tiles
 
-            # check 100% safe tiles
+            # better to not use suji for honitsu hands
+            if not player.chosen_suit:
+                player_safe_tiles += player_suji_tiles
+
             result = self._find_tile_to_discard(player_safe_tiles, discard_results)
+            if result:
+                return result
+
+            # try to find safe tiles against honitsu
+            against_honitsu = []
+            if player.chosen_suit:
+                for tile in range(0, 34):
+                    if not self.closed_hand_34[tile]:
+                        continue
+
+                    if not player.chosen_suit(tile) and not is_honor(tile):
+                        against_honitsu.append(DefenceTile(tile, DefenceTile.SAFE))
+
+            result = self._find_tile_to_discard(against_honitsu, discard_results)
             if result:
                 return result
 
@@ -147,7 +160,7 @@ class DefenceHandler(object):
         """
         result = []
         for player in self.table.enemy_players:
-            if player.in_riichi:
+            if player.is_threatening:
                 result.append(player)
 
         # dealer is most threatening player

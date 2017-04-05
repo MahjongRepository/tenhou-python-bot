@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from mahjong.ai.strategies.main import BaseStrategy
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_sou, is_pin, is_man, is_honor, simplify
+from mahjong.utils import is_honor, simplify, count_tiles_by_suits
 
 
 class HonitsuStrategy(BaseStrategy):
     REQUIRED_TILES = 10
+    min_shanten = 4
 
     chosen_suit = None
 
@@ -19,22 +20,8 @@ class HonitsuStrategy(BaseStrategy):
         if not result:
             return False
 
-        suits = [
-            {'count': 0, 'name': 'sou', 'function': is_sou},
-            {'count': 0, 'name': 'man', 'function': is_man},
-            {'count': 0, 'name': 'pin', 'function': is_pin},
-            {'count': 0, 'name': 'honor', 'function': is_honor}
-        ]
-
-        tiles = TilesConverter.to_34_array(self.player.tiles)
-        for x in range(0, 34):
-            tile = tiles[x]
-            if not tile:
-                continue
-
-            for item in suits:
-                if item['function'](x):
-                    item['count'] += tile
+        tiles_34 = TilesConverter.to_34_array(self.player.tiles)
+        suits = count_tiles_by_suits(tiles_34)
 
         honor = [x for x in suits if x['name'] == 'honor'][0]
         suits = [x for x in suits if x['name'] != 'honor']
@@ -43,12 +30,12 @@ class HonitsuStrategy(BaseStrategy):
         suit = suits[0]
         count_of_pairs = 0
         for x in range(0, 34):
-            if tiles[x] >= 2:
+            if tiles_34[x] >= 2:
                 count_of_pairs += 1
 
         suits.remove(suit)
-        count_of_ryanmens = self._find_ryanmen_waits(tiles, suits[0]['function'])
-        count_of_ryanmens += self._find_ryanmen_waits(tiles, suits[1]['function'])
+        count_of_ryanmens = self._find_ryanmen_waits(tiles_34, suits[0]['function'])
+        count_of_ryanmens += self._find_ryanmen_waits(tiles_34, suits[1]['function'])
 
         # it is a bad idea go for honitsu with ryanmen in other suit
         if count_of_ryanmens > 0 and not self.player.is_open_hand:

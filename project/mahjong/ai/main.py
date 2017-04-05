@@ -13,7 +13,6 @@ from mahjong.ai.strategies.yakuhai import YakuhaiStrategy
 from mahjong.constants import HAKU, CHUN, HATSU
 from mahjong.hand import HandDivider, FinishedHand
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_honor
 from utils.settings_handler import settings
 
 logger = logging.getLogger('ai')
@@ -96,7 +95,7 @@ class MainAI(BaseAI):
                                                                 is_tsumo=True,
                                                                 is_riichi=False,
                                                                 is_dealer=self.player.is_dealer,
-                                                                open_sets=self.player.meld_tiles,
+                                                                open_sets=self.player.open_hand_34_tiles,
                                                                 player_wind=self.player.player_wind,
                                                                 round_wind=self.player.table.round_wind)
                 if result['error'] is not None:
@@ -129,7 +128,7 @@ class MainAI(BaseAI):
         """
         tiles_34 = TilesConverter.to_34_array(tiles)
         closed_tiles_34 = TilesConverter.to_34_array(closed_hand)
-        is_agari = self.agari.is_agari(tiles_34, self.player.meld_tiles)
+        is_agari = self.agari.is_agari(tiles_34, self.player.open_hand_34_tiles)
 
         # win
         if is_agari:
@@ -143,7 +142,7 @@ class MainAI(BaseAI):
 
             tiles_34[hand_tile] -= 1
 
-            shanten = self.shanten.calculate_shanten(tiles_34, is_open_hand, self.player.meld_tiles)
+            shanten = self.shanten.calculate_shanten(tiles_34, is_open_hand, self.player.open_hand_34_tiles)
 
             waiting = []
             for j in range(0, 34):
@@ -151,7 +150,9 @@ class MainAI(BaseAI):
                     continue
 
                 tiles_34[j] += 1
-                if self.shanten.calculate_shanten(tiles_34, is_open_hand, self.player.meld_tiles) == shanten - 1:
+                if self.shanten.calculate_shanten(tiles_34,
+                                                  is_open_hand,
+                                                  self.player.open_hand_34_tiles) == shanten - 1:
                     waiting.append(j)
                 tiles_34[j] -= 1
 
@@ -164,7 +165,7 @@ class MainAI(BaseAI):
                                              waiting=waiting,
                                              tiles_count=self.count_tiles(waiting, tiles_34)))
 
-        shanten = self.shanten.calculate_shanten(tiles_34, is_open_hand, self.player.meld_tiles)
+        shanten = self.shanten.calculate_shanten(tiles_34, is_open_hand, self.player.open_hand_34_tiles)
 
         return results, shanten
 
@@ -248,7 +249,7 @@ class MainAI(BaseAI):
                                                         is_tsumo=False,
                                                         is_riichi=False,
                                                         is_dealer=self.player.is_dealer,
-                                                        open_sets=self.player.meld_tiles,
+                                                        open_sets=self.player.open_hand_34_tiles,
                                                         player_wind=self.player.player_wind,
                                                         round_wind=self.player.table.round_wind,
                                                         dora_indicators=self.player.table.dora_indicators)

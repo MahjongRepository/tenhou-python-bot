@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from mahjong.ai.discard import DiscardOption
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_man, is_pin, is_sou, is_chi, is_pon, find_isolated_tile_indices
@@ -247,7 +246,7 @@ class BaseStrategy(object):
             temp_hand_34[meld[2]] -= 1
             temp_hand_34[tile_to_replace] = 3
             # open hand always should be true to exclude chitoitsu hands from calculations
-            shanten = self.player.ai.shanten.calculate_shanten(temp_hand_34, True, self.player.meld_tiles)
+            shanten = self.player.ai.shanten.calculate_shanten(temp_hand_34, True, self.player.open_hand_34_tiles)
             results.append({'shanten': shanten, 'meld': meld})
 
         results = sorted(results, key=lambda i: i['shanten'])

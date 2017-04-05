@@ -4,6 +4,7 @@ from functools import reduce
 
 import copy
 
+from mahjong.ai.defence.enemy_analyzer import EnemyAnalyzer
 from mahjong.constants import EAST, SOUTH, WEST, NORTH
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter, Tile
@@ -85,6 +86,17 @@ class PlayerInterface(object):
     @property
     def is_open_hand(self):
         return len(self.melds) > 0
+
+    @property
+    def meld_tiles(self):
+        """
+        Array of 136 tiles format
+        :return:
+        """
+        meld_tiles = [x.tiles for x in self.melds]
+        if meld_tiles:
+            meld_tiles = reduce(lambda z, y: z + y, [x.tiles for x in self.melds])
+        return meld_tiles
 
 
 class Player(PlayerInterface):
@@ -184,14 +196,10 @@ class Player(PlayerInterface):
     @property
     def closed_hand(self):
         tiles = self.tiles[:]
-        meld_tiles = [x.tiles for x in self.melds]
-        if meld_tiles:
-            meld_tiles = reduce(lambda z, y: z + y, [x.tiles for x in self.melds])
-
-        return [item for item in tiles if item not in meld_tiles]
+        return [item for item in tiles if item not in self.meld_tiles]
 
     @property
-    def meld_tiles(self):
+    def open_hand_34_tiles(self):
         """
         Array of array with 34 tiles indices
         :return: array
@@ -228,14 +236,14 @@ class EnemyPlayer(PlayerInterface):
     # tiles that were discarded in the current "step"
     # so, for example kamicha discard will be a safe tile for all players
     temporary_safe_tiles = None
-    # calculated suji for this player
-    suji = []
+    enemy_analyzer = None
 
     def erase_state(self):
         super().erase_state()
 
         self.safe_tiles = []
         self.temporary_safe_tiles = []
+        self.enemy_analyzer = EnemyAnalyzer(self)
 
     def add_discarded_tile(self, tile: Tile):
         super().add_discarded_tile(tile)
@@ -262,3 +270,27 @@ class EnemyPlayer(PlayerInterface):
     @property
     def all_safe_tiles(self):
         return list(set(self.temporary_safe_tiles + self.safe_tiles))
+
+    @property
+    def in_tempai(self):
+        """
+        Try to detect is user in tempai or not
+        :return: boolean
+        """
+        return self.enemy_analyzer.in_tempai
+
+    @property
+    def is_threatening(self):
+        """
+        Should we fold against this player or not
+        :return: boolean
+        """
+        return self.enemy_analyzer.is_threatening
+
+    @property
+    def chosen_suit(self):
+        """
+        If user collecting honitsu we can detect his specific suit
+        :return: function
+        """
+        return self.enemy_analyzer.chosen_suit

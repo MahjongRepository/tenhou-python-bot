@@ -175,3 +175,13 @@ class TenhouDecoderTestCase(unittest.TestCase):
         self.assertEqual(len(result[3]['discards']), 10)
 
         self.assertEqual(len(result[2]['melds']), 1)
+
+    def test_is_match_discard(self):
+        decoder = TenhouDecoder()
+
+        self.assertTrue(decoder.is_discarded_tile_message('<e107/>'))
+        self.assertTrue(decoder.is_discarded_tile_message('<F107/>'))
+        self.assertTrue(decoder.is_discarded_tile_message('<g107/>'))
+
+        self.assertFalse(decoder.is_discarded_tile_message('<GO type="9" lobby="0" gpid=""/>'))
+        self.assertFalse(decoder.is_discarded_tile_message('<FURITEN show="1" />'))

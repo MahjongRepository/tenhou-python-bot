@@ -238,3 +238,16 @@ class TenhouDecoder(object):
     def get_attribute_content(self, message, attribute_name):
         result = re.findall(r'{}="([^"]*)"'.format(attribute_name), message)
         return result and result[0] or None
+
+    def is_discarded_tile_message(self, message):
+        if '<GO' in message:
+            return False
+
+        if '<FURITEN' in message:
+            return False
+
+        match_discard = re.match(r"^<[efgEFG]+\d*", message)
+        if match_discard:
+            return True
+
+        return False

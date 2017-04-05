@@ -6,8 +6,6 @@ from threading import Thread
 from time import sleep
 from urllib.parse import quote
 
-import re
-
 from mahjong.constants import DISPLAY_WINDS
 from mahjong.stat import Statistics
 from utils.settings_handler import settings
@@ -320,9 +318,7 @@ class TenhouClient(Client):
                     sleep(1)
                     self._send_message('<N type="6" />')
 
-                # other players discards: <e, <f, <g + tile number
-                match_discard = re.match(r"^<[efgEFG]+\d*", message)
-                if match_discard and '<GO' not in message:
+                if self.decoder.is_discarded_tile_message(message):
                     tile = self.decoder.parse_tile(message)
 
                     # <e21/> - is tsumogiri

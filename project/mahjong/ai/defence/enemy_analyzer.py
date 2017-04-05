@@ -56,12 +56,7 @@ class EnemyAnalyzer(object):
             # check that user has a discard and melds that looks like honitsu
             is_honitsu_open_sets, open_hand_suit = self._is_honitsu_open_sets(meld_tiles_34)
 
-        if is_honitsu_discards:
-            # user's discard looks like honitsu
-            # but he opened sets from different suits
-            if meld_tiles and not is_honitsu_open_sets:
-                return False
-
+        if is_honitsu_open_sets and is_honitsu_discards:
             # users open sets and his discards tell to us
             # that he is collecting specific suit
             self.chosen_suit = open_hand_suit

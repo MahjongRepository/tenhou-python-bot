@@ -35,8 +35,8 @@ class TenhouDecoder(object):
         if 'auth=' in message:
             auth_message = self.get_attribute_content(message, 'auth')
             # for NoName we don't have rating attribute
-            if 'pf4=' in message:
-                rating_string = self.get_attribute_content(message, 'pf4')
+            if 'PF4=' in message:
+                rating_string = self.get_attribute_content(message, 'PF4')
             return auth_message, rating_string
         else:
             return '', ''

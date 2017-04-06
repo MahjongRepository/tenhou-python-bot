@@ -9,6 +9,7 @@ project/settings_local.py
 old_version.py
 
 tests_validate_hand.py
+reproducer.py
 loader.py
 *.db
 temp

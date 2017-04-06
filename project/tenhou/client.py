@@ -60,11 +60,14 @@ class TenhouClient(Client):
 
             return True
 
-        auth_string, rating_string = self.decoder.parse_hello_string(auth_message)
+        auth_string, rating_string, new_rank_message = self.decoder.parse_hello_string(auth_message)
         self._rating_string = rating_string
         if not auth_string:
             logger.info("We didn't obtain auth string")
             return False
+
+        if new_rank_message:
+            logger.info('Achieved a new rank! \n {}'.format(new_rank_message))
 
         auth_token = self.decoder.generate_auth_token(auth_string)
 

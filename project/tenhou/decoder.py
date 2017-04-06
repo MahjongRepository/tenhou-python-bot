@@ -32,14 +32,19 @@ class TenhouDecoder(object):
 
     def parse_hello_string(self, message):
         rating_string = ''
+        auth_message = ''
+        new_rank_message = ''
+
         if 'auth=' in message:
             auth_message = self.get_attribute_content(message, 'auth')
             # for NoName we don't have rating attribute
             if 'PF4=' in message:
                 rating_string = self.get_attribute_content(message, 'PF4')
-            return auth_message, rating_string
-        else:
-            return '', ''
+
+        if 'nintei' in message:
+            new_rank_message = unquote(self.get_attribute_content(message, 'nintei'))
+
+        return auth_message, rating_string, new_rank_message
 
     def parse_initial_values(self, message):
         """

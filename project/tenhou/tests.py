@@ -78,7 +78,7 @@ class TenhouDecoderTestCase(unittest.TestCase):
                            auth="20160318-54ebe070" ratingscale=""
                            PF4="9,45,1290.90,-5184.0,69,95,129,157,71,4303,831,830,33,1761"/>"""
 
-        auth_string, rating_string = decoder.parse_hello_string(message)
+        auth_string, rating_string, _ = decoder.parse_hello_string(message)
 
         self.assertEqual(auth_string, '20160318-54ebe070')
         self.assertEqual(rating_string, '9,45,1290.90,-5184.0,69,95,129,157,71,4303,831,830,33,1761')

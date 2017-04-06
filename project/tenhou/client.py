@@ -279,7 +279,7 @@ class TenhouClient(Client):
                     self.table.add_dora_indicator(tile)
                     logger.info('New dora indicator: {}'.format(TilesConverter.to_one_line_string([tile])))
 
-                if '<REACH' in message and 'step="2"' in message:
+                if '<REACH' in message and 'step="1"' in message:
                     who_called_riichi = self.decoder.parse_who_called_riichi(message)
                     self.table.add_called_riichi(who_called_riichi)
                     logger.info('Riichi called by {} player'.format(who_called_riichi))

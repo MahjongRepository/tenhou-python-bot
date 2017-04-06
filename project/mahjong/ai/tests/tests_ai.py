@@ -44,13 +44,14 @@ class AITestCase(unittest.TestCase, TestMixin):
 
     def test_not_open_hand_in_defence_mode(self):
         table = Table()
-        player = Player(table, 0, 0, False)
-
-        player.ai.in_defence = True
+        player = table.player
 
         tiles = self._string_to_136_array(sou='12368', pin='2358', honors='4455')
-        tile = self._string_to_136_tile(honors='5')
         player.init_hand(tiles)
+
+        table.add_called_riichi(1)
+
+        tile = self._string_to_136_tile(honors='5')
         meld, _, _ = player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 

@@ -181,6 +181,15 @@ class Player(PlayerInterface):
         """
         return tiles_34[tile] + self.table.revealed_tiles[tile]
 
+    def enemy_called_riichi(self):
+        """
+        After enemy riichi we had to check will we fold or not
+        it is affect open hand decision
+        :return:
+        """
+        if self.ai.defence.should_go_to_defence_mode():
+            self.ai.in_defence = True
+
     def format_hand_for_print(self, tile):
         hand_string = '{} + {}'.format(
             TilesConverter.to_one_line_string(self.closed_hand),

@@ -91,6 +91,10 @@ class Table(object):
     def add_called_riichi(self, player_seat):
         self.get_player(player_seat).in_riichi = True
 
+        # we had to check will we go for defence or not
+        if player_seat != 0:
+            self.player.enemy_called_riichi()
+
     def add_discarded_tile(self, player_seat, tile, is_tsumogiri):
         """
         :param player_seat:

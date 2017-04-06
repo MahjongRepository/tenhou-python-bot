@@ -224,6 +224,9 @@ class GameManager(AbortiveDraw):
                 current_client.table.add_discarded_tile(0, tile, True)
 
             if in_tempai and current_client.player.can_call_riichi():
+                who_called_riichi = current_client.seat
+                for client in self.clients:
+                    client.table.add_called_riichi(self._enemy_position(who_called_riichi, client.seat))
                 self.replay.riichi(current_client.seat, 1)
 
             self.replay.discard(current_client.seat, tile)
@@ -470,9 +473,6 @@ class GameManager(AbortiveDraw):
         client.is_ippatsu = True
 
         who_called_riichi = client.seat
-        for client in self.clients:
-            client.table.add_called_riichi(self._enemy_position(who_called_riichi, client.seat))
-
         logger.info('Riichi: {0} -1,000'.format(self.clients[who_called_riichi].player.name))
         logger.info('With hand: {}'.format(
             TilesConverter.to_one_line_string(self.clients[who_called_riichi].player.closed_hand)

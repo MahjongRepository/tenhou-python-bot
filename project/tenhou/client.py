@@ -415,7 +415,7 @@ class TenhouClient(Client):
         self.socket.sendall(message.encode())
 
     def _read_message(self):
-        message = self.socket.recv(1024)
+        message = self.socket.recv(2048)
         logger.debug('Get: {}'.format(message.decode('utf-8').replace('\x00', ' ')))
         return message.decode('utf-8')
 

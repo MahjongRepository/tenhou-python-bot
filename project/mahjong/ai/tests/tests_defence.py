@@ -295,7 +295,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(table.player.can_call_riichi(), True)
         self.assertEqual(self._to_string([result]), '1z')
 
-    def test_fold_against_player_honitsu(self):
+    def test_defence_against_honitsu_first_case(self):
         table = Table()
 
         tiles = self._string_to_136_array(sou='22', pin='222367899', man='45', honors='1')
@@ -317,3 +317,29 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         # we can't discard pin and honor tiles against honitsu
         self.assertEqual(self._to_string([result]), '2s')
+
+    def test_defence_against_honitsu_second_case(self):
+        table = Table()
+
+        tiles = self._string_to_136_array(sou='4', pin='223456', man='678', honors='66')
+        table.player.init_hand(tiles)
+
+        table.add_called_meld(1, self._make_meld(Meld.CHI, self._string_to_136_array(sou='789')))
+        table.add_called_meld(1, self._make_meld(Meld.PON, self._string_to_136_array(honors='444')))
+        table.add_called_meld(1, self._make_meld(Meld.PON, self._string_to_136_array(honors='222')))
+
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='1'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(man='2'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='9'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(man='8'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='6'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='4'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='3'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(sou='7'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(honors='5'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(honors='7'), False)
+
+        table.player.draw_tile(self._string_to_136_tile(honors='6'))
+        result = table.player.discard_tile()
+
+        self.assertEqual(self._to_string([result]), '3p')

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from mahjong.ai.defence.defence import Defence, DefenceTile
-from mahjong.utils import is_man, is_pin, is_sou, simplify
+from mahjong.utils import is_man, is_pin, is_sou, simplify, plus_dora
 
 
 class Suji(Defence):
@@ -80,23 +80,31 @@ class Suji(Defence):
         second_danger = 30
         third_danger = 40
 
+        result = []
         if suji_temp == self.FIRST_SUJI:
-            return [
+            result = [
                 DefenceTile(base + 1, first_danger),
                 DefenceTile(base + 4, second_danger),
                 DefenceTile(base + 7, third_danger)
             ]
 
         if suji_temp == self.SECOND_SUJI:
-            return [
+            result = [
                 DefenceTile(base + 2, second_danger),
                 DefenceTile(base + 5, second_danger),
                 DefenceTile(base + 8, second_danger)
             ]
 
         if suji_temp == self.THIRD_SUJI:
-            return [
+            result = [
                 DefenceTile(base + 3, third_danger),
                 DefenceTile(base + 6, second_danger),
                 DefenceTile(base + 9, first_danger)
             ]
+
+        # mark dora tiles as dangerous tiles to discard
+        for tile in result:
+            if plus_dora(tile.value * 4, self.table.dora_indicators, False):
+                tile.danger += 100
+
+        return result

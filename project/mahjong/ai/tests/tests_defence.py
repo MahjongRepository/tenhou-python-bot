@@ -295,6 +295,22 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(table.player.can_call_riichi(), True)
         self.assertEqual(self._to_string([result]), '1z')
 
+    def test_mark_dora_as_dangerous_tile_for_suji(self):
+        table = Table()
+        table.add_dora_indicator(self._string_to_136_tile(man='8'))
+
+        tiles = self._string_to_136_array(man='112235', pin='4557788')
+        table.player.init_hand(tiles)
+        # 9 man is dora!
+        table.player.draw_tile(self._string_to_136_tile(man='9'))
+
+        table.add_discarded_tile(1, self._string_to_136_tile(man='6'), False)
+        table.add_called_riichi(1)
+
+        result = table.player.discard_tile()
+
+        self.assertEqual(self._to_string([result]), '3m')
+
     def test_defence_against_honitsu_first_case(self):
         table = Table()
 

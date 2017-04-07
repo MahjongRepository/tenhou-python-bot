@@ -16,7 +16,7 @@ def is_aka_dora(tile):
     return False
 
 
-def plus_dora(tile, dora_indicators):
+def plus_dora(tile, dora_indicators, count_aka_dora=True):
     """
     :param tile: int 136 tiles format
     :param dora_indicators: array of 136 tiles format
@@ -25,7 +25,7 @@ def plus_dora(tile, dora_indicators):
     tile_index = tile // 4
     dora_count = 0
 
-    if is_aka_dora(tile):
+    if count_aka_dora and is_aka_dora(tile):
         dora_count += 1
 
     for dora in dora_indicators:

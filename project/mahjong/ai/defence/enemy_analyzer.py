@@ -104,11 +104,10 @@ class EnemyAnalyzer(object):
 
         result = count_tiles_by_suits(discards_34)
 
-        honor = [x for x in result if x['name'] == 'honor'][0]
         suits = [x for x in result if x['name'] != 'honor']
         suits = sorted(suits, key=lambda x: x['count'], reverse=False)
 
-        less_suit = suits[0]['count'] + honor['count']
+        less_suit = suits[0]['count']
         percentage_of_less_suit = (less_suit / total_discards) * 100
 
         # there is not too much one suit + honor tiles in the discard

@@ -67,6 +67,13 @@ class PlayerInterface(object):
     def add_discarded_tile(self, tile: Tile):
         self.discards.append(tile)
 
+        # all tiles that were discarded after player riichi will be safe against him
+        # because of furiten
+        tile = tile.value // 4
+        for player in self.table.enemy_players:
+            if player.in_riichi and tile not in player.safe_tiles:
+                player.safe_tiles.append(tile)
+
     @property
     def player_wind(self):
         position = self.dealer_seat
@@ -261,12 +268,6 @@ class EnemyPlayer(PlayerInterface):
         tile = tile.value // 4
         if tile not in self.safe_tiles:
             self.safe_tiles.append(tile)
-
-        # all tiles that were discarded after player riichi will be safe against him
-        # because of furiten
-        for player in self.table.enemy_players:
-            if player.in_riichi and tile not in player.safe_tiles:
-                player.safe_tiles.append(tile)
 
         # erase temporary furiten after tile draw
         self.temporary_safe_tiles = []

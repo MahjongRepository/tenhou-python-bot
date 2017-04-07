@@ -14,6 +14,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         table.add_called_riichi(3)
 
         table.add_discarded_tile(1, self._string_to_136_tile(man='3'), False)
+        table.add_discarded_tile(0, self._string_to_136_tile(man='4'), False)
 
         self.assertEqual(len(table.get_player(1).discards), 1)
         self.assertEqual(len(table.get_player(2).discards), 0)
@@ -21,11 +22,11 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         self.assertEqual(len(table.get_player(1).safe_tiles), 1)
         self.assertEqual(len(table.get_player(2).safe_tiles), 0)
-        self.assertEqual(len(table.get_player(3).safe_tiles), 1)
+        self.assertEqual(len(table.get_player(3).safe_tiles), 2)
 
         # "2" is 3 man
-        self.assertEqual(table.get_player(1).safe_tiles[0], 2)
-        self.assertEqual(table.get_player(3).safe_tiles[0], 2)
+        self.assertEqual(table.get_player(1).safe_tiles, [2])
+        self.assertEqual(table.get_player(3).safe_tiles, [2, 3])
 
     def test_temporary_safe_tiles(self):
         table = Table()

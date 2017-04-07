@@ -95,14 +95,14 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
     def test_find_common_safe_tile_to_discard(self):
         table = Table()
 
-        tiles = self._string_to_136_array(sou='2345678', pin='34789', man='55')
+        tiles = self._string_to_136_array(sou='2456', pin='234478', man='2336')
         table.player.init_hand(tiles)
 
-        table.add_discarded_tile(1, self._string_to_136_tile(man='4'), False)
-        table.add_discarded_tile(1, self._string_to_136_tile(man='5'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(sou='6'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='5'), False)
 
-        table.add_discarded_tile(2, self._string_to_136_tile(man='5'), False)
-        table.add_discarded_tile(2, self._string_to_136_tile(man='6'), False)
+        table.add_discarded_tile(2, self._string_to_136_tile(pin='5'), False)
+        table.add_discarded_tile(2, self._string_to_136_tile(sou='6'), False)
 
         table.add_called_riichi(1)
         table.add_called_riichi(2)
@@ -113,7 +113,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         result = table.player.discard_tile()
 
-        self.assertEqual(self._to_string([result]), '5m')
+        self.assertEqual(self._to_string([result]), '6s')
 
     def test_find_dealer_tile_to_discard(self):
         dealer = 2

@@ -89,9 +89,14 @@ class DefenceHandler(object):
             if common_safe_tiles:
                 common_safe_tiles = [DefenceTile(x, DefenceTile.SAFE) for x in common_safe_tiles]
                 common_safe_tiles += safe_tiles
-                common_safe_tiles += common_suji_tiles
 
+                # first try to check 100% safe tiles for all players
                 result = self._find_tile_to_discard(common_safe_tiles, discard_results)
+                if result:
+                    return result
+
+                # if there is no 100% safe tiles try to check common suji tiles
+                result = self._find_tile_to_discard(common_suji_tiles, discard_results)
                 if result:
                     return result
 

@@ -8,19 +8,22 @@ from utils.tests import TestMixin
 
 class CallRiichiTestCase(unittest.TestCase, TestMixin):
 
-    def test_should_call_riichi_and_tanki_wait(self):
+    def test_dont_call_riichi_with_tanki_wait(self):
         table = Table()
         table.count_of_remaining_tiles = 60
         player = Player(table, 0, 0, False)
         player.scores = 25000
 
-        tiles = self._string_to_136_array(sou='123456', pin='12345', man='34')
-        tile = self._string_to_136_tile(pin='6')
+        tiles = self._string_to_136_array(sou='123456', pin='123456', man='3')
         player.init_hand(tiles)
-        player.draw_tile(tile)
+
+        player.draw_tile(self._string_to_136_tile(man='4'))
         player.discard_tile()
 
         self.assertEqual(player.can_call_riichi(), False)
+
+        player = Player(table, 0, 0, False)
+        player.scores = 25000
 
         tiles = self._string_to_136_array(sou='1133557799', pin='113')
         tile = self._string_to_136_tile(pin='6')
@@ -29,4 +32,18 @@ class CallRiichiTestCase(unittest.TestCase, TestMixin):
         player.discard_tile()
 
         # for chitoitsu it is ok to have a pair wait
+        self.assertEqual(player.can_call_riichi(), True)
+
+    def test_call_riichi_and_penchan_wait(self):
+        table = Table()
+        table.count_of_remaining_tiles = 60
+        player = Player(table, 0, 0, False)
+        player.scores = 25000
+
+        tiles = self._string_to_136_array(sou='11223', pin='234567', man='66')
+        tile = self._string_to_136_tile(man='9')
+        player.init_hand(tiles)
+        player.draw_tile(tile)
+        player.discard_tile()
+
         self.assertEqual(player.can_call_riichi(), True)

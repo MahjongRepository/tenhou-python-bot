@@ -129,6 +129,7 @@ class Player(PlayerInterface):
     def draw_tile(self, tile):
         self.last_draw = tile
         self.tiles.append(tile)
+
         # we need sort it to have a better string presentation
         self.tiles = sorted(self.tiles)
 

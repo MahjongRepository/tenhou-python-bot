@@ -13,6 +13,7 @@ from mahjong.ai.strategies.yakuhai import YakuhaiStrategy
 from mahjong.constants import HAKU, CHUN, HATSU
 from mahjong.hand import HandDivider, FinishedHand
 from mahjong.tile import TilesConverter
+from mahjong.utils import is_pair
 from utils.settings_handler import settings
 
 logger = logging.getLogger('ai')
@@ -79,9 +80,6 @@ class MainAI(BaseAI):
                 return self._process_discard_option(selected_tile, self.player.closed_hand)
         else:
             self.in_defence = False
-
-        if shanten == 0:
-            self.player.in_tempai = True
 
         # we are win!
         if shanten == Shanten.AGARI_STATE:
@@ -265,15 +263,21 @@ class MainAI(BaseAI):
             return True
 
         waiting = self.waiting[0]
-        tiles_34 = TilesConverter.to_34_array(self.player.closed_hand)
-        count_of_pairs = len([x for x in range(0, 34) if tiles_34[x] == 2])
+        tiles_34 = TilesConverter.to_34_array(self.player.closed_hand + [waiting * 4])
 
-        # pair wait is really easy to improve,
-        # so let's not riichi it
-        # but for chitoitsu we can call a riichi
-        is_pair_wait = tiles_34[waiting] == 1
-        if is_pair_wait and count_of_pairs != 6:
-            return False
+        results = self.hand_divider.divide_hand(tiles_34, [], [])
+        result = results[0]
+
+        count_of_pairs = len([x for x in result if is_pair(x)])
+        # with chitoitsu we can call a riichi with pair wait
+        if count_of_pairs == 7:
+            return True
+
+        for hand_set in result:
+            # better to not call a riichi for a pair wait
+            # it can be easily improved
+            if is_pair(hand_set) and waiting in hand_set:
+                return False
 
         return True
 

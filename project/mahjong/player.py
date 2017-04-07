@@ -175,7 +175,7 @@ class Player(PlayerInterface):
     def total_tiles(self, tile, tiles_34):
         """
         Return sum of all tiles (discarded + from melds + our hand)
-        :param tile: 36 tile format
+        :param tile: 34 tile format
         :param tiles_34: cached list of tiles (to not build it for each iteration)
         :return: int
         """

@@ -67,6 +67,10 @@ class YakuhaiStrategy(BaseStrategy):
         valued_pairs = [x for x in self.player.ai.valued_honors if tiles_34[x] == 2]
 
         for meld in self.player.melds:
+            # for big shanten number we don't need to check already opened pon set
+            if self.player.ai.previous_shanten >= 1:
+                break
+
             # we have already opened yakuhai pon
             # so we don't need to open hand without shanten improvement
             if meld.type == Meld.PON and meld.tiles[0] // 4 in self.player.ai.valued_honors:

@@ -163,23 +163,6 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         meld, tile_to_discard, shanten = player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)
 
-        table = Table()
-        player = Player(table, 0, 0, False)
-
-        tiles = self._string_to_136_array(man='56', sou='1235', pin='12', honors='11777')
-        player.init_hand(tiles)
-
-        meld = self._make_meld(Meld.PON, self._string_to_136_array(honors='777'))
-        player.add_called_meld(meld)
-        # to update previous_shanten attribute
-        player.draw_tile(self._string_to_136_tile(honors='3'))
-        player.discard_tile()
-
-        # we don't need to open hand with already opened yakuhai set
-        tile = self._string_to_136_tile(honors='1')
-        meld, tile_to_discard, shanten = player.try_to_call_meld(tile, True)
-        self.assertEqual(meld, None)
-
     def test_tempai_without_yaku(self):
         table = Table()
         player = Player(table, 0, 0, False)
@@ -195,6 +178,43 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
 
         discard = player.discard_tile()
         self.assertEqual(self._to_string([discard]), '5p')
+
+    def test_get_more_yakuhai_sets_in_hand(self):
+        table = Table()
+
+        tiles = self._string_to_136_array(sou='1378', pin='67', man='68', honors='5566')
+        table.player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(honors='5')
+        meld, tile_to_discard, shanten = table.player.try_to_call_meld(tile, False)
+        self.assertNotEqual(meld, None)
+
+        table.add_called_meld(0, meld)
+        table.player.tiles.append(tile)
+        table.player.ai.previous_shanten = shanten
+        table.player.discard_tile(tile_to_discard)
+
+        tile = self._string_to_136_tile(honors='6')
+        meld, tile_to_discard, shanten = table.player.try_to_call_meld(tile, False)
+        self.assertNotEqual(meld, None)
+
+        table = Table()
+
+        tiles = self._string_to_136_array(sou='234', pin='788', man='567', honors='5566')
+        table.player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(honors='5')
+        meld, tile_to_discard, shanten = table.player.try_to_call_meld(tile, False)
+        self.assertNotEqual(meld, None)
+
+        table.add_called_meld(0, meld)
+        table.player.tiles.append(tile)
+        table.player.ai.previous_shanten = shanten
+        table.player.discard_tile(tile_to_discard)
+
+        tile = self._string_to_136_tile(honors='6')
+        meld, tile_to_discard, shanten = table.player.try_to_call_meld(tile, False)
+        self.assertEqual(meld, None)
 
 
 class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):

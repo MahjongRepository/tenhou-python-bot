@@ -20,7 +20,7 @@ class Reproducer(object):
         self.stop_tag = stop_tag
         self.decoder = TenhouDecoder()
 
-    def reproduce(self):
+    def reproduce(self, display_tags=False):
         draw_tags = ['T', 'U', 'V', 'W']
         discard_tags = ['D', 'E', 'F', 'G']
 
@@ -31,7 +31,10 @@ class Reproducer(object):
 
         table = Table()
         for tag in self.round_content:
-            if tag == self.stop_tag:
+            if display_tags:
+                print(tag)
+
+            if not display_tags and tag == self.stop_tag:
                 break
 
             if 'INIT' in tag:
@@ -61,19 +64,19 @@ class Reproducer(object):
             if discard_regex.match(tag) and 'DORA' not in tag:
                 tile = self.decoder.parse_tile(tag)
                 player_sign = tag.upper()[1]
-                player_set = self.normalize_position(self.player_position, discard_tags.index(player_sign))
+                player_seat = self.normalize_position(self.player_position, discard_tags.index(player_sign))
 
-                if player_set == 0:
+                if player_seat == 0:
                     table.player.discard_tile(tile)
                 else:
-                    table.add_discarded_tile(player_set, tile, False)
+                    table.add_discarded_tile(player_seat, tile, False)
 
             if '<N who=' in tag:
                 meld = self.decoder.parse_meld(tag)
-                player_set = self.normalize_position(self.player_position, meld.who)
-                table.add_called_meld(player_set,  meld)
+                player_seat = self.normalize_position(self.player_position, meld.who)
+                table.add_called_meld(player_seat,  meld)
 
-                if player_set == 0:
+                if player_seat == 0:
                     table.player.draw_tile(meld.called_tile)
 
             if '<REACH' in tag and 'step="1"' in tag:
@@ -81,9 +84,13 @@ class Reproducer(object):
                                                             self.decoder.parse_who_called_riichi(tag))
                 table.add_called_riichi(who_called_riichi)
 
-        table.player.draw_tile(self.decoder.parse_tile(self.stop_tag))
-        tile = table.player.discard_tile()
-        print(TilesConverter.to_one_line_string([tile]))
+        if not display_tags:
+            tile = self.decoder.parse_tile(self.stop_tag)
+            print('Hand: {}'.format(table.player.format_hand_for_print(tile)))
+
+            table.player.draw_tile(tile)
+            tile = table.player.discard_tile()
+            print('Discard: {}'.format(TilesConverter.to_one_line_string([tile])))
 
     def normalize_position(self, who, from_who):
         positions = [0, 1, 2, 3]

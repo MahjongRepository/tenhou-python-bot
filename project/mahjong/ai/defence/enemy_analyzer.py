@@ -58,7 +58,7 @@ class EnemyAnalyzer(object):
 
         if is_honitsu_open_sets:
             # for 2 opened melds we had to check discard, to be sure
-            if len(self.player.melds) <= 2 and is_honitsu_discards:
+            if len(self.player.melds) <= 2 and is_honitsu_discards and discard_suit == open_hand_suit:
                 self.chosen_suit = open_hand_suit
                 return True
 

@@ -121,7 +121,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         table = Table()
         table.init_round(0, 0, 0, 0, dealer, [])
 
-        tiles = self._string_to_136_array(sou='2345678', pin='34', man='45789')
+        tiles = self._string_to_136_array(sou='2234678', pin='34', man='45789')
         table.player.init_hand(tiles)
 
         table.add_discarded_tile(1, self._string_to_136_tile(man='4'), False)

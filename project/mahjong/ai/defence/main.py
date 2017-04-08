@@ -3,7 +3,7 @@ from mahjong.ai.defence.impossible_wait import ImpossibleWait
 from mahjong.ai.defence.kabe import Kabe
 from mahjong.ai.defence.suji import Suji
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_honor
+from mahjong.utils import is_honor, plus_dora
 
 
 class DefenceHandler(object):
@@ -48,8 +48,16 @@ class DefenceHandler(object):
         if len(threatening_players) == 0:
             return False
 
-        # our hand is far away from tempai, so better to fold
-        if current_shanten >= 1:
+        if current_shanten == 1:
+            # TODO calculate all possible hand costs for 1-2 shanten
+            dora_count = sum([plus_dora(x, self.table.dora_indicators) for x in self.player.tiles])
+            # we had 2+ dora in our almost done hand,
+            # we can try to push it
+            if dora_count >= 2:
+                return False
+
+        # our hand is not tempai, so better to fold it
+        if current_shanten != 0:
             return True
 
         # we are in tempai, let's try to estimate hand value

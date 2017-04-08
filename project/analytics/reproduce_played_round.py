@@ -88,8 +88,13 @@ class Reproducer(object):
             tile = self.decoder.parse_tile(self.stop_tag)
             print('Hand: {}'.format(table.player.format_hand_for_print(tile)))
 
+            # to rebuild all caches
             table.player.draw_tile(tile)
             tile = table.player.discard_tile()
+
+            table.player.draw_tile(tile)
+            tile = table.player.discard_tile()
+
             print('Discard: {}'.format(TilesConverter.to_one_line_string([tile])))
 
     def normalize_position(self, who, from_who):

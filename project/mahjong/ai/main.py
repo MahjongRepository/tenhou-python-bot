@@ -20,7 +20,7 @@ logger = logging.getLogger('ai')
 
 
 class MainAI(BaseAI):
-    version = '0.2.3'
+    version = '0.2.4'
 
     agari = None
     shanten = None

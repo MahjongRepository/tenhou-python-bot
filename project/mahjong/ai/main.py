@@ -226,7 +226,29 @@ class MainAI(BaseAI):
             selected_tile = had_to_be_discarded_tiles[0]
         else:
             results = sorted(results, key=sorting)
-            selected_tile = results[0]
+
+            # let's chose most valuable tile first
+            temp_tile = results[0]
+            # and let's find all tiles with same shanten
+            results_with_same_shanten = [x for x in results if x.shanten == temp_tile.shanten]
+            possible_options = [temp_tile]
+            for discard_option in results_with_same_shanten:
+                # there is no sense to check already chosen tile
+                if discard_option.tile_to_discard == temp_tile.tile_to_discard:
+                    continue
+
+                # we don't need to select tiles almost dead waits
+                if discard_option.tiles_count <= 2:
+                    continue
+
+                # let's check all other tiles with same shanten
+                # maybe we can find tiles that have almost same tiles count number
+                if temp_tile.tiles_count - 2 < discard_option.tiles_count < temp_tile.tiles_count + 2:
+                    possible_options.append(discard_option)
+
+            # let's sort got tiles by value and let's chose less valuable tile to discard
+            possible_options = sorted(possible_options, key=lambda x: x.value)
+            selected_tile = possible_options[0]
 
         return self._process_discard_option(selected_tile, closed_hand)
 

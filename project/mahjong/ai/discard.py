@@ -18,6 +18,8 @@ class DiscardOption(object):
     shanten = None
     # sometimes we had to force tile to be discarded
     had_to_be_discarded = False
+    # special cases where we had to save tile in hand (usually for atodzuke opened hand)
+    had_to_be_saved = False
     # calculated tile value, for sorting
     valuation = None
     # how danger this tile is
@@ -36,6 +38,8 @@ class DiscardOption(object):
         self.waiting = waiting
         self.tiles_count = tiles_count
         self.danger = danger
+        self.had_to_be_saved = False
+        self.had_to_be_discarded = False
 
         self.calculate_value()
 

@@ -226,6 +226,8 @@ class MainAI(BaseAI):
             selected_tile = had_to_be_discarded_tiles[0]
         else:
             results = sorted(results, key=sorting)
+            # remove needed tiles from discard options
+            results = [x for x in results if not x.had_to_be_saved]
 
             # let's chose most valuable tile first
             temp_tile = results[0]

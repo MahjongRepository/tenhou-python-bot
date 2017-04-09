@@ -216,6 +216,22 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         meld, tile_to_discard, shanten = table.player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 
+    def test_atodzuke_opened_hand(self):
+        table = Table()
+        player = Player(table, 0, 0, False)
+
+        # 456m12355p22z + 5p [678s]
+        tiles = self._string_to_136_array(sou='4589', pin='123', man='1236', honors='66')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(man='6')
+        player.draw_tile(tile)
+        meld = self._make_meld(Meld.CHI, self._string_to_136_array(pin='123'))
+        player.add_called_meld(meld)
+
+        discard = player.discard_tile()
+        self.assertEqual(self._to_string([discard]), '9s')
+
 
 class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
 

@@ -50,12 +50,21 @@ class YakuhaiStrategy(BaseStrategy):
                 if valued_pair in item.waiting:
                     results.append(item)
             return results
-        else:
-            return super(YakuhaiStrategy, self).determine_what_to_discard(closed_hand,
-                                                                          outs_results,
-                                                                          shanten,
-                                                                          for_open_hand,
-                                                                          tile_for_open_hand)
+
+        if self.player.is_open_hand:
+            has_yakuhai_pon = any([self._is_yakuhai_pon(meld) for meld in self.player.melds])
+            # we opened our hand for atodzuke
+            if not has_yakuhai_pon:
+                for item in outs_results:
+                    for valued_pair in valued_pairs:
+                        if valued_pair == item.tile_to_discard:
+                            item.had_to_be_saved = True
+
+        return super(YakuhaiStrategy, self).determine_what_to_discard(closed_hand,
+                                                                      outs_results,
+                                                                      shanten,
+                                                                      for_open_hand,
+                                                                      tile_for_open_hand)
 
     def meld_had_to_be_called(self, tile):
         # for closed hand we don't need to open hand with special conditions
@@ -67,13 +76,14 @@ class YakuhaiStrategy(BaseStrategy):
         valued_pairs = [x for x in self.player.ai.valued_honors if tiles_34[x] == 2]
 
         for meld in self.player.melds:
-            # for big shanten number we don't need to check already opened pon set
+            # for big shanten number we don't need to check already opened pon set,
+            # because it will improve pur hand anyway
             if self.player.ai.previous_shanten >= 1:
                 break
 
             # we have already opened yakuhai pon
             # so we don't need to open hand without shanten improvement
-            if meld.type == Meld.PON and meld.tiles[0] // 4 in self.player.ai.valued_honors:
+            if self._is_yakuhai_pon(meld):
                 return False
 
         # open hand for valued pon
@@ -82,3 +92,6 @@ class YakuhaiStrategy(BaseStrategy):
                 return True
 
         return False
+
+    def _is_yakuhai_pon(self, meld):
+        return meld.type == Meld.PON and meld.tiles[0] // 4 in self.player.ai.valued_honors

@@ -218,7 +218,7 @@ class MainAI(BaseAI):
             # - is important for x.tiles_count
             # in that case we will discard tile that will give for us more tiles
             # to complete a hand
-            return x.shanten, -x.tiles_count, x.value
+            return x.shanten, -x.tiles_count, x.valuation
 
         had_to_be_discarded_tiles = [x for x in results if x.had_to_be_discarded]
         if had_to_be_discarded_tiles:
@@ -247,7 +247,7 @@ class MainAI(BaseAI):
                     possible_options.append(discard_option)
 
             # let's sort got tiles by value and let's chose less valuable tile to discard
-            possible_options = sorted(possible_options, key=lambda x: x.value)
+            possible_options = sorted(possible_options, key=lambda x: x.valuation)
             selected_tile = possible_options[0]
 
         return self._process_discard_option(selected_tile, closed_hand)

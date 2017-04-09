@@ -176,7 +176,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         result = table.player.discard_tile()
 
-        # discard of 2s will do less damage to our hand shape than 7s discard
+        # discard of 2s will do less damage to our hand shape than 7p discard
         self.assertEqual(self._to_string([result]), '2s')
 
     def test_find_impossible_waits_and_honor_tiles(self):
@@ -312,6 +312,22 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         self.assertEqual(self._to_string([result]), '3m')
 
+    def test_priority_of_players_safe_tiles(self):
+        table = Table()
+
+        tiles = self._string_to_136_array(man='789', pin='2789', sou='23789', honors='1')
+        table.player.init_hand(tiles)
+        table.player.draw_tile(self._string_to_136_tile(sou='1'))
+
+        table.add_discarded_tile(1, self._string_to_136_tile(sou='7'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(honors='1'), False)
+        table.add_called_riichi(1)
+        table.add_discarded_tile(2, self._string_to_136_tile(honors='1'), False)
+
+        result = table.player.discard_tile()
+
+        self.assertEqual(self._to_string([result]), '1z')
+
     def test_defence_against_honitsu_first_case(self):
         table = Table()
 
@@ -345,18 +361,18 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         table.add_called_meld(1, self._make_meld(Meld.PON, self._string_to_136_array(honors='444')))
         table.add_called_meld(1, self._make_meld(Meld.PON, self._string_to_136_array(honors='222')))
 
-        table.add_discarded_tile(1, self._string_to_136_tile(pin='1'), False)
         table.add_discarded_tile(1, self._string_to_136_tile(man='2'), False)
-        table.add_discarded_tile(1, self._string_to_136_tile(pin='9'), False)
         table.add_discarded_tile(1, self._string_to_136_tile(man='8'), False)
-        table.add_discarded_tile(1, self._string_to_136_tile(pin='6'), False)
-        table.add_discarded_tile(1, self._string_to_136_tile(pin='4'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='1'), False)
         table.add_discarded_tile(1, self._string_to_136_tile(pin='3'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='4'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='6'), False)
         table.add_discarded_tile(1, self._string_to_136_tile(sou='7'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='9'), False)
         table.add_discarded_tile(1, self._string_to_136_tile(honors='5'), False)
         table.add_discarded_tile(1, self._string_to_136_tile(honors='7'), False)
 
-        table.player.draw_tile(self._string_to_136_tile(honors='6'))
+        table.player.draw_tile(self._string_to_136_tile(sou='9'))
         result = table.player.discard_tile()
 
         self.assertEqual(self._to_string([result]), '3p')

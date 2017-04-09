@@ -96,10 +96,17 @@ class DefenceHandler(object):
             common_safe_tiles = list(set.intersection(*map(set, common_safe_tiles)))
             if common_safe_tiles:
                 common_safe_tiles = [DefenceTile(x, DefenceTile.SAFE) for x in common_safe_tiles]
-                common_safe_tiles += safe_tiles
+
+                # it can be that safe tile will be mark as "almost safe",
+                # but we already have "safe" tile in our hand
+                validated_safe_tiles = common_safe_tiles
+                for tile in safe_tiles:
+                    already_added_tile = [x for x in common_safe_tiles if x.value == tile.value]
+                    if not already_added_tile:
+                        validated_safe_tiles.append(tile)
 
                 # first try to check 100% safe tiles for all players
-                result = self._find_tile_to_discard(common_safe_tiles, discard_results)
+                result = self._find_tile_to_discard(validated_safe_tiles, discard_results)
                 if result:
                     return result
 
@@ -114,13 +121,20 @@ class DefenceHandler(object):
         for player in threatening_players:
             player_safe_tiles = [DefenceTile(x, DefenceTile.SAFE) for x in player.all_safe_tiles]
             player_suji_tiles = self.suji.find_tiles_to_discard([player])
-            player_safe_tiles += safe_tiles
+
+            # it can be that safe tile will be mark as "almost safe",
+            # but we already have "safe" tile in our hand
+            validated_safe_tiles = player_safe_tiles
+            for tile in safe_tiles:
+                already_added_tile = [x for x in player_safe_tiles if x.value == tile.value]
+                if not already_added_tile:
+                    validated_safe_tiles.append(tile)
 
             # better to not use suji for honitsu hands
             if not player.chosen_suit:
-                player_safe_tiles += player_suji_tiles
+                validated_safe_tiles += player_suji_tiles
 
-            result = self._find_tile_to_discard(player_safe_tiles, discard_results)
+            result = self._find_tile_to_discard(validated_safe_tiles, discard_results)
             if result:
                 return result
 
@@ -152,7 +166,7 @@ class DefenceHandler(object):
         if not was_safe_tiles:
             return None
 
-        final_results = sorted(discard_tiles, key=lambda x: (x.danger, x.shanten, -x.tiles_count, x.value))
+        final_results = sorted(discard_tiles, key=lambda x: (x.danger, x.shanten, -x.tiles_count, x.valuation))
 
         return final_results[0]
 

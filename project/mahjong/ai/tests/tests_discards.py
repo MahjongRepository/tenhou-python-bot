@@ -65,7 +65,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
             tile = item[0]
             value = item[1]
             option = DiscardOption(player, tile, 0, [], 0)
-            self.assertEqual(option.value, value)
+            self.assertEqual(option.valuation, value)
 
         settings.FIVE_REDS = True
 
@@ -76,37 +76,37 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
         # valuable honor, wind of the round
         option = DiscardOption(player, EAST, 0, [], 0)
-        self.assertEqual(option.value, 120)
+        self.assertEqual(option.valuation, 120)
 
         # valuable honor, wind of the player
         option = DiscardOption(player, SOUTH, 0, [], 0)
-        self.assertEqual(option.value, 120)
+        self.assertEqual(option.valuation, 120)
 
         # not valuable wind
         option = DiscardOption(player, WEST, 0, [], 0)
-        self.assertEqual(option.value, 100)
+        self.assertEqual(option.valuation, 100)
 
         # not valuable wind
         option = DiscardOption(player, NORTH, 0, [], 0)
-        self.assertEqual(option.value, 100)
+        self.assertEqual(option.valuation, 100)
 
         # valuable dragon
         option = DiscardOption(player, HAKU, 0, [], 0)
-        self.assertEqual(option.value, 120)
+        self.assertEqual(option.valuation, 120)
 
         # valuable dragon
         option = DiscardOption(player, HATSU, 0, [], 0)
-        self.assertEqual(option.value, 120)
+        self.assertEqual(option.valuation, 120)
 
         # valuable dragon
         option = DiscardOption(player, CHUN, 0, [], 0)
-        self.assertEqual(option.value, 120)
+        self.assertEqual(option.valuation, 120)
 
         player.dealer_seat = 0
 
         # double wind
         option = DiscardOption(player, EAST, 0, [], 0)
-        self.assertEqual(option.value, 140)
+        self.assertEqual(option.valuation, 140)
 
     def test_calculate_suit_tiles_value_and_dora(self):
         table = Table()
@@ -115,13 +115,13 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
         tile = self._string_to_34_tile(sou='1')
         option = DiscardOption(player, tile, 0, [], 0)
-        self.assertEqual(option.value, 160)
+        self.assertEqual(option.valuation, 160)
 
         # double dora
         table.dora_indicators = [self._string_to_136_tile(sou='9'), self._string_to_136_tile(sou='9')]
         tile = self._string_to_34_tile(sou='1')
         option = DiscardOption(player, tile, 0, [], 0)
-        self.assertEqual(option.value, 210)
+        self.assertEqual(option.valuation, 210)
 
     def test_discard_not_valuable_honor_first(self):
         table = Table()

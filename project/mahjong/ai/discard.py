@@ -19,7 +19,7 @@ class DiscardOption(object):
     # sometimes we had to force tile to be discarded
     had_to_be_discarded = False
     # calculated tile value, for sorting
-    value = None
+    valuation = None
     # how danger this tile is
     danger = None
 
@@ -100,4 +100,4 @@ class DiscardOption(object):
             if value == 0:
                 self.had_to_be_discarded = True
 
-        self.value = value
+        self.valuation = value

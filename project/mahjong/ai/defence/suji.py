@@ -61,6 +61,9 @@ class Suji(Defence):
 
             found_suji.append(suji)
 
+        if not found_suji:
+            return []
+
         common_suji = list(set.intersection(*map(set, found_suji)))
 
         tiles = []

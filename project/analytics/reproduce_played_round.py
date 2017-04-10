@@ -39,13 +39,18 @@ class Reproducer(object):
 
             if 'INIT' in tag:
                 values = self.decoder.parse_initial_values(tag)
+
+                shifted_scores = []
+                for x in range(0, 4):
+                    shifted_scores.append(values['scores'][self.normalize_position(x, self.player_position)])
+
                 table.init_round(
                     values['round_number'],
                     values['count_of_honba_sticks'],
                     values['count_of_riichi_sticks'],
                     values['dora_indicator'],
                     self.normalize_position(self.player_position, values['dealer']),
-                    values['scores'],
+                    shifted_scores,
                 )
 
                 hands = [

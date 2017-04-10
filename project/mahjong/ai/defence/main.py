@@ -88,15 +88,24 @@ class DefenceHandler(object):
 
         # safe tiles that can be safe based on the table situation
         safe_tiles = self.impossible_wait.find_tiles_to_discard(threatening_players)
-        common_suji_tiles = self.suji.find_tiles_to_discard(threatening_players)
 
         # first try to check common safe tiles to discard for all players
         if len(threatening_players) > 1:
             common_safe_tiles = [x.all_safe_tiles for x in threatening_players]
             common_safe_tiles = list(set.intersection(*map(set, common_safe_tiles)))
-            if common_safe_tiles:
-                common_safe_tiles = [DefenceTile(x, DefenceTile.SAFE) for x in common_safe_tiles]
+            common_safe_tiles = [DefenceTile(x, DefenceTile.SAFE) for x in common_safe_tiles]
 
+            against_honitsu = []
+            for player in threatening_players:
+                if player.chosen_suit:
+                    against_honitsu += self._mark_safe_tiles_against_honitsu(player)
+            common_safe_tiles += against_honitsu
+
+            # there is no sense to calculate suji tiles for honitsu players
+            not_honitsu_players = [x for x in threatening_players if x.chosen_suit is None]
+            common_suji_tiles = self.suji.find_tiles_to_discard(not_honitsu_players)
+
+            if common_safe_tiles:
                 # it can be that safe tile will be mark as "almost safe",
                 # but we already have "safe" tile in our hand
                 validated_safe_tiles = common_safe_tiles
@@ -110,6 +119,7 @@ class DefenceHandler(object):
                 if result:
                     return result
 
+            if common_suji_tiles:
                 # if there is no 100% safe tiles try to check common suji tiles
                 result = self._find_tile_to_discard(common_suji_tiles, discard_results)
                 if result:
@@ -141,12 +151,7 @@ class DefenceHandler(object):
             # try to find safe tiles against honitsu
             against_honitsu = []
             if player.chosen_suit:
-                for tile in range(0, 34):
-                    if not self.closed_hand_34[tile]:
-                        continue
-
-                    if not player.chosen_suit(tile) and not is_honor(tile):
-                        against_honitsu.append(DefenceTile(tile, DefenceTile.SAFE))
+                against_honitsu = self._mark_safe_tiles_against_honitsu(player)
 
             result = self._find_tile_to_discard(against_honitsu, discard_results)
             if result:
@@ -194,3 +199,13 @@ class DefenceHandler(object):
         result = sorted(result, key=lambda x: x.is_dealer, reverse=True)
 
         return result
+
+    def _mark_safe_tiles_against_honitsu(self, player):
+        against_honitsu = []
+        for tile in range(0, 34):
+            if not self.closed_hand_34[tile]:
+                continue
+
+            if not player.chosen_suit(tile) and not is_honor(tile):
+                against_honitsu.append(DefenceTile(tile, DefenceTile.SAFE))
+        return against_honitsu

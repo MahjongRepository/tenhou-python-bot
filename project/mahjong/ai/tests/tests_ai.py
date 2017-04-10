@@ -3,7 +3,6 @@ import unittest
 
 from mahjong.ai.strategies.main import BaseStrategy
 from mahjong.meld import Meld
-from mahjong.player import Player
 from mahjong.table import Table
 from utils.tests import TestMixin
 
@@ -12,7 +11,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
     def test_set_is_tempai_flag_to_the_player(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         tiles = self._string_to_136_array(sou='111345677', pin='45', man='56')
         tile = self._string_to_136_array(man='9')[0]
@@ -32,14 +31,14 @@ class AITestCase(unittest.TestCase, TestMixin):
 
     def test_not_open_hand_in_riichi(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         player.in_riichi = True
 
         tiles = self._string_to_136_array(sou='12368', pin='2358', honors='4455')
         tile = self._string_to_136_tile(honors='5')
         player.init_hand(tiles)
-        meld, _, _ = player.try_to_call_meld(tile, False)
+        meld, _ = player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 
     def test_not_open_hand_in_defence_mode(self):
@@ -52,7 +51,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         table.add_called_riichi(1)
 
         tile = self._string_to_136_tile(honors='5')
-        meld, _, _ = player.try_to_call_meld(tile, False)
+        meld, _ = player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 
     def test_chose_right_set_to_open_hand(self):
@@ -61,29 +60,35 @@ class AITestCase(unittest.TestCase, TestMixin):
         Based on real examples of incorrect opened hands
         """
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         tiles = self._string_to_136_array(man='23455', pin='3445678', honors='1')
         tile = self._string_to_136_tile(man='5')
         player.init_hand(tiles)
 
-        meld, _, _ = player.try_to_call_meld(tile, True)
+        meld, _ = player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)
         self.assertEqual(meld.type, Meld.PON)
         self.assertEqual(self._to_string(meld.tiles), '555m')
 
+        table = Table()
+        player = table.player
         tiles = self._string_to_136_array(man='335666', pin='22', sou='345', honors='55')
-        tile = self._string_to_136_tile(man='4')
         player.init_hand(tiles)
-        meld, _, _ = player.try_to_call_meld(tile, True)
+
+        tile = self._string_to_136_tile(man='4')
+        meld, _ = player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)
         self.assertEqual(meld.type, Meld.CHI)
         self.assertEqual(self._to_string(meld.tiles), '345m')
 
+        table = Table()
+        player = table.player
         tiles = self._string_to_136_array(man='23557', pin='556788', honors='22')
-        tile = self._string_to_136_tile(pin='5')
         player.init_hand(tiles)
-        meld, _, _ = player.try_to_call_meld(tile, True)
+
+        tile = self._string_to_136_tile(pin='5')
+        meld, _ = player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)
         self.assertEqual(meld.type, Meld.PON)
         self.assertEqual(self._to_string(meld.tiles), '555p')
@@ -94,24 +99,24 @@ class AITestCase(unittest.TestCase, TestMixin):
         It was a bug related to it
         """
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         tiles = self._string_to_136_array(man='22457', sou='12234', pin='9', honors='55')
-        tile = self._string_to_136_tile(sou='3')
         player.init_hand(tiles)
-        meld, tile_to_discard, shanten = player.try_to_call_meld(tile, True)
-        self.assertEqual(self._to_string(meld.tiles), '123s')
-        player.add_called_meld(meld)
-        player.discard_tile(tile_to_discard)
-        player.ai.previous_shanten = shanten
 
         tile = self._string_to_136_tile(sou='3')
-        meld, tile_to_discard, shanten = player.try_to_call_meld(tile, True)
+        meld, discard_option = player.try_to_call_meld(tile, True)
+        self.assertEqual(self._to_string(meld.tiles), '123s')
+        player.add_called_meld(meld)
+        player.discard_tile(discard_option)
+
+        tile = self._string_to_136_tile(sou='3')
+        meld, _ = player.try_to_call_meld(tile, True)
         self.assertIsNone(meld)
 
     def test_chose_strategy_and_reset_strategy(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         tiles = self._string_to_136_array(man='33355788', sou='3479', honors='3')
         player.init_hand(tiles)
@@ -136,7 +141,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
     def test_remaining_tiles_and_enemy_discard(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         tiles = self._string_to_136_array(man='123456789', sou='167', honors='77')
         player.init_hand(tiles)
@@ -160,7 +165,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
     def test_remaining_tiles_and_opened_meld(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         tiles = self._string_to_136_array(man='123456789', sou='167', honors='77')
         player.init_hand(tiles)
@@ -193,7 +198,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
     def test_remaining_tiles_and_dora_indicators(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         tiles = self._string_to_136_array(man='123456789', sou='167', honors='77')
         player.init_hand(tiles)
@@ -213,7 +218,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         It was a bug related to it, when bot wanted to call 9p12s chi :(
         """
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         # 16m2679p1348s111z
         tiles = [0, 21, 41, 56, 61, 70, 74, 80, 84, 102, 108, 110, 111]
@@ -221,5 +226,5 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         # 2s
         tile = 77
-        meld, tile_to_discard, shanten = player.try_to_call_meld(tile, True)
+        meld, _ = player.try_to_call_meld(tile, True)
         self.assertIsNotNone(meld)

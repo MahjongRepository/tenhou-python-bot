@@ -4,6 +4,7 @@ import unittest
 import game.game_manager
 from game.client import LocalClient
 from game.game_manager import GameManager
+from mahjong.tile import Tile
 from utils.tests import TestMixin
 from utils.settings_handler import settings
 
@@ -405,7 +406,7 @@ class GameManagerTestCase(unittest.TestCase, TestMixin):
         # to make furiten
         tile = self._string_to_136_tile(sou='1')
         client.player.draw_tile(tile)
-        client.player.discard_tile(tile)
+        client.player.discards.append(Tile(tile, False))
 
         # to set in_tempai flag
         client.player.draw_tile(self._string_to_136_tile(honors='1'))

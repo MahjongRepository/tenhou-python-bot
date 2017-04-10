@@ -2,9 +2,7 @@
 import unittest
 
 from mahjong.ai.discard import DiscardOption
-from mahjong.ai.shanten import Shanten
 from mahjong.constants import EAST, SOUTH, WEST, NORTH, HAKU, HATSU, CHUN, FIVE_RED_SOU
-from mahjong.player import Player
 from mahjong.table import Table
 from utils.tests import TestMixin
 from utils.settings_handler import settings
@@ -14,7 +12,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
     def test_discard_tile(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         tiles = self._string_to_136_array(sou='11134567', pin='159', man='45')
         tile = self._string_to_136_tile(man='9')
@@ -23,28 +21,28 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
         discarded_tile = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '9m')
+        self.assertEqual(player.ai.previous_shanten, 2)
 
         player.draw_tile(self._string_to_136_tile(pin='4'))
         discarded_tile = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '1p')
+        self.assertEqual(player.ai.previous_shanten, 2)
 
         player.draw_tile(self._string_to_136_tile(pin='3'))
         discarded_tile = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '9p')
+        self.assertEqual(player.ai.previous_shanten, 1)
 
         player.draw_tile(self._string_to_136_tile(man='4'))
         discarded_tile = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '5m')
-
-        player.draw_tile(self._string_to_136_tile(sou='8'))
-        discarded_tile = player.discard_tile()
-        self.assertEqual(discarded_tile, Shanten.AGARI_STATE)
+        self.assertEqual(player.ai.previous_shanten, 0)
 
     def test_calculate_suit_tiles_value(self):
         settings.FIVE_REDS = False
 
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         # 0 - 8   man
         # 9 - 17  pin
@@ -71,7 +69,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
     def test_calculate_honor_tiles_value(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
         player.dealer_seat = 3
 
         # valuable honor, wind of the round
@@ -111,7 +109,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
     def test_calculate_suit_tiles_value_and_dora(self):
         table = Table()
         table.dora_indicators = [self._string_to_136_tile(sou='9')]
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         tile = self._string_to_34_tile(sou='1')
         option = DiscardOption(player, tile, 0, [], 0)
@@ -125,7 +123,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
     def test_discard_not_valuable_honor_first(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         tiles = self._string_to_136_array(sou='123456', pin='123456', man='9', honors='2')
         player.init_hand(tiles)
@@ -136,7 +134,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
     def test_slide_set_to_keep_dora_in_hand(self):
         table = Table()
         table.dora_indicators = [self._string_to_136_tile(pin='9')]
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         tiles = self._string_to_136_array(sou='123456', pin='23478', man='99')
         tile = self._string_to_136_tile(pin='1')
@@ -150,7 +148,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
     def test_keep_aka_dora_in_hand(self):
         table = Table()
         table.dora_indicators = [self._string_to_136_tile(pin='1')]
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         tiles = self._string_to_136_array(sou='12346', pin='34578', man='99')
         # five sou, we can't get it from string (because from string it is always aka dora)
@@ -164,7 +162,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
     def test_dont_keep_honor_with_small_number_of_shanten(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         tiles = self._string_to_136_array(sou='11445', pin='55699', man='246')
         player.init_hand(tiles)
@@ -175,7 +173,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
     def test_prefer_valuable_tiles_with_almost_same_tiles_count(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
         table.add_dora_indicator(self._string_to_136_tile(sou='4'))
 
         tiles = self._string_to_136_array(sou='1366', pin='123456', man='345')

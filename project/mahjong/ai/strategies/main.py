@@ -74,23 +74,23 @@ class BaseStrategy(object):
         If yes, it will return Meld object and tile to discard
         :param tile: 136 format tile
         :param is_kamicha_discard: boolean
-        :return: meld and tile to discard after called open set, and new shanten count
+        :return: Meld and DiscardOption objects
         """
         if self.player.in_riichi:
-            return None, None, None
+            return None, None
 
         if self.player.ai.in_defence:
-            return None, None, None
+            return None, None
 
         closed_hand = self.player.closed_hand[:]
 
         # we opened all our hand
         if len(closed_hand) == 1:
-            return None, None, None
+            return None, None
 
         # we can't use this tile for our chosen strategy
         if not self.is_tile_suitable(tile):
-            return None, None, None
+            return None, None
 
         discarded_tile = tile // 4
 
@@ -101,11 +101,11 @@ class BaseStrategy(object):
 
         # each strategy can use their own value to min shanten number
         if shanten > self.min_shanten:
-            return None, None, None
+            return None, None
 
         # we can't improve hand, so we don't need to open it
         if not outs_results:
-            return None, None, None
+            return None, None
 
         # tile will decrease the count of shanten in hand
         # so let's call opened set with it
@@ -192,18 +192,21 @@ class BaseStrategy(object):
                 meld.type = meld_type
                 meld.tiles = sorted(tiles)
 
-                results = self.determine_what_to_discard(closed_hand, outs_results, shanten, True, tile)
-                # we don't have tiles to discard after hand opening
-                # so, we don't need to open hand
-                if not results:
-                    return None, None, None
+                # we had to be sure that all our discard results exists in the closed hand
+                filtered_results = []
+                for result in outs_results:
+                    if result.find_tile_in_hand(closed_hand):
+                        filtered_results.append(result)
 
-                tile_to_discard = self.player.ai.chose_tile_to_discard(results, closed_hand)
-                # 0 tile is possible, so we can't just use "if tile_to_discard"
-                if tile_to_discard is not None:
-                    return meld, tile_to_discard, shanten
+                # we can't discard anything, so let's not open our hand
+                if not filtered_results:
+                    return None, None
 
-        return None, None, None
+                selected_tile = self.player.ai.process_discard_options_and_select_tile_to_discard(filtered_results,
+                                                                                                  shanten)
+                return meld, selected_tile
+
+        return None, None
 
     def meld_had_to_be_called(self, tile):
         """

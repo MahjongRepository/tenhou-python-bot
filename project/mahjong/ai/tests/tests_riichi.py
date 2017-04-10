@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from mahjong.player import Player
 from mahjong.table import Table
 from utils.tests import TestMixin
 
@@ -11,7 +10,7 @@ class CallRiichiTestCase(unittest.TestCase, TestMixin):
     def test_dont_call_riichi_with_tanki_wait(self):
         table = Table()
         table.count_of_remaining_tiles = 60
-        player = Player(table, 0, 0, False)
+        player = table.player
         player.scores = 25000
 
         tiles = self._string_to_136_array(sou='123456', pin='123456', man='3')
@@ -22,7 +21,9 @@ class CallRiichiTestCase(unittest.TestCase, TestMixin):
 
         self.assertEqual(player.can_call_riichi(), False)
 
-        player = Player(table, 0, 0, False)
+        table = Table()
+        table.count_of_remaining_tiles = 60
+        player = table.player
         player.scores = 25000
 
         tiles = self._string_to_136_array(sou='1133557799', pin='113')
@@ -37,7 +38,7 @@ class CallRiichiTestCase(unittest.TestCase, TestMixin):
     def test_call_riichi_and_penchan_wait(self):
         table = Table()
         table.count_of_remaining_tiles = 60
-        player = Player(table, 0, 0, False)
+        player = table.player
         player.scores = 25000
 
         tiles = self._string_to_136_array(sou='11223', pin='234567', man='66')

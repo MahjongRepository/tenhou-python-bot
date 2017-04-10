@@ -269,7 +269,7 @@ class GameManager(AbortiveDraw):
                 else:
                     is_kamicha_discard = other_client.seat - current_client.seat == 1
 
-                meld, discarded_tile, shanten = other_client.player.try_to_call_meld(tile, is_kamicha_discard)
+                meld, discard_option = other_client.player.try_to_call_meld(tile, is_kamicha_discard)
 
                 if meld:
                     meld.from_who = current_client.seat
@@ -277,16 +277,14 @@ class GameManager(AbortiveDraw):
                     meld.called_tile = tile
                     possible_melds.append({
                         'meld': meld,
-                        'discarded_tile': discarded_tile,
-                        'shanten': shanten
+                        'discard_option': discard_option
                     })
 
             if possible_melds:
                 # pon is more important than chi
                 possible_melds = sorted(possible_melds, key=lambda x: x['meld'].type == Meld.PON)
-                tile_to_discard = possible_melds[0]['discarded_tile']
                 meld = possible_melds[0]['meld']
-                shanten = possible_melds[0]['shanten']
+                discard_option = possible_melds[0]['discard_option']
 
                 # clear ippatsu after called meld
                 for client_item in self.clients:
@@ -304,24 +302,15 @@ class GameManager(AbortiveDraw):
                 for _client in self.clients:
                     _client.table.add_called_meld(self._enemy_position(current_client.seat, _client.seat), meld)
 
-                current_client.player.tiles.append(tile)
-                current_client.player.ai.previous_shanten = shanten
-
-                if shanten == 0:
-                    current_client.player.in_tempai = True
-
                 self.replay.open_meld(meld)
+                current_client.player.tiles.append(tile)
+                discarded_tile = current_client.player.discard_tile(discard_option)
 
-                # we need to double validate that we are doing fine
-                if tile_to_discard not in current_client.player.closed_hand:
-                    raise ValueError("We can't discard a tile from the opened part of the hand")
-
-                current_client.player.discard_tile(tile_to_discard)
-                self.replay.discard(current_client.seat, tile_to_discard)
-                logger.info('Discard tile: {}'.format(TilesConverter.to_one_line_string([tile_to_discard])))
+                self.replay.discard(current_client.seat, discarded_tile)
+                logger.info('Discard tile: {}'.format(TilesConverter.to_one_line_string([discarded_tile])))
 
                 # the end of the round
-                result = self.check_clients_possible_ron(current_client, tile_to_discard, False)
+                result = self.check_clients_possible_ron(current_client, discarded_tile, False)
                 if result:
                     # check_clients_possible_ron already returns array
                     return result

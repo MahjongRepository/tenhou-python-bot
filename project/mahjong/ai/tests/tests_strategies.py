@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from mahjong.ai.shanten import Shanten
 from mahjong.ai.strategies.honitsu import HonitsuStrategy
 from mahjong.ai.strategies.main import BaseStrategy
 from mahjong.ai.strategies.tanyao import TanyaoStrategy
 from mahjong.ai.strategies.yakuhai import YakuhaiStrategy
 from mahjong.meld import Meld
-from mahjong.player import Player
 from mahjong.table import Table
 from utils.tests import TestMixin
 
@@ -16,7 +14,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
 
     def test_should_activate_strategy(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
         strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
 
         tiles = self._string_to_136_array(sou='12355689', man='89', honors='123')
@@ -39,7 +37,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
 
     def test_dont_activate_strategy_if_we_dont_have_enough_tiles_in_the_wall(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
         strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
 
         tiles = self._string_to_136_array(sou='12355689', man='89', honors='44')
@@ -55,7 +53,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
 
     def test_suitable_tiles(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
         strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
 
         # for yakuhai we can use any tile
@@ -64,21 +62,21 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
 
     def test_open_hand_with_yakuhai_pair_in_hand(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         tiles = self._string_to_136_array(sou='123678', pin='25899', honors='44')
         tile = self._string_to_136_tile(honors='4')
         player.init_hand(tiles)
 
         # we don't need to open hand with not our wind
-        meld, _, _ = player.try_to_call_meld(tile, False)
+        meld, _ = player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 
         # with dragon pair in hand let's open our hand
         tiles = self._string_to_136_array(sou='1689', pin='2358', man='1', honors='4455')
         tile = self._string_to_136_tile(honors='4')
         player.init_hand(tiles)
-        meld, _, _ = player.try_to_call_meld(tile, False)
+        meld, _ = player.try_to_call_meld(tile, False)
         self.assertNotEqual(meld, None)
         player.add_called_meld(meld)
         player.tiles.append(tile)
@@ -90,7 +88,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         player.discard_tile()
 
         tile = self._string_to_136_tile(honors='5')
-        meld, _, _ = player.try_to_call_meld(tile, False)
+        meld, _ = player.try_to_call_meld(tile, False)
         self.assertNotEqual(meld, None)
         player.add_called_meld(meld)
         player.tiles.append(tile)
@@ -103,10 +101,10 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
 
         tile = self._string_to_136_tile(sou='7')
         # we can call chi only from left player
-        meld, _, _ = player.try_to_call_meld(tile, False)
+        meld, _ = player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 
-        meld, _, _ = player.try_to_call_meld(tile, True)
+        meld, _ = player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)
         player.add_called_meld(meld)
         player.tiles.append(tile)
@@ -122,32 +120,38 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         we have tempai on yakuhai tile after open set
         """
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         tiles = self._string_to_136_array(sou='123', pin='678', man='34468', honors='66')
-        tile = self._string_to_136_tile(man='5')
         player.init_hand(tiles)
 
         # we will not get tempai on yakuhai pair with this hand, so let's skip this call
-        meld, _, _ = player.try_to_call_meld(tile, False)
+        tile = self._string_to_136_tile(man='5')
+        meld, _ = player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 
+        # but here we will have atodzuke tempai
         tile = self._string_to_136_tile(man='7')
-        meld, tile_to_discard, _ = player.try_to_call_meld(tile, True)
+        meld, _ = player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)
         self.assertEqual(meld.type, Meld.CHI)
         self.assertEqual(self._to_string(meld.tiles), '678m')
 
+        table = Table()
+        player = table.player
+
         # we can open hand in that case
         tiles = self._string_to_136_array(man='44556', sou='366789', honors='77')
-        tile = self._string_to_136_tile(honors='7')
         player.init_hand(tiles)
-        meld, tile_to_discard, shanten = player.try_to_call_meld(tile, True)
+
+        tile = self._string_to_136_tile(honors='7')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
         self.assertEqual(self._to_string(meld.tiles), '777z')
 
     def test_call_yakuhai_pair_and_special_conditions(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         tiles = self._string_to_136_array(man='56', sou='1235', pin='12888', honors='11')
         player.init_hand(tiles)
@@ -160,14 +164,13 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         player.discard_tile()
 
         tile = self._string_to_136_tile(honors='1')
-        meld, tile_to_discard, shanten = player.try_to_call_meld(tile, True)
+        meld, _ = player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)
 
     def test_tempai_without_yaku(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
-        # 456m12355p22z + 5p [678s]
         tiles = self._string_to_136_array(sou='678', pin='12355', man='456', honors='77')
         player.init_hand(tiles)
 
@@ -177,7 +180,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         player.add_called_meld(meld)
 
         discard = player.discard_tile()
-        self.assertEqual(self._to_string([discard]), '5p')
+        self.assertEqual(self._to_string([discard]), '1p')
 
     def test_get_more_yakuhai_sets_in_hand(self):
         table = Table()
@@ -186,16 +189,15 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         table.player.init_hand(tiles)
 
         tile = self._string_to_136_tile(honors='5')
-        meld, tile_to_discard, shanten = table.player.try_to_call_meld(tile, False)
+        meld, discard_option = table.player.try_to_call_meld(tile, False)
         self.assertNotEqual(meld, None)
 
         table.add_called_meld(0, meld)
         table.player.tiles.append(tile)
-        table.player.ai.previous_shanten = shanten
-        table.player.discard_tile(tile_to_discard)
+        table.player.discard_tile(discard_option)
 
         tile = self._string_to_136_tile(honors='6')
-        meld, tile_to_discard, shanten = table.player.try_to_call_meld(tile, False)
+        meld, _ = table.player.try_to_call_meld(tile, False)
         self.assertNotEqual(meld, None)
 
         table = Table()
@@ -204,21 +206,20 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         table.player.init_hand(tiles)
 
         tile = self._string_to_136_tile(honors='5')
-        meld, tile_to_discard, shanten = table.player.try_to_call_meld(tile, False)
+        meld, discard_option = table.player.try_to_call_meld(tile, False)
         self.assertNotEqual(meld, None)
 
         table.add_called_meld(0, meld)
         table.player.tiles.append(tile)
-        table.player.ai.previous_shanten = shanten
-        table.player.discard_tile(tile_to_discard)
+        table.player.discard_tile(discard_option)
 
         tile = self._string_to_136_tile(honors='6')
-        meld, tile_to_discard, shanten = table.player.try_to_call_meld(tile, False)
+        meld, _ = table.player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 
     def test_atodzuke_opened_hand(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         # 456m12355p22z + 5p [678s]
         tiles = self._string_to_136_array(sou='4589', pin='123', man='1236', honors='66')
@@ -237,7 +238,7 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
 
     def test_should_activate_strategy(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
         strategy = HonitsuStrategy(BaseStrategy.HONITSU, player)
 
         tiles = self._string_to_136_array(sou='12355', man='12389', honors='123')
@@ -261,7 +262,7 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
 
     def test_suitable_tiles(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
         strategy = HonitsuStrategy(BaseStrategy.HONITSU, player)
 
         tiles = self._string_to_136_array(sou='12355', man='238', honors='11234')
@@ -282,7 +283,7 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
 
     def test_open_hand_and_discard_tiles_logic(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         tiles = self._string_to_136_array(sou='112235589', man='24', honors='22')
         player.init_hand(tiles)
@@ -290,12 +291,12 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         # we don't need to call meld even if it improves our hand,
         # because we are collecting honitsu
         tile = self._string_to_136_tile(man='1')
-        meld, _, _ = player.try_to_call_meld(tile, False)
+        meld, _ = player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 
         # any honor tile is suitable
         tile = self._string_to_136_tile(honors='2')
-        meld, _, _ = player.try_to_call_meld(tile, False)
+        meld, _ = player.try_to_call_meld(tile, False)
         self.assertNotEqual(meld, None)
 
         tile = self._string_to_136_tile(man='1')
@@ -307,7 +308,7 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
 
     def test_riichi_and_tiles_from_another_suit_in_the_hand(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
         player.scores = 25000
         table.count_of_remaining_tiles = 100
 
@@ -323,7 +324,7 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
 
     def test_discard_not_needed_winds(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
         player.scores = 25000
         table.count_of_remaining_tiles = 100
 
@@ -342,7 +343,7 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
 
     def test_discard_not_effective_tiles_first(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
         player.scores = 25000
         table.count_of_remaining_tiles = 100
 
@@ -355,7 +356,7 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
 
     def test_dont_go_for_honitsu_with_ryanmen_in_other_suit(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
         strategy = HonitsuStrategy(BaseStrategy.HONITSU, player)
 
         tiles = self._string_to_136_array(man='14489', sou='45', pin='67', honors='44456')
@@ -368,7 +369,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 
     def test_should_activate_strategy_and_terminal_pon_sets(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
         strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
 
         tiles = self._string_to_136_array(sou='234', man='3459', pin='233', honors='111')
@@ -385,7 +386,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 
     def test_should_activate_strategy_and_terminal_pairs(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
         strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
 
         tiles = self._string_to_136_array(sou='234', man='3459', pin='2399', honors='11')
@@ -398,7 +399,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 
     def test_should_activate_strategy_and_valued_pair(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
         strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
 
         tiles = self._string_to_136_array(man='23446679', sou='345', honors='55')
@@ -411,7 +412,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 
     def test_should_activate_strategy_and_chitoitsu_like_hand(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
         strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
 
         tiles = self._string_to_136_array(sou='223388', man='3344', pin='6687')
@@ -420,7 +421,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 
     def test_should_activate_strategy_and_already_completed_sided_set(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
         strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
 
         tiles = self._string_to_136_array(sou='123234', man='3459', pin='234')
@@ -453,7 +454,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 
     def test_suitable_tiles(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
         strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
 
         tile = self._string_to_136_tile(man='1')
@@ -482,35 +483,35 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 
     def test_dont_open_hand_with_high_shanten(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         # with 4 shanten we don't need to aim for open tanyao
         tiles = self._string_to_136_array(man='369', pin='378', sou='3488', honors='123')
         tile = self._string_to_136_tile(sou='2')
         player.init_hand(tiles)
-        meld, _, _ = player.try_to_call_meld(tile, False)
+        meld, _ = player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 
         # with 3 shanten we can open a hand
         tiles = self._string_to_136_array(man='236', pin='378', sou='3488', honors='123')
         tile = self._string_to_136_tile(sou='2')
         player.init_hand(tiles)
-        meld, _, _ = player.try_to_call_meld(tile, True)
+        meld, _ = player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)
 
     def test_dont_open_hand_with_not_suitable_melds(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         tiles = self._string_to_136_array(man='33355788', sou='3479', honors='3')
         tile = self._string_to_136_tile(sou='8')
         player.init_hand(tiles)
-        meld, _, _ = player.try_to_call_meld(tile, False)
+        meld, _ = player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 
     def test_open_hand_and_discard_tiles_logic(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         # 2345779m1p256s44z
         tiles = self._string_to_136_array(man='22345777', sou='238', honors='44')
@@ -519,9 +520,10 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         # if we are in tanyao
         # we need to discard terminals and honors
         tile = self._string_to_136_tile(sou='4')
-        meld, tile_to_discard, _ = player.try_to_call_meld(tile, True)
+        meld, discard_option = player.try_to_call_meld(tile, True)
+        discarded_tile = table.player.discard_tile(discard_option)
         self.assertNotEqual(meld, None)
-        self.assertEqual(self._to_string([tile_to_discard]), '4z')
+        self.assertEqual(self._to_string([discarded_tile]), '4z')
 
         tile = self._string_to_136_tile(pin='5')
         player.draw_tile(tile)
@@ -532,7 +534,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 
     def test_dont_count_pairs_in_already_opened_hand(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         meld = self._make_meld(Meld.PON, self._string_to_136_array(sou='222'))
         player.add_called_meld(meld)
@@ -541,34 +543,29 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
 
         tile = self._string_to_136_tile(sou='6')
-        meld, _, _ = player.try_to_call_meld(tile, False)
+        meld, _ = player.try_to_call_meld(tile, False)
         # even if it looks like chitoitsu we can open hand and get tempai here
         self.assertNotEqual(meld, None)
 
     def test_we_cant_win_with_this_hand(self):
         table = Table()
-        player = Player(table, 0, 0, False)
 
         tiles = self._string_to_136_array(man='34577', sou='23', pin='233445')
-        player.init_hand(tiles)
-        player.draw_tile(self._string_to_136_tile(sou='1'))
-        player.ai.current_strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
-
-        discard = player.discard_tile()
-        # hand was closed and we have won!
-        self.assertEqual(discard, Shanten.AGARI_STATE)
-
+        table.player.init_hand(tiles)
         meld = self._make_meld(Meld.CHI, self._string_to_136_array(pin='234'))
-        player.add_called_meld(meld)
+        table.player.add_called_meld(meld)
 
-        discard = player.discard_tile()
+        table.player.draw_tile(self._string_to_136_tile(sou='1'))
+        discard = table.player.discard_tile()
         # but for already open hand we cant do tsumo
         # because we don't have a yaku here
+        # so, let's do tsumogiri
+        self.assertEqual(table.player.ai.previous_shanten, 0)
         self.assertEqual(self._to_string([discard]), '1s')
 
     def test_choose_correct_waiting(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         tiles = self._string_to_136_array(man='234678', sou='234', pin='3588')
         player.init_hand(tiles)
@@ -579,7 +576,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(self._to_string([discard]), '5p')
 
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         meld = self._make_meld(Meld.CHI, self._string_to_136_array(man='234'))
         player.add_called_meld(meld)
@@ -594,7 +591,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(self._to_string([discard]), '2p')
 
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         meld = self._make_meld(Meld.CHI, self._string_to_136_array(man='234'))
         player.add_called_meld(meld)

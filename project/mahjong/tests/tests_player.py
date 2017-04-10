@@ -12,7 +12,7 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
 
     def test_can_call_riichi_and_tempai(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         player.in_tempai = False
         player.in_riichi = False
@@ -28,7 +28,7 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
 
     def test_can_call_riichi_and_already_in_riichi(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         player.in_tempai = True
         player.in_riichi = True
@@ -44,7 +44,7 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
 
     def test_can_call_riichi_and_scores(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         player.in_tempai = True
         player.in_riichi = False
@@ -60,7 +60,7 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
 
     def test_can_call_riichi_and_remaining_tiles(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         player.in_tempai = True
         player.in_riichi = False
@@ -76,7 +76,7 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
 
     def test_can_call_riichi_and_open_hand(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         player.in_tempai = True
         player.in_riichi = False
@@ -94,7 +94,7 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
     def test_player_wind(self):
         table = Table()
 
-        player = Player(table, 0, 0, False)
+        player = table.player
         self.assertEqual(player.player_wind, EAST)
 
         player = Player(table, 0, 1, False)
@@ -108,7 +108,7 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
 
     def test_player_called_meld_and_closed_hand(self):
         table = Table()
-        player = Player(table, 0, 0, False)
+        player = table.player
 
         tiles = self._string_to_136_array(sou='123678', pin='3599', honors='555')
         player.init_hand(tiles)

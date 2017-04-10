@@ -9,7 +9,6 @@ from mahjong.constants import EAST, SOUTH, WEST, NORTH
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter, Tile
 from utils.settings_handler import settings
-from mahjong.ai.shanten import Shanten
 
 logger = logging.getLogger('tenhou')
 
@@ -142,25 +141,22 @@ class Player(PlayerInterface):
 
         self.ai.determine_strategy()
 
-    def discard_tile(self, tile=None):
+    def discard_tile(self, discard_option=None):
         """
-        We can say what tile to discard
-        input tile = None we will discard tile based on AI logic
-        :param tile: 136 tiles format
+        :param discard_option:
         :return:
         """
         # we can't use if tile, because of 0 tile
-        if tile is not None:
-            tile_to_discard = tile
+        if discard_option:
+            tile_to_discard = self.ai.process_discard_option(discard_option, self.closed_hand)
         else:
             tile_to_discard = self.ai.discard_tile()
 
-        if tile_to_discard != Shanten.AGARI_STATE:
-            is_tsumogiri = tile_to_discard == self.last_draw
-            # it is important to use table method,
-            # to recalculate revealed tiles and etc.
-            self.table.add_discarded_tile(0, tile_to_discard, is_tsumogiri)
-            self.tiles.remove(tile_to_discard)
+        is_tsumogiri = tile_to_discard == self.last_draw
+        # it is important to use table method,
+        # to recalculate revealed tiles and etc.
+        self.table.add_discarded_tile(0, tile_to_discard, is_tsumogiri)
+        self.tiles.remove(tile_to_discard)
 
         return tile_to_discard
 

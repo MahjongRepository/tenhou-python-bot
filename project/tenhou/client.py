@@ -188,10 +188,8 @@ class TenhouClient(Client):
 
         main_player = self.table.player
 
-        # tiles to work with meld calling
-        tile_to_discard = None
         meld_tile = None
-        shanten = 7
+        discard_option = None
 
         while self.game_is_continue:
             sleep(1)
@@ -243,6 +241,11 @@ class TenhouClient(Client):
 
                 # draw and discard
                 if '<T' in message:
+                    # we won by self draw (tsumo)
+                    if 't="16"' in message:
+                        self._send_message('<N type="7" />')
+                        continue
+
                     tile = self.decoder.parse_tile(message)
 
                     if not main_player.in_riichi:
@@ -252,26 +255,21 @@ class TenhouClient(Client):
                         sleep(1)
 
                         tile = self.player.discard_tile()
-
                         logger.info('Discard: {}'.format(TilesConverter.to_one_line_string([tile])))
                     else:
                         # we had to add it to discards, to calculate remaining tiles correctly
                         self.table.add_discarded_tile(0, tile, True)
 
-                    if 't="16"' in message:
-                        # we win by self draw (tsumo)
-                        self._send_message('<N type="7" />')
-                    else:
-                        # let's call riichi and after this discard tile
-                        if main_player.can_call_riichi():
-                            self._send_message('<REACH hai="{}" />'.format(tile))
-                            sleep(2)
-                            main_player.in_riichi = True
+                    # let's call riichi and after this discard tile
+                    if main_player.can_call_riichi():
+                        self._send_message('<REACH hai="{}" />'.format(tile))
+                        sleep(2)
+                        main_player.in_riichi = True
 
-                        # tenhou format: <D p="133" />
-                        self._send_message('<D p="{}"/>'.format(tile))
+                    # tenhou format: <D p="133" />
+                    self._send_message('<D p="{}"/>'.format(tile))
 
-                        logger.info('Remaining tiles: {}'.format(self.table.count_of_remaining_tiles))
+                    logger.info('Remaining tiles: {}'.format(self.table.count_of_remaining_tiles))
 
                 # new dora indicator after kan
                 if '<DORA' in message:
@@ -286,7 +284,7 @@ class TenhouClient(Client):
 
                 # the end of round
                 if '<AGARI' in message or '<RYUUKYOKU' in message:
-                    sleep(2)
+                    sleep(5)
                     self._send_message('<NEXTREADY />')
 
                 # for now I'm not sure about what sets was suggested to call with this numbers
@@ -299,6 +297,7 @@ class TenhouClient(Client):
                 # set was called
                 if '<N who=' in message:
                     meld = self.decoder.parse_meld(message)
+                    self.table.add_called_meld(meld.who, meld)
                     logger.info('Meld: {} by {}'.format(meld, meld.who))
 
                     # tenhou confirmed that we called a meld
@@ -306,14 +305,12 @@ class TenhouClient(Client):
                     if meld.who == 0:
                         logger.info('With hand: {}'.format(main_player.format_hand_for_print(meld_tile)))
                         logger.info('Discard tile after called meld: {}'.format(
-                            TilesConverter.to_one_line_string([tile_to_discard])))
-                        self._send_message('<D p="{}"/>'.format(tile_to_discard))
-                        self.player.discard_tile(tile_to_discard)
+                            TilesConverter.to_one_line_string([discard_option.tile_to_discard])))
 
                         self.player.tiles.append(meld_tile)
-                        self.player.ai.previous_shanten = shanten
+                        discarded_tile = self.player.discard_tile(discard_option)
 
-                    self.table.add_called_meld(meld.who, meld)
+                        self._send_message('<D p="{}"/>'.format(discarded_tile))
 
                 win_suggestions = ['t="8"', 't="9"', 't="12"', 't="13"']
                 # we win by other player's discard
@@ -344,7 +341,7 @@ class TenhouClient(Client):
                         if 't="4"' in message:
                             is_kamicha_discard = True
 
-                        meld, tile_to_discard, shanten = self.player.try_to_call_meld(tile, is_kamicha_discard)
+                        meld, discard_option = self.player.try_to_call_meld(tile, is_kamicha_discard)
                         if meld:
                             meld_tile = tile
 

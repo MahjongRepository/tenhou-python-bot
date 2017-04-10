@@ -52,20 +52,12 @@ class MainAI(BaseAI):
         self.in_defence = False
 
     def discard_tile(self):
-        tiles_34 = TilesConverter.to_34_array(self.player.tiles)
-
         results, shanten = self.calculate_outs(self.player.tiles,
                                                self.player.closed_hand,
                                                self.player.is_open_hand)
-        self.discards = results
-        # we had to update tiles value
-        # because it is related with shanten number
-        self.previous_shanten = shanten
-        for result in results:
-            result.calculate_value()
-            result.tiles_count = self.count_tiles(result.waiting, tiles_34)
-
         we_can_call_riichi = shanten == 0 and self.player.can_call_riichi()
+
+        selected_tile = self.process_discard_options_and_select_tile_to_discard(results, shanten)
 
         # bot think that there is a threat on the table
         # and better to fold
@@ -75,36 +67,23 @@ class MainAI(BaseAI):
                 logger.info('We decided to fold against other players')
                 self.in_defence = True
 
-            selected_tile = self.defence.try_to_find_safe_tile_to_discard(results)
-            if selected_tile:
-                return self._process_discard_option(selected_tile, self.player.closed_hand)
+            defence_tile = self.defence.try_to_find_safe_tile_to_discard(results)
+            if defence_tile:
+                return self.process_discard_option(defence_tile, self.player.closed_hand)
         else:
             self.in_defence = False
 
-        # we are win!
-        if shanten == Shanten.AGARI_STATE:
-            # special conditions for open hands
-            if self.player.is_open_hand:
-                # sometimes we can draw a tile that gave us agari,
-                # but didn't give us a yaku
-                # in that case we had to do last draw discard
-                result = self.finished_hand.estimate_hand_value(tiles=self.player.tiles,
-                                                                win_tile=self.player.last_draw,
-                                                                is_tsumo=True,
-                                                                is_riichi=False,
-                                                                is_dealer=self.player.is_dealer,
-                                                                open_sets=self.player.open_hand_34_tiles,
-                                                                player_wind=self.player.player_wind,
-                                                                round_wind=self.player.table.round_wind)
-                if result['error'] is not None:
-                    return self.player.last_draw
+        return self.process_discard_option(selected_tile, self.player.closed_hand)
 
-            return Shanten.AGARI_STATE
+    def process_discard_options_and_select_tile_to_discard(self, results, shanten):
+        tiles_34 = TilesConverter.to_34_array(self.player.tiles)
+        we_can_call_riichi = shanten == 0 and self.player.can_call_riichi()
 
-        # we are in agari state, but we can't win because we don't have yaku
-        # in that case let's do tsumogiri
-        if not results:
-            return self.player.last_draw
+        # we had to update tiles value there
+        # because it is related with shanten number
+        for result in results:
+            result.tiles_count = self.count_tiles(result.waiting, tiles_34)
+            result.calculate_value(shanten)
 
         # current strategy can affect on our discard options
         # so, don't use strategy specific choices for calling riichi
@@ -115,7 +94,7 @@ class MainAI(BaseAI):
                                                                       False,
                                                                       None)
 
-        return self.chose_tile_to_discard(results, self.player.closed_hand)
+        return self.chose_tile_to_discard(results)
 
     def calculate_outs(self, tiles, closed_hand, is_open_hand=False):
         """
@@ -127,10 +106,6 @@ class MainAI(BaseAI):
         tiles_34 = TilesConverter.to_34_array(tiles)
         closed_tiles_34 = TilesConverter.to_34_array(closed_hand)
         is_agari = self.agari.is_agari(tiles_34, self.player.open_hand_34_tiles)
-
-        # win
-        if is_agari:
-            return [], Shanten.AGARI_STATE
 
         results = []
 
@@ -163,7 +138,10 @@ class MainAI(BaseAI):
                                              waiting=waiting,
                                              tiles_count=self.count_tiles(waiting, tiles_34)))
 
-        shanten = self.shanten.calculate_shanten(tiles_34, is_open_hand, self.player.open_hand_34_tiles)
+        if is_agari:
+            shanten = Shanten.AGARI_STATE
+        else:
+            shanten = self.shanten.calculate_shanten(tiles_34, is_open_hand, self.player.open_hand_34_tiles)
 
         return results, shanten
 
@@ -175,7 +153,7 @@ class MainAI(BaseAI):
 
     def try_to_call_meld(self, tile, is_kamicha_discard):
         if not self.current_strategy:
-            return None, None, None
+            return None, None
 
         return self.current_strategy.try_to_call_meld(tile, is_kamicha_discard)
 
@@ -213,7 +191,11 @@ class MainAI(BaseAI):
 
         return self.current_strategy and True or False
 
-    def chose_tile_to_discard(self, results, closed_hand):
+    def chose_tile_to_discard(self, results: [DiscardOption]) -> DiscardOption:
+        """
+        Try to find best tile to discard, based on different valuations
+        """
+
         def sorting(x):
             # - is important for x.tiles_count
             # in that case we will discard tile that will give for us more tiles
@@ -252,11 +234,12 @@ class MainAI(BaseAI):
             possible_options = sorted(possible_options, key=lambda x: x.valuation)
             selected_tile = possible_options[0]
 
-        return self._process_discard_option(selected_tile, closed_hand)
+        return selected_tile
 
-    def _process_discard_option(self, selected_tile, closed_hand):
+    def process_discard_option(self, selected_tile, closed_hand):
         self.waiting = selected_tile.waiting
-        self.player.in_tempai = selected_tile.shanten == 0
+        self.player.ai.previous_shanten = selected_tile.shanten
+        self.player.in_tempai = self.player.ai.previous_shanten == 0
         return selected_tile.find_tile_in_hand(closed_hand)
 
     def estimate_hand_value(self, win_tile):
@@ -290,6 +273,9 @@ class MainAI(BaseAI):
         tiles_34 = TilesConverter.to_34_array(self.player.closed_hand + [waiting * 4])
 
         results = self.hand_divider.divide_hand(tiles_34, [], [])
+        if not results:
+            return False
+
         result = results[0]
 
         count_of_pairs = len([x for x in result if is_pair(x)])

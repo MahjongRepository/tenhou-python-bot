@@ -30,13 +30,21 @@ class DefenceHandler(object):
         self.hand_34 = None
         self.closed_hand_34 = None
 
-    def should_go_to_defence_mode(self):
+    def should_go_to_defence_mode(self, discard_candidate=None):
         """
         The method is decides should bot go to the defence mode or not.
         For now only full defence is possible
         :return: true|false
         """
-        current_shanten = self.player.ai.previous_shanten
+
+        # we drew a tile, so we have 14 tiles in our hand
+        if discard_candidate:
+            shanten = discard_candidate.shanten
+            waiting = discard_candidate.waiting
+        # we have 13 tiles in hand (this is not our turn)
+        else:
+            shanten = self.player.ai.previous_shanten
+            waiting = self.player.ai.waiting
 
         # if we are in riichi, we can't defence
         if self.player.in_riichi:
@@ -48,23 +56,30 @@ class DefenceHandler(object):
         if len(threatening_players) == 0:
             return False
 
-        if current_shanten == 1:
+        if shanten == 1:
             # TODO calculate all possible hand costs for 1-2 shanten
             dora_count = sum([plus_dora(x, self.table.dora_indicators) for x in self.player.tiles])
-            # we had 2+ dora in our almost done hand,
+            # we had 3+ dora in our almost done hand,
             # we can try to push it
-            if dora_count >= 2:
+            if dora_count >= 3:
                 return False
 
         # our hand is not tempai, so better to fold it
-        if current_shanten != 0:
+        if shanten != 0:
             return True
 
         # we are in tempai, let's try to estimate hand value
         hands_estimated_cost = []
-        waiting = self.player.ai.waiting
         for tile in waiting:
-            hand_result = self.player.ai.estimate_hand_value(tile)
+            # copy of tiles, because we are modifying a list
+            tiles = self.player.tiles[:]
+
+            # special case, when we already have 14 tiles in the hand
+            if discard_candidate:
+                temp_tile = discard_candidate.find_tile_in_hand(self.player.closed_hand)
+                tiles.remove(temp_tile)
+
+            hand_result = self.player.ai.estimate_hand_value(tile, tiles)
             if hand_result['error'] is None:
                 hands_estimated_cost.append(hand_result['cost']['main'])
 

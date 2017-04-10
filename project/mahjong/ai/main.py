@@ -62,7 +62,7 @@ class MainAI(BaseAI):
         # bot think that there is a threat on the table
         # and better to fold
         # if we can't find safe tiles, let's continue to build our hand
-        if self.defence.should_go_to_defence_mode() and not we_can_call_riichi:
+        if self.defence.should_go_to_defence_mode(selected_tile) and not we_can_call_riichi:
             if not self.in_defence:
                 logger.info('We decided to fold against other players')
                 self.in_defence = True
@@ -242,13 +242,16 @@ class MainAI(BaseAI):
         self.player.in_tempai = self.player.ai.previous_shanten == 0
         return selected_tile.find_tile_in_hand(closed_hand)
 
-    def estimate_hand_value(self, win_tile):
+    def estimate_hand_value(self, win_tile, tiles=None):
         """
-        :param win_tile: 36 tile format
+        :param win_tile: 34 tile format
+        :param tiles:
         :return:
         """
         win_tile *= 4
-        tiles = self.player.tiles + [win_tile]
+        if not tiles:
+            tiles = self.player.tiles
+        tiles += [win_tile]
         result = self.finished_hand.estimate_hand_value(tiles=tiles,
                                                         win_tile=win_tile,
                                                         is_tsumo=False,

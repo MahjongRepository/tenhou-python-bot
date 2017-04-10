@@ -56,6 +56,9 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(table.get_player(3).temporary_safe_tiles, [6])
 
     def test_should_go_for_defence_and_bad_hand(self):
+        """
+        When we have 13 tiles in hand and someone declared a riichi
+        """
         table = Table()
 
         tiles = self._string_to_136_array(sou='1259', pin='12348', honors='3456')
@@ -72,6 +75,9 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(table.player.ai.defence.should_go_to_defence_mode(), True)
 
     def test_should_go_for_defence_and_good_hand(self):
+        """
+        When we have 13 tiles in hand and someone declared a riichi
+        """
         table = Table()
 
         tiles = self._string_to_136_array(sou='234678', pin='34789', man='55')
@@ -92,6 +98,31 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         # our hand in tempai, and it has a cost, so let's push it
         self.assertEqual(table.player.ai.defence.should_go_to_defence_mode(), False)
+
+    def test_should_go_for_defence_and_good_hand_with_drawn_tile(self):
+        """
+        When we have 14 tiles in hand and someone declared a riichi
+        """
+        table = Table()
+
+        tiles = self._string_to_136_array(sou='2223457899', honors='666')
+        table.player.init_hand(tiles)
+        table.player.draw_tile(self._string_to_136_tile(man='8'))
+        table.player.add_called_meld(self._make_meld(Meld.PON, self._string_to_136_array(sou='222')))
+        table.player.add_called_meld(self._make_meld(Meld.PON, self._string_to_136_array(honors='666')))
+
+        self.assertEqual(table.player.ai.defence.should_go_to_defence_mode(), False)
+
+        table.add_called_riichi(3)
+
+        results, shanten = table.player.ai.calculate_outs(table.player.tiles,
+                                                          table.player.closed_hand,
+                                                          table.player.is_open_hand)
+        selected_tile = table.player.ai.process_discard_options_and_select_tile_to_discard(results, shanten)
+
+        self.assertEqual(table.player.ai.defence.should_go_to_defence_mode(selected_tile), False)
+        result = table.player.discard_tile()
+        self.assertEqual(self._to_string([result]), '8m')
 
     def test_find_common_safe_tile_to_discard(self):
         table = Table()
@@ -118,8 +149,9 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
     def test_find_dealer_tile_to_discard(self):
         dealer = 2
+        dora = self._string_to_136_tile(honors='3')
         table = Table()
-        table.init_round(0, 0, 0, 0, dealer, [])
+        table.init_round(0, 0, 0, dora, dealer, [])
 
         tiles = self._string_to_136_array(sou='2234678', pin='34', man='45789')
         table.player.init_hand(tiles)
@@ -141,7 +173,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         # second player is a dealer, let's fold against him
         self.assertEqual(self._to_string([result]), '9m')
 
-        tiles = self._string_to_136_array(sou='2345678', pin='34', man='456', honors='22')
+        tiles = self._string_to_136_array(sou='2345678', pin='34', man='234', honors='22')
         table.player.init_hand(tiles)
 
         result = table.player.discard_tile()
@@ -166,7 +198,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
     def test_try_to_discard_less_valuable_tiles_first_in_defence_mode(self):
         table = Table()
 
-        tiles = self._string_to_136_array(sou='234567', pin='556789', man='55')
+        tiles = self._string_to_136_array(sou='234678', pin='556789', man='55')
         table.player.init_hand(tiles)
 
         table.add_discarded_tile(1, self._string_to_136_tile(pin='7'), False)

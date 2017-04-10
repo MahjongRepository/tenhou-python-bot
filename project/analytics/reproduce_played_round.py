@@ -1,5 +1,6 @@
 import re
 
+from mahjong.ai.discard import DiscardOption
 from mahjong.table import Table
 from mahjong.tile import TilesConverter
 from tenhou.decoder import TenhouDecoder
@@ -72,7 +73,7 @@ class Reproducer(object):
                 player_seat = self.normalize_position(self.player_position, discard_tags.index(player_sign))
 
                 if player_seat == 0:
-                    table.player.discard_tile(tile)
+                    table.player.discard_tile(DiscardOption(table.player, tile // 4, 0, [], 0))
                 else:
                     table.add_discarded_tile(player_seat, tile, False)
 

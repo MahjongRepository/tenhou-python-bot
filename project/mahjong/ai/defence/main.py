@@ -106,15 +106,16 @@ class DefenceHandler(object):
 
         # first try to check common safe tiles to discard for all players
         if len(threatening_players) > 1:
-            common_safe_tiles = [x.all_safe_tiles for x in threatening_players]
-            common_safe_tiles = list(set.intersection(*map(set, common_safe_tiles)))
-            common_safe_tiles = [DefenceTile(x, DefenceTile.SAFE) for x in common_safe_tiles]
-
             against_honitsu = []
             for player in threatening_players:
                 if player.chosen_suit:
-                    against_honitsu += self._mark_safe_tiles_against_honitsu(player)
+                    against_honitsu += [self._mark_safe_tiles_against_honitsu(player)]
+
+            common_safe_tiles = [x.all_safe_tiles for x in threatening_players]
             common_safe_tiles += against_honitsu
+            # let's find a common tiles that will be safe against all threatening players
+            common_safe_tiles = list(set.intersection(*map(set, common_safe_tiles)))
+            common_safe_tiles = [DefenceTile(x, DefenceTile.SAFE) for x in common_safe_tiles]
 
             # there is no sense to calculate suji tiles for honitsu players
             not_honitsu_players = [x for x in threatening_players if x.chosen_suit is None]
@@ -164,13 +165,13 @@ class DefenceHandler(object):
                 return result
 
             # try to find safe tiles against honitsu
-            against_honitsu = []
             if player.chosen_suit:
                 against_honitsu = self._mark_safe_tiles_against_honitsu(player)
+                against_honitsu = [DefenceTile(x, DefenceTile.SAFE) for x in against_honitsu]
 
-            result = self._find_tile_to_discard(against_honitsu, discard_results)
-            if result:
-                return result
+                result = self._find_tile_to_discard(against_honitsu, discard_results)
+                if result:
+                    return result
 
         # we wasn't able to find safe tile to discard
         return None
@@ -222,5 +223,5 @@ class DefenceHandler(object):
                 continue
 
             if not player.chosen_suit(tile) and not is_honor(tile):
-                against_honitsu.append(DefenceTile(tile, DefenceTile.SAFE))
+                against_honitsu.append(tile)
         return against_honitsu

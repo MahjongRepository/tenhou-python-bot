@@ -10,7 +10,7 @@ from mahjong.ai.strategies.honitsu import HonitsuStrategy
 from mahjong.ai.strategies.main import BaseStrategy
 from mahjong.ai.strategies.tanyao import TanyaoStrategy
 from mahjong.ai.strategies.yakuhai import YakuhaiStrategy
-from mahjong.constants import HAKU, CHUN, HATSU
+from mahjong.constants import HAKU, CHUN, HATSU, AKA_DORA_LIST
 from mahjong.hand import HandDivider, FinishedHand
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_pair
@@ -249,8 +249,13 @@ class MainAI(BaseAI):
         :return:
         """
         win_tile *= 4
+        # we don't need to think, that our waiting is aka dora
+        if win_tile in AKA_DORA_LIST:
+            win_tile += 1
+
         if not tiles:
             tiles = self.player.tiles
+
         tiles += [win_tile]
         result = self.finished_hand.estimate_hand_value(tiles=tiles,
                                                         win_tile=win_tile,

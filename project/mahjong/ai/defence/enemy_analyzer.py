@@ -104,6 +104,7 @@ class EnemyAnalyzer(object):
 
         result = count_tiles_by_suits(discards_34)
 
+        honors = [x for x in result if x['name'] == 'honor'][0]
         suits = [x for x in result if x['name'] != 'honor']
         suits = sorted(suits, key=lambda x: x['count'], reverse=False)
 
@@ -112,7 +113,7 @@ class EnemyAnalyzer(object):
 
         # there is not too much one suit + honor tiles in the discard
         # so we can tell that user trying to collect honitsu
-        if percentage_of_less_suit <= 20:
+        if percentage_of_less_suit <= 20 and honors['count'] < 3:
             return True, suits[0]['function']
 
         return False, None

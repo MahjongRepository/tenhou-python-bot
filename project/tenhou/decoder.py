@@ -199,7 +199,7 @@ class TenhouDecoder(object):
             meld.type = Meld.PON
             meld.tiles = [t0 + 4 * base, t1 + 4 * base, t2 + 4 * base]
         else:
-            meld.type = Meld.CHAKAN
+            meld.type = Meld.CHANKAN
             meld.tiles = [t0 + 4 * base, t1 + 4 * base, t2 + 4 * base, t4 + 4 * base]
         meld.called_tile = meld.tiles[called]
 

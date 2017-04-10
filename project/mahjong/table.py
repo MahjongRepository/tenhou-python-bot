@@ -63,13 +63,18 @@ class Table(object):
         self.count_of_remaining_tiles = 136 - 14 - self.count_of_players * 13
 
     def add_called_meld(self, player_seat, meld):
+        # we don't need to add chankan as separate meld to the hand
+        # because we already added a pon
+        if meld.type == Meld.CHANKAN:
+            return
+
         # when opponent called meld it is means
         # that he discards tile from hand, not from wall
         self.count_of_remaining_tiles += 1
 
         # we will decrease count of remaining tiles after called kan
         # because we had to complement dead wall
-        if meld.type == Meld.KAN or meld.type == Meld.CHAKAN:
+        if meld.type == Meld.KAN:
             self.count_of_remaining_tiles -= 1
 
         self.get_player(player_seat).add_called_meld(meld)
@@ -80,10 +85,6 @@ class Table(object):
         # for closed kan we will not have called_tile
         if meld.called_tile:
             tiles.remove(meld.called_tile)
-
-        # for chankan we already added 3 tiles
-        if meld.type == Meld.CHAKAN:
-            tiles = [tiles[0]]
 
         for tile in tiles:
             self._add_revealed_tile(tile)

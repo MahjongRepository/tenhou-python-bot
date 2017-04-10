@@ -153,11 +153,11 @@ class HonitsuHands(ProcessDataCase):
                         open_hand_step = revealed_tiles // 4
 
                     meld = self.decoder.parse_meld(tag)
-                    if meld.called_tile is not None and meld.type != Meld.CHAKAN:
+                    if meld.called_tile is not None and meld.type != Meld.CHANKAN:
                         player_hand.append(meld.called_tile)
 
                     # for closed hand we already added this tile in the hand
-                    if meld.type == Meld.KAN or meld.type == Meld.CHAKAN:
+                    if meld.type == Meld.KAN or meld.type == Meld.CHANKAN:
                         player_hand.remove(meld.tiles[0])
 
                         shanten_number = shanten.calculate_shanten(TilesConverter.to_34_array(player_hand))

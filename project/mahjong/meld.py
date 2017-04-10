@@ -6,7 +6,7 @@ class Meld(object):
     CHI = 'chi'
     PON = 'pon'
     KAN = 'kan'
-    CHAKAN = 'chakan'
+    CHANKAN = 'chankan'
     NUKI = 'nuki'
 
     who = None

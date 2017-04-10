@@ -121,7 +121,7 @@ class TenhouDecoderTestCase(unittest.TestCase):
         meld = decoder.parse_meld('<N who="3" m="18547" />')
 
         self.assertEqual(meld.who, 3)
-        self.assertEqual(meld.type, Meld.CHAKAN)
+        self.assertEqual(meld.type, Meld.CHANKAN)
         self.assertEqual(meld.tiles, [48, 49, 50, 51])
 
     def test_parse_called_chi(self):

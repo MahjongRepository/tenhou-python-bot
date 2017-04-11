@@ -248,6 +248,17 @@ class TenhouClient(Client):
 
                     tile = self.decoder.parse_tile(message)
 
+                    kan_type = self.player.can_call_kan(tile)
+                    # we can call a kan
+                    if kan_type:
+                        if kan_type == Meld.CHANKAN:
+                            meld_type = 5
+                        else:
+                            meld_type = 4
+                        self._send_message('<N type="{}" hai="{}" />'.format(meld_type, tile))
+                        logger.info('We called a kan set!')
+                        continue
+
                     if not main_player.in_riichi:
                         logger.info('Hand: {}'.format(main_player.format_hand_for_print(tile)))
 

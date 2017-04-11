@@ -12,8 +12,9 @@ from mahjong.ai.strategies.tanyao import TanyaoStrategy
 from mahjong.ai.strategies.yakuhai import YakuhaiStrategy
 from mahjong.constants import HAKU, CHUN, HATSU, AKA_DORA_LIST
 from mahjong.hand import HandDivider, FinishedHand
+from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_pair
+from mahjong.utils import is_pair, is_pon
 from utils.settings_handler import settings
 
 logger = logging.getLogger('ai')
@@ -296,6 +297,45 @@ class MainAI(BaseAI):
                 return False
 
         return True
+
+    def can_call_kan(self, tile):
+        """
+        Method will decide should we call a kan,
+        or upgrade pon to kan
+        :param tile: 136 tile format
+        :return: kan type
+        """
+        # we don't need to add dora for other players
+        if self.player.ai.in_defence:
+            return None
+
+        tile_34 = tile // 4
+        tiles_34 = TilesConverter.to_34_array(self.player.tiles)
+        closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
+        pon_melds = [x for x in self.player.open_hand_34_tiles if is_pon(x)]
+
+        # let's check can we upgrade opened pon to the kan
+        if pon_melds:
+            for meld in pon_melds:
+                # tile is equal to our already opened pon,
+                # so let's call chankan!
+                if tile_34 in meld:
+                    return Meld.CHANKAN
+
+        # we have 3 tiles in our hand,
+        # so we can try to call closed meld
+        if closed_hand_34[tile_34] == 3:
+            melds = self.player.open_hand_34_tiles
+            previous_shanten = self.shanten.calculate_shanten(tiles_34, melds)
+
+            melds += [[tile_34, tile_34, tile_34]]
+            new_shanten = self.shanten.calculate_shanten(tiles_34, melds)
+
+            # called kan will not ruin our hand
+            if new_shanten <= previous_shanten:
+                return Meld.KAN
+
+        return None
 
     @property
     def valued_honors(self):

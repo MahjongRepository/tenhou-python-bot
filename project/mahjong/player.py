@@ -173,6 +173,15 @@ class Player(PlayerInterface):
 
         return result and self.ai.should_call_riichi()
 
+    def can_call_kan(self, tile):
+        """
+        Method will decide should we call a kan,
+        or upgrade pon to kan
+        :param tile: 136 tile format
+        :return:
+        """
+        return self.ai.can_call_kan(tile)
+
     def try_to_call_meld(self, tile, is_kamicha_discard):
         return self.ai.try_to_call_meld(tile, is_kamicha_discard)
 

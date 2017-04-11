@@ -229,3 +229,43 @@ class AITestCase(unittest.TestCase, TestMixin):
         tile = 77
         meld, _ = player.try_to_call_meld(tile, True)
         self.assertIsNotNone(meld)
+
+    def test_upgrade_opened_pon_to_kan(self):
+        table = Table()
+        player = table.player
+
+        tiles = self._string_to_136_array(man='34445', sou='123456', pin='89')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(man='4')
+        self.assertEqual(player.can_call_kan(tile), None)
+
+        player.add_called_meld(self._make_meld(Meld.PON, self._string_to_136_array(man='444')))
+
+        self.assertEqual(player.can_call_kan(tile), Meld.CHANKAN)
+
+    def test_call_closed_kan(self):
+        table = Table()
+        player = table.player
+
+        tiles = self._string_to_136_array(man='12223', sou='111456', pin='12')
+        player.init_hand(tiles)
+
+        # it is pretty stupid to call closed kan with 2m
+        tile = self._string_to_136_tile(man='2')
+        self.assertEqual(player.can_call_kan(tile), None)
+
+        # call closed kan with 1s is fine
+        tile = self._string_to_136_tile(sou='1')
+        self.assertEqual(player.can_call_kan(tile), Meld.KAN)
+
+    def test_dont_call_kan_in_defence_mode(self):
+        table = Table()
+
+        tiles = self._string_to_136_array(man='12589', sou='111459', pin='12')
+        table.player.init_hand(tiles)
+
+        table.add_called_riichi(1)
+
+        tile = self._string_to_136_tile(sou='1')
+        self.assertEqual(table.player.can_call_kan(tile), None)

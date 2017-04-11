@@ -298,16 +298,30 @@ class MainAI(BaseAI):
 
         return True
 
-    def can_call_kan(self, tile):
+    def can_call_kan(self, tile, open_kan):
         """
         Method will decide should we call a kan,
         or upgrade pon to kan
         :param tile: 136 tile format
+        :param open_kan: boolean
         :return: kan type
         """
         # we don't need to add dora for other players
         if self.player.ai.in_defence:
             return None
+
+        if open_kan:
+            # we don't want to start open our hand from called kan
+            if not self.player.is_open_hand:
+                return None
+
+            # there is no sense to call open kan when we are not in tempai
+            if not self.player.in_tempai:
+                return None
+
+            # we have a bad wait, rinshan chance is low
+            if len(self.waiting) < 2:
+                return None
 
         tile_34 = tile // 4
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)

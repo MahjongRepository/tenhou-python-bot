@@ -248,7 +248,7 @@ class TenhouClient(Client):
 
                     tile = self.decoder.parse_tile(message)
 
-                    kan_type = self.player.can_call_kan(tile)
+                    kan_type = self.player.can_call_kan(tile, False)
                     # we can call a kan
                     if kan_type:
                         if kan_type == Meld.CHANKAN:
@@ -298,13 +298,6 @@ class TenhouClient(Client):
                     sleep(5)
                     self._send_message('<NEXTREADY />')
 
-                # for now I'm not sure about what sets was suggested to call with this numbers
-                # will find it out later
-                not_allowed_open_sets = ['t="2"', 't="3"', 't="5"', 't="7"']
-                if any(i in message for i in not_allowed_open_sets):
-                    sleep(1)
-                    self._send_message('<N />')
-
                 # set was called
                 if '<N who=' in message:
                     meld = self.decoder.parse_meld(message)
@@ -345,10 +338,29 @@ class TenhouClient(Client):
 
                     self.table.add_discarded_tile(player_seat, tile, if_tsumogiri)
 
-                    if 't="1"' in message or 't="4"' in message:
-                        is_kamicha_discard = False
+                    # open hand suggestions
+                    if 't=' in message:
+                        # for now I'm not sure about what sets was suggested to call with this numbers
+                        # will find it out later
+                        not_allowed_open_sets = ['t="2"', 't="5"', 't="7"']
+                        if any(i in message for i in not_allowed_open_sets):
+                            sleep(1)
+                            self._send_message('<N />')
+                            continue
+
                         # t="1" - call pon set
+                        # t="3" - call kan set
                         # t="4" - call chi set
+
+                        # kan
+                        if 't="3"' in message:
+                            if self.player.can_call_kan(tile, True):
+                                self._send_message('<N type="2" />')
+                                logger.info('We called a kan set!')
+                                continue
+
+                        # chi or pon
+                        is_kamicha_discard = False
                         if 't="4"' in message:
                             is_kamicha_discard = True
 
@@ -371,6 +383,7 @@ class TenhouClient(Client):
                                 tiles[0],
                                 tiles[1]
                             ))
+                        # this meld will not improve our hand
                         else:
                             sleep(1)
                             self._send_message('<N />')

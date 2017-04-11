@@ -148,7 +148,8 @@ class TenhouDecoder(object):
 
         for player in players:
             for meld in player['melds']:
-                players[meld.from_who]['discards'].append(meld.called_tile)
+                if meld.called_tile:
+                    players[meld.from_who]['discards'].append(meld.called_tile)
 
         return players
 

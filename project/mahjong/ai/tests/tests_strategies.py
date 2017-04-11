@@ -233,6 +233,32 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         discard = player.discard_tile()
         self.assertEqual(self._to_string([discard]), '9s')
 
+    def test_wrong_shanten_improvements_detection(self):
+        """
+        With hand 2345s1p11z bot wanted to open set on 2s,
+        so after opened set we will get 25s1p11z
+        it is not correct logic, because we ruined our hand
+        :return:
+        """
+        table = Table()
+        player = table.player
+
+        tiles = self._string_to_136_array(sou='2345999', honors='114446')
+        player.init_hand(tiles)
+
+        meld = self._make_meld(Meld.PON, self._string_to_136_array(sou='999'))
+        player.add_called_meld(meld)
+        meld = self._make_meld(Meld.PON, self._string_to_136_array(honors='444'))
+        player.add_called_meld(meld)
+
+        # to rebuild all caches
+        player.draw_tile(self._string_to_136_tile(pin='2'))
+        player.discard_tile()
+
+        tile = self._string_to_136_tile(sou='2')
+        meld, _ = table.player.try_to_call_meld(tile, True)
+        self.assertEqual(meld, None)
+
 
 class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
 

@@ -20,7 +20,7 @@ logger = logging.getLogger('ai')
 
 
 class MainAI(BaseAI):
-    version = '0.2.4'
+    version = '0.2.5'
 
     agari = None
     shanten = None
@@ -54,7 +54,8 @@ class MainAI(BaseAI):
     def discard_tile(self):
         results, shanten = self.calculate_outs(self.player.tiles,
                                                self.player.closed_hand,
-                                               self.player.is_open_hand)
+                                               self.player.open_hand_34_tiles)
+
         we_can_call_riichi = shanten == 0 and self.player.can_call_riichi()
 
         selected_tile = self.process_discard_options_and_select_tile_to_discard(results, shanten)
@@ -96,11 +97,11 @@ class MainAI(BaseAI):
 
         return self.chose_tile_to_discard(results)
 
-    def calculate_outs(self, tiles, closed_hand, is_open_hand=False):
+    def calculate_outs(self, tiles, closed_hand, open_sets_34=None):
         """
         :param tiles: array of tiles in 136 format
         :param closed_hand: array of tiles in 136 format
-        :param is_open_hand: boolean flag
+        :param open_sets_34: array of array with tiles in 34 format
         :return:
         """
         tiles_34 = TilesConverter.to_34_array(tiles)
@@ -108,14 +109,13 @@ class MainAI(BaseAI):
         is_agari = self.agari.is_agari(tiles_34, self.player.open_hand_34_tiles)
 
         results = []
-
         for hand_tile in range(0, 34):
             if not closed_tiles_34[hand_tile]:
                 continue
 
             tiles_34[hand_tile] -= 1
 
-            shanten = self.shanten.calculate_shanten(tiles_34, is_open_hand, self.player.open_hand_34_tiles)
+            shanten = self.shanten.calculate_shanten(tiles_34, open_sets_34)
 
             waiting = []
             for j in range(0, 34):
@@ -123,9 +123,7 @@ class MainAI(BaseAI):
                     continue
 
                 tiles_34[j] += 1
-                if self.shanten.calculate_shanten(tiles_34,
-                                                  is_open_hand,
-                                                  self.player.open_hand_34_tiles) == shanten - 1:
+                if self.shanten.calculate_shanten(tiles_34, open_sets_34) == shanten - 1:
                     waiting.append(j)
                 tiles_34[j] -= 1
 
@@ -141,7 +139,7 @@ class MainAI(BaseAI):
         if is_agari:
             shanten = Shanten.AGARI_STATE
         else:
-            shanten = self.shanten.calculate_shanten(tiles_34, is_open_hand, self.player.open_hand_34_tiles)
+            shanten = self.shanten.calculate_shanten(tiles_34, open_sets_34)
 
         return results, shanten
 

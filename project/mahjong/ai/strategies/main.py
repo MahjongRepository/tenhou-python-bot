@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_man, is_pin, is_sou, is_chi, is_pon, find_isolated_tile_indices
+from mahjong.utils import is_man, is_pin, is_sou, is_chi, is_pon
 
 
 class BaseStrategy(object):
@@ -84,7 +84,7 @@ class BaseStrategy(object):
 
         closed_hand = self.player.closed_hand[:]
 
-        # we opened all our hand
+        # we can't open hand anymore
         if len(closed_hand) == 1:
             return None, None
 
@@ -93,118 +93,120 @@ class BaseStrategy(object):
             return None, None
 
         discarded_tile = tile // 4
-
         new_tiles = self.player.tiles[:] + [tile]
-        # we need to calculate count of shanten with open hand condition
-        # to exclude chitoitsu from the calculation
-        outs_results, shanten = self.player.ai.calculate_outs(new_tiles, closed_hand, is_open_hand=True)
+        closed_hand_34 = TilesConverter.to_34_array(closed_hand + [tile])
 
-        # each strategy can use their own value to min shanten number
-        if shanten > self.min_shanten:
-            return None, None
-
-        # we can't improve hand, so we don't need to open it
-        if not outs_results:
-            return None, None
-
-        # tile will decrease the count of shanten in hand
-        # so let's call opened set with it
-        if shanten < self.player.ai.previous_shanten or self.meld_had_to_be_called(tile):
-            closed_hand_34 = TilesConverter.to_34_array(closed_hand + [tile])
-
-            combinations = []
+        combinations = []
+        first_index = 0
+        second_index = 0
+        if is_man(discarded_tile):
             first_index = 0
-            second_index = 0
-            first_limit = 0
-            second_limit = 0
-            if is_man(discarded_tile):
-                first_index = 0
-                second_index = 8
-            elif is_pin(discarded_tile):
-                first_index = 9
-                second_index = 17
-            elif is_sou(discarded_tile):
-                first_index = 18
-                second_index = 26
+            second_index = 8
+        elif is_pin(discarded_tile):
+            first_index = 9
+            second_index = 17
+        elif is_sou(discarded_tile):
+            first_index = 18
+            second_index = 26
 
-            if second_index == 0:
-                # honor tiles
-                if closed_hand_34[discarded_tile] == 3:
-                    combinations = [[[discarded_tile] * 3]]
-            else:
-                # to avoid not necessary calculations
-                # we can check only tiles around +-2 discarded tile
-                first_limit = discarded_tile - 2
-                if first_limit < first_index:
-                    first_limit = first_index
+        if second_index == 0:
+            # honor tiles
+            if closed_hand_34[discarded_tile] == 3:
+                combinations = [[[discarded_tile] * 3]]
+        else:
+            # to avoid not necessary calculations
+            # we can check only tiles around +-2 discarded tile
+            first_limit = discarded_tile - 2
+            if first_limit < first_index:
+                first_limit = first_index
 
-                second_limit = discarded_tile + 2
-                if second_limit > second_index:
-                    second_limit = second_index
+            second_limit = discarded_tile + 2
+            if second_limit > second_index:
+                second_limit = second_index
 
-                combinations = self.player.ai.hand_divider.find_valid_combinations(closed_hand_34,
-                                                                                   first_limit,
-                                                                                   second_limit, True)
+            combinations = self.player.ai.hand_divider.find_valid_combinations(closed_hand_34,
+                                                                               first_limit,
+                                                                               second_limit, True)
 
-            if combinations:
-                combinations = combinations[0]
+        if combinations:
+            combinations = combinations[0]
 
-            possible_melds = []
-            for combination in combinations:
-                # we can call pon from everyone
-                if is_pon(combination) and discarded_tile in combination:
-                    if combination not in possible_melds:
-                        possible_melds.append(combination)
+        possible_melds = []
+        for best_meld_34 in combinations:
+            # we can call pon from everyone
+            if is_pon(best_meld_34) and discarded_tile in best_meld_34:
+                if best_meld_34 not in possible_melds:
+                    possible_melds.append(best_meld_34)
 
-                # we can call chi only from left player
-                if is_chi(combination) and is_kamicha_discard and discarded_tile in combination:
-                    if combination not in possible_melds:
-                        possible_melds.append(combination)
+            # we can call chi only from left player
+            if is_chi(best_meld_34) and is_kamicha_discard and discarded_tile in best_meld_34:
+                if best_meld_34 not in possible_melds:
+                    possible_melds.append(best_meld_34)
 
-            # we can call melds only with allowed tiles
-            validated_melds = []
-            for meld in possible_melds:
-                if (self.is_tile_suitable(meld[0] * 4) and
-                        self.is_tile_suitable(meld[1] * 4) and
-                        self.is_tile_suitable(meld[2] * 4)):
-                    validated_melds.append(meld)
-            possible_melds = validated_melds
+        # we can call melds only with allowed tiles
+        validated_melds = []
+        for meld in possible_melds:
+            if (self.is_tile_suitable(meld[0] * 4) and
+                    self.is_tile_suitable(meld[1] * 4) and
+                    self.is_tile_suitable(meld[2] * 4)):
+                validated_melds.append(meld)
+        possible_melds = validated_melds
 
-            if len(possible_melds):
-                combination = self._find_best_meld_to_open(possible_melds, closed_hand_34, first_limit, second_limit,
-                                                           new_tiles)
-                meld_type = is_chi(combination) and Meld.CHI or Meld.PON
-                combination.remove(discarded_tile)
+        if not possible_melds:
+            return None, None
 
-                first_tile = TilesConverter.find_34_tile_in_136_array(combination[0], closed_hand)
-                closed_hand.remove(first_tile)
+        best_meld_34 = self._find_best_meld_to_open(possible_melds, new_tiles)
+        if best_meld_34:
+            # we need to calculate count of shanten with supposed meld
+            # to prevent bad hand openings
+            melds = self.player.open_hand_34_tiles + [best_meld_34]
+            outs_results, shanten = self.player.ai.calculate_outs(new_tiles, closed_hand, melds)
 
-                second_tile = TilesConverter.find_34_tile_in_136_array(combination[1], closed_hand)
-                closed_hand.remove(second_tile)
+            # each strategy can use their own value to min shanten number
+            if shanten > self.min_shanten:
+                return None, None
 
-                tiles = [
-                    first_tile,
-                    second_tile,
-                    tile
-                ]
+            # we can't improve hand, so we don't need to open it
+            if not outs_results:
+                return None, None
 
-                meld = Meld()
-                meld.type = meld_type
-                meld.tiles = sorted(tiles)
+            # sometimes we had to call tile, even if it will not improve our hand
+            # otherwise we can call only with improvements of shanten
+            if not self.meld_had_to_be_called(tile) and shanten >= self.player.ai.previous_shanten:
+                return None, None
 
-                # we had to be sure that all our discard results exists in the closed hand
-                filtered_results = []
-                for result in outs_results:
-                    if result.find_tile_in_hand(closed_hand):
-                        filtered_results.append(result)
+            meld_type = is_chi(best_meld_34) and Meld.CHI or Meld.PON
+            best_meld_34.remove(discarded_tile)
 
-                # we can't discard anything, so let's not open our hand
-                if not filtered_results:
-                    return None, None
+            first_tile = TilesConverter.find_34_tile_in_136_array(best_meld_34[0], closed_hand)
+            closed_hand.remove(first_tile)
 
-                selected_tile = self.player.ai.process_discard_options_and_select_tile_to_discard(filtered_results,
-                                                                                                  shanten)
-                return meld, selected_tile
+            second_tile = TilesConverter.find_34_tile_in_136_array(best_meld_34[1], closed_hand)
+            closed_hand.remove(second_tile)
+
+            tiles = [
+                first_tile,
+                second_tile,
+                tile
+            ]
+
+            meld = Meld()
+            meld.type = meld_type
+            meld.tiles = sorted(tiles)
+
+            # we had to be sure that all our discard results exists in the closed hand
+            filtered_results = []
+            for result in outs_results:
+                if result.find_tile_in_hand(closed_hand):
+                    filtered_results.append(result)
+
+            # we can't discard anything, so let's not open our hand
+            if not filtered_results:
+                return None, None
+
+            selected_tile = self.player.ai.process_discard_options_and_select_tile_to_discard(filtered_results,
+                                                                                              shanten)
+            return meld, selected_tile
 
         return None, None
 
@@ -216,40 +218,25 @@ class BaseStrategy(object):
         """
         return False
 
-    def _find_best_meld_to_open(self, possible_melds, closed_hand_34, first_limit, second_limit, completed_hand):
+    def _find_best_meld_to_open(self, possible_melds, completed_hand):
         """
-        For now best meld will be the meld with higher count of remaining sets in the hand
         :param possible_melds:
-        :param closed_hand_34:
-        :param first_limit:
-        :param second_limit:
+        :param completed_hand:
         :return:
         """
 
         if len(possible_melds) == 1:
             return possible_melds[0]
 
-        # For now we will replace possible set with one completed pon set
+        # We will replace possible set with one completed pon set
         # and we will calculate remaining shanten in the hand
         # and chose the hand with min shanten count
         completed_hand_34 = TilesConverter.to_34_array(completed_hand)
-        tile_to_replace = None
-        isolated_tiles = find_isolated_tile_indices(completed_hand_34)
-        if isolated_tiles:
-            tile_to_replace = isolated_tiles[0]
-
-        if not tile_to_replace:
-            return possible_melds[0]
 
         results = []
         for meld in possible_melds:
-            temp_hand_34 = completed_hand_34[:]
-            temp_hand_34[meld[0]] -= 1
-            temp_hand_34[meld[1]] -= 1
-            temp_hand_34[meld[2]] -= 1
-            temp_hand_34[tile_to_replace] = 3
-            # open hand always should be true to exclude chitoitsu hands from calculations
-            shanten = self.player.ai.shanten.calculate_shanten(temp_hand_34, True, self.player.open_hand_34_tiles)
+            melds = self.player.open_hand_34_tiles + [meld]
+            shanten = self.player.ai.shanten.calculate_shanten(completed_hand_34, melds)
             results.append({'shanten': shanten, 'meld': meld})
 
         results = sorted(results, key=lambda i: i['shanten'])

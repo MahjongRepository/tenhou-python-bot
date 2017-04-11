@@ -117,7 +117,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         results, shanten = table.player.ai.calculate_outs(table.player.tiles,
                                                           table.player.closed_hand,
-                                                          table.player.is_open_hand)
+                                                          table.player.open_hand_34_tiles)
         selected_tile = table.player.ai.process_discard_options_and_select_tile_to_discard(results, shanten)
 
         self.assertEqual(table.player.ai.defence.should_go_to_defence_mode(selected_tile), False)

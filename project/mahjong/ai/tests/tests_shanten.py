@@ -75,11 +75,11 @@ class ShantenTestCase(unittest.TestCase, TestMixin):
 
         tiles = self._string_to_34_array(sou='44467778', pin='222567')
         open_sets = []
-        self.assertEqual(shanten.calculate_shanten(tiles, melds=open_sets), Shanten.AGARI_STATE)
+        self.assertEqual(shanten.calculate_shanten(tiles, open_sets_34=open_sets), Shanten.AGARI_STATE)
 
         open_sets = [self._string_to_open_34_set(sou='777')]
-        self.assertEqual(shanten.calculate_shanten(tiles, melds=open_sets), 0)
+        self.assertEqual(shanten.calculate_shanten(tiles, open_sets_34=open_sets), 0)
 
         tiles = self._string_to_34_array(sou='23455567', pin='222', man='345')
         open_sets = [self._string_to_open_34_set(man='345'), self._string_to_open_34_set(sou='555')]
-        self.assertEqual(shanten.calculate_shanten(tiles, melds=open_sets), 0)
+        self.assertEqual(shanten.calculate_shanten(tiles, open_sets_34=open_sets), 0)

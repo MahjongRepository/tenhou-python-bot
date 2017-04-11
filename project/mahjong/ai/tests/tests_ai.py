@@ -106,6 +106,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         tile = self._string_to_136_tile(sou='3')
         meld, discard_option = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
         self.assertEqual(self._to_string(meld.tiles), '123s')
         player.add_called_meld(meld)
         player.discard_tile(discard_option)

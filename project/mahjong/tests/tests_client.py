@@ -36,8 +36,10 @@ class ClientTestCase(unittest.TestCase):
         self.assertEqual(len(client.player.melds), 1)
         self.assertEqual(client.table.count_of_remaining_tiles, 71)
 
+        client.player.tiles = [0]
         meld = Meld()
         meld.type = Meld.KAN
+        meld.called_tile = 0
         client.table.add_called_meld(0, meld)
 
         self.assertEqual(len(client.player.melds), 2)

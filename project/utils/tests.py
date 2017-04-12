@@ -41,4 +41,5 @@ class TestMixin(object):
         meld.who = 0
         meld.type = meld_type
         meld.tiles = tiles
+        meld.called_tile = tiles[0]
         return meld

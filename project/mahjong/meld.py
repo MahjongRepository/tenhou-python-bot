@@ -14,6 +14,8 @@ class Meld(object):
     type = None
     from_who = None
     called_tile = None
+    # we need it to distinguish opened and closed kan
+    opened = True
 
     def __str__(self):
         return 'Type: {}, Tiles: {} {}'.format(self.type, TilesConverter.to_one_line_string(self.tiles), self.tiles)

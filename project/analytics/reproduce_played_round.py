@@ -1,6 +1,7 @@
 import re
 
 from mahjong.ai.discard import DiscardOption
+from mahjong.meld import Meld
 from mahjong.table import Table
 from mahjong.tile import TilesConverter
 from tenhou.decoder import TenhouDecoder
@@ -80,10 +81,13 @@ class Reproducer(object):
             if '<N who=' in tag:
                 meld = self.decoder.parse_meld(tag)
                 player_seat = self.normalize_position(self.player_position, meld.who)
-                table.add_called_meld(player_seat,  meld)
+                table.add_called_meld(player_seat, meld)
 
                 if player_seat == 0:
-                    table.player.draw_tile(meld.called_tile)
+                    # we had to delete called tile from hand
+                    # to have correct tiles count in the hand
+                    if meld.type != Meld.KAN and meld.type != Meld.CHANKAN:
+                        table.player.draw_tile(meld.called_tile)
 
             if '<REACH' in tag and 'step="1"' in tag:
                 who_called_riichi = self.normalize_position(self.player_position,

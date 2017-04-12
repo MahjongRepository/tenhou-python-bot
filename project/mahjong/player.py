@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import logging
-from functools import reduce
 
 import copy
 
@@ -61,6 +60,10 @@ class PlayerInterface(object):
         self.uma = 0
 
     def add_called_meld(self, meld: Meld):
+        # we already added chankan as a pon set
+        if meld.type == Meld.CHANKAN:
+            return
+
         self.melds.append(meld)
 
     def add_discarded_tile(self, tile: Tile):
@@ -91,7 +94,8 @@ class PlayerInterface(object):
 
     @property
     def is_open_hand(self):
-        return len(self.melds) > 0
+        opened_melds = [x for x in self.melds if x.opened]
+        return len(opened_melds) > 0
 
     @property
     def meld_tiles(self):
@@ -99,10 +103,10 @@ class PlayerInterface(object):
         Array of 136 tiles format
         :return:
         """
-        meld_tiles = [x.tiles for x in self.melds]
-        if meld_tiles:
-            meld_tiles = reduce(lambda z, y: z + y, [x.tiles for x in self.melds])
-        return meld_tiles
+        result = []
+        for meld in self.melds:
+            result.extend(meld.tiles)
+        return result
 
 
 class Player(PlayerInterface):
@@ -202,6 +206,13 @@ class Player(PlayerInterface):
         """
         if self.ai.defence.should_go_to_defence_mode():
             self.ai.in_defence = True
+
+    def add_called_meld(self, meld: Meld):
+        # we had to remove tile from the hand for the kan set
+        if meld.type == Meld.KAN or meld.type == Meld.CHANKAN:
+            self.tiles.remove(meld.called_tile)
+
+        super().add_called_meld(meld)
 
     def format_hand_for_print(self, tile):
         hand_string = '{} + {}'.format(

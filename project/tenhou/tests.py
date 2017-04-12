@@ -106,14 +106,27 @@ class TenhouDecoderTestCase(unittest.TestCase):
 
         self.assertEqual(meld.who, 3)
         self.assertEqual(meld.type, Meld.PON)
+        self.assertEqual(meld.opened, True)
         self.assertEqual(meld.tiles, [89, 90, 91])
 
-    def test_parse_called_kan(self):
+    def test_parse_called_closed_kan(self):
+        decoder = TenhouDecoder()
+        meld = decoder.parse_meld('<N who="0" m="15872" />')
+
+        self.assertEqual(meld.who, 0)
+        self.assertEqual(meld.from_who, 0)
+        self.assertEqual(meld.type, Meld.KAN)
+        self.assertEqual(meld.opened, False)
+        self.assertEqual(meld.tiles, [60, 61, 62, 63])
+
+    def test_parse_called_opened_kan(self):
         decoder = TenhouDecoder()
         meld = decoder.parse_meld('<N who="3" m="13825" />')
 
         self.assertEqual(meld.who, 3)
+        self.assertEqual(meld.from_who, 1)
         self.assertEqual(meld.type, Meld.KAN)
+        self.assertEqual(meld.opened, True)
         self.assertEqual(meld.tiles, [52, 53, 54, 55])
 
     def test_parse_called_chakan(self):
@@ -122,6 +135,7 @@ class TenhouDecoderTestCase(unittest.TestCase):
 
         self.assertEqual(meld.who, 3)
         self.assertEqual(meld.type, Meld.CHANKAN)
+        self.assertEqual(meld.opened, True)
         self.assertEqual(meld.tiles, [48, 49, 50, 51])
 
     def test_parse_called_chi(self):
@@ -130,6 +144,7 @@ class TenhouDecoderTestCase(unittest.TestCase):
 
         self.assertEqual(meld.who, 3)
         self.assertEqual(meld.type, Meld.CHI)
+        self.assertEqual(meld.opened, True)
         self.assertEqual(meld.tiles, [42, 44, 51])
 
     def test_parse_tile(self):

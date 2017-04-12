@@ -277,7 +277,12 @@ class MainAI(BaseAI):
             return True
 
         waiting = self.waiting[0]
-        tiles_34 = TilesConverter.to_34_array(self.player.closed_hand + [waiting * 4])
+        tiles = self.player.closed_hand + [waiting * 4]
+        closed_melds = [x for x in self.player.melds if not x.opened]
+        for meld in closed_melds:
+            tiles.extend(meld.tiles[:3])
+
+        tiles_34 = TilesConverter.to_34_array(tiles)
 
         results = self.hand_divider.divide_hand(tiles_34, [], [])
         if not results:
@@ -336,9 +341,19 @@ class MainAI(BaseAI):
                 if tile_34 in meld:
                     return Meld.CHANKAN
 
+        count_of_needed_tiles = 4
+        # for open kan 3 tiles is enough to call a kan
+        if open_kan:
+            count_of_needed_tiles = 3
+
         # we have 3 tiles in our hand,
         # so we can try to call closed meld
-        if closed_hand_34[tile_34] == 3:
+        if closed_hand_34[tile_34] == count_of_needed_tiles:
+            if not open_kan:
+                # to correctly count shanten in the hand
+                # we had do subtract drown tile
+                tiles_34[tile_34] -= 1
+
             melds = self.player.open_hand_34_tiles
             previous_shanten = self.shanten.calculate_shanten(tiles_34, melds)
 

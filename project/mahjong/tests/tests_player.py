@@ -81,7 +81,7 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
         player.in_tempai = True
         player.in_riichi = False
         player.scores = 2000
-        player.melds = [1]
+        player.melds = [Meld()]
         player.table.count_of_remaining_tiles = 40
         player.ai.waiting = [1, 2]
 

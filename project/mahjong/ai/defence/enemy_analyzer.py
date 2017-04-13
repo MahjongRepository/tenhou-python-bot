@@ -85,7 +85,7 @@ class EnemyAnalyzer(object):
         suits = sorted(suits, key=lambda x: x['count'], reverse=True)
 
         # for honitsu we can have tiles only in one suit
-        if suits[1]['count'] == 0 or suits[2]['count'] == 0:
+        if suits[1]['count'] == 0 and suits[2]['count'] == 0:
             return True, suits[0]['function']
 
         return False, None

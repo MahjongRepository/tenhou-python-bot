@@ -80,7 +80,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         """
         table = Table()
 
-        tiles = self._string_to_136_array(sou='234678', pin='34789', man='55')
+        tiles = self._string_to_136_array(sou='234678', pin='34789', man='77')
         table.player.init_hand(tiles)
         table.player.draw_tile(self._string_to_136_tile(man='6'))
         # discard here to reinit shanten number in AI
@@ -98,6 +98,38 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         # our hand in tempai, and it has a cost, so let's push it
         self.assertEqual(table.player.ai.defence.should_go_to_defence_mode(), False)
+
+    def test_call_riichi_with_good_wait_against_other_player_riichi(self):
+        table = Table()
+        table.count_of_remaining_tiles = 60
+        table.player.scores = 25000
+
+        tiles = self._string_to_136_array(sou='123789', pin='23467', man='55')
+        table.player.init_hand(tiles)
+        table.player.draw_tile(self._string_to_136_tile(man='9'))
+
+        table.add_called_riichi(3)
+
+        discard = table.player.discard_tile()
+        self.assertEqual(self._to_string([discard]), '9m')
+        self.assertEqual(table.player.ai.in_defence, False)
+        self.assertEqual(table.player.can_call_riichi(), True)
+
+    def test_call_riichi_with_bad_wait_against_other_player_riichi(self):
+        table = Table()
+        table.count_of_remaining_tiles = 60
+        table.player.scores = 25000
+
+        tiles = self._string_to_136_array(sou='11223', pin='234678', man='55')
+        table.player.init_hand(tiles)
+        table.player.draw_tile(self._string_to_136_tile(man='9'))
+
+        table.add_called_riichi(3)
+
+        discard = table.player.discard_tile()
+        self.assertEqual(self._to_string([discard]), '9m')
+        self.assertEqual(table.player.ai.in_defence, True)
+        self.assertEqual(table.player.can_call_riichi(), False)
 
     def test_should_go_for_defence_and_good_hand_with_drawn_tile(self):
         """
@@ -173,11 +205,12 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         # second player is a dealer, let's fold against him
         self.assertEqual(self._to_string([result]), '9m')
 
-        tiles = self._string_to_136_array(sou='2345678', pin='34', man='234', honors='22')
+        tiles = self._string_to_136_array(sou='234567', pin='348', man='234', honors='23')
         table.player.init_hand(tiles)
 
         result = table.player.discard_tile()
         # there is no safe tiles against dealer, so let's fold against other players
+        self.assertEqual(table.player.ai.in_defence, True)
         self.assertEqual(self._to_string([result]), '4m')
 
     def test_try_to_discard_not_needed_tiles_first_in_defence_mode(self):
@@ -198,7 +231,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
     def test_try_to_discard_less_valuable_tiles_first_in_defence_mode(self):
         table = Table()
 
-        tiles = self._string_to_136_array(sou='234678', pin='556789', man='55')
+        tiles = self._string_to_136_array(sou='234678', pin='6789', man='55', honors='13')
         table.player.init_hand(tiles)
 
         table.add_discarded_tile(1, self._string_to_136_tile(pin='7'), False)
@@ -209,6 +242,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         result = table.player.discard_tile()
 
         # discard of 2s will do less damage to our hand shape than 7p discard
+        self.assertEqual(table.player.ai.in_defence, True)
         self.assertEqual(self._to_string([result]), '2s')
 
     def test_find_impossible_waits_and_honor_tiles(self):

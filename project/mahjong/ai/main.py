@@ -238,10 +238,11 @@ class MainAI(BaseAI):
         self.player.in_tempai = self.player.ai.previous_shanten == 0
         return selected_tile.find_tile_in_hand(closed_hand)
 
-    def estimate_hand_value(self, win_tile, tiles=None):
+    def estimate_hand_value(self, win_tile, tiles=None, call_riichi=False):
         """
         :param win_tile: 34 tile format
         :param tiles:
+        :param call_riichi:
         :return:
         """
         win_tile *= 4
@@ -256,7 +257,7 @@ class MainAI(BaseAI):
         result = self.finished_hand.estimate_hand_value(tiles=tiles,
                                                         win_tile=win_tile,
                                                         is_tsumo=False,
-                                                        is_riichi=False,
+                                                        is_riichi=call_riichi,
                                                         is_dealer=self.player.is_dealer,
                                                         open_sets=self.player.open_hand_34_tiles,
                                                         player_wind=self.player.player_wind,

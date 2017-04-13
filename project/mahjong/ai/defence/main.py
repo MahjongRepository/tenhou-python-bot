@@ -70,6 +70,7 @@ class DefenceHandler(object):
 
         # we are in tempai, let's try to estimate hand value
         hands_estimated_cost = []
+        call_riichi = not self.player.is_open_hand
         for tile in waiting:
             # copy of tiles, because we are modifying a list
             tiles = self.player.tiles[:]
@@ -79,7 +80,7 @@ class DefenceHandler(object):
                 temp_tile = discard_candidate.find_tile_in_hand(self.player.closed_hand)
                 tiles.remove(temp_tile)
 
-            hand_result = self.player.ai.estimate_hand_value(tile, tiles)
+            hand_result = self.player.ai.estimate_hand_value(tile, tiles, call_riichi)
             if hand_result['error'] is None:
                 hands_estimated_cost.append(hand_result['cost']['main'])
 
@@ -88,10 +89,18 @@ class DefenceHandler(object):
             return True
 
         max_cost = max(hands_estimated_cost)
-        # our hand in tempai, but it is cheap
+        # our open hand in tempai, but it is cheap
         # so we can fold it
-        if max_cost < 7000:
+        if self.player.is_open_hand and max_cost < 7000:
             return True
+
+        # when we call riichi we can get ura dora,
+        # so it is reasonable to riichi 3k+ hands
+        if not self.player.is_open_hand:
+            # there are a lot of chances that we will not win with a bad wait
+            # against other threatening players
+            if max_cost < 3000 or len(waiting) < 2:
+                return True
 
         return False
 

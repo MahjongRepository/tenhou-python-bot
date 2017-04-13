@@ -170,6 +170,7 @@ class Player(PlayerInterface):
 
             not self.in_riichi,
             not self.is_open_hand,
+            not self.ai.in_defence,
 
             self.scores >= 1000,
             self.table.count_of_remaining_tiles > 4

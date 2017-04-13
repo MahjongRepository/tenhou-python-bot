@@ -198,10 +198,11 @@ class TenhouDecoder(object):
         if data & 0x8:
             meld.type = Meld.PON
             meld.tiles = [t0 + 4 * base, t1 + 4 * base, t2 + 4 * base]
+            meld.called_tile = meld.tiles[called]
         else:
             meld.type = Meld.CHANKAN
             meld.tiles = [t0 + 4 * base, t1 + 4 * base, t2 + 4 * base, t4 + 4 * base]
-        meld.called_tile = meld.tiles[called]
+            meld.called_tile = meld.tiles[3]
 
     def parse_kan(self, data, meld):
         base_and_called = data >> 8

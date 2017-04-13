@@ -94,7 +94,7 @@ class DiscardOption(object):
         if is_honor(self.tile_to_discard):
             # depends on how much honor tiles were discarded
             # we will decrease tile value
-            discard_percentage = [100, 75, 20, 0]
+            discard_percentage = [100, 75, 20, 0, 0]
             discarded_tiles = self.player.table.revealed_tiles[self.tile_to_discard]
 
             value = (value * discard_percentage[discarded_tiles]) / 100

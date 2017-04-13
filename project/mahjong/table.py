@@ -80,6 +80,10 @@ class Table(object):
         if meld.called_tile:
             tiles.remove(meld.called_tile)
 
+        # for chankan we already added 3 tiles
+        if meld.type == meld.CHANKAN:
+            tiles = [meld.tiles[0]]
+
         for tile in tiles:
             self._add_revealed_tile(tile)
 

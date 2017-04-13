@@ -238,13 +238,12 @@ class Player(PlayerInterface):
         Array of array with 34 tiles indices
         :return: array
         """
-        melds = [x.tiles for x in self.melds]
+        melds = [x.tiles for x in self.melds if x.opened]
         melds = copy.deepcopy(melds)
+        results = []
         for meld in melds:
-            meld[0] //= 4
-            meld[1] //= 4
-            meld[2] //= 4
-        return melds
+            results.append([meld[0] // 4, meld[1] // 4, meld[2] // 4])
+        return results
 
     def _load_ai(self):
         if self.previous_ai:

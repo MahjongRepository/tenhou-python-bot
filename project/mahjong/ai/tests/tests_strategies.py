@@ -338,10 +338,10 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         player.scores = 25000
         table.count_of_remaining_tiles = 100
 
-        tiles = self._string_to_136_array(man='3335689', pin='456', honors='155')
+        tiles = self._string_to_136_array(man='33345678', pin='22', honors='155')
         player.init_hand(tiles)
 
-        player.draw_tile(self._string_to_136_tile(man='4'))
+        player.draw_tile(self._string_to_136_tile(man='9'))
         tile_to_discard = player.discard_tile()
 
         # we don't need to go for honitsu here
@@ -540,7 +540,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         player = table.player
 
         # 2345779m1p256s44z
-        tiles = self._string_to_136_array(man='22345777', sou='238', honors='44')
+        tiles = self._string_to_136_array(man='22345', sou='238', pin='256', honors='44')
         player.init_hand(tiles)
 
         # if we are in tanyao

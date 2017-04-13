@@ -60,6 +60,10 @@ class BaseStrategy(object):
         :return: array of DiscardOption
         """
 
+        # for riichi we don't need to discard useful tiles
+        if shanten == 0 and not self.player.is_open_hand:
+            return outs_results
+
         # mark all not suitable tiles as ready to discard
         # even if they not should be discarded by uke-ire
         for j in outs_results:

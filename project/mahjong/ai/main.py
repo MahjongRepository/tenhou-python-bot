@@ -57,14 +57,12 @@ class MainAI(BaseAI):
                                                self.player.closed_hand,
                                                self.player.open_hand_34_tiles)
 
-        we_can_call_riichi = shanten == 0 and self.player.can_call_riichi()
-
         selected_tile = self.process_discard_options_and_select_tile_to_discard(results, shanten)
 
         # bot think that there is a threat on the table
         # and better to fold
         # if we can't find safe tiles, let's continue to build our hand
-        if self.defence.should_go_to_defence_mode(selected_tile) and not we_can_call_riichi:
+        if self.defence.should_go_to_defence_mode(selected_tile):
             if not self.in_defence:
                 logger.info('We decided to fold against other players')
                 self.in_defence = True
@@ -79,7 +77,6 @@ class MainAI(BaseAI):
 
     def process_discard_options_and_select_tile_to_discard(self, results, shanten):
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
-        we_can_call_riichi = shanten == 0 and self.player.can_call_riichi()
 
         # we had to update tiles value there
         # because it is related with shanten number
@@ -89,7 +86,7 @@ class MainAI(BaseAI):
 
         # current strategy can affect on our discard options
         # so, don't use strategy specific choices for calling riichi
-        if self.current_strategy and not we_can_call_riichi:
+        if self.current_strategy:
             results = self.current_strategy.determine_what_to_discard(self.player.closed_hand,
                                                                       results,
                                                                       shanten,
@@ -285,9 +282,6 @@ class MainAI(BaseAI):
         tiles_34 = TilesConverter.to_34_array(tiles)
 
         results = self.hand_divider.divide_hand(tiles_34, [], [])
-        if not results:
-            return False
-
         result = results[0]
 
         count_of_pairs = len([x for x in result if is_pair(x)])

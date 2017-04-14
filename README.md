@@ -45,19 +45,6 @@ Rate was somewhere around R1350.
 
 So, even with the current simple logic it can play and win.
 
-## Local runner for mahjong bots
-
-It allows to run four copies of bots to play with each other and it collects 
-different statistics for each copy of the bot.
-
-It doesn't support 100% of mahjong rules, but we are working on it.
-
-The main purpose of it to be able to run three old bots to play against a new copy of the bot. 
-It will allow to determine was a new version improved or not.
-
-To be able to run it you need to copy an old ai version to the `mahjong/ai/old_version.py` 
-and run `bots_battle.py`.
-
 # For developers
 
 ## How to run it?

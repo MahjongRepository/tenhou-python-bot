@@ -110,10 +110,11 @@ class EnemyAnalyzer(object):
 
         less_suit = suits[0]['count']
         percentage_of_less_suit = (less_suit / total_discards) * 100
+        percentage_of_honor_tiles = (honors['count'] / total_discards) * 100
 
         # there is not too much one suit + honor tiles in the discard
         # so we can tell that user trying to collect honitsu
-        if percentage_of_less_suit <= 20 and honors['count'] < 3:
+        if percentage_of_less_suit <= 20 and percentage_of_honor_tiles <= 30:
             return True, suits[0]['function']
 
         return False, None

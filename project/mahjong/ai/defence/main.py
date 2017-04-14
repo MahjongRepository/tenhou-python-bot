@@ -206,7 +206,8 @@ class DefenceHandler(object):
             for discard_tile in discard_tiles:
                 if discard_tile.tile_to_discard == safe_tile.value:
                     was_safe_tiles = True
-                    discard_tile.danger = safe_tile.danger
+                    if safe_tile.danger < discard_tile.danger:
+                        discard_tile.danger = safe_tile.danger
         return was_safe_tiles
 
     def _get_threatening_players(self):

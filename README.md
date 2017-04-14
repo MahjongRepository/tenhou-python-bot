@@ -58,14 +58,6 @@ It will allow to determine was a new version improved or not.
 To be able to run it you need to copy an old ai version to the `mahjong/ai/old_version.py` 
 and run `bots_battle.py`.
 
-## Tenhou logs analytics
-
-We have an analytics package. It contains: 
-
-- `analytics/download_game_ids.py` - script to load phoenix game ids from the last 7 days
-- `analytics/download_logs_content.py` - script to download logs content for ids that were obtained from the previous script
-- `analytics/cases/*` - package for different analytics scripts (like % of suji traps) that will be written later
-
 # For developers
 
 ## How to run it?

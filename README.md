@@ -4,6 +4,8 @@ For now only **Python 3.5+** is supported.
 
 # What do we have here?
 
+![Example of bot game](https://cloud.githubusercontent.com/assets/475367/25059936/31b33ac2-21c3-11e7-8cb2-de33d7ba96cb.gif)
+
 ## Mahjong hands calculation
 
 We have a code which can calculate hand cost (han, fu, yaku and scores) based on the hand's tiles.
@@ -22,7 +24,7 @@ So, we can say that our own hand calculator works the same way that tenhou.net h
 
 The example of usage you can find here: https://github.com/MahjongRepository/tenhou-python-bot/blob/master/project/validate_hand.py#L194
 
-## Simple mahjong bot
+## Mahjong bot
 
 For research purposes we built a simple bot to play riichi mahjong on tenhou.net server.
 
@@ -31,19 +33,42 @@ For research purposes we built a simple bot to play riichi mahjong on tenhou.net
 It can reach a tempai and call a riichi. It doesn't know about dora, yaku, defence and etc. 
 Only about tempai and riichi so far.
 
-This version had played 335 games (hanchans) and achieved only first dan on the tenhou.net so far
+This version had played 335 games (hanchans) and achieved only first dan (初段) on the tenhou.net so far
 (and lost it later, and achieved it again...).
 
 Rate was somewhere around R1350.
+
+Stat:
 
 |   | Result |
 | --- | --- |
 | Average position | 2.78 |
 | Win rate | 20.73% |
 | Feed rate | 19.40% |
-| Riichi rate| 36.17% |
+| Riichi rate | 36.17% |
+| Call rate | 0% |
 
 So, even with the current simple logic it can play and win.
+
+### 0.2.5 version
+
+This version is much smarter than 0.0.x versions. It can open hand, go to defence and build hand effective (all supported features you can find in releases description).
+
+This version had played 375 games (hanchans) and achieved second dan (二段).
+
+Rate was somewhere around R1500.
+
+Stat:
+
+|   | Result |
+| --- | --- |
+| Average position | 2.65 |
+| Win rate | 18.60% |
+| Feed rate | 10.59% |
+| Riichi rate | 15.64% |
+| Call rate | 34.89% |
+
+For the next version I have a plan to improve win rate, probably bot should push with good hands more often.
 
 # For developers
 

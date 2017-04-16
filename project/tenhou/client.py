@@ -31,13 +31,21 @@ class TenhouClient(Client):
 
     _count_of_empty_messages = 0
     _rating_string = None
+    _socket_mock = None
 
-    def __init__(self):
+    def __init__(self, socket_mock=None):
         super().__init__()
         self.statistics = Statistics()
+        self._socket_mock = socket_mock
 
     def connect(self):
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # for reproducer
+        if self._socket_mock:
+            self.socket = self._socket_mock
+            TenhouClient.SLEEP_BETWEEN_ACTIONS = 0
+        else:
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
         self.socket.connect((settings.TENHOU_HOST, settings.TENHOU_PORT))
 
     def authenticate(self):

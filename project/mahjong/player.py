@@ -210,7 +210,7 @@ class Player(PlayerInterface):
 
     def add_called_meld(self, meld: Meld):
         # we had to remove tile from the hand for the kan set
-        if meld.type == Meld.KAN or meld.type == Meld.CHANKAN:
+        if meld.type == Meld.KAN or meld.type == Meld.CHANKAN and meld.called_tile in self.tiles:
             self.tiles.remove(meld.called_tile)
 
         super().add_called_meld(meld)

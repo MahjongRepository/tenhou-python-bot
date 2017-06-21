@@ -320,13 +320,15 @@ class TenhouClient(Client):
                     # we had to do discard after this
                     if meld.who == 0:
                         if meld.type != Meld.KAN and meld.type != Meld.CHANKAN:
-                            logger.info('With hand: {}'.format(main_player.format_hand_for_print(meld_tile)))
-                            logger.info('Discard tile after called meld: {}'.format(
-                                TilesConverter.to_one_line_string([discard_option.tile_to_discard])))
-
-                            self.player.tiles.append(meld_tile)
+                            player_formatted_hand = main_player.format_hand_for_print(meld_tile)
                             discarded_tile = self.player.discard_tile(discard_option)
 
+                            logger.info('With hand: {}'.format(player_formatted_hand))
+                            logger.info('Discard tile after called meld: {}'.format(
+                                TilesConverter.to_one_line_string([discarded_tile]))
+                            )
+
+                            self.player.tiles.append(meld_tile)
                             self._send_message('<D p="{}"/>'.format(discarded_tile))
 
                 win_suggestions = ['t="8"', 't="9"', 't="12"', 't="13"']

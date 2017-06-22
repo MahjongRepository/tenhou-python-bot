@@ -2,7 +2,7 @@
 from mahjong.constants import EAST, SOUTH, WEST, NORTH
 from mahjong.meld import Meld
 from mahjong.player import Player, EnemyPlayer
-from mahjong.tile import Tile
+from mahjong.tile import Tile, TilesConverter
 from mahjong.utils import plus_dora, is_aka_dora
 
 
@@ -35,9 +35,10 @@ class Table(object):
         self.revealed_tiles = [0] * 34
 
     def __str__(self):
+        dora_string = TilesConverter.to_one_line_string(self.dora_indicators)
         return 'Round: {0}, Honba: {1}, Dora Indicators: {2}'.format(self.round_number,
                                                                      self.count_of_honba_sticks,
-                                                                     self.dora_indicators)
+                                                                     dora_string)
 
     def init_round(self, round_number, count_of_honba_sticks, count_of_riichi_sticks,
                    dora_indicator, dealer_seat, scores):

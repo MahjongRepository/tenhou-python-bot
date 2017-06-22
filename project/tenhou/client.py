@@ -312,6 +312,10 @@ class TenhouClient(Client):
 
                 # set was called
                 if '<N who=' in message:
+                    player_formatted_hand = ''
+                    if meld_tile:
+                        player_formatted_hand = main_player.format_hand_for_print(meld_tile)
+
                     meld = self.decoder.parse_meld(message)
                     self.table.add_called_meld(meld.who, meld)
                     logger.info('Meld: {} by {}'.format(meld, meld.who))
@@ -320,7 +324,6 @@ class TenhouClient(Client):
                     # we had to do discard after this
                     if meld.who == 0:
                         if meld.type != Meld.KAN and meld.type != Meld.CHANKAN:
-                            player_formatted_hand = main_player.format_hand_for_print(meld_tile)
                             discarded_tile = self.player.discard_tile(discard_option)
 
                             logger.info('With hand: {}'.format(player_formatted_hand))

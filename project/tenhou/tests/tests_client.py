@@ -8,6 +8,12 @@ from tenhou.decoder import TenhouDecoder, Meld
 
 class TenhouClientTestCase(unittest.TestCase):
 
+    def setUp(self):
+        self.client = None
+
+    def tearDown(self):
+        self.client.end_game(False)
+
     def test_fixed_crash_after_called_kan(self):
         log = """
         Get: <HELO uname="Name" auth="20170415-1111111" />
@@ -63,14 +69,14 @@ class TenhouClientTestCase(unittest.TestCase):
         Get: <N who="0" m="30211" /> <T39/>
         """
 
-        client = TenhouClient(SocketMock(None, log))
+        self.client = TenhouClient(SocketMock(None, log))
         with self.assertRaises(KeyboardInterrupt) as context:
-            client.connect()
-            client.authenticate()
-            client.start_game()
+            self.client.connect()
+            self.client.authenticate()
+            self.client.start_game()
 
         # close all threads
-        client.end_game()
+        self.client.end_game()
 
         # end of commands is correct way to end log reproducing
         self.assertTrue('End of commands' in str(context.exception))

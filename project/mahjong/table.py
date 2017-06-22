@@ -140,7 +140,7 @@ class Table(object):
         return self.players[player_seat]
 
     def get_players_sorted_by_scores(self):
-        return sorted(self.players, key=lambda x: x.scores, reverse=True)
+        return sorted(self.players, key=lambda x: x.scores or 0, reverse=True)
 
     @property
     def round_wind(self):

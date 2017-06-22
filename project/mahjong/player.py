@@ -22,7 +22,7 @@ class PlayerInterface(object):
     dealer_seat = 0
     # position based on scores
     position = 0
-    scores = 0
+    scores = None
     uma = 0
 
     name = ''
@@ -40,7 +40,7 @@ class PlayerInterface(object):
 
     def __str__(self):
         result = u'{0}'.format(self.name)
-        if self.scores:
+        if self.scores is not None:
             result += u' ({:,d})'.format(int(self.scores))
             if self.uma:
                 result += u' {0}'.format(self.uma)
@@ -56,7 +56,7 @@ class PlayerInterface(object):
         self.melds = []
         self.in_riichi = False
         self.position = 0
-        self.scores = 0
+        self.scores = None
         self.uma = 0
 
     def add_called_meld(self, meld: Meld):

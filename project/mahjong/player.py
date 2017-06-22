@@ -209,8 +209,8 @@ class Player(PlayerInterface):
             self.ai.in_defence = True
 
     def add_called_meld(self, meld: Meld):
-        # we had to remove tile from the hand for the kan set
-        if meld.type == Meld.KAN or meld.type == Meld.CHANKAN and meld.called_tile in self.tiles:
+        # we had to remove tile from the hand for closed kan set
+        if (meld.type == Meld.KAN or meld.type == Meld.CHANKAN) and not meld.opened:
             self.tiles.remove(meld.called_tile)
 
         super().add_called_meld(meld)

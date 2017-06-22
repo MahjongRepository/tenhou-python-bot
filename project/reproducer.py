@@ -206,10 +206,13 @@ class SocketMock(object):
     Reproduce tenhou <-> bot communication
     """
 
-    def __init__(self, log_path):
+    def __init__(self, log_path, log_content=''):
         self.log_path = log_path
         self.commands = []
-        self.text = self._load_text()
+        if not log_content:
+            self.text = self._load_text()
+        else:
+            self.text = log_content
         self._parse_text()
 
     def connect(self, _):

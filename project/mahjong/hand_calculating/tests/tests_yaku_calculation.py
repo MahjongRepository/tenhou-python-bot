@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from mahjong.hand import FinishedHand, HandDivider
 from mahjong.constants import EAST, SOUTH, WEST, NORTH, FIVE_RED_SOU
-from utils.tests import TestMixin
+from mahjong.hand_calculating.hand import FinishedHand, HandDivider
 from utils.settings_handler import settings
+from utils.tests import TestMixin
 
 
 class YakuCalculationTestCase(unittest.TestCase, TestMixin):
@@ -12,47 +12,6 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
     def tearDown(self):
         settings.FIVE_REDS = False
         settings.OPEN_TANYAO = True
-
-    def test_hand_dividing(self):
-        hand = HandDivider()
-
-        tiles_34 = self._string_to_34_array(man='234567', sou='23455', honors='777')
-        result = hand.divide_hand(tiles_34, [], [])
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0], [[1, 2, 3], [4, 5, 6], [19, 20, 21], [22, 22], [33, 33, 33]])
-
-        tiles_34 = self._string_to_34_array(man='123', pin='123', sou='123', honors='11222')
-        result = hand.divide_hand(tiles_34, [], [])
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0], [[0, 1, 2], [9, 10, 11], [18, 19, 20], [27, 27], [28, 28, 28]])
-
-        tiles_34 = self._string_to_34_array(man='23444', pin='344556', sou='333')
-        result = hand.divide_hand(tiles_34, [], [])
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0], [[1, 2, 3], [3, 3], [11, 12, 13], [12, 13, 14], [20, 20, 20]])
-
-        tiles_34 = self._string_to_34_array(man='11122233388899')
-        result = hand.divide_hand(tiles_34, [], [])
-        self.assertEqual(len(result), 2)
-        self.assertEqual(result[0], [[0, 1, 2], [0, 1, 2], [0, 1, 2], [7, 7, 7], [8, 8]])
-        self.assertEqual(result[1], [[0, 0, 0], [1, 1, 1], [2, 2, 2], [7, 7, 7], [8, 8]])
-
-        tiles_34 = self._string_to_34_array(man='112233', sou='445566', pin='99')
-        result = hand.divide_hand(tiles_34, [], [])
-        self.assertEqual(len(result), 2)
-        self.assertEqual(result[0], [[0, 1, 2], [0, 1, 2], [17, 17], [21, 22, 23], [21, 22, 23]])
-        self.assertEqual(result[1], [[0, 0], [1, 1], [2, 2], [17, 17], [21, 21], [22, 22], [23, 23]])
-
-        tiles_34 = self._string_to_34_array(sou='111123666789', honors='11')
-        result = hand.divide_hand(tiles_34, [], [])
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0], [[18, 18, 18], [18, 19, 20], [23, 23, 23], [24, 25, 26], [27, 27]])
-
-        tiles_34 = self._string_to_34_array(pin='234777888999', honors='22')
-        open_sets = [self._string_to_open_34_set(pin='789'), self._string_to_open_34_set(pin='234')]
-        result = hand.divide_hand(tiles_34, open_sets, [])
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0], [[10, 11, 12], [15, 16, 17], [15, 16, 17], [15, 16, 17], [28, 28]])
 
     def test_fu_calculation(self):
         hand = FinishedHand()
@@ -1179,6 +1138,8 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(len(result['hand_yaku']), 2)
 
     def test_dora_in_hand(self):
+        settings.FIVE_REDS = False
+
         hand = FinishedHand()
 
         # hand without yaku, but with dora should be consider as invalid

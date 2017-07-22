@@ -7,18 +7,17 @@ Validation working correctly only for phoenix replays, for kyu, first dan and se
 you need to set ids for hirosima, no red fives and no open tanyao games.
 """
 import logging
-import sys
-
 import os
-from bs4 import BeautifulSoup
+import sys
 from functools import reduce
 
+from bs4 import BeautifulSoup
+
 from mahjong.constants import EAST, SOUTH, WEST, NORTH
-from mahjong.hand import FinishedHand
+from mahjong.hand_calculating.hand import FinishedHand
 from mahjong.tile import TilesConverter
 from tenhou.decoder import TenhouDecoder
 from utils.settings_handler import settings
-
 
 logger = logging.getLogger('validate_hand')
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from mahjong.hand import FinishedHand
+from mahjong.hand_calculating.hand import FinishedHand
 from utils.tests import TestMixin
 
 

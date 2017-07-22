@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 import math
-import itertools
 
 import copy
 from functools import reduce
 
 from mahjong.ai.agari import Agari
 from mahjong import yaku
+from mahjong.hand_calculating.divider import HandDivider
+from mahjong.hand_calculating.scores import ScoresCalculator
 from mahjong.tile import TilesConverter
 from mahjong.constants import EAST, SOUTH, WEST, NORTH, CHUN, HATSU, HAKU, TERMINAL_INDICES, HONOR_INDICES
 from mahjong.utils import is_chi, is_pon, is_pair, is_sou, is_pin, is_man, plus_dora, simplify
@@ -84,6 +85,7 @@ class FinishedHand(object):
         hand_yaku = []
         han = 0
         fu = 0
+        scores_calculator = ScoresCalculator()
 
         def return_response():
             return {'cost': cost, 'error': error, 'han': han, 'fu': fu, 'hand_yaku': hand_yaku}
@@ -93,7 +95,7 @@ class FinishedHand(object):
             hand_yaku.append(yaku.nagashi_mangan)
             fu = 30
             han = yaku.nagashi_mangan.han['closed']
-            cost = self.calculate_scores(han, fu, is_tsumo, is_dealer)
+            cost = scores_calculator.calculate_scores(han, fu, is_tsumo, is_dealer)
             return return_response()
 
         if win_tile not in tiles:
@@ -382,7 +384,7 @@ class FinishedHand(object):
                     han += count_of_aka_dora
 
             if not error:
-                cost = self.calculate_scores(han, fu, is_tsumo, is_dealer)
+                cost = scores_calculator.calculate_scores(han, fu, is_tsumo, is_dealer)
 
             calculated_hand = {
                 'cost': cost,
@@ -400,7 +402,7 @@ class FinishedHand(object):
             else:
                 han = yaku.kokushi.han['closed']
             fu = 0
-            cost = self.calculate_scores(han, fu, is_tsumo, is_dealer)
+            cost = scores_calculator.calculate_scores(han, fu, is_tsumo, is_dealer)
             calculated_hands.append({
                 'cost': cost,
                 'error': None,
@@ -420,66 +422,6 @@ class FinishedHand(object):
         fu = calculated_hand['fu']
 
         return return_response()
-
-    def calculate_scores(self, han, fu, is_tsumo, is_dealer):
-        """
-        Calculate how much scores cost a hand with given han and fu
-        :param han:
-        :param fu:
-        :param is_tsumo:
-        :param is_dealer:
-        :return: a dictionary with main and additional cost
-        for ron additional cost is always = 0
-        for tsumo main cost is cost for dealer and additional is cost for player
-        {'main': 1000, 'additional': 0}
-        """
-        if han >= 5:
-            # double yakuman
-            if han >= 26:
-                rounded = 16000
-            # yakuman
-            elif han >= 13:
-                rounded = 8000
-            # sanbaiman
-            elif han >= 11:
-                rounded = 6000
-            # baiman
-            elif han >= 8:
-                rounded = 4000
-            # haneman
-            elif han >= 6:
-                rounded = 3000
-            else:
-                rounded = 2000
-
-            double_rounded = rounded * 2
-            four_rounded = double_rounded * 2
-            six_rounded = double_rounded * 3
-        else:
-            base_points = fu * pow(2, 2 + han)
-            rounded = math.ceil(base_points / 100.) * 100
-            double_rounded = math.ceil(2 * base_points / 100.) * 100
-            four_rounded = math.ceil(4 * base_points / 100.) * 100
-            six_rounded = math.ceil(6 * base_points / 100.) * 100
-
-            # mangan
-            if rounded > 2000:
-                rounded = 2000
-                double_rounded = rounded * 2
-                four_rounded = double_rounded * 2
-                six_rounded = double_rounded * 3
-
-            # kiriage mangan
-            if han == 4 and fu == 30:
-                rounded = 2000
-                double_rounded = 3900
-                four_rounded = 7700
-                six_rounded = 11600
-
-        if is_tsumo:
-            return {'main': double_rounded, 'additional': is_dealer and double_rounded or rounded}
-        else:
-            return {'main': is_dealer and six_rounded or four_rounded, 'additional': 0}
 
     def calculate_additional_fu(self, win_tile, hand, is_tsumo, player_wind, round_wind, open_sets, called_kan_indices):
         """
@@ -1209,224 +1151,3 @@ class FinishedHand(object):
 
         return count_of_kan_sets == 4
 
-
-class HandDivider(object):
-
-    def divide_hand(self, tiles_34, open_sets, called_kan_indices):
-        """
-        Return a list of possible hands.
-        :param tiles_34:
-        :param open_sets: list of array with 34 arrays
-        :param called_kan_indices: list of array with 34 tiles
-        :return:
-        """
-
-        # small optimization, we can't have a pair in open part of the hand,
-        # so we don't need to try find pairs in open sets
-        open_tile_indices = open_sets and reduce(lambda x, y: x + y, open_sets) or []
-        closed_hand_tiles_34 = tiles_34[:]
-        for open_item in open_tile_indices:
-            closed_hand_tiles_34[open_item] -= 1
-
-        # let's remove closed kan sets from hand
-        closed_kan_sets = []
-        for kan_item in called_kan_indices:
-            open_tiles = len([x for x in open_tile_indices if x == kan_item])
-            if open_tiles != 3:
-                closed_hand_tiles_34[kan_item] -= 3
-                tiles_34[kan_item] -= 3
-                closed_kan_sets.append([kan_item] * 3)
-
-        if closed_kan_sets:
-            closed_kan_sets = [closed_kan_sets]
-
-        pair_indices = self.find_pairs(closed_hand_tiles_34)
-
-        # let's try to find all possible hand options
-        hands = []
-        for pair_index in pair_indices:
-            local_tiles_34 = tiles_34[:]
-
-            # we don't need to combine already open sets
-            for open_item in open_tile_indices:
-                local_tiles_34[open_item] -= 1
-
-            local_tiles_34[pair_index] -= 2
-
-            # 0 - 8 man tiles
-            man = self.find_valid_combinations(local_tiles_34, 0, 8)
-
-            # 9 - 17 pin tiles
-            pin = self.find_valid_combinations(local_tiles_34, 9, 17)
-
-            # 18 - 26 sou tiles
-            sou = self.find_valid_combinations(local_tiles_34, 18, 26)
-
-            honor = []
-            for x in HONOR_INDICES:
-                if local_tiles_34[x] == 3:
-                    honor.append([x] * 3)
-
-            if honor:
-                honor = [honor]
-
-            arrays = [[[pair_index] * 2]]
-            if sou:
-                arrays.append(sou)
-            if man:
-                arrays.append(man)
-            if pin:
-                arrays.append(pin)
-            if honor:
-                arrays.append(honor)
-            if open_sets:
-                for item in open_sets:
-                    arrays.append([item])
-            if closed_kan_sets:
-                arrays.append(closed_kan_sets)
-
-            # let's find all possible hand from our valid sets
-            for s in itertools.product(*arrays):
-                hand = []
-                for item in list(s):
-                    if isinstance(item[0], list):
-                        for x in item:
-                            hand.append(x)
-                    else:
-                        hand.append(item)
-
-                hand = sorted(hand, key=lambda a: a[0])
-                if len(hand) == 5:
-                    hands.append(hand)
-
-        # small optimization, let's remove hand duplicates
-        unique_hands = []
-        for hand in hands:
-            hand = sorted(hand, key=lambda x: (x[0], x[1]))
-            if hand not in unique_hands:
-                unique_hands.append(hand)
-
-        hands = unique_hands
-
-        if len(pair_indices) == 7:
-            hand = []
-            for index in pair_indices:
-                hand.append([index] * 2)
-            hands.append(hand)
-
-        return hands
-
-    def find_pairs(self, tiles_34, first_index=0, second_index=33):
-        """
-        Find all possible pairs in the hand and return their indices
-        :return: array of pair indices
-        """
-        pair_indices = []
-        for x in range(first_index, second_index + 1):
-            # ignore pon of honor tiles, because it can't be a part of pair
-            if x in HONOR_INDICES and tiles_34[x] != 2:
-                continue
-
-            if tiles_34[x] >= 2:
-                pair_indices.append(x)
-
-        return pair_indices
-
-    def find_valid_combinations(self, tiles_34, first_index, second_index, hand_not_completed=False):
-        """
-        Find and return all valid set combinations in given suit
-        :param tiles_34:
-        :param first_index:
-        :param second_index:
-        :param hand_not_completed: in that mode we can return just possible shi\pon sets
-        :return: list of valid combinations
-        """
-        indices = []
-        for x in range(first_index, second_index + 1):
-            if tiles_34[x] > 0:
-                indices.extend([x] * tiles_34[x])
-
-        if not indices:
-            return []
-
-        all_possible_combinations = list(itertools.permutations(indices, 3))
-
-        def is_valid_combination(possible_set):
-            if is_chi(possible_set):
-                return True
-
-            if is_pon(possible_set):
-                return True
-
-            return False
-
-        valid_combinations = []
-        for combination in all_possible_combinations:
-            if is_valid_combination(combination):
-                valid_combinations.append(list(combination))
-
-        if not valid_combinations:
-            return []
-
-        count_of_needed_combinations = int(len(indices) / 3)
-
-        # simple case, we have count of sets == count of tiles
-        if count_of_needed_combinations == len(valid_combinations) and \
-                reduce(lambda z, y: z + y, valid_combinations) == indices:
-            return [valid_combinations]
-
-        # filter and remove not possible pon sets
-        for item in valid_combinations:
-            if is_pon(item):
-                count_of_sets = 1
-                count_of_tiles = 0
-                while count_of_sets > count_of_tiles:
-                    count_of_tiles = len([x for x in indices if x == item[0]]) / 3
-                    count_of_sets = len([x for x in valid_combinations
-                                         if x[0] == item[0] and x[1] == item[1] and x[2] == item[2]])
-
-                    if count_of_sets > count_of_tiles:
-                        valid_combinations.remove(item)
-
-        # filter and remove not possible chi sets
-        for item in valid_combinations:
-            if is_chi(item):
-                count_of_sets = 5
-                # TODO calculate real count of possible sets
-                count_of_possible_sets = 4
-                while count_of_sets > count_of_possible_sets:
-                    count_of_sets = len([x for x in valid_combinations
-                                         if x[0] == item[0] and x[1] == item[1] and x[2] == item[2]])
-
-                    if count_of_sets > count_of_possible_sets:
-                        valid_combinations.remove(item)
-
-        # lit of chi\pon sets for not completed hand
-        if hand_not_completed:
-            return [valid_combinations]
-
-        # hard case - we can build a lot of sets from our tiles
-        # for example we have 123456 tiles and we can build sets:
-        # [1, 2, 3] [4, 5, 6] [2, 3, 4] [3, 4, 5]
-        # and only two of them valid in the same time [1, 2, 3] [4, 5, 6]
-
-        possible_combinations = set(itertools.permutations(
-            range(0, len(valid_combinations)), count_of_needed_combinations
-        ))
-
-        combinations_results = []
-        for combination in possible_combinations:
-            result = []
-            for item in combination:
-                result += valid_combinations[item]
-            result = sorted(result)
-
-            if result == indices:
-                results = []
-                for item in combination:
-                    results.append(valid_combinations[item])
-                results = sorted(results, key=lambda z: z[0])
-                if results not in combinations_results:
-                    combinations_results.append(results)
-
-        return combinations_results

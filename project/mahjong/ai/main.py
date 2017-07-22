@@ -11,7 +11,8 @@ from mahjong.ai.strategies.main import BaseStrategy
 from mahjong.ai.strategies.tanyao import TanyaoStrategy
 from mahjong.ai.strategies.yakuhai import YakuhaiStrategy
 from mahjong.constants import HAKU, CHUN, HATSU, AKA_DORA_LIST
-from mahjong.hand import HandDivider, FinishedHand
+from mahjong.hand_calculating.divider import HandDivider
+from mahjong.hand_calculating.hand import FinishedHand
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_pair, is_pon

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from mahjong.hand import FinishedHand
+from mahjong.hand_calculating.scores import ScoresCalculator
 
 
-class PointsCalculationTestCase(unittest.TestCase):
+class ScoresCalculationTestCase(unittest.TestCase):
 
     def test_calculate_scores_and_ron(self):
-        hand = FinishedHand()
+        hand = ScoresCalculator()
 
         result = hand.calculate_scores(han=1, fu=30, is_tsumo=False, is_dealer=False)
         self.assertEqual(result['main'], 1000)
@@ -49,7 +49,7 @@ class PointsCalculationTestCase(unittest.TestCase):
         self.assertEqual(result['main'], 64000)
 
     def test_calculate_scores_and_ron_by_dealer(self):
-        hand = FinishedHand()
+        hand = ScoresCalculator()
 
         result = hand.calculate_scores(han=1, fu=30, is_tsumo=False, is_dealer=True)
         self.assertEqual(result['main'], 1500)
@@ -82,15 +82,15 @@ class PointsCalculationTestCase(unittest.TestCase):
         self.assertEqual(result['main'], 96000)
 
     def test_calculate_scores_and_tsumo(self):
-        hand = FinishedHand()
+        hand = ScoresCalculator()
 
-        # result = hand.calculate_scores(han=1, fu=30, is_tsumo=True, is_dealer=False)
-        # self.assertEqual(result['main'], 500)
-        # self.assertEqual(result['additional'], 300)
-        #
-        # result = hand.calculate_scores(han=3, fu=30, is_tsumo=True, is_dealer=False)
-        # self.assertEqual(result['main'], 2000)
-        # self.assertEqual(result['additional'], 1000)
+        result = hand.calculate_scores(han=1, fu=30, is_tsumo=True, is_dealer=False)
+        self.assertEqual(result['main'], 500)
+        self.assertEqual(result['additional'], 300)
+
+        result = hand.calculate_scores(han=3, fu=30, is_tsumo=True, is_dealer=False)
+        self.assertEqual(result['main'], 2000)
+        self.assertEqual(result['additional'], 1000)
 
         result = hand.calculate_scores(han=3, fu=60, is_tsumo=True, is_dealer=False)
         self.assertEqual(result['main'], 3900)
@@ -125,7 +125,7 @@ class PointsCalculationTestCase(unittest.TestCase):
         self.assertEqual(result['additional'], 16000)
 
     def test_calculate_scores_and_tsumo_by_dealer(self):
-        hand = FinishedHand()
+        hand = ScoresCalculator()
 
         result = hand.calculate_scores(han=1, fu=30, is_tsumo=True, is_dealer=True)
         self.assertEqual(result['main'], 500)

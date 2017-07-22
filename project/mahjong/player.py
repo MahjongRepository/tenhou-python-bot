@@ -62,7 +62,9 @@ class PlayerInterface(object):
     def add_called_meld(self, meld: Meld):
         # we already added chankan as a pon set
         if meld.type == Meld.CHANKAN:
-            return
+            tile_34 = meld.tiles[0] // 4
+            pon_set = [x for x in self.melds if x.type == Meld.PON and (x.tiles[0] // 4) == tile_34]
+            self.melds.remove(pon_set[0])
 
         self.melds.append(meld)
 
@@ -210,7 +212,7 @@ class Player(PlayerInterface):
 
     def add_called_meld(self, meld: Meld):
         # we had to remove tile from the hand for closed kan set
-        if (meld.type == Meld.KAN or meld.type == Meld.CHANKAN) and not meld.opened:
+        if (meld.type == Meld.KAN and not meld.opened) or meld.type == Meld.CHANKAN:
             self.tiles.remove(meld.called_tile)
 
         super().add_called_meld(meld)

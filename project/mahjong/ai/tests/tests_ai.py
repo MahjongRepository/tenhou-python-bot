@@ -243,7 +243,17 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         player.add_called_meld(self._make_meld(Meld.PON, self._string_to_136_array(man='444')))
 
+        self.assertEqual(len(player.melds), 1)
+        self.assertEqual(len(player.tiles), 14)
         self.assertEqual(player.can_call_kan(tile, False), Meld.CHANKAN)
+
+        player.discard_tile()
+        player.draw_tile(tile)
+        player.add_called_meld(self._make_meld(Meld.CHANKAN, self._string_to_136_array(man='4444')))
+
+        self.assertEqual(len(player.melds), 1)
+        self.assertEqual(player.melds[0].type, Meld.CHANKAN)
+        self.assertEqual(len(player.tiles), 13)
 
     def test_call_closed_kan(self):
         table = Table()

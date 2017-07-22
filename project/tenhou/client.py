@@ -271,7 +271,7 @@ class TenhouClient(Client):
                             else:
                                 meld_type = 4
                             self._send_message('<N type="{}" hai="{}" />'.format(meld_type, drawn_tile))
-                            logger.info('We called a kan set!')
+                            logger.info('We called a closed kan\chankan set!')
                             continue
 
                         discarded_tile = self.player.discard_tile()
@@ -374,7 +374,7 @@ class TenhouClient(Client):
                         if 't="3"' in message:
                             if self.player.can_call_kan(tile, True):
                                 self._send_message('<N type="2" />')
-                                logger.info('We called a kan set!')
+                                logger.info('We called an open kan set!')
                                 continue
 
                         # chi or pon

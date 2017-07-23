@@ -140,8 +140,8 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(sou='2223457899', honors='666')
         table.player.init_hand(tiles)
         table.player.draw_tile(self._string_to_136_tile(man='8'))
-        table.player.add_called_meld(self._make_meld(Meld.PON, self._string_to_136_array(sou='222')))
-        table.player.add_called_meld(self._make_meld(Meld.PON, self._string_to_136_array(honors='666')))
+        table.player.add_called_meld(self._make_meld(Meld.PON, sou='222'))
+        table.player.add_called_meld(self._make_meld(Meld.PON, honors='666'))
 
         self.assertEqual(table.player.ai.defence.should_go_to_defence_mode(), False)
 
@@ -400,9 +400,9 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(sou='22', pin='222367899', man='45', honors='1')
         table.player.init_hand(tiles)
 
-        table.add_called_meld(1, self._make_meld(Meld.CHI, self._string_to_136_array(pin='567')))
-        table.add_called_meld(1, self._make_meld(Meld.CHI, self._string_to_136_array(pin='123')))
-        table.add_called_meld(1, self._make_meld(Meld.CHI, self._string_to_136_array(pin='345')))
+        table.add_called_meld(1, self._make_meld(Meld.CHI, pin='567'))
+        table.add_called_meld(1, self._make_meld(Meld.CHI, pin='123'))
+        table.add_called_meld(1, self._make_meld(Meld.CHI, pin='345'))
 
         table.add_discarded_tile(1, self._string_to_136_tile(sou='6'), False)
         table.add_discarded_tile(1, self._string_to_136_tile(sou='6'), False)
@@ -423,9 +423,9 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(sou='4', pin='223456', man='678', honors='66')
         table.player.init_hand(tiles)
 
-        table.add_called_meld(1, self._make_meld(Meld.CHI, self._string_to_136_array(sou='789')))
-        table.add_called_meld(1, self._make_meld(Meld.PON, self._string_to_136_array(honors='444')))
-        table.add_called_meld(1, self._make_meld(Meld.PON, self._string_to_136_array(honors='222')))
+        table.add_called_meld(1, self._make_meld(Meld.CHI, sou='789'))
+        table.add_called_meld(1, self._make_meld(Meld.PON, honors='444'))
+        table.add_called_meld(1, self._make_meld(Meld.PON, honors='222'))
 
         table.add_discarded_tile(1, self._string_to_136_tile(man='2'), False)
         table.add_discarded_tile(1, self._string_to_136_tile(man='8'), False)

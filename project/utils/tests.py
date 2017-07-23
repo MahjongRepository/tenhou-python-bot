@@ -36,10 +36,12 @@ class TestMixin(object):
         hand_divider = HandDivider()
         return hand_divider.divide_hand(tiles, [], [])[hand_index]
 
-    def _make_meld(self, meld_type, tiles):
+    def _make_meld(self, meld_type, is_open=True, man='', pin='', sou='', honors=''):
+        tiles = self._string_to_136_array(man=man, pin=pin, sou=sou, honors=honors)
         meld = Meld()
         meld.who = 0
         meld.type = meld_type
         meld.tiles = tiles
+        meld.opened = is_open
         meld.called_tile = tiles[0]
         return meld

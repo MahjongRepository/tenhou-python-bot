@@ -208,7 +208,7 @@ class TenhouLogParser(object):
                                                            round_wind=round_wind,
                                                            player_wind=player_wind,
                                                            called_kan_indices=called_kan_indices,
-                                                           open_sets=melds,
+                                                           melds=melds,
                                                            dora_indicators=dora_indicators)
 
                 if result['error']:

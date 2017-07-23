@@ -113,10 +113,8 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(sou='123678', pin='3599', honors='555')
         player.init_hand(tiles)
 
-        meld_tiles = [124, 125, 126]
-
         self.assertEqual(len(player.closed_hand), 13)
 
-        player.add_called_meld(self._make_meld(Meld.PON, meld_tiles))
+        player.add_called_meld(self._make_meld(Meld.PON, honors='555'))
 
         self.assertEqual(len(player.closed_hand), 10)

@@ -178,7 +178,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         # was discard and set was opened
         tile = self._string_to_136_tile(sou='8')
         player.table.add_discarded_tile(3, tile, False)
-        meld = self._make_meld(Meld.PON, self._string_to_136_array(sou='888'))
+        meld = self._make_meld(Meld.PON, sou='888')
         meld.called_tile = tile
         player.table.add_called_meld(3, meld)
 
@@ -189,7 +189,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         # was discard and set was opened
         tile = self._string_to_136_tile(sou='3')
         player.table.add_discarded_tile(2, tile, False)
-        meld = self._make_meld(Meld.PON, self._string_to_136_array(sou='345'))
+        meld = self._make_meld(Meld.PON, sou='345')
         meld.called_tile = tile
         player.table.add_called_meld(2, meld)
 
@@ -241,7 +241,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         self.assertEqual(player.can_call_kan(tile, False), None)
 
-        player.add_called_meld(self._make_meld(Meld.PON, self._string_to_136_array(man='444')))
+        player.add_called_meld(self._make_meld(Meld.PON, man='444'))
 
         self.assertEqual(len(player.melds), 1)
         self.assertEqual(len(player.tiles), 14)
@@ -249,7 +249,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         player.discard_tile()
         player.draw_tile(tile)
-        player.add_called_meld(self._make_meld(Meld.CHANKAN, self._string_to_136_array(man='4444')))
+        player.add_called_meld(self._make_meld(Meld.CHANKAN, man='4444'))
 
         self.assertEqual(len(player.melds), 1)
         self.assertEqual(player.melds[0].type, Meld.CHANKAN)
@@ -290,7 +290,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         tile = self._string_to_136_tile(sou='1')
         self.assertEqual(player.can_call_kan(tile, True), None)
 
-        player.add_called_meld(self._make_meld(Meld.PON, self._string_to_136_array(honors='111')))
+        player.add_called_meld(self._make_meld(Meld.PON, honors='111'))
 
         # our hand is open, but it is not tempai
         # we don't need to open kan here
@@ -302,7 +302,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         tiles = self._string_to_136_array(man='2399', sou='111456', honors='111')
         player.init_hand(tiles)
-        player.add_called_meld(self._make_meld(Meld.PON, self._string_to_136_array(honors='111')))
+        player.add_called_meld(self._make_meld(Meld.PON, honors='111'))
 
         # to rebuild all caches
         player.draw_tile(self._string_to_136_tile(pin='9'))

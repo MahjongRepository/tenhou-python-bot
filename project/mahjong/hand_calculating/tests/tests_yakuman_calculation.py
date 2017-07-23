@@ -2,6 +2,7 @@
 import unittest
 
 from mahjong.hand_calculating.hand import FinishedHand
+from mahjong.meld import Meld
 from utils.tests import TestMixin
 
 
@@ -232,19 +233,25 @@ class YakumanCalculationTestCase(unittest.TestCase, TestMixin):
     def test_is_suukantsu(self):
         hand = FinishedHand()
 
-        tiles = self._string_to_34_array(sou='111333', man='222', pin='44555')
-        called_kan_indices = [self._string_to_34_tile(sou='1'), self._string_to_34_tile(sou='3'),
-                              self._string_to_34_tile(pin='5'), self._string_to_34_tile(man='2')]
-        self.assertTrue(hand.is_suukantsu(self._hand(tiles, 0), called_kan_indices))
+        melds = [
+            self._make_meld(Meld.KAN, sou='1111'),
+            self._make_meld(Meld.KAN, sou='3333'),
+            self._make_meld(Meld.KAN, pin='5555'),
+            self._make_meld(Meld.KAN, man='2222'),
+        ]
+        self.assertTrue(hand.is_suukantsu(melds))
 
         tiles = self._string_to_136_array(sou='111333', man='222', pin='44555')
         win_tile = self._string_to_136_tile(pin='4')
-        open_sets = [self._string_to_open_34_set(sou='111'), self._string_to_open_34_set(sou='333')]
-        called_kan_indices = [self._string_to_136_tile(sou='1'), self._string_to_136_tile(sou='3'),
-                              self._string_to_136_tile(pin='5'), self._string_to_136_tile(man='2')]
+        melds = [
+            self._make_meld(Meld.KAN, sou='1111'),
+            self._make_meld(Meld.KAN, sou='3333'),
+            self._make_meld(Meld.KAN, pin='5555'),
+            self._make_meld(Meld.KAN, man='2222'),
+        ]
 
-        result = hand.estimate_hand_value(tiles, win_tile, open_sets=open_sets, called_kan_indices=called_kan_indices)
+        result = hand.estimate_hand_value(tiles, win_tile, melds=melds)
         self.assertEqual(result['error'], None)
         self.assertEqual(result['han'], 13)
-        self.assertEqual(result['fu'], 80)
+        self.assertEqual(result['fu'], 70)
         self.assertEqual(len(result['hand_yaku']), 1)

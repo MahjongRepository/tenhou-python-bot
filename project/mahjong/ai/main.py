@@ -260,7 +260,7 @@ class MainAI(BaseAI):
                                                         is_tsumo=False,
                                                         is_riichi=call_riichi,
                                                         is_dealer=self.player.is_dealer,
-                                                        open_sets=self.player.open_hand_34_tiles,
+                                                        melds=self.player.melds,
                                                         player_wind=self.player.player_wind,
                                                         round_wind=self.player.table.round_wind,
                                                         dora_indicators=self.player.table.dora_indicators)

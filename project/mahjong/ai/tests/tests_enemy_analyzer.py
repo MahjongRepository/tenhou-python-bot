@@ -26,10 +26,10 @@ class EnemyAnalyzerTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(table.get_player(1).in_tempai, False)
         self.assertEqual(table.get_player(1).is_threatening, False)
 
-        table.add_called_meld(1, self._make_meld(Meld.CHI, self._string_to_136_array(sou='567')))
-        table.add_called_meld(1, self._make_meld(Meld.CHI, self._string_to_136_array(pin='123')))
-        table.add_called_meld(1, self._make_meld(Meld.CHI, self._string_to_136_array(man='345')))
-        table.add_called_meld(1, self._make_meld(Meld.PON, self._string_to_136_array(man='777')))
+        table.add_called_meld(1, self._make_meld(Meld.CHI, sou='567'))
+        table.add_called_meld(1, self._make_meld(Meld.CHI, pin='123'))
+        table.add_called_meld(1, self._make_meld(Meld.CHI, man='345'))
+        table.add_called_meld(1, self._make_meld(Meld.PON, man='777'))
 
         self.assertEqual(table.get_player(1).in_tempai, True)
         self.assertEqual(table.get_player(1).is_threatening, False)
@@ -43,9 +43,9 @@ class EnemyAnalyzerTestCase(unittest.TestCase, TestMixin):
     def test_try_to_detect_honitsu_hand(self):
         table = Table()
 
-        table.add_called_meld(1, self._make_meld(Meld.CHI, self._string_to_136_array(pin='567')))
-        table.add_called_meld(1, self._make_meld(Meld.CHI, self._string_to_136_array(pin='123')))
-        table.add_called_meld(1, self._make_meld(Meld.CHI, self._string_to_136_array(pin='345')))
+        table.add_called_meld(1, self._make_meld(Meld.CHI, pin='567'))
+        table.add_called_meld(1, self._make_meld(Meld.CHI, pin='123'))
+        table.add_called_meld(1, self._make_meld(Meld.CHI, pin='345'))
 
         table.add_discarded_tile(1, self._string_to_136_tile(sou='1'), False)
         table.add_discarded_tile(1, self._string_to_136_tile(sou='5'), False)

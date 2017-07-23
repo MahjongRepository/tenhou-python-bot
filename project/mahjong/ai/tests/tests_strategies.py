@@ -156,7 +156,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='56', sou='1235', pin='12888', honors='11')
         player.init_hand(tiles)
 
-        meld = self._make_meld(Meld.PON, self._string_to_136_array(pin='888'))
+        meld = self._make_meld(Meld.PON, pin='888')
         player.add_called_meld(meld)
 
         # to update previous_shanten attribute
@@ -176,7 +176,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
 
         tile = self._string_to_136_tile(pin='5')
         player.draw_tile(tile)
-        meld = self._make_meld(Meld.CHI, self._string_to_136_array(sou='678'))
+        meld = self._make_meld(Meld.CHI, sou='678')
         player.add_called_meld(meld)
 
         discard = player.discard_tile()
@@ -227,7 +227,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
 
         tile = self._string_to_136_tile(man='6')
         player.draw_tile(tile)
-        meld = self._make_meld(Meld.CHI, self._string_to_136_array(pin='123'))
+        meld = self._make_meld(Meld.CHI, pin='123')
         player.add_called_meld(meld)
 
         discard = player.discard_tile()
@@ -246,9 +246,9 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(sou='2345999', honors='114446')
         player.init_hand(tiles)
 
-        meld = self._make_meld(Meld.PON, self._string_to_136_array(sou='999'))
+        meld = self._make_meld(Meld.PON, sou='999')
         player.add_called_meld(meld)
-        meld = self._make_meld(Meld.PON, self._string_to_136_array(honors='444'))
+        meld = self._make_meld(Meld.PON, honors='444')
         player.add_called_meld(meld)
 
         # to rebuild all caches
@@ -562,7 +562,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         table = Table()
         player = table.player
 
-        meld = self._make_meld(Meld.PON, self._string_to_136_array(sou='222'))
+        meld = self._make_meld(Meld.PON, sou='222')
         player.add_called_meld(meld)
 
         tiles = self._string_to_136_array(man='33556788', sou='22266')
@@ -578,7 +578,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 
         tiles = self._string_to_136_array(man='34577', sou='23', pin='233445')
         table.player.init_hand(tiles)
-        meld = self._make_meld(Meld.CHI, self._string_to_136_array(pin='234'))
+        meld = self._make_meld(Meld.CHI, pin='234')
         table.player.add_called_meld(meld)
 
         table.player.draw_tile(self._string_to_136_tile(sou='1'))
@@ -604,7 +604,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         table = Table()
         player = table.player
 
-        meld = self._make_meld(Meld.CHI, self._string_to_136_array(man='234'))
+        meld = self._make_meld(Meld.CHI, man='234')
         player.add_called_meld(meld)
 
         tiles = self._string_to_136_array(man='234678', sou='234', pin='3588')
@@ -619,7 +619,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         table = Table()
         player = table.player
 
-        meld = self._make_meld(Meld.CHI, self._string_to_136_array(man='234'))
+        meld = self._make_meld(Meld.CHI, man='234')
         player.add_called_meld(meld)
 
         tiles = self._string_to_136_array(man='234678', sou='234', pin='2388')

@@ -13,5 +13,5 @@ class Suukantsu(Yaku):
 
         self.is_yakuman = True
 
-    def is_condition_met(self, hand):
+    def is_condition_met(self, hand, *args):
         return True

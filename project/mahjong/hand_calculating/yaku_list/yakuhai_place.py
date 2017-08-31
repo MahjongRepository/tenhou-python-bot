@@ -13,5 +13,5 @@ class YakuhaiOfPlace(Yaku):
 
         self.is_yakuman = False
 
-    def is_condition_met(self, hand):
+    def is_condition_met(self, hand, *args):
         return True

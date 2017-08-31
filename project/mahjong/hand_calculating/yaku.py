@@ -18,10 +18,11 @@ class Yaku(object):
         # for calls in array
         return self.__str__()
 
-    def is_condition_met(self, hand):
+    def is_condition_met(self, hand, *args):
         """
         Is this yaku exists in the hand?
         :param: hand
+        :param: args: some yaku requires additional attributes
         :return: boolean
         """
         raise NotImplemented

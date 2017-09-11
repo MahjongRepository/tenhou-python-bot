@@ -133,55 +133,38 @@ class FinishedHand(object):
 
         calculated_hands = []
         for hand in hand_options:
+            is_chitoitsu = self.config.chiitoitsu.is_condition_met(hand)
+
             cost = None
             error = None
             hand_yaku = []
             han = 0
-            fu = 0
-
-            if is_tsumo or is_open_hand:
-                fu += 20
-            else:
-                fu += 30
+            fu = fu_calculator.calculate_fu(hand,
+                                            is_tsumo,
+                                            is_open_hand,
+                                            win_tile,
+                                            player_wind,
+                                            round_wind,
+                                            open_sets_34,
+                                            called_kan_indices,
+                                            is_chitoitsu)
+            is_pinfu = False
+            if not is_open_hand:
+                if fu == 20 and is_tsumo:
+                    is_pinfu = True
+                if fu == 30 and not is_tsumo:
+                    is_pinfu = True
 
             pon_sets = [x for x in hand if is_pon(x)]
             chi_sets = [x for x in hand if is_chi(x)]
-            additional_fu = fu_calculator.calculate_additional_fu(win_tile,
-                                                                  hand,
-                                                                  is_tsumo,
-                                                                  player_wind,
-                                                                  round_wind,
-                                                                  open_sets_34,
-                                                                  called_kan_indices)
-
-            if additional_fu == 0 and len(chi_sets) == 4:
-                """
-                - A hand without pon and kan sets, so it should contains all sequences and a pair
-                - The pair should be not valued
-                - The waiting must be an open wait (on 2 different tiles)
-                - Hand should be closed
-                """
-                if is_open_hand:
-                    fu += 2
-                    is_pinfu = False
-                else:
-                    is_pinfu = True
-            else:
-                fu += additional_fu
-                is_pinfu = False
 
             if is_tsumo:
                 if not is_open_hand:
                     hand_yaku.append(self.config.tsumo)
 
-                # pinfu + tsumo always is 20 fu
-                if not is_pinfu:
-                    fu += 2
-
             if is_pinfu:
                 hand_yaku.append(self.config.pinfu)
 
-            is_chitoitsu = self.config.chiitoitsu.is_condition_met(hand)
             # let's skip hand that looks like chitoitsu, but it contains open sets
             if is_chitoitsu and is_open_hand:
                 continue
@@ -342,10 +325,6 @@ class FinishedHand(object):
                 if self.config.suukantsu.is_condition_met(hand, melds):
                     hand_yaku.append(self.config.suukantsu)
 
-            # chitoitsu is always 25 fu
-            if is_chitoitsu:
-                fu = 25
-
             # yakuman is not connected with other yaku
             yakuman_list = [x for x in hand_yaku if x.is_yakuman]
             if yakuman_list:
@@ -360,7 +339,7 @@ class FinishedHand(object):
 
             # round up
             # 22 -> 30 and etc.
-            if fu != 25:
+            if not is_chitoitsu:
                 fu = int(math.ceil(fu / 10.0)) * 10
 
             if han == 0 or (han == 1 and fu < 30):

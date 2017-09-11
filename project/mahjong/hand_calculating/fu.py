@@ -7,6 +7,47 @@ from mahjong.utils import is_pair, is_pon, is_chi, simplify
 
 class HandFuCalculator(object):
 
+    def calculate_fu(self,
+                     hand,
+                     is_tsumo,
+                     is_open_hand,
+                     win_tile,
+                     player_wind,
+                     round_wind,
+                     open_sets_34,
+                     called_kan_indices,
+                     is_chitoitsu):
+
+        if is_chitoitsu:
+            return 25
+
+        fu = 0
+
+        if is_tsumo or is_open_hand:
+            fu += 20
+        else:
+            fu += 30
+
+        additional_fu = self.calculate_additional_fu(win_tile,
+                                                     hand,
+                                                     is_tsumo,
+                                                     player_wind,
+                                                     round_wind,
+                                                     open_sets_34,
+                                                     called_kan_indices)
+
+        fu += additional_fu
+
+        # there is no 1-20 hand
+        if is_open_hand and additional_fu == 0:
+            fu += 2
+
+        # 2 additional fu because of tsumo (except pinfu)
+        if additional_fu and is_tsumo:
+            fu += 2
+
+        return fu
+
     def calculate_additional_fu(self, win_tile, hand, is_tsumo, player_wind, round_wind, open_sets, called_kan_indices):
         """
         :param win_tile: "136 format" tile

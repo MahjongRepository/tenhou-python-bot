@@ -951,23 +951,23 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
     def test_is_honitsu(self):
         hand = FinishedHand()
 
-        tiles = self._string_to_34_array(man='123456789', honors='11122')
-        self.assertTrue(hand.config.honitsu.is_condition_met(self._hand(tiles)))
-
-        tiles = self._string_to_34_array(man='123456789', pin='123', honors='22')
-        self.assertFalse(hand.config.honitsu.is_condition_met(self._hand(tiles)))
-
-        tiles = self._string_to_34_array(man='12345666778899')
-        self.assertFalse(hand.config.honitsu.is_condition_met(self._hand(tiles)))
+        # tiles = self._string_to_34_array(man='123456789', honors='11122')
+        # self.assertTrue(hand.config.honitsu.is_condition_met(self._hand(tiles)))
+        #
+        # tiles = self._string_to_34_array(man='123456789', pin='123', honors='22')
+        # self.assertFalse(hand.config.honitsu.is_condition_met(self._hand(tiles)))
+        #
+        # tiles = self._string_to_34_array(man='12345666778899')
+        # self.assertFalse(hand.config.honitsu.is_condition_met(self._hand(tiles)))
 
         tiles = self._string_to_136_array(man='123455667', honors='11122')
         win_tile = self._string_to_136_tile(honors='2')
 
-        result = hand.estimate_hand_value(tiles, win_tile)
-        self.assertEqual(result.error, None)
-        self.assertEqual(result.han, 3)
-        self.assertEqual(result.fu, 40)
-        self.assertEqual(len(result.yaku), 1)
+        # result = hand.estimate_hand_value(tiles, win_tile)
+        # self.assertEqual(result.error, None)
+        # self.assertEqual(result.han, 3)
+        # self.assertEqual(result.fu, 40)
+        # self.assertEqual(len(result.yaku), 1)
 
         melds = [self._make_meld(Meld.CHI, man='123')]
         result = hand.estimate_hand_value(tiles, win_tile, melds=melds)

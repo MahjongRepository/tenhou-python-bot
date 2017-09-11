@@ -14,6 +14,23 @@ from mahjong.utils import is_chi, is_pon, is_pair, is_sou, is_pin, is_man, plus_
 from utils.settings_handler import settings
 
 
+class HandResponse(object):
+    cost = None
+    han = None
+    fu = None
+    fu_details = None
+    yaku = None
+    error = None
+
+    def __init__(self, cost=None, han=None, fu=None, yaku=None, error=None, fu_details=None):
+        self.cost = cost
+        self.han = han
+        self.fu = fu
+        self.fu_details = fu_details
+        self.yaku = yaku
+        self.error = error
+
+
 class FinishedHand(object):
     config = YakuConfig()
 
@@ -57,10 +74,7 @@ class FinishedHand(object):
         :param dora_indicators: array of tiles in 136-tile format
         :param player_wind: index of player wind
         :param round_wind: index of round wind
-        :return: The dictionary with hand cost or error response
-
-        {"cost": {'main': 1000, 'additional': 0}, "han": 1, "fu": 30, "error": None, "hand_yaku": []}
-        {"cost": None, "han": 0, "fu": 0, "error": "Hand is not valid", "hand_yaku": []}
+        :return: HandResponse object
         """
 
         if not melds:
@@ -85,15 +99,8 @@ class FinishedHand(object):
             dora_indicators = []
 
         agari = Agari()
-        cost = None
-        error = None
         hand_yaku = []
-        han = 0
-        fu = 0
         scores_calculator = ScoresCalculator()
-
-        def return_response():
-            return {'cost': cost, 'error': error, 'han': han, 'fu': fu, 'hand_yaku': hand_yaku}
 
         # special situation
         if is_nagashi_mangan:
@@ -101,31 +108,26 @@ class FinishedHand(object):
             fu = 30
             han = self.config.nagashi_mangan.han_closed
             cost = scores_calculator.calculate_scores(han, fu, is_tsumo, is_dealer)
-            return return_response()
+            return HandResponse(cost, han, fu, hand_yaku)
 
         if win_tile not in tiles:
-            error = "Win tile not in the hand"
-            return return_response()
+            return HandResponse(error="Win tile not in the hand")
 
         if is_riichi and is_open_hand:
-            error = "Riichi can't be declared with open hand"
-            return return_response()
+            return HandResponse(error="Riichi can't be declared with open hand")
 
         if is_ippatsu and is_open_hand:
-            error = "Ippatsu can't be declared with open hand"
-            return return_response()
+            return HandResponse(error="Ippatsu can't be declared with open hand")
 
         if is_ippatsu and not is_riichi and not is_daburu_riichi:
-            error = "Ippatsu can't be declared without riichi"
-            return return_response()
+            return HandResponse(error="Ippatsu can't be declared without riichi")
 
         tiles_34 = TilesConverter.to_34_array(tiles)
         divider = HandDivider()
         fu_calculator = HandFuCalculator()
 
         if not agari.is_agari(tiles_34, open_sets_34):
-            error = 'Hand is not winning'
-            return return_response()
+            return HandResponse(error='Hand is not winning')
 
         hand_options = divider.divide_hand(tiles_34, open_sets_34, called_kan_indices)
 
@@ -364,7 +366,6 @@ class FinishedHand(object):
             if han == 0 or (han == 1 and fu < 30):
                 error = 'Not valid han ({0}) and fu ({1})'.format(han, fu)
                 cost = None
-            # else:
 
             # we can add dora han only if we have other yaku in hand
             # and if we don't have yakuman
@@ -428,4 +429,4 @@ class FinishedHand(object):
         han = calculated_hand['han']
         fu = calculated_hand['fu']
 
-        return return_response()
+        return HandResponse(cost, han, fu, hand_yaku, error)

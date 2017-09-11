@@ -81,8 +81,8 @@ class DefenceHandler(object):
                 tiles.remove(temp_tile)
 
             hand_result = self.player.ai.estimate_hand_value(tile, tiles, call_riichi)
-            if hand_result['error'] is None:
-                hands_estimated_cost.append(hand_result['cost']['main'])
+            if hand_result.error is None:
+                hands_estimated_cost.append(hand_result.cost['main'])
 
         # probably we are with opened hand without yaku, let's fold it
         if not hands_estimated_cost:

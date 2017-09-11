@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
+from mahjong.constants import EAST, SOUTH, WEST, NORTH
 from mahjong.hand_calculating.yaku import Yaku
+from mahjong.utils import is_pon
 
 
 class DaiSuushii(Yaku):
     """
-    Yaku situation
+    The hand contains four sets of winds
     """
 
     def set_attributes(self):
@@ -17,5 +19,19 @@ class DaiSuushii(Yaku):
         self.is_yakuman = True
 
     def is_condition_met(self, hand, *args):
-        # was it here or not is controlling by superior code
-        return True
+        """
+        The hand contains four sets of winds
+        :param hand: list of hand's sets
+        :return: boolean
+        """
+        pon_sets = [x for x in hand if is_pon(x)]
+        if len(pon_sets) != 4:
+            return False
+
+        count_wind_sets = 0
+        winds = [EAST, SOUTH, WEST, NORTH]
+        for item in pon_sets:
+            if is_pon(item) and item[0] in winds:
+                count_wind_sets += 1
+
+        return count_wind_sets == 4

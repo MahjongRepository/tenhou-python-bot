@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
+from mahjong.constants import CHUN, HAKU, HATSU
 from mahjong.hand_calculating.yaku import Yaku
+from mahjong.utils import is_pon
 
 
 class Daisangen(Yaku):
     """
-    Yaku situation
+    The hand contains three sets of dragons
     """
 
     def set_attributes(self):
@@ -17,5 +19,8 @@ class Daisangen(Yaku):
         self.is_yakuman = True
 
     def is_condition_met(self, hand, *args):
-        # was it here or not is controlling by superior code
-        return True
+        count_of_dragon_pon_sets = 0
+        for item in hand:
+            if is_pon(item) and item[0] in [CHUN, HAKU, HATSU]:
+                count_of_dragon_pon_sets += 1
+        return count_of_dragon_pon_sets == 3

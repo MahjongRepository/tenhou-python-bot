@@ -559,10 +559,10 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         hand = FinishedHand()
 
         tiles = self._string_to_34_array(sou='113355', man='113355', pin='11')
-        self.assertTrue(hand.is_chitoitsu(self._hand(tiles)))
+        self.assertTrue(hand.config.chiitoitsu.is_condition_met(self._hand(tiles)))
 
         tiles = self._string_to_34_array(sou='2299', man='2299', pin='1199', honors='44')
-        self.assertTrue(hand.is_chitoitsu(self._hand(tiles)))
+        self.assertTrue(hand.config.chiitoitsu.is_condition_met(self._hand(tiles)))
 
         tiles = self._string_to_136_array(sou='113355', man='113355', pin='11')
         win_tile = self._string_to_136_tile(pin='1')
@@ -805,7 +805,7 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
             self._make_meld(Meld.KAN, sou='3333'),
             self._make_meld(Meld.KAN, pin='6666'),
         ]
-        self.assertTrue(hand.is_sankantsu(melds))
+        self.assertTrue(hand.config.sankantsu.is_condition_met(hand, melds))
 
         tiles = self._string_to_136_array(sou='111333', man='123', pin='44666')
         melds = [
@@ -1079,7 +1079,7 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         hand = FinishedHand()
 
         tiles = self._string_to_34_array(sou='234567', man='23422', honors='111')
-        self.assertTrue(hand.is_east(self._hand(tiles), player_wind, round_wind))
+        self.assertTrue(hand.config.east.is_condition_met(self._hand(tiles), player_wind, round_wind))
 
         tiles = self._string_to_136_array(sou='234567', man='23422', honors='111')
         win_tile = self._string_to_136_tile(honors='1')
@@ -1112,7 +1112,7 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         hand = FinishedHand()
 
         tiles = self._string_to_34_array(sou='234567', man='23422', honors='222')
-        self.assertTrue(hand.is_south(self._hand(tiles), player_wind, round_wind))
+        self.assertTrue(hand.config.south.is_condition_met(self._hand(tiles), player_wind, round_wind))
 
         tiles = self._string_to_136_array(sou='234567', man='23422', honors='222')
         win_tile = self._string_to_136_tile(honors='2')
@@ -1145,7 +1145,7 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         hand = FinishedHand()
 
         tiles = self._string_to_34_array(sou='234567', man='23422', honors='333')
-        self.assertTrue(hand.is_west(self._hand(tiles), player_wind, round_wind))
+        self.assertTrue(hand.config.west.is_condition_met(self._hand(tiles), player_wind, round_wind))
 
         tiles = self._string_to_136_array(sou='234567', man='23422', honors='333')
         win_tile = self._string_to_136_tile(honors='3')
@@ -1178,7 +1178,7 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         hand = FinishedHand()
 
         tiles = self._string_to_34_array(sou='234567', man='23422', honors='444')
-        self.assertTrue(hand.is_north(self._hand(tiles), player_wind, round_wind))
+        self.assertTrue(hand.config.north.is_condition_met(self._hand(tiles), player_wind, round_wind))
 
         tiles = self._string_to_136_array(sou='234567', man='23422', honors='444')
         win_tile = self._string_to_136_tile(honors='4')

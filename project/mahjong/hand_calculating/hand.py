@@ -179,7 +179,7 @@ class FinishedHand(object):
             if is_pinfu:
                 hand_yaku.append(self.config.pinfu)
 
-            is_chitoitsu = self.is_chitoitsu(hand)
+            is_chitoitsu = self.config.chiitoitsu.is_condition_met(hand)
             # let's skip hand that looks like chitoitsu, but it contains open sets
             if is_chitoitsu and is_open_hand:
                 continue
@@ -230,13 +230,13 @@ class FinishedHand(object):
             if self.config.chinitsu.is_condition_met(hand):
                 hand_yaku.append(self.config.chinitsu)
 
-            if self.is_tsuisou(hand):
+            if self.config.tsuisou.is_condition_met(hand):
                 hand_yaku.append(self.config.tsuisou)
 
             if self.config.honroto.is_condition_met(hand):
                 hand_yaku.append(self.config.honroto)
 
-            if self.is_chinroto(hand):
+            if self.config.chinroto.is_condition_met(hand):
                 hand_yaku.append(self.config.chinroto)
 
             # small optimization, try to detect yaku with chi required sets only if we have chi sets in hand
@@ -282,62 +282,62 @@ class FinishedHand(object):
                 if self.config.chun.is_condition_met(hand):
                     hand_yaku.append(self.config.hatsu)
 
-                if self.is_east(hand, player_wind, round_wind):
+                if self.config.east.is_condition_met(hand, player_wind, round_wind):
                     if player_wind == EAST:
                         hand_yaku.append(self.config.yakuhai_place)
 
                     if round_wind == EAST:
                         hand_yaku.append(self.config.yakuhai_round)
 
-                if self.is_south(hand, player_wind, round_wind):
+                if self.config.south.is_condition_met(hand, player_wind, round_wind):
                     if player_wind == SOUTH:
                         hand_yaku.append(self.config.yakuhai_place)
 
                     if round_wind == SOUTH:
                         hand_yaku.append(self.config.yakuhai_round)
 
-                if self.is_west(hand, player_wind, round_wind):
+                if self.config.west.is_condition_met(hand, player_wind, round_wind):
                     if player_wind == WEST:
                         hand_yaku.append(self.config.yakuhai_place)
 
                     if round_wind == WEST:
                         hand_yaku.append(self.config.yakuhai_round)
 
-                if self.is_north(hand, player_wind, round_wind):
+                if self.config.north.is_condition_met(hand, player_wind, round_wind):
                     if player_wind == NORTH:
                         hand_yaku.append(self.config.yakuhai_place)
 
                     if round_wind == NORTH:
                         hand_yaku.append(self.config.yakuhai_round)
 
-                if self.is_daisangen(hand):
+                if self.config.daisangen.is_condition_met(hand):
                     hand_yaku.append(self.config.daisangen)
 
-                if self.is_shosuushi(hand):
+                if self.config.shosuushi.is_condition_met(hand):
                     hand_yaku.append(self.config.shosuushi)
 
-                if self.is_daisuushi(hand):
+                if self.config.daisuushi.is_condition_met(hand):
                     hand_yaku.append(self.config.daisuushi)
 
-                if self.is_ryuisou(hand):
+                if self.config.ryuisou.is_condition_met(hand):
                     hand_yaku.append(self.config.ryuisou)
 
-                if not is_open_hand and self.is_chuuren_poutou(hand):
+                if not is_open_hand and self.config.chuuren_poutou.is_condition_met(hand):
                     if tiles_34[win_tile // 4] == 2:
                         hand_yaku.append(self.config.daburu_chuuren_poutou)
                     else:
                         hand_yaku.append(self.config.chuuren_poutou)
 
-                if not is_open_hand and self.is_suuankou(win_tile, hand, is_tsumo):
+                if not is_open_hand and self.config.suuankou.is_condition_met(hand, win_tile, is_tsumo):
                     if tiles_34[win_tile // 4] == 2:
                         hand_yaku.append(self.config.suuankou_tanki)
                     else:
                         hand_yaku.append(self.config.suuankou)
 
-                if self.is_sankantsu(melds):
+                if self.config.sankantsu.is_condition_met(hand, melds):
                     hand_yaku.append(self.config.sankantsu)
 
-                if self.is_suukantsu(melds):
+                if self.config.suukantsu.is_condition_met(hand, melds):
                     hand_yaku.append(self.config.suukantsu)
 
             # chitoitsu is always 25 fu
@@ -402,11 +402,12 @@ class FinishedHand(object):
             calculated_hands.append(calculated_hand)
 
         # exception hand
-        if not is_open_hand and self.is_kokushi(tiles_34):
+        if not is_open_hand and self.config.kokushi.is_condition_met(None, tiles_34):
             if tiles_34[win_tile // 4] == 2:
                 han = self.config.daburu_kokushi.han_closed
             else:
                 han = self.config.kokushi.han_closed
+
             fu = 0
             cost = scores_calculator.calculate_scores(han, fu, is_tsumo, is_dealer)
             calculated_hands.append({
@@ -428,262 +429,3 @@ class FinishedHand(object):
         fu = calculated_hand['fu']
 
         return return_response()
-
-    def is_chitoitsu(self, hand):
-        """
-        Hand contains only pairs
-        :param hand: list of hand's sets
-        :return: boolean
-        """
-        return len(hand) == 7
-
-    def is_sankantsu(self, melds):
-        """
-        The hand with three kan sets
-        :param melds: array of Meld objects
-        :return: boolean
-        """
-        kan_sets = [x for x in melds if x.type == Meld.KAN]
-        return len(kan_sets) == 3
-
-    def is_east(self, hand, player_wind, round_wind):
-        """
-        Pon of east winds
-        :param hand: list of hand's sets
-        :param player_wind: index of player wind
-        :param round_wind: index of round wind
-        :return: boolean
-        """
-
-        if len([x for x in hand if is_pon(x) and x[0] == player_wind]) == 1 and player_wind == EAST:
-            return True
-
-        if len([x for x in hand if is_pon(x) and x[0] == round_wind]) == 1 and round_wind == EAST:
-            return True
-
-        return False
-
-    def is_south(self, hand, player_wind, round_wind):
-        """
-        Pon of south winds
-        :param hand: list of hand's sets
-        :param player_wind: index of player wind
-        :param round_wind: index of round wind
-        :return: boolean
-        """
-
-        if len([x for x in hand if is_pon(x) and x[0] == player_wind]) == 1 and player_wind == SOUTH:
-            return True
-
-        if len([x for x in hand if is_pon(x) and x[0] == round_wind]) == 1 and round_wind == SOUTH:
-            return True
-
-        return False
-
-    def is_west(self, hand, player_wind, round_wind):
-        """
-        Pon of west winds
-        :param hand: list of hand's sets
-        :param player_wind: index of player wind
-        :param round_wind: index of round wind
-        :return: boolean
-        """
-
-        if len([x for x in hand if is_pon(x) and x[0] == player_wind]) == 1 and player_wind == WEST:
-            return True
-
-        if len([x for x in hand if is_pon(x) and x[0] == round_wind]) == 1 and round_wind == WEST:
-            return True
-
-        return False
-
-    def is_north(self, hand, player_wind, round_wind):
-        """
-        Pon of north winds
-        :param hand: list of hand's sets
-        :param player_wind: index of player wind
-        :param round_wind: index of round wind
-        :return: boolean
-        """
-
-        if len([x for x in hand if is_pon(x) and x[0] == player_wind]) == 1 and player_wind == NORTH:
-            return True
-
-        if len([x for x in hand if is_pon(x) and x[0] == round_wind]) == 1 and round_wind == NORTH:
-            return True
-
-        return False
-
-    def is_daisangen(self, hand):
-        """
-        The hand contains three sets of dragons
-        :param hand: list of hand's sets
-        :return: boolean
-        """
-        count_of_dragon_pon_sets = 0
-        for item in hand:
-            if is_pon(item) and item[0] in [CHUN, HAKU, HATSU]:
-                count_of_dragon_pon_sets += 1
-        return count_of_dragon_pon_sets == 3
-
-    def is_shosuushi(self, hand):
-        """
-        The hand contains three sets of winds and a pair of the remaining wind.
-        :param hand: list of hand's sets
-        :return: boolean
-        """
-        pon_sets = [x for x in hand if is_pon(x)]
-        if len(pon_sets) < 3:
-            return False
-
-        count_of_wind_sets = 0
-        wind_pair = 0
-        winds = [EAST, SOUTH, WEST, NORTH]
-        for item in hand:
-            if is_pon(item) and item[0] in winds:
-                count_of_wind_sets += 1
-
-            if is_pair(item) and item[0] in winds:
-                wind_pair += 1
-
-        return count_of_wind_sets == 3 and wind_pair == 1
-
-    def is_daisuushi(self, hand):
-        """
-        The hand contains four sets of winds
-        :param hand: list of hand's sets
-        :return: boolean
-        """
-        pon_sets = [x for x in hand if is_pon(x)]
-        if len(pon_sets) != 4:
-            return False
-
-        count_wind_sets = 0
-        winds = [EAST, SOUTH, WEST, NORTH]
-        for item in pon_sets:
-            if is_pon(item) and item[0] in winds:
-                count_wind_sets += 1
-
-        return count_wind_sets == 4
-
-    def is_tsuisou(self, hand):
-        """
-        Hand composed entirely of honour tiles.
-        :param hand: list of hand's sets
-        :return: boolean
-        """
-        indices = reduce(lambda z, y: z + y, hand)
-        return all(x in HONOR_INDICES for x in indices)
-
-    def is_chinroto(self, hand):
-        """
-        Hand composed entirely of terminal tiles.
-        :param hand: list of hand's sets
-        :return: boolean
-        """
-        indices = reduce(lambda z, y: z + y, hand)
-        return all(x in TERMINAL_INDICES for x in indices)
-
-    def is_kokushi(self, tiles_34):
-        """
-        A hand composed of one of each of the terminals and honour tiles plus
-        any tile that matches anything else in the hand.
-        :param tiles_34:
-        :return: boolean
-        """
-        if (tiles_34[0] * tiles_34[8] * tiles_34[9] * tiles_34[17] * tiles_34[18] *
-                tiles_34[26] * tiles_34[27] * tiles_34[28] * tiles_34[29] * tiles_34[30] *
-                tiles_34[31] * tiles_34[32] * tiles_34[33] == 2):
-            return True
-
-    def is_ryuisou(self, hand):
-        """
-        Hand composed entirely of green tiles. Green tiles are: green dragons and 2, 3, 4, 6 and 8 of sou.
-        :param hand: list of hand's sets
-        :return: boolean
-        """
-        green_indices = [19, 20, 21, 23, 25, HATSU]
-        indices = reduce(lambda z, y: z + y, hand)
-        return all(x in green_indices for x in indices)
-
-    def is_suuankou(self, win_tile, hand, is_tsumo):
-        """
-        Four closed pon sets
-        :param win_tile: 136 tiles format
-        :param hand: list of hand's sets
-        :param is_tsumo:
-        :return: boolean
-        """
-        win_tile //= 4
-        closed_hand = []
-        for item in hand:
-            # if we do the ron on syanpon wait our pon will be consider as open
-            if is_pon(item) and win_tile in item and not is_tsumo:
-                continue
-
-            closed_hand.append(item)
-
-        count_of_pon = len([i for i in closed_hand if is_pon(i)])
-        return count_of_pon == 4
-
-    def is_chuuren_poutou(self, hand):
-        """
-        The hand contains 1-1-1-2-3-4-5-6-7-8-9-9-9 of one suit, plus any other tile of the same suit.
-        :param hand: list of hand's sets
-        :return: boolean
-        """
-
-        sou_sets = 0
-        pin_sets = 0
-        man_sets = 0
-        honor_sets = 0
-        for item in hand:
-            if is_sou(item[0]):
-                sou_sets += 1
-            elif is_pin(item[0]):
-                pin_sets += 1
-            elif is_man(item[0]):
-                man_sets += 1
-            else:
-                honor_sets += 1
-
-        sets = [sou_sets, pin_sets, man_sets]
-        only_one_suit = len([x for x in sets if x != 0]) == 1
-        if not only_one_suit or honor_sets > 0:
-            return False
-
-        indices = reduce(lambda z, y: z + y, hand)
-        # cast tile indices to 0..8 representation
-        indices = [simplify(x) for x in indices]
-
-        # 1-1-1
-        if len([x for x in indices if x == 0]) < 3:
-            return False
-
-        # 9-9-9
-        if len([x for x in indices if x == 8]) < 3:
-            return False
-
-        # 1-2-3-4-5-6-7-8-9 and one tile to any of them
-        indices.remove(0)
-        indices.remove(0)
-        indices.remove(8)
-        indices.remove(8)
-        for x in range(0, 9):
-            if x in indices:
-                indices.remove(x)
-
-        if len(indices) == 1:
-            return True
-
-        return False
-
-    def is_suukantsu(self, melds):
-        """
-        The hand with four kan sets
-        :param melds: array of Meld objects
-        :return: boolean
-        """
-        kan_sets = [x for x in melds if x.type == Meld.KAN]
-        return len(kan_sets) == 4
-

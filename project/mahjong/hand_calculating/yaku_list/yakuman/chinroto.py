@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+from functools import reduce
+
+from mahjong.constants import TERMINAL_INDICES
 from mahjong.hand_calculating.yaku import Yaku
 
 
@@ -14,4 +17,10 @@ class Chinroutou(Yaku):
         self.is_yakuman = True
 
     def is_condition_met(self, hand, *args):
-        return True
+        """
+        Hand composed entirely of terminal tiles.
+        :param hand: list of hand's sets
+        :return: boolean
+        """
+        indices = reduce(lambda z, y: z + y, hand)
+        return all(x in TERMINAL_INDICES for x in indices)

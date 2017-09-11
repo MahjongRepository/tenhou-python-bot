@@ -3,6 +3,9 @@ from mahjong.hand_calculating.yaku import Yaku
 
 
 class Chiitoitsu(Yaku):
+    """
+    Hand contains only pairs
+    """
 
     def set_attributes(self):
         self.yaku_id = 22
@@ -14,5 +17,4 @@ class Chiitoitsu(Yaku):
         self.is_yakuman = False
 
     def is_condition_met(self, hand, *args):
-        # was it here or not is controlling by superior code
-        return True
+        return len(hand) == 7

@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 from mahjong.hand_calculating.yaku_list import *
+from mahjong.hand_calculating.yaku_list.east import YakuhaiEast
+from mahjong.hand_calculating.yaku_list.north import YakuhaiNorth
+from mahjong.hand_calculating.yaku_list.south import YakuhaiSouth
+from mahjong.hand_calculating.yaku_list.west import YakuhaiWest
 from mahjong.hand_calculating.yaku_list.yakuman import *
 
 
@@ -23,6 +27,11 @@ class YakuConfig(object):
     haku = Haku()
     hatsu = Hatsu()
     chun = Chun()
+
+    east = YakuhaiEast()
+    south = YakuhaiSouth()
+    west = YakuhaiWest()
+    north = YakuhaiNorth()
     yakuhai_place = YakuhaiOfPlace()
     yakuhai_round = YakuhaiOfRound()
 

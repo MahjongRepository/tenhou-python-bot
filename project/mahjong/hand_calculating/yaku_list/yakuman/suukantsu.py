@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from mahjong.hand_calculating.yaku import Yaku
+from mahjong.meld import Meld
 
 
 class Suukantsu(Yaku):
+    """
+    The hand with four kan sets
+    """
 
     def set_attributes(self):
         self.yaku_id = 51
@@ -13,5 +17,6 @@ class Suukantsu(Yaku):
 
         self.is_yakuman = True
 
-    def is_condition_met(self, hand, *args):
-        return True
+    def is_condition_met(self, hand, melds, *args):
+        kan_sets = [x for x in melds if x.type == Meld.KAN]
+        return len(kan_sets) == 4

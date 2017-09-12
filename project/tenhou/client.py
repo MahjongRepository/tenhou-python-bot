@@ -549,12 +549,12 @@ class TenhouClient(Client):
         if is_hirosima:
             return False
 
-        settings.FIVE_REDS = is_aka
-        settings.OPEN_TANYAO = is_open_tanyao
+        self.table.has_aka_dora = is_aka
+        self.table.has_open_tanyao = is_open_tanyao
 
         logger.info('Game settings:')
-        logger.info('Aka dora: {}'.format(settings.FIVE_REDS))
-        logger.info('Open tanyao: {}'.format(settings.OPEN_TANYAO))
+        logger.info('Aka dora: {}'.format(self.table.has_aka_dora))
+        logger.info('Open tanyao: {}'.format(self.table.has_open_tanyao))
         logger.info('Game type: {}'.format(is_hanchan and 'hanchan' or 'tonpusen'))
 
         return True

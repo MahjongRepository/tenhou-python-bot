@@ -392,9 +392,14 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
 
 
 class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
+    
+    def _make_table(self):
+        table = Table()
+        table.has_open_tanyao = True
+        return table
 
     def test_should_activate_strategy_and_terminal_pon_sets(self):
-        table = Table()
+        table = self._make_table()
         player = table.player
         strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
 
@@ -411,7 +416,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(strategy.should_activate_strategy(), True)
 
     def test_should_activate_strategy_and_terminal_pairs(self):
-        table = Table()
+        table = self._make_table()
         player = table.player
         strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
 
@@ -424,7 +429,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(strategy.should_activate_strategy(), True)
 
     def test_should_activate_strategy_and_valued_pair(self):
-        table = Table()
+        table = self._make_table()
         player = table.player
         strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
 
@@ -437,7 +442,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(strategy.should_activate_strategy(), True)
 
     def test_should_activate_strategy_and_chitoitsu_like_hand(self):
-        table = Table()
+        table = self._make_table()
         player = table.player
         strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
 
@@ -446,7 +451,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(strategy.should_activate_strategy(), False)
 
     def test_should_activate_strategy_and_already_completed_sided_set(self):
-        table = Table()
+        table = self._make_table()
         player = table.player
         strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
 
@@ -479,7 +484,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(strategy.should_activate_strategy(), True)
 
     def test_suitable_tiles(self):
-        table = Table()
+        table = self._make_table()
         player = table.player
         strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
 
@@ -508,7 +513,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(strategy.is_tile_suitable(tile), True)
 
     def test_dont_open_hand_with_high_shanten(self):
-        table = Table()
+        table = self._make_table()
         player = table.player
 
         # with 4 shanten we don't need to aim for open tanyao
@@ -526,7 +531,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertNotEqual(meld, None)
 
     def test_dont_open_hand_with_not_suitable_melds(self):
-        table = Table()
+        table = self._make_table()
         player = table.player
 
         tiles = self._string_to_136_array(man='33355788', sou='3479', honors='3')
@@ -536,7 +541,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(meld, None)
 
     def test_open_hand_and_discard_tiles_logic(self):
-        table = Table()
+        table = self._make_table()
         player = table.player
 
         # 2345779m1p256s44z
@@ -559,7 +564,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(self._to_string([tile_to_discard]), '4z')
 
     def test_dont_count_pairs_in_already_opened_hand(self):
-        table = Table()
+        table = self._make_table()
         player = table.player
 
         meld = self._make_meld(Meld.PON, sou='222')
@@ -574,7 +579,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertNotEqual(meld, None)
 
     def test_we_cant_win_with_this_hand(self):
-        table = Table()
+        table = self._make_table()
 
         tiles = self._string_to_136_array(man='34577', sou='23', pin='233445')
         table.player.init_hand(tiles)
@@ -590,7 +595,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(self._to_string([discard]), '1s')
 
     def test_choose_correct_waiting(self):
-        table = Table()
+        table = self._make_table()
         player = table.player
 
         tiles = self._string_to_136_array(man='234678', sou='234', pin='3588')
@@ -601,7 +606,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         discard = player.discard_tile()
         self.assertEqual(self._to_string([discard]), '5p')
 
-        table = Table()
+        table = self._make_table()
         player = table.player
 
         meld = self._make_meld(Meld.CHI, man='234')
@@ -616,7 +621,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         discard = player.discard_tile()
         self.assertEqual(self._to_string([discard]), '2p')
 
-        table = Table()
+        table = table = self._make_table()
         player = table.player
 
         meld = self._make_meld(Meld.CHI, man='234')

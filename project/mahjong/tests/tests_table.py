@@ -156,8 +156,6 @@ class TableTestCase(unittest.TestCase, TestMixin):
         table.dora_indicators = [self._string_to_136_tile(pin='1')]
         self.assertFalse(table.is_dora(self._string_to_136_tile(sou='2')))
 
-        settings.FIVE_REDS = True
-
         # red five man
         self.assertTrue(table.is_dora(FIVE_RED_MAN))
 
@@ -166,8 +164,6 @@ class TableTestCase(unittest.TestCase, TestMixin):
 
         # red five sou
         self.assertTrue(table.is_dora(FIVE_RED_SOU))
-
-        settings.FIVE_REDS = False
 
     def test_round_wind(self):
         table = Table()

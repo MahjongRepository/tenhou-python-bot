@@ -48,7 +48,7 @@ class DiscardOption(object):
         Find and return 136 tile in closed player hand
         """
 
-        if settings.FIVE_REDS:
+        if self.player.table.has_aka_dora:
             # special case, to keep aka dora in hand
             if self.tile_to_discard in [4, 13, 22]:
                 aka_closed_hand = closed_hand[:]
@@ -88,7 +88,9 @@ class DiscardOption(object):
             simplified_tile = simplify(self.tile_to_discard)
             value += suit_tile_grades[simplified_tile]
 
-        count_of_dora = plus_dora(self.tile_to_discard * 4, self.player.table.dora_indicators)
+        count_of_dora = plus_dora(self.tile_to_discard * 4,
+                                  self.player.table.dora_indicators,
+                                  self.player.table.has_aka_dora)
         value += 50 * count_of_dora
 
         if is_honor(self.tile_to_discard):

@@ -27,6 +27,9 @@ class Table(object):
 
     previous_ai = False
 
+    has_open_tanyao = False
+    has_aka_dora = False
+
     def __init__(self, previous_ai=False):
         self.previous_ai = previous_ai
 

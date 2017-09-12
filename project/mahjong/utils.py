@@ -7,8 +7,6 @@ def is_aka_dora(tile):
     :param tile: int 136 tiles format
     :return: boolean
     """
-    if not settings.FIVE_REDS:
-        return False
 
     if tile in [FIVE_RED_MAN, FIVE_RED_PIN, FIVE_RED_SOU]:
         return True

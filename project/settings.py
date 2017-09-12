@@ -49,11 +49,6 @@ ENABLE_AI = True
 # GAME_TYPE = None
 GAME_TYPE = '1'
 
-# game related settings
-# TODO put them to the separate settings files
-FIVE_REDS = True
-OPEN_TANYAO = True
-
 try:
     from settings_local import *
 except ImportError:

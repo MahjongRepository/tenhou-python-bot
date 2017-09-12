@@ -101,6 +101,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
     def test_call_riichi_with_good_wait_against_other_player_riichi(self):
         table = Table()
+        table.has_aka_dora = True
         table.count_of_remaining_tiles = 60
         table.player.scores = 25000
 
@@ -136,6 +137,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         When we have 14 tiles in hand and someone declared a riichi
         """
         table = Table()
+        table.has_aka_dora = True
 
         tiles = self._string_to_136_array(sou='2223457899', honors='666')
         table.player.init_hand(tiles)

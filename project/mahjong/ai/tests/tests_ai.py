@@ -60,6 +60,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         Based on real examples of incorrect opened hands
         """
         table = Table()
+        table.has_open_tanyao = True
         player = table.player
 
         tiles = self._string_to_136_array(man='23455', pin='3445678', honors='1')
@@ -83,6 +84,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         self.assertEqual(self._to_string(meld.tiles), '345m')
 
         table = Table()
+        table.has_open_tanyao = True
         player = table.player
         tiles = self._string_to_136_array(man='23557', pin='556788', honors='22')
         player.init_hand(tiles)
@@ -117,6 +119,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
     def test_chose_strategy_and_reset_strategy(self):
         table = Table()
+        table.has_open_tanyao = True
         player = table.player
 
         tiles = self._string_to_136_array(man='33355788', sou='3479', honors='3')

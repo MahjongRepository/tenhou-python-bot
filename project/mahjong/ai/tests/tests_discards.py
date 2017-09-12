@@ -39,8 +39,6 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(player.ai.previous_shanten, 0)
 
     def test_calculate_suit_tiles_value(self):
-        settings.FIVE_REDS = False
-
         table = Table()
         player = table.player
 
@@ -64,8 +62,6 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
             value = item[1]
             option = DiscardOption(player, tile, 0, [], 0)
             self.assertEqual(option.valuation, value)
-
-        settings.FIVE_REDS = True
 
     def test_calculate_honor_tiles_value(self):
         table = Table()
@@ -148,6 +144,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
     def test_keep_aka_dora_in_hand(self):
         table = Table()
         table.dora_indicators = [self._string_to_136_tile(pin='1')]
+        table.has_aka_dora = True
         player = table.player
 
         tiles = self._string_to_136_array(sou='12346', pin='34578', man='99')

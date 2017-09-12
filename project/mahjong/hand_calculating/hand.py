@@ -53,7 +53,9 @@ class FinishedHand(object):
                             melds=None,
                             dora_indicators=None,
                             player_wind=None,
-                            round_wind=None):
+                            round_wind=None,
+                            has_open_tanyao=False,
+                            has_aka_dora=False):
         """
         :param tiles: array with 14 tiles in 136-tile format
         :param win_tile: tile that caused win (ron or tsumo)
@@ -70,6 +72,8 @@ class FinishedHand(object):
         :param is_chiihou:
         :param is_daburu_riichi:
         :param is_nagashi_mangan:
+        :param has_open_tanyao:
+        :param has_aka_dora:
         :param melds: array with Meld objects
         :param dora_indicators: array of tiles in 136-tile format
         :param player_wind: index of player wind
@@ -173,7 +177,7 @@ class FinishedHand(object):
                 hand_yaku.append(self.config.chiitoitsu)
 
             is_tanyao = self.config.tanyao.is_condition_met(hand)
-            if is_open_hand and not settings.OPEN_TANYAO:
+            if is_open_hand and not has_open_tanyao:
                 is_tanyao = False
 
             if is_tanyao:
@@ -353,7 +357,7 @@ class FinishedHand(object):
                 count_of_dora = 0
                 count_of_aka_dora = 0
                 for tile in tiles_for_dora:
-                    count_of_dora += plus_dora(tile, dora_indicators)
+                    count_of_dora += plus_dora(tile, dora_indicators, has_aka_dora)
 
                 if count_of_dora:
                     yaku_item = self.config.dora

@@ -58,7 +58,7 @@ class DefenceHandler(object):
 
         if shanten == 1:
             # TODO calculate all possible hand costs for 1-2 shanten
-            dora_count = sum([plus_dora(x, self.table.dora_indicators) for x in self.player.tiles])
+            dora_count = sum([plus_dora(x, self.table.dora_indicators, self.table.has_aka_dora) for x in self.player.tiles])
             # we had 3+ dora in our almost done hand,
             # we can try to push it
             if dora_count >= 3:

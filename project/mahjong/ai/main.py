@@ -168,7 +168,7 @@ class MainAI(BaseAI):
             HonitsuStrategy(BaseStrategy.HONITSU, self.player),
         ]
 
-        if settings.OPEN_TANYAO:
+        if self.player.table.has_open_tanyao:
             strategies.append(TanyaoStrategy(BaseStrategy.TANYAO, self.player))
 
         for strategy in strategies:
@@ -263,7 +263,9 @@ class MainAI(BaseAI):
                                                         melds=self.player.melds,
                                                         player_wind=self.player.player_wind,
                                                         round_wind=self.player.table.round_wind,
-                                                        dora_indicators=self.player.table.dora_indicators)
+                                                        dora_indicators=self.player.table.dora_indicators,
+                                                        has_aka_dora=self.player.table.has_aka_dora,
+                                                        has_open_tanyao=self.player.table.has_open_tanyao)
         return result
 
     def should_call_riichi(self):

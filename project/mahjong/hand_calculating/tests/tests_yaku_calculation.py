@@ -11,12 +11,8 @@ from utils.tests import TestMixin
 
 class YakuCalculationTestCase(unittest.TestCase, TestMixin):
 
-    def setUp(self):
-        settings.FIVE_REDS = False
-
-    def tearDown(self):
-        settings.FIVE_REDS = False
-        settings.OPEN_TANYAO = True
+    # def setUp(self):
+    #     self.has_open_tanyao = False
 
     def test_fu_calculation(self):
         hand = FinishedHand()
@@ -574,8 +570,6 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(len(result.yaku), 1)
 
     def test_is_tanyao(self):
-        settings.FIVE_REDS = False
-
         hand = FinishedHand()
 
         tiles = self._string_to_34_array(sou='234567', man='234567', pin='22')
@@ -599,21 +593,17 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(sou='234567', man='234567', pin='22')
         win_tile = self._string_to_136_tile(man='7')
         melds = [self._make_meld(Meld.CHI, sou='234')]
-        result = hand.estimate_hand_value(tiles, win_tile, melds=melds)
+        result = hand.estimate_hand_value(tiles, win_tile, melds=melds, has_open_tanyao=True)
         self.assertEqual(result.error, None)
         self.assertEqual(result.han, 1)
         self.assertEqual(result.fu, 30)
         self.assertEqual(len(result.yaku), 1)
 
-        settings.OPEN_TANYAO = False
-
         tiles = self._string_to_136_array(sou='234567', man='234567', pin='22')
         win_tile = self._string_to_136_tile(man='7')
         melds = [self._make_meld(Meld.CHI, sou='234')]
-        result = hand.estimate_hand_value(tiles, win_tile, melds=melds)
+        result = hand.estimate_hand_value(tiles, win_tile, melds=melds, has_open_tanyao=False)
         self.assertNotEqual(result.error, None)
-
-        settings.OPEN_TANYAO = True
 
     def test_is_pinfu_hand(self):
         player_wind, round_wind = EAST, WEST
@@ -1207,8 +1197,6 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(len(result.yaku), 2)
 
     def test_dora_in_hand(self):
-        settings.FIVE_REDS = False
-
         hand = FinishedHand()
 
         # hand without yaku, but with dora should be consider as invalid
@@ -1259,20 +1247,17 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(result.fu, 40)
         self.assertEqual(len(result.yaku), 2)
 
-        settings.FIVE_REDS = True
-
         # double dora indicators and red fives
         tiles = self._string_to_136_array(sou='12346', man='123678', pin='44')
         win_tile = self._string_to_136_tile(pin='4')
         tiles.append(FIVE_RED_SOU)
         dora_indicators = [self._string_to_136_tile(pin='2'), self._string_to_136_tile(pin='2')]
-        result = hand.estimate_hand_value(tiles, win_tile, dora_indicators=dora_indicators, is_tsumo=True)
+        result = hand.estimate_hand_value(tiles, win_tile, dora_indicators=dora_indicators, is_tsumo=True,
+                                          has_aka_dora=True)
         self.assertEqual(result.error, None)
         self.assertEqual(result.han, 2)
         self.assertEqual(result.fu, 30)
         self.assertEqual(len(result.yaku), 2)
-
-        settings.FIVE_REDS = False
 
         # dora in kan
         tiles = self._string_to_136_array(man='777', pin='34577', sou='123345')

@@ -23,3 +23,7 @@ class Meld(object):
     # for calls in array
     def __repr__(self):
         return self.__str__()
+
+    @property
+    def tiles_34(self):
+        return [x // 4 for x in self.tiles[:3]]

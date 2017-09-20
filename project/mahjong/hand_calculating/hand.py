@@ -84,8 +84,9 @@ class FinishedHand(object):
         if not melds:
             melds = []
 
-        opened_melds = [x for x in melds if x.opened]
+        opened_melds = [x.tiles_34 for x in melds if x.opened]
         is_open_hand = len(opened_melds) > 0
+        win_tile_34 = (win_tile or 0) // 4
 
         # TODO Deprecated. Change it to melds in all places
         called_kan_indices = []
@@ -94,10 +95,6 @@ class FinishedHand(object):
             if meld.type == Meld.KAN or meld.type == Meld.CHANKAN:
                 called_kan_indices.append(meld.tiles[0] // 4)
                 kan_indices_136 = [meld.tiles[0]]
-
-        open_sets_34 = []
-        for meld in opened_melds:
-            open_sets_34.append([x // 4 for x in meld.tiles[:3]])
 
         if not dora_indicators:
             dora_indicators = []
@@ -130,260 +127,262 @@ class FinishedHand(object):
         divider = HandDivider()
         fu_calculator = HandFuCalculator()
 
-        if not agari.is_agari(tiles_34, open_sets_34):
+        if not agari.is_agari(tiles_34, opened_melds):
             return HandResponse(error='Hand is not winning')
 
-        hand_options = divider.divide_hand(tiles_34, open_sets_34, called_kan_indices)
+        hand_options = divider.divide_hand(tiles_34, opened_melds, called_kan_indices)
 
         calculated_hands = []
         for hand in hand_options:
             is_chitoitsu = self.config.chiitoitsu.is_condition_met(hand)
+            valued_tiles = [HAKU, HATSU, CHUN, player_wind, round_wind]
 
-            cost = None
-            error = None
-            hand_yaku = []
-            han = 0
-            fu = fu_calculator.calculate_fu(hand,
-                                            is_tsumo,
-                                            is_open_hand,
-                                            win_tile,
-                                            player_wind,
-                                            round_wind,
-                                            open_sets_34,
-                                            called_kan_indices,
-                                            is_chitoitsu)
-            is_pinfu = False
-            if not is_open_hand:
-                if fu == 20 and is_tsumo:
-                    is_pinfu = True
-                if fu == 30 and not is_tsumo:
-                    is_pinfu = True
-
-            pon_sets = [x for x in hand if is_pon(x)]
-            chi_sets = [x for x in hand if is_chi(x)]
-
-            if is_tsumo:
-                if not is_open_hand:
-                    hand_yaku.append(self.config.tsumo)
-
-            if is_pinfu:
-                hand_yaku.append(self.config.pinfu)
-
-            # let's skip hand that looks like chitoitsu, but it contains open sets
-            if is_chitoitsu and is_open_hand:
-                continue
-
-            if is_chitoitsu:
-                hand_yaku.append(self.config.chiitoitsu)
-
-            is_tanyao = self.config.tanyao.is_condition_met(hand)
-            if is_open_hand and not has_open_tanyao:
-                is_tanyao = False
-
-            if is_tanyao:
-                hand_yaku.append(self.config.tanyao)
-
-            if is_riichi and not is_daburu_riichi:
-                hand_yaku.append(self.config.riichi)
-
-            if is_daburu_riichi:
-                hand_yaku.append(self.config.daburu_riichi)
-
-            if is_ippatsu:
-                hand_yaku.append(self.config.ippatsu)
-
-            if is_rinshan:
-                hand_yaku.append(self.config.rinshan)
-
-            if is_chankan:
-                hand_yaku.append(self.config.chankan)
-
-            if is_haitei:
-                hand_yaku.append(self.config.haitei)
-
-            if is_houtei:
-                hand_yaku.append(self.config.houtei)
-
-            if is_renhou:
-                hand_yaku.append(self.config.renhou)
-
-            if is_tenhou:
-                hand_yaku.append(self.config.tenhou)
-
-            if is_chiihou:
-                hand_yaku.append(self.config.chiihou)
-
-            if self.config.honitsu.is_condition_met(hand):
-                hand_yaku.append(self.config.honitsu)
-
-            if self.config.chinitsu.is_condition_met(hand):
-                hand_yaku.append(self.config.chinitsu)
-
-            if self.config.tsuisou.is_condition_met(hand):
-                hand_yaku.append(self.config.tsuisou)
-
-            if self.config.honroto.is_condition_met(hand):
-                hand_yaku.append(self.config.honroto)
-
-            if self.config.chinroto.is_condition_met(hand):
-                hand_yaku.append(self.config.chinroto)
-
-            # small optimization, try to detect yaku with chi required sets only if we have chi sets in hand
-            if len(chi_sets):
-                if self.config.chanta.is_condition_met(hand):
-                    hand_yaku.append(self.config.chanta)
-
-                if self.config.junchan.is_condition_met(hand):
-                    hand_yaku.append(self.config.junchan)
-
-                if self.config.ittsu.is_condition_met(hand):
-                    hand_yaku.append(self.config.ittsu)
-
-                if not is_open_hand:
-                    if self.config.ryanpeiko.is_condition_met(hand):
-                        hand_yaku.append(self.config.ryanpeiko)
-                    elif self.config.iipeiko.is_condition_met(hand):
-                        hand_yaku.append(self.config.iipeiko)
-
-                if self.config.sanshoku.is_condition_met(hand):
-                    hand_yaku.append(self.config.sanshoku)
-
-            # small optimization, try to detect yaku with pon required sets only if we have pon sets in hand
-            if len(pon_sets):
-                if self.config.toitoi.is_condition_met(hand):
-                    hand_yaku.append(self.config.toitoi)
-
-                if self.config.sanankou.is_condition_met(hand, win_tile, open_sets_34, is_tsumo):
-                    hand_yaku.append(self.config.sanankou)
-
-                if self.config.sanshoku_douko.is_condition_met(hand):
-                    hand_yaku.append(self.config.sanshoku_douko)
-
-                if self.config.shosangen.is_condition_met(hand):
-                    hand_yaku.append(self.config.shosangen)
-
-                if self.config.haku.is_condition_met(hand):
-                    hand_yaku.append(self.config.haku)
-
-                if self.config.hatsu.is_condition_met(hand):
-                    hand_yaku.append(self.config.hatsu)
-
-                if self.config.chun.is_condition_met(hand):
-                    hand_yaku.append(self.config.hatsu)
-
-                if self.config.east.is_condition_met(hand, player_wind, round_wind):
-                    if player_wind == EAST:
-                        hand_yaku.append(self.config.yakuhai_place)
-
-                    if round_wind == EAST:
-                        hand_yaku.append(self.config.yakuhai_round)
-
-                if self.config.south.is_condition_met(hand, player_wind, round_wind):
-                    if player_wind == SOUTH:
-                        hand_yaku.append(self.config.yakuhai_place)
-
-                    if round_wind == SOUTH:
-                        hand_yaku.append(self.config.yakuhai_round)
-
-                if self.config.west.is_condition_met(hand, player_wind, round_wind):
-                    if player_wind == WEST:
-                        hand_yaku.append(self.config.yakuhai_place)
-
-                    if round_wind == WEST:
-                        hand_yaku.append(self.config.yakuhai_round)
-
-                if self.config.north.is_condition_met(hand, player_wind, round_wind):
-                    if player_wind == NORTH:
-                        hand_yaku.append(self.config.yakuhai_place)
-
-                    if round_wind == NORTH:
-                        hand_yaku.append(self.config.yakuhai_round)
-
-                if self.config.daisangen.is_condition_met(hand):
-                    hand_yaku.append(self.config.daisangen)
-
-                if self.config.shosuushi.is_condition_met(hand):
-                    hand_yaku.append(self.config.shosuushi)
-
-                if self.config.daisuushi.is_condition_met(hand):
-                    hand_yaku.append(self.config.daisuushi)
-
-                if self.config.ryuisou.is_condition_met(hand):
-                    hand_yaku.append(self.config.ryuisou)
-
-                if not is_open_hand and self.config.chuuren_poutou.is_condition_met(hand):
-                    if tiles_34[win_tile // 4] == 2:
-                        hand_yaku.append(self.config.daburu_chuuren_poutou)
-                    else:
-                        hand_yaku.append(self.config.chuuren_poutou)
-
-                if not is_open_hand and self.config.suuankou.is_condition_met(hand, win_tile, is_tsumo):
-                    if tiles_34[win_tile // 4] == 2:
-                        hand_yaku.append(self.config.suuankou_tanki)
-                    else:
-                        hand_yaku.append(self.config.suuankou)
-
-                if self.config.sankantsu.is_condition_met(hand, melds):
-                    hand_yaku.append(self.config.sankantsu)
-
-                if self.config.suukantsu.is_condition_met(hand, melds):
-                    hand_yaku.append(self.config.suukantsu)
-
-            # yakuman is not connected with other yaku
-            yakuman_list = [x for x in hand_yaku if x.is_yakuman]
-            if yakuman_list:
-                hand_yaku = yakuman_list
-
-            # calculate han
-            for item in hand_yaku:
-                if is_open_hand and item.han_open:
-                    han += item.han_open
+            # to detect win groups
+            # we had to use only closed sets
+            # and we had to filter sets that in open hand
+            copied_opened_melds = opened_melds[:]
+            closed_set_items = []
+            for x in hand:
+                if x not in copied_opened_melds:
+                    closed_set_items.append(x)
                 else:
-                    han += item.han_closed
+                    copied_opened_melds.remove(x)
 
-            # round up
-            # 22 -> 30 and etc.
-            if not is_chitoitsu:
-                fu = int(math.ceil(fu / 10.0)) * 10
-
-            if han == 0 or (han == 1 and fu < 30):
-                error = 'Not valid han ({0}) and fu ({1})'.format(han, fu)
+            # for forms like 45666 and ron on 6
+            # we can assume that ron was on 456 form and on 66 form
+            # and depends on form we will have different hand cost
+            win_groups = [x for x in closed_set_items if win_tile_34 in x]
+            for win_group in win_groups:
                 cost = None
+                error = None
+                hand_yaku = []
+                han = 0
 
-            # we can add dora han only if we have other yaku in hand
-            # and if we don't have yakuman
-            if not yakuman_list:
-                tiles_for_dora = tiles + kan_indices_136
-                count_of_dora = 0
-                count_of_aka_dora = 0
-                for tile in tiles_for_dora:
-                    count_of_dora += plus_dora(tile, dora_indicators, has_aka_dora)
+                fu_details, fu = fu_calculator.calculate_fu(hand, win_tile, win_group, is_tsumo, valued_tiles, melds)
+                is_pinfu = len(fu_details) == 1 and not is_chitoitsu
 
-                if count_of_dora:
-                    yaku_item = self.config.dora
-                    yaku_item.han_open = count_of_dora
-                    yaku_item.han_closed = count_of_dora
-                    hand_yaku.append(yaku_item)
-                    han += count_of_dora
+                pon_sets = [x for x in hand if is_pon(x)]
+                chi_sets = [x for x in hand if is_chi(x)]
 
-                if count_of_aka_dora:
-                    yaku_item = self.config.aka_dora
-                    yaku_item.han_open = count_of_aka_dora
-                    yaku_item.han_closed = count_of_aka_dora
-                    hand_yaku.append(yaku_item)
-                    han += count_of_aka_dora
+                if is_tsumo:
+                    if not is_open_hand:
+                        hand_yaku.append(self.config.tsumo)
 
-            if not error:
-                cost = scores_calculator.calculate_scores(han, fu, is_tsumo, is_dealer)
+                if is_pinfu:
+                    hand_yaku.append(self.config.pinfu)
 
-            calculated_hand = {
-                'cost': cost,
-                'error': error,
-                'hand_yaku': hand_yaku,
-                'han': han,
-                'fu': fu
-            }
-            calculated_hands.append(calculated_hand)
+                # let's skip hand that looks like chitoitsu, but it contains open sets
+                if is_chitoitsu and is_open_hand:
+                    continue
+
+                if is_chitoitsu:
+                    hand_yaku.append(self.config.chiitoitsu)
+
+                is_tanyao = self.config.tanyao.is_condition_met(hand)
+                if is_open_hand and not has_open_tanyao:
+                    is_tanyao = False
+
+                if is_tanyao:
+                    hand_yaku.append(self.config.tanyao)
+
+                if is_riichi and not is_daburu_riichi:
+                    hand_yaku.append(self.config.riichi)
+
+                if is_daburu_riichi:
+                    hand_yaku.append(self.config.daburu_riichi)
+
+                if is_ippatsu:
+                    hand_yaku.append(self.config.ippatsu)
+
+                if is_rinshan:
+                    hand_yaku.append(self.config.rinshan)
+
+                if is_chankan:
+                    hand_yaku.append(self.config.chankan)
+
+                if is_haitei:
+                    hand_yaku.append(self.config.haitei)
+
+                if is_houtei:
+                    hand_yaku.append(self.config.houtei)
+
+                if is_renhou:
+                    hand_yaku.append(self.config.renhou)
+
+                if is_tenhou:
+                    hand_yaku.append(self.config.tenhou)
+
+                if is_chiihou:
+                    hand_yaku.append(self.config.chiihou)
+
+                if self.config.honitsu.is_condition_met(hand):
+                    hand_yaku.append(self.config.honitsu)
+
+                if self.config.chinitsu.is_condition_met(hand):
+                    hand_yaku.append(self.config.chinitsu)
+
+                if self.config.tsuisou.is_condition_met(hand):
+                    hand_yaku.append(self.config.tsuisou)
+
+                if self.config.honroto.is_condition_met(hand):
+                    hand_yaku.append(self.config.honroto)
+
+                if self.config.chinroto.is_condition_met(hand):
+                    hand_yaku.append(self.config.chinroto)
+
+                # small optimization, try to detect yaku with chi required sets only if we have chi sets in hand
+                if len(chi_sets):
+                    if self.config.chanta.is_condition_met(hand):
+                        hand_yaku.append(self.config.chanta)
+
+                    if self.config.junchan.is_condition_met(hand):
+                        hand_yaku.append(self.config.junchan)
+
+                    if self.config.ittsu.is_condition_met(hand):
+                        hand_yaku.append(self.config.ittsu)
+
+                    if not is_open_hand:
+                        if self.config.ryanpeiko.is_condition_met(hand):
+                            hand_yaku.append(self.config.ryanpeiko)
+                        elif self.config.iipeiko.is_condition_met(hand):
+                            hand_yaku.append(self.config.iipeiko)
+
+                    if self.config.sanshoku.is_condition_met(hand):
+                        hand_yaku.append(self.config.sanshoku)
+
+                # small optimization, try to detect yaku with pon required sets only if we have pon sets in hand
+                if len(pon_sets):
+                    if self.config.toitoi.is_condition_met(hand):
+                        hand_yaku.append(self.config.toitoi)
+
+                    if self.config.sanankou.is_condition_met(hand, win_tile, opened_melds, is_tsumo):
+                        hand_yaku.append(self.config.sanankou)
+
+                    if self.config.sanshoku_douko.is_condition_met(hand):
+                        hand_yaku.append(self.config.sanshoku_douko)
+
+                    if self.config.shosangen.is_condition_met(hand):
+                        hand_yaku.append(self.config.shosangen)
+
+                    if self.config.haku.is_condition_met(hand):
+                        hand_yaku.append(self.config.haku)
+
+                    if self.config.hatsu.is_condition_met(hand):
+                        hand_yaku.append(self.config.hatsu)
+
+                    if self.config.chun.is_condition_met(hand):
+                        hand_yaku.append(self.config.hatsu)
+
+                    if self.config.east.is_condition_met(hand, player_wind, round_wind):
+                        if player_wind == EAST:
+                            hand_yaku.append(self.config.yakuhai_place)
+
+                        if round_wind == EAST:
+                            hand_yaku.append(self.config.yakuhai_round)
+
+                    if self.config.south.is_condition_met(hand, player_wind, round_wind):
+                        if player_wind == SOUTH:
+                            hand_yaku.append(self.config.yakuhai_place)
+
+                        if round_wind == SOUTH:
+                            hand_yaku.append(self.config.yakuhai_round)
+
+                    if self.config.west.is_condition_met(hand, player_wind, round_wind):
+                        if player_wind == WEST:
+                            hand_yaku.append(self.config.yakuhai_place)
+
+                        if round_wind == WEST:
+                            hand_yaku.append(self.config.yakuhai_round)
+
+                    if self.config.north.is_condition_met(hand, player_wind, round_wind):
+                        if player_wind == NORTH:
+                            hand_yaku.append(self.config.yakuhai_place)
+
+                        if round_wind == NORTH:
+                            hand_yaku.append(self.config.yakuhai_round)
+
+                    if self.config.daisangen.is_condition_met(hand):
+                        hand_yaku.append(self.config.daisangen)
+
+                    if self.config.shosuushi.is_condition_met(hand):
+                        hand_yaku.append(self.config.shosuushi)
+
+                    if self.config.daisuushi.is_condition_met(hand):
+                        hand_yaku.append(self.config.daisuushi)
+
+                    if self.config.ryuisou.is_condition_met(hand):
+                        hand_yaku.append(self.config.ryuisou)
+
+                    if not is_open_hand and self.config.chuuren_poutou.is_condition_met(hand):
+                        if tiles_34[win_tile // 4] == 2:
+                            hand_yaku.append(self.config.daburu_chuuren_poutou)
+                        else:
+                            hand_yaku.append(self.config.chuuren_poutou)
+
+                    if not is_open_hand and self.config.suuankou.is_condition_met(hand, win_tile, is_tsumo):
+                        if tiles_34[win_tile // 4] == 2:
+                            hand_yaku.append(self.config.suuankou_tanki)
+                        else:
+                            hand_yaku.append(self.config.suuankou)
+
+                    if self.config.sankantsu.is_condition_met(hand, melds):
+                        hand_yaku.append(self.config.sankantsu)
+
+                    if self.config.suukantsu.is_condition_met(hand, melds):
+                        hand_yaku.append(self.config.suukantsu)
+
+                # yakuman is not connected with other yaku
+                yakuman_list = [x for x in hand_yaku if x.is_yakuman]
+                if yakuman_list:
+                    hand_yaku = yakuman_list
+
+                # calculate han
+                for item in hand_yaku:
+                    if is_open_hand and item.han_open:
+                        han += item.han_open
+                    else:
+                        han += item.han_closed
+
+                if han == 0 or (han == 1 and fu < 30):
+                    error = 'Not valid han ({0}) and fu ({1})'.format(han, fu)
+                    cost = None
+
+                # we can add dora han only if we have other yaku in hand
+                # and if we don't have yakuman
+                if not yakuman_list:
+                    tiles_for_dora = tiles + kan_indices_136
+                    count_of_dora = 0
+                    count_of_aka_dora = 0
+                    for tile in tiles_for_dora:
+                        count_of_dora += plus_dora(tile, dora_indicators, has_aka_dora)
+
+                    if count_of_dora:
+                        yaku_item = self.config.dora
+                        yaku_item.han_open = count_of_dora
+                        yaku_item.han_closed = count_of_dora
+                        hand_yaku.append(yaku_item)
+                        han += count_of_dora
+
+                    if count_of_aka_dora:
+                        yaku_item = self.config.aka_dora
+                        yaku_item.han_open = count_of_aka_dora
+                        yaku_item.han_closed = count_of_aka_dora
+                        hand_yaku.append(yaku_item)
+                        han += count_of_aka_dora
+
+                if not error:
+                    cost = scores_calculator.calculate_scores(han, fu, is_tsumo, is_dealer)
+
+                calculated_hand = {
+                    'cost': cost,
+                    'error': error,
+                    'hand_yaku': hand_yaku,
+                    'han': han,
+                    'fu': fu,
+                    'fu_details': fu_details
+                }
+
+                calculated_hands.append(calculated_hand)
 
         # exception hand
         if not is_open_hand and self.config.kokushi.is_condition_met(None, tiles_34):
@@ -399,17 +398,19 @@ class FinishedHand(object):
                 'error': None,
                 'hand_yaku': [self.config.kokushi],
                 'han': han,
-                'fu': fu
+                'fu': fu,
+                'fu_details': []
             })
 
         # let's use cost for most expensive hand
         calculated_hands = sorted(calculated_hands, key=lambda x: (x['han'], x['fu']), reverse=True)
-
         calculated_hand = calculated_hands[0]
+
         cost = calculated_hand['cost']
         error = calculated_hand['error']
         hand_yaku = calculated_hand['hand_yaku']
         han = calculated_hand['han']
         fu = calculated_hand['fu']
+        fu_details = calculated_hand['fu_details']
 
-        return HandResponse(cost, han, fu, hand_yaku, error)
+        return HandResponse(cost, han, fu, hand_yaku, error, fu_details)

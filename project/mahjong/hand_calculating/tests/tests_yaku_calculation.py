@@ -11,226 +11,12 @@ from utils.tests import TestMixin
 
 class YakuCalculationTestCase(unittest.TestCase, TestMixin):
 
-    # def setUp(self):
-    #     self.has_open_tanyao = False
-
-    def test_fu_calculation(self):
-        hand = FinishedHand()
-        fu_calculator = HandFuCalculator()
-        player_wind, round_wind = EAST, WEST
-
-        tiles = self._string_to_136_array(sou='123678', man='123456', pin='22')
-        win_tile = self._string_to_136_tile(sou='6')
-        result = hand.estimate_hand_value(tiles, win_tile, is_tsumo=False)
-        self.assertEqual(result.fu, 30)
-        result = hand.estimate_hand_value(tiles, win_tile, is_tsumo=True)
-        self.assertEqual(result.fu, 20)
-
-        # penchan 1-2-... waiting
-        tiles = self._string_to_136_array(sou='12456', man='123456', pin='55')
-        win_tile = self._string_to_136_tile(sou='3')
-        hand_tiles = self._hand(self._to_34_array(tiles + [win_tile]), 0)
-        self.assertEqual(
-            2,
-            fu_calculator.calculate_additional_fu(win_tile, hand_tiles, False, player_wind, round_wind, [], [])
-        )
-
-        # penchan ...-8-9 waiting
-        tiles = self._string_to_136_array(sou='34589', man='123456', pin='55')
-        win_tile = self._string_to_136_tile(sou='7')
-        hand_tiles = self._hand(self._to_34_array(tiles + [win_tile]), 0)
-        self.assertEqual(
-            2,
-            fu_calculator.calculate_additional_fu(win_tile, hand_tiles, False, player_wind, round_wind, [], [])
-        )
-
-        # kanchan waiting
-        tiles = self._string_to_136_array(sou='12357', man='123456', pin='55')
-        win_tile = self._string_to_136_tile(sou='6')
-        hand_tiles = self._hand(self._to_34_array(tiles + [win_tile]), 0)
-        self.assertEqual(
-            2,
-            fu_calculator.calculate_additional_fu(win_tile, hand_tiles, False, player_wind, round_wind, [], [])
-        )
-
-        # valued pair
-        tiles = self._string_to_136_array(sou='12378', man='123456', honors='11')
-        win_tile = self._string_to_136_tile(sou='6')
-        hand_tiles = self._hand(self._to_34_array(tiles + [win_tile]), 0)
-        self.assertEqual(
-            2,
-            fu_calculator.calculate_additional_fu(win_tile, hand_tiles, False, player_wind, round_wind, [], [])
-        )
-
-        # double valued pair
-        player_wind = EAST
-        round_wind = EAST
-        tiles = self._string_to_136_array(sou='12378', man='123456', honors='11')
-        win_tile = self._string_to_136_tile(sou='6')
-        hand_tiles = self._hand(self._to_34_array(tiles + [win_tile]), 0)
-        self.assertEqual(
-            4,
-            fu_calculator.calculate_additional_fu(win_tile, hand_tiles, False, player_wind, round_wind, [], [])
-        )
-
-        # pair waiting
-        tiles = self._string_to_136_array(sou='123678', man='123456', pin='1')
-        win_tile = self._string_to_136_tile(pin='1')
-        hand_tiles = self._hand(self._to_34_array(tiles + [win_tile]), 0)
-        self.assertEqual(
-            2,
-            fu_calculator.calculate_additional_fu(win_tile, hand_tiles, False, player_wind, round_wind, [], [])
-        )
-
-        # pon
-        tiles = self._string_to_136_array(sou='22278', man='123456', pin='11')
-        win_tile = self._string_to_136_tile(sou='6')
-        hand_tiles = self._hand(self._to_34_array(tiles + [win_tile]), 0)
-        self.assertEqual(
-            4,
-            fu_calculator.calculate_additional_fu(win_tile, hand_tiles, False, player_wind, round_wind, [], [])
-        )
-
-        # pon and ron on tile
-        tiles = self._string_to_136_array(sou='22678', man='123456', pin='11')
-        win_tile = self._string_to_136_tile(sou='2')
-        hand_tiles = self._hand(self._to_34_array(tiles + [win_tile]), 0)
-        self.assertEqual(
-            2,
-            fu_calculator.calculate_additional_fu(win_tile, hand_tiles, False, player_wind, round_wind, [], [])
-        )
-
-        # open pon
-        tiles = self._string_to_136_array(sou='22278', man='123456', pin='11')
-        win_tile = self._string_to_136_tile(sou='6')
-        hand_tiles = self._hand(self._to_34_array(tiles + [win_tile]), 0)
-        open_sets = [self._string_to_open_34_set(sou='222')]
-        self.assertEqual(
-            2,
-            fu_calculator.calculate_additional_fu(win_tile, hand_tiles, False, player_wind, round_wind, open_sets, [])
-        )
-
-        # kan
-        tiles = self._string_to_136_array(sou='22278', man='123456', pin='11')
-        win_tile = self._string_to_136_tile(sou='6')
-        hand_tiles = self._hand(self._to_34_array(tiles + [win_tile]), 0)
-        called_kan_indices = [self._string_to_34_tile(sou='2')]
-        self.assertEqual(
-            16,
-            fu_calculator.calculate_additional_fu(win_tile, hand_tiles, False, player_wind, round_wind, [],
-                                                  called_kan_indices)
-        )
-
-        # open kan
-        tiles = self._string_to_136_array(sou='22278', man='123456', pin='11')
-        win_tile = self._string_to_136_tile(sou='6')
-        hand_tiles = self._hand(self._to_34_array(tiles + [win_tile]), 0)
-        called_kan_indices = [self._string_to_34_tile(sou='2')]
-        open_sets = [self._string_to_open_34_set(sou='222')]
-        self.assertEqual(
-            8,
-            fu_calculator.calculate_additional_fu(win_tile, hand_tiles, False, player_wind, round_wind, open_sets,
-                                                  called_kan_indices)
-        )
-
-        # terminal pon
-        tiles = self._string_to_136_array(sou='11178', man='123456', pin='11')
-        win_tile = self._string_to_136_tile(sou='6')
-        hand_tiles = self._hand(self._to_34_array(tiles + [win_tile]), 0)
-        self.assertEqual(
-            8,
-            fu_calculator.calculate_additional_fu(win_tile, hand_tiles, False, player_wind, round_wind, [], [])
-        )
-
-        # terminal pon and ron on tile
-        tiles = self._string_to_136_array(sou='11678', man='123456', pin='11')
-        win_tile = self._string_to_136_tile(sou='1')
-        hand_tiles = self._hand(self._to_34_array(tiles + [win_tile]), 0)
-        self.assertEqual(
-            4,
-            fu_calculator.calculate_additional_fu(win_tile, hand_tiles, False, player_wind, round_wind, [], [])
-        )
-
-        # open terminal pon
-        tiles = self._string_to_136_array(sou='11178', man='123456', pin='11')
-        win_tile = self._string_to_136_tile(sou='6')
-        hand_tiles = self._hand(self._to_34_array(tiles + [win_tile]), 0)
-        open_sets = [self._string_to_open_34_set(sou='111')]
-        self.assertEqual(
-            4,
-            fu_calculator.calculate_additional_fu(win_tile, hand_tiles, False, player_wind, round_wind, open_sets, [])
-        )
-
-        # terminal kan
-        tiles = self._string_to_136_array(sou='11178', man='123456', pin='11')
-        win_tile = self._string_to_136_tile(sou='6')
-        hand_tiles = self._hand(self._to_34_array(tiles + [win_tile]), 0)
-        called_kan_indices = [self._string_to_34_tile(sou='1')]
-        self.assertEqual(
-            32,
-            fu_calculator.calculate_additional_fu(win_tile, hand_tiles, False, player_wind, round_wind, [],
-                                                  called_kan_indices)
-        )
-
-        # open terminal kan
-        tiles = self._string_to_136_array(sou='11178', man='123456', pin='11')
-        win_tile = self._string_to_136_tile(sou='6')
-        hand_tiles = self._hand(self._to_34_array(tiles + [win_tile]), 0)
-        called_kan_indices = [self._string_to_34_tile(sou='1')]
-        open_sets = [self._string_to_open_34_set(sou='111')]
-        self.assertEqual(
-            16,
-            fu_calculator.calculate_additional_fu(win_tile, hand_tiles, False, player_wind, round_wind, open_sets,
-                                                  called_kan_indices)
-        )
-
-        # honor pon
-        tiles = self._string_to_136_array(sou='78', man='123456', pin='11', honors='111')
-        win_tile = self._string_to_136_tile(sou='6')
-        hand_tiles = self._hand(self._to_34_array(tiles + [win_tile]), 0)
-        self.assertEqual(
-            8,
-            fu_calculator.calculate_additional_fu(win_tile, hand_tiles, False, player_wind, round_wind, [], [])
-        )
-
-        # open honor pon
-        tiles = self._string_to_136_array(sou='78', man='123456', pin='11', honors='111')
-        win_tile = self._string_to_136_tile(sou='6')
-        hand_tiles = self._hand(self._to_34_array(tiles + [win_tile]), 0)
-        open_sets = [self._string_to_open_34_set(honors='111')]
-        self.assertEqual(
-            4,
-            fu_calculator.calculate_additional_fu(win_tile, hand_tiles, False, player_wind, round_wind, open_sets, [])
-        )
-
-        # honor kan
-        tiles = self._string_to_136_array(sou='78', man='123456', pin='11', honors='111')
-        win_tile = self._string_to_136_tile(sou='6')
-        hand_tiles = self._hand(self._to_34_array(tiles + [win_tile]), 0)
-        called_kan_indices = [self._string_to_34_tile(honors='1')]
-        self.assertEqual(
-            32,
-            fu_calculator.calculate_additional_fu(win_tile, hand_tiles, False, player_wind, round_wind, [],
-                                                  called_kan_indices)
-        )
-
-        # open honor kan
-        tiles = self._string_to_136_array(sou='78', man='123456', pin='11', honors='111')
-        win_tile = self._string_to_136_tile(sou='6')
-        hand_tiles = self._hand(self._to_34_array(tiles + [win_tile]), 0)
-        called_kan_indices = [self._string_to_34_tile(honors='1')]
-        open_sets = [self._string_to_open_34_set(honors='111')]
-        self.assertEqual(
-            16,
-            fu_calculator.calculate_additional_fu(win_tile, hand_tiles, False, player_wind, round_wind, open_sets,
-                                                  called_kan_indices)
-        )
-
     def test_hands_calculation(self):
         """
         Group of hands that were not properly calculated on tenhou replays
         I did fixes and leave hands in tests, to be sure that bugs were fixed.
         """
+
         hand = FinishedHand()
         player_wind = EAST
 
@@ -664,7 +450,7 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
 
         # open hand
         tiles = self._string_to_136_array(sou='12399', man='123456', pin='456')
-        win_tile = self._string_to_136_tile(sou='1')
+        win_tile = self._string_to_136_tile(man='1')
         melds = [self._make_meld(Meld.CHI, sou='123')]
         result = hand.estimate_hand_value(tiles, win_tile, melds=melds)
         self.assertNotEqual(result.error, None)
@@ -923,7 +709,7 @@ class YakuCalculationTestCase(unittest.TestCase, TestMixin):
         self.assertFalse(hand.config.junchan.is_condition_met(self._hand(tiles)))
 
         tiles = self._string_to_136_array(sou='789', man='123789', pin='12399')
-        win_tile = self._string_to_136_tile(sou='8')
+        win_tile = self._string_to_136_tile(man='2')
 
         result = hand.estimate_hand_value(tiles, win_tile)
         self.assertEqual(result.error, None)

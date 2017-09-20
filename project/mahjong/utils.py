@@ -1,4 +1,4 @@
-from mahjong.constants import EAST, FIVE_RED_MAN, FIVE_RED_PIN, FIVE_RED_SOU, HONOR_INDICES
+from mahjong.constants import EAST, FIVE_RED_MAN, FIVE_RED_PIN, FIVE_RED_SOU, HONOR_INDICES, TERMINAL_INDICES
 from utils.settings_handler import settings
 
 
@@ -123,6 +123,14 @@ def is_honor(tile):
     :return: boolean
     """
     return tile >= 27
+
+
+def contains_terminals(hand_set):
+    """
+    :param hand_set: array of 34 tiles
+    :return: boolean
+    """
+    return any([x in TERMINAL_INDICES for x in hand_set])
 
 
 def simplify(tile):

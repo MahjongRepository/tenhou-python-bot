@@ -5,6 +5,7 @@ from mahjong.utils import plus_dora, count_tiles_by_suits
 class EnemyAnalyzer(object):
     player = None
     chosen_suit = None
+    initialized = False
 
     def __init__(self, player):
         """
@@ -12,7 +13,19 @@ class EnemyAnalyzer(object):
         """
         self.player = player
         self.table = player.table
+
         self.chosen_suit = None
+
+        # we need it to determine user's chosen suit
+        self.initialized = self.is_threatening
+
+    @property
+    def is_dealer(self):
+        return self.player.is_dealer
+
+    @property
+    def all_safe_tiles(self):
+        return self.player.all_safe_tiles
 
     @property
     def in_tempai(self):

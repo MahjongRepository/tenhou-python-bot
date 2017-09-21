@@ -2,6 +2,7 @@ from mahjong.tile import TilesConverter
 from mahjong.utils import plus_dora, is_honor
 
 from game.ai.first_version.defence.defence import DefenceTile
+from game.ai.first_version.defence.enemy_analyzer import EnemyAnalyzer
 from game.ai.first_version.defence.impossible_wait import ImpossibleWait
 from game.ai.first_version.defence.kabe import Kabe
 from game.ai.first_version.defence.suji import Suji
@@ -155,7 +156,7 @@ class DefenceHandler(object):
         # let's find safe tiles for most dangerous player first
         # and than for all other players if we failed find tile for dangerous player
         for player in threatening_players:
-            player_safe_tiles = [DefenceTile(x, DefenceTile.SAFE) for x in player.all_safe_tiles]
+            player_safe_tiles = [DefenceTile(x, DefenceTile.SAFE) for x in player.player.all_safe_tiles]
             player_suji_tiles = self.suji.find_tiles_to_discard([player])
 
             # it can be that safe tile will be mark as "almost safe",
@@ -185,6 +186,11 @@ class DefenceHandler(object):
 
         # we wasn't able to find safe tile to discard
         return None
+
+    @property
+    def analyzed_enemies(self):
+        players = self.player.ai.enemy_players
+        return [EnemyAnalyzer(x) for x in players]
 
     def _find_tile_to_discard(self, safe_tiles, discard_tiles):
         """
@@ -218,12 +224,12 @@ class DefenceHandler(object):
         Sorted by threat level. Most threatening on the top
         """
         result = []
-        for player in self.table.enemy_players:
+        for player in self.analyzed_enemies:
             if player.is_threatening:
                 result.append(player)
 
         # dealer is most threatening player
-        result = sorted(result, key=lambda x: x.is_dealer, reverse=True)
+        result = sorted(result, key=lambda x: x.player.is_dealer, reverse=True)
 
         return result
 

@@ -4,7 +4,7 @@ import unittest
 from mahjong.constants import EAST, SOUTH, WEST, NORTH, HAKU, HATSU, CHUN, FIVE_RED_SOU
 from mahjong.tests_mixin import TestMixin
 
-from game.ai.base.discard import DiscardOption
+from game.ai.discard import DiscardOption
 from game.table import Table
 
 

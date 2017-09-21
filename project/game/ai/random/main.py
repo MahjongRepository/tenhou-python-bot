@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import random
 
-from game.ai.base.base import BaseAI
+from game.ai.base.main import BaseAI
 
 
 class MainAI(BaseAI):

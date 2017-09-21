@@ -98,13 +98,13 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
         player = table.player
         self.assertEqual(player.player_wind, EAST)
 
-        player = Player(table, 0, 1, False)
+        player = Player(table, 0, 1)
         self.assertEqual(player.player_wind, NORTH)
 
-        player = Player(table, 0, 2, False)
+        player = Player(table, 0, 2)
         self.assertEqual(player.player_wind, WEST)
 
-        player = Player(table, 0, 3, False)
+        player = Player(table, 0, 3)
         self.assertEqual(player.player_wind, SOUTH)
 
     def test_player_called_meld_and_closed_hand(self):

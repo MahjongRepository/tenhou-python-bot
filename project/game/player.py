@@ -6,7 +6,6 @@ from mahjong.constants import EAST, SOUTH, WEST, NORTH
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter, Tile
 
-from game.ai.first_version.defence.enemy_analyzer import EnemyAnalyzer
 from game.ai.first_version.main import MainAI
 
 logger = logging.getLogger('tenhou')
@@ -28,13 +27,10 @@ class PlayerInterface(object):
     name = ''
     rank = ''
 
-    previous_ai = False
-
-    def __init__(self, table, seat, dealer_seat, previous_ai):
+    def __init__(self, table, seat, dealer_seat):
         self.table = table
         self.seat = seat
         self.dealer_seat = dealer_seat
-        self.previous_ai = previous_ai
 
         self.erase_state()
 
@@ -74,7 +70,7 @@ class PlayerInterface(object):
         # all tiles that were discarded after player riichi will be safe against him
         # because of furiten
         tile = tile.value // 4
-        for player in self.table.enemy_players:
+        for player in self.table.players[1:]:
             if player.in_riichi and tile not in player.safe_tiles:
                 player.safe_tiles.append(tile)
 
@@ -118,9 +114,10 @@ class Player(PlayerInterface):
     in_tempai = False
     in_defence_mode = False
 
-    def __init__(self, table, seat, dealer_seat, previous_ai):
-        super().__init__(table, seat, dealer_seat, previous_ai)
-        self._load_ai()
+    def __init__(self, table, seat, dealer_seat):
+        super().__init__(table, seat, dealer_seat)
+
+        self.ai = MainAI(self)
 
     def erase_state(self):
         super().erase_state()
@@ -247,9 +244,6 @@ class Player(PlayerInterface):
             results.append([meld[0] // 4, meld[1] // 4, meld[2] // 4])
         return results
 
-    def _load_ai(self):
-        self.ai = MainAI(self)
-
 
 class EnemyPlayer(PlayerInterface):
     # array of tiles in 34 tile format
@@ -257,14 +251,12 @@ class EnemyPlayer(PlayerInterface):
     # tiles that were discarded in the current "step"
     # so, for example kamicha discard will be a safe tile for all players
     temporary_safe_tiles = None
-    enemy_analyzer = None
 
     def erase_state(self):
         super().erase_state()
 
         self.safe_tiles = []
         self.temporary_safe_tiles = []
-        self.enemy_analyzer = EnemyAnalyzer(self)
 
     def add_discarded_tile(self, tile: Tile):
         super().add_discarded_tile(tile)
@@ -277,6 +269,7 @@ class EnemyPlayer(PlayerInterface):
         self.temporary_safe_tiles = []
         affected_players = [1, 2, 3]
         affected_players.remove(self.seat)
+
         # temporary furiten, for one "step"
         for x in affected_players:
             if tile not in self.table.get_player(x).temporary_safe_tiles:
@@ -285,27 +278,3 @@ class EnemyPlayer(PlayerInterface):
     @property
     def all_safe_tiles(self):
         return list(set(self.temporary_safe_tiles + self.safe_tiles))
-
-    @property
-    def in_tempai(self):
-        """
-        Try to detect is user in tempai or not
-        :return: boolean
-        """
-        return self.enemy_analyzer.in_tempai
-
-    @property
-    def is_threatening(self):
-        """
-        Should we fold against this player or not
-        :return: boolean
-        """
-        return self.enemy_analyzer.is_threatening
-
-    @property
-    def chosen_suit(self):
-        """
-        If user collecting honitsu we can detect his specific suit
-        :return: function
-        """
-        return self.enemy_analyzer.chosen_suit

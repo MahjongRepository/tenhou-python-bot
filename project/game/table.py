@@ -26,14 +26,10 @@ class Table(object):
     # array of tiles in 34 format
     revealed_tiles = None
 
-    previous_ai = False
-
     has_open_tanyao = False
     has_aka_dora = False
 
-    def __init__(self, previous_ai=False):
-        self.previous_ai = previous_ai
-
+    def __init__(self):
         self._init_players()
         self.dora_indicators = []
         self.revealed_tiles = [0] * 34
@@ -157,21 +153,14 @@ class Table(object):
         else:
             return NORTH
 
-    @property
-    def enemy_players(self):
-        """
-        Return list of players except our bot
-        """
-        return self.players[1:]
-
     def _add_revealed_tile(self, tile):
         tile //= 4
         self.revealed_tiles[tile] += 1
 
     def _init_players(self,):
-        self.player = Player(self, 0, self.dealer_seat, self.previous_ai)
+        self.player = Player(self, 0, self.dealer_seat)
 
         self.players = [self.player]
         for seat in range(1, self.count_of_players):
-            player = EnemyPlayer(self, seat, self.dealer_seat, self.previous_ai)
+            player = EnemyPlayer(self, seat, self.dealer_seat)
             self.players.append(player)

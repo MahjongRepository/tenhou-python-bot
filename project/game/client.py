@@ -5,8 +5,8 @@ from game.table import Table
 class Client(object):
     table = None
 
-    def __init__(self, previous_ai=False):
-        self.table = Table(previous_ai)
+    def __init__(self):
+        self.table = Table()
 
     def connect(self):
         raise NotImplemented()

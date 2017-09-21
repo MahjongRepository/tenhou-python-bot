@@ -10,8 +10,9 @@ from mahjong.shanten import Shanten
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_pair, is_pon
 
-from game.ai.base.base import BaseAI
-from game.ai.base.discard import DiscardOption
+from game.ai.base.main import BaseAI
+from game.ai.discard import DiscardOption
+from game.ai.first_version.defence.enemy_analyzer import EnemyAnalyzer
 from game.ai.first_version.defence.main import DefenceHandler
 from game.ai.first_version.strategies.honitsu import HonitsuStrategy
 from game.ai.first_version.strategies.main import BaseStrategy
@@ -363,6 +364,13 @@ class MainAI(BaseAI):
                 return Meld.KAN
 
         return None
+
+    @property
+    def enemy_players(self):
+        """
+        Return list of players except our bot
+        """
+        return self.player.table.players[1:]
 
     @property
     def valued_honors(self):

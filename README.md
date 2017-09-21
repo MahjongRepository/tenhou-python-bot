@@ -8,21 +8,7 @@ For now only **Python 3.5+** is supported.
 
 ## Mahjong hands calculation
 
-We have a code which can calculate hand cost (han, fu, yaku and scores) based on the hand's tiles.
-
-It supports features like:
-
-- Disable\enable aka dora in the hand
-- Disable\enable open tanyao yaku
-- By now it supports double yakumans (Dai Suushii, Daburu Kokushi musou, Suu ankou tanki, 
-Daburu Chuuren Poutou). Later I plan to have a disabling option in settings for it.
-
-The code was validated on tenhou.net phoenix replays in total on **8'527'296 hands**, and 
-results were the same in 100% cases.
-
-So, we can say that our own hand calculator works the same way that tenhou.net hand calculation.
-
-The example of usage you can find here: https://github.com/MahjongRepository/tenhou-python-bot/blob/master/project/validate_hand.py#L194
+You can find it here: https://github.com/MahjongRepository/mahjong
 
 ## Mahjong bot
 

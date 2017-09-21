@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from mahjong.ai.main import MainAI
+from game.ai.main import MainAI
 from tenhou.client import TenhouClient
 from utils.settings_handler import settings
 

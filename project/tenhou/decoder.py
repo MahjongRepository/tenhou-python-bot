@@ -2,6 +2,7 @@
 from urllib.parse import unquote
 
 import re
+
 from mahjong.meld import Meld
 
 

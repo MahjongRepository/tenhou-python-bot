@@ -4,11 +4,11 @@ from optparse import OptionParser
 
 import logging
 import requests
-
-from mahjong.ai.discard import DiscardOption
 from mahjong.meld import Meld
-from mahjong.table import Table
 from mahjong.tile import TilesConverter
+
+from game.ai.discard import DiscardOption
+from game.table import Table
 from tenhou.client import TenhouClient
 from tenhou.decoder import TenhouDecoder
 from utils.logger import set_up_logging

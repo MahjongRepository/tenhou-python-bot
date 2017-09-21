@@ -7,12 +7,14 @@ from time import sleep
 from urllib.parse import quote
 
 from mahjong.constants import DISPLAY_WINDS
-from mahjong.stat import Statistics
-from utils.settings_handler import settings
-from mahjong.client import Client
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
+
+from game.client import Client
+from game.stat import Statistics
 from tenhou.decoder import TenhouDecoder
+
+from utils.settings_handler import settings
 
 logger = logging.getLogger('tenhou')
 

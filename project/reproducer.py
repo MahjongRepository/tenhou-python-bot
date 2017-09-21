@@ -7,7 +7,7 @@ import requests
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
 
-from game.ai.discard import DiscardOption
+from game.ai.base.discard import DiscardOption
 from game.table import Table
 from tenhou.client import TenhouClient
 from tenhou.decoder import TenhouDecoder

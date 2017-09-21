@@ -2,7 +2,7 @@
 from mahjong.constants import EAST
 from mahjong.utils import simplify, is_man, is_pin, is_sou
 
-from game.ai.defence.defence import Defence, DefenceTile
+from game.ai.first_version.defence.defence import Defence, DefenceTile
 
 
 class Kabe(Defence):

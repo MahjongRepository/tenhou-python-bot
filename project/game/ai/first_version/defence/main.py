@@ -1,10 +1,10 @@
 from mahjong.tile import TilesConverter
 from mahjong.utils import plus_dora, is_honor
 
-from game.ai.defence.defence import DefenceTile
-from game.ai.defence.impossible_wait import ImpossibleWait
-from game.ai.defence.kabe import Kabe
-from game.ai.defence.suji import Suji
+from game.ai.first_version.defence.defence import DefenceTile
+from game.ai.first_version.defence.impossible_wait import ImpossibleWait
+from game.ai.first_version.defence.kabe import Kabe
+from game.ai.first_version.defence.suji import Suji
 
 
 class DefenceHandler(object):

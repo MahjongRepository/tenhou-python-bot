@@ -2,7 +2,7 @@
 from mahjong.tile import TilesConverter
 from mahjong.utils import count_tiles_by_suits, is_honor, simplify
 
-from game.ai.strategies.main import BaseStrategy
+from game.ai.first_version.strategies.main import BaseStrategy
 
 
 class HonitsuStrategy(BaseStrategy):

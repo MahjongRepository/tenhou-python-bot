@@ -10,19 +10,19 @@ from mahjong.shanten import Shanten
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_pair, is_pon
 
-from game.ai.base import BaseAI
-from game.ai.defence.main import DefenceHandler
-from game.ai.discard import DiscardOption
-from game.ai.strategies.honitsu import HonitsuStrategy
-from game.ai.strategies.main import BaseStrategy
-from game.ai.strategies.tanyao import TanyaoStrategy
-from game.ai.strategies.yakuhai import YakuhaiStrategy
+from game.ai.base.base import BaseAI
+from game.ai.base.discard import DiscardOption
+from game.ai.first_version.defence.main import DefenceHandler
+from game.ai.first_version.strategies.honitsu import HonitsuStrategy
+from game.ai.first_version.strategies.main import BaseStrategy
+from game.ai.first_version.strategies.tanyao import TanyaoStrategy
+from game.ai.first_version.strategies.yakuhai import YakuhaiStrategy
 
 logger = logging.getLogger('ai')
 
 
 class MainAI(BaseAI):
-    version = '0.2.7'
+    version = '0.3.0'
 
     agari = None
     shanten = None

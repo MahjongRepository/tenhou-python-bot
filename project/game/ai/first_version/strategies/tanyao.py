@@ -2,7 +2,7 @@
 from mahjong.constants import TERMINAL_INDICES, HONOR_INDICES
 from mahjong.tile import TilesConverter
 
-from game.ai.strategies.main import BaseStrategy
+from game.ai.first_version.strategies.main import BaseStrategy
 
 
 class TanyaoStrategy(BaseStrategy):

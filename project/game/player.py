@@ -6,8 +6,8 @@ from mahjong.constants import EAST, SOUTH, WEST, NORTH
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter, Tile
 
-from game.ai.defence.enemy_analyzer import EnemyAnalyzer
-from game.ai.main import MainAI
+from game.ai.first_version.defence.enemy_analyzer import EnemyAnalyzer
+from game.ai.first_version.main import MainAI
 
 logger = logging.getLogger('tenhou')
 

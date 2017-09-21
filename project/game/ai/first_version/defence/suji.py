@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from mahjong.utils import is_man, simplify, is_pin, is_sou, plus_dora
 
-from game.ai.defence.defence import Defence, DefenceTile
+from game.ai.first_version.defence.defence import Defence, DefenceTile
 
 
 class Suji(Defence):

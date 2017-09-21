@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from mahjong.constants import HONOR_INDICES
 
-from game.ai.defence.defence import DefenceTile, Defence
+from game.ai.first_version.defence.defence import Defence, DefenceTile
 
 
 class ImpossibleWait(Defence):

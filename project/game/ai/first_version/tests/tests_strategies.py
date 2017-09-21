@@ -4,10 +4,10 @@ import unittest
 from mahjong.meld import Meld
 from mahjong.tests_mixin import TestMixin
 
-from game.ai.strategies.honitsu import HonitsuStrategy
-from game.ai.strategies.main import BaseStrategy
-from game.ai.strategies.tanyao import TanyaoStrategy
-from game.ai.strategies.yakuhai import YakuhaiStrategy
+from game.ai.first_version.strategies.honitsu import HonitsuStrategy
+from game.ai.first_version.strategies.main import BaseStrategy
+from game.ai.first_version.strategies.tanyao import TanyaoStrategy
+from game.ai.first_version.strategies.yakuhai import YakuhaiStrategy
 from game.table import Table
 
 

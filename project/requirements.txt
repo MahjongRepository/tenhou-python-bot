@@ -1,2 +1,2 @@
-mahjong==1.0.2
+mahjong==1.0.3
 requests==2.18.4

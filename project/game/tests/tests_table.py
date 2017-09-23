@@ -156,6 +156,8 @@ class TableTestCase(unittest.TestCase, TestMixin):
         table.dora_indicators = [self._string_to_136_tile(pin='1')]
         self.assertFalse(table.is_dora(self._string_to_136_tile(sou='2')))
 
+        table.has_open_tanyao = True
+
         # red five man
         self.assertTrue(table.is_dora(FIVE_RED_MAN))
 

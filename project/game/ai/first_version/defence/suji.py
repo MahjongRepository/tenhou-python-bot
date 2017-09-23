@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from mahjong.utils import is_man, simplify, is_pin, is_sou, plus_dora
+from mahjong.utils import is_man, simplify, is_pin, is_sou, plus_dora, is_aka_dora
 
 from game.ai.first_version.defence.defence import Defence, DefenceTile
 
@@ -108,7 +108,7 @@ class Suji(Defence):
 
         # mark dora tiles as dangerous tiles to discard
         for tile in result:
-            if plus_dora(tile.value * 4, self.table.dora_indicators, False):
+            if plus_dora(tile.value * 4, self.table.dora_indicators) or is_aka_dora(tile.value * 4, self.table.has_open_tanyao):
                 tile.danger += 100
 
         return result

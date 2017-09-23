@@ -1,5 +1,5 @@
 from mahjong.tile import TilesConverter
-from mahjong.utils import plus_dora, count_tiles_by_suits
+from mahjong.utils import plus_dora, count_tiles_by_suits, is_aka_dora
 
 
 class EnemyAnalyzer(object):
@@ -61,6 +61,8 @@ class EnemyAnalyzer(object):
         meld_tiles_34 = TilesConverter.to_34_array(meld_tiles)
         if meld_tiles:
             dora_count = sum([plus_dora(x, self.table.dora_indicators) for x in meld_tiles])
+            # aka dora
+            dora_count += sum([1 for x in meld_tiles if is_aka_dora(x, self.table.has_open_tanyao)])
             # enemy has a lot of dora tiles in his opened sets
             # so better to fold against him
             if dora_count >= 3:

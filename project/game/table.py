@@ -114,7 +114,7 @@ class Table(object):
         self._add_revealed_tile(tile)
 
     def is_dora(self, tile):
-        return plus_dora(tile, self.dora_indicators) or is_aka_dora(tile)
+        return plus_dora(tile, self.dora_indicators) or is_aka_dora(tile, self.has_open_tanyao)
 
     def set_players_scores(self, scores, uma=None):
         for i in range(0, len(scores)):

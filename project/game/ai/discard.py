@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from mahjong.constants import AKA_DORA_LIST
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_honor, simplify, plus_dora
+from mahjong.utils import is_honor, simplify, plus_dora, is_aka_dora
 
 
 class DiscardOption(object):
@@ -87,9 +87,10 @@ class DiscardOption(object):
             simplified_tile = simplify(self.tile_to_discard)
             value += suit_tile_grades[simplified_tile]
 
-        count_of_dora = plus_dora(self.tile_to_discard * 4,
-                                  self.player.table.dora_indicators,
-                                  self.player.table.has_aka_dora)
+        count_of_dora = plus_dora(self.tile_to_discard * 4, self.player.table.dora_indicators)
+        if is_aka_dora(self.tile_to_discard * 4, self.player.table.has_open_tanyao):
+            count_of_dora += 1
+
         value += 50 * count_of_dora
 
         if is_honor(self.tile_to_discard):

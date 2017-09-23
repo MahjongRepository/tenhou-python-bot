@@ -1,5 +1,5 @@
 from mahjong.tile import TilesConverter
-from mahjong.utils import plus_dora, is_honor
+from mahjong.utils import plus_dora, is_honor, is_aka_dora
 
 from game.ai.first_version.defence.defence import DefenceTile
 from game.ai.first_version.defence.enemy_analyzer import EnemyAnalyzer
@@ -60,7 +60,9 @@ class DefenceHandler(object):
 
         if shanten == 1:
             # TODO calculate all possible hand costs for 1-2 shanten
-            dora_count = sum([plus_dora(x, self.table.dora_indicators, self.table.has_aka_dora) for x in self.player.tiles])
+            dora_count = sum([plus_dora(x, self.table.dora_indicators) for x in self.player.tiles])
+            # aka dora
+            dora_count += sum([1 for x in self.player.tiles if is_aka_dora(x, self.table.has_open_tanyao)])
             # we had 3+ dora in our almost done hand,
             # we can try to push it
             if dora_count >= 3:

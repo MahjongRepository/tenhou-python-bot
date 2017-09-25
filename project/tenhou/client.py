@@ -266,7 +266,7 @@ class TenhouClient(Client):
                         self.player.draw_tile(drawn_tile)
                         sleep(TenhouClient.SLEEP_BETWEEN_ACTIONS)
 
-                        kan_type = self.player.can_call_kan(drawn_tile, False)
+                        kan_type = self.player.should_call_kan(drawn_tile, False)
                         if kan_type:
                             if kan_type == Meld.CHANKAN:
                                 meld_type = 5
@@ -374,7 +374,7 @@ class TenhouClient(Client):
 
                         # kan
                         if 't="3"' in message:
-                            if self.player.can_call_kan(tile, True):
+                            if self.player.should_call_kan(tile, True):
                                 self._send_message('<N type="2" />')
                                 logger.info('We called an open kan set!')
                                 continue

@@ -93,7 +93,7 @@ class Table(object):
 
         # we had to check will we go for defence or not
         if player_seat != 0:
-            self.player.enemy_called_riichi()
+            self.player.enemy_called_riichi(player_seat)
 
     def add_discarded_tile(self, player_seat, tile, is_tsumogiri):
         """

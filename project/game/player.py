@@ -6,7 +6,7 @@ from mahjong.constants import EAST, SOUTH, WEST, NORTH
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter, Tile
 
-from game.ai.first_version.main import MainAI
+from utils.settings_handler import settings
 
 logger = logging.getLogger('tenhou')
 
@@ -117,7 +117,7 @@ class Player(PlayerInterface):
     def __init__(self, table, seat, dealer_seat):
         super().__init__(table, seat, dealer_seat)
 
-        self.ai = MainAI(self)
+        self.ai = settings.AI_CLASS(self)
 
     def erase_state(self):
         super().erase_state()
@@ -133,7 +133,7 @@ class Player(PlayerInterface):
     def init_hand(self, tiles):
         self.tiles = tiles
 
-        self.ai.determine_strategy()
+        self.ai.init_state()
 
     def draw_tile(self, tile):
         self.last_draw = tile
@@ -142,14 +142,14 @@ class Player(PlayerInterface):
         # we need sort it to have a better string presentation
         self.tiles = sorted(self.tiles)
 
-        self.ai.determine_strategy()
+        self.ai.draw_tile(tile)
 
     def discard_tile(self, discard_option=None):
         """
         :param discard_option:
         :return:
         """
-        # we can't use if tile, because of 0 tile
+
         if discard_option:
             tile_to_discard = self.ai.process_discard_option(discard_option, self.closed_hand)
         else:
@@ -169,7 +169,6 @@ class Player(PlayerInterface):
 
             not self.in_riichi,
             not self.is_open_hand,
-            not self.ai.in_defence,
 
             self.scores >= 1000,
             self.table.count_of_remaining_tiles > 4
@@ -177,17 +176,20 @@ class Player(PlayerInterface):
 
         return result and self.ai.should_call_riichi()
 
-    def can_call_kan(self, tile, open_kan):
+    def should_call_kan(self, tile, open_kan):
         """
         Method will decide should we call a kan,
         or upgrade pon to kan
         :param tile: 136 tile format
         :return:
         """
-        return self.ai.can_call_kan(tile, open_kan)
+        return self.ai.should_call_kan(tile, open_kan)
 
     def try_to_call_meld(self, tile, is_kamicha_discard):
         return self.ai.try_to_call_meld(tile, is_kamicha_discard)
+
+    def enemy_called_riichi(self, player_seat):
+        self.ai.enemy_called_riichi(player_seat)
 
     def total_tiles(self, tile, tiles_34):
         """
@@ -197,15 +199,6 @@ class Player(PlayerInterface):
         :return: int
         """
         return tiles_34[tile] + self.table.revealed_tiles[tile]
-
-    def enemy_called_riichi(self):
-        """
-        After enemy riichi we had to check will we fold or not
-        it is affect open hand decision
-        :return:
-        """
-        if self.ai.defence.should_go_to_defence_mode():
-            self.ai.in_defence = True
 
     def add_called_meld(self, meld: Meld):
         # we had to remove tile from the hand for closed kan set

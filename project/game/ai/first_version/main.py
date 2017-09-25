@@ -10,9 +10,8 @@ from mahjong.shanten import Shanten
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_pair, is_pon
 
-from game.ai.base.main import BaseAI
+from game.ai.base.main import InterfaceAI
 from game.ai.discard import DiscardOption
-from game.ai.first_version.defence.enemy_analyzer import EnemyAnalyzer
 from game.ai.first_version.defence.main import DefenceHandler
 from game.ai.first_version.strategies.honitsu import HonitsuStrategy
 from game.ai.first_version.strategies.main import BaseStrategy
@@ -22,7 +21,7 @@ from game.ai.first_version.strategies.yakuhai import YakuhaiStrategy
 logger = logging.getLogger('ai')
 
 
-class MainAI(BaseAI):
+class ImplementationAI(InterfaceAI):
     version = '0.3.0'
 
     agari = None
@@ -30,6 +29,7 @@ class MainAI(BaseAI):
     defence = None
     hand_divider = None
     finished_hand = None
+    last_discard_option = None
 
     previous_shanten = 7
     in_defence = False
@@ -38,7 +38,7 @@ class MainAI(BaseAI):
     current_strategy = None
 
     def __init__(self, player):
-        super(MainAI, self).__init__(player)
+        super(ImplementationAI, self).__init__(player)
 
         self.agari = Agari()
         self.shanten = Shanten()
@@ -49,10 +49,25 @@ class MainAI(BaseAI):
         self.current_strategy = None
         self.waiting = []
         self.in_defence = False
+        self.last_discard_option = None
+
+    def init_state(self):
+        """
+        Let's decide what we will do with our hand (like open for tanyao and etc.)
+        """
+        self.determine_strategy()
 
     def erase_state(self):
         self.current_strategy = None
         self.in_defence = False
+        self.last_discard_option = None
+
+    def draw_tile(self, tile):
+        """
+        :param tile: 136 tile format
+        :return:
+        """
+        self.determine_strategy()
 
     def discard_tile(self):
         results, shanten = self.calculate_outs(self.player.tiles,
@@ -234,11 +249,11 @@ class MainAI(BaseAI):
 
         return selected_tile
 
-    def process_discard_option(self, selected_tile, closed_hand):
-        self.waiting = selected_tile.waiting
-        self.player.ai.previous_shanten = selected_tile.shanten
+    def process_discard_option(self, discard_option, closed_hand):
+        self.waiting = discard_option.waiting
+        self.player.ai.previous_shanten = discard_option.shanten
         self.player.in_tempai = self.player.ai.previous_shanten == 0
-        return selected_tile.find_tile_in_hand(closed_hand)
+        return discard_option.find_tile_in_hand(closed_hand)
 
     def estimate_hand_value(self, win_tile, tiles=None, call_riichi=False):
         """
@@ -274,6 +289,9 @@ class MainAI(BaseAI):
         if not self.waiting:
             return False
 
+        if self.in_defence:
+            return False
+
         # we have a good wait, let's riichi
         if len(self.waiting) > 1:
             return True
@@ -302,7 +320,7 @@ class MainAI(BaseAI):
 
         return True
 
-    def can_call_kan(self, tile, open_kan):
+    def should_call_kan(self, tile, open_kan):
         """
         Method will decide should we call a kan,
         or upgrade pon to kan
@@ -364,6 +382,15 @@ class MainAI(BaseAI):
                 return Meld.KAN
 
         return None
+
+    def enemy_called_riichi(self, enemy_seat):
+        """
+        After enemy riichi we had to check will we fold or not
+        it is affect open hand decisions
+        :return:
+        """
+        if self.defence.should_go_to_defence_mode():
+            self.in_defence = True
 
     @property
     def enemy_players(self):

@@ -38,10 +38,10 @@ def parse_args_and_set_up_settings():
                       type='string',
                       help='Tournament lobby to play.')
 
-    parser.add_option('-d', '--disable_ai',
-                      action='store_false',
-                      default=settings.ENABLE_AI,
-                      help='Enable AI')
+    parser.add_option('-a', '--ai',
+                      type='string',
+                      default=settings.AI,
+                      help='AI package')
 
     opts, _ = parser.parse_args()
 
@@ -49,7 +49,7 @@ def parse_args_and_set_up_settings():
     settings.GAME_TYPE = opts.game_type
     settings.LOBBY = opts.lobby
     settings.WAITING_GAME_TIMEOUT_MINUTES = opts.timeout
-    settings.ENABLE_AI = opts.disable_ai
+    settings.AI_PACKAGE = opts.ai
 
     if opts.championship:
         settings.IS_TOURNAMENT = True

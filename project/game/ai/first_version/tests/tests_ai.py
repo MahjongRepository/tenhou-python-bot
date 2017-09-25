@@ -243,13 +243,13 @@ class AITestCase(unittest.TestCase, TestMixin):
         tile = self._string_to_136_tile(man='4')
         player.draw_tile(tile)
 
-        self.assertEqual(player.can_call_kan(tile, False), None)
+        self.assertEqual(player.should_call_kan(tile, False), None)
 
         player.add_called_meld(self._make_meld(Meld.PON, man='444'))
 
         self.assertEqual(len(player.melds), 1)
         self.assertEqual(len(player.tiles), 14)
-        self.assertEqual(player.can_call_kan(tile, False), Meld.CHANKAN)
+        self.assertEqual(player.should_call_kan(tile, False), Meld.CHANKAN)
 
         player.discard_tile()
         player.draw_tile(tile)
@@ -269,7 +269,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         player.draw_tile(tile)
 
         # it is pretty stupid to call closed kan with 2m
-        self.assertEqual(player.can_call_kan(tile, False), None)
+        self.assertEqual(player.should_call_kan(tile, False), None)
 
         tiles = self._string_to_136_array(man='12223', sou='111456', pin='12')
         player.init_hand(tiles)
@@ -277,7 +277,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         player.draw_tile(tile)
 
         # call closed kan with 1s is fine
-        self.assertEqual(player.can_call_kan(tile, False), Meld.KAN)
+        self.assertEqual(player.should_call_kan(tile, False), Meld.KAN)
 
     def test_opened_kan(self):
         table = Table()
@@ -292,14 +292,14 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         # our hand is closed, we don't need to call opened kan here
         tile = self._string_to_136_tile(sou='1')
-        self.assertEqual(player.can_call_kan(tile, True), None)
+        self.assertEqual(player.should_call_kan(tile, True), None)
 
         player.add_called_meld(self._make_meld(Meld.PON, honors='111'))
 
         # our hand is open, but it is not tempai
         # we don't need to open kan here
         tile = self._string_to_136_tile(sou='1')
-        self.assertEqual(player.can_call_kan(tile, True), None)
+        self.assertEqual(player.should_call_kan(tile, True), None)
 
         table = Table()
         player = table.player
@@ -314,7 +314,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         # our hand is open, in tempai and with a good wait
         tile = self._string_to_136_tile(sou='1')
-        self.assertEqual(player.can_call_kan(tile, True), Meld.KAN)
+        self.assertEqual(player.should_call_kan(tile, True), Meld.KAN)
 
     def test_closed_kan_and_riichi(self):
         table = Table()
@@ -330,7 +330,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         tile = kan_tiles[3]
         player.draw_tile(tile)
 
-        kan_type = player.can_call_kan(tile, False)
+        kan_type = player.should_call_kan(tile, False)
         self.assertEqual(kan_type, Meld.KAN)
 
         meld = Meld()
@@ -362,4 +362,4 @@ class AITestCase(unittest.TestCase, TestMixin):
         table.add_called_riichi(1)
 
         tile = self._string_to_136_tile(sou='1')
-        self.assertEqual(table.player.can_call_kan(tile, False), None)
+        self.assertEqual(table.player.should_call_kan(tile, False), None)

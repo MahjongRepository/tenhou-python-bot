@@ -1,18 +1,14 @@
 # -*- coding: utf-8 -*-
 import random
 
-from game.ai.base.main import BaseAI
+from game.ai.base.main import InterfaceAI
 
 
-class MainAI(BaseAI):
+class ImplementationAI(InterfaceAI):
     """
     AI that will discard random tile from the hand
     """
-
     version = 'random'
-
-    def __init__(self, player):
-        super(MainAI, self).__init__(player)
 
     def discard_tile(self):
         tile_to_discard = random.randrange(len(self.player.tiles) - 1)

@@ -15,7 +15,9 @@ IS_TOURNAMENT = False
 STAT_SERVER_URL = ''
 STAT_TOKEN = ''
 
-ENABLE_AI = True
+AI_PACKAGE = 'first_version'
+# class will be loaded automatically
+AI_CLASS = None
 
 """
   Game type decoding:

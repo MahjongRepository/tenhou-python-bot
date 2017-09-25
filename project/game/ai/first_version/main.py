@@ -4,7 +4,7 @@ import logging
 from mahjong.agari import Agari
 from mahjong.constants import AKA_DORA_LIST, CHUN, HAKU, HATSU
 from mahjong.hand_calculating.divider import HandDivider
-from mahjong.hand_calculating.hand import FinishedHand
+from mahjong.hand_calculating.hand import HandCalculator
 from mahjong.meld import Meld
 from mahjong.shanten import Shanten
 from mahjong.tile import TilesConverter
@@ -44,7 +44,7 @@ class ImplementationAI(InterfaceAI):
         self.shanten = Shanten()
         self.defence = DefenceHandler(player)
         self.hand_divider = HandDivider()
-        self.finished_hand = FinishedHand()
+        self.finished_hand = HandCalculator()
         self.previous_shanten = 7
         self.current_strategy = None
         self.waiting = []

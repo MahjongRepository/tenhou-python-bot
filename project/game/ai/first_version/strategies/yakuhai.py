@@ -17,7 +17,7 @@ class YakuhaiStrategy(BaseStrategy):
             return False
 
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
-        valued_pairs = [x for x in self.player.ai.valued_honors if tiles_34[x] >= 2]
+        valued_pairs = [x for x in self.player.valued_honors if tiles_34[x] >= 2]
 
         for pair in valued_pairs:
             # we have valued pair in the hand and there is enough tiles
@@ -40,7 +40,7 @@ class YakuhaiStrategy(BaseStrategy):
             tile_for_open_hand //= 4
 
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
-        valued_pairs = [x for x in self.player.ai.valued_honors if tiles_34[x] == 2]
+        valued_pairs = [x for x in self.player.valued_honors if tiles_34[x] == 2]
 
         # when we trying to open hand with tempai state, we need to chose a valued pair waiting
         if shanten == 0 and valued_pairs and for_open_hand and tile_for_open_hand not in valued_pairs:
@@ -74,7 +74,7 @@ class YakuhaiStrategy(BaseStrategy):
 
         tile //= 4
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
-        valued_pairs = [x for x in self.player.ai.valued_honors if tiles_34[x] == 2]
+        valued_pairs = [x for x in self.player.valued_honors if tiles_34[x] == 2]
 
         for meld in self.player.melds:
             # for big shanten number we don't need to check already opened pon set,
@@ -95,4 +95,4 @@ class YakuhaiStrategy(BaseStrategy):
         return False
 
     def _is_yakuhai_pon(self, meld):
-        return meld.type == Meld.PON and meld.tiles[0] // 4 in self.player.ai.valued_honors
+        return meld.type == Meld.PON and meld.tiles[0] // 4 in self.player.valued_honors

@@ -13,7 +13,7 @@ class SettingsSingleton(object):
     def __init__(self):
         if not SettingsSingleton.instance:
             SettingsSingleton.instance = Settings()
-            self._load_ai_class()
+            self.load_ai_class()
 
     def __getattr__(self, name):
         return getattr(self.instance, name)
@@ -21,7 +21,7 @@ class SettingsSingleton(object):
     def __setattr__(self, key, value):
         return setattr(self.instance, key, value)
 
-    def _load_ai_class(self):
+    def load_ai_class(self):
         module = importlib.import_module('game.ai.{}.main'.format(self.AI_PACKAGE))
         self.AI_CLASS = getattr(module, 'ImplementationAI')
 
@@ -34,5 +34,6 @@ class Settings(object):
         for setting in dir(mod):
             setting_value = getattr(mod, setting)
             setattr(self, setting, setting_value)
+
 
 settings = SettingsSingleton()

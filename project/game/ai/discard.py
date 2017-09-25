@@ -77,8 +77,8 @@ class DiscardOption(object):
             honored_value = 0
 
         if is_honor(self.tile_to_discard):
-            if self.tile_to_discard in self.player.ai.valued_honors:
-                count_of_winds = [x for x in self.player.ai.valued_honors if x == self.tile_to_discard]
+            if self.tile_to_discard in self.player.valued_honors:
+                count_of_winds = [x for x in self.player.valued_honors if x == self.tile_to_discard]
                 # for west-west, east-east we had to double tile value
                 value += honored_value * len(count_of_winds)
         else:

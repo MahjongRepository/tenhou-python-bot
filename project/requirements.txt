@@ -1,2 +1,3 @@
 mahjong==1.0.3
 requests==2.18.4
+flake8==3.4.1

@@ -105,7 +105,7 @@ After this you can debug bot decisions.
 
 ### Reproduce from our log
 
-Sometimes we had to debug bot <-> server communication. For this purpose we built this reproducer.
+Sometimes we had to debug `bot <-> server` communication. For this purpose we built this reproducer.
 
 Just use it with already played game:
 

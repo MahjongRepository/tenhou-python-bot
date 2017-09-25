@@ -9,7 +9,7 @@ logger = logging.getLogger('tenhou')
 
 
 def connect_and_play():
-    logger.info('AI: {}, '.format(settings.AI_CLASS.version, settings.AI_PACKAGE))
+    logger.info('AI: {}, {}'.format(settings.AI_CLASS.version, settings.AI_PACKAGE))
 
     client = TenhouClient()
     client.connect()

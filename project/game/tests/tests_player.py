@@ -7,6 +7,7 @@ from mahjong.tests_mixin import TestMixin
 
 from game.player import Player
 from game.table import Table
+from utils.settings_handler import settings
 
 
 class PlayerTestCase(unittest.TestCase, TestMixin):
@@ -19,13 +20,12 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
         player.in_riichi = False
         player.scores = 2000
         player.table.count_of_remaining_tiles = 40
-        player.ai.waiting = [1, 2]
 
-        self.assertEqual(player.can_call_riichi(), False)
+        self.assertEqual(player.formal_riichi_conditions(), False)
 
         player.in_tempai = True
 
-        self.assertEqual(player.can_call_riichi(), True)
+        self.assertEqual(player.formal_riichi_conditions(), True)
 
     def test_can_call_riichi_and_already_in_riichi(self):
         table = Table()
@@ -35,13 +35,12 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
         player.in_riichi = True
         player.scores = 2000
         player.table.count_of_remaining_tiles = 40
-        player.ai.waiting = [1, 2]
 
-        self.assertEqual(player.can_call_riichi(), False)
+        self.assertEqual(player.formal_riichi_conditions(), False)
 
         player.in_riichi = False
 
-        self.assertEqual(player.can_call_riichi(), True)
+        self.assertEqual(player.formal_riichi_conditions(), True)
 
     def test_can_call_riichi_and_scores(self):
         table = Table()
@@ -51,13 +50,12 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
         player.in_riichi = False
         player.scores = 0
         player.table.count_of_remaining_tiles = 40
-        player.ai.waiting = [1, 2]
 
-        self.assertEqual(player.can_call_riichi(), False)
+        self.assertEqual(player.formal_riichi_conditions(), False)
 
         player.scores = 1000
 
-        self.assertEqual(player.can_call_riichi(), True)
+        self.assertEqual(player.formal_riichi_conditions(), True)
 
     def test_can_call_riichi_and_remaining_tiles(self):
         table = Table()
@@ -67,13 +65,12 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
         player.in_riichi = False
         player.scores = 2000
         player.table.count_of_remaining_tiles = 3
-        player.ai.waiting = [1, 2]
 
-        self.assertEqual(player.can_call_riichi(), False)
+        self.assertEqual(player.formal_riichi_conditions(), False)
 
         player.table.count_of_remaining_tiles = 5
 
-        self.assertEqual(player.can_call_riichi(), True)
+        self.assertEqual(player.formal_riichi_conditions(), True)
 
     def test_can_call_riichi_and_open_hand(self):
         table = Table()
@@ -84,13 +81,12 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
         player.scores = 2000
         player.melds = [Meld()]
         player.table.count_of_remaining_tiles = 40
-        player.ai.waiting = [1, 2]
 
-        self.assertEqual(player.can_call_riichi(), False)
+        self.assertEqual(player.formal_riichi_conditions(), False)
 
         player.melds = []
 
-        self.assertEqual(player.can_call_riichi(), True)
+        self.assertEqual(player.formal_riichi_conditions(), True)
 
     def test_player_wind(self):
         table = Table()

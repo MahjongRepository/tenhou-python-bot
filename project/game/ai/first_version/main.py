@@ -69,7 +69,13 @@ class ImplementationAI(InterfaceAI):
         """
         self.determine_strategy()
 
-    def discard_tile(self):
+    def discard_tile(self, discard_tile):
+        # we called meld and we had discard tile that we wanted to discard
+        if discard_tile is not None:
+            if not self.last_discard_option:
+                return discard_tile
+            return self.process_discard_option(self.last_discard_option, self.player.closed_hand)
+
         results, shanten = self.calculate_outs(self.player.tiles,
                                                self.player.closed_hand,
                                                self.player.open_hand_34_tiles)
@@ -168,7 +174,13 @@ class ImplementationAI(InterfaceAI):
         if not self.current_strategy:
             return None, None
 
-        return self.current_strategy.try_to_call_meld(tile, is_kamicha_discard)
+        meld, discard_option = self.current_strategy.try_to_call_meld(tile, is_kamicha_discard)
+        tile_to_discard = None
+        if discard_option:
+            self.last_discard_option = discard_option
+            tile_to_discard = discard_option.tile_to_discard
+
+        return meld, tile_to_discard
 
     def determine_strategy(self):
         # for already opened hand we don't need to give up on selected strategy
@@ -383,6 +395,9 @@ class ImplementationAI(InterfaceAI):
 
         return None
 
+    def should_call_win(self, tile, enemy_seat):
+        return True
+
     def enemy_called_riichi(self, enemy_seat):
         """
         After enemy riichi we had to check will we fold or not
@@ -398,7 +413,3 @@ class ImplementationAI(InterfaceAI):
         Return list of players except our bot
         """
         return self.player.table.players[1:]
-
-    @property
-    def valued_honors(self):
-        return [CHUN, HAKU, HATSU, self.player.table.round_wind, self.player.player_wind]

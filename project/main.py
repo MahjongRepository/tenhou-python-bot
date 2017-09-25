@@ -40,7 +40,7 @@ def parse_args_and_set_up_settings():
 
     parser.add_option('-a', '--ai',
                       type='string',
-                      default=settings.AI,
+                      default=settings.AI_PACKAGE,
                       help='AI package')
 
     opts, _ = parser.parse_args()
@@ -50,6 +50,9 @@ def parse_args_and_set_up_settings():
     settings.LOBBY = opts.lobby
     settings.WAITING_GAME_TIMEOUT_MINUTES = opts.timeout
     settings.AI_PACKAGE = opts.ai
+
+    # it is important to reload bot class
+    settings.load_ai_class()
 
     if opts.championship:
         settings.IS_TOURNAMENT = True

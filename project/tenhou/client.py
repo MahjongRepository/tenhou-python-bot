@@ -201,7 +201,7 @@ class TenhouClient(Client):
         main_player = self.table.player
 
         meld_tile = None
-        discard_option = None
+        tile_to_discard = None
 
         while self.game_is_continue:
             sleep(TenhouClient.SLEEP_BETWEEN_ACTIONS)
@@ -326,7 +326,7 @@ class TenhouClient(Client):
                     # we had to do discard after this
                     if meld.who == 0:
                         if meld.type != Meld.KAN and meld.type != Meld.CHANKAN:
-                            discarded_tile = self.player.discard_tile(discard_option)
+                            discarded_tile = self.player.discard_tile(tile_to_discard)
 
                             logger.info('With hand: {}'.format(player_formatted_hand))
                             logger.info('Discard tile after called meld: {}'.format(
@@ -339,8 +339,14 @@ class TenhouClient(Client):
                 win_suggestions = ['t="8"', 't="9"', 't="12"', 't="13"']
                 # we win by other player's discard
                 if any(i in message for i in win_suggestions):
+                    tile = self.decoder.parse_tile(message)
+                    enemy_seat = self.decoder.get_enemy_seat(message)
                     sleep(TenhouClient.SLEEP_BETWEEN_ACTIONS)
-                    self._send_message('<N type="6" />')
+
+                    if main_player.should_call_win(tile, enemy_seat):
+                        self._send_message('<N type="6" />')
+                    else:
+                        self._send_message('<N />')
 
                 if self.decoder.is_discarded_tile_message(message):
                     tile = self.decoder.parse_tile(message)
@@ -348,13 +354,7 @@ class TenhouClient(Client):
                     # <e21/> - is tsumogiri
                     # <E21/> - discard from the hand
                     if_tsumogiri = message[1].islower()
-                    player_sign = message.lower()[1]
-                    if player_sign == 'e':
-                        player_seat = 1
-                    elif player_sign == 'f':
-                        player_seat = 2
-                    else:
-                        player_seat = 3
+                    player_seat = self.decoder.get_enemy_seat(message)
 
                     self.table.add_discarded_tile(player_seat, tile, if_tsumogiri)
 
@@ -384,7 +384,7 @@ class TenhouClient(Client):
                         if 't="4"' in message:
                             is_kamicha_discard = True
 
-                        meld, discard_option = self.player.try_to_call_meld(tile, is_kamicha_discard)
+                        meld, tile_to_discard = self.player.try_to_call_meld(tile, is_kamicha_discard)
                         if meld:
                             meld_tile = tile
 

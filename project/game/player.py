@@ -2,7 +2,7 @@
 import logging
 import copy
 
-from mahjong.constants import EAST, SOUTH, WEST, NORTH
+from mahjong.constants import EAST, SOUTH, WEST, NORTH, CHUN, HAKU, HATSU
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter, Tile
 
@@ -144,16 +144,13 @@ class Player(PlayerInterface):
 
         self.ai.draw_tile(tile)
 
-    def discard_tile(self, discard_option=None):
+    def discard_tile(self, discard_tile=None):
         """
-        :param discard_option:
+        :param discard_tile: 136 tile format
         :return:
         """
 
-        if discard_option:
-            tile_to_discard = self.ai.process_discard_option(discard_option, self.closed_hand)
-        else:
-            tile_to_discard = self.ai.discard_tile()
+        tile_to_discard = self.ai.discard_tile(discard_tile)
 
         is_tsumogiri = tile_to_discard == self.last_draw
         # it is important to use table method,
@@ -164,7 +161,11 @@ class Player(PlayerInterface):
         return tile_to_discard
 
     def can_call_riichi(self):
-        result = all([
+        result = self.formal_riichi_conditions()
+        return result and self.ai.should_call_riichi()
+
+    def formal_riichi_conditions(self):
+        return all([
             self.in_tempai,
 
             not self.in_riichi,
@@ -174,8 +175,6 @@ class Player(PlayerInterface):
             self.table.count_of_remaining_tiles > 4
         ])
 
-        return result and self.ai.should_call_riichi()
-
     def should_call_kan(self, tile, open_kan):
         """
         Method will decide should we call a kan,
@@ -184,6 +183,9 @@ class Player(PlayerInterface):
         :return:
         """
         return self.ai.should_call_kan(tile, open_kan)
+
+    def should_call_win(self, tile, enemy_seat):
+        return self.ai.should_call_win(tile, enemy_seat)
 
     def try_to_call_meld(self, tile, is_kamicha_discard):
         return self.ai.try_to_call_meld(tile, is_kamicha_discard)
@@ -236,6 +238,10 @@ class Player(PlayerInterface):
         for meld in melds:
             results.append([meld[0] // 4, meld[1] // 4, meld[2] // 4])
         return results
+
+    @property
+    def valued_honors(self):
+        return [CHUN, HAKU, HATSU, self.table.round_wind, self.player_wind]
 
 
 class EnemyPlayer(PlayerInterface):

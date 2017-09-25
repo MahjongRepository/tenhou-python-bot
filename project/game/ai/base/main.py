@@ -14,10 +14,11 @@ class InterfaceAI(object):
         self.player = player
         self.table = player.table
 
-    def discard_tile(self):
+    def discard_tile(self, discard_tile):
         """
         Simple tile discard (after draw)
-        :return: int, 136 tile format
+        :param discard_tile: 136 tile format
+        :return: 136 tile format
         """
         raise NotImplemented()
 
@@ -40,12 +41,13 @@ class InterfaceAI(object):
         :return:
         """
 
-    def process_discard_option(self, discard_option, closed_hand):
+    def should_call_win(self, tile, enemy_seat):
         """
-        :param discard_option: DiscardOption object
-        :param closed_hand: list of 136 tiles format
-        :return:
+        When we can call win by other player discard
+        this methid will be called
+        :return: boolean
         """
+        return True
 
     def should_call_riichi(self):
         """

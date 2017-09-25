@@ -35,7 +35,7 @@ class TanyaoStrategy(BaseStrategy):
             if x in self.not_suitable_tiles and tile == 2:
                 count_of_terminal_pairs += 1
 
-                if x in self.player.ai.valued_honors:
+                if x in self.player.valued_honors:
                     count_of_valued_pairs += 1
 
         # if we already have pon of honor\terminal tiles

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from mahjong.ai.main import MainAI
 from tenhou.client import TenhouClient
 from utils.settings_handler import settings
 
@@ -10,9 +9,7 @@ logger = logging.getLogger('tenhou')
 
 
 def connect_and_play():
-    logger.info('Bot AI enabled: {}'.format(settings.ENABLE_AI))
-    if settings.ENABLE_AI:
-        logger.info('AI version: {}'.format(MainAI.version))
+    logger.info('AI: {}, {}'.format(settings.AI_CLASS.version, settings.AI_PACKAGE))
 
     client = TenhouClient()
     client.connect()

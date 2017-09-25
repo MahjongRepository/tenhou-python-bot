@@ -8,21 +8,7 @@ For now only **Python 3.5+** is supported.
 
 ## Mahjong hands calculation
 
-We have a code which can calculate hand cost (han, fu, yaku and scores) based on the hand's tiles.
-
-It supports features like:
-
-- Disable\enable aka dora in the hand
-- Disable\enable open tanyao yaku
-- By now it supports double yakumans (Dai Suushii, Daburu Kokushi musou, Suu ankou tanki, 
-Daburu Chuuren Poutou). Later I plan to have a disabling option in settings for it.
-
-The code was validated on tenhou.net phoenix replays in total on **8'527'296 hands**, and 
-results were the same in 100% cases.
-
-So, we can say that our own hand calculator works the same way that tenhou.net hand calculation.
-
-The example of usage you can find here: https://github.com/MahjongRepository/tenhou-python-bot/blob/master/project/validate_hand.py#L194
+You can find it here: https://github.com/MahjongRepository/mahjong
 
 ## Mahjong bot
 
@@ -74,8 +60,8 @@ For the next version I have a plan to improve win rate, probably bot should push
 
 ## How to run it?
 
-Run `pythone main.py` it will connect to the tenhou.net and will play a match. 
-After the end of the match it will close connection to the server
+1. `pip install -r requirements.txt`
+2. Run `pythone main.py` it will connect to the tenhou.net and will play a game
 
 ## Configuration instructions
 
@@ -83,6 +69,21 @@ After the end of the match it will close connection to the server
 They will override settings from default `settings.py` file
 2. Also you can override some default settings with command argument. 
 Use `python main.py -h` to check all available commands
+
+## Implement your own AI
+
+We tried to isolate default AI from the project as much as we could.
+
+There is `game.ai.base.InterfaceAI` with one required method `discard_tile` that had to be implemented by your AI.
+
+### Start with your AI
+
+This command will make a copy of the simple bot (it is discarding random tiles from the hand)
+1. `cd project`
+2. `cp -a game/ai/random game/ai/common` 
+3. You can run new AI with command: `python main.py -a common` (or change `AI_PACKAGE` in settings)
+
+After that you can change all what you want in `game.ai.common` package and test it in real games.
 
 ## Round reproducer
 
@@ -119,7 +120,7 @@ After this you can debug bot decisions.
 
 ### Reproduce from our log
 
-Sometimes we had to debug bot <-> server communication. For this purpose we built this reproducer.
+Sometimes we had to debug `bot <-> server` communication. For this purpose we built this reproducer.
 
 Just use it with already played game:
 

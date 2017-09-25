@@ -1,18 +1,16 @@
+import logging
 import os
 import re
 from optparse import OptionParser
 
-import logging
 import requests
-
-from mahjong.ai.discard import DiscardOption
 from mahjong.meld import Meld
-from mahjong.table import Table
 from mahjong.tile import TilesConverter
+
+from game.table import Table
 from tenhou.client import TenhouClient
 from tenhou.decoder import TenhouDecoder
 from utils.logger import set_up_logging
-
 
 logger = logging.getLogger('tenhou')
 
@@ -84,7 +82,7 @@ class TenhouLogReproducer(object):
                 player_seat = self._normalize_position(self.player_position, discard_tags.index(player_sign))
 
                 if player_seat == 0:
-                    table.player.discard_tile(DiscardOption(table.player, tile // 4, 0, [], 0))
+                    table.player.discard_tile(tile)
                 else:
                     table.add_discarded_tile(player_seat, tile, False)
 

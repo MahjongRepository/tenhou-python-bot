@@ -2,6 +2,7 @@
 from urllib.parse import unquote
 
 import re
+
 from mahjong.meld import Meld
 
 
@@ -258,3 +259,14 @@ class TenhouDecoder(object):
             return True
 
         return False
+
+    def get_enemy_seat(self, message):
+        player_sign = message.lower()[1]
+        if player_sign == 'e':
+            player_seat = 1
+        elif player_sign == 'f':
+            player_seat = 2
+        else:
+            player_seat = 3
+
+        return player_seat

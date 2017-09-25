@@ -15,7 +15,9 @@ IS_TOURNAMENT = False
 STAT_SERVER_URL = ''
 STAT_TOKEN = ''
 
-ENABLE_AI = True
+AI_PACKAGE = 'first_version'
+# class will be loaded automatically
+AI_CLASS = None
 
 """
   Game type decoding:
@@ -48,11 +50,6 @@ ENABLE_AI = True
 # you can use:
 # GAME_TYPE = None
 GAME_TYPE = '1'
-
-# game related settings
-# TODO put them to the separate settings files
-FIVE_REDS = True
-OPEN_TANYAO = True
 
 try:
     from settings_local import *

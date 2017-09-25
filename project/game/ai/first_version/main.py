@@ -51,7 +51,7 @@ class ImplementationAI(InterfaceAI):
         self.in_defence = False
         self.last_discard_option = None
 
-    def init_state(self):
+    def init_hand(self):
         """
         Let's decide what we will do with our hand (like open for tanyao and etc.)
         """

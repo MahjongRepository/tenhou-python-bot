@@ -60,8 +60,8 @@ For the next version I have a plan to improve win rate, probably bot should push
 
 ## How to run it?
 
-Run `pythone main.py` it will connect to the tenhou.net and will play a match. 
-After the end of the match it will close connection to the server
+1. `pip install -r requirements.txt`
+2. Run `pythone main.py` it will connect to the tenhou.net and will play a game
 
 ## Configuration instructions
 
@@ -69,6 +69,21 @@ After the end of the match it will close connection to the server
 They will override settings from default `settings.py` file
 2. Also you can override some default settings with command argument. 
 Use `python main.py -h` to check all available commands
+
+## Implement your own AI
+
+We tried to isolate default AI from the project as much as we could.
+
+There is `game.ai.base.InterfaceAI` with one required method `discard_tile` that had to be implemented by your AI.
+
+### Start with your AI
+
+This command will make a copy of the simple bot (it is discarding random tiles from the hand)
+1. `cd project`
+2. `cp -a game/ai/random game/ai/common` 
+3. You can run new AI with command: `python main.py -a common` (or change `AI_PACKAGE` in settings)
+
+After that you can change all what you want in `game.ai.common` package and test it in real games.
 
 ## Round reproducer
 

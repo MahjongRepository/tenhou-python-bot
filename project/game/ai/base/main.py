@@ -16,15 +16,15 @@ class InterfaceAI(object):
 
     def discard_tile(self, discard_tile):
         """
-        Simple tile discard (after draw)
-        :param discard_tile: 136 tile format
+        AI should decide what tile had to be discarded from the hand on bot turn
+        :param discard_tile: 136 tile format. Sometimes we want to discard specific tile
         :return: 136 tile format
         """
         raise NotImplemented()
 
-    def init_state(self):
+    def init_hand(self):
         """
-        Method will be called after bot hand initialization
+        Method will be called after bot hand initialization (when tiles will be set to the player)
         :return:
         """
 
@@ -43,15 +43,14 @@ class InterfaceAI(object):
 
     def should_call_win(self, tile, enemy_seat):
         """
-        When we can call win by other player discard
-        this methid will be called
+        When we can call win by other player discard this method will be called
         :return: boolean
         """
         return True
 
     def should_call_riichi(self):
         """
-        When bot in tempai this method will be run
+        When bot can call riichi this method will be called.
         You can check additional params here to decide should be riichi called or not
         :return: boolean
         """
@@ -59,7 +58,7 @@ class InterfaceAI(object):
 
     def should_call_kan(self, tile, is_open_kan):
         """
-        Method will decide should we call a kan or upgrade pon to kan (chankan)
+        When bot can call kan or chankan this method will be called
         :param tile: 136 tile format
         :param is_open_kan: boolean
         :return: kan type (Meld.KAN, Meld.CHANKAN) or None
@@ -68,7 +67,7 @@ class InterfaceAI(object):
 
     def try_to_call_meld(self, tile, is_kamicha_discard):
         """
-        Determine should we call a meld or not.
+        When bot can open hand with a set (chi or pon/kan) this method will be called
         :param tile: 136 format tile
         :param is_kamicha_discard: boolean
         :return: Meld and DiscardOption objects or None, None

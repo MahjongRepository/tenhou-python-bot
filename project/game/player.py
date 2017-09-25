@@ -133,7 +133,7 @@ class Player(PlayerInterface):
     def init_hand(self, tiles):
         self.tiles = tiles
 
-        self.ai.init_state()
+        self.ai.init_hand()
 
     def draw_tile(self, tile):
         self.last_draw = tile

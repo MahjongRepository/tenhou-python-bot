@@ -6,7 +6,7 @@ __pycache__
 .DS_Store
 logs
 project/settings_local.py
-old_version.py
+project/game/ai/common
 
 tests_validate_hand.py
 loader.py

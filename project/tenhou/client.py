@@ -11,10 +11,10 @@ from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
 
 from game.client import Client
-from game.stat import Statistics
 from tenhou.decoder import TenhouDecoder
 
 from utils.settings_handler import settings
+from utils.statistics import Statistics
 
 logger = logging.getLogger('tenhou')
 
@@ -171,11 +171,14 @@ class TenhouClient(Client):
                         self.looking_for_game = False
                         game_id, seat = self.decoder.parse_log_link(message)
                         log_link = 'http://tenhou.net/0/?log={}&tw={}'.format(game_id, seat)
+
                         self.statistics.game_id = game_id
 
                     if '<UN' in message:
                         values = self.decoder.parse_names_and_ranks(message)
                         self.table.set_players_names_and_ranks(values)
+
+                        self.statistics.username = values[0]['name']
 
                     if '<LN' in message:
                         self._send_message(self._pxr_tag())

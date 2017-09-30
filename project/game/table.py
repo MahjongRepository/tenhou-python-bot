@@ -63,6 +63,13 @@ class Table(object):
         # 13 - tiles in each player hand
         self.count_of_remaining_tiles = 136 - 14 - self.count_of_players * 13
 
+        if round_number == 0 and count_of_honba_sticks == 0:
+            i = 0
+            seats = [0, 1, 2, 3]
+            for player in self.players:
+                player.first_seat = seats[i - dealer_seat]
+                i += 1
+
     def add_called_meld(self, player_seat, meld):
         # when opponent called meld it is means
         # that he discards tile from hand, not from wall
@@ -140,7 +147,7 @@ class Table(object):
         return self.players[player_seat]
 
     def get_players_sorted_by_scores(self):
-        return sorted(self.players, key=lambda x: x.scores or 0, reverse=True)
+        return sorted(self.players, key=lambda x: (x.scores or 0, -x.first_seat), reverse=True)
 
     @property
     def round_wind(self):

@@ -79,6 +79,11 @@ class TableTestCase(unittest.TestCase, TestMixin):
         table = Table()
         table.init_round(0, 0, 0, 0, 0, [])
 
+        self.assertEqual(table.get_player(0).first_seat, 0)
+        self.assertEqual(table.get_player(1).first_seat, 1)
+        self.assertEqual(table.get_player(2).first_seat, 2)
+        self.assertEqual(table.get_player(3).first_seat, 3)
+
         scores = [230, 110, 55, 405]
         table.set_players_scores(scores)
 

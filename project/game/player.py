@@ -16,9 +16,14 @@ class PlayerInterface(object):
     discards = None
     melds = None
     in_riichi = None
+
+    # current player seat
     seat = 0
     # where is sitting dealer, based on this information we can calculate player wind
     dealer_seat = 0
+    # it is important to know initial seat for correct players sorting
+    first_seat = 0
+
     # position based on scores
     position = 0
     scores = None

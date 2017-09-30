@@ -74,7 +74,8 @@ class ImplementationAI(InterfaceAI):
         if discard_tile is not None:
             if not self.last_discard_option:
                 return discard_tile
-            return self.process_discard_option(self.last_discard_option, self.player.closed_hand)
+
+            return self.process_discard_option(self.last_discard_option, self.player.closed_hand, True)
 
         results, shanten = self.calculate_outs(self.player.tiles,
                                                self.player.closed_hand,
@@ -261,11 +262,20 @@ class ImplementationAI(InterfaceAI):
 
         return selected_tile
 
-    def process_discard_option(self, discard_option, closed_hand):
+    def process_discard_option(self, discard_option, closed_hand, force_discard=False):
         self.waiting = discard_option.waiting
         self.player.ai.previous_shanten = discard_option.shanten
         self.player.in_tempai = self.player.ai.previous_shanten == 0
-        return discard_option.find_tile_in_hand(closed_hand)
+
+        # when we called meld we don't need "smart" discard
+        if force_discard:
+            return discard_option.find_tile_in_hand(closed_hand)
+
+        last_draw_34 = self.player.last_draw  and self.player.last_draw // 4 or None
+        if self.player.last_draw not in AKA_DORA_LIST and last_draw_34 == discard_option.tile_to_discard:
+            return self.player.last_draw
+        else:
+            return discard_option.find_tile_in_hand(closed_hand)
 
     def estimate_hand_value(self, win_tile, tiles=None, call_riichi=False):
         """

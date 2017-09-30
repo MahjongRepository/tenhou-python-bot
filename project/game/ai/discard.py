@@ -48,12 +48,14 @@ class DiscardOption(object):
         """
 
         if self.player.table.has_aka_dora:
+            tiles_five_of_suits = [4, 13, 22]
             # special case, to keep aka dora in hand
-            if self.tile_to_discard in [4, 13, 22]:
+            if self.tile_to_discard in tiles_five_of_suits:
                 aka_closed_hand = closed_hand[:]
                 while True:
                     tile = TilesConverter.find_34_tile_in_136_array(self.tile_to_discard, aka_closed_hand)
-                    # we have only aka dora in the hand
+
+                    # we have only aka dora in the hand, without simple five
                     if not tile:
                         break
 

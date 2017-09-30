@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from mahjong.constants import EAST, SOUTH, WEST, NORTH, HAKU, HATSU, CHUN, FIVE_RED_SOU
+from mahjong.constants import EAST, SOUTH, WEST, NORTH, HAKU, HATSU, CHUN, FIVE_RED_SOU, FIVE_RED_PIN
 from mahjong.tests_mixin import TestMixin
 
 from game.ai.discard import DiscardOption
@@ -37,6 +37,30 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         discarded_tile = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '5m')
         self.assertEqual(player.ai.previous_shanten, 0)
+
+    def test_discard_tile_force_tsumogiri(self):
+        table = Table()
+        table.has_aka_dora = True
+        player = table.player
+
+        tiles = self._string_to_136_array(sou='11134567', pin='456', man='45')
+        tile = 57 # 6p
+
+        player.init_hand(tiles)
+        player.draw_tile(tile)
+
+        discarded_tile = player.discard_tile()
+        self.assertEqual(discarded_tile, tile)
+
+        tiles = self._string_to_136_array(sou='11134567', pin='46', man='45') + [53] # simple five pin
+        tile = FIVE_RED_PIN
+
+        player.init_hand(tiles)
+        player.draw_tile(tile)
+
+        discarded_tile = player.discard_tile()
+        # WE DON'T NEED TO DISCARD RED FIVE
+        self.assertNotEqual(discarded_tile, tile)
 
     def test_calculate_suit_tiles_value(self):
         table = Table()

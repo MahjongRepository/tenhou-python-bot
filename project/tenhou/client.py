@@ -256,8 +256,9 @@ class TenhouClient(Client):
 
                 # draw and discard
                 if '<T' in message:
+                    win_suggestions = ['t="16"', 't="48"']
                     # we won by self draw (tsumo)
-                    if 't="16"' in message:
+                    if any(i in message for i in win_suggestions):
                         self._send_message('<N type="7" />')
                         continue
 

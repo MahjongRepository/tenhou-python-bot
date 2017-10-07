@@ -5,6 +5,7 @@ from mahjong.agari import Agari
 from mahjong.constants import AKA_DORA_LIST, CHUN, HAKU, HATSU
 from mahjong.hand_calculating.divider import HandDivider
 from mahjong.hand_calculating.hand import HandCalculator
+from mahjong.hand_calculating.hand_config import HandConfig
 from mahjong.meld import Meld
 from mahjong.shanten import Shanten
 from mahjong.tile import TilesConverter
@@ -285,6 +286,7 @@ class ImplementationAI(InterfaceAI):
         :return:
         """
         win_tile *= 4
+
         # we don't need to think, that our waiting is aka dora
         if win_tile in AKA_DORA_LIST:
             win_tile += 1
@@ -293,17 +295,20 @@ class ImplementationAI(InterfaceAI):
             tiles = self.player.tiles
 
         tiles += [win_tile]
-        result = self.finished_hand.estimate_hand_value(tiles=tiles,
-                                                        win_tile=win_tile,
-                                                        is_tsumo=False,
-                                                        is_riichi=call_riichi,
-                                                        is_dealer=self.player.is_dealer,
-                                                        melds=self.player.melds,
-                                                        player_wind=self.player.player_wind,
-                                                        round_wind=self.player.table.round_wind,
-                                                        dora_indicators=self.player.table.dora_indicators,
-                                                        has_aka_dora=self.player.table.has_aka_dora,
-                                                        has_open_tanyao=self.player.table.has_open_tanyao)
+
+        config = HandConfig(
+            is_riichi=call_riichi,
+            player_wind=self.player.player_wind,
+            round_wind=self.player.table.round_wind,
+            has_aka_dora=self.player.table.has_aka_dora,
+            has_open_tanyao=self.player.table.has_open_tanyao
+        )
+
+        result = self.finished_hand.estimate_hand_value(tiles,
+                                                        win_tile,
+                                                        self.player.melds,
+                                                        self.player.table.dora_indicators,
+                                                        config)
         return result
 
     def should_call_riichi(self):
@@ -326,7 +331,7 @@ class ImplementationAI(InterfaceAI):
 
         tiles_34 = TilesConverter.to_34_array(tiles)
 
-        results = self.hand_divider.divide_hand(tiles_34, [], [])
+        results = self.hand_divider.divide_hand(tiles_34)
         result = results[0]
 
         count_of_pairs = len([x for x in result if is_pair(x)])

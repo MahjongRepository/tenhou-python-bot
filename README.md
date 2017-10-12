@@ -56,6 +56,33 @@ Stat:
 
 For the next version I have a plan to improve win rate, probably bot should push with good hands more often.
 
+### 0.3.2 version
+
+Version with various improvements.
+
+This version had played 600 games (hanchans) and achieved fourth dan (四段).
+
+Rate was somewhere around R1700.
+
+Stat:
+
+|   | Result |
+| --- | --- |
+| Average position | 2.53 |
+| Win rate | 19.97% |
+| Feed rate | 10.88% |
+| Riichi rate | 15.80% |
+| Call rate | 36.39% |
+
+| Places |  |
+| --- | --- |
+| First | 22.41% |
+| Second | 25.52% |
+| Third| 28.28% |
+| Fourth | 23.79% |
+| Bankruptcy | 4.48% |
+
+
 # For developers
 
 ## How to run it?
@@ -72,67 +99,11 @@ Use `python main.py -h` to check all available commands
 
 ## Implement your own AI
 
-We tried to isolate default AI from the project as much as we could.
-
-There is `game.ai.base.InterfaceAI` with one required method `discard_tile` that had to be implemented by your AI.
-
-### Start with your AI
-
-This command will make a copy of the simple bot (it is discarding random tiles from the hand)
-1. `cd project`
-2. `cp -a game/ai/random game/ai/common` 
-3. You can run new AI with command: `python main.py -a common` (or change `AI_PACKAGE` in settings)
-
-After that you can change all what you want in `game.ai.common` package and test it in real games.
+https://github.com/MahjongRepository/tenhou-python-bot/wiki/Implement-AI
 
 ## Round reproducer
 
-We built the way to reproduce already played round. 
-This is really helpful when you want to reproduce table state and fix bot bad behaviour.
-
-There are two options to do it.
-
-### Reproduce from tenhou log link
-
-First you need to do dry run of the reproducer with command:
-
-```
-python reproducer.py -o "http://tenhou.net/0/?log=2017041516gm-0089-0000-23b4752d&tw=3&ts=2" -d
-```
-
-It will print all available tags in the round. For example we want to stop before 
-discard tile to other player ron, in given example we had to chose `<W59/>` tag as a stop tag.
-
-Next command will be:
-
-```
-python reproducer.py -o "http://tenhou.net/0/?log=2017041516gm-0089-0000-23b4752d&tw=3&ts=2" -t "<W59/>"
-```
-
-And output:
-
-```
-Hand: 268m28p23456677s + 6p
-Discard: 2m
-```
-
-After this you can debug bot decisions.
-
-### Reproduce from our log
-
-Sometimes we had to debug `bot <-> server` communication. For this purpose we built this reproducer.
-
-Just use it with already played game:
-
-```
-python reproducer.py -l d6a5e_2017-04-13\ 09_54_01.log
-```
-
-It will send to the bot all commands that were send from tenhou in real game.
-
-## Code checking
-
-This command will check the code style: `flake8 --config=../.flake8`
+https://github.com/MahjongRepository/tenhou-python-bot/wiki/Round-reproducer
 
 ## Contribution to the project
 

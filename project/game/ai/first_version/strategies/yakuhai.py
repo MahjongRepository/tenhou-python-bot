@@ -35,7 +35,8 @@ class YakuhaiStrategy(BaseStrategy):
         """
         return True
 
-    def determine_what_to_discard(self, closed_hand, outs_results, shanten, for_open_hand, tile_for_open_hand):
+    def determine_what_to_discard(self, closed_hand, outs_results, shanten, for_open_hand, tile_for_open_hand,
+                                  hand_was_open=False):
         if tile_for_open_hand:
             tile_for_open_hand //= 4
 
@@ -65,7 +66,8 @@ class YakuhaiStrategy(BaseStrategy):
                                                                       outs_results,
                                                                       shanten,
                                                                       for_open_hand,
-                                                                      tile_for_open_hand)
+                                                                      tile_for_open_hand,
+                                                                      hand_was_open)
 
     def meld_had_to_be_called(self, tile):
         # for closed hand we don't need to open hand with special conditions

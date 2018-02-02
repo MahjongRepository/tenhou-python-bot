@@ -23,7 +23,7 @@ logger = logging.getLogger('ai')
 
 
 class ImplementationAI(InterfaceAI):
-    version = '0.3.1'
+    version = '0.3.2'
 
     agari = None
     shanten = None
@@ -100,7 +100,7 @@ class ImplementationAI(InterfaceAI):
 
         return self.process_discard_option(selected_tile, self.player.closed_hand)
 
-    def process_discard_options_and_select_tile_to_discard(self, results, shanten):
+    def process_discard_options_and_select_tile_to_discard(self, results, shanten, had_was_open=False):
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
 
         # we had to update tiles value there
@@ -116,7 +116,8 @@ class ImplementationAI(InterfaceAI):
                                                                       results,
                                                                       shanten,
                                                                       False,
-                                                                      None)
+                                                                      None,
+                                                                      had_was_open)
 
         return self.chose_tile_to_discard(results)
 

@@ -69,11 +69,14 @@ class TanyaoStrategy(BaseStrategy):
 
         return True
 
-    def determine_what_to_discard(self, closed_hand, outs_results, shanten, for_open_hand, tile_for_open_hand):
+    def determine_what_to_discard(self, closed_hand, outs_results, shanten, for_open_hand, tile_for_open_hand,
+                                  hand_was_open=False):
         if tile_for_open_hand:
             tile_for_open_hand //= 4
 
-        if shanten == 0 and self.player.is_open_hand:
+        is_open_hand = self.player.is_open_hand or hand_was_open
+
+        if shanten == 0 and is_open_hand:
             results = []
             # there is no sense to wait 1-4 if we have open hand
             for item in outs_results:
@@ -92,7 +95,8 @@ class TanyaoStrategy(BaseStrategy):
                                                                          outs_results,
                                                                          shanten,
                                                                          for_open_hand,
-                                                                         tile_for_open_hand)
+                                                                         tile_for_open_hand,
+                                                                         hand_was_open)
 
     def is_tile_suitable(self, tile):
         """

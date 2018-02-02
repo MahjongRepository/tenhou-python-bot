@@ -635,3 +635,16 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         # we can wait only on 1-4, so let's do it even if we can't get yaku on 1
         discard = player.discard_tile()
         self.assertEqual(self._to_string([discard]), '7s')
+
+    def test_choose_correct_waiting_and_fist_opened_meld(self):
+        table = self._make_table()
+        player = table.player
+
+        tiles = self._string_to_136_array(man='2337788', sou='345', pin='234')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(man='8')
+        meld, tile_to_discard = player.try_to_call_meld(tile, False)
+
+        discard = player.discard_tile(tile_to_discard)
+        self.assertEqual(self._to_string([discard]), '2m')

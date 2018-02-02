@@ -50,13 +50,24 @@ class BaseStrategy(object):
         """
         raise NotImplemented()
 
-    def determine_what_to_discard(self, closed_hand, outs_results, shanten, for_open_hand, tile_for_open_hand):
+    def determine_what_to_discard(self, closed_hand, outs_results, shanten, for_open_hand, tile_for_open_hand,
+                                  hand_was_open=False):
         """
+
+        "for_open_hand" and "tile_for_open_hand" we had to use when we want to
+        determine what melds will be open
+
+        "hand_was_open" we will use in rare cases
+        when we open hand and before meld was added to the player
+        it happens between we send a message to tenhou and tenhou send confirmation message to us
+        sometimes we failed to call a meld because of other player
+
         :param closed_hand: array of 136 tiles format
         :param outs_results: dict
         :param shanten: number of shanten
         :param for_open_hand: boolean
         :param tile_for_open_hand: 136 tile format
+        :param hand_was_open: boolean
         :return: array of DiscardOption
         """
 
@@ -208,8 +219,12 @@ class BaseStrategy(object):
             if not filtered_results:
                 return None, None
 
-            selected_tile = self.player.ai.process_discard_options_and_select_tile_to_discard(filtered_results,
-                                                                                              shanten)
+            selected_tile = self.player.ai.process_discard_options_and_select_tile_to_discard(
+                filtered_results,
+                shanten,
+                had_was_open=True
+            )
+
             return meld, selected_tile
 
         return None, None

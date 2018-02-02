@@ -229,7 +229,7 @@ class TenhouDecoder(object):
 
         first_part = parts[0]
         second_part = parts[1]
-        if len(first_part) != 8 and len(second_part) != 8:
+        if len(first_part) != 8 or len(second_part) != 8:
             return False
 
         table_index = int('2' + first_part[2:8]) % (12 - int(first_part[7:8])) * 2

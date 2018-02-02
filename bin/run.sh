@@ -4,12 +4,12 @@
 # and will search the run process
 # if there is no process, it will run it
 
-# */5 * * * * bash /var/www/bot/bin/run.sh
+# */5 * * * * bash /root/bot/bin/run.sh
 
 PID=`ps -eaf | grep project/main.py | grep -v grep | awk '{print $2}'`
 
 if [[ "" =  "$PID" ]]; then
-  /var/www/bot/env/bin/python /var/www/bot/project/main.py
+  /root/bot/env/bin/python /root/bot/project/main.py
 else
   WORKED_SECONDS=`ps -p "$PID" -o etimes=`
   # if process run > 60 minutes, probably it hang and we need to kill it

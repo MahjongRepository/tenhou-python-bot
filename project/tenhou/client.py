@@ -347,7 +347,9 @@ class TenhouClient(Client):
                             self.player.tiles.append(meld_tile)
                             self._send_message('<D p="{}"/>'.format(discarded_tile))
 
-                win_suggestions = ['t="8"', 't="9"', 't="12"', 't="13"']
+                win_suggestions = [
+                    't="8"', 't="9"', 't="10"', 't="11"', 't="12"', 't="13"', 't="15"'
+                ]
                 # we win by other player's discard
                 if any(i in message for i in win_suggestions):
                     tile = self.decoder.parse_tile(message)

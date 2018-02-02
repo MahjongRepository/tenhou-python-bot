@@ -262,6 +262,13 @@ class TenhouClient(Client):
                         self._send_message('<N type="7" />')
                         continue
 
+                    # Kyuushuu kyuuhai 「九種九牌」
+                    # (9 kinds of honor or terminal tiles)
+                    if 't="64"' in message:
+                        # TODO aim for kokushi
+                        self._send_message('<N type="9" />')
+                        continue
+
                     drawn_tile = self.decoder.parse_tile(message)
 
                     if not main_player.in_riichi:

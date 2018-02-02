@@ -373,34 +373,32 @@ class TenhouClient(Client):
 
                     # open hand suggestions
                     if 't=' in message:
-                        # for now I'm not sure about what sets was suggested to call with this numbers
-                        # will find it out later
-                        not_allowed_open_sets = ['t="2"', 't="5"', 't="7"']
-                        if any(i in message for i in not_allowed_open_sets):
-                            sleep(TenhouClient.SLEEP_BETWEEN_ACTIONS)
-                            self._send_message('<N />')
-                            continue
+                        # Possible t="" suggestions
+                        # 1 pon
+                        # 2 kan (it is a closed kan and can be send only to the self draw)
+                        # 3 pon + kan
+                        # 4 chi
+                        # 5 pon + chi
+                        # 7 pon + kan + chi
 
-                        # t="1" - call pon set
-                        # t="3" - call kan set
-                        # t="4" - call chi set
-
-                        # kan
-                        if 't="3"' in message:
+                        # should we call a kan?
+                        if 't="3"' in message or 't="7"' in message:
                             if self.player.should_call_kan(tile, True):
+                                # 2 is open kan
                                 self._send_message('<N type="2" />')
                                 logger.info('We called an open kan set!')
                                 continue
 
-                        # chi or pon
+                        # player with "g" discard is always our kamicha
                         is_kamicha_discard = False
-                        if 't="4"' in message:
+                        if message[1].lower() == 'g':
                             is_kamicha_discard = True
 
                         meld, tile_to_discard = self.player.try_to_call_meld(tile, is_kamicha_discard)
                         if meld:
                             meld_tile = tile
 
+                            # 1 is pon
                             meld_type = '1'
                             if meld.type == Meld.CHI:
                                 # yeah it is 3, not 4

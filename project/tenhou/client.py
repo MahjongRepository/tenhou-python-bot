@@ -278,7 +278,7 @@ class TenhouClient(Client):
                         sleep(TenhouClient.SLEEP_BETWEEN_ACTIONS)
 
                         kan_type = self.player.should_call_kan(drawn_tile, False)
-                        if kan_type:
+                        if kan_type and self.table.count_of_remaining_tiles > 1:
                             if kan_type == Meld.CHANKAN:
                                 meld_type = 5
                             else:

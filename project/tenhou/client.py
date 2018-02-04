@@ -210,6 +210,8 @@ class TenhouClient(Client):
             sleep(TenhouClient.SLEEP_BETWEEN_ACTIONS)
             messages = self._get_multiple_messages()
 
+            last_received_messages = datetime.datetime.now()
+
             if self.reconnected_messages:
                 messages = self.reconnected_messages + messages
                 self.reconnected_messages = None
@@ -217,6 +219,7 @@ class TenhouClient(Client):
             if not messages:
                 self._count_of_empty_messages += 1
             else:
+                last_received_messages = datetime.datetime.now()
                 # we had set to zero counter
                 self._count_of_empty_messages = 0
 
@@ -426,8 +429,15 @@ class TenhouClient(Client):
                 if '<PROF' in message:
                     self.game_is_continue = False
 
+            # socket was closed by tenhou
             if self._count_of_empty_messages >= 5:
                 logger.error('We are getting empty messages from socket. Probably socket connection was closed')
+                self.end_game(False)
+                return
+
+            delta = datetime.datetime.now() - last_received_messages
+            if delta.seconds > 20:
+                logger.error('Tenhou stopped to send messages to us, but connection wasn\'t closed')
                 self.end_game(False)
                 return
 

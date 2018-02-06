@@ -32,7 +32,6 @@ class TenhouClient(Client):
     decoder = TenhouDecoder()
 
     _count_of_empty_messages = 0
-    _last_received_messages_date = None
     _rating_string = None
     _socket_mock = None
 
@@ -218,7 +217,6 @@ class TenhouClient(Client):
             if not messages:
                 self._count_of_empty_messages += 1
             else:
-                self._last_received_messages_date = datetime.datetime.now()
                 # we had set to zero counter
                 self._count_of_empty_messages = 0
 
@@ -489,11 +487,6 @@ class TenhouClient(Client):
     def _send_keep_alive_ping(self):
         def send_request():
             while self.game_is_continue:
-                delta = datetime.datetime.now() - self._last_received_messages_date
-                if delta.seconds > 20:
-                    logger.error('Tenhou stopped to send messages to us, but connection wasn\'t closed')
-                    self.end_game(False)
-
                 self._send_message('<Z />')
 
                 # we can't use sleep(15), because we want to be able

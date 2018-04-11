@@ -88,7 +88,7 @@ Stat:
 ## How to run it?
 
 1. `pip install -r requirements.txt`
-2. Run `pythone main.py` it will connect to the tenhou.net and will play a game
+2. Run `python main.py` it will connect to the tenhou.net and will play a game
 
 ## Configuration instructions
 

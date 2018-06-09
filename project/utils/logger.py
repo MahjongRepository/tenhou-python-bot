@@ -27,7 +27,7 @@ def set_up_logging():
     ch.setLevel(logging.DEBUG)
 
     file_name = '{}_{}.log'.format(name_hash, datetime.datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
-    fh = logging.FileHandler(os.path.join(logs_directory, file_name))
+    fh = logging.FileHandler(os.path.join(logs_directory, file_name), encoding='utf-8')
     fh.setLevel(logging.DEBUG)
 
     formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')

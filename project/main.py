@@ -43,6 +43,11 @@ def parse_args_and_set_up_settings():
                       default=settings.AI_PACKAGE,
                       help='AI package')
 
+    parser.add_option('-s', '--settings',
+                      type='string',
+                      default=None,
+                      help='Settings file name (without path, just file name without extension)')
+
     opts, _ = parser.parse_args()
 
     settings.USER_ID = opts.user_id
@@ -50,6 +55,13 @@ def parse_args_and_set_up_settings():
     settings.LOBBY = opts.lobby
     settings.WAITING_GAME_TIMEOUT_MINUTES = opts.timeout
     settings.AI_PACKAGE = opts.ai
+
+    if opts.settings:
+        module = __import__(opts.settings)
+        for key, value in vars(module).items():
+            # let's use only upper case settings
+            if key.isupper():
+                settings.__setattr__(key, value)
 
     # it is important to reload bot class
     settings.load_ai_class()

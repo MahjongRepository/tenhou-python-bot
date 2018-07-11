@@ -6,6 +6,7 @@ __pycache__
 .DS_Store
 logs
 project/settings_local.py
+project/*_settings.py
 project/game/ai/common
 
 tests_validate_hand.py

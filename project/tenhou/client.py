@@ -43,7 +43,7 @@ class TenhouClient(Client):
         # for reproducer
         if self._socket_mock:
             self.socket = self._socket_mock
-            TenhouClient._random_sleep = lambda x, y: 0
+            TenhouClient._random_sleep = lambda x, y=0, z=0: 0
         else:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 

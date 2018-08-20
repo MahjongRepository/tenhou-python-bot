@@ -23,7 +23,7 @@ logger = logging.getLogger('ai')
 
 
 class ImplementationAI(InterfaceAI):
-    version = '0.3.2'
+    version = '0.4.0-dev'
 
     agari = None
     shanten = None

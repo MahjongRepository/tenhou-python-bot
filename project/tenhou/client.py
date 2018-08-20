@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import datetime
 import logging
+import random
 import socket
 from threading import Thread
 from time import sleep
@@ -20,8 +21,6 @@ logger = logging.getLogger('tenhou')
 
 
 class TenhouClient(Client):
-    SLEEP_BETWEEN_ACTIONS = 1
-
     statistics = None
     socket = None
     game_is_continue = True
@@ -44,7 +43,7 @@ class TenhouClient(Client):
         # for reproducer
         if self._socket_mock:
             self.socket = self._socket_mock
-            TenhouClient.SLEEP_BETWEEN_ACTIONS = 0
+            TenhouClient._random_sleep = lambda x, y: 0
         else:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -121,18 +120,18 @@ class TenhouClient(Client):
             if settings.IS_TOURNAMENT:
                 logger.info('Go to the tournament lobby: {}'.format(settings.LOBBY))
                 self._send_message('<CS lobby="{}" />'.format(settings.LOBBY))
-                sleep(TenhouClient.SLEEP_BETWEEN_ACTIONS * 2)
+                self._random_sleep()
                 self._send_message('<DATE />')
             else:
                 logger.info('Go to the lobby: {}'.format(settings.LOBBY))
                 self._send_message('<CHAT text="{}" />'.format(quote('/lobby {}'.format(settings.LOBBY))))
-                sleep(TenhouClient.SLEEP_BETWEEN_ACTIONS * 2)
+                self._random_sleep()
 
         if self.reconnected_messages:
             # we already in the game
             self.looking_for_game = False
             self._send_message('<GOK />')
-            sleep(TenhouClient.SLEEP_BETWEEN_ACTIONS)
+            self._random_sleep()
         else:
             selected_game_type = self._build_game_type()
             game_type = '{},{}'.format(settings.LOBBY, selected_game_type)
@@ -144,7 +143,7 @@ class TenhouClient(Client):
             start_time = datetime.datetime.now()
 
             while self.looking_for_game:
-                sleep(TenhouClient.SLEEP_BETWEEN_ACTIONS)
+                self._random_sleep()
 
                 messages = self._get_multiple_messages()
 
@@ -207,7 +206,7 @@ class TenhouClient(Client):
         tile_to_discard = None
 
         while self.game_is_continue:
-            sleep(TenhouClient.SLEEP_BETWEEN_ACTIONS)
+            self._random_sleep()
             messages = self._get_multiple_messages()
 
             if self.reconnected_messages:
@@ -275,7 +274,7 @@ class TenhouClient(Client):
                         logger.info('Hand: {}'.format(main_player.format_hand_for_print(drawn_tile)))
 
                         self.player.draw_tile(drawn_tile)
-                        sleep(TenhouClient.SLEEP_BETWEEN_ACTIONS)
+                        self._random_sleep(2, 4)
 
                         kan_type = self.player.should_call_kan(drawn_tile, False)
                         if kan_type and self.table.count_of_remaining_tiles > 1:
@@ -295,7 +294,7 @@ class TenhouClient(Client):
                         # let's call riichi
                         if can_call_riichi:
                             self._send_message('<REACH hai="{}" />'.format(discarded_tile))
-                            sleep(TenhouClient.SLEEP_BETWEEN_ACTIONS)
+                            self._random_sleep()
                             main_player.in_riichi = True
                     else:
                         # we had to add it to discards, to calculate remaining tiles correctly
@@ -320,7 +319,7 @@ class TenhouClient(Client):
 
                 # the end of round
                 if '<AGARI' in message or '<RYUUKYOKU' in message:
-                    sleep(TenhouClient.SLEEP_BETWEEN_ACTIONS * 7)
+                    self._random_sleep(3, 7)
                     self._send_message('<NEXTREADY />')
 
                 # set was called
@@ -354,7 +353,7 @@ class TenhouClient(Client):
                 if any(i in message for i in win_suggestions):
                     tile = self.decoder.parse_tile(message)
                     enemy_seat = self.decoder.get_enemy_seat(message)
-                    sleep(TenhouClient.SLEEP_BETWEEN_ACTIONS)
+                    self._random_sleep(4, 7)
 
                     if main_player.should_call_win(tile, enemy_seat):
                         self._send_message('<N type="6" />')
@@ -373,6 +372,8 @@ class TenhouClient(Client):
 
                     # open hand suggestions
                     if 't=' in message:
+                        self._random_sleep(2, 5)
+
                         # Possible t="" suggestions
                         # 1 pon
                         # 2 kan (it is a closed kan and can be send only to the self draw)
@@ -416,7 +417,6 @@ class TenhouClient(Client):
                             ))
                         # this meld will not improve our hand
                         else:
-                            sleep(TenhouClient.SLEEP_BETWEEN_ACTIONS)
                             self._send_message('<N />')
 
                 if 'owari' in message:
@@ -572,3 +572,6 @@ class TenhouClient(Client):
         logger.info('Game type: {}'.format(is_hanchan and 'hanchan' or 'tonpusen'))
 
         return True
+
+    def _random_sleep(self, min_sleep=1, max_sleep=3):
+        sleep(random.randint(min_sleep, max_sleep + 1))

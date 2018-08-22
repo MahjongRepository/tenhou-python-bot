@@ -222,7 +222,6 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         table = Table()
         player = table.player
 
-        # 456m12355p22z + 5p [678s]
         tiles = self._string_to_136_array(sou='4589', pin='123', man='1236', honors='66')
         player.init_hand(tiles)
 
@@ -312,19 +311,22 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         table = Table()
         player = table.player
 
-        tiles = self._string_to_136_array(sou='112235589', man='24', honors='22')
+        tiles = self._string_to_136_array(sou='112235589', man='23', honors='22')
         player.init_hand(tiles)
 
         # we don't need to call meld even if it improves our hand,
-        # because we are collecting honitsu
+        # because we are aim for honitsu
         tile = self._string_to_136_tile(man='1')
         meld, _ = player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 
         # any honor tile is suitable
         tile = self._string_to_136_tile(honors='2')
-        meld, _ = player.try_to_call_meld(tile, False)
+        meld, tile_to_discard = player.try_to_call_meld(tile, False)
         self.assertNotEqual(meld, None)
+        self.assertEqual(self._to_string([tile_to_discard * 4]), '2m')
+
+        player.discard_tile(tile_to_discard * 4)
 
         tile = self._string_to_136_tile(man='1')
         player.draw_tile(tile)

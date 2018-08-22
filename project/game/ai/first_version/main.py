@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
+import copy
 import logging
 
 from mahjong.agari import Agari
-from mahjong.constants import AKA_DORA_LIST, CHUN, HAKU, HATSU
+from mahjong.constants import AKA_DORA_LIST
 from mahjong.hand_calculating.divider import HandDivider
 from mahjong.hand_calculating.hand import HandCalculator
 from mahjong.hand_calculating.hand_config import HandConfig
 from mahjong.meld import Meld
 from mahjong.shanten import Shanten
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_pair, is_pon
+from mahjong.utils import is_pair, is_pon, is_tile_strictly_isolated
 
 from game.ai.base.main import InterfaceAI
 from game.ai.discard import DiscardOption
@@ -119,7 +120,7 @@ class ImplementationAI(InterfaceAI):
                                                                       None,
                                                                       had_was_open)
 
-        return self.chose_tile_to_discard(results)
+        return self.choose_tile_to_discard(results)
 
     def calculate_outs(self, tiles, closed_hand, open_sets_34=None):
         """
@@ -219,50 +220,92 @@ class ImplementationAI(InterfaceAI):
 
         return self.current_strategy and True or False
 
-    def chose_tile_to_discard(self, results: [DiscardOption]) -> DiscardOption:
+    def choose_tile_to_discard(self, results: [DiscardOption]) -> DiscardOption:
         """
-        Try to find best tile to discard, based on different valuations
+        Try to find best tile to discard, based on different rules
         """
-
-        def sorting(x):
-            # - is important for x.tiles_count
-            # in that case we will discard tile that will give for us more tiles
-            # to complete a hand
-            return x.shanten, -x.tiles_count, x.valuation
 
         had_to_be_discarded_tiles = [x for x in results if x.had_to_be_discarded]
         if had_to_be_discarded_tiles:
-            had_to_be_discarded_tiles = sorted(had_to_be_discarded_tiles, key=sorting)
-            selected_tile = had_to_be_discarded_tiles[0]
-        else:
-            results = sorted(results, key=sorting)
-            # remove needed tiles from discard options
-            results = [x for x in results if not x.had_to_be_saved]
+            return sorted(had_to_be_discarded_tiles, key=lambda x: (x.shanten, -x.tiles_count, x.valuation))[0]
 
-            # let's chose most valuable tile first
-            temp_tile = results[0]
-            # and let's find all tiles with same shanten
-            results_with_same_shanten = [x for x in results if x.shanten == temp_tile.shanten]
-            possible_options = [temp_tile]
-            for discard_option in results_with_same_shanten:
-                # there is no sense to check already chosen tile
-                if discard_option.tile_to_discard == temp_tile.tile_to_discard:
-                    continue
+        # remove needed tiles from discard options
+        results = [x for x in results if not x.had_to_be_saved]
 
-                # we don't need to select tiles almost dead waits
-                if discard_option.tiles_count <= 2:
-                    continue
+        results = sorted(results, key=lambda x: (x.shanten, -x.tiles_count))
+        first_option = results[0]
+        results_with_same_shanten = [x for x in results if x.shanten == first_option.shanten]
 
-                # let's check all other tiles with same shanten
-                # maybe we can find tiles that have almost same tiles count number
-                if temp_tile.tiles_count - 2 < discard_option.tiles_count < temp_tile.tiles_count + 2:
-                    possible_options.append(discard_option)
+        possible_options = [first_option]
+        border_percentage = 20
+        for discard_option in results_with_same_shanten:
+            # there is no sense to check already chosen tile
+            if discard_option.tile_to_discard == first_option.tile_to_discard:
+                continue
 
-            # let's sort got tiles by value and let's chose less valuable tile to discard
-            possible_options = sorted(possible_options, key=lambda x: x.valuation)
-            selected_tile = possible_options[0]
+            # we don't need to select tiles almost dead waits
+            if discard_option.tiles_count <= 2:
+                continue
 
-        return selected_tile
+            tiles_count_borders = round((first_option.tiles_count / 100) * border_percentage)
+
+            if first_option.shanten == 0 and tiles_count_borders < 2:
+                tiles_count_borders = 2
+
+            if first_option.shanten == 1 and tiles_count_borders < 4:
+                tiles_count_borders = 4
+
+            if first_option.shanten >= 2 and tiles_count_borders < 8:
+                tiles_count_borders = 8
+
+            # let's choose tiles that are close to the max ukeire tile
+            if discard_option.tiles_count >= first_option.tiles_count - tiles_count_borders:
+                possible_options.append(discard_option)
+
+        if first_option.shanten <= 1:
+            # let's sort tiles by value and let's choose less valuable tile to discard
+            return sorted(possible_options, key=lambda x: x.valuation)[0]
+
+        # as second step
+        # let's choose tiles that are close to the max ukeire2 tile
+        for x in possible_options:
+            self.calculate_second_level_tiles_count(x)
+
+        possible_options = sorted(possible_options, key=lambda x: -x.tiles_count_second_level)
+
+        filter_percentage = 20
+        filtered_options = self._filter_list_by_percentage(
+            possible_options,
+            'tiles_count_second_level',
+            filter_percentage
+        )
+
+        dora_tiles = [x for x in filtered_options if x.count_of_dora > 0]
+        # we have only dora candidates to discard
+        if len(dora_tiles) == len(filtered_options):
+            min_dora = min([x.count_of_dora for x in filtered_options])
+            min_dora_list = [x for x in filtered_options if x.count_of_dora == min_dora]
+
+            # let's discard tile with greater ukeire2
+            return sorted(min_dora_list, key=lambda x: -x.tiles_count_second_level)[0]
+
+        second_filter_percentage = 10
+        filtered_options = self._filter_list_by_percentage(
+            filtered_options,
+            'tiles_count_second_level',
+            second_filter_percentage
+        )
+
+        closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
+        isolated_tiles = [x for x in filtered_options if is_tile_strictly_isolated(closed_hand_34, x.tile_to_discard)]
+        # isolated tiles should be discarded first
+        if isolated_tiles:
+            # let's sort tiles by value and let's choose less valuable tile to discard
+            return sorted(isolated_tiles, key=lambda x: x.valuation)[0]
+
+        # there are no isolated tiles
+        # let's discard tile with greater ukeire2
+        return sorted(filtered_options, key=lambda x: -x.tiles_count_second_level)[0]
 
     def process_discard_option(self, discard_option, closed_hand, force_discard=False):
         self.waiting = discard_option.waiting
@@ -423,9 +466,39 @@ class ImplementationAI(InterfaceAI):
         if self.defence.should_go_to_defence_mode():
             self.in_defence = True
 
+    def calculate_second_level_tiles_count(self, discard_option):
+        tiles = copy.copy(self.player.tiles)
+        tiles.remove(discard_option.find_tile_in_hand(self.player.closed_hand))
+
+        sum_tiles = 0
+        for wait in discard_option.waiting:
+            wait = wait * 4
+            tiles.append(wait)
+
+            results, shanten = self.calculate_outs(
+                tiles,
+                self.player.closed_hand,
+                self.player.open_hand_34_tiles
+            )
+            results = [x for x in results if x.shanten == discard_option.shanten - 1]
+            sum_tiles += sum([x.tiles_count for x in results])
+
+            tiles.remove(wait)
+
+        discard_option.tiles_count_second_level = sum_tiles
+
     @property
     def enemy_players(self):
         """
         Return list of players except our bot
         """
         return self.player.table.players[1:]
+
+    def _filter_list_by_percentage(self, items, attribute, percentage):
+        filtered_options = []
+        first_option = items[0]
+        tiles_count_borders = round((getattr(first_option, attribute) / 100) * percentage)
+        for x in items:
+            if getattr(x, attribute) >= getattr(first_option, attribute) - tiles_count_borders:
+                filtered_options.append(x)
+        return filtered_options

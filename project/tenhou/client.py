@@ -146,13 +146,13 @@ class TenhouClient(Client):
                 self._random_sleep()
 
                 messages = self._get_multiple_messages()
-
                 for message in messages:
                     if '<REJOIN' in message:
                         # game wasn't found, continue to wait
                         self._send_message('<JOIN t="{},r" />'.format(game_type))
 
                     if '<GO' in message:
+                        self._random_sleep()
                         self._send_message('<GOK />')
                         self._send_message('<NEXTREADY />')
 
@@ -206,7 +206,8 @@ class TenhouClient(Client):
         tile_to_discard = None
 
         while self.game_is_continue:
-            self._random_sleep()
+            self._random_sleep(1, 2)
+
             messages = self._get_multiple_messages()
 
             if self.reconnected_messages:
@@ -258,12 +259,14 @@ class TenhouClient(Client):
                     win_suggestions = ['t="16"', 't="48"']
                     # we won by self draw (tsumo)
                     if any(i in message for i in win_suggestions):
+                        self._random_sleep(1, 2)
                         self._send_message('<N type="7" />')
                         continue
 
                     # Kyuushuu kyuuhai 「九種九牌」
                     # (9 kinds of honor or terminal tiles)
                     if 't="64"' in message:
+                        self._random_sleep(1, 2)
                         # TODO aim for kokushi
                         self._send_message('<N type="9" />')
                         continue
@@ -274,10 +277,11 @@ class TenhouClient(Client):
                         logger.info('Hand: {}'.format(main_player.format_hand_for_print(drawn_tile)))
 
                         self.player.draw_tile(drawn_tile)
-                        self._random_sleep(2, 4)
 
                         kan_type = self.player.should_call_kan(drawn_tile, False)
                         if kan_type and self.table.count_of_remaining_tiles > 1:
+                            self._random_sleep()
+
                             if kan_type == Meld.CHANKAN:
                                 meld_type = 5
                             else:
@@ -293,8 +297,8 @@ class TenhouClient(Client):
 
                         # let's call riichi
                         if can_call_riichi:
-                            self._send_message('<REACH hai="{}" />'.format(discarded_tile))
                             self._random_sleep()
+                            self._send_message('<REACH hai="{}" />'.format(discarded_tile))
                             main_player.in_riichi = True
                     else:
                         # we had to add it to discards, to calculate remaining tiles correctly
@@ -319,7 +323,7 @@ class TenhouClient(Client):
 
                 # the end of round
                 if '<AGARI' in message or '<RYUUKYOKU' in message:
-                    self._random_sleep(3, 7)
+                    self._random_sleep(3, 5)
                     self._send_message('<NEXTREADY />')
 
                 # set was called
@@ -353,7 +357,7 @@ class TenhouClient(Client):
                 if any(i in message for i in win_suggestions):
                     tile = self.decoder.parse_tile(message)
                     enemy_seat = self.decoder.get_enemy_seat(message)
-                    self._random_sleep(4, 7)
+                    self._random_sleep(2, 4)
 
                     if main_player.should_call_win(tile, enemy_seat):
                         self._send_message('<N type="6" />')
@@ -372,8 +376,6 @@ class TenhouClient(Client):
 
                     # open hand suggestions
                     if 't=' in message:
-                        self._random_sleep(2, 5)
-
                         # Possible t="" suggestions
                         # 1 pon
                         # 2 kan (it is a closed kan and can be send only to the self draw)
@@ -385,6 +387,8 @@ class TenhouClient(Client):
                         # should we call a kan?
                         if 't="3"' in message or 't="7"' in message:
                             if self.player.should_call_kan(tile, True):
+                                self._random_sleep()
+
                                 # 2 is open kan
                                 self._send_message('<N type="2" />')
                                 logger.info('We called an open kan set!')
@@ -397,6 +401,8 @@ class TenhouClient(Client):
 
                         meld, tile_to_discard = self.player.try_to_call_meld(tile, is_kamicha_discard)
                         if meld:
+                            self._random_sleep(2, 3)
+
                             meld_tile = tile
 
                             # 1 is pon

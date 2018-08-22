@@ -5,6 +5,8 @@ from mahjong.constants import EAST, SOUTH, WEST, NORTH, HAKU, HATSU, CHUN, FIVE_
 from mahjong.tests_mixin import TestMixin
 
 from game.ai.discard import DiscardOption
+from game.ai.first_version.strategies.main import BaseStrategy
+from game.ai.first_version.strategies.tanyao import TanyaoStrategy
 from game.table import Table
 
 
@@ -72,10 +74,36 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         results = [
             [0, 110], [9,  110], [18, 110],
             [1, 120], [10, 120], [19, 120],
+            [2, 140], [11, 140], [20, 140],
+            [3, 150], [12, 150], [21, 150],
+            [4, 130], [13, 130], [22, 130],
+            [5, 150], [14, 150], [23, 150],
+            [6, 140], [15, 140], [24, 140],
+            [7, 120], [16, 120], [25, 120],
+            [8, 110], [17, 110], [26, 110]
+        ]
+
+        for item in results:
+            tile = item[0]
+            value = item[1]
+            option = DiscardOption(player, tile, 0, [], 0)
+            self.assertEqual(option.valuation, value)
+
+    def test_calculate_suit_tiles_value_and_tanyao_hand(self):
+        table = Table()
+        player = table.player
+        player.ai.current_strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
+
+        # 0 - 8   man
+        # 9 - 17  pin
+        # 18 - 26 sou
+        results = [
+            [0, 110], [9,  110], [18, 110],
+            [1, 120], [10, 120], [19, 120],
             [2, 130], [11, 130], [20, 130],
-            [3, 140], [12, 140], [21, 140],
-            [4, 150], [13, 150], [22, 150],
-            [5, 140], [14, 140], [23, 140],
+            [3, 150], [12, 150], [21, 150],
+            [4, 140], [13, 140], [22, 140],
+            [5, 150], [14, 150], [23, 150],
             [6, 130], [15, 130], [24, 130],
             [7, 120], [16, 120], [25, 120],
             [8, 110], [17, 110], [26, 110]
@@ -203,3 +231,38 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
         discarded_tile = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '1s')
+
+    def test_discard_less_valuable_isolated_tile_first(self):
+        table = Table()
+        player = table.player
+        table.add_dora_indicator(self._string_to_136_tile(sou='4'))
+
+        tiles = self._string_to_136_array(sou='2456', pin='129', man='234458')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(sou='7'))
+
+        discarded_tile = player.discard_tile()
+        # we have a choice what to discard: 9p or 8m
+        # 9p is less valuable
+        self.assertEqual(self._to_string([discarded_tile]), '9p')
+
+        table.dora_indicators.append(self._string_to_136_tile(pin='8'))
+        tiles = self._string_to_136_array(sou='2456', pin='129', man='234458')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(sou='7'))
+        discarded_tile = player.discard_tile()
+        # but if 9p is dora
+        # let's discard 8m instead
+        self.assertEqual(self._to_string([discarded_tile]), '8m')
+
+    def test_discard_tile_with_max_ukeire_second_level(self):
+        table = Table()
+        player = table.player
+        table.add_dora_indicator(self._string_to_136_tile(sou='4'))
+
+        tiles = self._string_to_136_array(sou='11367', pin='45', man='344778')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(pin='6'))
+
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '3s')

@@ -3,6 +3,8 @@ from mahjong.constants import AKA_DORA_LIST
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_honor, simplify, plus_dora, is_aka_dora
 
+from game.ai.first_version.strategies.main import BaseStrategy
+
 
 class DiscardOption(object):
     player = None
@@ -13,6 +15,7 @@ class DiscardOption(object):
     waiting = None
     # how much tiles will improve our hand
     tiles_count = None
+    tiles_count_second_level = None
     # number of shanten for that tile
     shanten = None
     # sometimes we had to force tile to be discarded
@@ -36,11 +39,25 @@ class DiscardOption(object):
         self.shanten = shanten
         self.waiting = waiting
         self.tiles_count = tiles_count
+        self.tiles_count_second_level = 0
+        self.count_of_dora = 0
         self.danger = danger
         self.had_to_be_saved = False
         self.had_to_be_discarded = False
 
         self.calculate_value()
+
+    def __unicode__(self):
+        tile_format_136 = TilesConverter.to_one_line_string([self.tile_to_discard*4])
+        return 'tile={}, ukeire={}, ukeire2={}, valuation={}'.format(
+            tile_format_136,
+            self.tiles_count,
+            self.tiles_count_second_level,
+            self.valuation
+        )
+
+    def __repr__(self):
+        return '{}'.format(self.__unicode__())
 
     def find_tile_in_hand(self, closed_hand):
         """
@@ -84,8 +101,12 @@ class DiscardOption(object):
                 # for west-west, east-east we had to double tile value
                 value += honored_value * len(count_of_winds)
         else:
-            # suits
-            suit_tile_grades = [10, 20, 30, 40, 50, 40, 30, 20, 10]
+            # aim for tanyao
+            if self.player.ai.current_strategy and self.player.ai.current_strategy.type == BaseStrategy.TANYAO:
+                suit_tile_grades = [10, 20, 30, 50, 40, 50, 30, 20, 10]
+            # usual hand
+            else:
+                suit_tile_grades = [10, 20, 40, 50, 30, 50, 40, 20, 10]
             simplified_tile = simplify(self.tile_to_discard)
             value += suit_tile_grades[simplified_tile]
 
@@ -93,7 +114,8 @@ class DiscardOption(object):
         if is_aka_dora(self.tile_to_discard * 4, self.player.table.has_open_tanyao):
             count_of_dora += 1
 
-        value += 50 * count_of_dora
+        self.count_of_dora = count_of_dora
+        value += count_of_dora * 50
 
         if is_honor(self.tile_to_discard):
             # depends on how much honor tiles were discarded

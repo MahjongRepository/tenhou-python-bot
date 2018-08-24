@@ -155,20 +155,20 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         results, shanten = player.ai.calculate_outs(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
-        self.assertEqual(result.tiles_count, 8)
+        self.assertEqual(result.ukeire, 8)
 
         player.table.add_discarded_tile(1, self._string_to_136_tile(sou='5'), False)
 
         results, shanten = player.ai.calculate_outs(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
-        self.assertEqual(result.tiles_count, 7)
+        self.assertEqual(result.ukeire, 7)
 
         player.table.add_discarded_tile(2, self._string_to_136_tile(sou='5'), False)
         player.table.add_discarded_tile(3, self._string_to_136_tile(sou='8'), False)
 
         results, shanten = player.ai.calculate_outs(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
-        self.assertEqual(result.tiles_count, 5)
+        self.assertEqual(result.ukeire, 5)
 
     def test_remaining_tiles_and_opened_meld(self):
         table = Table()
@@ -179,7 +179,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         results, shanten = player.ai.calculate_outs(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
-        self.assertEqual(result.tiles_count, 8)
+        self.assertEqual(result.ukeire, 8)
 
         # was discard and set was opened
         tile = self._string_to_136_tile(sou='8')
@@ -190,7 +190,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         results, shanten = player.ai.calculate_outs(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
-        self.assertEqual(result.tiles_count, 5)
+        self.assertEqual(result.ukeire, 5)
 
         # was discard and set was opened
         tile = self._string_to_136_tile(sou='3')
@@ -201,7 +201,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         results, shanten = player.ai.calculate_outs(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
-        self.assertEqual(result.tiles_count, 4)
+        self.assertEqual(result.ukeire, 4)
 
     def test_remaining_tiles_and_dora_indicators(self):
         table = Table()
@@ -212,13 +212,13 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         results, shanten = player.ai.calculate_outs(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
-        self.assertEqual(result.tiles_count, 8)
+        self.assertEqual(result.ukeire, 8)
 
         table.add_dora_indicator(self._string_to_136_tile(sou='8'))
 
         results, shanten = player.ai.calculate_outs(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
-        self.assertEqual(result.tiles_count, 7)
+        self.assertEqual(result.ukeire, 7)
 
     def test_using_tiles_of_different_suit_for_chi(self):
         """

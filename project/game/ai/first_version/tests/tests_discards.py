@@ -220,7 +220,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         discarded_tile = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '7z')
 
-    def test_prefer_valuable_tiles_with_almost_same_tiles_count(self):
+    def test_prefer_valuable_tiles_with_almost_same_ukeire(self):
         table = Table()
         player = table.player
         table.add_dora_indicator(self._string_to_136_tile(sou='4'))

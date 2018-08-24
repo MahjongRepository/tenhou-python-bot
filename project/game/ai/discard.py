@@ -14,8 +14,8 @@ class DiscardOption(object):
     # array of tiles that will improve our hand
     waiting = None
     # how much tiles will improve our hand
-    tiles_count = None
-    tiles_count_second_level = None
+    ukeire = None
+    ukeire_second = None
     # number of shanten for that tile
     shanten = None
     # sometimes we had to force tile to be discarded
@@ -27,19 +27,19 @@ class DiscardOption(object):
     # how danger this tile is
     danger = None
 
-    def __init__(self, player, tile_to_discard, shanten, waiting, tiles_count, danger=100):
+    def __init__(self, player, tile_to_discard, shanten, waiting, ukeire, danger=100):
         """
         :param player:
         :param tile_to_discard: tile in 34 format
         :param waiting: list of tiles in 34 format
-        :param tiles_count: count of tiles to wait after discard
+        :param ukeire: count of tiles to wait after discard
         """
         self.player = player
         self.tile_to_discard = tile_to_discard
         self.shanten = shanten
         self.waiting = waiting
-        self.tiles_count = tiles_count
-        self.tiles_count_second_level = 0
+        self.ukeire = ukeire
+        self.ukeire_second = 0
         self.count_of_dora = 0
         self.danger = danger
         self.had_to_be_saved = False
@@ -51,8 +51,8 @@ class DiscardOption(object):
         tile_format_136 = TilesConverter.to_one_line_string([self.tile_to_discard*4])
         return 'tile={}, ukeire={}, ukeire2={}, valuation={}'.format(
             tile_format_136,
-            self.tiles_count,
-            self.tiles_count_second_level,
+            self.ukeire,
+            self.ukeire_second,
             self.valuation
         )
 

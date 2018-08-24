@@ -36,7 +36,7 @@ class ImplementationAI(InterfaceAI):
 
     previous_shanten = 7
     ukeire = 0
-    tiles_count_second_level = 0
+    ukeire_second = 0
     in_defence = False
     waiting = None
 
@@ -52,7 +52,7 @@ class ImplementationAI(InterfaceAI):
         self.finished_hand = HandCalculator()
         self.previous_shanten = 7
         self.ukeire = 0
-        self.tiles_count_second_level = 0
+        self.ukeire_second = 0
         self.current_strategy = None
         self.waiting = []
         self.in_defence = False
@@ -71,7 +71,7 @@ class ImplementationAI(InterfaceAI):
         self.last_discard_option = None
         self.previous_shanten = 7
         self.ukeire = 0
-        self.tiles_count_second_level = 0
+        self.ukeire_second = 0
 
     def draw_tile(self, tile):
         """
@@ -116,7 +116,7 @@ class ImplementationAI(InterfaceAI):
         # we had to update tiles value there
         # because it is related with shanten number
         for result in results:
-            result.tiles_count = self.count_tiles(result.waiting, tiles_34)
+            result.ukeire = self.count_tiles(result.waiting, tiles_34)
             result.calculate_value(shanten)
 
         # current strategy can affect on our discard options
@@ -168,7 +168,7 @@ class ImplementationAI(InterfaceAI):
                                              shanten=shanten,
                                              tile_to_discard=hand_tile,
                                              waiting=waiting,
-                                             tiles_count=self.count_tiles(waiting, tiles_34)))
+                                             ukeire=self.count_tiles(waiting, tiles_34)))
 
         if is_agari:
             shanten = Shanten.AGARI_STATE
@@ -238,12 +238,12 @@ class ImplementationAI(InterfaceAI):
 
         had_to_be_discarded_tiles = [x for x in results if x.had_to_be_discarded]
         if had_to_be_discarded_tiles:
-            return sorted(had_to_be_discarded_tiles, key=lambda x: (x.shanten, -x.tiles_count, x.valuation))[0]
+            return sorted(had_to_be_discarded_tiles, key=lambda x: (x.shanten, -x.ukeire, x.valuation))[0]
 
         # remove needed tiles from discard options
         results = [x for x in results if not x.had_to_be_saved]
 
-        results = sorted(results, key=lambda x: (x.shanten, -x.tiles_count))
+        results = sorted(results, key=lambda x: (x.shanten, -x.ukeire))
         first_option = results[0]
         results_with_same_shanten = [x for x in results if x.shanten == first_option.shanten]
 
@@ -255,22 +255,22 @@ class ImplementationAI(InterfaceAI):
                 continue
 
             # we don't need to select tiles almost dead waits
-            if discard_option.tiles_count <= 2:
+            if discard_option.ukeire <= 2:
                 continue
 
-            tiles_count_borders = round((first_option.tiles_count / 100) * border_percentage)
+            ukeire_borders = round((first_option.ukeire / 100) * border_percentage)
 
-            if first_option.shanten == 0 and tiles_count_borders < 2:
-                tiles_count_borders = 2
+            if first_option.shanten == 0 and ukeire_borders < 2:
+                ukeire_borders = 2
 
-            if first_option.shanten == 1 and tiles_count_borders < 4:
-                tiles_count_borders = 4
+            if first_option.shanten == 1 and ukeire_borders < 4:
+                ukeire_borders = 4
 
-            if first_option.shanten >= 2 and tiles_count_borders < 8:
-                tiles_count_borders = 8
+            if first_option.shanten >= 2 and ukeire_borders < 8:
+                ukeire_borders = 8
 
             # let's choose tiles that are close to the max ukeire tile
-            if discard_option.tiles_count >= first_option.tiles_count - tiles_count_borders:
+            if discard_option.ukeire >= first_option.ukeire - ukeire_borders:
                 possible_options.append(discard_option)
 
         if first_option.shanten <= 1:
@@ -280,14 +280,14 @@ class ImplementationAI(InterfaceAI):
         # as second step
         # let's choose tiles that are close to the max ukeire2 tile
         for x in possible_options:
-            self.calculate_second_level_tiles_count(x)
+            self.calculate_second_level_ukeire(x)
 
-        possible_options = sorted(possible_options, key=lambda x: -x.tiles_count_second_level)
+        possible_options = sorted(possible_options, key=lambda x: -x.ukeire_second)
 
         filter_percentage = 20
         filtered_options = self._filter_list_by_percentage(
             possible_options,
-            'tiles_count_second_level',
+            'ukeire_second',
             filter_percentage
         )
 
@@ -298,12 +298,12 @@ class ImplementationAI(InterfaceAI):
             min_dora_list = [x for x in filtered_options if x.count_of_dora == min_dora]
 
             # let's discard tile with greater ukeire2
-            return sorted(min_dora_list, key=lambda x: -x.tiles_count_second_level)[0]
+            return sorted(min_dora_list, key=lambda x: -x.ukeire_second)[0]
 
         second_filter_percentage = 10
         filtered_options = self._filter_list_by_percentage(
             filtered_options,
-            'tiles_count_second_level',
+            'ukeire_second',
             second_filter_percentage
         )
 
@@ -316,14 +316,14 @@ class ImplementationAI(InterfaceAI):
 
         # there are no isolated tiles
         # let's discard tile with greater ukeire2
-        return sorted(filtered_options, key=lambda x: -x.tiles_count_second_level)[0]
+        return sorted(filtered_options, key=lambda x: -x.ukeire_second)[0]
 
     def process_discard_option(self, discard_option, closed_hand, force_discard=False):
         self.waiting = discard_option.waiting
         self.player.ai.previous_shanten = discard_option.shanten
         self.player.in_tempai = self.player.ai.previous_shanten == 0
-        self.player.ai.ukeire = discard_option.tiles_count
-        self.player.ai.tiles_count_second_level = discard_option.tiles_count_second_level
+        self.player.ai.ukeire = discard_option.ukeire
+        self.player.ai.ukeire_second = discard_option.ukeire_second
 
         # when we called meld we don't need "smart" discard
         if force_discard:
@@ -479,7 +479,7 @@ class ImplementationAI(InterfaceAI):
         if self.defence.should_go_to_defence_mode():
             self.in_defence = True
 
-    def calculate_second_level_tiles_count(self, discard_option):
+    def calculate_second_level_ukeire(self, discard_option):
         tiles = copy.copy(self.player.tiles)
         tiles.remove(discard_option.find_tile_in_hand(self.player.closed_hand))
 
@@ -494,11 +494,11 @@ class ImplementationAI(InterfaceAI):
                 self.player.open_hand_34_tiles
             )
             results = [x for x in results if x.shanten == discard_option.shanten - 1]
-            sum_tiles += sum([x.tiles_count for x in results])
+            sum_tiles += sum([x.ukeire for x in results])
 
             tiles.remove(wait)
 
-        discard_option.tiles_count_second_level = sum_tiles
+        discard_option.ukeire_second = sum_tiles
 
     @property
     def enemy_players(self):
@@ -510,8 +510,8 @@ class ImplementationAI(InterfaceAI):
     def _filter_list_by_percentage(self, items, attribute, percentage):
         filtered_options = []
         first_option = items[0]
-        tiles_count_borders = round((getattr(first_option, attribute) / 100) * percentage)
+        ukeire_borders = round((getattr(first_option, attribute) / 100) * percentage)
         for x in items:
-            if getattr(x, attribute) >= getattr(first_option, attribute) - tiles_count_borders:
+            if getattr(x, attribute) >= getattr(first_option, attribute) - ukeire_borders:
                 filtered_options.append(x)
         return filtered_options

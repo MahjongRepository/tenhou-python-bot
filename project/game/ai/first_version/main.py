@@ -19,6 +19,7 @@ from game.ai.first_version.strategies.honitsu import HonitsuStrategy
 from game.ai.first_version.strategies.main import BaseStrategy
 from game.ai.first_version.strategies.tanyao import TanyaoStrategy
 from game.ai.first_version.strategies.yakuhai import YakuhaiStrategy
+from game.ai.first_version.strategies.formal_tempai import FormalTempaiStrategy
 
 logger = logging.getLogger('ai')
 
@@ -34,6 +35,8 @@ class ImplementationAI(InterfaceAI):
     last_discard_option = None
 
     previous_shanten = 7
+    ukeire = 0
+    tiles_count_second_level = 0
     in_defence = False
     waiting = None
 
@@ -48,6 +51,8 @@ class ImplementationAI(InterfaceAI):
         self.hand_divider = HandDivider()
         self.finished_hand = HandCalculator()
         self.previous_shanten = 7
+        self.ukeire = 0
+        self.tiles_count_second_level = 0
         self.current_strategy = None
         self.waiting = []
         self.in_defence = False
@@ -61,8 +66,12 @@ class ImplementationAI(InterfaceAI):
 
     def erase_state(self):
         self.current_strategy = None
+        self.waiting = []
         self.in_defence = False
         self.last_discard_option = None
+        self.previous_shanten = 7
+        self.ukeire = 0
+        self.tiles_count_second_level = 0
 
     def draw_tile(self, tile):
         """
@@ -203,6 +212,8 @@ class ImplementationAI(InterfaceAI):
         if self.player.table.has_open_tanyao:
             strategies.append(TanyaoStrategy(BaseStrategy.TANYAO, self.player))
 
+        strategies.append(FormalTempaiStrategy(BaseStrategy.FORMAL_TEMPAI, self.player))
+
         for strategy in strategies:
             if strategy.should_activate_strategy():
                 self.current_strategy = strategy
@@ -311,6 +322,8 @@ class ImplementationAI(InterfaceAI):
         self.waiting = discard_option.waiting
         self.player.ai.previous_shanten = discard_option.shanten
         self.player.in_tempai = self.player.ai.previous_shanten == 0
+        self.player.ai.ukeire = discard_option.tiles_count
+        self.player.ai.tiles_count_second_level = discard_option.tiles_count_second_level
 
         # when we called meld we don't need "smart" discard
         if force_discard:

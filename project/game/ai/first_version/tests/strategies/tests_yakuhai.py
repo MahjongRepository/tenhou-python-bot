@@ -12,7 +12,7 @@ from game.table import Table
 
 
 class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
-    
+
     def setUp(self):
         self.table = Table()
         self.player = self.table.player
@@ -132,7 +132,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
 
     def test_open_hand_with_doras_in_the_hand(self):
         """
-        If we have valuable pair in the hand, and 2+ dora let's open on this 
+        If we have valuable pair in the hand, and 2+ dora let's open on this
         valuable pair
         """
 

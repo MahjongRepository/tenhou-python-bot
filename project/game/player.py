@@ -16,6 +16,7 @@ class PlayerInterface(object):
     discards = None
     melds = None
     in_riichi = None
+    round_step = None
 
     # current player seat
     seat = 0
@@ -59,6 +60,7 @@ class PlayerInterface(object):
         self.position = 0
         self.scores = None
         self.uma = 0
+        self.round_step = 0
 
     def add_called_meld(self, meld: Meld):
         # we already added chankan as a pon set
@@ -78,6 +80,9 @@ class PlayerInterface(object):
         for player in self.table.players[1:]:
             if player.in_riichi and tile not in player.safe_tiles:
                 player.safe_tiles.append(tile)
+
+        # one discard == one round step
+        self.round_step += 1
 
     @property
     def player_wind(self):

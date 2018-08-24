@@ -75,6 +75,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         table = Table()
         player = table.player
+        table.dora_indicators.append(self._string_to_136_tile(honors='7'))
         tiles = self._string_to_136_array(man='335666', pin='22', sou='345', honors='55')
         player.init_hand(tiles)
 
@@ -104,6 +105,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         table = Table()
         player = table.player
 
+        table.dora_indicators.append(self._string_to_136_tile(honors='7'))
         tiles = self._string_to_136_array(man='22457', sou='12234', pin='9', honors='55')
         player.init_hand(tiles)
 
@@ -226,6 +228,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         player = table.player
 
         # 16m2679p1348s111z
+        table.dora_indicators.append(self._string_to_136_tile(honors='4'))
         tiles = [0, 21, 41, 56, 61, 70, 74, 80, 84, 102, 108, 110, 111]
         player.init_hand(tiles)
 

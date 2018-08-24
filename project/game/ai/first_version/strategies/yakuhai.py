@@ -1,11 +1,20 @@
 # -*- coding: utf-8 -*-
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
+from mahjong.utils import plus_dora, is_aka_dora
 
 from game.ai.first_version.strategies.main import BaseStrategy
 
 
 class YakuhaiStrategy(BaseStrategy):
+    valued_pairs = None
+    has_valued_pon = None
+
+    def __init__(self, strategy_type, player):
+        super().__init__(strategy_type, player)
+
+        self.valued_pairs = []
+        self.has_valued_pon = False
 
     def should_activate_strategy(self):
         """
@@ -17,12 +26,47 @@ class YakuhaiStrategy(BaseStrategy):
             return False
 
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
-        valued_pairs = [x for x in self.player.valued_honors if tiles_34[x] >= 2]
+        self.valued_pairs = [x for x in self.player.valued_honors if tiles_34[x] >= 2]
+        self.valued_pairs = list(set(self.valued_pairs))
+        self.has_valued_pon = len([x for x in self.player.valued_honors if tiles_34[x] == 3]) > 1
 
-        for pair in valued_pairs:
-            # we have valued pair in the hand and there is enough tiles
+        has_valued_pair = False
+
+        for pair in self.valued_pairs:
+            # we have valued pair in the hand and there are enough tiles
             # in the wall
             if self.player.total_tiles(pair, tiles_34) < 4:
+                has_valued_pair = True
+                break
+
+        # we don't have valuable pair to open our hand
+        if not has_valued_pair:
+            return False
+
+        dora_count = sum([plus_dora(x, self.player.table.dora_indicators) for x in self.player.tiles])
+        dora_count += sum([1 for x in self.player.tiles if is_aka_dora(x, self.player.table.has_open_tanyao)])
+
+        # If we have 1+ dora in the hand and there are 2+ valuable pairs let's open hand
+        if len(self.valued_pairs) >= 2 and dora_count >= 1:
+            return True
+
+        # If we have 2+ dora in the hand let's open hand
+        if dora_count >= 2:
+            for x in range(0, 34):
+                # we have other pair in the hand
+                # so we can open hand for atodzuke
+                if tiles_34[x] >= 2 and x not in self.valued_pairs:
+                    self.go_for_atodzuke = True
+            return True
+
+        # If we have 1+ dora in the hand and there is 5+ round step let's open hand
+        if dora_count >= 1 and self.player.round_step > 5:
+            return True
+
+        for pair in self.valued_pairs:
+            # this valuable tile was discarded once
+            # let's open on it in that case
+            if self.player.total_tiles(pair, tiles_34) == 3 and self.player.ai.previous_shanten > 1:
                 return True
 
         return False
@@ -95,6 +139,20 @@ class YakuhaiStrategy(BaseStrategy):
                 return True
 
         return False
+
+    def try_to_call_meld(self, tile, is_kamicha_discard):
+        if self.has_valued_pon:
+            return super(YakuhaiStrategy, self).try_to_call_meld(tile, is_kamicha_discard)
+
+        tile_34 = tile // 4
+        # we will open hand for atodzuke only in the special cases
+        if not self.player.is_open_hand and tile_34 not in self.valued_pairs:
+            if self.go_for_atodzuke:
+                return super(YakuhaiStrategy, self).try_to_call_meld(tile, is_kamicha_discard)
+
+            return None, None
+
+        return super(YakuhaiStrategy, self).try_to_call_meld(tile, is_kamicha_discard)
 
     def _is_yakuhai_pon(self, meld):
         return meld.type == Meld.PON and meld.tiles[0] // 4 in self.player.valued_honors

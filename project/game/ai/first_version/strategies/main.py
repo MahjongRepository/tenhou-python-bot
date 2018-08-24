@@ -19,10 +19,12 @@ class BaseStrategy(object):
     type = None
     # number of shanten where we can start to open hand
     min_shanten = 7
+    go_for_atodzuke = False
 
     def __init__(self, strategy_type, player):
         self.type = strategy_type
         self.player = player
+        self.go_for_atodzuke = False
 
     def __str__(self):
         return self.TYPES[self.type]

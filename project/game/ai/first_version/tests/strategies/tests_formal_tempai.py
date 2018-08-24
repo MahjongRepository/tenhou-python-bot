@@ -23,8 +23,13 @@ class FormalTempaiStrategyTestCase(unittest.TestCase, TestMixin):
         self.player.init_hand(tiles)
         self.assertEqual(strategy.should_activate_strategy(), False)
 
-        # Let's move to 10th round step
-        for i in range(0, 10):
+        self.player.draw_tile(self._string_to_136_tile(honors='1'))
+        # to calculate hand shanten number
+        self.player.discard_tile()
+
+        # Let's move to 10th round step, one tile was already discarded, 9 more
+        # to go
+        for i in range(0, 9):
             self.player.add_discarded_tile(Tile(0, False))
 
         self.assertEqual(strategy.should_activate_strategy(), False)

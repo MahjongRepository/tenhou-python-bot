@@ -39,10 +39,9 @@ class FormalTempaiStrategy(BaseStrategy):
                 # having 0 or 1 dora and 2 shanten, let's go for formal tempai
                 # starting from 11th turn
                 return True
-            else:
-                # having 2 or more doras and 2 shanten, let's go for formal
-                # tempai starting from 12th turn
-                return (self.player.round_step >= 12)
+            # having 2 or more doras and 2 shanten, let's go for formal
+            # tempai starting from 12th turn
+            return self.player.round_step >= 12
 
         # for 1 shanten we check number of doras and ukeire to determine
         # correct time to go for formal tempai
@@ -50,22 +49,25 @@ class FormalTempaiStrategy(BaseStrategy):
             if dora_count == 0:
                 if self.player.ai.ukeire <= 16:
                     return True
-                elif self.player.ai.ukeire <= 28:
-                    return (self.player.round_step >= 12)
-                else:
-                    return (self.player.round_step >= 13)
-            elif dora_count == 1:
+
+                if self.player.ai.ukeire <= 28:
+                    return self.player.round_step >= 12
+
+                return self.player.round_step >= 13
+
+            if dora_count == 1:
                 if self.player.ai.ukeire <= 16:
-                    return (self.player.round_step >= 12)
-                elif self.player.ai.ukeire <= 28:
-                    return (self.player.round_step >= 13)
-                else:
-                    return (self.player.round_step >= 14)
-            else:
-                if self.player.ai.ukeire <= 16:
-                    return (self.player.round_step >= 13)
-                else:
-                    return (self.player.round_step >= 14)
+                    return self.player.round_step >= 12
+
+                if self.player.ai.ukeire <= 28:
+                    return self.player.round_step >= 13
+
+                return self.player.round_step >= 14
+
+            if self.player.ai.ukeire <= 16:
+                return self.player.round_step >= 13
+
+            return self.player.round_step >= 14
 
         # we actually never reach here
         return False

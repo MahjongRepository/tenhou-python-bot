@@ -32,3 +32,4 @@ class FormalTempaiStrategyTestCase(unittest.TestCase, TestMixin):
         # Now we move to 11th turn, we have 2 shanten and no doras,
         # we should go for formal tempai
         self.player.add_discarded_tile(Tile(0, True))
+        self.assertEqual(strategy.should_activate_strategy(), True)

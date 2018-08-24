@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from mahjong.constants import EAST, SOUTH
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
 from mahjong.utils import plus_dora, is_aka_dora
@@ -27,8 +28,12 @@ class YakuhaiStrategy(BaseStrategy):
 
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
         self.valued_pairs = [x for x in self.player.valued_honors if tiles_34[x] >= 2]
+
+        is_double_east_wind = len([x for x in self.valued_pairs if x == EAST]) == 2
+        is_double_south_wind = len([x for x in self.valued_pairs if x == SOUTH]) == 2
+
         self.valued_pairs = list(set(self.valued_pairs))
-        self.has_valued_pon = len([x for x in self.player.valued_honors if tiles_34[x] == 3]) > 1
+        self.has_valued_pon = len([x for x in self.player.valued_honors if tiles_34[x] == 3]) >= 1
 
         has_valued_pair = False
 
@@ -45,6 +50,15 @@ class YakuhaiStrategy(BaseStrategy):
 
         dora_count = sum([plus_dora(x, self.player.table.dora_indicators) for x in self.player.tiles])
         dora_count += sum([1 for x in self.player.tiles if is_aka_dora(x, self.player.table.has_open_tanyao)])
+
+        # let's always open double east
+        if is_double_east_wind:
+            return True
+
+        # let's open double south if we have a dora in the hand
+        # or we have other valuable pairs
+        if is_double_south_wind and (dora_count >= 1 or len(self.valued_pairs) >= 2):
+            return True
 
         # If we have 1+ dora in the hand and there are 2+ valuable pairs let's open hand
         if len(self.valued_pairs) >= 2 and dora_count >= 1:

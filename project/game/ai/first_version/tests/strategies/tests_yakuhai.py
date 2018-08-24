@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
+from mahjong.constants import WEST, EAST, SOUTH
 from mahjong.meld import Meld
 from mahjong.tests_mixin import TestMixin
 from mahjong.tile import Tile
@@ -15,6 +16,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
     def setUp(self):
         self.table = Table()
         self.player = self.table.player
+        self.player.dealer_seat = 3
 
     def test_should_activate_strategy(self):
         strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, self.player)
@@ -281,9 +283,58 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(meld, None)
 
     def test_open_hand_when_yakuhai_already_in_the_hand(self):
-        tiles = self._string_to_136_array(man='46', pin='4679', sou='1348', honors='111')
+        tiles = self._string_to_136_array(man='46', pin='4679', sou='1348', honors='555')
         self.player.init_hand(tiles)
 
         tile = self._string_to_136_tile(sou='2')
+        meld, _ = self.player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+
+    def test_always_open_double_east_wind(self):
+        tiles = self._string_to_136_array(man='59', sou='1235', pin='12788', honors='11')
+        self.player.init_hand(tiles)
+
+        # player is is not east
+        self.player.dealer_seat = 2
+        self.assertEqual(self.player.player_wind, WEST)
+
+        self.player.init_hand(tiles)
+        tile = self._string_to_136_tile(honors='1')
+        meld, _ = self.player.try_to_call_meld(tile, True)
+        self.assertEqual(meld, None)
+
+        # player is is east
+        self.player.dealer_seat = 0
+        self.assertEqual(self.player.player_wind, EAST)
+
+        self.player.init_hand(tiles)
+        tile = self._string_to_136_tile(honors='1')
+        meld, _ = self.player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+
+    def test_open_double_south_wind(self):
+        tiles = self._string_to_136_array(man='59', sou='1235', pin='12788', honors='22')
+        self.player.init_hand(tiles)
+
+        self.player.init_hand(tiles)
+        tile = self._string_to_136_tile(honors='2')
+        meld, _ = self.player.try_to_call_meld(tile, True)
+        self.assertEqual(meld, None)
+
+        # player is south and round is south
+        self.table.round_number = 5
+        self.player.dealer_seat = 3
+        self.assertEqual(self.player.player_wind, SOUTH)
+
+        self.player.init_hand(tiles)
+        tile = self._string_to_136_tile(honors='2')
+        meld, _ = self.player.try_to_call_meld(tile, True)
+        self.assertEqual(meld, None)
+
+        # add dora in the hand and after that we can open a hand
+        self.table.dora_indicators.append(self._string_to_136_tile(pin='6'))
+
+        self.player.init_hand(tiles)
+        tile = self._string_to_136_tile(honors='2')
         meld, _ = self.player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)

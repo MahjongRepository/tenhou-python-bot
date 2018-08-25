@@ -273,10 +273,6 @@ class TenhouClient(Client):
 
                     drawn_tile = self.decoder.parse_tile(message)
 
-                    if drawn_tile == 26:
-                        d = 1
-                        print(TilesConverter.to_one_line_string(self.player.tiles))
-
                     if not main_player.in_riichi:
                         logger.info('Hand: {}'.format(main_player.format_hand_for_print(drawn_tile)))
 

@@ -205,7 +205,7 @@ class DefenceHandler(object):
         if not was_safe_tiles:
             return None
 
-        final_results = sorted(discard_tiles, key=lambda x: (x.danger, x.shanten, -x.tiles_count, x.valuation))
+        final_results = sorted(discard_tiles, key=lambda x: (x.danger, x.shanten, -x.ukeire, x.valuation))
 
         return final_results[0]
 

@@ -8,11 +8,13 @@ class BaseStrategy(object):
     YAKUHAI = 0
     HONITSU = 1
     TANYAO = 2
+    FORMAL_TEMPAI = 3
 
     TYPES = {
         YAKUHAI: 'Yakuhai',
         HONITSU: 'Honitsu',
         TANYAO: 'Tanyao',
+        FORMAL_TEMPAI: 'Formal Tempai'
     }
 
     player = None

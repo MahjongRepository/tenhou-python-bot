@@ -12,7 +12,7 @@ from game.table import Table
 
 
 class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
-    
+
     def setUp(self):
         self.table = Table()
         self.player = self.table.player
@@ -132,7 +132,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
 
     def test_open_hand_with_doras_in_the_hand(self):
         """
-        If we have valuable pair in the hand, and 2+ dora let's open on this 
+        If we have valuable pair in the hand, and 2+ dora let's open on this
         valuable pair
         """
 
@@ -254,7 +254,6 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         """
         If we have valuable pair in the hand, this tile was discarded once and we have 1+ shanten
         let's open on this valuable pair
-        5. Если в руке есть ценная пара, один тайл этой ценной пары уже вышел, в руке больше ишантена, то открываемся на этой ценной паре.
         """
 
         tiles = self._string_to_136_array(man='29', sou='1189', pin='12789', honors='11')

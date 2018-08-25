@@ -90,7 +90,7 @@ class ImplementationAI(InterfaceAI):
 
         results, shanten = self.calculate_outs(self.player.tiles,
                                                self.player.closed_hand,
-                                               self.player.open_hand_34_tiles)
+                                               self.player.meld_34_tiles)
 
         selected_tile = self.process_discard_options_and_select_tile_to_discard(results, shanten)
 
@@ -140,7 +140,7 @@ class ImplementationAI(InterfaceAI):
         """
         tiles_34 = TilesConverter.to_34_array(tiles)
         closed_tiles_34 = TilesConverter.to_34_array(closed_hand)
-        is_agari = self.agari.is_agari(tiles_34, self.player.open_hand_34_tiles)
+        is_agari = self.agari.is_agari(tiles_34, self.player.meld_34_tiles)
 
         results = []
         for hand_tile in range(0, 34):
@@ -431,8 +431,9 @@ class ImplementationAI(InterfaceAI):
 
         tile_34 = tile // 4
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
+
         closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
-        pon_melds = [x for x in self.player.open_hand_34_tiles if is_pon(x)]
+        pon_melds = [x for x in self.player.meld_34_tiles if is_pon(x)]
 
         # let's check can we upgrade opened pon to the kan
         if pon_melds:
@@ -447,16 +448,13 @@ class ImplementationAI(InterfaceAI):
         if open_kan:
             count_of_needed_tiles = 3
 
-        # we have 3 tiles in our hand,
-        # so we can try to call closed meld
+        # we can try to call closed meld
         if closed_hand_34[tile_34] == count_of_needed_tiles:
-            if not open_kan:
-                # to correctly count shanten in the hand
-                # we had do subtract drown tile
-                tiles_34[tile_34] -= 1
-
-            melds = self.player.open_hand_34_tiles
+            melds = self.player.meld_34_tiles
             previous_shanten = self.shanten.calculate_shanten(tiles_34, melds)
+
+            if not open_kan:
+                tiles_34[tile_34] -= 1
 
             melds += [[tile_34, tile_34, tile_34]]
             new_shanten = self.shanten.calculate_shanten(tiles_34, melds)
@@ -491,7 +489,7 @@ class ImplementationAI(InterfaceAI):
             results, shanten = self.calculate_outs(
                 tiles,
                 self.player.closed_hand,
-                self.player.open_hand_34_tiles
+                self.player.meld_34_tiles
             )
             results = [x for x in results if x.shanten == discard_option.shanten - 1]
             sum_tiles += sum([x.ukeire for x in results])

@@ -178,7 +178,7 @@ class BaseStrategy(object):
         if best_meld_34:
             # we need to calculate count of shanten with supposed meld
             # to prevent bad hand openings
-            melds = self.player.open_hand_34_tiles + [best_meld_34]
+            melds = self.player.meld_34_tiles + [best_meld_34]
             outs_results, shanten = self.player.ai.calculate_outs(new_tiles, closed_hand, melds)
 
             # each strategy can use their own value to min shanten number
@@ -258,7 +258,7 @@ class BaseStrategy(object):
 
         results = []
         for meld in possible_melds:
-            melds = self.player.open_hand_34_tiles + [meld]
+            melds = self.player.meld_34_tiles + [meld]
             shanten = self.player.ai.shanten.calculate_shanten(completed_hand_34, melds)
             results.append({'shanten': shanten, 'meld': meld})
 

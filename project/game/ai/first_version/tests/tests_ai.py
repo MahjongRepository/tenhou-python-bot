@@ -319,43 +319,6 @@ class AITestCase(unittest.TestCase, TestMixin):
         tile = self._string_to_136_tile(sou='1')
         self.assertEqual(player.should_call_kan(tile, True), Meld.KAN)
 
-    def test_closed_kan_and_riichi(self):
-        table = Table()
-        table.count_of_remaining_tiles = 60
-        player = table.player
-        player.scores = 25000
-
-        kan_tiles = self._string_to_136_array(pin='7777')
-        tiles = self._string_to_136_array(pin='568', sou='1235788') + kan_tiles[:3]
-        player.init_hand(tiles)
-
-        # +3 to avoid tile duplication of 7 pin
-        tile = kan_tiles[3]
-        player.draw_tile(tile)
-
-        kan_type = player.should_call_kan(tile, False)
-        self.assertEqual(kan_type, Meld.KAN)
-
-        meld = Meld()
-        meld.type = Meld.KAN
-        meld.tiles = kan_tiles
-        meld.called_tile = tile
-        meld.who = 0
-        meld.from_who = 0
-        meld.opened = False
-
-        # replacement from the dead wall
-        player.draw_tile(self._string_to_136_tile(pin='4'))
-        table.add_called_meld(meld.who, meld)
-        discard = player.discard_tile()
-
-        self.assertEqual(self._to_string([discard]), '8p')
-        self.assertEqual(player.can_call_riichi(), True)
-
-        # with closed kan we can't call riichi
-        player.melds[0].opened = True
-        self.assertEqual(player.can_call_riichi(), False)
-
     def test_dont_call_kan_in_defence_mode(self):
         table = Table()
 
@@ -366,3 +329,35 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         tile = self._string_to_136_tile(sou='1')
         self.assertEqual(table.player.should_call_kan(tile, False), None)
+
+    def test_closed_kan_and_wrong_shanten_number_calculation(self):
+        """
+        Bot tried to call riichi with 567m666p14578s + [9999s] hand
+        """
+        table = Table()
+        player = table.player
+
+        tiles = self._string_to_136_array(man='56', sou='14578999', pin='666')
+        player.init_hand(tiles)
+        tile = self._string_to_136_tile(man='7')
+        player.melds.append(self._make_meld(Meld.KAN, False, sou='9999'))
+        player.draw_tile(tile)
+
+        player.discard_tile()
+
+        # bot not in the tempai, because all 9s in the closed kan
+        self.assertEqual(player.ai.previous_shanten, 1)
+
+    def test_closed_kan_and_not_necessary_call(self):
+        """
+        Bot tried to call closed kan with 568m669p1478999s + 9s hand
+        """
+        table = Table()
+        player = table.player
+
+        tiles = self._string_to_136_array(man='568', sou='1478999', pin='669')
+        player.init_hand(tiles)
+        tile = self._string_to_136_tile(sou='9')
+        player.draw_tile(tile)
+
+        self.assertEqual(player.should_call_kan(tile, False), None)

@@ -116,6 +116,19 @@ class PlayerInterface(object):
             result.extend(meld.tiles)
         return result
 
+    @property
+    def meld_34_tiles(self):
+        """
+        Array of array with 34 tiles indices
+        :return: array
+        """
+        melds = [x.tiles for x in self.melds]
+        melds = copy.deepcopy(melds)
+        results = []
+        for meld in melds:
+            results.append([meld[0] // 4, meld[1] // 4, meld[2] // 4])
+        return results
+
 
 class Player(PlayerInterface):
     ai = None
@@ -235,19 +248,6 @@ class Player(PlayerInterface):
     def closed_hand(self):
         tiles = self.tiles[:]
         return [item for item in tiles if item not in self.meld_tiles]
-
-    @property
-    def open_hand_34_tiles(self):
-        """
-        Array of array with 34 tiles indices
-        :return: array
-        """
-        melds = [x.tiles for x in self.melds if x.opened]
-        melds = copy.deepcopy(melds)
-        results = []
-        for meld in melds:
-            results.append([meld[0] // 4, meld[1] // 4, meld[2] // 4])
-        return results
 
     @property
     def valued_honors(self):

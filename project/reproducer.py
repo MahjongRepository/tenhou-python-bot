@@ -292,7 +292,7 @@ def parse_args_and_start_reproducer():
         reproducer = TenhouLogReproducer(opts.online_log, opts.tag)
         reproducer.reproduce(opts.dry_run)
     else:
-        set_up_logging()
+        set_up_logging(save_to_file=False)
 
         client = TenhouClient(SocketMock(opts.local_log))
         try:

@@ -108,7 +108,9 @@ class Suji(Defence):
 
         # mark dora tiles as dangerous tiles to discard
         for tile in result:
-            if plus_dora(tile.value * 4, self.table.dora_indicators) or is_aka_dora(tile.value * 4, self.table.has_open_tanyao):
+            is_dora = plus_dora(tile.value * 4, self.table.dora_indicators) \
+                      or is_aka_dora(tile.value * 4, self.table.has_open_tanyao)
+            if is_dora:
                 tile.danger += 100
 
         return result

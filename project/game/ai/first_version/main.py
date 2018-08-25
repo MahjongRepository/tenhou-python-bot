@@ -329,7 +329,7 @@ class ImplementationAI(InterfaceAI):
         if force_discard:
             return discard_option.find_tile_in_hand(closed_hand)
 
-        last_draw_34 = self.player.last_draw  and self.player.last_draw // 4 or None
+        last_draw_34 = self.player.last_draw and self.player.last_draw // 4 or None
         if self.player.last_draw not in AKA_DORA_LIST and last_draw_34 == discard_option.tile_to_discard:
             return self.player.last_draw
         else:

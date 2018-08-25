@@ -140,6 +140,3 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
 
         self.assertEqual(strategy.should_activate_strategy(), False)
-
-
-

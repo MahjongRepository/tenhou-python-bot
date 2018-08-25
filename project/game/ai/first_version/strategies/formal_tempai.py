@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from mahjong.meld import Meld
-from mahjong.tile import TilesConverter
 from mahjong.utils import plus_dora, is_aka_dora
 
 from game.ai.first_version.strategies.main import BaseStrategy

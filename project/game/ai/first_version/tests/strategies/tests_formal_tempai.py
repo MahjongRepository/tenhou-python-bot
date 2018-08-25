@@ -4,8 +4,8 @@ import unittest
 from mahjong.tests_mixin import TestMixin
 from mahjong.tile import Tile
 
-from game.ai.first_version.strategies.main import BaseStrategy
 from game.ai.first_version.strategies.formal_tempai import FormalTempaiStrategy
+from game.ai.first_version.strategies.main import BaseStrategy
 from game.table import Table
 
 

@@ -32,11 +32,12 @@ def set_up_logging(save_to_file=True):
     logger.addHandler(ch)
 
     if save_to_file:
-        # we shouldn't be afraid about collision
-        # also, we need it to distinguish different bots logs (if they were run in the same time)
-        name_hash = hashlib.sha1(settings.USER_ID.encode('utf-8')).hexdigest()[:5]
+        # we need it to distinguish different bots logs (if they were run in the same time)
+        log_prefix = settings.LOG_PREFIX
+        if not log_prefix:
+            log_prefix = hashlib.sha1(settings.USER_ID.encode('utf-8')).hexdigest()[:5]
 
-        file_name = '{}_{}.log'.format(name_hash, datetime.datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
+        file_name = '{}_{}.log'.format(log_prefix, datetime.datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
         fh = logging.FileHandler(os.path.join(logs_directory, file_name), encoding='utf-8')
         fh.setLevel(logging.DEBUG)
         fh.setFormatter(formatter)

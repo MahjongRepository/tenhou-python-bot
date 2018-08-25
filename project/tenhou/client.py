@@ -273,26 +273,26 @@ class TenhouClient(Client):
 
                     drawn_tile = self.decoder.parse_tile(message)
 
+                    logger.info('Hand: {}'.format(main_player.format_hand_for_print(drawn_tile)))
+
+                    kan_type = self.player.should_call_kan(drawn_tile, False, main_player.in_riichi)
+                    if kan_type:
+                        self._random_sleep()
+
+                        if kan_type == Meld.CHANKAN:
+                            meld_type = 5
+                        else:
+                            meld_type = 4
+
+                        self._send_message('<N type="{}" hai="{}" />'.format(meld_type, drawn_tile))
+                        logger.info('We called a closed kan\chankan set!')
+                        continue
+
                     if not main_player.in_riichi:
                         logger.info('Hand: {}'.format(main_player.format_hand_for_print(drawn_tile)))
 
                         self.player.draw_tile(drawn_tile)
-
-                        kan_type = self.player.should_call_kan(drawn_tile, False)
-                        if kan_type and self.table.count_of_remaining_tiles > 1:
-                            self._random_sleep()
-
-                            if kan_type == Meld.CHANKAN:
-                                meld_type = 5
-                            else:
-                                meld_type = 4
-                            self._send_message('<N type="{}" hai="{}" />'.format(meld_type, drawn_tile))
-                            logger.info('We called a closed kan\chankan set!')
-                            continue
-
                         discarded_tile = self.player.discard_tile()
-                        logger.info('Discard: {}'.format(TilesConverter.to_one_line_string([discarded_tile])))
-
                         can_call_riichi = main_player.can_call_riichi()
 
                         # let's call riichi
@@ -307,6 +307,7 @@ class TenhouClient(Client):
 
                     # tenhou format: <D p="133" />
                     self._send_message('<D p="{}"/>'.format(discarded_tile))
+                    logger.info('Discard: {}'.format(TilesConverter.to_one_line_string([discarded_tile])))
 
                     logger.info('Remaining tiles: {}'.format(self.table.count_of_remaining_tiles))
 

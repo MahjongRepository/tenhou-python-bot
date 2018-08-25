@@ -404,14 +404,20 @@ class ImplementationAI(InterfaceAI):
 
         return True
 
-    def should_call_kan(self, tile, open_kan):
+    def should_call_kan(self, tile, open_kan, from_riichi=False):
         """
         Method will decide should we call a kan,
         or upgrade pon to kan
         :param tile: 136 tile format
         :param open_kan: boolean
+        :param from_riichi: boolean
         :return: kan type
         """
+
+        # we can't call kan on the latest tile
+        if self.table.count_of_remaining_tiles <= 1:
+            return None
+
         # we don't need to add dora for other players
         if self.player.ai.in_defence:
             return None
@@ -443,17 +449,15 @@ class ImplementationAI(InterfaceAI):
                 if tile_34 in meld:
                     return Meld.CHANKAN
 
-        count_of_needed_tiles = 4
-        # for open kan 3 tiles is enough to call a kan
-        if open_kan:
-            count_of_needed_tiles = 3
-
         # we can try to call closed meld
-        if closed_hand_34[tile_34] == count_of_needed_tiles:
+        if closed_hand_34[tile_34] == 3:
+            if not open_kan and not from_riichi:
+                tiles_34[tile_34] += 1
+
             melds = self.player.meld_34_tiles
             previous_shanten = self.shanten.calculate_shanten(tiles_34, melds)
 
-            if not open_kan:
+            if not open_kan and not from_riichi:
                 tiles_34[tile_34] -= 1
 
             melds += [[tile_34, tile_34, tile_34]]

@@ -198,14 +198,8 @@ class Player(PlayerInterface):
             self.table.count_of_remaining_tiles > 4
         ])
 
-    def should_call_kan(self, tile, open_kan):
-        """
-        Method will decide should we call a kan,
-        or upgrade pon to kan
-        :param tile: 136 tile format
-        :return:
-        """
-        return self.ai.should_call_kan(tile, open_kan)
+    def should_call_kan(self, tile, open_kan, from_riichi=False):
+        return self.ai.should_call_kan(tile, open_kan, from_riichi)
 
     def should_call_win(self, tile, enemy_seat):
         return self.ai.should_call_win(tile, enemy_seat)

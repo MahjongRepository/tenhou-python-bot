@@ -18,16 +18,16 @@ class AITestCase(unittest.TestCase, TestMixin):
         tile = self._string_to_136_array(man='9')[0]
         player.init_hand(tiles)
         player.draw_tile(tile)
-
         player.discard_tile()
+
         self.assertEqual(player.in_tempai, False)
 
         tiles = self._string_to_136_array(sou='11145677', pin='345', man='56')
         tile = self._string_to_136_array(man='9')[0]
         player.init_hand(tiles)
         player.draw_tile(tile)
-
         player.discard_tile()
+
         self.assertEqual(player.in_tempai, True)
 
     def test_not_open_hand_in_riichi(self):
@@ -269,7 +269,6 @@ class AITestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='12223', sou='111456', pin='12')
         player.init_hand(tiles)
         tile = self._string_to_136_tile(man='2')
-        player.draw_tile(tile)
 
         # it is pretty stupid to call closed kan with 2m
         self.assertEqual(player.should_call_kan(tile, False), None)
@@ -277,7 +276,6 @@ class AITestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='12223', sou='111456', pin='12')
         player.init_hand(tiles)
         tile = self._string_to_136_tile(sou='1')
-        player.draw_tile(tile)
 
         # call closed kan with 1s is fine
         self.assertEqual(player.should_call_kan(tile, False), Meld.KAN)
@@ -342,7 +340,6 @@ class AITestCase(unittest.TestCase, TestMixin):
         tile = self._string_to_136_tile(man='7')
         player.melds.append(self._make_meld(Meld.KAN, False, sou='9999'))
         player.draw_tile(tile)
-
         player.discard_tile()
 
         # bot not in the tempai, because all 9s in the closed kan
@@ -358,6 +355,5 @@ class AITestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='568', sou='1478999', pin='669')
         player.init_hand(tiles)
         tile = self._string_to_136_tile(sou='9')
-        player.draw_tile(tile)
 
         self.assertEqual(player.should_call_kan(tile, False), None)

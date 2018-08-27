@@ -7,6 +7,10 @@ from game.ai.first_version.strategies.main import BaseStrategy
 
 
 class DiscardOption(object):
+    DORA_VALUE = 10000
+    DORA_FIRST_NEIGHBOUR = 1000
+    DORA_SECOND_NEIGHBOUR = 1000
+
     player = None
 
     # in 34 tile format
@@ -120,11 +124,11 @@ class DiscardOption(object):
 
                 # tile close to the dora
                 if simplified_tile + 1 == simplified_dora or simplified_tile - 1 == simplified_dora:
-                    value += 1000
+                    value += DiscardOption.DORA_FIRST_NEIGHBOUR
 
                 # tile not far away from dora
                 if simplified_tile + 2 == simplified_dora or simplified_tile - 2 == simplified_dora:
-                    value += 100
+                    value += DiscardOption.DORA_SECOND_NEIGHBOUR
 
         count_of_dora = plus_dora(self.tile_to_discard * 4, self.player.table.dora_indicators)
 
@@ -133,7 +137,7 @@ class DiscardOption(object):
             count_of_dora += 1
 
         self.count_of_dora = count_of_dora
-        value += count_of_dora * 10000
+        value += count_of_dora * DiscardOption.DORA_VALUE
 
         if is_honor(self.tile_to_discard):
             # depends on how much honor tiles were discarded

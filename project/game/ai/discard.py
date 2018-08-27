@@ -107,8 +107,24 @@ class DiscardOption(object):
             # usual hand
             else:
                 suit_tile_grades = [10, 20, 40, 50, 30, 50, 40, 20, 10]
+
             simplified_tile = simplify(self.tile_to_discard)
             value += suit_tile_grades[simplified_tile]
+
+            for indicator in self.player.table.dora_indicators:
+                simplified_indicator = simplify(indicator // 4)
+                simplified_dora = simplified_indicator + 1
+                # indicator is 9 man
+                if simplified_dora == 9:
+                    simplified_dora = 0
+
+                # tile close to the dora
+                if simplified_tile + 1 == simplified_dora or simplified_tile - 1 == simplified_dora:
+                    value += 1000
+
+                # tile not far away from dora
+                if simplified_tile + 2 == simplified_dora or simplified_tile - 2 == simplified_dora:
+                    value += 100
 
         count_of_dora = plus_dora(self.tile_to_discard * 4, self.player.table.dora_indicators)
 
@@ -117,7 +133,7 @@ class DiscardOption(object):
             count_of_dora += 1
 
         self.count_of_dora = count_of_dora
-        value += count_of_dora * 50
+        value += count_of_dora * 10000
 
         if is_honor(self.tile_to_discard):
             # depends on how much honor tiles were discarded

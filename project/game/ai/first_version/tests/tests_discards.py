@@ -163,13 +163,25 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
         tile = self._string_to_34_tile(sou='1')
         option = DiscardOption(player, tile, 0, [], 0)
-        self.assertEqual(option.valuation, 160)
+        self.assertEqual(option.valuation, 10110)
 
         # double dora
         table.dora_indicators = [self._string_to_136_tile(sou='9'), self._string_to_136_tile(sou='9')]
         tile = self._string_to_34_tile(sou='1')
         option = DiscardOption(player, tile, 0, [], 0)
-        self.assertEqual(option.valuation, 210)
+        self.assertEqual(option.valuation, 20110)
+
+        # tile close to dora
+        table.dora_indicators = [self._string_to_136_tile(sou='9')]
+        tile = self._string_to_34_tile(sou='2')
+        option = DiscardOption(player, tile, 0, [], 0)
+        self.assertEqual(option.valuation, 1120)
+
+        # tile not far away from dora
+        table.dora_indicators = [self._string_to_136_tile(sou='9')]
+        tile = self._string_to_34_tile(sou='3')
+        option = DiscardOption(player, tile, 0, [], 0)
+        self.assertEqual(option.valuation, 240)
 
     def test_discard_not_valuable_honor_first(self):
         table = Table()

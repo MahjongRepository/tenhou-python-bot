@@ -111,7 +111,9 @@ class DiscardOption(object):
             value += suit_tile_grades[simplified_tile]
 
         count_of_dora = plus_dora(self.tile_to_discard * 4, self.player.table.dora_indicators)
-        if is_aka_dora(self.tile_to_discard * 4, self.player.table.has_open_tanyao):
+
+        tile_136 = self.find_tile_in_hand(self.player.closed_hand)
+        if is_aka_dora(tile_136, self.player.table.has_aka_dora):
             count_of_dora += 1
 
         self.count_of_dora = count_of_dora

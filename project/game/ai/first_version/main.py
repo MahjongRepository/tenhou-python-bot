@@ -287,9 +287,9 @@ class ImplementationAI(InterfaceAI):
             filter_percentage
         )
 
-        dora_tiles = [x for x in filtered_options if x.count_of_dora > 0]
+        tiles_without_dora = [x for x in filtered_options if x.count_of_dora == 0]
         # we have only dora candidates to discard
-        if len(dora_tiles) == len(filtered_options):
+        if not tiles_without_dora:
             min_dora = min([x.count_of_dora for x in filtered_options])
             min_dora_list = [x for x in filtered_options if x.count_of_dora == min_dora]
 
@@ -298,7 +298,7 @@ class ImplementationAI(InterfaceAI):
 
         second_filter_percentage = 10
         filtered_options = self._filter_list_by_percentage(
-            filtered_options,
+            tiles_without_dora,
             'ukeire_second',
             second_filter_percentage
         )

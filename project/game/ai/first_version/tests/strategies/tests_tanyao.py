@@ -233,6 +233,17 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         discard = self.player.discard_tile(tile_to_discard)
         self.assertEqual(self._to_string([discard]), '2m')
 
+    def test_we_dont_need_to_discard_terminals_from_closed_hand(self):
+        tiles = self._string_to_136_array(man='22345', sou='13588', pin='558')
+        self.player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(pin='5')
+        self.player.draw_tile(tile)
+        tile_to_discard = self.player.discard_tile()
+
+        # our hand is closed, let's keep terminal for now
+        self.assertEqual(self._to_string([tile_to_discard]), '8p')
+
     def _make_table(self):
         table = Table()
         table.has_open_tanyao = True

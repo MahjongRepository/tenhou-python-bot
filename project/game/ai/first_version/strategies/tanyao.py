@@ -76,6 +76,10 @@ class TanyaoStrategy(BaseStrategy):
 
         is_open_hand = self.player.is_open_hand or hand_was_open
 
+        # our hand is closed, we don't need to discard terminal tiles here
+        if not is_open_hand:
+            return outs_results
+
         if shanten == 0 and is_open_hand:
             results = []
             # there is no sense to wait 1-4 if we have open hand
@@ -90,13 +94,13 @@ class TanyaoStrategy(BaseStrategy):
                 return outs_results
 
             return results
-        else:
-            return super(TanyaoStrategy, self).determine_what_to_discard(closed_hand,
-                                                                         outs_results,
-                                                                         shanten,
-                                                                         for_open_hand,
-                                                                         tile_for_open_hand,
-                                                                         hand_was_open)
+
+        return super(TanyaoStrategy, self).determine_what_to_discard(closed_hand,
+                                                                     outs_results,
+                                                                     shanten,
+                                                                     for_open_hand,
+                                                                     tile_for_open_hand,
+                                                                     hand_was_open)
 
     def is_tile_suitable(self, tile):
         """

@@ -9,7 +9,7 @@ from game.ai.first_version.strategies.main import BaseStrategy
 class DiscardOption(object):
     DORA_VALUE = 10000
     DORA_FIRST_NEIGHBOUR = 1000
-    DORA_SECOND_NEIGHBOUR = 1000
+    DORA_SECOND_NEIGHBOUR = 100
 
     player = None
 

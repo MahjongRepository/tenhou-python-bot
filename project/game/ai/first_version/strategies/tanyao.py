@@ -24,6 +24,7 @@ class TanyaoStrategy(BaseStrategy):
         count_of_terminal_pon_sets = 0
         count_of_terminal_pairs = 0
         count_of_valued_pairs = 0
+        count_of_not_suitable_tiles = 0
         for x in range(0, 34):
             tile = tiles[x]
             if not tile:
@@ -37,6 +38,13 @@ class TanyaoStrategy(BaseStrategy):
 
                 if x in self.player.valued_honors:
                     count_of_valued_pairs += 1
+
+            if x in self.not_suitable_tiles:
+                count_of_not_suitable_tiles += 1
+
+        # we have too much terminals and honors
+        if count_of_not_suitable_tiles >= 5:
+            return False
 
         # if we already have pon of honor\terminal tiles
         # we don't need to open hand for tanyao

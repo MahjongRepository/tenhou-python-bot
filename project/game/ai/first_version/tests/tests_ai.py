@@ -239,83 +239,83 @@ class AITestCase(unittest.TestCase, TestMixin):
 
     def test_upgrade_opened_pon_to_kan(self):
         table = Table()
-        player = table.player
+        table.count_of_remaining_tiles = 10
 
         tiles = self._string_to_136_array(man='34445', sou='123456', pin='89')
-        player.init_hand(tiles)
+        table.player.init_hand(tiles)
         tile = self._string_to_136_tile(man='4')
-        player.draw_tile(tile)
+        table.player.draw_tile(tile)
 
-        self.assertEqual(player.should_call_kan(tile, False), None)
+        self.assertEqual(table.player.should_call_kan(tile, False), None)
 
-        player.add_called_meld(self._make_meld(Meld.PON, man='444'))
+        table.player.add_called_meld(self._make_meld(Meld.PON, man='444'))
 
-        self.assertEqual(len(player.melds), 1)
-        self.assertEqual(len(player.tiles), 14)
-        self.assertEqual(player.should_call_kan(tile, False), Meld.CHANKAN)
+        self.assertEqual(len(table.player.melds), 1)
+        self.assertEqual(len(table.player.tiles), 14)
+        self.assertEqual(table.player.should_call_kan(tile, False), Meld.CHANKAN)
 
-        player.discard_tile()
-        player.draw_tile(tile)
-        player.add_called_meld(self._make_meld(Meld.CHANKAN, man='4444'))
+        table.player.discard_tile()
+        table.player.draw_tile(tile)
+        table.player.add_called_meld(self._make_meld(Meld.CHANKAN, man='4444'))
 
-        self.assertEqual(len(player.melds), 1)
-        self.assertEqual(player.melds[0].type, Meld.CHANKAN)
-        self.assertEqual(len(player.tiles), 13)
+        self.assertEqual(len(table.player.melds), 1)
+        self.assertEqual(table.player.melds[0].type, Meld.CHANKAN)
+        self.assertEqual(len(table.player.tiles), 13)
 
     def test_call_closed_kan(self):
         table = Table()
-        player = table.player
+        table.count_of_remaining_tiles = 10
 
         tiles = self._string_to_136_array(man='12223', sou='111456', pin='12')
-        player.init_hand(tiles)
+        table.player.init_hand(tiles)
         tile = self._string_to_136_tile(man='2')
 
         # it is pretty stupid to call closed kan with 2m
-        self.assertEqual(player.should_call_kan(tile, False), None)
+        self.assertEqual(table.player.should_call_kan(tile, False), None)
 
         tiles = self._string_to_136_array(man='12223', sou='111456', pin='12')
-        player.init_hand(tiles)
+        table.player.init_hand(tiles)
         tile = self._string_to_136_tile(sou='1')
 
         # call closed kan with 1s is fine
-        self.assertEqual(player.should_call_kan(tile, False), Meld.KAN)
+        self.assertEqual(table.player.should_call_kan(tile, False), Meld.KAN)
 
     def test_opened_kan(self):
         table = Table()
-        player = table.player
+        table.count_of_remaining_tiles = 10
 
         tiles = self._string_to_136_array(man='299', sou='111456', pin='1', honors='111')
-        player.init_hand(tiles)
+        table.player.init_hand(tiles)
 
         # to rebuild all caches
-        player.draw_tile(self._string_to_136_tile(pin='9'))
-        player.discard_tile()
+        table.player.draw_tile(self._string_to_136_tile(pin='9'))
+        table.player.discard_tile()
 
         # our hand is closed, we don't need to call opened kan here
         tile = self._string_to_136_tile(sou='1')
-        self.assertEqual(player.should_call_kan(tile, True), None)
+        self.assertEqual(table.player.should_call_kan(tile, True), None)
 
-        player.add_called_meld(self._make_meld(Meld.PON, honors='111'))
+        table.player.add_called_meld(self._make_meld(Meld.PON, honors='111'))
 
         # our hand is open, but it is not tempai
         # we don't need to open kan here
         tile = self._string_to_136_tile(sou='1')
-        self.assertEqual(player.should_call_kan(tile, True), None)
+        self.assertEqual(table.player.should_call_kan(tile, True), None)
 
         table = Table()
-        player = table.player
+        table.count_of_remaining_tiles = 10
 
         tiles = self._string_to_136_array(man='2399', sou='111456', honors='111')
-        player.init_hand(tiles)
-        player.add_called_meld(self._make_meld(Meld.PON, honors='111'))
+        table.player.init_hand(tiles)
+        table.player.add_called_meld(self._make_meld(Meld.PON, honors='111'))
 
         # to rebuild all caches
-        player.draw_tile(self._string_to_136_tile(pin='9'))
-        player.discard_tile()
+        table.player.draw_tile(self._string_to_136_tile(pin='9'))
+        table.player.discard_tile()
 
         # our hand is open, in tempai and with a good wait
         tile = self._string_to_136_tile(sou='1')
-        self.assertEqual(player.should_call_kan(tile, True), Meld.KAN)
+        self.assertEqual(table.player.should_call_kan(tile, True), Meld.KAN)
 
     def test_dont_call_kan_in_defence_mode(self):
         table = Table()

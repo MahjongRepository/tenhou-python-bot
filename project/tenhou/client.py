@@ -289,8 +289,6 @@ class TenhouClient(Client):
                         continue
 
                     if not main_player.in_riichi:
-                        logger.info('Hand: {}'.format(main_player.format_hand_for_print(drawn_tile)))
-
                         self.player.draw_tile(drawn_tile)
                         discarded_tile = self.player.discard_tile()
                         can_call_riichi = main_player.can_call_riichi()

@@ -273,10 +273,6 @@ class ImplementationAI(InterfaceAI):
             if discard_option.ukeire >= first_option.ukeire - ukeire_borders:
                 possible_options.append(discard_option)
 
-        if first_option.shanten <= 1:
-            # let's sort tiles by value and let's choose less valuable tile to discard
-            return sorted(possible_options, key=lambda x: x.valuation)[0]
-
         # as second step
         # let's choose tiles that are close to the max ukeire2 tile
         for x in possible_options:
@@ -316,7 +312,19 @@ class ImplementationAI(InterfaceAI):
 
         # there are no isolated tiles
         # let's discard tile with greater ukeire2
-        return sorted(filtered_options, key=lambda x: -x.ukeire_second)[0]
+        filtered_options = sorted(filtered_options, key=lambda x: -x.ukeire_second)
+        first_option = filtered_options[0]
+
+        other_tiles_with_same_ukeire_second = [x for x in filtered_options
+                                               if x.ukeire_second == first_option.ukeire_second]
+
+        # it will happen with shanten=1, all tiles will have ukeire_second == 0
+        if other_tiles_with_same_ukeire_second:
+            # let's sort tiles by value and let's choose less valuable tile to discard
+            return sorted(other_tiles_with_same_ukeire_second, key=lambda x: x.valuation)[0]
+
+        # we have only one candidate to discard with greater ukeire
+        return first_option
 
     def process_discard_option(self, discard_option, closed_hand, force_discard=False):
         self.waiting = discard_option.waiting

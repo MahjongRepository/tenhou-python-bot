@@ -244,23 +244,14 @@ class AITestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='34445', sou='123456', pin='89')
         table.player.init_hand(tiles)
         tile = self._string_to_136_tile(man='4')
-        table.player.draw_tile(tile)
 
         self.assertEqual(table.player.should_call_kan(tile, False), None)
 
         table.player.add_called_meld(self._make_meld(Meld.PON, man='444'))
 
         self.assertEqual(len(table.player.melds), 1)
-        self.assertEqual(len(table.player.tiles), 14)
-        self.assertEqual(table.player.should_call_kan(tile, False), Meld.CHANKAN)
-
-        table.player.discard_tile()
-        table.player.draw_tile(tile)
-        table.player.add_called_meld(self._make_meld(Meld.CHANKAN, man='4444'))
-
-        self.assertEqual(len(table.player.melds), 1)
-        self.assertEqual(table.player.melds[0].type, Meld.CHANKAN)
         self.assertEqual(len(table.player.tiles), 13)
+        self.assertEqual(table.player.should_call_kan(tile, False), Meld.CHANKAN)
 
     def test_call_closed_kan(self):
         table = Table()

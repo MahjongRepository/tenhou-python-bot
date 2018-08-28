@@ -219,13 +219,6 @@ class Player(PlayerInterface):
         """
         return tiles_34[tile] + self.table.revealed_tiles[tile]
 
-    def add_called_meld(self, meld: Meld):
-        # we had to remove tile from the hand for closed kan set
-        if (meld.type == Meld.KAN and not meld.opened) or meld.type == Meld.CHANKAN:
-            self.tiles.remove(meld.called_tile)
-
-        super().add_called_meld(meld)
-
     def format_hand_for_print(self, tile):
         hand_string = '{} + {}'.format(
             TilesConverter.to_one_line_string(self.closed_hand),

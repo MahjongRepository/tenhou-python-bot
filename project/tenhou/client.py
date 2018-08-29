@@ -43,7 +43,7 @@ class TenhouClient(Client):
         # for reproducer
         if self._socket_mock:
             self.socket = self._socket_mock
-            TenhouClient._random_sleep = lambda x, y=0, z=0: 0
+            TenhouClient._random_sleep = lambda x, y, z: 0
         else:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -120,18 +120,18 @@ class TenhouClient(Client):
             if settings.IS_TOURNAMENT:
                 logger.info('Go to the tournament lobby: {}'.format(settings.LOBBY))
                 self._send_message('<CS lobby="{}" />'.format(settings.LOBBY))
-                self._random_sleep()
+                self._random_sleep(1, 2)
                 self._send_message('<DATE />')
             else:
                 logger.info('Go to the lobby: {}'.format(settings.LOBBY))
                 self._send_message('<CHAT text="{}" />'.format(quote('/lobby {}'.format(settings.LOBBY))))
-                self._random_sleep()
+                self._random_sleep(1, 2)
 
         if self.reconnected_messages:
             # we already in the game
             self.looking_for_game = False
             self._send_message('<GOK />')
-            self._random_sleep()
+            self._random_sleep(1, 2)
         else:
             selected_game_type = self._build_game_type()
             game_type = '{},{}'.format(settings.LOBBY, selected_game_type)
@@ -143,7 +143,7 @@ class TenhouClient(Client):
             start_time = datetime.datetime.now()
 
             while self.looking_for_game:
-                self._random_sleep()
+                self._random_sleep(1, 2)
 
                 messages = self._get_multiple_messages()
                 for message in messages:
@@ -152,7 +152,7 @@ class TenhouClient(Client):
                         self._send_message('<JOIN t="{},r" />'.format(game_type))
 
                     if '<GO' in message:
-                        self._random_sleep()
+                        self._random_sleep(1, 2)
                         self._send_message('<GOK />')
                         self._send_message('<NEXTREADY />')
 
@@ -277,7 +277,7 @@ class TenhouClient(Client):
 
                     kan_type = self.player.should_call_kan(drawn_tile, False, main_player.in_riichi)
                     if kan_type:
-                        self._random_sleep()
+                        self._random_sleep(1, 2)
 
                         if kan_type == Meld.CHANKAN:
                             meld_type = 5
@@ -295,7 +295,7 @@ class TenhouClient(Client):
 
                         # let's call riichi
                         if can_call_riichi:
-                            self._random_sleep()
+                            self._random_sleep(1, 2)
                             self._send_message('<REACH hai="{}" />'.format(discarded_tile))
                             main_player.in_riichi = True
                     else:
@@ -322,7 +322,7 @@ class TenhouClient(Client):
 
                 # the end of round
                 if '<AGARI' in message or '<RYUUKYOKU' in message:
-                    self._random_sleep(5, 7)
+                    self._random_sleep(6, 8)
                     self._send_message('<NEXTREADY />')
 
                 # set was called
@@ -356,7 +356,7 @@ class TenhouClient(Client):
                 if any(i in message for i in win_suggestions):
                     tile = self.decoder.parse_tile(message)
                     enemy_seat = self.decoder.get_enemy_seat(message)
-                    self._random_sleep(2, 4)
+                    self._random_sleep(1, 2)
 
                     if main_player.should_call_win(tile, enemy_seat):
                         self._send_message('<N type="6" />')
@@ -386,7 +386,7 @@ class TenhouClient(Client):
                         # should we call a kan?
                         if 't="3"' in message or 't="7"' in message:
                             if self.player.should_call_kan(tile, True):
-                                self._random_sleep()
+                                self._random_sleep(1, 2)
 
                                 # 2 is open kan
                                 self._send_message('<N type="2" />')
@@ -578,5 +578,5 @@ class TenhouClient(Client):
 
         return True
 
-    def _random_sleep(self, min_sleep=1, max_sleep=3):
+    def _random_sleep(self, min_sleep, max_sleep):
         sleep(random.randint(min_sleep, max_sleep + 1))

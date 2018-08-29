@@ -42,6 +42,8 @@ class ImplementationAI(InterfaceAI):
 
     current_strategy = None
 
+    hand_cache = {}
+
     def __init__(self, player):
         super(ImplementationAI, self).__init__(player)
 
@@ -72,6 +74,8 @@ class ImplementationAI(InterfaceAI):
         self.previous_shanten = 7
         self.ukeire = 0
         self.ukeire_second = 0
+
+        self.hand_cache = {}
 
     def draw_tile(self, tile):
         """
@@ -138,6 +142,9 @@ class ImplementationAI(InterfaceAI):
         :param open_sets_34: array of array with tiles in 34 format
         :return:
         """
+        if open_sets_34 is None:
+            open_sets_34 = []
+
         tiles_34 = TilesConverter.to_34_array(tiles)
         closed_tiles_34 = TilesConverter.to_34_array(closed_hand)
         is_agari = self.agari.is_agari(tiles_34, self.player.meld_34_tiles)
@@ -157,8 +164,21 @@ class ImplementationAI(InterfaceAI):
                     continue
 
                 tiles_34[j] += 1
-                if self.shanten.calculate_shanten(tiles_34, open_sets_34) == shanten - 1:
+
+                key = '{},{}'.format(
+                    ''.join([str(x) for x in tiles_34]),
+                    ';'.join([str(x) for x in open_sets_34])
+                )
+
+                if key in self.hand_cache:
+                    new_shanten = self.hand_cache[key]
+                else:
+                    new_shanten = self.shanten.calculate_shanten(tiles_34, open_sets_34)
+                    self.hand_cache[key] = new_shanten
+
+                if new_shanten == shanten - 1:
                     waiting.append(j)
+
                 tiles_34[j] -= 1
 
             tiles_34[hand_tile] += 1
@@ -273,10 +293,11 @@ class ImplementationAI(InterfaceAI):
             if discard_option.ukeire >= first_option.ukeire - ukeire_borders:
                 possible_options.append(discard_option)
 
-        # as second step
-        # let's choose tiles that are close to the max ukeire2 tile
-        for x in possible_options:
-            self.calculate_second_level_ukeire(x)
+        if 1 < first_option.shanten < 4:
+            # as second step
+            # let's choose tiles that are close to the max ukeire2 tile
+            for x in possible_options:
+                self.calculate_second_level_ukeire(x)
 
         possible_options = sorted(possible_options, key=lambda x: -x.ukeire_second)
 

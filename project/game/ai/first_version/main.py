@@ -293,34 +293,35 @@ class ImplementationAI(InterfaceAI):
             if discard_option.ukeire >= first_option.ukeire - ukeire_borders:
                 possible_options.append(discard_option)
 
-        if 1 < first_option.shanten < 4:
-            # as second step
-            # let's choose tiles that are close to the max ukeire2 tile
+        if first_option.shanten == 2 or first_option.shanten == 3:
+            sorting_field = 'ukeire_second'
             for x in possible_options:
                 self.calculate_second_level_ukeire(x)
+        else:
+            sorting_field = 'ukeire'
 
-        possible_options = sorted(possible_options, key=lambda x: -x.ukeire_second)
+        possible_options = sorted(possible_options, key=lambda x: -getattr(x, sorting_field))
 
         filter_percentage = 20
         filtered_options = self._filter_list_by_percentage(
             possible_options,
-            'ukeire_second',
+            sorting_field,
             filter_percentage
         )
 
         tiles_without_dora = [x for x in filtered_options if x.count_of_dora == 0]
+
         # we have only dora candidates to discard
         if not tiles_without_dora:
             min_dora = min([x.count_of_dora for x in filtered_options])
             min_dora_list = [x for x in filtered_options if x.count_of_dora == min_dora]
 
-            # let's discard tile with greater ukeire2
-            return sorted(min_dora_list, key=lambda x: -x.ukeire_second)[0]
+            return sorted(min_dora_list, key=lambda x: -getattr(x, sorting_field))[0]
 
         second_filter_percentage = 10
         filtered_options = self._filter_list_by_percentage(
             tiles_without_dora,
-            'ukeire_second',
+            sorting_field,
             second_filter_percentage
         )
 
@@ -333,16 +334,16 @@ class ImplementationAI(InterfaceAI):
 
         # there are no isolated tiles
         # let's discard tile with greater ukeire2
-        filtered_options = sorted(filtered_options, key=lambda x: -x.ukeire_second)
+        filtered_options = sorted(filtered_options, key=lambda x: -getattr(x, sorting_field))
         first_option = filtered_options[0]
 
-        other_tiles_with_same_ukeire_second = [x for x in filtered_options
-                                               if x.ukeire_second == first_option.ukeire_second]
+        other_tiles_with_same_ukeire = [x for x in filtered_options
+                                        if getattr(x, sorting_field) == getattr(first_option, sorting_field)]
 
         # it will happen with shanten=1, all tiles will have ukeire_second == 0
-        if other_tiles_with_same_ukeire_second:
+        if other_tiles_with_same_ukeire:
             # let's sort tiles by value and let's choose less valuable tile to discard
-            return sorted(other_tiles_with_same_ukeire_second, key=lambda x: x.valuation)[0]
+            return sorted(other_tiles_with_same_ukeire, key=lambda x: x.valuation)[0]
 
         # we have only one candidate to discard with greater ukeire
         return first_option

@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from mahjong.constants import TERMINAL_INDICES, HONOR_INDICES
 from mahjong.tile import TilesConverter
+from mahjong.utils import is_tile_strictly_isolated
+from mahjong.utils import plus_dora, is_aka_dora
+from mahjong.utils import is_honor
 
 from game.ai.first_version.strategies.main import BaseStrategy
 
@@ -21,10 +24,15 @@ class TanyaoStrategy(BaseStrategy):
             return False
 
         tiles = TilesConverter.to_34_array(self.player.tiles)
+
+        closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
+        isolated_tiles = [x // 4 for x in self.player.tiles if is_tile_strictly_isolated(closed_hand_34, x // 4) or is_honor(x // 4)]
+
         count_of_terminal_pon_sets = 0
         count_of_terminal_pairs = 0
         count_of_valued_pairs = 0
         count_of_not_suitable_tiles = 0
+        count_of_not_suitable_not_isolated_tiles = 0
         for x in range(0, 34):
             tile = tiles[x]
             if not tile:
@@ -40,7 +48,10 @@ class TanyaoStrategy(BaseStrategy):
                     count_of_valued_pairs += 1
 
             if x in self.not_suitable_tiles:
-                count_of_not_suitable_tiles += 1
+                count_of_not_suitable_tiles += tile
+
+            if x in self.not_suitable_tiles and x not in isolated_tiles:
+                count_of_not_suitable_not_isolated_tiles += tile
 
         # we have too much terminals and honors
         if count_of_not_suitable_tiles >= 5:
@@ -61,6 +72,17 @@ class TanyaoStrategy(BaseStrategy):
         if count_of_terminal_pairs > 1:
             return False
 
+        # 3 or more not suitable tiles that
+        # are not isolated is too much
+        if count_of_not_suitable_not_isolated_tiles >= 3:
+            return False
+
+        # if we are 1 shanten, even 2 tiles
+        # that are not suitable and not isolated
+        # is too much
+        if count_of_not_suitable_not_isolated_tiles >= 2 and self.player.ai.previous_shanten == 1:
+            return False
+
         # 123 and 789 indices
         indices = [
             [0, 1, 2], [6, 7, 8],
@@ -75,7 +97,33 @@ class TanyaoStrategy(BaseStrategy):
             if first >= 1 and second >= 1 and third >= 1:
                 return False
 
+        dora_indicators_central = [x for x in self.player.table.dora_indicators if not is_honor(x // 4) and not TanyaoStrategy.is_indicator_for_terminal(x // 4)]
+        dora_count_central = sum([plus_dora(x, dora_indicators_central) for x in self.player.tiles])
+        dora_count_central += sum([1 for x in self.player.tiles if is_aka_dora(x, self.player.table.has_aka_dora)])
+
+        dora_indicators_not_central = [x for x in self.player.table.dora_indicators if is_honor(x // 4) or TanyaoStrategy.is_indicator_for_terminal(x // 4)]
+        dora_count_not_central = sum([plus_dora(x, dora_indicators_not_central) for x in self.player.tiles])
+
+        # if we have 2 or more non-central doras
+        # we don't want to go for tanyao
+        if dora_count_not_central >= 2:
+            return False
+
+        # if we have less than two central doras
+        # let's not consider open tanyao
+        if dora_count_central < 2:
+            return False
+
+        # if we have only two central doras let's
+        # wait for 5th turn before opening our hand
+        if dora_count_central == 2 and self.player.round_step < 5:
+            return False
+
         return True
+
+    @staticmethod
+    def is_indicator_for_terminal(tile):
+        return tile == 7 or tile == 8 or tile == 16 or tile == 17 or tile == 25 or tile == 26
 
     def determine_what_to_discard(self, closed_hand, outs_results, shanten, for_open_hand, tile_for_open_hand,
                                   hand_was_open=False):

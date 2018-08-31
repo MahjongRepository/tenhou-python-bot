@@ -218,7 +218,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         let's open on one of this valuable pairs
         """
 
-        tiles = self._string_to_136_array(man='59', sou='12', pin='12789', honors='5566')
+        tiles = self._string_to_136_array(man='159', sou='128', pin='789', honors='5566')
         self.player.init_hand(tiles)
 
         tile = self._string_to_136_tile(honors='5')

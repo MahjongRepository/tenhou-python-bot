@@ -9,12 +9,14 @@ class BaseStrategy(object):
     HONITSU = 1
     TANYAO = 2
     FORMAL_TEMPAI = 3
+    CHINITSU = 4
 
     TYPES = {
         YAKUHAI: 'Yakuhai',
         HONITSU: 'Honitsu',
         TANYAO: 'Tanyao',
-        FORMAL_TEMPAI: 'Formal Tempai'
+        FORMAL_TEMPAI: 'Formal Tempai',
+        CHINITSU: 'Chinitsu'
     }
 
     not_suitable_tiles = []
@@ -28,6 +30,7 @@ class BaseStrategy(object):
     dora_count_central = 0
     dora_count_not_central = 0
     aka_dora_count = 0
+    dora_count_honor = 0
 
     def __init__(self, strategy_type, player):
         self.type = strategy_type
@@ -258,18 +261,21 @@ class BaseStrategy(object):
         for tile_136 in tiles_136:
             tile_34 = tile_136 // 4
 
-            dora = plus_dora(tile_136, self.player.table.dora_indicators)
+            dora_count = plus_dora(tile_136, self.player.table.dora_indicators)
 
             if is_aka_dora(tile_136, self.player.table.has_aka_dora):
                 self.aka_dora_count += 1
 
-            if not dora:
+            if not dora_count:
                 continue
 
-            if is_honor(tile_34) or is_terminal(tile_34):
-                self.dora_count_not_central += 1
+            if is_honor(tile_34):
+                self.dora_count_not_central += dora_count
+                self.dora_count_honor += dora_count
+            elif is_terminal(tile_34):
+                self.dora_count_not_central += dora_count
             else:
-                self.dora_count_central += 1
+                self.dora_count_central += dora_count
 
         self.dora_count_central += self.aka_dora_count
         self.dora_count_total = self.dora_count_central + self.dora_count_not_central

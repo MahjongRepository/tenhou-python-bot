@@ -57,6 +57,7 @@ class ImplementationAI(InterfaceAI):
 
     def init_hand(self):
         # it will set correct hand shanten number and ukeire to the new hand
+        # tile will not be removed from the hand
         self.discard_tile(None)
 
         # Let's decide what we will do with our hand (like open for tanyao and etc.)

@@ -248,6 +248,51 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 
         table.add_dora_indicator(self._string_to_136_tile(pin='8'))
 
+        tiles = self._string_to_136_array(man='22234', sou='888', pin='5599')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(pin='5')
+        meld, _ = player.try_to_call_meld(tile, False)
+        self.assertEqual(meld, None)
+
+    def test_dont_open_tanyao_with_three_not_isolated_terminals(self):
+        tiles = self._string_to_136_array(man='2226', sou='2799', pin='5579')
+        self.player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(pin='5')
+        meld, _ = self.player.try_to_call_meld(tile, False)
+        self.assertEqual(meld, None)
+
+    def test_dont_open_tanyao_with_two_not_isolated_terminals_one_shanten(self):
+        tiles = self._string_to_136_array(man='22234', sou='79', pin='55579')
+        self.player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(man='5')
+        meld, _ = self.player.try_to_call_meld(tile, False)
+        self.assertEqual(meld, None)
+
+    def test_dont_count_terminal_tiles_in_ukeire(self):
+        # for closed hand let's chose tile with best ukeire
+        tiles = self._string_to_136_array(man='234578', sou='235', pin='2246')
+        self.player.init_hand(tiles)
+        self.player.draw_tile(self._string_to_136_tile(pin='5'))
+        discard = self.player.discard_tile()
+        self.assertEqual(self._to_string([discard]), '5m')
+
+        # but with opened hand we don't need to count not suitable tiles as ukeire
+        tiles = self._string_to_136_array(man='234578', sou='235', pin='2246')
+        self.player.init_hand(tiles)
+        self.player.add_called_meld(self._make_meld(Meld.CHI, man='234'))
+        self.player.draw_tile(self._string_to_136_tile(pin='5'))
+        discard = self.player.discard_tile()
+        self.assertEqual(self._to_string([discard]), '8m')
+
+    def test_dont_open_tanyao_with_two_non_central_doras(self):
+        table = self._make_table()
+        player = table.player
+
+        table.add_dora_indicator(self._string_to_136_tile(pin='8'))
+
         tiles = self._string_to_136_array(man='22234', sou='6888', pin='5599')
         player.init_hand(tiles)
 

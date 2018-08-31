@@ -80,6 +80,17 @@ class TanyaoStrategy(BaseStrategy):
         # if we are 1 shanten, even 2 tiles
         # that are not suitable and not isolated
         # is too much
+        if count_of_not_suitable_not_isolated_tiles >= 2 and self.player.ai.previous_shanten == 1:
+            return False
+
+        # 3 or more not suitable tiles that
+        # are not isolated is too much
+        if count_of_not_suitable_not_isolated_tiles >= 3:
+            return False
+
+        # if we are 1 shanten, even 2 tiles
+        # that are not suitable and not isolated
+        # is too much
         if count_of_not_suitable_not_isolated_tiles >= 2 and self.player.ai.shanten == 1:
             return False
 

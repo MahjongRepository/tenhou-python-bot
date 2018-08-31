@@ -347,7 +347,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         player.discard_tile()
 
         # bot not in the tempai, because all 9s in the closed kan
-        self.assertEqual(player.ai.previous_shanten, 1)
+        self.assertEqual(player.ai.shanten, 1)
 
     def test_closed_kan_and_not_necessary_call(self):
         """

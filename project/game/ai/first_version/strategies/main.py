@@ -192,7 +192,7 @@ class BaseStrategy(object):
 
             # sometimes we had to call tile, even if it will not improve our hand
             # otherwise we can call only with improvements of shanten
-            if not self.meld_had_to_be_called(tile) and shanten >= self.player.ai.previous_shanten:
+            if not self.meld_had_to_be_called(tile) and shanten >= self.player.ai.shanten:
                 return None, None
 
             meld_type = is_chi(best_meld_34) and Meld.CHI or Meld.PON
@@ -260,7 +260,7 @@ class BaseStrategy(object):
         results = []
         for meld in possible_melds:
             melds = self.player.meld_34_tiles + [meld]
-            shanten = self.player.ai.shanten.calculate_shanten(completed_hand_34, melds)
+            shanten = self.player.ai.shanten_calculator.calculate_shanten(completed_hand_34, melds)
             results.append({'shanten': shanten, 'meld': meld})
 
         results = sorted(results, key=lambda i: i['shanten'])

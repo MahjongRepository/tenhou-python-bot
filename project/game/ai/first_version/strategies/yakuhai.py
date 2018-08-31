@@ -80,7 +80,7 @@ class YakuhaiStrategy(BaseStrategy):
         for pair in self.valued_pairs:
             # this valuable tile was discarded once
             # let's open on it in that case
-            if self.player.total_tiles(pair, tiles_34) == 3 and self.player.ai.previous_shanten > 1:
+            if self.player.total_tiles(pair, tiles_34) == 3 and self.player.ai.shanten > 1:
                 return True
 
         return False
@@ -139,7 +139,7 @@ class YakuhaiStrategy(BaseStrategy):
         for meld in self.player.melds:
             # for big shanten number we don't need to check already opened pon set,
             # because it will improve pur hand anyway
-            if self.player.ai.previous_shanten >= 1:
+            if self.player.ai.shanten >= 1:
                 break
 
             # we have already opened yakuhai pon

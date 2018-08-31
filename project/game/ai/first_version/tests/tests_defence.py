@@ -423,7 +423,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
     def test_defence_against_honitsu_second_case(self):
         table = Table()
 
-        tiles = self._string_to_136_array(sou='4', pin='223456', man='678', honors='66')
+        tiles = self._string_to_136_array(sou='4', pin='2223456', man='678', honors='66')
         table.player.init_hand(tiles)
 
         table.add_called_meld(1, self._make_meld(Meld.CHI, sou='789'))

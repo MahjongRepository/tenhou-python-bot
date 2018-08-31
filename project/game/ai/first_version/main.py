@@ -28,19 +28,19 @@ class ImplementationAI(InterfaceAI):
     version = '0.4.0-dev'
 
     agari = None
-    shanten = None
+    shanten_calculator = None
     defence = None
     hand_divider = None
     finished_hand = None
-    last_discard_option = None
 
-    previous_shanten = 7
+    shanten = 7
     ukeire = 0
     ukeire_second = 0
     in_defence = False
     waiting = None
 
     current_strategy = None
+    last_discard_option = None
 
     hand_cache = {}
 
@@ -48,17 +48,12 @@ class ImplementationAI(InterfaceAI):
         super(ImplementationAI, self).__init__(player)
 
         self.agari = Agari()
-        self.shanten = Shanten()
+        self.shanten_calculator = Shanten()
         self.defence = DefenceHandler(player)
         self.hand_divider = HandDivider()
         self.finished_hand = HandCalculator()
-        self.previous_shanten = 7
-        self.ukeire = 0
-        self.ukeire_second = 0
-        self.current_strategy = None
-        self.waiting = []
-        self.in_defence = False
-        self.last_discard_option = None
+
+        self.erase_state()
 
     def init_hand(self):
         """
@@ -66,16 +61,8 @@ class ImplementationAI(InterfaceAI):
         """
         self.determine_strategy()
 
-    def erase_state(self):
-        self.current_strategy = None
-        self.waiting = []
-        self.in_defence = False
-        self.last_discard_option = None
-        self.previous_shanten = 7
-        self.ukeire = 0
-        self.ukeire_second = 0
-
-        self.hand_cache = {}
+        # it will set correct hand shanten number and ukeire to the new hand
+        self.discard_tile(None)
 
     def draw_tile(self, tile):
         """
@@ -156,7 +143,7 @@ class ImplementationAI(InterfaceAI):
 
             tiles_34[hand_tile] -= 1
 
-            shanten = self.shanten.calculate_shanten(tiles_34, open_sets_34)
+            shanten = self.shanten_calculator.calculate_shanten(tiles_34, open_sets_34)
 
             waiting = []
             for j in range(0, 34):
@@ -173,7 +160,7 @@ class ImplementationAI(InterfaceAI):
                 if key in self.hand_cache:
                     new_shanten = self.hand_cache[key]
                 else:
-                    new_shanten = self.shanten.calculate_shanten(tiles_34, open_sets_34)
+                    new_shanten = self.shanten_calculator.calculate_shanten(tiles_34, open_sets_34)
                     self.hand_cache[key] = new_shanten
 
                 if new_shanten == shanten - 1:
@@ -193,7 +180,7 @@ class ImplementationAI(InterfaceAI):
         if is_agari:
             shanten = Shanten.AGARI_STATE
         else:
-            shanten = self.shanten.calculate_shanten(tiles_34, open_sets_34)
+            shanten = self.shanten_calculator.calculate_shanten(tiles_34, open_sets_34)
 
         return results, shanten
 
@@ -354,8 +341,8 @@ class ImplementationAI(InterfaceAI):
 
     def process_discard_option(self, discard_option, closed_hand, force_discard=False):
         self.waiting = discard_option.waiting
-        self.player.ai.previous_shanten = discard_option.shanten
-        self.player.in_tempai = self.player.ai.previous_shanten == 0
+        self.player.ai.shanten = discard_option.shanten
+        self.player.in_tempai = self.player.ai.shanten == 0
         self.player.ai.ukeire = discard_option.ukeire
         self.player.ai.ukeire_second = discard_option.ukeire_second
 
@@ -489,13 +476,13 @@ class ImplementationAI(InterfaceAI):
                 tiles_34[tile_34] += 1
 
             melds = self.player.meld_34_tiles
-            previous_shanten = self.shanten.calculate_shanten(tiles_34, melds)
+            previous_shanten = self.shanten_calculator.calculate_shanten(tiles_34, melds)
 
             if not open_kan and not from_riichi:
                 tiles_34[tile_34] -= 1
 
             melds += [[tile_34, tile_34, tile_34]]
-            new_shanten = self.shanten.calculate_shanten(tiles_34, melds)
+            new_shanten = self.shanten_calculator.calculate_shanten(tiles_34, melds)
 
             # called kan will not ruin our hand
             if new_shanten <= previous_shanten:

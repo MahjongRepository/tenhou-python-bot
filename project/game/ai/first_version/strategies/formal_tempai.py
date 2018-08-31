@@ -27,13 +27,13 @@ class FormalTempaiStrategy(BaseStrategy):
 
         # it's 11th turn or later and we still have 3 shanten or more,
         # let's try to go for formal tempai at least
-        if self.player.ai.previous_shanten >= 3:
+        if self.player.ai.shanten >= 3:
             return True
 
         dora_count = sum([plus_dora(x, self.player.table.dora_indicators) for x in self.player.tiles])
         dora_count += sum([1 for x in self.player.tiles if is_aka_dora(x, self.player.table.has_aka_dora)])
 
-        if self.player.ai.previous_shanten == 2:
+        if self.player.ai.shanten == 2:
             if dora_count < 2:
                 # having 0 or 1 dora and 2 shanten, let's go for formal tempai
                 # starting from 11th turn
@@ -44,7 +44,7 @@ class FormalTempaiStrategy(BaseStrategy):
 
         # for 1 shanten we check number of doras and ukeire to determine
         # correct time to go for formal tempai
-        if self.player.ai.previous_shanten == 1:
+        if self.player.ai.shanten == 1:
             if dora_count == 0:
                 if self.player.ai.ukeire <= 16:
                     return True

@@ -23,22 +23,22 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
         discarded_tile = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '9m')
-        self.assertEqual(player.ai.previous_shanten, 2)
+        self.assertEqual(player.ai.shanten, 2)
 
         player.draw_tile(self._string_to_136_tile(pin='4'))
         discarded_tile = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '1p')
-        self.assertEqual(player.ai.previous_shanten, 2)
+        self.assertEqual(player.ai.shanten, 2)
 
         player.draw_tile(self._string_to_136_tile(pin='3'))
         discarded_tile = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '9p')
-        self.assertEqual(player.ai.previous_shanten, 1)
+        self.assertEqual(player.ai.shanten, 1)
 
         player.draw_tile(self._string_to_136_tile(man='4'))
         discarded_tile = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '5m')
-        self.assertEqual(player.ai.previous_shanten, 0)
+        self.assertEqual(player.ai.shanten, 0)
 
     def test_discard_tile_force_tsumogiri(self):
         table = Table()

@@ -45,7 +45,7 @@ class DefenceHandler(object):
             waiting = discard_candidate.waiting
         # we have 13 tiles in hand (this is not our turn)
         else:
-            shanten = self.player.ai.previous_shanten
+            shanten = self.player.ai.shanten
             waiting = self.player.ai.waiting
 
         # if we are in riichi, we can't defence

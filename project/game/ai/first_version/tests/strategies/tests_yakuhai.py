@@ -26,11 +26,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(strategy.should_activate_strategy(), False)
 
         self.table.dora_indicators.append(self._string_to_136_tile(honors='7'))
-        tiles = self._string_to_136_array(sou='12355689', man='89', honors='55')
-        self.player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), True)
-
-        tiles = self._string_to_136_array(sou='12355689', man='89', honors='666')
+        tiles = self._string_to_136_array(sou='12355689', man='899', honors='55')
         self.player.init_hand(tiles)
         self.assertEqual(strategy.should_activate_strategy(), True)
 
@@ -121,10 +117,6 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         self.player.add_called_meld(meld)
         meld = self._make_meld(Meld.PON, honors='444')
         self.player.add_called_meld(meld)
-
-        # to rebuild all caches
-        self.player.draw_tile(self._string_to_136_tile(pin='2'))
-        self.player.discard_tile()
 
         tile = self._string_to_136_tile(sou='2')
         meld, _ = self.table.player.try_to_call_meld(tile, True)
@@ -259,8 +251,6 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='29', sou='1189', pin='12789', honors='11')
         self.player.init_hand(tiles)
         self.player.draw_tile(self._string_to_136_tile(man='6'))
-        # to calculate hand shanten number
-        self.player.discard_tile()
 
         tile = self._string_to_136_tile(honors='1')
         meld, _ = self.player.try_to_call_meld(tile, True)
@@ -269,8 +259,6 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         self.table.add_discarded_tile(1, self._string_to_136_tile(honors='1'), False)
         tiles = self._string_to_136_array(man='29', sou='1189', pin='12789', honors='11')
         self.player.init_hand(tiles)
-        self.player.draw_tile(self._string_to_136_tile(man='6'))
-        self.player.discard_tile()
 
         tile = self._string_to_136_tile(honors='1')
         meld, _ = self.player.try_to_call_meld(tile, True)

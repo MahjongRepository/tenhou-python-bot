@@ -37,7 +37,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.player.init_hand(tiles)
         self.assertEqual(strategy.should_activate_strategy(), False)
 
-        tiles = self._string_to_136_array(sou='222', man='345669', pin='2399')
+        tiles = self._string_to_136_array(sou='22258', man='3566', pin='2399')
         self.player.init_hand(tiles)
         self.assertEqual(strategy.should_activate_strategy(), True)
 
@@ -179,7 +179,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         # but for already open hand we cant do tsumo
         # because we don't have a yaku here
         # so, let's do tsumogiri
-        self.assertEqual(self.player.ai.previous_shanten, 0)
+        self.assertEqual(self.player.ai.shanten, 0)
         self.assertEqual(self._to_string([discard]), '1s')
 
     def test_choose_correct_waiting(self):
@@ -248,7 +248,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 
         table.add_dora_indicator(self._string_to_136_tile(pin='8'))
 
-        tiles = self._string_to_136_array(man='22234', sou='888', pin='5599')
+        tiles = self._string_to_136_array(man='22234', sou='6888', pin='5599')
         player.init_hand(tiles)
 
         tile = self._string_to_136_tile(pin='5')
@@ -256,7 +256,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(meld, None)
 
     def test_dont_open_tanyao_with_three_not_isolated_terminals(self):
-        tiles = self._string_to_136_array(man='2226', sou='2799', pin='5579')
+        tiles = self._string_to_136_array(man='22256', sou='2799', pin='5579')
         self.player.init_hand(tiles)
 
         tile = self._string_to_136_tile(pin='5')
@@ -264,7 +264,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(meld, None)
 
     def test_dont_open_tanyao_with_two_not_isolated_terminals_one_shanten(self):
-        tiles = self._string_to_136_array(man='22234', sou='79', pin='55579')
+        tiles = self._string_to_136_array(man='22234', sou='379', pin='55579')
         self.player.init_hand(tiles)
 
         tile = self._string_to_136_tile(man='5')

@@ -17,22 +17,22 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
 
         tiles = self._string_to_136_array(sou='12355', man='12389', honors='123')
         player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), False)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), False)
 
         tiles = self._string_to_136_array(sou='12355', man='238', honors='11234')
         player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), True)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
 
         # with hand without pairs we not should go for honitsu,
         # because it is far away from tempai
         tiles = self._string_to_136_array(sou='12358', man='238', honors='12345')
         player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), False)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), False)
 
         # with chitoitsu-like hand we don't need to go for honitsu
         tiles = self._string_to_136_array(pin='77', man='3355677899', sou='11')
         player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), False)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), False)
 
     def test_suitable_tiles(self):
         table = Table()
@@ -41,7 +41,7 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
 
         tiles = self._string_to_136_array(sou='12355', man='238', honors='11234')
         player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), True)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
 
         tile = self._string_to_136_tile(man='1')
         self.assertEqual(strategy.is_tile_suitable(tile), False)
@@ -139,4 +139,4 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='14489', sou='45', pin='67', honors='44456')
         player.init_hand(tiles)
 
-        self.assertEqual(strategy.should_activate_strategy(), False)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), False)

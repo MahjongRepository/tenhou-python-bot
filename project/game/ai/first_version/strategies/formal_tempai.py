@@ -4,14 +4,13 @@ from game.ai.first_version.strategies.main import BaseStrategy
 
 class FormalTempaiStrategy(BaseStrategy):
 
-    def should_activate_strategy(self):
+    def should_activate_strategy(self, tiles_136):
         """
         When we get closer to the end of the round, we start to consider
         going for formal tempai.
-        :return: boolean
         """
 
-        result = super(FormalTempaiStrategy, self).should_activate_strategy()
+        result = super(FormalTempaiStrategy, self).should_activate_strategy(tiles_136)
         if not result:
             return False
 

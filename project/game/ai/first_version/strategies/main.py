@@ -37,19 +37,20 @@ class BaseStrategy(object):
     def __str__(self):
         return self.TYPES[self.type]
 
-    def should_activate_strategy(self):
+    def should_activate_strategy(self, tiles_136):
         """
         Based on player hand and table situation
         we can determine should we use this strategy or not.
         For now default rule for all strategies: don't open hand with 5+ pairs
+        :param: tiles_136
         :return: boolean
         """
-        self.calculate_dora_count()
+        self.calculate_dora_count(tiles_136)
 
         if self.player.is_open_hand:
             return True
 
-        tiles_34 = TilesConverter.to_34_array(self.player.tiles)
+        tiles_34 = TilesConverter.to_34_array(tiles_136)
         count_of_pairs = len([x for x in range(0, 34) if tiles_34[x] >= 2])
 
         return count_of_pairs < 5
@@ -95,12 +96,13 @@ class BaseStrategy(object):
 
         return outs_results
 
-    def try_to_call_meld(self, tile, is_kamicha_discard):
+    def try_to_call_meld(self, tile, is_kamicha_discard, new_tiles):
         """
         Determine should we call a meld or not.
         If yes, it will return Meld object and tile to discard
         :param tile: 136 format tile
         :param is_kamicha_discard: boolean
+        :param new_tiles:
         :return: Meld and DiscardOption objects
         """
         if self.player.in_riichi:
@@ -120,7 +122,6 @@ class BaseStrategy(object):
             return None, None
 
         discarded_tile = tile // 4
-        new_tiles = self.player.tiles[:] + [tile]
         closed_hand_34 = TilesConverter.to_34_array(closed_hand + [tile])
 
         combinations = []
@@ -249,12 +250,12 @@ class BaseStrategy(object):
         """
         return False
 
-    def calculate_dora_count(self):
+    def calculate_dora_count(self, tiles_136):
         self.dora_count_central = 0
         self.dora_count_not_central = 0
         self.aka_dora_count = 0
 
-        for tile_136 in self.player.tiles:
+        for tile_136 in tiles_136:
             tile_34 = tile_136 // 4
 
             dora = plus_dora(tile_136, self.player.table.dora_indicators)

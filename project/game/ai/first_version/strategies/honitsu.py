@@ -11,17 +11,16 @@ class HonitsuStrategy(BaseStrategy):
 
     chosen_suit = None
 
-    def should_activate_strategy(self):
+    def should_activate_strategy(self, tiles_136):
         """
         We can go for honitsu/chinitsu strategy if we have prevalence of one suit and honor tiles
-        :return: boolean
         """
 
-        result = super(HonitsuStrategy, self).should_activate_strategy()
+        result = super(HonitsuStrategy, self).should_activate_strategy(tiles_136)
         if not result:
             return False
 
-        tiles_34 = TilesConverter.to_34_array(self.player.tiles)
+        tiles_34 = TilesConverter.to_34_array(tiles_136)
         suits = count_tiles_by_suits(tiles_34)
 
         honor = [x for x in suits if x['name'] == 'honor'][0]

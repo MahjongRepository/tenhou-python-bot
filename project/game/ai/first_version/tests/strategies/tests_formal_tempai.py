@@ -21,7 +21,7 @@ class FormalTempaiStrategyTestCase(unittest.TestCase, TestMixin):
 
         tiles = self._string_to_136_array(sou='12355689', man='89', pin='339')
         self.player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), False)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), False)
 
         self.player.draw_tile(self._string_to_136_tile(honors='1'))
         # to calculate hand shanten number
@@ -32,9 +32,9 @@ class FormalTempaiStrategyTestCase(unittest.TestCase, TestMixin):
         for i in range(0, 9):
             self.player.add_discarded_tile(Tile(0, False))
 
-        self.assertEqual(strategy.should_activate_strategy(), False)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), False)
 
         # Now we move to 11th turn, we have 2 shanten and no doras,
         # we should go for formal tempai
         self.player.add_discarded_tile(Tile(0, True))
-        self.assertEqual(strategy.should_activate_strategy(), True)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), True)

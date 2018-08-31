@@ -23,17 +23,17 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
 
         tiles = self._string_to_136_array(sou='12355689', man='89', honors='123')
         self.player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), False)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), False)
 
         self.table.dora_indicators.append(self._string_to_136_tile(honors='7'))
         tiles = self._string_to_136_array(sou='12355689', man='899', honors='55')
         self.player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), True)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), True)
 
         # with chitoitsu-like hand we don't need to go for yakuhai
         tiles = self._string_to_136_array(sou='1235566', man='8899', honors='66')
         self.player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), False)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), False)
 
     def test_dont_activate_strategy_if_we_dont_have_enough_tiles_in_the_wall(self):
         strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, self.player)
@@ -42,13 +42,13 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='59', sou='1235', pin='12789', honors='55')
         self.player.init_hand(tiles)
 
-        self.assertEqual(strategy.should_activate_strategy(), True)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), True)
 
         self.table.add_discarded_tile(3, self._string_to_136_tile(honors='5'), False)
         self.table.add_discarded_tile(3, self._string_to_136_tile(honors='5'), False)
 
         # we can't complete yakuhai, because there is not enough honor tiles
-        self.assertEqual(strategy.should_activate_strategy(), False)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), False)
 
     def test_suitable_tiles(self):
         strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, self.player)

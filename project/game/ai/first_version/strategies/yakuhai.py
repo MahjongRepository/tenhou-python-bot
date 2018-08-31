@@ -16,16 +16,17 @@ class YakuhaiStrategy(BaseStrategy):
         self.valued_pairs = []
         self.has_valued_pon = False
 
-    def should_activate_strategy(self):
+    def should_activate_strategy(self, tiles_136):
         """
         We can go for yakuhai strategy if we have at least one yakuhai pair in the hand
         :return: boolean
         """
-        result = super(YakuhaiStrategy, self).should_activate_strategy()
+        result = super(YakuhaiStrategy, self).should_activate_strategy(tiles_136)
         if not result:
             return False
 
-        tiles_34 = TilesConverter.to_34_array(self.player.tiles)
+        tiles_34 = TilesConverter.to_34_array(tiles_136)
+        player_hand_tiles_34 = TilesConverter.to_34_array(self.player.tiles)
         self.valued_pairs = [x for x in self.player.valued_honors if tiles_34[x] >= 2]
 
         is_double_east_wind = len([x for x in self.valued_pairs if x == EAST]) == 2
@@ -39,7 +40,7 @@ class YakuhaiStrategy(BaseStrategy):
         for pair in self.valued_pairs:
             # we have valued pair in the hand and there are enough tiles
             # in the wall
-            if self.player.total_tiles(pair, tiles_34) < 4:
+            if self.player.total_tiles(pair, player_hand_tiles_34) < 4:
                 has_valued_pair = True
                 break
 
@@ -76,7 +77,7 @@ class YakuhaiStrategy(BaseStrategy):
         for pair in self.valued_pairs:
             # this valuable tile was discarded once
             # let's open on it in that case
-            if self.player.total_tiles(pair, tiles_34) == 3 and self.player.ai.shanten > 1:
+            if self.player.total_tiles(pair, player_hand_tiles_34) == 3 and self.player.ai.shanten > 1:
                 return True
 
         return False
@@ -150,19 +151,19 @@ class YakuhaiStrategy(BaseStrategy):
 
         return False
 
-    def try_to_call_meld(self, tile, is_kamicha_discard):
+    def try_to_call_meld(self, tile, is_kamicha_discard, tiles_136):
         if self.has_valued_pon:
-            return super(YakuhaiStrategy, self).try_to_call_meld(tile, is_kamicha_discard)
+            return super(YakuhaiStrategy, self).try_to_call_meld(tile, is_kamicha_discard, tiles_136)
 
         tile_34 = tile // 4
         # we will open hand for atodzuke only in the special cases
         if not self.player.is_open_hand and tile_34 not in self.valued_pairs:
             if self.go_for_atodzuke:
-                return super(YakuhaiStrategy, self).try_to_call_meld(tile, is_kamicha_discard)
+                return super(YakuhaiStrategy, self).try_to_call_meld(tile, is_kamicha_discard, tiles_136)
 
             return None, None
 
-        return super(YakuhaiStrategy, self).try_to_call_meld(tile, is_kamicha_discard)
+        return super(YakuhaiStrategy, self).try_to_call_meld(tile, is_kamicha_discard, tiles_136)
 
     def _is_yakuhai_pon(self, meld):
         return meld.type == Meld.PON and meld.tiles[0] // 4 in self.player.valued_honors

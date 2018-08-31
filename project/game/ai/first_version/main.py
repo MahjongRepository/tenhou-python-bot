@@ -61,14 +61,14 @@ class ImplementationAI(InterfaceAI):
         self.discard_tile(None)
 
         # Let's decide what we will do with our hand (like open for tanyao and etc.)
-        self.determine_strategy()
+        self.determine_strategy(self.player.tiles)
 
     def draw_tile(self, tile):
         """
         :param tile: 136 tile format
         :return:
         """
-        self.determine_strategy()
+        self.determine_strategy(self.player.tiles)
 
     def discard_tile(self, discard_tile):
         # we called meld and we had discard tile that we wanted to discard
@@ -194,10 +194,13 @@ class ImplementationAI(InterfaceAI):
         return n
 
     def try_to_call_meld(self, tile, is_kamicha_discard):
+        tiles_136 = self.player.tiles[:] + [tile]
+        self.determine_strategy(tiles_136)
+
         if not self.current_strategy:
             return None, None
 
-        meld, discard_option = self.current_strategy.try_to_call_meld(tile, is_kamicha_discard)
+        meld, discard_option = self.current_strategy.try_to_call_meld(tile, is_kamicha_discard, tiles_136)
         tile_to_discard = None
         if discard_option:
             self.last_discard_option = discard_option
@@ -205,7 +208,7 @@ class ImplementationAI(InterfaceAI):
 
         return meld, tile_to_discard
 
-    def determine_strategy(self):
+    def determine_strategy(self, tiles_136):
         # for already opened hand we don't need to give up on selected strategy
         if self.player.is_open_hand and self.current_strategy:
             return False
@@ -225,7 +228,7 @@ class ImplementationAI(InterfaceAI):
         strategies.append(FormalTempaiStrategy(BaseStrategy.FORMAL_TEMPAI, self.player))
 
         for strategy in strategies:
-            if strategy.should_activate_strategy():
+            if strategy.should_activate_strategy(tiles_136):
                 self.current_strategy = strategy
 
         if self.current_strategy:

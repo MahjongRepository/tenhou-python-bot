@@ -11,21 +11,21 @@ class TanyaoStrategy(BaseStrategy):
     min_shanten = 3
     not_suitable_tiles = TERMINAL_INDICES + HONOR_INDICES
 
-    def should_activate_strategy(self):
+    def should_activate_strategy(self, tiles_136):
         """
         Tanyao hand is a hand without terminal and honor tiles, to achieve this
         we will use different approaches
         :return: boolean
         """
 
-        result = super(TanyaoStrategy, self).should_activate_strategy()
+        result = super(TanyaoStrategy, self).should_activate_strategy(tiles_136)
         if not result:
             return False
 
-        tiles = TilesConverter.to_34_array(self.player.tiles)
+        tiles = TilesConverter.to_34_array(tiles_136)
 
         closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
-        isolated_tiles = [x // 4 for x in self.player.tiles if is_tile_strictly_isolated(closed_hand_34, x // 4) or is_honor(x // 4)]
+        isolated_tiles = [x // 4 for x in tiles_136 if is_tile_strictly_isolated(closed_hand_34, x // 4) or is_honor(x // 4)]
 
         count_of_terminal_pon_sets = 0
         count_of_terminal_pairs = 0

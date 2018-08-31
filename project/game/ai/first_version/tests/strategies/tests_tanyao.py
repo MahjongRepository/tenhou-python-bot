@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
+from mahjong.constants import FIVE_RED_PIN
 from mahjong.meld import Meld
 from mahjong.tests_mixin import TestMixin
 
@@ -20,75 +21,75 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 
         tiles = self._string_to_136_array(sou='222', man='3459', pin='233', honors='111')
         self.player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), False)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), False)
 
         tiles = self._string_to_136_array(sou='222', man='3459', pin='233999')
         self.player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), False)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), False)
 
         tiles = self._string_to_136_array(sou='222', man='3459', pin='233444')
         self.player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), True)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), True)
 
     def test_should_activate_strategy_and_terminal_pairs(self):
         strategy = TanyaoStrategy(BaseStrategy.TANYAO, self.player)
 
         tiles = self._string_to_136_array(sou='222', man='3459', pin='2399', honors='11')
         self.player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), False)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), False)
 
         tiles = self._string_to_136_array(sou='22258', man='3566', pin='2399')
         self.player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), True)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), True)
 
     def test_should_activate_strategy_and_valued_pair(self):
         strategy = TanyaoStrategy(BaseStrategy.TANYAO, self.player)
 
         tiles = self._string_to_136_array(man='23446679', sou='222', honors='55')
         self.player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), False)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), False)
 
         tiles = self._string_to_136_array(man='23446679', sou='222', honors='22')
         self.player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), True)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), True)
 
     def test_should_activate_strategy_and_chitoitsu_like_hand(self):
         strategy = TanyaoStrategy(BaseStrategy.TANYAO, self.player)
 
         tiles = self._string_to_136_array(sou='223388', man='2244', pin='6687')
         self.player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), False)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), False)
 
     def test_should_activate_strategy_and_already_completed_sided_set(self):
         strategy = TanyaoStrategy(BaseStrategy.TANYAO, self.player)
 
         tiles = self._string_to_136_array(sou='123234', man='2349', pin='234')
         self.player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), False)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), False)
 
         tiles = self._string_to_136_array(sou='234789', man='2349', pin='234')
         self.player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), False)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), False)
 
         tiles = self._string_to_136_array(sou='234', man='1233459', pin='234')
         self.player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), False)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), False)
 
         tiles = self._string_to_136_array(sou='234', man='2227899', pin='234')
         self.player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), False)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), False)
 
         tiles = self._string_to_136_array(sou='234', man='2229', pin='122334')
         self.player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), False)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), False)
 
         tiles = self._string_to_136_array(sou='234', man='2229', pin='234789')
         self.player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), False)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), False)
 
         tiles = self._string_to_136_array(sou='223344', man='2229', pin='234')
         self.player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), True)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), True)
 
     def test_suitable_tiles(self):
         strategy = TanyaoStrategy(BaseStrategy.TANYAO, self.player)
@@ -243,16 +244,13 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(self._to_string([tile_to_discard]), '8p')
 
     def test_dont_open_tanyao_with_two_non_central_doras(self):
-        table = self._make_table()
-        player = table.player
-
-        table.add_dora_indicator(self._string_to_136_tile(pin='8'))
+        self.table.add_dora_indicator(self._string_to_136_tile(pin='8'))
 
         tiles = self._string_to_136_array(man='22234', sou='6888', pin='5599')
-        player.init_hand(tiles)
+        self.table.player.init_hand(tiles)
 
         tile = self._string_to_136_tile(pin='5')
-        meld, _ = player.try_to_call_meld(tile, False)
+        meld, _ = self.table.player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 
     def test_dont_open_tanyao_with_three_not_isolated_terminals(self):
@@ -286,6 +284,20 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.player.draw_tile(self._string_to_136_tile(pin='5'))
         discard = self.player.discard_tile()
         self.assertEqual(self._to_string([discard]), '8m')
+
+    def test_determine_strategy_when_we_try_to_call_meld(self):
+        self.table.has_aka_dora = True
+
+        self.table.add_dora_indicator(self._string_to_136_tile(sou='5'))
+        tiles = self._string_to_136_array(man='66678', sou='6888', pin='5588')
+        self.table.player.init_hand(tiles)
+
+        # with this red five we will have 2 dora in the hand
+        # and in that case we can open our hand
+        meld, _ = self.table.player.try_to_call_meld(FIVE_RED_PIN, False)
+        self.assertNotEqual(meld, None)
+
+        self._assert_tanyao(self.player)
 
     def _make_table(self):
         table = Table()

@@ -224,11 +224,14 @@ class Player(PlayerInterface):
             TilesConverter.to_one_line_string(self.closed_hand),
             TilesConverter.to_one_line_string([tile])
         )
-        if self.is_open_hand:
-            melds = []
-            for item in self.melds:
-                melds.append('{}'.format(TilesConverter.to_one_line_string(item.tiles)))
+
+        melds = []
+        for item in self.melds:
+            melds.append('{}'.format(TilesConverter.to_one_line_string(item.tiles)))
+
+        if melds:
             hand_string += ' [{}]'.format(', '.join(melds))
+
         return hand_string
 
     @property

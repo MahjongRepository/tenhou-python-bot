@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 from mahjong.constants import TERMINAL_INDICES, HONOR_INDICES
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_tile_strictly_isolated, is_terminal
-from mahjong.utils import plus_dora, is_aka_dora
 from mahjong.utils import is_honor
+from mahjong.utils import is_tile_strictly_isolated
 
 from game.ai.first_version.strategies.main import BaseStrategy
 
@@ -97,37 +96,19 @@ class TanyaoStrategy(BaseStrategy):
             if first >= 1 and second >= 1 and third >= 1:
                 return False
 
-        dora_count_central = 0
-        dora_count_not_central = 0
-        for tile_136 in self.player.tiles:
-            tile_34 = tile_136 // 4
-
-            dora = plus_dora(tile_136, self.player.table.dora_indicators)
-
-            if is_aka_dora(tile_136, self.player.table.has_aka_dora):
-                dora_count_central += 1
-
-            if not dora:
-                continue
-
-            if is_honor(tile_34) or is_terminal(tile_34):
-                dora_count_not_central += 1
-            else:
-                dora_count_central += 1
-
         # if we have 2 or more non-central doras
         # we don't want to go for tanyao
-        if dora_count_not_central >= 2:
+        if self.dora_count_not_central >= 2:
             return False
 
         # if we have less than two central doras
         # let's not consider open tanyao
-        if dora_count_central < 2:
+        if self.dora_count_central < 2:
             return False
 
         # if we have only two central doras let's
         # wait for 5th turn before opening our hand
-        if dora_count_central == 2 and self.player.round_step < 5:
+        if self.dora_count_central == 2 and self.player.round_step < 5:
             return False
 
         return True

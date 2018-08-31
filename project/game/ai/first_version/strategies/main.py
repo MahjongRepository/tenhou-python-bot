@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_man, is_pin, is_sou, is_pon, is_chi
+from mahjong.utils import is_man, is_pin, is_sou, is_pon, is_chi, plus_dora, is_aka_dora, is_honor, is_terminal
 
 
 class BaseStrategy(object):
@@ -24,6 +24,11 @@ class BaseStrategy(object):
     min_shanten = 7
     go_for_atodzuke = False
 
+    dora_count_total = 0
+    dora_count_central = 0
+    dora_count_not_central = 0
+    aka_dora_count = 0
+
     def __init__(self, strategy_type, player):
         self.type = strategy_type
         self.player = player
@@ -39,6 +44,8 @@ class BaseStrategy(object):
         For now default rule for all strategies: don't open hand with 5+ pairs
         :return: boolean
         """
+        self.calculate_dora_count()
+
         if self.player.is_open_hand:
             return True
 
@@ -241,6 +248,30 @@ class BaseStrategy(object):
         :return: boolean
         """
         return False
+
+    def calculate_dora_count(self):
+        self.dora_count_central = 0
+        self.dora_count_not_central = 0
+        self.aka_dora_count = 0
+
+        for tile_136 in self.player.tiles:
+            tile_34 = tile_136 // 4
+
+            dora = plus_dora(tile_136, self.player.table.dora_indicators)
+
+            if is_aka_dora(tile_136, self.player.table.has_aka_dora):
+                self.aka_dora_count += 1
+
+            if not dora:
+                continue
+
+            if is_honor(tile_34) or is_terminal(tile_34):
+                self.dora_count_not_central += 1
+            else:
+                self.dora_count_central += 1
+
+        self.dora_count_central += self.aka_dora_count
+        self.dora_count_total = self.dora_count_central + self.dora_count_not_central
 
     def _find_best_meld_to_open(self, possible_melds, completed_hand):
         """

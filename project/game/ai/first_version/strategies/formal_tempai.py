@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from mahjong.utils import plus_dora, is_aka_dora
-
 from game.ai.first_version.strategies.main import BaseStrategy
 
 
@@ -30,11 +28,8 @@ class FormalTempaiStrategy(BaseStrategy):
         if self.player.ai.shanten >= 3:
             return True
 
-        dora_count = sum([plus_dora(x, self.player.table.dora_indicators) for x in self.player.tiles])
-        dora_count += sum([1 for x in self.player.tiles if is_aka_dora(x, self.player.table.has_aka_dora)])
-
         if self.player.ai.shanten == 2:
-            if dora_count < 2:
+            if self.dora_count_total < 2:
                 # having 0 or 1 dora and 2 shanten, let's go for formal tempai
                 # starting from 11th turn
                 return True
@@ -45,7 +40,7 @@ class FormalTempaiStrategy(BaseStrategy):
         # for 1 shanten we check number of doras and ukeire to determine
         # correct time to go for formal tempai
         if self.player.ai.shanten == 1:
-            if dora_count == 0:
+            if self.dora_count_total == 0:
                 if self.player.ai.ukeire <= 16:
                     return True
 
@@ -54,7 +49,7 @@ class FormalTempaiStrategy(BaseStrategy):
 
                 return self.player.round_step >= 13
 
-            if dora_count == 1:
+            if self.dora_count_total == 1:
                 if self.player.ai.ukeire <= 16:
                     return self.player.round_step >= 12
 

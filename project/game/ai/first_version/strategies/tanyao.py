@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from mahjong.constants import TERMINAL_INDICES, HONOR_INDICES
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_tile_strictly_isolated
+from mahjong.utils import is_tile_strictly_isolated, is_terminal
 from mahjong.utils import plus_dora, is_aka_dora
 from mahjong.utils import is_honor
 
@@ -97,12 +97,23 @@ class TanyaoStrategy(BaseStrategy):
             if first >= 1 and second >= 1 and third >= 1:
                 return False
 
-        dora_indicators_central = [x for x in self.player.table.dora_indicators if not is_honor(x // 4) and not TanyaoStrategy.is_indicator_for_terminal(x // 4)]
-        dora_count_central = sum([plus_dora(x, dora_indicators_central) for x in self.player.tiles])
-        dora_count_central += sum([1 for x in self.player.tiles if is_aka_dora(x, self.player.table.has_aka_dora)])
+        dora_count_central = 0
+        dora_count_not_central = 0
+        for tile_136 in self.player.tiles:
+            tile_34 = tile_136 // 4
 
-        dora_indicators_not_central = [x for x in self.player.table.dora_indicators if is_honor(x // 4) or TanyaoStrategy.is_indicator_for_terminal(x // 4)]
-        dora_count_not_central = sum([plus_dora(x, dora_indicators_not_central) for x in self.player.tiles])
+            dora = plus_dora(tile_136, self.player.table.dora_indicators)
+
+            if is_aka_dora(tile_136, self.player.table.has_aka_dora):
+                dora_count_central += 1
+
+            if not dora:
+                continue
+
+            if is_honor(tile_34) or is_terminal(tile_34):
+                dora_count_not_central += 1
+            else:
+                dora_count_central += 1
 
         # if we have 2 or more non-central doras
         # we don't want to go for tanyao
@@ -120,10 +131,6 @@ class TanyaoStrategy(BaseStrategy):
             return False
 
         return True
-
-    @staticmethod
-    def is_indicator_for_terminal(tile):
-        return tile == 7 or tile == 8 or tile == 16 or tile == 17 or tile == 25 or tile == 26
 
     def determine_what_to_discard(self, closed_hand, outs_results, shanten, for_open_hand, tile_for_open_hand,
                                   hand_was_open=False):

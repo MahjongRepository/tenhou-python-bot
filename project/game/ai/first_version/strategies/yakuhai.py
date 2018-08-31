@@ -49,7 +49,7 @@ class YakuhaiStrategy(BaseStrategy):
             return False
 
         dora_count = sum([plus_dora(x, self.player.table.dora_indicators) for x in self.player.tiles])
-        dora_count += sum([1 for x in self.player.tiles if is_aka_dora(x, self.player.table.has_open_tanyao)])
+        dora_count += sum([1 for x in self.player.tiles if is_aka_dora(x, self.player.table.has_aka_dora)])
 
         # let's always open double east
         if is_double_east_wind:

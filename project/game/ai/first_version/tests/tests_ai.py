@@ -64,6 +64,10 @@ class AITestCase(unittest.TestCase, TestMixin):
         table.has_open_tanyao = True
         player = table.player
 
+        # add 3 doras so we are sure to go for tanyao
+        table.add_dora_indicator(self._string_to_136_tile(pin='2'))
+        table.add_dora_indicator(self._string_to_136_tile(pin='3'))
+
         tiles = self._string_to_136_array(man='23455', pin='3445678', honors='1')
         tile = self._string_to_136_tile(man='5')
         player.init_hand(tiles)
@@ -75,7 +79,8 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         table = Table()
         player = table.player
-        table.dora_indicators.append(self._string_to_136_tile(honors='7'))
+        # add 3 doras so we are sure to go for tanyao
+        table.add_dora_indicator(self._string_to_136_tile(man='5'))
         tiles = self._string_to_136_array(man='335666', pin='22', sou='345', honors='55')
         player.init_hand(tiles)
 
@@ -88,6 +93,9 @@ class AITestCase(unittest.TestCase, TestMixin):
         table = Table()
         table.has_open_tanyao = True
         player = table.player
+        # add 3 doras so we are sure to go for tanyao
+        table.add_dora_indicator(self._string_to_136_tile(man='1'))
+        table.add_dora_indicator(self._string_to_136_tile(man='4'))
         tiles = self._string_to_136_array(man='23557', pin='556788', honors='22')
         player.init_hand(tiles)
 
@@ -125,8 +133,12 @@ class AITestCase(unittest.TestCase, TestMixin):
         table.has_open_tanyao = True
         player = table.player
 
+        # add 3 doras so we are sure to go for tanyao
+        table.add_dora_indicator(self._string_to_136_tile(man='2'))
+
         tiles = self._string_to_136_array(man='33355788', sou='3479', honors='3')
         player.init_hand(tiles)
+        self.assertNotEqual(player.ai.current_strategy, None)
         self.assertEqual(player.ai.current_strategy.type, BaseStrategy.TANYAO)
 
         # we draw a tile that will change our selected strategy
@@ -144,6 +156,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         player.add_called_meld(meld)
         tile = self._string_to_136_tile(sou='8')
         player.draw_tile(tile)
+        self.assertNotEqual(player.ai.current_strategy, None)
         self.assertEqual(player.ai.current_strategy.type, BaseStrategy.TANYAO)
 
     def test_remaining_tiles_and_enemy_discard(self):

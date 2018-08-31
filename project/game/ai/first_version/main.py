@@ -199,8 +199,12 @@ class ImplementationAI(InterfaceAI):
 
     def count_tiles(self, waiting, tiles_34):
         n = 0
-        for item in waiting:
-            n += 4 - self.player.total_tiles(item, tiles_34)
+        not_suitable_tiles = self.current_strategy and self.current_strategy.not_suitable_tiles or []
+        for tile_34 in waiting:
+            if self.player.is_open_hand and tile_34 in not_suitable_tiles:
+                continue
+
+            n += 4 - self.player.total_tiles(tile_34, tiles_34)
         return n
 
     def try_to_call_meld(self, tile, is_kamicha_discard):

@@ -140,15 +140,13 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(meld, None)
 
     def test_open_hand_and_discard_tiles_logic(self):
-        # 2345779m1p256s44z
         tiles = self._string_to_136_array(man='22234', sou='238', pin='256', honors='44')
         self.player.init_hand(tiles)
 
-        # if we are in tanyao
-        # we need to discard terminals and honors
         tile = self._string_to_136_tile(sou='4')
         meld, discard_option = self.player.try_to_call_meld(tile, True)
         discarded_tile = self.player.discard_tile(discard_option)
+
         self.assertNotEqual(meld, None)
         self.assertEqual(self._to_string([discarded_tile]), '4z')
 
@@ -156,7 +154,6 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.player.draw_tile(tile)
         tile_to_discard = self.player.discard_tile()
 
-        # we are in tanyao, so we should discard honors and terminals
         self.assertEqual(self._to_string([tile_to_discard]), '4z')
 
     def test_dont_count_pairs_in_already_opened_hand(self):
@@ -222,7 +219,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         discard = player.discard_tile()
         self.assertEqual(self._to_string([discard]), '7s')
 
-    def test_choose_correct_waiting_and_fist_opened_meld(self):
+    def test_choose_correct_waiting_and_first_opened_meld(self):
         tiles = self._string_to_136_array(man='2337788', sou='222', pin='234')
         self.player.init_hand(tiles)
 
@@ -245,7 +242,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         # our hand is closed, let's keep terminal for now
         self.assertEqual(self._to_string([tile_to_discard]), '8p')
 
-    def test_dont_open_tanyo_with_two_non_central_doras(self):
+    def test_dont_open_tanyao_with_two_non_central_doras(self):
         table = self._make_table()
         player = table.player
 
@@ -258,7 +255,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         meld, _ = player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 
-    def test_dont_open_tanyo_with_three_not_isolated_terminals(self):
+    def test_dont_open_tanyao_with_three_not_isolated_terminals(self):
         tiles = self._string_to_136_array(man='2226', sou='2799', pin='5579')
         self.player.init_hand(tiles)
 
@@ -266,15 +263,9 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         meld, _ = self.player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 
-    def test_dont_open_tanyo_with_two_not_isolated_terminals_one_shanten(self):
+    def test_dont_open_tanyao_with_two_not_isolated_terminals_one_shanten(self):
         tiles = self._string_to_136_array(man='22234', sou='79', pin='55579')
         self.player.init_hand(tiles)
-
-        # to calculate hand shanten number
-        self.player.draw_tile(self._string_to_136_tile(honors='1'))
-        self.player.discard_tile()
-        self.player.draw_tile(self._string_to_136_tile(honors='1'))
-        self.player.discard_tile()
 
         tile = self._string_to_136_tile(man='5')
         meld, _ = self.player.try_to_call_meld(tile, False)

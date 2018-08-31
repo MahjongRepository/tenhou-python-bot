@@ -56,13 +56,11 @@ class ImplementationAI(InterfaceAI):
         self.erase_state()
 
     def init_hand(self):
-        """
-        Let's decide what we will do with our hand (like open for tanyao and etc.)
-        """
-        self.determine_strategy()
-
         # it will set correct hand shanten number and ukeire to the new hand
         self.discard_tile(None)
+
+        # Let's decide what we will do with our hand (like open for tanyao and etc.)
+        self.determine_strategy()
 
     def draw_tile(self, tile):
         """

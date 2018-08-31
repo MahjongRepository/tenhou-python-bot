@@ -303,7 +303,6 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='59', sou='1235', pin='12788', honors='22')
         self.player.init_hand(tiles)
 
-        self.player.init_hand(tiles)
         tile = self._string_to_136_tile(honors='2')
         meld, _ = self.player.try_to_call_meld(tile, True)
         self.assertEqual(meld, None)

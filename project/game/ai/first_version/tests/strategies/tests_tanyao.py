@@ -271,6 +271,22 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         meld, _ = self.player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 
+    def test_dont_count_terminal_tiles_in_ukeire(self):
+        # for closed hand let's chose tile with best ukeire
+        tiles = self._string_to_136_array(man='234578', sou='235', pin='2246')
+        self.player.init_hand(tiles)
+        self.player.draw_tile(self._string_to_136_tile(pin='5'))
+        discard = self.player.discard_tile()
+        self.assertEqual(self._to_string([discard]), '5m')
+
+        # but with opened hand we don't need to count not suitable tiles as ukeire
+        tiles = self._string_to_136_array(man='234578', sou='235', pin='2246')
+        self.player.init_hand(tiles)
+        self.player.add_called_meld(self._make_meld(Meld.CHI, man='234'))
+        self.player.draw_tile(self._string_to_136_tile(pin='5'))
+        discard = self.player.discard_tile()
+        self.assertEqual(self._to_string([discard]), '8m')
+
     def _make_table(self):
         table = Table()
         table.has_open_tanyao = True

@@ -17,6 +17,7 @@ class BaseStrategy(object):
         FORMAL_TEMPAI: 'Formal Tempai'
     }
 
+    not_suitable_tiles = []
     player = None
     type = None
     # number of shanten where we can start to open hand

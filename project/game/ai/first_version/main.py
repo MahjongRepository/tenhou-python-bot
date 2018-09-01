@@ -96,6 +96,8 @@ class ImplementationAI(InterfaceAI):
             if defence_tile:
                 return self.process_discard_option(defence_tile, self.player.closed_hand)
         else:
+            if self.in_defence:
+                logger.info('Stop defence mode')
             self.in_defence = False
 
         return self.process_discard_option(selected_tile, self.player.closed_hand)

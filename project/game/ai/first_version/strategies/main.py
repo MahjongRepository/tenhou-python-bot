@@ -10,13 +10,15 @@ class BaseStrategy(object):
     TANYAO = 2
     FORMAL_TEMPAI = 3
     CHINITSU = 4
+    CHIITOITSU = 5
 
     TYPES = {
         YAKUHAI: 'Yakuhai',
         HONITSU: 'Honitsu',
         TANYAO: 'Tanyao',
         FORMAL_TEMPAI: 'Formal Tempai',
-        CHINITSU: 'Chinitsu'
+        CHINITSU: 'Chinitsu',
+        CHIITOITSU: 'Chiitoitsu'
     }
 
     not_suitable_tiles = []
@@ -44,7 +46,6 @@ class BaseStrategy(object):
         """
         Based on player hand and table situation
         we can determine should we use this strategy or not.
-        For now default rule for all strategies: don't open hand with 5+ pairs
         :param: tiles_136
         :return: boolean
         """
@@ -53,10 +54,7 @@ class BaseStrategy(object):
         if self.player.is_open_hand:
             return True
 
-        tiles_34 = TilesConverter.to_34_array(tiles_136)
-        count_of_pairs = len([x for x in range(0, 34) if tiles_34[x] >= 2])
-
-        return count_of_pairs < 5
+        return True
 
     def is_tile_suitable(self, tile):
         """

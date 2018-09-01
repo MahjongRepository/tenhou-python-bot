@@ -58,7 +58,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 
         tiles = self._string_to_136_array(sou='223388', man='2244', pin='6687')
         self.player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), False)
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), True)
 
     def test_should_activate_strategy_and_already_completed_sided_set(self):
         strategy = TanyaoStrategy(BaseStrategy.TANYAO, self.player)

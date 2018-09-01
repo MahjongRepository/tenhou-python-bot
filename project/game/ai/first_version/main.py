@@ -21,6 +21,7 @@ from game.ai.first_version.strategies.tanyao import TanyaoStrategy
 from game.ai.first_version.strategies.yakuhai import YakuhaiStrategy
 from game.ai.first_version.strategies.formal_tempai import FormalTempaiStrategy
 from game.ai.first_version.strategies.chinitsu import ChinitsuStrategy
+from game.ai.first_version.strategies.chiitoitsu import ChiitoitsuStrategy
 
 logger = logging.getLogger('ai')
 
@@ -233,6 +234,7 @@ class ImplementationAI(InterfaceAI):
         if self.player.table.has_open_tanyao:
             strategies.append(TanyaoStrategy(BaseStrategy.TANYAO, self.player))
 
+        strategies.append(ChiitoitsuStrategy(BaseStrategy.CHIITOITSU, self.player))
         strategies.append(FormalTempaiStrategy(BaseStrategy.FORMAL_TEMPAI, self.player))
 
         for strategy in strategies:

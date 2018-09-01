@@ -324,3 +324,13 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         tile = self._string_to_136_tile(honors='2')
         meld, _ = self.player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)
+
+    def test_keep_yakuhai_in_closed_hand(self):
+        tiles = self._string_to_136_array(man='14', sou='15', pin='113347', honors='777')
+        self.player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(honors='3')
+        self.player.draw_tile(tile)
+
+        discard = self.player.discard_tile()
+        self.assertNotEqual(self._to_string([discard]), '7z')

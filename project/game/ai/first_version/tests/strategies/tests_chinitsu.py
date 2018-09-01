@@ -52,6 +52,21 @@ class ChinitsuStrategyTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
         self.assertEqual(strategy.should_activate_strategy(player.tiles), False)
 
+        # even if the set may be interpreted as two forms
+        tiles = self._string_to_136_array(sou='111223688', pin='2334')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), False)
+
+        # even if the set may be interpreted as two forms v2
+        tiles = self._string_to_136_array(sou='111223688', pin='2345')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), False)
+
+        # if we have a long form with dora, we shouldn't go for chinitsu
+        tiles = self._string_to_136_array(sou='111223688', pin='2333')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), False)
+
         # buf it it's just a ryanmen - no problem
         tiles = self._string_to_136_array(sou='1112223688', pin='238')
         player.init_hand(tiles)

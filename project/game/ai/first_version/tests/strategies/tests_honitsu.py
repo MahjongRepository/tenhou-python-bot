@@ -23,7 +23,7 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(strategy.should_activate_strategy(player.tiles), False)
 
         # many tiles in one suit and yakuhai pair, but still many useless winds
-        tiles = self._string_to_136_array(sou='12355', man='238', honors='23455')
+        tiles = self._string_to_136_array(sou='12355', man='23', pin='68', honors='2355')
         player.init_hand(tiles)
         self.assertEqual(strategy.should_activate_strategy(player.tiles), False)
 
@@ -36,13 +36,34 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         # same conditions, but ready suit with dora in another suit, so no honitsu
         tiles = self._string_to_136_array(sou='12355', pin='234', honors='22355')
         player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), False)
 
         # same conditions, but we have a pon of yakuhai doras, we shouldn't
         # force honitsu with this hand
         tiles = self._string_to_136_array(sou='12355', pin='238', honors='22666')
         player.init_hand(tiles)
         self.assertEqual(strategy.should_activate_strategy(player.tiles), False)
+
+        # if we have a complete set with dora, we shouldn't go for honitsu
+        tiles = self._string_to_136_array(sou='11123688', pin='123', honors='55')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), False)
+
+        # even if the set may be interpreted as two forms
+        tiles = self._string_to_136_array(sou='1223688', pin='2334', honors='55')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), False)
+
+        # even if the set may be interpreted as two forms v2
+        tiles = self._string_to_136_array(sou='1223688', pin='2345', honors='55')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), False)
+
+        # if we have a long form with dora, we shouldn't go for honitsu
+        tiles = self._string_to_136_array(sou='1223688', pin='2333', honors='55')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), False)
+
 
     def test_suitable_tiles(self):
         table = Table()

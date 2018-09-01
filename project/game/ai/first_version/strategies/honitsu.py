@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from mahjong.tile import TilesConverter
 from mahjong.utils import count_tiles_by_suits, simplify, is_tile_strictly_isolated
-from mahjong.utils import is_man, is_pin, is_sou, is_pon, is_chi, plus_dora, is_aka_dora, is_honor, is_pair
+from mahjong.utils import is_man, is_pin, is_sou, plus_dora, is_aka_dora, is_honor
 
 from game.ai.first_version.strategies.main import BaseStrategy
 
@@ -11,8 +11,9 @@ class HonitsuStrategy(BaseStrategy):
 
     chosen_suit = None
 
-    dora_count_not_suitable = 0
-    tiles_count_not_suitable = 0
+    dora_count_other_suits_not_isolated = 0
+    tiles_count_other_suits = 0
+    tiles_count_other_suits_not_isolated = 0
 
     def should_activate_strategy(self, tiles_136):
         """
@@ -45,12 +46,12 @@ class HonitsuStrategy(BaseStrategy):
 
         # let's not go for honitsu if we have 5 or more non-isolated
         # tiles in other suits
-        if self.tiles_count_not_suitable >= 5:
+        if self.tiles_count_other_suits >= 5:
             return False
 
         # let's not go for honitsu if we have 2 or more non-isolated doras
         # in other suits
-        if self.dora_count_not_suitable >= 2:
+        if self.dora_count_other_suits_not_isolated >= 2:
             return False
 
         # if we have a pon of valued doras, let's not go for honitsu
@@ -69,9 +70,9 @@ class HonitsuStrategy(BaseStrategy):
                                 and x not in self.player.valued_honors
                                 and tiles_34[x] == 1])
 
-        # there are not many non-suitable tiles, but let's check other patterns,
-        # maybe it's not enough to assume honitsu
-        if self.tiles_count_not_suitable >= 3:
+        # if we have some decent amount of not isolated tiles in other suits
+        # we may not rush for honitsu considering other conditions
+        if self.tiles_count_other_suits_not_isolated >= 3:
             # if we don't have pair or pon of honored doras
             if honor_doras_pairs_or_pons == 0:
                 # we need to either have a valued pair or have at least two honor
@@ -96,7 +97,6 @@ class HonitsuStrategy(BaseStrategy):
                     return False
 
         # if we have a complete set in other suits, we can only throw it away if it's early in the game
-        # TODO: also check that it doesn't contain dora
         if count_of_shuntsu_other_suits + count_of_koutsu_other_suits >= 1:
             # too late to throw away chi after 8 step
             if self.player.round_step > 8:
@@ -104,6 +104,10 @@ class HonitsuStrategy(BaseStrategy):
 
             # already 1 shanten, no need to throw away complete set
             if self.player.ai.shanten == 1:
+                return False
+
+            # dora is not isolated and we have a complete set, let's not go for honitsu
+            if self.dora_count_other_suits_not_isolated >= 1:
                 return False
 
         self.chosen_suit = suit['function']
@@ -119,18 +123,19 @@ class HonitsuStrategy(BaseStrategy):
         tile //= 4
         return self.chosen_suit(tile) or is_honor(tile)
 
-    # TODO: differentiate between all not-suitable tiles and not-suitable not isolated tiles
-    def _calculate_not_suitable_tiles_cnt(self, tiles, suit):
-        suit_tiles_cnt = 0
+    def _calculate_not_suitable_tiles_cnt(self, tiles_34, suit):
+        self.tiles_count_other_suits = 0
+        self.tiles_count_other_suits_not_isolated = 0
+
         for x in range(0, 34):
-            tile = tiles[x]
+            tile = tiles_34[x]
             if not tile:
                 continue
 
             if not suit(x) and not is_honor(x):
-                suit_tiles_cnt += 1
-
-        self.tiles_count_not_suitable = suit_tiles_cnt
+                self.tiles_count_other_suits += tile
+                if not is_tile_strictly_isolated(tiles_34, x):
+                    self.tiles_count_other_suits_not_isolated += tile
 
     def _initialize_honitsu_dora_count(self, tiles_136, suit):
         tiles_34 = TilesConverter.to_34_array(tiles_136)
@@ -160,13 +165,14 @@ class HonitsuStrategy(BaseStrategy):
                     dora_count_sou_not_isolated += dora_count
 
         if suit['name'] == 'pin':
-            self.dora_count_not_suitable= dora_count_man_not_isolated + dora_count_sou_not_isolated
+            self.dora_count_other_suits_not_isolated = dora_count_man_not_isolated + dora_count_sou_not_isolated
         elif suit['name'] == 'sou':
-            self.dora_count_not_suitable= dora_count_man_not_isolated + dora_count_pin_not_isolated
+            self.dora_count_other_suits_not_isolated = dora_count_man_not_isolated + dora_count_pin_not_isolated
         elif suit['name'] == 'man':
-            self.dora_count_not_suitable = dora_count_sou_not_isolated + dora_count_pin_not_isolated
+            self.dora_count_other_suits_not_isolated = dora_count_sou_not_isolated + dora_count_pin_not_isolated
 
-    def _find_ryanmen_waits(self, tiles, suit):
+    @staticmethod
+    def _find_ryanmen_waits(tiles, suit):
         suit_tiles = []
         for x in range(0, 34):
             tile = tiles[x]
@@ -195,6 +201,7 @@ class HonitsuStrategy(BaseStrategy):
 
     # we know we have no more that 5 tiles of other suit,
     # so this is a simplified version
+    # be aware, that it will return 2 for 2345 form so use with care
     @staticmethod
     def _count_of_shuntsu(tiles, suit):
         suit_tiles = []
@@ -206,26 +213,29 @@ class HonitsuStrategy(BaseStrategy):
             if suit(x):
                 suit_tiles.append(x)
 
-        count_of_shuntsu = 0
+        count_of_left_tiles = 0
+        count_of_middle_tiles = 0
+        count_of_right_tiles = 0
+
         simple_tiles = [simplify(x) for x in suit_tiles]
         for x in range(0, len(simple_tiles)):
             tile = simple_tiles[x]
 
-            # not enough room to make shuntsu
-            if x + 2 >= len(simple_tiles):
-                continue
+            if tile + 1 in simple_tiles and tile + 2 in simple_tiles:
+                count_of_left_tiles += 1
 
-            if tile + 1 >= 1 and simple_tiles[x + 1] >= 1 and simple_tiles[x + 2] >= 1:
-                count_of_shuntsu += 1
+            if tile - 1 in simple_tiles and tile + 1 in simple_tiles:
+                count_of_middle_tiles += 1
 
-        count_of_shuntsu //= 3
+            if tile - 2 in simple_tiles and tile - 1 in simple_tiles:
+                count_of_right_tiles += 1
 
-        return count_of_shuntsu
+        return (count_of_left_tiles + count_of_middle_tiles + count_of_right_tiles) // 3
 
     # we know we have no more that 5 tiles of other suit,
     # so this is a simplified version
     @staticmethod
-    def _count_of_koutsu( tiles, suit):
+    def _count_of_koutsu(tiles, suit):
         count_of_koutsu = 0
 
         for x in range(0, 34):

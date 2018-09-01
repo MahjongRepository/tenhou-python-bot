@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from mahjong.tile import TilesConverter
 from mahjong.utils import count_tiles_by_suits, is_tile_strictly_isolated
-from mahjong.utils import is_man, is_pin, is_sou, is_pon, is_chi, plus_dora, is_aka_dora, is_honor, is_pair, simplify
+from mahjong.utils import is_man, is_pin, is_sou, plus_dora, is_aka_dora, is_honor
 
 from game.ai.first_version.strategies.main import BaseStrategy
 from game.ai.first_version.strategies.honitsu import HonitsuStrategy
@@ -104,7 +104,6 @@ class ChinitsuStrategy(BaseStrategy):
                 return False
 
         # if we have a complete set in other suits, we can only throw it away if it's early in the game
-        # TODO: also check that it doesn't contain dora
         if count_of_shuntsu_other_suits + count_of_koutsu_other_suits >= 1:
             # too late to throw away chi after 8 step
             if self.player.round_step > 8:
@@ -112,6 +111,10 @@ class ChinitsuStrategy(BaseStrategy):
 
             # already 1 shanten, no need to throw away complete set
             if self.player.round_step > 5 and self.player.ai.shanten == 1:
+                return False
+
+            # dora is not isolated and we have a complete set, let's not go for chinitsu
+            if self.dora_count_not_suitable >= 1:
                 return False
 
         self.chosen_suit = suit['function']
@@ -162,10 +165,10 @@ class ChinitsuStrategy(BaseStrategy):
 
         if suit['name'] == 'pin':
             self.dora_count_suitable = dora_count_pin
-            self.dora_count_not_suitable= dora_count_man_not_isolated + dora_count_sou_not_isolated
+            self.dora_count_not_suitable = dora_count_man_not_isolated + dora_count_sou_not_isolated
         elif suit['name'] == 'sou':
             self.dora_count_suitable = dora_count_sou
-            self.dora_count_not_suitable= dora_count_man_not_isolated + dora_count_pin_not_isolated
+            self.dora_count_not_suitable = dora_count_man_not_isolated + dora_count_pin_not_isolated
         elif suit['name'] == 'man':
             self.dora_count_suitable = dora_count_man
             self.dora_count_not_suitable = dora_count_sou_not_isolated + dora_count_pin_not_isolated

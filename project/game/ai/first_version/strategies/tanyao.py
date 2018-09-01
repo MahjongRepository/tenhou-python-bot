@@ -25,7 +25,8 @@ class TanyaoStrategy(BaseStrategy):
         tiles = TilesConverter.to_34_array(tiles_136)
 
         closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
-        isolated_tiles = [x // 4 for x in tiles_136 if is_tile_strictly_isolated(closed_hand_34, x // 4) or is_honor(x // 4)]
+        isolated_tiles = [x // 4 for x in tiles_136
+                          if is_tile_strictly_isolated(closed_hand_34, x // 4) or is_honor(x // 4)]
 
         count_of_terminal_pon_sets = 0
         count_of_terminal_pairs = 0

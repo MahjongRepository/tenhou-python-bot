@@ -97,6 +97,7 @@ class YakuhaiStrategy(BaseStrategy):
 
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
         valued_pairs = [x for x in self.player.valued_honors if tiles_34[x] == 2]
+        valued_pons = [x for x in self.player.valued_honors if tiles_34[x] == 3]
 
         # when we trying to open hand with tempai state, we need to chose a valued pair waiting
         if shanten == 0 and valued_pairs and for_open_hand and tile_for_open_hand not in valued_pairs:
@@ -108,14 +109,14 @@ class YakuhaiStrategy(BaseStrategy):
                     results.append(item)
             return results
 
-        if self.player.is_open_hand:
-            has_yakuhai_pon = any([self._is_yakuhai_pon(meld) for meld in self.player.melds])
-            # we opened our hand for atodzuke
-            if not has_yakuhai_pon:
-                for item in outs_results:
-                    for valued_pair in valued_pairs:
-                        if valued_pair == item.tile_to_discard:
-                            item.had_to_be_saved = True
+        for item in outs_results:
+            for valued_pair in valued_pairs:
+                if valued_pair == item.tile_to_discard:
+                    item.had_to_be_saved = True
+
+            for valued_pon in valued_pons:
+                if valued_pon == item.tile_to_discard:
+                    item.had_to_be_saved = True
 
         return super(YakuhaiStrategy, self).determine_what_to_discard(closed_hand,
                                                                       outs_results,

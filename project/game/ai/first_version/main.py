@@ -20,6 +20,7 @@ from game.ai.first_version.strategies.main import BaseStrategy
 from game.ai.first_version.strategies.tanyao import TanyaoStrategy
 from game.ai.first_version.strategies.yakuhai import YakuhaiStrategy
 from game.ai.first_version.strategies.formal_tempai import FormalTempaiStrategy
+from game.ai.first_version.strategies.chinitsu import ChinitsuStrategy
 
 logger = logging.getLogger('ai')
 
@@ -148,7 +149,13 @@ class ImplementationAI(InterfaceAI):
 
             waiting = []
             for j in range(0, 34):
-                if hand_tile == j or tiles_34[j] == 4:
+                if tiles_34[j] == 4:
+                    continue
+
+                # agari is a special case, we are forced to make number
+                # of shanten larger, so we don't skip any tiles
+                # in the end we let the strategy decide what to do if agari without yaku happened
+                if not is_agari and hand_tile == j:
                     continue
 
                 tiles_34[j] += 1
@@ -220,8 +227,9 @@ class ImplementationAI(InterfaceAI):
 
         # order is important
         strategies = [
-            YakuhaiStrategy(BaseStrategy.YAKUHAI, self.player),
+            ChinitsuStrategy(BaseStrategy.CHINITSU, self.player),
             HonitsuStrategy(BaseStrategy.HONITSU, self.player),
+            YakuhaiStrategy(BaseStrategy.YAKUHAI, self.player),
         ]
 
         if self.player.table.has_open_tanyao:

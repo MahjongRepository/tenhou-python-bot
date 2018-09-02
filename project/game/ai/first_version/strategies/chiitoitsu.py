@@ -42,3 +42,13 @@ class ChiitoitsuStrategy(BaseStrategy):
         :return: True
         """
         return True
+
+    def try_to_call_meld(self, tile, is_kamicha_discard, new_tiles):
+        """
+        Never meld with chiitoitsu
+        :param tile: 136 format tile
+        :param is_kamicha_discard: boolean
+        :param new_tiles:
+        :return: Meld and DiscardOption objects
+        """
+        return None, None

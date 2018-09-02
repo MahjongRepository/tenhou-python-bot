@@ -33,3 +33,16 @@ class ChiitoitsuStrategyTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(sou='234', man='22334455669')
         player.init_hand(tiles)
         self.assertEqual(strategy.should_activate_strategy(player.tiles), False)
+
+    def test_dont_call_meld(self):
+        table = Table()
+        player = table.player
+        strategy = ChiitoitsuStrategy(BaseStrategy.CHIITOITSU, player)
+
+        tiles = self._string_to_136_array(sou='112234', man='2334499')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
+
+        tile = self._string_to_136_tile(man='9')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertEqual(meld, None)

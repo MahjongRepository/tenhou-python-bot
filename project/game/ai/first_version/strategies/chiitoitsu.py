@@ -37,7 +37,7 @@ class ChiitoitsuStrategy(BaseStrategy):
 
     def is_tile_suitable(self, tile):
         """
-        For yakuhai we don't have any limits
+        For chiitoitsu we don't have any limits
         :param tile: 136 tiles format
         :return: True
         """

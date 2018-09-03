@@ -299,6 +299,32 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 
         self._assert_tanyao(self.player)
 
+    def test_correct_discard_agari_no_yaku(self):
+        tiles = self._string_to_136_array(man='23567', sou='456', pin='22244')
+        self.player.init_hand(tiles)
+
+        meld = self._make_meld(Meld.CHI, man='567')
+        self.player.add_called_meld(meld)
+
+        tile = self._string_to_136_tile(man='1')
+        self.player.draw_tile(tile)
+        discard = self.player.discard_tile()
+        self.assertEqual(self._to_string([discard]), '1m')
+
+    # In case we are in temporary furiten, we can't call ron, but can still
+    # make chi. We assume this chi to be bad, so let's not call it.
+    @unittest.expectedFailure
+    def test_dont_meld_agari(self):
+        tiles = self._string_to_136_array(man='23567', sou='456', pin='22244')
+        self.player.init_hand(tiles)
+
+        meld = self._make_meld(Meld.CHI, man='567')
+        self.player.add_called_meld(meld)
+
+        tile = self._string_to_136_tile(man='4')
+        meld, _ = self.player.try_to_call_meld(tile, True)
+        self.assertEqual(meld, None)
+
     def _make_table(self):
         table = Table()
         table.has_open_tanyao = True

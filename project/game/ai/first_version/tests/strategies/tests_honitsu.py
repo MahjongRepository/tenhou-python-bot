@@ -65,7 +65,6 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
         self.assertEqual(strategy.should_activate_strategy(player.tiles), False)
 
-
     def test_suitable_tiles(self):
         table = Table()
         player = table.player
@@ -182,3 +181,25 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         meld, _ = player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)
         self.assertEqual(self._to_string(meld.tiles), '777z')
+
+    # issue #84
+    @unittest.expectedFailure
+    def test_open_suit_same_shanten(self):
+        table = Table()
+        player = table.player
+        player.scores = 25000
+        table.count_of_remaining_tiles = 100
+
+        tiles = self._string_to_136_array(man='1134556', pin='3', sou='78', honors='777')
+        player.init_hand(tiles)
+
+        meld = self._make_meld(Meld.CHI, man='345')
+        player.add_called_meld(meld)
+
+        strategy = HonitsuStrategy(BaseStrategy.HONITSU, player)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
+
+        tile = self._string_to_136_tile(man='1')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(self._to_string(meld.tiles), '111m')

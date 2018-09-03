@@ -123,6 +123,21 @@ class HonitsuStrategy(BaseStrategy):
         tile //= 4
         return self.chosen_suit(tile) or is_honor(tile)
 
+    def meld_had_to_be_called(self, tile):
+        has_not_suitable_tiles = False
+
+        for hand_tile in self.player.tiles:
+            if not self.is_tile_suitable(hand_tile):
+                has_not_suitable_tiles = True
+                break
+
+        # if we still have unsuitable tiles, let's call honor pons
+        # even if they don't change number of shanten
+        if has_not_suitable_tiles and is_honor(tile // 4):
+            return True
+
+        return False
+
     def _calculate_not_suitable_tiles_cnt(self, tiles_34, suit):
         self.tiles_count_other_suits = 0
         self.tiles_count_other_suits_not_isolated = 0

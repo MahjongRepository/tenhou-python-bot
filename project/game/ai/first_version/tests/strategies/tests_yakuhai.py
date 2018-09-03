@@ -248,33 +248,46 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         let's open on this valuable pair
         """
 
-        tiles = self._string_to_136_array(man='29', sou='1189', pin='12789', honors='11')
-        self.player.init_hand(tiles)
-        self.player.draw_tile(self._string_to_136_tile(man='6'))
+        strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, self.player)
 
-        tile = self._string_to_136_tile(honors='1')
+        tiles = self._string_to_136_array(sou='678', pin='14689', man='456', honors='77')
+        self.player.init_hand(tiles)
+
+        # we don't activate strategy yet
+        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), False)
+
+        # let's skip first yakuhai early in the game
+        tile = self._string_to_136_tile(honors='7')
+        # when we are melding tile it's already counted as discarded
+        self.table.add_discarded_tile(1, tile, False)
         meld, _ = self.player.try_to_call_meld(tile, True)
         self.assertEqual(meld, None)
 
-        self.table.add_discarded_tile(1, self._string_to_136_tile(honors='1'), False)
-        tiles = self._string_to_136_array(man='29', sou='1189', pin='12789', honors='11')
-        self.player.init_hand(tiles)
-
-        tile = self._string_to_136_tile(honors='1')
+        # now the second one is out
+        self.table.add_discarded_tile(1, tile, False)
         meld, _ = self.player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)
+        self.assertEqual(self._to_string(meld.tiles), '777z')
 
         # but we don't need to open hand for atodzuke here
-        tile = self._string_to_136_tile(pin='3')
+        tile = self._string_to_136_tile(pin='7')
         meld, _ = self.player.try_to_call_meld(tile, True)
         self.assertEqual(meld, None)
 
     def test_open_hand_when_yakuhai_already_in_the_hand(self):
-        tiles = self._string_to_136_array(man='46', pin='4679', sou='1348', honors='555')
-        self.player.init_hand(tiles)
+        # make sure yakuhai strategy is activated by adding 3 doras to the hand
+        table = Table()
+        player = table.player
+        table.add_dora_indicator(self._string_to_136_tile(honors='5'))
+
+        tiles = self._string_to_136_array(man='46', pin='4679', sou='1348', honors='666')
+        player.init_hand(tiles)
+
+        strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
 
         tile = self._string_to_136_tile(sou='2')
-        meld, _ = self.player.try_to_call_meld(tile, True)
+        meld, _ = player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)
 
     def test_always_open_double_east_wind(self):

@@ -15,6 +15,7 @@ class YakuhaiStrategy(BaseStrategy):
 
         self.valued_pairs = []
         self.has_valued_pon = False
+        self.last_chance_calls = []
 
     def should_activate_strategy(self, tiles_136):
         """
@@ -27,25 +28,31 @@ class YakuhaiStrategy(BaseStrategy):
 
         tiles_34 = TilesConverter.to_34_array(tiles_136)
         player_hand_tiles_34 = TilesConverter.to_34_array(self.player.tiles)
-        self.valued_pairs = [x for x in self.player.valued_honors if tiles_34[x] >= 2]
+        self.valued_pairs = [x for x in self.player.valued_honors if player_hand_tiles_34[x] == 2]
 
         is_double_east_wind = len([x for x in self.valued_pairs if x == EAST]) == 2
         is_double_south_wind = len([x for x in self.valued_pairs if x == SOUTH]) == 2
 
         self.valued_pairs = list(set(self.valued_pairs))
-        self.has_valued_pon = len([x for x in self.player.valued_honors if tiles_34[x] == 3]) >= 1
+        self.has_valued_pon = len([x for x in self.player.valued_honors if player_hand_tiles_34[x] >= 3]) >= 1
+
+        opportunity_to_meld_yakuhai = False
+
+        for x in range(0, 34):
+            if x in self.valued_pairs and tiles_34[x] - player_hand_tiles_34[x] == 1:
+                opportunity_to_meld_yakuhai = True
 
         has_valued_pair = False
 
         for pair in self.valued_pairs:
             # we have valued pair in the hand and there are enough tiles
             # in the wall
-            if self.player.total_tiles(pair, player_hand_tiles_34) < 4:
+            if opportunity_to_meld_yakuhai or self.player.total_tiles(pair, player_hand_tiles_34) < 4:
                 has_valued_pair = True
                 break
 
-        # we don't have valuable pair to open our hand
-        if not has_valued_pair:
+        # we don't have valuable pair or pon to open our hand
+        if not has_valued_pair and not self.has_valued_pon:
             return False
 
         # let's always open double east
@@ -66,7 +73,7 @@ class YakuhaiStrategy(BaseStrategy):
             for x in range(0, 34):
                 # we have other pair in the hand
                 # so we can open hand for atodzuke
-                if tiles_34[x] >= 2 and x not in self.valued_pairs:
+                if player_hand_tiles_34[x] >= 2 and x not in self.valued_pairs:
                     self.go_for_atodzuke = True
             return True
 
@@ -75,9 +82,10 @@ class YakuhaiStrategy(BaseStrategy):
             return True
 
         for pair in self.valued_pairs:
-            # this valuable tile was discarded once
-            # let's open on it in that case
-            if self.player.total_tiles(pair, player_hand_tiles_34) == 3 and self.player.ai.shanten > 1:
+            # last chance to get that yakuhai, let's go for it
+            if opportunity_to_meld_yakuhai and self.player.total_tiles(pair, player_hand_tiles_34) == 4 and self.player.ai.shanten >= 1:
+                if pair not in self.last_chance_calls:
+                    self.last_chance_calls.append(pair)
                 return True
 
         return False
@@ -126,26 +134,29 @@ class YakuhaiStrategy(BaseStrategy):
                                                                       hand_was_open)
 
     def meld_had_to_be_called(self, tile):
-        # for closed hand we don't need to open hand with special conditions
-        if not self.player.is_open_hand:
-            return False
-
         tile //= 4
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
         valued_pairs = [x for x in self.player.valued_honors if tiles_34[x] == 2]
 
-        for meld in self.player.melds:
-            # for big shanten number we don't need to check already opened pon set,
-            # because it will improve pur hand anyway
-            if self.player.ai.shanten >= 1:
-                break
+        # for big shanten number we don't need to check already opened pon set,
+        # because it will improve our hand anyway
+        if self.player.ai.shanten < 2:
+            for meld in self.player.melds:
+                # we have already opened yakuhai pon
+                # so we don't need to open hand without shanten improvement
+                if self._is_yakuhai_pon(meld):
+                    return False
 
-            # we have already opened yakuhai pon
-            # so we don't need to open hand without shanten improvement
-            if self._is_yakuhai_pon(meld):
-                return False
+        # if we don't have any yakuhai pon and this is our last chance, we must call this tile
+        if tile in self.last_chance_calls:
+            return True
 
-        # open hand for valued pon
+        # in all other cases for closed hand we don't need to open hand with special conditions
+        if not self.player.is_open_hand:
+            return False
+
+        # we have opened the hand already and don't yet have yakuhai pon
+        # so we now must get it
         for valued_pair in valued_pairs:
             if valued_pair == tile:
                 return True

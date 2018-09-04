@@ -210,6 +210,12 @@ class ImplementationAI(InterfaceAI):
         if not self.current_strategy:
             return None, None
 
+        tiles_34 = TilesConverter.to_34_array(tiles_136)
+        previous_shanten = self.shanten_calculator.calculate_shanten(tiles_34, self.player.meld_34_tiles)
+        if previous_shanten == Shanten.AGARI_STATE:
+            if not self.current_strategy.can_meld_into_agari():
+                return None, None
+
         meld, discard_option = self.current_strategy.try_to_call_meld(tile, is_kamicha_discard, tiles_136)
         tile_to_discard = None
         if discard_option:

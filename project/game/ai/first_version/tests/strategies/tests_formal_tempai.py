@@ -53,7 +53,6 @@ class FormalTempaiStrategyTestCase(unittest.TestCase, TestMixin):
 
     # We shouldn't open when we are already in tempai expect for some
     # special cases
-    @unittest.expectedFailure
     def test_dont_meld_agari(self):
         strategy = FormalTempaiStrategy(BaseStrategy.FORMAL_TEMPAI, self.player)
 

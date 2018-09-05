@@ -21,7 +21,8 @@ class Damaten:
             return False
 
         # It is daburi!
-        if self.player.round_step == 1:
+        first_discard = self.player.round_step == 1
+        if first_discard and not self.player.table.meld_was_called:
             return True
 
         # first of all let's consider 1-sided waits

@@ -23,6 +23,8 @@ class Table(object):
     count_of_remaining_tiles = 0
     count_of_players = 4
 
+    meld_was_called = False
+
     # array of tiles in 34 format
     revealed_tiles = None
 
@@ -42,6 +44,7 @@ class Table(object):
 
     def init_round(self, round_number, count_of_honba_sticks, count_of_riichi_sticks,
                    dora_indicator, dealer_seat, scores):
+        self.meld_was_called = False
         self.dealer_seat = dealer_seat
         self.round_number = round_number
         self.count_of_honba_sticks = count_of_honba_sticks
@@ -71,6 +74,8 @@ class Table(object):
                 i += 1
 
     def add_called_meld(self, player_seat, meld):
+        self.meld_was_called = True
+
         # when opponent called meld it is means
         # that he discards tile from hand, not from wall
         self.count_of_remaining_tiles += 1

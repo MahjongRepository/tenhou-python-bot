@@ -18,24 +18,6 @@ class CallRiichiTestCase(unittest.TestCase, TestMixin):
 
         self.assertEqual(self.player.can_call_riichi(), False)
 
-    def test_call_riichi_and_penchan_wait(self):
-        self._make_table()
-
-        tiles = self._string_to_136_array(sou='11223', pin='234567', man='66')
-        self.player.init_hand(tiles)
-        self.player.draw_tile(self._string_to_136_tile(man='9'))
-        self.player.discard_tile()
-
-        self.assertEqual(self.player.can_call_riichi(), True)
-
-        self.table.add_discarded_tile(1, self._string_to_136_tile(sou='3'), False)
-        self.table.add_discarded_tile(1, self._string_to_136_tile(sou='3'), False)
-        self.table.add_discarded_tile(1, self._string_to_136_tile(sou='3'), False)
-
-        # we are in karaten
-        # so we don't need to riichi it
-        self.assertEqual(self.player.can_call_riichi(), False)
-
     def test_dont_call_riichi_expensive_damaten_with_yaku(self):
         self._make_table(dora_indicators=[
             self._string_to_136_tile(man='7'),
@@ -111,6 +93,38 @@ class CallRiichiTestCase(unittest.TestCase, TestMixin):
 
         self.assertEqual(self.player.can_call_riichi(), True)
 
+    def test_dont_call_karaten_tanki_riichi(self):
+        self._make_table()
+
+        tiles = self._string_to_136_array(man='22336688', sou='99', pin='99', honors='2')
+        self.player.init_hand(tiles)
+
+        for i in range(0, 3):
+            self.table.add_discarded_tile(1, self._string_to_136_tile(honors='2'), False)
+            self.table.add_discarded_tile(1, self._string_to_136_tile(honors='3'), False)
+
+        self.player.draw_tile(self._string_to_136_tile(honors='3'))
+        self.player.discard_tile()
+        self.assertEqual(self.player.can_call_riichi(), False)
+
+    def test_dont_call_karaten_ryanmen_riichi(self):
+        self._make_table(dora_indicators=[
+            self._string_to_136_tile(man='1'),
+            self._string_to_136_tile(sou='1'),
+            self._string_to_136_tile(pin='1')
+        ])
+
+        tiles = self._string_to_136_array(man='222', sou='22278', pin='22789')
+        self.player.init_hand(tiles)
+
+        for i in range(0, 4):
+            self.table.add_discarded_tile(1, self._string_to_136_tile(sou='6'), False)
+            self.table.add_discarded_tile(1, self._string_to_136_tile(sou='9'), False)
+
+        self.player.draw_tile(self._string_to_136_tile(honors='3'))
+        self.player.discard_tile()
+        self.assertEqual(self.player.can_call_riichi(), False)
+
     def _make_table(self, dora_indicators=None):
         self.table = Table()
         self.table.count_of_remaining_tiles = 60
@@ -123,3 +137,33 @@ class CallRiichiTestCase(unittest.TestCase, TestMixin):
         if dora_indicators:
             for x in dora_indicators:
                 self.table.add_dora_indicator(x)
+
+    def test_call_riichi_penchan_with_suji(self):
+        self._make_table(dora_indicators=[
+            self._string_to_136_tile(pin='1'),
+        ])
+
+        tiles = self._string_to_136_array(sou='11223', pin='234567', man='66')
+        self.player.init_hand(tiles)
+        self.player.draw_tile(self._string_to_136_tile(sou='6'))
+        self.player.discard_tile()
+
+        self.assertEqual(self.player.can_call_riichi(), True)
+
+    def test_call_riichi_tanki_with_kabe(self):
+        self._make_table(dora_indicators=[
+            self._string_to_136_tile(pin='1'),
+        ])
+
+        for i in range(0, 3):
+            self.table.add_discarded_tile(1, self._string_to_136_tile(honors='1'), False)
+
+        for i in range(0, 4):
+            self.table.add_discarded_tile(1, self._string_to_136_tile(sou='8'), False)
+
+        tiles = self._string_to_136_array(sou='1119', pin='234567', man='666')
+        self.player.init_hand(tiles)
+        self.player.draw_tile(self._string_to_136_tile(honors='1'))
+        self.player.discard_tile()
+
+        self.assertEqual(self.player.can_call_riichi(), True)

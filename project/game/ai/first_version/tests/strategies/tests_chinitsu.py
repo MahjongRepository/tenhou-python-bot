@@ -2,6 +2,7 @@
 import unittest
 
 from mahjong.tests_mixin import TestMixin
+from mahjong.meld import Meld
 
 from game.ai.first_version.strategies.chinitsu import ChinitsuStrategy
 from game.ai.first_version.strategies.main import BaseStrategy
@@ -108,3 +109,60 @@ class ChinitsuStrategyTestCase(unittest.TestCase, TestMixin):
 
         tile = self._string_to_136_tile(honors='1')
         self.assertEqual(strategy.is_tile_suitable(tile), False)
+
+    # issue #84
+    @unittest.expectedFailure
+    def test_open_suit_same_shanten(self):
+        table = Table()
+        player = table.player
+        player.scores = 25000
+        table.count_of_remaining_tiles = 100
+
+        tiles = self._string_to_136_array(man='1134556999', pin='3', sou='78')
+        player.init_hand(tiles)
+
+        meld = self._make_meld(Meld.CHI, man='345')
+        player.add_called_meld(meld)
+
+        strategy = ChinitsuStrategy(BaseStrategy.CHINITSU, player)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
+
+        tile = self._string_to_136_tile(man='1')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(self._to_string(meld.tiles), '111m')
+
+    def test_correct_discard_agari_no_yaku(self):
+        table = Table()
+        player = table.player
+
+        tiles = self._string_to_136_array(man='111234677889', sou='1', pin='')
+        player.init_hand(tiles)
+
+        meld = self._make_meld(Meld.CHI, man='789')
+        player.add_called_meld(meld)
+
+        tile = self._string_to_136_tile(sou='1')
+        player.draw_tile(tile)
+        discard = player.discard_tile()
+        self.assertEqual(self._to_string([discard]), '1s')
+
+    def test_open_suit_agari_no_yaku(self):
+        table = Table()
+        player = table.player
+        player.scores = 25000
+        table.count_of_remaining_tiles = 100
+
+        tiles = self._string_to_136_array(man='11123455589', pin='22')
+        player.init_hand(tiles)
+
+        meld = self._make_meld(Meld.CHI, man='234')
+        player.add_called_meld(meld)
+
+        strategy = ChinitsuStrategy(BaseStrategy.CHINITSU, player)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
+
+        tile = self._string_to_136_tile(man='7')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(self._to_string(meld.tiles), '789m')

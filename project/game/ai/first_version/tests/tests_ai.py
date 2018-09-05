@@ -361,21 +361,3 @@ class AITestCase(unittest.TestCase, TestMixin):
         tile = self._string_to_136_tile(sou='9')
 
         self.assertEqual(player.should_call_kan(tile, False), None)
-
-    def test_agari_without_yaku(self):
-        """
-        Bot tried to call closed kan with 568m669p1478999s + 9s hand
-        """
-        table = Table()
-        player = table.player
-
-        tiles = self._string_to_136_array(man='111234677889', sou='1', pin='')
-        player.init_hand(tiles)
-        tile = self._string_to_136_tile(sou='1')
-
-        meld = self._make_meld(Meld.CHI, man='789')
-        player.add_called_meld(meld)
-
-        player.draw_tile(tile)
-        discard = player.discard_tile()
-        self.assertEqual(self._to_string([discard]), '1s')

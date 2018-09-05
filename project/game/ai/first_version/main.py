@@ -44,6 +44,8 @@ class ImplementationAI(InterfaceAI):
     current_strategy = None
     last_discard_option = None
 
+    use_chitoitsu = False
+
     hand_cache = {}
 
     def __init__(self, player):
@@ -61,6 +63,7 @@ class ImplementationAI(InterfaceAI):
         # it will set correct hand shanten number and ukeire to the new hand
         # tile will not be removed from the hand
         self.discard_tile(None)
+        self.player.in_tempai = False
 
         # Let's decide what we will do with our hand (like open for tanyao and etc.)
         self.determine_strategy(self.player.tiles)
@@ -146,7 +149,7 @@ class ImplementationAI(InterfaceAI):
 
             tiles_34[hand_tile] -= 1
 
-            shanten = self.shanten_calculator.calculate_shanten(tiles_34, open_sets_34)
+            shanten = self.shanten_calculator.calculate_shanten(tiles_34, open_sets_34, chiitoitsu=self.use_chitoitsu)
 
             waiting = []
             for j in range(0, 34):
@@ -169,7 +172,11 @@ class ImplementationAI(InterfaceAI):
                 if key in self.hand_cache:
                     new_shanten = self.hand_cache[key]
                 else:
-                    new_shanten = self.shanten_calculator.calculate_shanten(tiles_34, open_sets_34)
+                    new_shanten = self.shanten_calculator.calculate_shanten(
+                        tiles_34,
+                        open_sets_34,
+                        chiitoitsu=self.use_chitoitsu
+                    )
                     self.hand_cache[key] = new_shanten
 
                 if new_shanten == shanten - 1:
@@ -189,7 +196,7 @@ class ImplementationAI(InterfaceAI):
         if is_agari:
             shanten = Shanten.AGARI_STATE
         else:
-            shanten = self.shanten_calculator.calculate_shanten(tiles_34, open_sets_34)
+            shanten = self.shanten_calculator.calculate_shanten(tiles_34, open_sets_34, chiitoitsu=self.use_chitoitsu)
 
         return results, shanten
 
@@ -210,6 +217,16 @@ class ImplementationAI(InterfaceAI):
         if not self.current_strategy:
             return None, None
 
+        tiles_34 = TilesConverter.to_34_array(tiles_136)
+        previous_shanten = self.shanten_calculator.calculate_shanten(
+            tiles_34,
+            self.player.meld_34_tiles,
+            chiitoitsu=self.use_chitoitsu
+        )
+        if previous_shanten == Shanten.AGARI_STATE:
+            if not self.current_strategy.can_meld_into_agari():
+                return None, None
+
         meld, discard_option = self.current_strategy.try_to_call_meld(tile, is_kamicha_discard, tiles_136)
         tile_to_discard = None
         if discard_option:
@@ -219,6 +236,8 @@ class ImplementationAI(InterfaceAI):
         return meld, tile_to_discard
 
     def determine_strategy(self, tiles_136):
+        self.use_chitoitsu = False
+
         # for already opened hand we don't need to give up on selected strategy
         if self.player.is_open_hand and self.current_strategy:
             return False
@@ -244,6 +263,8 @@ class ImplementationAI(InterfaceAI):
                 self.current_strategy = strategy
 
         if self.current_strategy:
+            self.use_chitoitsu = self.current_strategy.type == BaseStrategy.CHIITOITSU
+
             if not old_strategy or self.current_strategy.type != old_strategy.type:
                 message = '{} switched to {} strategy'.format(self.player.name, self.current_strategy)
                 if old_strategy:
@@ -625,13 +646,13 @@ class ImplementationAI(InterfaceAI):
                 tiles_34[tile_34] += 1
 
             melds = self.player.meld_34_tiles
-            previous_shanten = self.shanten_calculator.calculate_shanten(tiles_34, melds)
+            previous_shanten = self.shanten_calculator.calculate_shanten(tiles_34, melds, chiitoitsu=self.use_chitoitsu)
 
             if not open_kan and not from_riichi:
                 tiles_34[tile_34] -= 1
 
             melds += [[tile_34, tile_34, tile_34]]
-            new_shanten = self.shanten_calculator.calculate_shanten(tiles_34, melds)
+            new_shanten = self.shanten_calculator.calculate_shanten(tiles_34, melds, chiitoitsu=self.use_chitoitsu)
 
             # called kan will not ruin our hand
             if new_shanten <= previous_shanten:

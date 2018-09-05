@@ -63,6 +63,7 @@ class ImplementationAI(InterfaceAI):
         # it will set correct hand shanten number and ukeire to the new hand
         # tile will not be removed from the hand
         self.discard_tile(None)
+        self.player.in_tempai = False
 
         # Let's decide what we will do with our hand (like open for tanyao and etc.)
         self.determine_strategy(self.player.tiles)

@@ -182,6 +182,21 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertNotEqual(meld, None)
         self.assertEqual(self._to_string(meld.tiles), '777z')
 
+    def test_open_hand_and_not_go_for_chiitoitsu(self):
+        table = Table()
+        player = table.player
+
+        tiles = self._string_to_136_array(sou='1122559', honors='134557', pin='4')
+        player.init_hand(tiles)
+
+        tile = player.discard_tile()
+        self.assertEqual(self._to_string([tile]), '4p')
+
+        tile = self._string_to_136_tile(honors='5')
+        meld, _ = player.try_to_call_meld(tile, False)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(self._to_string(meld.tiles), '555z')
+
     # issue #84
     @unittest.expectedFailure
     def test_open_suit_same_shanten(self):

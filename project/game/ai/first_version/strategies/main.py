@@ -311,7 +311,11 @@ class BaseStrategy(object):
         results = []
         for meld in possible_melds:
             melds = self.player.meld_34_tiles + [meld]
-            shanten = self.player.ai.shanten_calculator.calculate_shanten(completed_hand_34, melds)
+            shanten = self.player.ai.shanten_calculator.calculate_shanten(
+                completed_hand_34,
+                melds,
+                chiitoitsu=self.player.ai.use_chitoitsu
+            )
             results.append({'shanten': shanten, 'meld': meld})
 
         results = sorted(results, key=lambda i: i['shanten'])

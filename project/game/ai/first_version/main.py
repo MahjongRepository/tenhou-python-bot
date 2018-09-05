@@ -10,18 +10,19 @@ from mahjong.hand_calculating.hand_config import HandConfig
 from mahjong.meld import Meld
 from mahjong.shanten import Shanten
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_pair, is_pon, is_tile_strictly_isolated, is_honor, simplify, is_chi
+from mahjong.utils import is_pon, is_tile_strictly_isolated
 
 from game.ai.base.main import InterfaceAI
 from game.ai.discard import DiscardOption
+from game.ai.first_version.damaten import Damaten
 from game.ai.first_version.defence.main import DefenceHandler
+from game.ai.first_version.strategies.chiitoitsu import ChiitoitsuStrategy
+from game.ai.first_version.strategies.chinitsu import ChinitsuStrategy
+from game.ai.first_version.strategies.formal_tempai import FormalTempaiStrategy
 from game.ai.first_version.strategies.honitsu import HonitsuStrategy
 from game.ai.first_version.strategies.main import BaseStrategy
 from game.ai.first_version.strategies.tanyao import TanyaoStrategy
 from game.ai.first_version.strategies.yakuhai import YakuhaiStrategy
-from game.ai.first_version.strategies.formal_tempai import FormalTempaiStrategy
-from game.ai.first_version.strategies.chinitsu import ChinitsuStrategy
-from game.ai.first_version.strategies.chiitoitsu import ChiitoitsuStrategy
 
 logger = logging.getLogger('ai')
 
@@ -32,6 +33,7 @@ class ImplementationAI(InterfaceAI):
     agari = None
     shanten_calculator = None
     defence = None
+    damaten = None
     hand_divider = None
     finished_hand = None
 
@@ -54,6 +56,7 @@ class ImplementationAI(InterfaceAI):
         self.agari = Agari()
         self.shanten_calculator = Shanten()
         self.defence = DefenceHandler(player)
+        self.damaten = Damaten(player)
         self.hand_divider = HandDivider()
         self.finished_hand = HandCalculator()
 
@@ -425,175 +428,7 @@ class ImplementationAI(InterfaceAI):
         return result
 
     def should_call_riichi(self):
-        # empty waiting can be found in some cases
-        if not self.waiting:
-            return False
-
-        # TODO: always call daburi
-
-        if self.in_defence:
-            return False
-
-        # don't call karaten riichi
-        count_tiles = self.count_tiles(self.waiting, TilesConverter.to_34_array(self.player.tiles))
-        if count_tiles == 0:
-            return False
-
-        # first of all let's consider 1-sided waits
-        if len(self.waiting) == 1:
-            waiting = self.waiting[0]
-            hand_value = self.estimate_hand_value(waiting, call_riichi=False)
-
-            tiles = self.player.closed_hand + [waiting * 4]
-            closed_melds = [x for x in self.player.melds if not x.opened]
-            for meld in closed_melds:
-                tiles.extend(meld.tiles[:3])
-
-            tiles_34 = TilesConverter.to_34_array(tiles)
-
-            results = self.hand_divider.divide_hand(tiles_34)
-            result = results[0]
-
-            # what if we have yaku
-            if hand_value.yaku is not None and hand_value.cost is not None:
-                min_cost = hand_value.cost['main']
-
-                # tanki honor is a good wait, let's damaten only if hand is already expensive
-                if is_honor(waiting):
-                    if self.player.is_dealer and min_cost < 12000:
-                        return True
-
-                    if not self.player.is_dealer and min_cost < 8000:
-                        return True
-
-                    return False
-
-                simplified_waiting = simplify(waiting)
-
-                for hand_set in result:
-                    if waiting not in hand_set:
-                        continue
-
-                    if is_pair(hand_set):
-                        # let's not riichi tanki 4, 5, 6
-                        if 3 <= simplified_waiting <= 5:
-                            return False
-
-                        # don't riichi tanki wait on 1, 2, 3, 7, 8, 9 if it's only 1 tile
-                        if count_tiles == 1:
-                            return False
-
-                        # don't riichi 2378 tanki if hand has good value
-                        if simplified_waiting != 0 and simplified_waiting != 8:
-                            if self.player.is_dealer and min_cost >= 7700:
-                                return False
-
-                            if not self.player.is_dealer and min_cost >= 5200:
-                                return False
-
-                        # TODO: check for kabe and suji
-                        return True
-
-                    # 1-sided wait means kanchan or penchan
-                    if is_chi(hand_set):
-                        # let's not riichi kanchan on 4, 5, 6
-                        if 4 <= simplified_waiting <= 6:
-                            return False
-
-                        # now checking waiting for 2, 3, 7, 8
-                        # if we only have 1 tile to wait for, let's damaten
-                        if count_tiles == 1:
-                            return False
-
-                        # if we have 2 tiles to wait for and hand cost is good without riichi,
-                        # let's damaten
-                        if count_tiles == 2:
-                            if self.player.is_dealer and min_cost >= 7700:
-                                return False
-
-                            if not self.player.is_dealer and min_cost >= 5200:
-                                return False
-
-                        # TODO: check for kabe and suji
-                        return True
-
-            # what if we don't have yaku
-            # our tanki wait is good, let's riichi
-            if is_honor(waiting):
-                return True
-
-            simplified_waiting = simplify(waiting)
-
-            for hand_set in result:
-                if not waiting in hand_set:
-                    continue
-
-                if is_pair(hand_set):
-                    # let's not riichi tanki 4, 5, 6
-                    if 3 <= simplified_waiting <= 5:
-                        return False
-
-                # 1-sided wait means kanchan or penchan
-                if is_chi(hand_set):
-                    # let's only riichi this bad wait if
-                    # it has all 4 tiles available or it
-                    # it's not too early
-                    if 4 <= simplified_waiting <= 6:
-                        return count_tiles == 4 or self.player.round_step >= 6
-
-            # TODO: implement rest of the logic
-
-            return True
-
-        # now we are looking at two or more sided waits only
-        hand_costs = []
-        waits_with_yaku = 0
-        for waiting in self.waiting:
-            hand_value = self.estimate_hand_value(waiting, call_riichi=False)
-            if hand_value.error is None:
-                hand_costs.append(hand_value.cost['main'])
-                if hand_value.yaku is not None and hand_value.cost is not None:
-                    waits_with_yaku += 1
-
-        # if we have yaku on every wait
-        if waits_with_yaku == len(self.waiting):
-            min_cost = min(hand_costs)
-
-            # let's not riichi this bad wait
-            if count_tiles <= 2:
-                return False
-
-            # if wait is slighly better, we will riichi only a cheap hand
-            if count_tiles <= 4:
-                if self.player.is_dealer and min_cost >= 7700:
-                    return False
-
-                if not self.player.is_dealer and min_cost >= 5200:
-                    return False
-
-                return True
-
-            # wait is even better, but still don't call riichi on damaten mangan
-            if count_tiles <= 6:
-                if self.player.is_dealer and min_cost >= 11600:
-                    return False
-
-                if not self.player.is_dealer and min_cost >= 7700:
-                    return False
-
-                return True
-
-            # if wait is good we only damaten haneman
-            if self.player.is_dealer and min_cost >= 18000:
-                return False
-
-            if not self.player.is_dealer and min_cost >= 12000:
-                return False
-
-            return True
-
-        # if we don't have yaku on every wait and it's two-sided or more, we call riichi
-        return True
+        return self.damaten.should_call_riichi()
 
     def should_call_kan(self, tile, open_kan, from_riichi=False):
         """

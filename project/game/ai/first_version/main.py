@@ -235,6 +235,8 @@ class ImplementationAI(InterfaceAI):
         return meld, tile_to_discard
 
     def determine_strategy(self, tiles_136):
+        self.use_chitoitsu = False
+
         # for already opened hand we don't need to give up on selected strategy
         if self.player.is_open_hand and self.current_strategy:
             return False
@@ -260,8 +262,7 @@ class ImplementationAI(InterfaceAI):
                 self.current_strategy = strategy
 
         if self.current_strategy:
-            if self.current_strategy.type == BaseStrategy.CHIITOITSU:
-                self.use_chitoitsu = True
+            self.use_chitoitsu = self.current_strategy.type == BaseStrategy.CHIITOITSU
 
             if not old_strategy or self.current_strategy.type != old_strategy.type:
                 message = '{} switched to {} strategy'.format(self.player.name, self.current_strategy)

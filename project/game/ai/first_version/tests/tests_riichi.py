@@ -28,6 +28,14 @@ class CallRiichiTestCase(unittest.TestCase, TestMixin):
 
         self.assertEqual(self.player.can_call_riichi(), True)
 
+        self.table.add_discarded_tile(1, self._string_to_136_tile(sou='3'), False)
+        self.table.add_discarded_tile(1, self._string_to_136_tile(sou='3'), False)
+        self.table.add_discarded_tile(1, self._string_to_136_tile(sou='3'), False)
+
+        # we are in karaten
+        # so we don't need to riichi it
+        self.assertEqual(self.player.can_call_riichi(), False)
+
     def test_dont_call_riichi_expensive_damaten_with_yaku(self):
         self._make_table(dora_indicators=[
             self._string_to_136_tile(man='7'),
@@ -92,11 +100,25 @@ class CallRiichiTestCase(unittest.TestCase, TestMixin):
         self.player.discard_tile()
         self.assertEqual(self.player.can_call_riichi(), True)
 
+    def test_always_call_daburi(self):
+        self._make_table()
+        self.player.round_step = 0
+
+        tiles = self._string_to_136_array(sou='234567', pin='234567', man='4')
+        self.player.init_hand(tiles)
+        self.player.draw_tile(self._string_to_136_tile(man='5'))
+        self.player.discard_tile()
+
+        self.assertEqual(self.player.can_call_riichi(), True)
+
     def _make_table(self, dora_indicators=None):
         self.table = Table()
         self.table.count_of_remaining_tiles = 60
         self.player = self.table.player
         self.player.scores = 25000
+
+        # with that we don't have daburi anymore
+        self.player.round_step = 1
 
         if dora_indicators:
             for x in dora_indicators:

@@ -12,8 +12,6 @@ class Damaten:
         if not self.player.ai.waiting:
             return False
 
-        # TODO: always call daburi
-
         if self.player.ai.in_defence:
             return False
 
@@ -21,6 +19,10 @@ class Damaten:
         count_tiles = self.player.ai.count_tiles(self.player.ai.waiting, TilesConverter.to_34_array(self.player.tiles))
         if count_tiles == 0:
             return False
+
+        # It is daburi!
+        if self.player.round_step == 1:
+            return True
 
         # first of all let's consider 1-sided waits
         if len(self.player.ai.waiting) == 1:

@@ -102,15 +102,15 @@ class Table(object):
         if player_seat != 0:
             self.player.enemy_called_riichi(player_seat)
 
-    def add_discarded_tile(self, player_seat, tile, is_tsumogiri):
+    def add_discarded_tile(self, player_seat, tile_136, is_tsumogiri):
         """
         :param player_seat:
-        :param tile: 136 format tile
+        :param tile_136: 136 format tile
         :param is_tsumogiri: was tile discarded from hand or not
         """
         self.count_of_remaining_tiles -= 1
 
-        tile = Tile(tile, is_tsumogiri)
+        tile = Tile(tile_136, is_tsumogiri)
         self.get_player(player_seat).add_discarded_tile(tile)
 
         # cache already revealed tiles

@@ -56,6 +56,21 @@ class BaseStrategy(object):
 
         return True
 
+    def can_meld_into_agari(self):
+        """
+        Is melding into agari allowed with this strategy
+        :return: boolean
+        """
+        # By default, the logic is the following: if we have any
+        # non-suitable tiles, we can meld into agari state, because we'll
+        # throw them away after meld.
+        # Otherwise, there is no point.
+        for tile in self.player.tiles:
+            if not self.is_tile_suitable(tile):
+                return True
+
+        return False
+
     def is_tile_suitable(self, tile):
         """
         Can tile be used for open hand strategy or not

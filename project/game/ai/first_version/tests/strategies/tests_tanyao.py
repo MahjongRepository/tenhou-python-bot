@@ -313,7 +313,6 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 
     # In case we are in temporary furiten, we can't call ron, but can still
     # make chi. We assume this chi to be bad, so let's not call it.
-    @unittest.expectedFailure
     def test_dont_meld_agari(self):
         tiles = self._string_to_136_array(man='23567', sou='456', pin='22244')
         self.player.init_hand(tiles)

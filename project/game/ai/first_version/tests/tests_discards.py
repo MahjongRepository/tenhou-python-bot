@@ -3,6 +3,7 @@ import unittest
 
 from mahjong.constants import EAST, SOUTH, WEST, NORTH, HAKU, HATSU, CHUN, FIVE_RED_SOU, FIVE_RED_PIN
 from mahjong.tests_mixin import TestMixin
+from mahjong.meld import Meld
 
 from game.ai.discard import DiscardOption
 from game.ai.first_version.strategies.main import BaseStrategy
@@ -279,4 +280,47 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         player.draw_tile(self._string_to_136_tile(pin='6'))
 
         discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '3s')
+
+    # There was a bug with count of live tiles that are used in melds,
+    # hence this test
+    def test_choose_best_option_with_melds(self):
+        table = Table()
+        player = table.player
+        table.has_aka_dora = False
+
+        tiles = self._string_to_136_array(sou='245666789', honors='2266')
+        player.init_hand(tiles)
+
+        meld = self._make_meld(Meld.PON, sou='666')
+        player.add_called_meld(meld)
+        meld = self._make_meld(Meld.CHI, sou='789')
+        player.add_called_meld(meld)
+
+        player.draw_tile(self._string_to_136_tile(sou='5'))
+
+        discarded_tile = player.discard_tile()
+        # we should discard best ukeire option here - 2s
+        self.assertEqual(self._to_string([discarded_tile]), '2s')
+
+    def test_choose_best_wait_with_melds(self):
+        table = Table()
+        player = table.player
+        table.has_aka_dora = False
+
+        tiles = self._string_to_136_array(sou='1222233455599')
+        player.init_hand(tiles)
+
+        meld = self._make_meld(Meld.CHI, sou='123')
+        player.add_called_meld(meld)
+        meld = self._make_meld(Meld.PON, sou='222')
+        player.add_called_meld(meld)
+        meld = self._make_meld(Meld.PON, sou='555')
+        player.add_called_meld(meld)
+
+        player.draw_tile(self._string_to_136_tile(sou='4'))
+
+        discarded_tile = player.discard_tile()
+        # double-pairs wait becomes better, because it has 4 tiles to wait for
+        # against just 1 in ryanmen
         self.assertEqual(self._to_string([discarded_tile]), '3s')

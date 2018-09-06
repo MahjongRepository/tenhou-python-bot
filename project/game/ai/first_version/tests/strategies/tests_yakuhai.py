@@ -347,3 +347,129 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
 
         discard = self.player.discard_tile()
         self.assertNotEqual(self._to_string([discard]), '7z')
+
+    # issue #88
+    @unittest.expectedFailure
+    def test_atodzuke_keep_yakuhai_wait(self):
+        # make sure yakuhai strategy is activated by adding 3 doras to the hand
+        table = Table()
+        player = table.player
+        table.add_dora_indicator(self._string_to_136_tile(man='9'))
+
+        tiles = self._string_to_136_array(man='11144', sou='567', pin='567', honors='77')
+        player.init_hand(tiles)
+
+        meld = self._make_meld(Meld.PON, man='111')
+        player.add_called_meld(meld)
+
+        # two of 4 man tiles are already out, so it would seem our wait is worse, but we know
+        # we must keep two pairs in order to be atodzuke tempai
+        table.add_discarded_tile(1, self._string_to_136_tile(man='4'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(man='4'), False)
+
+        strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
+
+        player.draw_tile(self._string_to_136_tile(man='2'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '2m')
+
+    # issue #88
+    @unittest.expectedFailure
+    def test_atodzuke_dont_destroy_second_pair(self):
+        # make sure yakuhai strategy is activated by adding 3 doras to the hand
+        table = Table()
+        player = table.player
+        table.add_dora_indicator(self._string_to_136_tile(man='9'))
+
+        tiles = self._string_to_136_array(man='111445', sou='468', pin='56', honors='77')
+        player.init_hand(tiles)
+
+        meld = self._make_meld(Meld.PON, man='111')
+        player.add_called_meld(meld)
+
+        strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
+
+        # 6 man is bad meld, we lose our second pair and so is 4 man
+        tile = self._string_to_136_tile(man='6')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertEqual(meld, None)
+
+        tile = self._string_to_136_tile(man='4')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertEqual(meld, None)
+
+        # but if we have backup pair it's ok
+        tiles = self._string_to_136_array(man='111445', sou='468', pin='88', honors='77')
+        player.init_hand(tiles)
+
+        meld = self._make_meld(Meld.PON, man='111')
+        player.add_called_meld(meld)
+
+        strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
+
+        # 6 man is bad meld, we lose our second pair and so is 4 man
+        tile = self._string_to_136_tile(man='6')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+
+        tile = self._string_to_136_tile(man='4')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+
+    # issue #88
+    @unittest.expectedFailure
+    def test_atodzuke_dont_open_no_yaku_tempai(self):
+        # make sure yakuhai strategy is activated by adding 3 doras to the hand
+        table = Table()
+        player = table.player
+        table.add_dora_indicator(self._string_to_136_tile(man='9'))
+
+        tiles = self._string_to_136_array(man='111445', sou='567', pin='56', honors='77')
+        player.init_hand(tiles)
+
+        meld = self._make_meld(Meld.PON, man='111')
+        player.add_called_meld(meld)
+
+        strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
+
+        # 6 man is bad meld, we lose our second pair and so is 4 man
+        tile = self._string_to_136_tile(man='6')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertEqual(meld, None)
+
+        tile = self._string_to_136_tile(man='4')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertEqual(meld, None)
+
+        # 7 pin is a good meld, we get to tempai keeping yakuhai wait
+        tile = self._string_to_136_tile(pin='7')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+
+    # issue #88
+    @unittest.expectedFailure
+    def test_atodzuke_choose_hidden_syanpon(self):
+        # make sure yakuhai strategy is activated by adding 3 doras to the hand
+        table = Table()
+        player = table.player
+        table.add_dora_indicator(self._string_to_136_tile(man='9'))
+
+        tiles = self._string_to_136_array(man='111678', sou='56678', honors='77')
+        player.init_hand(tiles)
+
+        meld = self._make_meld(Meld.PON, man='111')
+        player.add_called_meld(meld)
+
+        strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
+
+        for i in range(0, 4):
+            table.add_discarded_tile(1, self._string_to_136_tile(sou='9'), False)
+
+        player.draw_tile(self._string_to_136_tile(man='6'))
+        discarded_tile = player.discard_tile()
+        self.assertNotEqual(self._to_string([discarded_tile]), '6m')

@@ -2,11 +2,24 @@
 import unittest
 
 from mahjong.tests_mixin import TestMixin
+from mahjong.tile import Tile
 
 from game.table import Table
 
 
 class CallRiichiTestCase(unittest.TestCase, TestMixin):
+    def _make_table(self, dora_indicators=None):
+        self.table = Table()
+        self.table.count_of_remaining_tiles = 60
+        self.player = self.table.player
+        self.player.scores = 25000
+
+        # with that we don't have daburi anymore
+        self.player.round_step = 1
+
+        if dora_indicators:
+            for x in dora_indicators:
+                self.table.add_dora_indicator(x)
 
     def test_dont_call_riichi_with_yaku_and_central_tanki_wait(self):
         self._make_table()
@@ -125,19 +138,6 @@ class CallRiichiTestCase(unittest.TestCase, TestMixin):
         self.player.discard_tile()
         self.assertEqual(self.player.can_call_riichi(), False)
 
-    def _make_table(self, dora_indicators=None):
-        self.table = Table()
-        self.table.count_of_remaining_tiles = 60
-        self.player = self.table.player
-        self.player.scores = 25000
-
-        # with that we don't have daburi anymore
-        self.player.round_step = 1
-
-        if dora_indicators:
-            for x in dora_indicators:
-                self.table.add_dora_indicator(x)
-
     def test_call_riichi_penchan_with_suji(self):
         self._make_table(dora_indicators=[
             self._string_to_136_tile(pin='1'),
@@ -167,3 +167,34 @@ class CallRiichiTestCase(unittest.TestCase, TestMixin):
         self.player.discard_tile()
 
         self.assertEqual(self.player.can_call_riichi(), True)
+
+    def test_call_riichi_chiitoitsu_with_suji(self):
+        self._make_table(dora_indicators=[
+            self._string_to_136_tile(man='1'),
+        ])
+
+        for i in range(0, 3):
+            self.table.add_discarded_tile(1, self._string_to_136_tile(honors='3'), False)
+
+        tiles = self._string_to_136_array(man='22336688', sou='9', pin='99', honors='22')
+        self.player.init_hand(tiles)
+        self.player.add_discarded_tile(Tile(self._string_to_136_tile(sou='6'), True))
+
+        self.player.draw_tile(self._string_to_136_tile(honors='3'))
+        self.player.discard_tile()
+        self.assertEqual(self.player.can_call_riichi(), True)
+
+    def test_dont_call_riichi_chiitoitsu_bad_wait(self):
+        self._make_table(dora_indicators=[
+            self._string_to_136_tile(man='1'),
+        ])
+
+        for i in range(0, 3):
+            self.table.add_discarded_tile(1, self._string_to_136_tile(honors='3'), False)
+
+        tiles = self._string_to_136_array(man='22336688', sou='4', pin='99', honors='22')
+        self.player.init_hand(tiles)
+
+        self.player.draw_tile(self._string_to_136_tile(honors='3'))
+        self.player.discard_tile()
+        self.assertEqual(self.player.can_call_riichi(), False)

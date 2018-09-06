@@ -111,12 +111,10 @@ class ImplementationAI(InterfaceAI):
         return self.process_discard_option(selected_tile, self.player.closed_hand)
 
     def process_discard_options_and_select_tile_to_discard(self, results, shanten, had_was_open=False):
-        tiles_34 = TilesConverter.to_34_array(self.player.tiles)
-
         # we had to update tiles value there
         # because it is related with shanten number
         for result in results:
-            result.ukeire = self.count_tiles(result.waiting, tiles_34)
+            result.ukeire = self.count_tiles(result.waiting, TilesConverter.to_34_array(self.player.closed_hand))
             result.calculate_value(shanten)
 
         # current strategy can affect on our discard options
@@ -194,7 +192,7 @@ class ImplementationAI(InterfaceAI):
                                              shanten=shanten,
                                              tile_to_discard=hand_tile,
                                              waiting=waiting,
-                                             ukeire=self.count_tiles(waiting, tiles_34)))
+                                             ukeire=self.count_tiles(waiting, closed_tiles_34)))
 
         if is_agari:
             shanten = Shanten.AGARI_STATE

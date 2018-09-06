@@ -18,7 +18,10 @@ class Damaten:
             return False
 
         # don't call karaten riichi
-        count_tiles = self.player.ai.count_tiles(self.player.ai.waiting, TilesConverter.to_34_array(self.player.tiles))
+        count_tiles = self.player.ai.count_tiles(
+            self.player.ai.waiting,
+            TilesConverter.to_34_array(self.player.closed_hand)
+        )
         if count_tiles == 0:
             return False
 
@@ -33,7 +36,10 @@ class Damaten:
         return self._should_call_riichi_many_sided()
 
     def _should_call_riichi_one_sided(self):
-        count_tiles = self.player.ai.count_tiles(self.player.ai.waiting, TilesConverter.to_34_array(self.player.tiles))
+        count_tiles = self.player.ai.count_tiles(
+            self.player.ai.waiting,
+            TilesConverter.to_34_array(self.player.closed_hand)
+        )
         waiting = self.player.ai.waiting[0]
         hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=False)
 
@@ -176,7 +182,10 @@ class Damaten:
         return True
 
     def _should_call_riichi_many_sided(self):
-        count_tiles = self.player.ai.count_tiles(self.player.ai.waiting, TilesConverter.to_34_array(self.player.tiles))
+        count_tiles = self.player.ai.count_tiles(
+            self.player.ai.waiting,
+            TilesConverter.to_34_array(self.player.closed_hand)
+        )
         hand_costs = []
         waits_with_yaku = 0
         for waiting in self.player.ai.waiting:

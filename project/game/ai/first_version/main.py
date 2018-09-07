@@ -334,11 +334,8 @@ class ImplementationAI(InterfaceAI):
 
             return sorted(min_dora_list, key=lambda x: -getattr(x, sorting_field))[0]
 
-        # there is no need to filter tiles with one shanten
-        if first_option.shanten == 1:
-            filtered_options = tiles_without_dora
         # we filter 10% of options here
-        elif first_option.shanten == 2 or first_option.shanten == 3:
+        if first_option.shanten == 2 or first_option.shanten == 3:
             second_filter_percentage = 10
             filtered_options = self._filter_list_by_percentage(
                 tiles_without_dora,

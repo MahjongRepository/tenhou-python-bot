@@ -38,7 +38,7 @@ class Kabe(Defence):
         kabe_tiles_weak = []
         kabe_tiles_partial = []
 
-        suits = self._suits_tiles(self.defence.closed_hand_34)
+        suits = self._suits_tiles(tiles_34)
         for x in range(0, 3):
             suit = suits[x]
             # "kabe" - 4 revealed tiles
@@ -82,7 +82,7 @@ class Kabe(Defence):
         return kabe_tiles_unique
 
     def find_tiles_to_discard(self, _):
-        all_kabe = self.find_all_kabe(self.defence.hand_34)
+        all_kabe = self.find_all_kabe(self.defence.closed_hand_34)
 
         results = []
 

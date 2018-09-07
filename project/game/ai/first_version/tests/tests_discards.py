@@ -324,3 +324,14 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         # double-pairs wait becomes better, because it has 4 tiles to wait for
         # against just 1 in ryanmen
         self.assertEqual(self._to_string([discarded_tile]), '3s')
+
+    def test_discard_tile_with_better_wait_in_iishanten(self):
+        table = Table()
+        player = table.player
+        table.add_dora_indicator(self._string_to_136_tile(sou='4'))
+
+        tiles = self._string_to_136_array(man='123567', pin='113788', sou='99')
+        player.init_hand(tiles)
+
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '8p')

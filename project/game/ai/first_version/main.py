@@ -308,8 +308,7 @@ class ImplementationAI(InterfaceAI):
             if discard_option.ukeire >= first_option.ukeire - ukeire_borders:
                 possible_options.append(discard_option)
 
-        # for 2 or 3 shanten hand we consider ukeire one step ahead
-        if first_option.shanten == 2 or first_option.shanten == 3:
+        if first_option.shanten <= 3:
             sorting_field = 'ukeire_second'
             for x in possible_options:
                 self.calculate_second_level_ukeire(x)
@@ -335,14 +334,18 @@ class ImplementationAI(InterfaceAI):
 
             return sorted(min_dora_list, key=lambda x: -getattr(x, sorting_field))[0]
 
-        # we filter 10% of options, but if we use ukeire, we should also consider borders
-        if first_option.shanten == 2 or first_option.shanten == 3:
+        # there is no need to filter tiles with one shanten
+        if first_option.shanten == 1:
+            filtered_options = tiles_without_dora
+        # we filter 10% of options here
+        elif first_option.shanten == 2 or first_option.shanten == 3:
             second_filter_percentage = 10
             filtered_options = self._filter_list_by_percentage(
                 tiles_without_dora,
                 sorting_field,
                 second_filter_percentage
             )
+        # we should also consider borders for 3+ shanten hands
         else:
             best_option_without_dora = tiles_without_dora[0]
             ukeire_borders = self._choose_ukeire_borders(best_option_without_dora, 10)
@@ -506,12 +509,16 @@ class ImplementationAI(InterfaceAI):
 
     def calculate_second_level_ukeire(self, discard_option):
         closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
+        not_suitable_tiles = self.current_strategy and self.current_strategy.not_suitable_tiles or []
 
         tiles = copy.copy(self.player.tiles)
         tiles.remove(discard_option.find_tile_in_hand(self.player.closed_hand))
 
         sum_tiles = 0
         for wait_34 in discard_option.waiting:
+            if self.player.is_open_hand and wait_34 in not_suitable_tiles:
+                continue
+
             wait_136 = wait_34 * 4
             tiles.append(wait_136)
 

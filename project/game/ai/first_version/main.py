@@ -295,62 +295,60 @@ class ImplementationAI(InterfaceAI):
         results_with_same_shanten = [x for x in results if x.shanten == first_option.shanten]
 
         possible_options = [first_option]
-        border_percentage = 20
+
+        ukeire_borders = self._choose_ukeire_borders(first_option, 20)
+
         for discard_option in results_with_same_shanten:
             # there is no sense to check already chosen tile
             if discard_option.tile_to_discard == first_option.tile_to_discard:
                 continue
 
-            # we don't need to select tiles almost dead waits
-            if discard_option.ukeire <= 2:
-                continue
-
-            ukeire_borders = round((first_option.ukeire / 100) * border_percentage)
-
-            if first_option.shanten == 0 and ukeire_borders < 2:
-                ukeire_borders = 2
-
-            if first_option.shanten == 1 and ukeire_borders < 4:
-                ukeire_borders = 4
-
-            if first_option.shanten >= 2 and ukeire_borders < 8:
-                ukeire_borders = 8
-
             # let's choose tiles that are close to the max ukeire tile
             if discard_option.ukeire >= first_option.ukeire - ukeire_borders:
                 possible_options.append(discard_option)
 
+        # for 2 or 3 shanten hand we consider ukeire one step ahead
         if first_option.shanten == 2 or first_option.shanten == 3:
             sorting_field = 'ukeire_second'
             for x in possible_options:
                 self.calculate_second_level_ukeire(x)
+
+            possible_options = sorted(possible_options, key=lambda x: -getattr(x, sorting_field))
+
+            filter_percentage = 20
+            possible_options = self._filter_list_by_percentage(
+                possible_options,
+                sorting_field,
+                filter_percentage
+            )
         else:
             sorting_field = 'ukeire'
+            possible_options = sorted(possible_options, key=lambda x: -getattr(x, sorting_field))
 
-        possible_options = sorted(possible_options, key=lambda x: -getattr(x, sorting_field))
-
-        filter_percentage = 20
-        filtered_options = self._filter_list_by_percentage(
-            possible_options,
-            sorting_field,
-            filter_percentage
-        )
-
-        tiles_without_dora = [x for x in filtered_options if x.count_of_dora == 0]
+        tiles_without_dora = [x for x in possible_options if x.count_of_dora == 0]
 
         # we have only dora candidates to discard
         if not tiles_without_dora:
-            min_dora = min([x.count_of_dora for x in filtered_options])
-            min_dora_list = [x for x in filtered_options if x.count_of_dora == min_dora]
+            min_dora = min([x.count_of_dora for x in possible_options])
+            min_dora_list = [x for x in possible_options if x.count_of_dora == min_dora]
 
             return sorted(min_dora_list, key=lambda x: -getattr(x, sorting_field))[0]
 
-        second_filter_percentage = 10
-        filtered_options = self._filter_list_by_percentage(
-            tiles_without_dora,
-            sorting_field,
-            second_filter_percentage
-        )
+        # we filter 10% of options, but if we use ukeire, we should also consider borders
+        if first_option.shanten == 2 or first_option.shanten == 3:
+            second_filter_percentage = 10
+            filtered_options = self._filter_list_by_percentage(
+                tiles_without_dora,
+                sorting_field,
+                second_filter_percentage
+            )
+        else:
+            best_option_without_dora = tiles_without_dora[0]
+            ukeire_borders = self._choose_ukeire_borders(best_option_without_dora, 10)
+            filtered_options = [best_option_without_dora]
+            for discard_option in tiles_without_dora:
+                if discard_option.ukeire >= best_option_without_dora.ukeire - ukeire_borders:
+                    filtered_options.append(discard_option)
 
         closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
         isolated_tiles = [x for x in filtered_options if is_tile_strictly_isolated(closed_hand_34, x.tile_to_discard)]
@@ -533,7 +531,8 @@ class ImplementationAI(InterfaceAI):
         """
         return self.player.table.players[1:]
 
-    def _filter_list_by_percentage(self, items, attribute, percentage):
+    @staticmethod
+    def _filter_list_by_percentage(items, attribute, percentage):
         filtered_options = []
         first_option = items[0]
         ukeire_borders = round((getattr(first_option, attribute) / 100) * percentage)
@@ -541,3 +540,18 @@ class ImplementationAI(InterfaceAI):
             if getattr(x, attribute) >= getattr(first_option, attribute) - ukeire_borders:
                 filtered_options.append(x)
         return filtered_options
+
+    @staticmethod
+    def _choose_ukeire_borders(first_option, border_percentage):
+        ukeire_borders = round((first_option.ukeire / 100) * border_percentage)
+
+        if first_option.shanten == 0 and ukeire_borders < 2:
+            ukeire_borders = 2
+
+        if first_option.shanten == 1 and ukeire_borders < 4:
+            ukeire_borders = 4
+
+        if first_option.shanten >= 2 and ukeire_borders < 8:
+            ukeire_borders = 8
+
+        return ukeire_borders

@@ -4,7 +4,7 @@ from mahjong.utils import is_honor, simplify, is_pair, is_chi
 from game.ai.first_version.defence.kabe import KabeTile
 
 
-class Damaten:
+class Riichi:
 
     def __init__(self, player):
         self.player = player

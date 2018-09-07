@@ -14,7 +14,7 @@ from mahjong.utils import is_pon, is_tile_strictly_isolated
 
 from game.ai.base.main import InterfaceAI
 from game.ai.discard import DiscardOption
-from game.ai.first_version.damaten import Damaten
+from game.ai.first_version.riichi import Riichi
 from game.ai.first_version.defence.main import DefenceHandler
 from game.ai.first_version.strategies.chiitoitsu import ChiitoitsuStrategy
 from game.ai.first_version.strategies.chinitsu import ChinitsuStrategy
@@ -56,7 +56,7 @@ class ImplementationAI(InterfaceAI):
         self.agari = Agari()
         self.shanten_calculator = Shanten()
         self.defence = DefenceHandler(player)
-        self.damaten = Damaten(player)
+        self.riichi = Riichi(player)
         self.hand_divider = HandDivider()
         self.finished_hand = HandCalculator()
 
@@ -425,7 +425,7 @@ class ImplementationAI(InterfaceAI):
         return result
 
     def should_call_riichi(self):
-        return self.damaten.should_call_riichi()
+        return self.riichi.should_call_riichi()
 
     def should_call_kan(self, tile, open_kan, from_riichi=False):
         """

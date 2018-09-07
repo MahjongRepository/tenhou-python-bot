@@ -519,7 +519,9 @@ class ImplementationAI(InterfaceAI):
                 self.player.meld_34_tiles
             )
             results = [x for x in results if x.shanten == discard_option.shanten - 1]
-            sum_tiles += sum([x.ukeire for x in results])
+            # let's take best ukeire here
+            if results:
+                sum_tiles += sorted(results, key=lambda x: -x.ukeire)[0].ukeire
 
             tiles.remove(wait)
 

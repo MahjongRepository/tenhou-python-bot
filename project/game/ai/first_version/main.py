@@ -297,7 +297,7 @@ class ImplementationAI(InterfaceAI):
 
         possible_options = [first_option]
 
-        ukeire_borders = self._choose_ukeire_borders(first_option, 20)
+        ukeire_borders = self._choose_ukeire_borders(first_option, 20, 'ukeire')
 
         for discard_option in results_with_same_shanten:
             # there is no sense to check already chosen tile
@@ -348,7 +348,7 @@ class ImplementationAI(InterfaceAI):
         # we should also consider borders for 3+ shanten hands
         else:
             best_option_without_dora = tiles_without_dora[0]
-            ukeire_borders = self._choose_ukeire_borders(best_option_without_dora, 10)
+            ukeire_borders = self._choose_ukeire_borders(best_option_without_dora, 10, sorting_field)
             filtered_options = [best_option_without_dora]
             for discard_option in tiles_without_dora:
                 if discard_option.ukeire >= best_option_without_dora.ukeire - ukeire_borders:
@@ -557,8 +557,8 @@ class ImplementationAI(InterfaceAI):
         return filtered_options
 
     @staticmethod
-    def _choose_ukeire_borders(first_option, border_percentage):
-        ukeire_borders = round((first_option.ukeire / 100) * border_percentage)
+    def _choose_ukeire_borders(first_option, border_percentage, border_field):
+        ukeire_borders = round((getattr(first_option, border_field) / 100) * border_percentage)
 
         if first_option.shanten == 0 and ukeire_borders < 2:
             ukeire_borders = 2

@@ -400,7 +400,7 @@ class TenhouClient(Client):
 
                         meld, tile_to_discard = self.player.try_to_call_meld(tile, is_kamicha_discard)
                         if meld:
-                            self._random_sleep(2, 3)
+                            self._random_sleep(1, 2)
 
                             meld_tile = tile
 

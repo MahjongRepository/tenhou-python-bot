@@ -505,13 +505,15 @@ class ImplementationAI(InterfaceAI):
             self.in_defence = True
 
     def calculate_second_level_ukeire(self, discard_option):
+        closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
+
         tiles = copy.copy(self.player.tiles)
         tiles.remove(discard_option.find_tile_in_hand(self.player.closed_hand))
 
         sum_tiles = 0
-        for wait in discard_option.waiting:
-            wait = wait * 4
-            tiles.append(wait)
+        for wait_34 in discard_option.waiting:
+            wait_136 = wait_34 * 4
+            tiles.append(wait_136)
 
             results, shanten = self.calculate_outs(
                 tiles,
@@ -519,11 +521,14 @@ class ImplementationAI(InterfaceAI):
                 self.player.meld_34_tiles
             )
             results = [x for x in results if x.shanten == discard_option.shanten - 1]
+
             # let's take best ukeire here
             if results:
-                sum_tiles += sorted(results, key=lambda x: -x.ukeire)[0].ukeire
+                best_one = sorted(results, key=lambda x: -x.ukeire)[0]
+                live_tiles = 4 - self.player.total_tiles(wait_34, closed_hand_34)
+                sum_tiles += best_one.ukeire * live_tiles
 
-            tiles.remove(wait)
+            tiles.remove(wait_136)
 
         discard_option.ukeire_second = sum_tiles
 

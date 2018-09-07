@@ -165,9 +165,10 @@ class ImplementationAI(InterfaceAI):
 
                 tiles_34[j] += 1
 
-                key = '{},{}'.format(
+                key = '{},{},{}'.format(
                     ''.join([str(x) for x in tiles_34]),
-                    ';'.join([str(x) for x in open_sets_34])
+                    ';'.join([str(x) for x in open_sets_34]),
+                    self.use_chitoitsu
                 )
 
                 if key in self.hand_cache:

@@ -184,6 +184,12 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         option = DiscardOption(player, tile, 0, [], 0)
         self.assertEqual(option.valuation, DiscardOption.DORA_SECOND_NEIGHBOUR + 140)
 
+        # tile from other suit
+        table.dora_indicators = [self._string_to_136_tile(sou='9')]
+        tile = self._string_to_34_tile(man='3')
+        option = DiscardOption(player, tile, 0, [], 0)
+        self.assertEqual(option.valuation, 140)
+
     def test_discard_not_valuable_honor_first(self):
         table = Table()
         player = table.player
@@ -335,3 +341,30 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
         discarded_tile = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '8p')
+
+    def test_discard_tile_and_wrong_tiles_valuation(self):
+        """
+        Bot wanted to discard 5m from the first hand,
+        because valuation for 2p was miscalculated (too high)
+
+        Same issue with wrong valuation was with second hand
+        """
+        table = Table()
+        player = table.player
+        table.add_dora_indicator(self._string_to_136_tile(honors='2'))
+
+        tiles = self._string_to_136_array(man='445567', pin='245678', sou='67')
+        player.init_hand(tiles)
+
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '2p')
+
+        table = Table()
+        player = table.player
+        table.add_dora_indicator(self._string_to_136_tile(man='5'))
+
+        tiles = self._string_to_136_array(man='45667', pin='34677', sou='38', honors='22')
+        player.init_hand(tiles)
+
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '8s')

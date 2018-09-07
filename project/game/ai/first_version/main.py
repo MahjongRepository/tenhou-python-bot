@@ -348,7 +348,7 @@ class ImplementationAI(InterfaceAI):
             ukeire_borders = self._choose_ukeire_borders(best_option_without_dora, 10, sorting_field)
             filtered_options = [best_option_without_dora]
             for discard_option in tiles_without_dora:
-                if discard_option.ukeire >= best_option_without_dora.ukeire - ukeire_borders:
+                if getattr(discard_option, sorting_field) >= getattr(best_option_without_dora, sorting_field) - ukeire_borders:
                     filtered_options.append(discard_option)
 
         closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)

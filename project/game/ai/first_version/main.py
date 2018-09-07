@@ -308,7 +308,7 @@ class ImplementationAI(InterfaceAI):
             if discard_option.ukeire >= first_option.ukeire - ukeire_borders:
                 possible_options.append(discard_option)
 
-        if first_option.shanten <= 3:
+        if first_option.shanten in [1, 2, 3]:
             sorting_field = 'ukeire_second'
             for x in possible_options:
                 self.calculate_second_level_ukeire(x)

@@ -38,7 +38,7 @@ class Kabe(Defence):
         kabe_tiles_weak = []
         kabe_tiles_partial = []
 
-        suits = self._suits_tiles(tiles_34)
+        suits = self._suits_tiles(self.defence.closed_hand_34)
         for x in range(0, 3):
             suit = suits[x]
             # "kabe" - 4 revealed tiles
@@ -92,10 +92,10 @@ class Kabe(Defence):
                 continue
 
             tile = kabe.tile_34
-            if self.player.total_tiles(tile, self.defence.hand_34) == 4:
+            if self.player.total_tiles(tile, self.defence.closed_hand_34) == 4:
                 results.append(DefenceTile(tile, DefenceTile.SAFE))
 
-            if self.player.total_tiles(tile, self.defence.hand_34) == 3:
+            if self.player.total_tiles(tile, self.defence.closed_hand_34) == 3:
                 results.append(DefenceTile(tile, DefenceTile.ALMOST_SAFE_TILE))
 
         return results

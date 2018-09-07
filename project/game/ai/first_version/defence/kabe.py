@@ -139,9 +139,7 @@ class KabeTile(object):
     WEAK_KABE = 1
     PARTIAL_KABE = 2
 
-    # how danger this tile is
     tile_34 = None
-    # kabe type
     kabe_type = None
 
     def __init__(self, tile_34, kabe_type):

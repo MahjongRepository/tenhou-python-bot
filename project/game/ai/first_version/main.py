@@ -10,18 +10,19 @@ from mahjong.hand_calculating.hand_config import HandConfig
 from mahjong.meld import Meld
 from mahjong.shanten import Shanten
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_pair, is_pon, is_tile_strictly_isolated
+from mahjong.utils import is_pon, is_tile_strictly_isolated
 
 from game.ai.base.main import InterfaceAI
 from game.ai.discard import DiscardOption
+from game.ai.first_version.riichi import Riichi
 from game.ai.first_version.defence.main import DefenceHandler
+from game.ai.first_version.strategies.chiitoitsu import ChiitoitsuStrategy
+from game.ai.first_version.strategies.chinitsu import ChinitsuStrategy
+from game.ai.first_version.strategies.formal_tempai import FormalTempaiStrategy
 from game.ai.first_version.strategies.honitsu import HonitsuStrategy
 from game.ai.first_version.strategies.main import BaseStrategy
 from game.ai.first_version.strategies.tanyao import TanyaoStrategy
 from game.ai.first_version.strategies.yakuhai import YakuhaiStrategy
-from game.ai.first_version.strategies.formal_tempai import FormalTempaiStrategy
-from game.ai.first_version.strategies.chinitsu import ChinitsuStrategy
-from game.ai.first_version.strategies.chiitoitsu import ChiitoitsuStrategy
 
 logger = logging.getLogger('ai')
 
@@ -32,6 +33,7 @@ class ImplementationAI(InterfaceAI):
     agari = None
     shanten_calculator = None
     defence = None
+    damaten = None
     hand_divider = None
     finished_hand = None
 
@@ -54,6 +56,7 @@ class ImplementationAI(InterfaceAI):
         self.agari = Agari()
         self.shanten_calculator = Shanten()
         self.defence = DefenceHandler(player)
+        self.riichi = Riichi(player)
         self.hand_divider = HandDivider()
         self.finished_hand = HandCalculator()
 
@@ -108,12 +111,10 @@ class ImplementationAI(InterfaceAI):
         return self.process_discard_option(selected_tile, self.player.closed_hand)
 
     def process_discard_options_and_select_tile_to_discard(self, results, shanten, had_was_open=False):
-        tiles_34 = TilesConverter.to_34_array(self.player.tiles)
-
         # we had to update tiles value there
         # because it is related with shanten number
         for result in results:
-            result.ukeire = self.count_tiles(result.waiting, tiles_34)
+            result.ukeire = self.count_tiles(result.waiting, TilesConverter.to_34_array(self.player.closed_hand))
             result.calculate_value(shanten)
 
         # current strategy can affect on our discard options
@@ -164,9 +165,10 @@ class ImplementationAI(InterfaceAI):
 
                 tiles_34[j] += 1
 
-                key = '{},{}'.format(
+                key = '{},{},{}'.format(
                     ''.join([str(x) for x in tiles_34]),
-                    ';'.join([str(x) for x in open_sets_34])
+                    ';'.join([str(x) for x in open_sets_34]),
+                    self.use_chitoitsu and 1 or 0
                 )
 
                 if key in self.hand_cache:
@@ -191,7 +193,7 @@ class ImplementationAI(InterfaceAI):
                                              shanten=shanten,
                                              tile_to_discard=hand_tile,
                                              waiting=waiting,
-                                             ukeire=self.count_tiles(waiting, tiles_34)))
+                                             ukeire=self.count_tiles(waiting, closed_tiles_34)))
 
         if is_agari:
             shanten = Shanten.AGARI_STATE
@@ -294,62 +296,60 @@ class ImplementationAI(InterfaceAI):
         results_with_same_shanten = [x for x in results if x.shanten == first_option.shanten]
 
         possible_options = [first_option]
-        border_percentage = 20
+
+        ukeire_borders = self._choose_ukeire_borders(first_option, 20, 'ukeire')
+
         for discard_option in results_with_same_shanten:
             # there is no sense to check already chosen tile
             if discard_option.tile_to_discard == first_option.tile_to_discard:
                 continue
 
-            # we don't need to select tiles almost dead waits
-            if discard_option.ukeire <= 2:
-                continue
-
-            ukeire_borders = round((first_option.ukeire / 100) * border_percentage)
-
-            if first_option.shanten == 0 and ukeire_borders < 2:
-                ukeire_borders = 2
-
-            if first_option.shanten == 1 and ukeire_borders < 4:
-                ukeire_borders = 4
-
-            if first_option.shanten >= 2 and ukeire_borders < 8:
-                ukeire_borders = 8
-
             # let's choose tiles that are close to the max ukeire tile
             if discard_option.ukeire >= first_option.ukeire - ukeire_borders:
                 possible_options.append(discard_option)
 
-        if first_option.shanten == 2 or first_option.shanten == 3:
+        if first_option.shanten <= 3:
             sorting_field = 'ukeire_second'
             for x in possible_options:
                 self.calculate_second_level_ukeire(x)
+
+            possible_options = sorted(possible_options, key=lambda x: -getattr(x, sorting_field))
+
+            filter_percentage = 20
+            possible_options = self._filter_list_by_percentage(
+                possible_options,
+                sorting_field,
+                filter_percentage
+            )
         else:
             sorting_field = 'ukeire'
+            possible_options = sorted(possible_options, key=lambda x: -getattr(x, sorting_field))
 
-        possible_options = sorted(possible_options, key=lambda x: -getattr(x, sorting_field))
-
-        filter_percentage = 20
-        filtered_options = self._filter_list_by_percentage(
-            possible_options,
-            sorting_field,
-            filter_percentage
-        )
-
-        tiles_without_dora = [x for x in filtered_options if x.count_of_dora == 0]
+        tiles_without_dora = [x for x in possible_options if x.count_of_dora == 0]
 
         # we have only dora candidates to discard
         if not tiles_without_dora:
-            min_dora = min([x.count_of_dora for x in filtered_options])
-            min_dora_list = [x for x in filtered_options if x.count_of_dora == min_dora]
+            min_dora = min([x.count_of_dora for x in possible_options])
+            min_dora_list = [x for x in possible_options if x.count_of_dora == min_dora]
 
             return sorted(min_dora_list, key=lambda x: -getattr(x, sorting_field))[0]
 
-        second_filter_percentage = 10
-        filtered_options = self._filter_list_by_percentage(
-            tiles_without_dora,
-            sorting_field,
-            second_filter_percentage
-        )
+        # we filter 10% of options here
+        if first_option.shanten == 2 or first_option.shanten == 3:
+            second_filter_percentage = 10
+            filtered_options = self._filter_list_by_percentage(
+                tiles_without_dora,
+                sorting_field,
+                second_filter_percentage
+            )
+        # we should also consider borders for 3+ shanten hands
+        else:
+            best_option_without_dora = tiles_without_dora[0]
+            ukeire_borders = self._choose_ukeire_borders(best_option_without_dora, 10, sorting_field)
+            filtered_options = [best_option_without_dora]
+            for discard_option in tiles_without_dora:
+                if getattr(discard_option, sorting_field) >= getattr(best_option_without_dora, sorting_field) - ukeire_borders:
+                    filtered_options.append(discard_option)
 
         closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
         isolated_tiles = [x for x in filtered_options if is_tile_strictly_isolated(closed_hand_34, x.tile_to_discard)]
@@ -405,7 +405,7 @@ class ImplementationAI(InterfaceAI):
             win_tile += 1
 
         if not tiles:
-            tiles = self.player.tiles
+            tiles = copy.copy(self.player.tiles)
 
         tiles += [win_tile]
 
@@ -425,40 +425,7 @@ class ImplementationAI(InterfaceAI):
         return result
 
     def should_call_riichi(self):
-        # empty waiting can be found in some cases
-        if not self.waiting:
-            return False
-
-        if self.in_defence:
-            return False
-
-        # we have a good wait, let's riichi
-        if len(self.waiting) > 1:
-            return True
-
-        waiting = self.waiting[0]
-        tiles = self.player.closed_hand + [waiting * 4]
-        closed_melds = [x for x in self.player.melds if not x.opened]
-        for meld in closed_melds:
-            tiles.extend(meld.tiles[:3])
-
-        tiles_34 = TilesConverter.to_34_array(tiles)
-
-        results = self.hand_divider.divide_hand(tiles_34)
-        result = results[0]
-
-        count_of_pairs = len([x for x in result if is_pair(x)])
-        # with chitoitsu we can call a riichi with pair wait
-        if count_of_pairs == 7:
-            return True
-
-        for hand_set in result:
-            # better to not call a riichi for a pair wait
-            # it can be easily improved
-            if is_pair(hand_set) and waiting in hand_set:
-                return False
-
-        return True
+        return self.riichi.should_call_riichi()
 
     def should_call_kan(self, tile, open_kan, from_riichi=False):
         """
@@ -538,13 +505,19 @@ class ImplementationAI(InterfaceAI):
             self.in_defence = True
 
     def calculate_second_level_ukeire(self, discard_option):
+        closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
+        not_suitable_tiles = self.current_strategy and self.current_strategy.not_suitable_tiles or []
+
         tiles = copy.copy(self.player.tiles)
         tiles.remove(discard_option.find_tile_in_hand(self.player.closed_hand))
 
         sum_tiles = 0
-        for wait in discard_option.waiting:
-            wait = wait * 4
-            tiles.append(wait)
+        for wait_34 in discard_option.waiting:
+            if self.player.is_open_hand and wait_34 in not_suitable_tiles:
+                continue
+
+            wait_136 = wait_34 * 4
+            tiles.append(wait_136)
 
             results, shanten = self.calculate_outs(
                 tiles,
@@ -552,9 +525,14 @@ class ImplementationAI(InterfaceAI):
                 self.player.meld_34_tiles
             )
             results = [x for x in results if x.shanten == discard_option.shanten - 1]
-            sum_tiles += sum([x.ukeire for x in results])
 
-            tiles.remove(wait)
+            # let's take best ukeire here
+            if results:
+                best_one = sorted(results, key=lambda x: -x.ukeire)[0]
+                live_tiles = 4 - self.player.total_tiles(wait_34, closed_hand_34)
+                sum_tiles += best_one.ukeire * live_tiles
+
+            tiles.remove(wait_136)
 
         discard_option.ukeire_second = sum_tiles
 
@@ -565,7 +543,8 @@ class ImplementationAI(InterfaceAI):
         """
         return self.player.table.players[1:]
 
-    def _filter_list_by_percentage(self, items, attribute, percentage):
+    @staticmethod
+    def _filter_list_by_percentage(items, attribute, percentage):
         filtered_options = []
         first_option = items[0]
         ukeire_borders = round((getattr(first_option, attribute) / 100) * percentage)
@@ -573,3 +552,18 @@ class ImplementationAI(InterfaceAI):
             if getattr(x, attribute) >= getattr(first_option, attribute) - ukeire_borders:
                 filtered_options.append(x)
         return filtered_options
+
+    @staticmethod
+    def _choose_ukeire_borders(first_option, border_percentage, border_field):
+        ukeire_borders = round((getattr(first_option, border_field) / 100) * border_percentage)
+
+        if first_option.shanten == 0 and ukeire_borders < 2:
+            ukeire_borders = 2
+
+        if first_option.shanten == 1 and ukeire_borders < 4:
+            ukeire_borders = 4
+
+        if first_option.shanten >= 2 and ukeire_borders < 8:
+            ukeire_borders = 8
+
+        return ukeire_borders

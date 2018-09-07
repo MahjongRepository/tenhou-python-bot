@@ -217,7 +217,9 @@ class Player(PlayerInterface):
         :param tiles_34: cached list of tiles (to not build it for each iteration)
         :return: int
         """
-        return tiles_34[tile] + self.table.revealed_tiles[tile]
+        revealed_tiles = tiles_34[tile] + self.table.revealed_tiles[tile]
+        assert revealed_tiles <= 4, 'we have only 4 tiles in the game'
+        return revealed_tiles
 
     def format_hand_for_print(self, tile):
         hand_string = '{} + {}'.format(

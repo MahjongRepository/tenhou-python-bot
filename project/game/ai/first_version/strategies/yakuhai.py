@@ -28,6 +28,7 @@ class YakuhaiStrategy(BaseStrategy):
 
         tiles_34 = TilesConverter.to_34_array(tiles_136)
         player_hand_tiles_34 = TilesConverter.to_34_array(self.player.tiles)
+        player_closed_hand_tiles_34 = TilesConverter.to_34_array(self.player.closed_hand)
         self.valued_pairs = [x for x in self.player.valued_honors if player_hand_tiles_34[x] == 2]
 
         is_double_east_wind = len([x for x in self.valued_pairs if x == EAST]) == 2
@@ -47,7 +48,7 @@ class YakuhaiStrategy(BaseStrategy):
         for pair in self.valued_pairs:
             # we have valued pair in the hand and there are enough tiles
             # in the wall
-            if opportunity_to_meld_yakuhai or self.player.total_tiles(pair, player_hand_tiles_34) < 4:
+            if opportunity_to_meld_yakuhai or self.player.total_tiles(pair, player_closed_hand_tiles_34) < 4:
                 has_valued_pair = True
                 break
 
@@ -83,7 +84,7 @@ class YakuhaiStrategy(BaseStrategy):
 
         for pair in self.valued_pairs:
             # last chance to get that yakuhai, let's go for it
-            if opportunity_to_meld_yakuhai and self.player.total_tiles(pair, player_hand_tiles_34) == 4 and self.player.ai.shanten >= 1:
+            if opportunity_to_meld_yakuhai and self.player.total_tiles(pair, player_closed_hand_tiles_34) == 4 and self.player.ai.shanten >= 1:
                 if pair not in self.last_chance_calls:
                     self.last_chance_calls.append(pair)
                 return True

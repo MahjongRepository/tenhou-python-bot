@@ -3,6 +3,7 @@ import unittest
 
 from mahjong.constants import EAST, SOUTH, WEST, NORTH, HAKU, HATSU, CHUN, FIVE_RED_SOU, FIVE_RED_PIN
 from mahjong.tests_mixin import TestMixin
+from mahjong.meld import Meld
 
 from game.ai.discard import DiscardOption
 from game.ai.first_version.strategies.main import BaseStrategy
@@ -183,6 +184,12 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         option = DiscardOption(player, tile, 0, [], 0)
         self.assertEqual(option.valuation, DiscardOption.DORA_SECOND_NEIGHBOUR + 140)
 
+        # tile from other suit
+        table.dora_indicators = [self._string_to_136_tile(sou='9')]
+        tile = self._string_to_34_tile(man='3')
+        option = DiscardOption(player, tile, 0, [], 0)
+        self.assertEqual(option.valuation, 140)
+
     def test_discard_not_valuable_honor_first(self):
         table = Table()
         player = table.player
@@ -280,3 +287,84 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
         discarded_tile = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '3s')
+
+    # There was a bug with count of live tiles that are used in melds,
+    # hence this test
+    def test_choose_best_option_with_melds(self):
+        table = Table()
+        player = table.player
+        table.has_aka_dora = False
+
+        tiles = self._string_to_136_array(sou='245666789', honors='2266')
+        player.init_hand(tiles)
+
+        meld = self._make_meld(Meld.PON, sou='666')
+        player.add_called_meld(meld)
+        meld = self._make_meld(Meld.CHI, sou='789')
+        player.add_called_meld(meld)
+
+        player.draw_tile(self._string_to_136_tile(sou='5'))
+
+        discarded_tile = player.discard_tile()
+        # we should discard best ukeire option here - 2s
+        self.assertEqual(self._to_string([discarded_tile]), '2s')
+
+    def test_choose_best_wait_with_melds(self):
+        table = Table()
+        player = table.player
+        table.has_aka_dora = False
+
+        tiles = self._string_to_136_array(sou='1222233455599')
+        player.init_hand(tiles)
+
+        meld = self._make_meld(Meld.CHI, sou='123')
+        player.add_called_meld(meld)
+        meld = self._make_meld(Meld.PON, sou='222')
+        player.add_called_meld(meld)
+        meld = self._make_meld(Meld.PON, sou='555')
+        player.add_called_meld(meld)
+
+        player.draw_tile(self._string_to_136_tile(sou='4'))
+
+        discarded_tile = player.discard_tile()
+        # double-pairs wait becomes better, because it has 4 tiles to wait for
+        # against just 1 in ryanmen
+        self.assertEqual(self._to_string([discarded_tile]), '3s')
+
+    def test_discard_tile_with_better_wait_in_iishanten(self):
+        table = Table()
+        player = table.player
+        table.add_dora_indicator(self._string_to_136_tile(sou='4'))
+
+        tiles = self._string_to_136_array(man='123567', pin='113788', sou='99')
+        player.init_hand(tiles)
+
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '8p')
+
+    def test_discard_tile_and_wrong_tiles_valuation(self):
+        """
+        Bot wanted to discard 5m from the first hand,
+        because valuation for 2p was miscalculated (too high)
+
+        Same issue with wrong valuation was with second hand
+        """
+        table = Table()
+        player = table.player
+        table.add_dora_indicator(self._string_to_136_tile(honors='2'))
+
+        tiles = self._string_to_136_array(man='445567', pin='245678', sou='67')
+        player.init_hand(tiles)
+
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '2p')
+
+        table = Table()
+        player = table.player
+        table.add_dora_indicator(self._string_to_136_tile(man='5'))
+
+        tiles = self._string_to_136_array(man='45667', pin='34677', sou='38', honors='22')
+        player.init_hand(tiles)
+
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '8s')

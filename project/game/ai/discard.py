@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from mahjong.constants import AKA_DORA_LIST
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_honor, simplify, plus_dora, is_aka_dora
+from mahjong.utils import is_honor, simplify, plus_dora, is_aka_dora, is_sou, is_man, is_pin
 
 from game.ai.first_version.strategies.main import BaseStrategy
 
@@ -116,13 +116,29 @@ class DiscardOption(object):
             value += suit_tile_grades[simplified_tile]
 
             for indicator in self.player.table.dora_indicators:
-                simplified_indicator = simplify(indicator // 4)
+                indicator_34 = indicator // 4
+                if is_honor(indicator_34):
+                    continue
+
+                # indicator and tile not from the same suit
+                if is_sou(indicator_34) and not is_sou(self.tile_to_discard):
+                    continue
+
+                # indicator and tile not from the same suit
+                if is_man(indicator_34) and not is_man(self.tile_to_discard):
+                    continue
+
+                # indicator and tile not from the same suit
+                if is_pin(indicator_34) and not is_pin(self.tile_to_discard):
+                    continue
+
+                simplified_indicator = simplify(indicator_34)
                 simplified_dora = simplified_indicator + 1
                 # indicator is 9 man
                 if simplified_dora == 9:
                     simplified_dora = 0
 
-                # tile close to the dora
+                # tile so close to the dora
                 if simplified_tile + 1 == simplified_dora or simplified_tile - 1 == simplified_dora:
                     value += DiscardOption.DORA_FIRST_NEIGHBOUR
 

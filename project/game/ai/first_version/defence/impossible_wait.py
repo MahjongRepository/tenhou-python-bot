@@ -14,10 +14,10 @@ class ImpossibleWait(Defence):
 
         results = []
         for x in HONOR_INDICES:
-            if self.player.total_tiles(x, self.defence.hand_34) == 4:
+            if self.player.total_tiles(x, self.defence.closed_hand_34) == 4:
                 results.append(DefenceTile(x, DefenceTile.SAFE))
 
-            if self.player.total_tiles(x, self.defence.hand_34) == 3:
+            if self.player.total_tiles(x, self.defence.closed_hand_34) == 3:
                 results.append(DefenceTile(x, DefenceTile.ALMOST_SAFE_TILE))
 
         return results

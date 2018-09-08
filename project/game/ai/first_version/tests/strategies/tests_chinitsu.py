@@ -89,6 +89,18 @@ class ChinitsuStrategyTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
         self.assertEqual(strategy.should_activate_strategy(player.tiles), False)
 
+        # we don't want to open on 9th tile into chinitsu, but it's ok to
+        # switch to chinitsu if we get in from the wall
+        tiles = self._string_to_136_array(sou='11223578', man='57', pin='466')
+        player.init_hand(tiles)
+        # plus one tile to open hand
+        tiles = self._string_to_136_array(sou='112223578', man='57', pin='466')
+        self.assertEqual(strategy.should_activate_strategy(tiles), False)
+        # but now let's init hand with these tiles, we can now slowly move to chinitsu
+        tiles = self._string_to_136_array(sou='112223578', man='57', pin='466')
+        player.init_hand(tiles)
+        self.assertEqual(strategy.should_activate_strategy(tiles), True)
+
     def test_suitable_tiles(self):
         table = Table()
         player = table.player

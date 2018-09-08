@@ -251,7 +251,7 @@ class BaseStrategy(object):
             selected_tile = self.player.ai.process_discard_options_and_select_tile_to_discard(
                 filtered_results,
                 shanten,
-                had_was_open=True
+                hand_was_open=True
             )
 
             return meld, selected_tile

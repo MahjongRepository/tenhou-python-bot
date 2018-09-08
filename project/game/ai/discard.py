@@ -53,8 +53,9 @@ class DiscardOption(object):
 
     def __unicode__(self):
         tile_format_136 = TilesConverter.to_one_line_string([self.tile_to_discard*4])
-        return 'tile={}, ukeire={}, ukeire2={}, valuation={}'.format(
+        return 'tile={}, shanten={}, ukeire={}, ukeire2={}, valuation={}'.format(
             tile_format_136,
+            self.shanten,
             self.ukeire,
             self.ukeire_second,
             self.valuation
@@ -168,4 +169,4 @@ class DiscardOption(object):
             if value == 0:
                 self.had_to_be_discarded = True
 
-        self.valuation = value
+        self.valuation = int(value)

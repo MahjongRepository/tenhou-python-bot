@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import logging
 import copy
+import utils.decisions_constants as log
 
 from mahjong.constants import EAST, SOUTH, WEST, NORTH, CHUN, HAKU, HATSU
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter, Tile
 
+from utils.decisions_logger import DecisionsLogger
 from utils.settings_handler import settings
 
 logger = logging.getLogger('tenhou')
@@ -158,14 +160,24 @@ class Player(PlayerInterface):
 
         self.ai.init_hand()
 
-    def draw_tile(self, tile):
-        self.last_draw = tile
-        self.tiles.append(tile)
+    def draw_tile(self, tile_136):
+        DecisionsLogger.debug(
+            log.DRAW,
+            context=[
+                'Step: {}'.format(self.round_step),
+                'Hand: {}'.format(self.format_hand_for_print(tile_136)),
+                'In defence: {}'.format(self.ai.in_defence),
+                'Current strategy: {}'.format(self.ai.current_strategy)
+            ]
+        )
+
+        self.last_draw = tile_136
+        self.tiles.append(tile_136)
 
         # we need sort it to have a better string presentation
         self.tiles = sorted(self.tiles)
 
-        self.ai.draw_tile(tile)
+        self.ai.draw_tile(tile_136)
 
     def discard_tile(self, discard_tile=None):
         """
@@ -221,11 +233,11 @@ class Player(PlayerInterface):
         assert revealed_tiles <= 4, 'we have only 4 tiles in the game'
         return revealed_tiles
 
-    def format_hand_for_print(self, tile):
-        hand_string = '{} + {}'.format(
-            TilesConverter.to_one_line_string(self.closed_hand),
-            TilesConverter.to_one_line_string([tile])
-        )
+    def format_hand_for_print(self, tile_136=None):
+        hand_string = '{}'.format(TilesConverter.to_one_line_string(self.closed_hand))
+
+        if tile_136 is not None:
+            hand_string += ' + {}'.format(TilesConverter.to_one_line_string([tile_136]))
 
         melds = []
         for item in self.melds:
@@ -243,7 +255,7 @@ class Player(PlayerInterface):
 
     @property
     def valued_honors(self):
-        return [CHUN, HAKU, HATSU, self.table.round_wind, self.player_wind]
+        return [CHUN, HAKU, HATSU, self.table.round_wind_tile, self.player_wind]
 
 
 class EnemyPlayer(PlayerInterface):

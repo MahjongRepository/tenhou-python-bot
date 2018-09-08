@@ -73,7 +73,7 @@ class TenhouLogReproducer(object):
                     shifted_scores.append(values['scores'][self._normalize_position(x, self.player_position)])
 
                 table.init_round(
-                    values['round_number'],
+                    values['round_wind_number'],
                     values['count_of_honba_sticks'],
                     values['count_of_riichi_sticks'],
                     values['dora_indicator'],
@@ -136,7 +136,7 @@ class TenhouLogReproducer(object):
 
     def _parse_url(self, log_url):
         temp = log_url.split('?')[1].split('&')
-        log_id, player, round_number = '', 0, 0
+        log_id, player, round_wind = '', 0, 0
         for item in temp:
             item = item.split('=')
             if 'log' == item[0]:
@@ -144,8 +144,8 @@ class TenhouLogReproducer(object):
             if 'tw' == item[0]:
                 player = int(item[1])
             if 'ts' == item[0]:
-                round_number = int(item[1])
-        return log_id, player, round_number
+                round_wind = int(item[1])
+        return log_id, player, round_wind
 
     def _download_log_content(self, log_id):
         """

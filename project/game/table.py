@@ -16,7 +16,8 @@ class Table(object):
     dora_indicators = None
 
     dealer_seat = 0
-    round_number = 0
+    round_number = -1
+    round_wind_number = 0
     count_of_riichi_sticks = 0
     count_of_honba_sticks = 0
 
@@ -38,15 +39,36 @@ class Table(object):
 
     def __str__(self):
         dora_string = TilesConverter.to_one_line_string(self.dora_indicators)
-        return 'Round: {0}, Honba: {1}, Dora Indicators: {2}'.format(self.round_number,
-                                                                     self.count_of_honba_sticks,
-                                                                     dora_string)
 
-    def init_round(self, round_number, count_of_honba_sticks, count_of_riichi_sticks,
-                   dora_indicator, dealer_seat, scores):
+        round_settings = {
+            EAST:  ['e', 0],
+            SOUTH: ['s', 3],
+            WEST:  ['w', 7]
+        }.get(self.round_wind_tile)
+
+        round_string, round_diff = round_settings
+        display_round = '{}{}'.format(round_string, (self.round_wind_number + 1) - round_diff)
+
+        return 'Round: {}, Honba: {}, Dora Indicators: {}'.format(
+            display_round,
+            self.count_of_honba_sticks,
+            dora_string
+        )
+
+    def init_round(self,
+                   round_wind_number,
+                   count_of_honba_sticks,
+                   count_of_riichi_sticks,
+                   dora_indicator,
+                   dealer_seat,
+                   scores):
+
+        # we need it to properly display log for each round
+        self.round_number += 1
+
         self.meld_was_called = False
         self.dealer_seat = dealer_seat
-        self.round_number = round_number
+        self.round_wind_number = round_wind_number
         self.count_of_honba_sticks = count_of_honba_sticks
         self.count_of_riichi_sticks = count_of_riichi_sticks
 
@@ -66,7 +88,7 @@ class Table(object):
         # 13 - tiles in each player hand
         self.count_of_remaining_tiles = 136 - 14 - self.count_of_players * 13
 
-        if round_number == 0 and count_of_honba_sticks == 0:
+        if round_wind_number == 0 and count_of_honba_sticks == 0:
             i = 0
             seats = [0, 1, 2, 3]
             for player in self.players:
@@ -155,12 +177,12 @@ class Table(object):
         return sorted(self.players, key=lambda x: (x.scores or 0, -x.first_seat), reverse=True)
 
     @property
-    def round_wind(self):
-        if self.round_number < 4:
+    def round_wind_tile(self):
+        if self.round_wind_number < 4:
             return EAST
-        elif 4 <= self.round_number < 8:
+        elif 4 <= self.round_wind_number < 8:
             return SOUTH
-        elif 8 <= self.round_number < 12:
+        elif 8 <= self.round_wind_number < 12:
             return WEST
         else:
             return NORTH

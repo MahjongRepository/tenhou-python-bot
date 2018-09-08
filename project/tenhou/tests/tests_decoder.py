@@ -12,7 +12,7 @@ class TenhouDecoderTestCase(unittest.TestCase):
                   'hai="30,67,44,21,133,123,87,69,36,34,94,4,128"/>'
 
         values = decoder.parse_initial_values(message)
-        self.assertEqual(values['round_number'], 0)
+        self.assertEqual(values['round_wind_number'], 0)
         self.assertEqual(values['count_of_honba_sticks'], 2)
         self.assertEqual(values['count_of_riichi_sticks'], 3)
         self.assertEqual(values['dora_indicator'], 126)

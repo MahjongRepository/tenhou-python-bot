@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import copy
-import logging
+import utils.decisions_constants as log
 
 from mahjong.agari import Agari
-from mahjong.constants import AKA_DORA_LIST
+from mahjong.constants import AKA_DORA_LIST, DISPLAY_WINDS
 from mahjong.hand_calculating.divider import HandDivider
 from mahjong.hand_calculating.hand import HandCalculator
 from mahjong.hand_calculating.hand_config import HandConfig
@@ -23,8 +23,7 @@ from game.ai.first_version.strategies.honitsu import HonitsuStrategy
 from game.ai.first_version.strategies.main import BaseStrategy
 from game.ai.first_version.strategies.tanyao import TanyaoStrategy
 from game.ai.first_version.strategies.yakuhai import YakuhaiStrategy
-
-logger = logging.getLogger('ai')
+from utils.decisions_logger import DecisionsLogger
 
 
 class ImplementationAI(InterfaceAI):
@@ -33,7 +32,7 @@ class ImplementationAI(InterfaceAI):
     agari = None
     shanten_calculator = None
     defence = None
-    damaten = None
+    riichi = None
     hand_divider = None
     finished_hand = None
 
@@ -45,7 +44,6 @@ class ImplementationAI(InterfaceAI):
 
     current_strategy = None
     last_discard_option = None
-
     use_chitoitsu = False
 
     hand_cache = {}
@@ -62,23 +60,38 @@ class ImplementationAI(InterfaceAI):
 
         self.erase_state()
 
+    def erase_state(self):
+        self.shanten = 7
+        self.ukeire = 0
+        self.ukeire_second = 0
+        self.in_defence = False
+        self.waiting = None
+
+        self.current_strategy = None
+        self.last_discard_option = None
+        self.use_chitoitsu = False
+
+        self.hand_cache = {}
+
     def init_hand(self):
+        DecisionsLogger.debug(log.INIT_HAND, context=[
+            'Round  wind: {}'.format(DISPLAY_WINDS[self.table.round_wind_tile]),
+            'Player wind: {}'.format(DISPLAY_WINDS[self.player.player_wind]),
+            'Hand: {}'.format(self.player.format_hand_for_print()),
+        ])
+
         # it will set correct hand shanten number and ukeire to the new hand
         # tile will not be removed from the hand
-        self.discard_tile(None)
+        self.discard_tile(None, print_log=False)
         self.player.in_tempai = False
 
         # Let's decide what we will do with our hand (like open for tanyao and etc.)
         self.determine_strategy(self.player.tiles)
 
-    def draw_tile(self, tile):
-        """
-        :param tile: 136 tile format
-        :return:
-        """
+    def draw_tile(self, tile_136):
         self.determine_strategy(self.player.tiles)
 
-    def discard_tile(self, discard_tile):
+    def discard_tile(self, discard_tile, print_log=True):
         # we called meld and we had discard tile that we wanted to discard
         if discard_tile is not None:
             if not self.last_discard_option:
@@ -90,14 +103,18 @@ class ImplementationAI(InterfaceAI):
                                                self.player.closed_hand,
                                                self.player.meld_34_tiles)
 
-        selected_tile = self.process_discard_options_and_select_tile_to_discard(results, shanten)
+        selected_tile = self.process_discard_options_and_select_tile_to_discard(
+            results,
+            shanten,
+            print_log=print_log
+        )
 
         # bot think that there is a threat on the table
         # and better to fold
         # if we can't find safe tiles, let's continue to build our hand
         if self.defence.should_go_to_defence_mode(selected_tile):
             if not self.in_defence:
-                logger.info('We decided to fold against other players')
+                DecisionsLogger.debug(log.DEFENCE_ACTIVATE)
                 self.in_defence = True
 
             defence_tile = self.defence.try_to_find_safe_tile_to_discard(results)
@@ -105,12 +122,12 @@ class ImplementationAI(InterfaceAI):
                 return self.process_discard_option(defence_tile, self.player.closed_hand)
         else:
             if self.in_defence:
-                logger.info('Stop defence mode')
+                DecisionsLogger.debug(log.DEFENCE_DEACTIVATE)
             self.in_defence = False
 
-        return self.process_discard_option(selected_tile, self.player.closed_hand)
+        return self.process_discard_option(selected_tile, self.player.closed_hand, print_log=print_log)
 
-    def process_discard_options_and_select_tile_to_discard(self, results, shanten, had_was_open=False):
+    def process_discard_options_and_select_tile_to_discard(self, results, shanten, hand_was_open=False, print_log=True):
         # we had to update tiles value there
         # because it is related with shanten number
         for result in results:
@@ -125,9 +142,9 @@ class ImplementationAI(InterfaceAI):
                                                                       shanten,
                                                                       False,
                                                                       None,
-                                                                      had_was_open)
+                                                                      hand_was_open)
 
-        return self.choose_tile_to_discard(results)
+        return self.choose_tile_to_discard(results, print_log=print_log)
 
     def calculate_outs(self, tiles, closed_hand, open_sets_34=None):
         """
@@ -212,8 +229,8 @@ class ImplementationAI(InterfaceAI):
             n += 4 - self.player.total_tiles(tile_34, tiles_34)
         return n
 
-    def try_to_call_meld(self, tile, is_kamicha_discard):
-        tiles_136 = self.player.tiles[:] + [tile]
+    def try_to_call_meld(self, tile_136, is_kamicha_discard):
+        tiles_136 = self.player.tiles[:] + [tile_136]
         self.determine_strategy(tiles_136)
 
         if not self.current_strategy:
@@ -225,15 +242,21 @@ class ImplementationAI(InterfaceAI):
             self.player.meld_34_tiles,
             chiitoitsu=self.use_chitoitsu
         )
-        if previous_shanten == Shanten.AGARI_STATE:
-            if not self.current_strategy.can_meld_into_agari():
-                return None, None
 
-        meld, discard_option = self.current_strategy.try_to_call_meld(tile, is_kamicha_discard, tiles_136)
+        if previous_shanten == Shanten.AGARI_STATE and not self.current_strategy.can_meld_into_agari():
+            return None, None
+
+        meld, discard_option = self.current_strategy.try_to_call_meld(tile_136, is_kamicha_discard, tiles_136)
         tile_to_discard = None
         if discard_option:
             self.last_discard_option = discard_option
             tile_to_discard = discard_option.tile_to_discard
+
+            DecisionsLogger.debug(log.CALL_MELD, 'Try to call meld', context=[
+                'Hand: {}'.format(self.player.format_hand_for_print(tile_136)),
+                'Meld: {}'.format(meld),
+                'Discard after meld: {}'.format(discard_option)
+            ])
 
         return meld, tile_to_discard
 
@@ -268,25 +291,31 @@ class ImplementationAI(InterfaceAI):
             self.use_chitoitsu = self.current_strategy.type == BaseStrategy.CHIITOITSU
 
             if not old_strategy or self.current_strategy.type != old_strategy.type:
-                message = '{} switched to {} strategy'.format(self.player.name, self.current_strategy)
-                if old_strategy:
-                    message += ' from {}'.format(old_strategy)
-                logger.debug(message)
-                logger.debug('With hand: {}'.format(TilesConverter.to_one_line_string(self.player.tiles)))
+                DecisionsLogger.debug(
+                    log.STRATEGY_ACTIVATE,
+                    context=self.current_strategy,
+                )
 
         if not self.current_strategy and old_strategy:
-            logger.debug('{} gave up on {}'.format(self.player.name, old_strategy))
+            DecisionsLogger.debug(log.STRATEGY_DROP, context=old_strategy)
 
         return self.current_strategy and True or False
 
-    def choose_tile_to_discard(self, results: [DiscardOption]) -> DiscardOption:
+    def choose_tile_to_discard(self, results: [DiscardOption], print_log=True) -> DiscardOption:
         """
         Try to find best tile to discard, based on different rules
         """
 
         had_to_be_discarded_tiles = [x for x in results if x.had_to_be_discarded]
         if had_to_be_discarded_tiles:
-            return sorted(had_to_be_discarded_tiles, key=lambda x: (x.shanten, -x.ukeire, x.valuation))[0]
+            results = sorted(had_to_be_discarded_tiles, key=lambda x: (x.shanten, -x.ukeire, x.valuation))
+            DecisionsLogger.debug(
+                log.DISCARD_OPTIONS,
+                'Discard marked tiles first',
+                results,
+                print_log=print_log
+            )
+            return results[0]
 
         # remove needed tiles from discard options
         results = [x for x in results if not x.had_to_be_saved]
@@ -296,9 +325,7 @@ class ImplementationAI(InterfaceAI):
         results_with_same_shanten = [x for x in results if x.shanten == first_option.shanten]
 
         possible_options = [first_option]
-
         ukeire_borders = self._choose_ukeire_borders(first_option, 20, 'ukeire')
-
         for discard_option in results_with_same_shanten:
             # there is no sense to check already chosen tile
             if discard_option.tile_to_discard == first_option.tile_to_discard:
@@ -329,6 +356,12 @@ class ImplementationAI(InterfaceAI):
 
         # we have only dora candidates to discard
         if not tiles_without_dora:
+            DecisionsLogger.debug(
+                log.DISCARD_OPTIONS,
+                context=possible_options,
+                print_log=print_log
+            )
+
             min_dora = min([x.count_of_dora for x in possible_options])
             min_dora_list = [x for x in possible_options if x.count_of_dora == min_dora]
 
@@ -350,6 +383,12 @@ class ImplementationAI(InterfaceAI):
             for discard_option in tiles_without_dora:
                 if getattr(discard_option, sorting_field) >= getattr(best_option_without_dora, sorting_field) - ukeire_borders:
                     filtered_options.append(discard_option)
+
+        DecisionsLogger.debug(
+            log.DISCARD_OPTIONS,
+            context=possible_options,
+            print_log=print_log
+        )
 
         closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
         isolated_tiles = [x for x in filtered_options if is_tile_strictly_isolated(closed_hand_34, x.tile_to_discard)]
@@ -374,7 +413,13 @@ class ImplementationAI(InterfaceAI):
         # we have only one candidate to discard with greater ukeire
         return first_option
 
-    def process_discard_option(self, discard_option, closed_hand, force_discard=False):
+    def process_discard_option(self, discard_option, closed_hand, force_discard=False, print_log=True):
+        if print_log:
+            DecisionsLogger.debug(
+                log.DISCARD,
+                context=discard_option
+            )
+
         self.waiting = discard_option.waiting
         self.player.ai.shanten = discard_option.shanten
         self.player.in_tempai = self.player.ai.shanten == 0
@@ -412,7 +457,7 @@ class ImplementationAI(InterfaceAI):
         config = HandConfig(
             is_riichi=call_riichi,
             player_wind=self.player.player_wind,
-            round_wind=self.player.table.round_wind,
+            round_wind=self.player.table.round_wind_tile,
             has_aka_dora=self.player.table.has_aka_dora,
             has_open_tanyao=self.player.table.has_open_tanyao
         )
@@ -501,8 +546,10 @@ class ImplementationAI(InterfaceAI):
         it is affect open hand decisions
         :return:
         """
+
         if self.defence.should_go_to_defence_mode():
             self.in_defence = True
+            DecisionsLogger.debug(log.DEFENCE_ACTIVATE)
 
     def calculate_second_level_ukeire(self, discard_option):
         closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)

@@ -7,7 +7,6 @@ from threading import Thread
 from time import sleep
 from urllib.parse import quote
 
-from mahjong.constants import DISPLAY_WINDS
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
 
@@ -223,8 +222,9 @@ class TenhouClient(Client):
             for message in messages:
                 if '<INIT' in message or '<REINIT' in message:
                     values = self.decoder.parse_initial_values(message)
+
                     self.table.init_round(
-                        values['round_number'],
+                        values['round_wind_number'],
                         values['count_of_honba_sticks'],
                         values['count_of_riichi_sticks'],
                         values['dora_indicator'],
@@ -232,14 +232,14 @@ class TenhouClient(Client):
                         values['scores'],
                     )
 
+                    logger.info('Round Log: {}&ts={}'.format(log_link, self.table.round_number))
+
                     tiles = self.decoder.parse_initial_hand(message)
                     self.table.player.init_hand(tiles)
 
-                    logger.info(self.table.__str__())
+                    logger.info(self.table)
                     logger.info('Players: {}'.format(self.table.get_players_sorted_by_scores()))
                     logger.info('Dealer: {}'.format(self.table.get_player(values['dealer'])))
-                    logger.info('Round  wind: {}'.format(DISPLAY_WINDS[self.table.round_wind]))
-                    logger.info('Player wind: {}'.format(DISPLAY_WINDS[main_player.player_wind]))
 
                 if '<REINIT' in message:
                     players = self.decoder.parse_table_state_after_reconnection(message)
@@ -273,7 +273,7 @@ class TenhouClient(Client):
 
                     drawn_tile = self.decoder.parse_tile(message)
 
-                    logger.info('Hand: {}'.format(main_player.format_hand_for_print(drawn_tile)))
+                    logger.info('Drawn tile: {}'.format(TilesConverter.to_one_line_string([drawn_tile])))
 
                     kan_type = self.player.should_call_kan(drawn_tile, False, main_player.in_riichi)
                     if kan_type:
@@ -340,11 +340,6 @@ class TenhouClient(Client):
                     if meld.who == 0:
                         if meld.type != Meld.KAN and meld.type != Meld.CHANKAN:
                             discarded_tile = self.player.discard_tile(tile_to_discard)
-
-                            logger.info('With hand: {}'.format(player_formatted_hand))
-                            logger.info('Discard tile after called meld: {}'.format(
-                                TilesConverter.to_one_line_string([discarded_tile]))
-                            )
 
                             self.player.tiles.append(meld_tile)
                             self._send_message('<D p="{}"/>'.format(discarded_tile))

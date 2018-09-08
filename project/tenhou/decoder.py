@@ -61,7 +61,7 @@ class TenhouDecoder(object):
         seed = self.get_attribute_content(message, 'seed').split(',')
         seed = [int(i) for i in seed]
 
-        round_number = seed[0]
+        round_wind_number = seed[0]
         count_of_honba_sticks = seed[1]
         count_of_riichi_sticks = seed[2]
         dora_indicator = seed[5]
@@ -71,7 +71,7 @@ class TenhouDecoder(object):
         scores = [int(i) for i in scores]
 
         return {
-            'round_number': round_number,
+            'round_wind_number': round_wind_number,
             'count_of_honba_sticks': count_of_honba_sticks,
             'count_of_riichi_sticks': count_of_riichi_sticks,
             'dora_indicator': dora_indicator,

@@ -321,7 +321,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(meld, None)
 
         # player is south and round is south
-        self.table.round_number = 5
+        self.table.round_wind_number = 5
         self.player.dealer_seat = 3
         self.assertEqual(self.player.player_wind, SOUTH)
 

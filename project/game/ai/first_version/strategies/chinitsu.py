@@ -24,7 +24,9 @@ class ChinitsuStrategy(BaseStrategy):
         if not result:
             return False
 
-        tiles_34 = TilesConverter.to_34_array(tiles_136)
+        # when making decisions about chinitsu, we should consider
+        # the state of our own hand,
+        tiles_34 = TilesConverter.to_34_array(self.player.tiles)
         suits = count_tiles_by_suits(tiles_34)
 
         suits = [x for x in suits if x['name'] != 'honor']

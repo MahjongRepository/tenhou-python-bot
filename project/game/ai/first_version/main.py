@@ -146,6 +146,44 @@ class ImplementationAI(InterfaceAI):
 
         return self.choose_tile_to_discard(results, print_log=print_log)
 
+    def calculate_waits(self, tiles_34, open_sets_34=None):
+        """
+        :param tiles_34: array of tiles in 34 formant, 13 of them (this is important)
+        :param open_sets_34: array of array with tiles in 34 format
+        :return: array of waits in 34 format and number of shanten
+        """
+        shanten = self.shanten_calculator.calculate_shanten(tiles_34, open_sets_34, chiitoitsu=self.use_chitoitsu)
+        waiting = []
+        for j in range(0, 34):
+            if tiles_34[j] == 4:
+                continue
+
+            tiles_34[j] += 1
+
+            key = '{},{},{}'.format(
+                ''.join([str(x) for x in tiles_34]),
+                ';'.join([str(x) for x in open_sets_34]),
+                self.use_chitoitsu and 1 or 0
+            )
+
+            if key in self.hand_cache:
+                new_shanten = self.hand_cache[key]
+            else:
+                new_shanten = self.shanten_calculator.calculate_shanten(
+                    tiles_34,
+                    open_sets_34,
+                    chiitoitsu=self.use_chitoitsu
+                )
+                self.hand_cache[key] = new_shanten
+
+            if new_shanten == shanten - 1:
+                waiting.append(j)
+
+            tiles_34[j] -= 1
+
+        return waiting, shanten
+
+
     def calculate_outs(self, tiles, closed_hand, open_sets_34=None):
         """
         :param tiles: array of tiles in 136 format
@@ -166,43 +204,7 @@ class ImplementationAI(InterfaceAI):
                 continue
 
             tiles_34[hand_tile] -= 1
-
-            shanten = self.shanten_calculator.calculate_shanten(tiles_34, open_sets_34, chiitoitsu=self.use_chitoitsu)
-
-            waiting = []
-            for j in range(0, 34):
-                if tiles_34[j] == 4:
-                    continue
-
-                # agari is a special case, we are forced to make number
-                # of shanten larger, so we don't skip any tiles
-                # in the end we let the strategy decide what to do if agari without yaku happened
-                if not is_agari and hand_tile == j:
-                    continue
-
-                tiles_34[j] += 1
-
-                key = '{},{},{}'.format(
-                    ''.join([str(x) for x in tiles_34]),
-                    ';'.join([str(x) for x in open_sets_34]),
-                    self.use_chitoitsu and 1 or 0
-                )
-
-                if key in self.hand_cache:
-                    new_shanten = self.hand_cache[key]
-                else:
-                    new_shanten = self.shanten_calculator.calculate_shanten(
-                        tiles_34,
-                        open_sets_34,
-                        chiitoitsu=self.use_chitoitsu
-                    )
-                    self.hand_cache[key] = new_shanten
-
-                if new_shanten == shanten - 1:
-                    waiting.append(j)
-
-                tiles_34[j] -= 1
-
+            waiting, shanten = self.calculate_waits(tiles_34, open_sets_34)
             tiles_34[hand_tile] += 1
 
             if waiting:
@@ -517,23 +519,49 @@ class ImplementationAI(InterfaceAI):
                 if tile_34 in meld:
                     return Meld.CHANKAN
 
+        melds_34 = copy.copy(self.player.meld_34_tiles)
+        tiles = copy.copy(self.player.tiles)
+        closed_hand_tiles = copy.copy(self.player.closed_hand)
+
         # we can try to call closed meld
         if closed_hand_34[tile_34] == 3:
-            if not open_kan and not from_riichi:
-                tiles_34[tile_34] += 1
+            if open_kan or from_riichi:
+                # this 4 tiles can only be used in kan, no other options
+                previous_waiting, previous_shanten = self.calculate_waits(tiles_34, melds_34)
+                previous_waits_cnt = self.count_tiles(previous_waiting, closed_hand_34)
 
-            melds = self.player.meld_34_tiles
-            previous_shanten = self.shanten_calculator.calculate_shanten(tiles_34, melds, chiitoitsu=self.use_chitoitsu)
+                # shanten calculator doesn't like working with kans, so we pretend it's a pon
+                melds_34 += [[tile_34, tile_34, tile_34]]
+                closed_hand_34[tile_34] = 0
 
-            if not open_kan and not from_riichi:
-                tiles_34[tile_34] -= 1
+                new_waiting, new_shanten = self.calculate_waits(tiles_34, melds_34)
+                new_waits_cnt = self.count_tiles(new_waiting, closed_hand_34)
+            else:
+                # if we can use or tile in the hand for the forms other than KAN
+                tiles.append(tile)
+                closed_hand_tiles.append(tile)
+                closed_hand_34[tile_34] += 1
 
-            melds += [[tile_34, tile_34, tile_34]]
-            new_shanten = self.shanten_calculator.calculate_shanten(tiles_34, melds, chiitoitsu=self.use_chitoitsu)
+                previous_results, previous_shanten = self.calculate_outs(tiles, closed_hand_tiles, melds_34)
+                previous_results = [x for x in previous_results if x.shanten == previous_shanten]
+                previous_waits_cnt = sorted(previous_results, key=lambda x: -x.ukeire)[0].ukeire
 
-            # called kan will not ruin our hand
-            if new_shanten <= previous_shanten:
-                return Meld.KAN
+                # shanten calculator doesn't like working with kans, so we pretend it's a pon
+                closed_hand_34[tile_34] = 0
+                melds_34 += [[tile_34, tile_34, tile_34]]
+
+                new_waiting, new_shanten = self.calculate_waits(tiles_34, melds_34)
+                new_waits_cnt = self.count_tiles(new_waiting, closed_hand_34)
+
+            # it is not possible to reduce number of shanten by calling a kan
+            assert new_shanten >= previous_shanten
+
+            # if shanten number is the same, we should only call kan if ukeire didn't become worse
+            if new_shanten == previous_shanten:
+                # we cannot improve ukeire by calling kan (not considering the tile we drew from the dead wall)
+                assert new_waits_cnt <= previous_waits_cnt
+                if new_waits_cnt == previous_waits_cnt:
+                    return Meld.KAN
 
         return None
 

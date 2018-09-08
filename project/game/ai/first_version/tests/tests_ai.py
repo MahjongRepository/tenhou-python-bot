@@ -361,3 +361,42 @@ class AITestCase(unittest.TestCase, TestMixin):
         tile = self._string_to_136_tile(sou='9')
 
         self.assertEqual(player.should_call_kan(tile, False), None)
+
+    def test_closed_kan_same_shanten_bad_ukeire(self):
+        """
+        Bot tried to call closed kan with 4557888899m2z + 333m melded hand
+        Shanten number is the same, but ukeire becomes much worse
+        """
+        table = Table()
+        player = table.player
+
+        table.add_dora_indicator(self._string_to_136_tile(honors='2'))
+        table.add_dora_indicator(self._string_to_136_tile(honors='4'))
+
+        table.count_of_remaining_tiles = 10
+
+        tiles = self._string_to_136_array(man='333455788899', honors='3')
+        player.init_hand(tiles)
+        player.melds.append(self._make_meld(Meld.PON, man='333'))
+
+        tile = self._string_to_136_tile(man='8')
+
+        self.assertEqual(player.should_call_kan(tile, False), None)
+
+
+    def test_closed_kan_same_shanten_same_ukeire(self):
+        table = Table()
+        player = table.player
+
+        table.add_dora_indicator(self._string_to_136_tile(honors='2'))
+        table.add_dora_indicator(self._string_to_136_tile(honors='4'))
+
+        table.count_of_remaining_tiles = 10
+
+        tiles = self._string_to_136_array(man='3334557889', honors='333')
+        player.init_hand(tiles)
+        player.melds.append(self._make_meld(Meld.PON, man='333'))
+
+        tile = self._string_to_136_tile(honors='3')
+
+        self.assertEqual(player.should_call_kan(tile, False), Meld.KAN)

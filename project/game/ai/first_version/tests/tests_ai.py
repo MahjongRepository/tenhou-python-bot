@@ -166,20 +166,20 @@ class AITestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='123456789', sou='167', honors='77')
         player.init_hand(tiles)
 
-        results, shanten = player.ai.calculate_outs(tiles, tiles)
+        results, shanten = player.ai.hand_builder.calculate_outs(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
         self.assertEqual(result.ukeire, 8)
 
         player.table.add_discarded_tile(1, self._string_to_136_tile(sou='5'), False)
 
-        results, shanten = player.ai.calculate_outs(tiles, tiles)
+        results, shanten = player.ai.hand_builder.calculate_outs(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
         self.assertEqual(result.ukeire, 7)
 
         player.table.add_discarded_tile(2, self._string_to_136_tile(sou='5'), False)
         player.table.add_discarded_tile(3, self._string_to_136_tile(sou='8'), False)
 
-        results, shanten = player.ai.calculate_outs(tiles, tiles)
+        results, shanten = player.ai.hand_builder.calculate_outs(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
         self.assertEqual(result.ukeire, 5)
 
@@ -190,7 +190,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='123456789', sou='167', honors='77')
         player.init_hand(tiles)
 
-        results, shanten = player.ai.calculate_outs(tiles, tiles)
+        results, shanten = player.ai.hand_builder.calculate_outs(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
         self.assertEqual(result.ukeire, 8)
 
@@ -201,7 +201,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         meld.called_tile = tile
         player.table.add_called_meld(3, meld)
 
-        results, shanten = player.ai.calculate_outs(tiles, tiles)
+        results, shanten = player.ai.hand_builder.calculate_outs(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
         self.assertEqual(result.ukeire, 5)
 
@@ -212,7 +212,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         meld.called_tile = tile
         player.table.add_called_meld(2, meld)
 
-        results, shanten = player.ai.calculate_outs(tiles, tiles)
+        results, shanten = player.ai.hand_builder.calculate_outs(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
         self.assertEqual(result.ukeire, 4)
 
@@ -223,13 +223,13 @@ class AITestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='123456789', sou='167', honors='77')
         player.init_hand(tiles)
 
-        results, shanten = player.ai.calculate_outs(tiles, tiles)
+        results, shanten = player.ai.hand_builder.calculate_outs(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
         self.assertEqual(result.ukeire, 8)
 
         table.add_dora_indicator(self._string_to_136_tile(sou='8'))
 
-        results, shanten = player.ai.calculate_outs(tiles, tiles)
+        results, shanten = player.ai.hand_builder.calculate_outs(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
         self.assertEqual(result.ukeire, 7)
 

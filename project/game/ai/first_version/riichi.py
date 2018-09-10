@@ -18,7 +18,7 @@ class Riichi:
             return False
 
         # don't call karaten riichi
-        count_tiles = self.player.ai.count_tiles(
+        count_tiles = self.player.ai.hand_builder.count_tiles(
             self.player.ai.waiting,
             TilesConverter.to_34_array(self.player.closed_hand)
         )
@@ -36,7 +36,7 @@ class Riichi:
         return self._should_call_riichi_many_sided()
 
     def _should_call_riichi_one_sided(self):
-        count_tiles = self.player.ai.count_tiles(
+        count_tiles = self.player.ai.hand_builder.count_tiles(
             self.player.ai.waiting,
             TilesConverter.to_34_array(self.player.closed_hand)
         )
@@ -182,7 +182,7 @@ class Riichi:
         return True
 
     def _should_call_riichi_many_sided(self):
-        count_tiles = self.player.ai.count_tiles(
+        count_tiles = self.player.ai.hand_builder.count_tiles(
             self.player.ai.waiting,
             TilesConverter.to_34_array(self.player.closed_hand)
         )

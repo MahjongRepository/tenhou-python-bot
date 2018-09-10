@@ -150,10 +150,10 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         table.add_called_riichi(3)
 
-        results, shanten = table.player.ai.calculate_outs(table.player.tiles,
-                                                          table.player.closed_hand,
-                                                          table.player.meld_34_tiles)
-        selected_tile = table.player.ai.process_discard_options_and_select_tile_to_discard(results, shanten)
+        results, shanten = table.player.ai.hand_builder.calculate_outs(table.player.tiles,
+                                                                       table.player.closed_hand,
+                                                                       table.player.meld_34_tiles)
+        selected_tile = table.player.ai.hand_builder.process_discard_options_and_select_tile_to_discard(results, shanten)
 
         self.assertEqual(table.player.ai.defence.should_go_to_defence_mode(selected_tile), False)
         result = table.player.discard_tile()

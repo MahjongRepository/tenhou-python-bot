@@ -204,7 +204,7 @@ class BaseStrategy(object):
             # we need to calculate count of shanten with supposed meld
             # to prevent bad hand openings
             melds = self.player.meld_34_tiles + [best_meld_34]
-            outs_results, shanten = self.player.ai.calculate_outs(new_tiles, closed_hand, melds)
+            outs_results, shanten = self.player.ai.hand_builder.calculate_outs(new_tiles, closed_hand, melds)
 
             # each strategy can use their own value to min shanten number
             if shanten > self.min_shanten:
@@ -248,7 +248,7 @@ class BaseStrategy(object):
             if not filtered_results:
                 return None, None
 
-            selected_tile = self.player.ai.process_discard_options_and_select_tile_to_discard(
+            selected_tile = self.player.ai.hand_builder.process_discard_options_and_select_tile_to_discard(
                 filtered_results,
                 shanten,
                 hand_was_open=True

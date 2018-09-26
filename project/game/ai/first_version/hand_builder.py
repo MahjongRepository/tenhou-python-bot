@@ -18,21 +18,11 @@ class HandBuilder:
         self.player = player
         self.ai = ai
 
-    def discard_tile(self, discard_tile, print_log=True):
-        # we called meld and we had discard tile that we wanted to discard
-        if discard_tile is not None:
-            if not self.ai.last_discard_option:
-                return discard_tile
-
-            return self.process_discard_option(self.ai.last_discard_option, self.player.closed_hand, True)
-
-        results, shanten = self.calculate_outs(self.player.tiles,
-                                               self.player.closed_hand,
-                                               self.player.meld_34_tiles)
-
-        selected_tile = self.process_discard_options_and_select_tile_to_discard(
-            results,
-            shanten,
+    def discard_tile(self, tiles, closed_hand, open_sets_34, print_log=True):
+        selected_tile = self.choose_tile_to_discard(
+            tiles,
+            closed_hand,
+            open_sets_34,
             print_log=print_log
         )
 
@@ -44,34 +34,15 @@ class HandBuilder:
                 DecisionsLogger.debug(log.DEFENCE_ACTIVATE)
                 self.ai.in_defence = True
 
-            defence_tile = self.ai.defence.try_to_find_safe_tile_to_discard(results)
+            defence_tile = self.ai.defence.try_to_find_safe_tile_to_discard()
             if defence_tile:
-                return self.process_discard_option(defence_tile, self.player.closed_hand)
+                return self.process_discard_option(defence_tile, closed_hand)
         else:
             if self.ai.in_defence:
                 DecisionsLogger.debug(log.DEFENCE_DEACTIVATE)
             self.ai.in_defence = False
 
-        return self.process_discard_option(selected_tile, self.player.closed_hand, print_log=print_log)
-
-    def process_discard_options_and_select_tile_to_discard(self, results, shanten, hand_was_open=False, print_log=True):
-        # we had to update tiles value there
-        # because it is related with shanten number
-        for result in results:
-            result.ukeire = self.count_tiles(result.waiting, TilesConverter.to_34_array(self.player.closed_hand))
-            result.calculate_value(shanten)
-
-        # current strategy can affect on our discard options
-        # so, don't use strategy specific choices for calling riichi
-        if self.ai.current_strategy:
-            results = self.ai.current_strategy.determine_what_to_discard(self.player.closed_hand,
-                                                                         results,
-                                                                         shanten,
-                                                                         False,
-                                                                         None,
-                                                                         hand_was_open)
-
-        return self.choose_tile_to_discard(results, print_log=print_log)
+        return self.process_discard_option(selected_tile, closed_hand, print_log=print_log)
 
     def calculate_waits(self, tiles_34, open_sets_34=None):
         """
@@ -110,7 +81,7 @@ class HandBuilder:
 
         return waiting, shanten
 
-    def calculate_outs(self, tiles, closed_hand, open_sets_34=None):
+    def find_discard_options(self, tiles, closed_hand, open_sets_34=None):
         """
         :param tiles: array of tiles in 136 format
         :param closed_hand: array of tiles in 136 format
@@ -161,28 +132,42 @@ class HandBuilder:
             n += 4 - self.player.total_tiles(tile_34, tiles_34)
         return n
 
-    def choose_tile_to_discard(self, results: [DiscardOption], print_log=True) -> DiscardOption:
+    def choose_tile_to_discard(self, tiles, closed_hand, open_sets_34, print_log=True):
         """
         Try to find best tile to discard, based on different rules
         """
 
-        had_to_be_discarded_tiles = [x for x in results if x.had_to_be_discarded]
+        discard_options, _ = self.find_discard_options(
+            tiles,
+            closed_hand,
+            open_sets_34
+        )
+
+        # our strategy can affect discard options
+        if self.ai.current_strategy:
+            discard_options = self.ai.current_strategy.determine_what_to_discard(
+                discard_options,
+                closed_hand,
+                open_sets_34
+            )
+
+        had_to_be_discarded_tiles = [x for x in discard_options if x.had_to_be_discarded]
         if had_to_be_discarded_tiles:
-            results = sorted(had_to_be_discarded_tiles, key=lambda x: (x.shanten, -x.ukeire, x.valuation))
+            discard_options = sorted(had_to_be_discarded_tiles, key=lambda x: (x.shanten, -x.ukeire, x.valuation))
             DecisionsLogger.debug(
                 log.DISCARD_OPTIONS,
                 'Discard marked tiles first',
-                results,
+                discard_options,
                 print_log=print_log
             )
-            return results[0]
+            return discard_options[0]
 
         # remove needed tiles from discard options
-        results = [x for x in results if not x.had_to_be_saved]
+        discard_options = [x for x in discard_options if not x.had_to_be_saved]
 
-        results = sorted(results, key=lambda x: (x.shanten, -x.ukeire))
-        first_option = results[0]
-        results_with_same_shanten = [x for x in results if x.shanten == first_option.shanten]
+        discard_options = sorted(discard_options, key=lambda x: (x.shanten, -x.ukeire))
+        first_option = discard_options[0]
+        results_with_same_shanten = [x for x in discard_options if x.shanten == first_option.shanten]
 
         possible_options = [first_option]
         ukeire_borders = self._choose_ukeire_borders(first_option, 20, 'ukeire')
@@ -251,7 +236,7 @@ class HandBuilder:
             print_log=print_log
         )
 
-        closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
+        closed_hand_34 = TilesConverter.to_34_array(closed_hand)
         isolated_tiles = [x for x in filtered_options if is_tile_strictly_isolated(closed_hand_34, x.tile_to_discard)]
         # isolated tiles should be discarded first
         if isolated_tiles:
@@ -312,7 +297,7 @@ class HandBuilder:
             wait_136 = wait_34 * 4
             tiles.append(wait_136)
 
-            results, shanten = self.calculate_outs(
+            results, shanten = self.find_discard_options(
                 tiles,
                 self.player.closed_hand,
                 self.player.meld_34_tiles

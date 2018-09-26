@@ -11,4 +11,5 @@ STRATEGY_DROP = 'drop_strategy'
 
 INIT_HAND = 'init_hand'
 
-CALL_MELD = 'meld'
+MELD_CALL = 'meld'
+MELD_PREPARE = 'meld_prepare'

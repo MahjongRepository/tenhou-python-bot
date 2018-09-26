@@ -108,7 +108,13 @@ class DefenceHandler(object):
 
         return False
 
-    def try_to_find_safe_tile_to_discard(self, discard_results):
+    def try_to_find_safe_tile_to_discard(self):
+        discard_results, _ = self.player.ai.hand_builder.find_discard_options(
+            self.player.tiles,
+            self.player.closed_hand,
+            self.player.meld_34_tiles
+        )
+
         self.hand_34 = TilesConverter.to_34_array(self.player.tiles)
         self.closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
 

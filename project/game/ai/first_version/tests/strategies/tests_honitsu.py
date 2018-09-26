@@ -101,11 +101,11 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
 
         # any honor tile is suitable
         tile = self._string_to_136_tile(honors='2')
-        meld, tile_to_discard = player.try_to_call_meld(tile, False)
+        meld, discard_option = player.try_to_call_meld(tile, False)
         self.assertNotEqual(meld, None)
-        self.assertEqual(self._to_string([tile_to_discard * 4]), '2m')
+        self.assertEqual(self._to_string([discard_option.tile_to_discard * 4]), '2m')
 
-        player.discard_tile(tile_to_discard * 4)
+        player.discard_tile(discard_option)
 
         tile = self._string_to_136_tile(man='1')
         player.draw_tile(tile)
@@ -197,8 +197,6 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertNotEqual(meld, None)
         self.assertEqual(self._to_string(meld.tiles), '555z')
 
-    # issue #84
-    @unittest.expectedFailure
     def test_open_suit_same_shanten(self):
         table = Table()
         player = table.player

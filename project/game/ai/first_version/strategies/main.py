@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
+import utils.decisions_constants as log
+
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_man, is_pin, is_sou, is_pon, is_chi, plus_dora, is_aka_dora, is_honor, is_terminal
+
+from utils.decisions_logger import DecisionsLogger
 
 
 class BaseStrategy(object):
@@ -51,9 +55,6 @@ class BaseStrategy(object):
         """
         self.calculate_dora_count(tiles_136)
 
-        if self.player.is_open_hand:
-            return True
-
         return True
 
     def can_meld_into_agari(self):
@@ -79,38 +80,18 @@ class BaseStrategy(object):
         """
         raise NotImplemented()
 
-    def determine_what_to_discard(self, closed_hand, outs_results, shanten, for_open_hand, tile_for_open_hand,
-                                  hand_was_open=False):
-        """
-
-        "for_open_hand" and "tile_for_open_hand" we had to use when we want to
-        determine what melds will be open
-
-        "hand_was_open" we will use in rare cases
-        when we open hand and before meld was added to the player
-        it happens between we send a message to tenhou and tenhou send confirmation message to us
-        sometimes we failed to call a meld because of other player
-
-        :param closed_hand: array of 136 tiles format
-        :param outs_results: dict
-        :param shanten: number of shanten
-        :param for_open_hand: boolean
-        :param tile_for_open_hand: 136 tile format
-        :param hand_was_open: boolean
-        :return: array of DiscardOption
-        """
-
+    def determine_what_to_discard(self, discard_options, hand, open_melds):
         # for riichi we don't need to discard useful tiles
-        if shanten == 0 and not self.player.is_open_hand:
-            return outs_results
+        # if shanten == 0 and not self.player.is_open_hand:
+        #     return outs_results
 
         # mark all not suitable tiles as ready to discard
         # even if they not should be discarded by uke-ire
-        for j in outs_results:
-            if not self.is_tile_suitable(j.tile_to_discard * 4):
-                j.had_to_be_discarded = True
+        for x in discard_options:
+            if not self.is_tile_suitable(x.tile_to_discard * 4):
+                x.had_to_be_discarded = True
 
-        return outs_results
+        return discard_options
 
     def try_to_call_meld(self, tile, is_kamicha_discard, new_tiles):
         """
@@ -168,9 +149,12 @@ class BaseStrategy(object):
             if second_limit > second_index:
                 second_limit = second_index
 
-            combinations = self.player.ai.hand_divider.find_valid_combinations(closed_hand_34,
-                                                                               first_limit,
-                                                                               second_limit, True)
+            combinations = self.player.ai.hand_divider.find_valid_combinations(
+                closed_hand_34,
+                first_limit,
+                second_limit,
+                True
+            )
 
         if combinations:
             combinations = combinations[0]
@@ -199,25 +183,11 @@ class BaseStrategy(object):
         if not possible_melds:
             return None, None
 
-        best_meld_34 = self._find_best_meld_to_open(possible_melds, new_tiles)
+        best_meld_34 = self._find_best_meld_to_open(possible_melds, new_tiles, closed_hand)
         if best_meld_34:
             # we need to calculate count of shanten with supposed meld
             # to prevent bad hand openings
-            melds = self.player.meld_34_tiles + [best_meld_34]
-            outs_results, shanten = self.player.ai.hand_builder.calculate_outs(new_tiles, closed_hand, melds)
-
-            # each strategy can use their own value to min shanten number
-            if shanten > self.min_shanten:
-                return None, None
-
-            # we can't improve hand, so we don't need to open it
-            if not outs_results:
-                return None, None
-
-            # sometimes we had to call tile, even if it will not improve our hand
-            # otherwise we can call only with improvements of shanten
-            if not self.meld_had_to_be_called(tile) and shanten >= self.player.ai.shanten:
-                return None, None
+            open_sets_34 = self.player.meld_34_tiles + [best_meld_34[:]]
 
             meld_type = is_chi(best_meld_34) and Meld.CHI or Meld.PON
             best_meld_34.remove(discarded_tile)
@@ -228,6 +198,26 @@ class BaseStrategy(object):
             second_tile = TilesConverter.find_34_tile_in_136_array(best_meld_34[1], closed_hand)
             closed_hand.remove(second_tile)
 
+            selected_tile = self.player.ai.hand_builder.choose_tile_to_discard(
+                new_tiles,
+                closed_hand,
+                open_sets_34,
+                print_log=False
+            )
+
+            shanten = selected_tile.shanten
+            had_to_be_called = self.meld_had_to_be_called(tile)
+            had_to_be_called = had_to_be_called or selected_tile.had_to_be_discarded
+
+            # each strategy can use their own value to min shanten number
+            if shanten > self.min_shanten:
+                return None, None
+
+            # sometimes we had to call tile, even if it will not improve our hand
+            # otherwise we can call only with improvements of shanten
+            if not had_to_be_called and shanten >= self.player.ai.shanten:
+                return None, None
+
             tiles = [
                 first_tile,
                 second_tile,
@@ -237,22 +227,6 @@ class BaseStrategy(object):
             meld = Meld()
             meld.type = meld_type
             meld.tiles = sorted(tiles)
-
-            # we had to be sure that all our discard results exists in the closed hand
-            filtered_results = []
-            for result in outs_results:
-                if result.find_tile_in_hand(closed_hand):
-                    filtered_results.append(result)
-
-            # we can't discard anything, so let's not open our hand
-            if not filtered_results:
-                return None, None
-
-            selected_tile = self.player.ai.hand_builder.process_discard_options_and_select_tile_to_discard(
-                filtered_results,
-                shanten,
-                hand_was_open=True
-            )
 
             return meld, selected_tile
 
@@ -293,30 +267,29 @@ class BaseStrategy(object):
         self.dora_count_central += self.aka_dora_count
         self.dora_count_total = self.dora_count_central + self.dora_count_not_central
 
-    def _find_best_meld_to_open(self, possible_melds, completed_hand):
-        """
-        :param possible_melds:
-        :param completed_hand:
-        :return:
-        """
-
+    def _find_best_meld_to_open(self, possible_melds, new_tiles, closed_hand):
         if len(possible_melds) == 1:
             return possible_melds[0]
 
-        # We will replace possible set with one completed pon set
-        # and we will calculate remaining shanten in the hand
-        # and chose the hand with min shanten count
-        completed_hand_34 = TilesConverter.to_34_array(completed_hand)
-
-        results = []
+        final_results = []
         for meld in possible_melds:
-            melds = self.player.meld_34_tiles + [meld]
-            shanten = self.player.ai.shanten_calculator.calculate_shanten(
-                completed_hand_34,
-                melds,
-                chiitoitsu=self.player.ai.use_chitoitsu
-            )
-            results.append({'shanten': shanten, 'meld': meld})
+            open_sets_34 = self.player.meld_34_tiles + [meld]
 
-        results = sorted(results, key=lambda i: i['shanten'])
-        return results[0]['meld']
+            selected_tile = self.player.ai.hand_builder.choose_tile_to_discard(
+                new_tiles,
+                closed_hand,
+                open_sets_34,
+                print_log=False
+            )
+
+            final_results.append({
+                'discard_tile': selected_tile,
+                'meld_print': TilesConverter.to_one_line_string([meld[0] * 4, meld[1] * 4, meld[2] * 4]),
+                'meld': meld
+            })
+
+        final_results = sorted(final_results, key=lambda x: (x['discard_tile'].shanten, -x['discard_tile'].ukeire))
+
+        DecisionsLogger.debug(log.MELD_PREPARE, 'Options with meld calling', context=final_results)
+
+        return final_results[0]['meld']

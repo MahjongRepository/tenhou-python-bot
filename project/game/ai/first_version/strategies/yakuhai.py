@@ -99,40 +99,39 @@ class YakuhaiStrategy(BaseStrategy):
         """
         return True
 
-    def determine_what_to_discard(self, closed_hand, outs_results, shanten, for_open_hand, tile_for_open_hand,
-                                  hand_was_open=False):
-        if tile_for_open_hand:
-            tile_for_open_hand //= 4
-
-        tiles_34 = TilesConverter.to_34_array(self.player.tiles)
-        valued_pairs = [x for x in self.player.valued_honors if tiles_34[x] == 2]
-        valued_pons = [x for x in self.player.valued_honors if tiles_34[x] == 3]
-
-        # when we trying to open hand with tempai state, we need to chose a valued pair waiting
-        if shanten == 0 and valued_pairs and for_open_hand and tile_for_open_hand not in valued_pairs:
-            valued_pair = valued_pairs[0]
-
-            results = []
-            for item in outs_results:
-                if valued_pair in item.waiting:
-                    results.append(item)
-            return results
-
-        for item in outs_results:
-            for valued_pair in valued_pairs:
-                if valued_pair == item.tile_to_discard:
-                    item.had_to_be_saved = True
-
-            for valued_pon in valued_pons:
-                if valued_pon == item.tile_to_discard:
-                    item.had_to_be_saved = True
-
-        return super(YakuhaiStrategy, self).determine_what_to_discard(closed_hand,
-                                                                      outs_results,
-                                                                      shanten,
-                                                                      for_open_hand,
-                                                                      tile_for_open_hand,
-                                                                      hand_was_open)
+    def determine_what_to_discard(self, discard_options, hand, open_melds):
+        return discard_options
+        # if tile_for_open_hand:
+        #     tile_for_open_hand //= 4
+        #
+        # tiles_34 = TilesConverter.to_34_array(self.player.tiles)
+        # valued_pairs = [x for x in self.player.valued_honors if tiles_34[x] == 2]
+        # valued_pons = [x for x in self.player.valued_honors if tiles_34[x] == 3]
+        #
+        # # when we trying to open hand with tempai state, we need to chose a valued pair waiting
+        # if shanten == 0 and valued_pairs and for_open_hand and tile_for_open_hand not in valued_pairs:
+        #     valued_pair = valued_pairs[0]
+        #
+        #     results = []
+        #     for item in outs_results:
+        #         if valued_pair in item.waiting:
+        #             results.append(item)
+        #     return results
+        #
+        # for item in outs_results:
+        #     for valued_pair in valued_pairs:
+        #         if valued_pair == item.tile_to_discard:
+        #             item.had_to_be_saved = True
+        #
+        #     for valued_pon in valued_pons:
+        #         if valued_pon == item.tile_to_discard:
+        #             item.had_to_be_saved = True
+        #
+        # return super(YakuhaiStrategy, self).determine_what_to_discard(closed_hand,
+        #                                                               outs_results,
+        #                                                               shanten,
+        #                                                               for_open_hand,
+        #                                                               tile_for_open_hand)
 
     def meld_had_to_be_called(self, tile):
         tile //= 4

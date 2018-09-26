@@ -146,10 +146,10 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 
         tile = self._string_to_136_tile(sou='4')
         meld, discard_option = self.player.try_to_call_meld(tile, True)
-        discarded_tile = self.player.discard_tile(discard_option)
-
         self.assertNotEqual(meld, None)
-        self.assertEqual(self._to_string([discarded_tile]), '4z')
+        self.assertEqual(self._to_string([discard_option.tile_to_discard * 4]), '4z')
+
+        self.player.discard_tile(discard_option)
 
         tile = self._string_to_136_tile(pin='5')
         self.player.draw_tile(tile)

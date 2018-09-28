@@ -81,9 +81,12 @@ class BaseStrategy(object):
         raise NotImplemented()
 
     def determine_what_to_discard(self, discard_options, hand, open_melds):
+        first_option = sorted(discard_options, key=lambda x: x.shanten)[0]
+        shanten = first_option.shanten
+
         # for riichi we don't need to discard useful tiles
-        # if shanten == 0 and not self.player.is_open_hand:
-        #     return outs_results
+        if shanten == 0 and not self.player.is_open_hand:
+            return discard_options
 
         # mark all not suitable tiles as ready to discard
         # even if they not should be discarded by uke-ire

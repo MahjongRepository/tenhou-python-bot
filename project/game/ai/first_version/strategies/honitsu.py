@@ -138,16 +138,6 @@ class HonitsuStrategy(BaseStrategy):
 
         return False
 
-    def determine_what_to_discard(self, discard_options, hand, open_melds):
-        first_option = sorted(discard_options, key=lambda x: x.shanten)[0]
-        shanten = first_option.shanten
-
-        # we can riichi our hand, so let's not destroy it with not suitable tiles discarding
-        if shanten == 0 and not self.player.is_open_hand:
-            return discard_options
-        else:
-            return super(HonitsuStrategy, self).determine_what_to_discard(discard_options, hand, open_melds)
-
     def _calculate_not_suitable_tiles_cnt(self, tiles_34, suit):
         self.tiles_count_other_suits = 0
         self.tiles_count_other_suits_not_isolated = 0

@@ -122,8 +122,6 @@ class ChinitsuStrategyTestCase(unittest.TestCase, TestMixin):
         tile = self._string_to_136_tile(honors='1')
         self.assertEqual(strategy.is_tile_suitable(tile), False)
 
-    # issue #84
-    @unittest.expectedFailure
     def test_open_suit_same_shanten(self):
         table = Table()
         player = table.player

@@ -91,14 +91,10 @@ class DiscardOption(object):
 
         return TilesConverter.find_34_tile_in_136_array(self.tile_to_discard, closed_hand)
 
-    def calculate_value(self, shanten=None):
+    def calculate_value(self):
         # base is 100 for ability to mark tiles as not needed (like set value to 50)
         value = 100
         honored_value = 20
-
-        # we don't need to keep honor tiles in almost completed hand
-        if shanten and shanten <= 2:
-            honored_value = 0
 
         if is_honor(self.tile_to_discard):
             if self.tile_to_discard in self.player.valued_honors:

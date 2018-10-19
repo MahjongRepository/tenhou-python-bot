@@ -93,7 +93,19 @@ class ImplementationAI(InterfaceAI):
         self.determine_strategy(self.player.tiles)
 
     def discard_tile(self, discard_tile, print_log=True):
-        return self.hand_builder.discard_tile(discard_tile, print_log)
+        # we called meld and we had discard tile that we wanted to discard
+        if discard_tile is not None:
+            if not self.last_discard_option:
+                return discard_tile
+
+            return self.hand_builder.process_discard_option(self.last_discard_option, self.player.closed_hand, True)
+
+        return self.hand_builder.discard_tile(
+            self.player.tiles,
+            self.player.closed_hand,
+            self.player.meld_34_tiles,
+            print_log
+        )
 
     def try_to_call_meld(self, tile_136, is_kamicha_discard):
         tiles_136 = self.player.tiles[:] + [tile_136]
@@ -113,18 +125,16 @@ class ImplementationAI(InterfaceAI):
             return None, None
 
         meld, discard_option = self.current_strategy.try_to_call_meld(tile_136, is_kamicha_discard, tiles_136)
-        tile_to_discard = None
         if discard_option:
             self.last_discard_option = discard_option
-            tile_to_discard = discard_option.tile_to_discard
 
-            DecisionsLogger.debug(log.CALL_MELD, 'Try to call meld', context=[
+            DecisionsLogger.debug(log.MELD_CALL, 'Try to call meld', context=[
                 'Hand: {}'.format(self.player.format_hand_for_print(tile_136)),
                 'Meld: {}'.format(meld),
                 'Discard after meld: {}'.format(discard_option)
             ])
 
-        return meld, tile_to_discard
+        return meld, discard_option
 
     def determine_strategy(self, tiles_136):
         self.use_chitoitsu = False
@@ -271,7 +281,11 @@ class ImplementationAI(InterfaceAI):
                 closed_hand_tiles.append(tile)
                 closed_hand_34[tile_34] += 1
 
-                previous_results, previous_shanten = self.hand_builder.calculate_outs(tiles, closed_hand_tiles, melds_34)
+                previous_results, previous_shanten = self.hand_builder.find_discard_options(
+                    tiles,
+                    closed_hand_tiles,
+                    melds_34
+                )
                 previous_results = [x for x in previous_results if x.shanten == previous_shanten]
                 previous_waits_cnt = sorted(previous_results, key=lambda x: -x.ukeire)[0].ukeire
 

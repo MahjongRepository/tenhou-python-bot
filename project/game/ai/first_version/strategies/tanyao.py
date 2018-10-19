@@ -114,38 +114,45 @@ class TanyaoStrategy(BaseStrategy):
 
         return True
 
-    def determine_what_to_discard(self, closed_hand, outs_results, shanten, for_open_hand, tile_for_open_hand,
-                                  hand_was_open=False):
-        if tile_for_open_hand:
-            tile_for_open_hand //= 4
-
-        is_open_hand = self.player.is_open_hand or hand_was_open
+    def determine_what_to_discard(self, discard_options, hand, open_melds):
+        is_open_hand = len(open_melds) > 0
 
         # our hand is closed, we don't need to discard terminal tiles here
         if not is_open_hand:
-            return outs_results
+            return discard_options
 
-        if shanten == 0 and is_open_hand:
-            results = []
+        first_option = sorted(discard_options, key=lambda x: x.shanten)[0]
+        shanten = first_option.shanten
+
+        if shanten > 1:
+            return super(TanyaoStrategy, self).determine_what_to_discard(
+                discard_options,
+                hand,
+                open_melds
+            )
+
+        results = []
+        not_suitable_tiles = []
+        for item in discard_options:
+            if not self.is_tile_suitable(item.tile_to_discard * 4):
+                item.had_to_be_discarded = True
+                not_suitable_tiles.append(item)
+                continue
+
             # there is no sense to wait 1-4 if we have open hand
-            for item in outs_results:
-                all_waiting_are_fine = all([self.is_tile_suitable(x * 4) for x in item.waiting])
-                if all_waiting_are_fine:
-                    results.append(item)
+            all_waiting_are_fine = all([self.is_tile_suitable(x * 4) for x in item.waiting])
+            if all_waiting_are_fine:
+                results.append(item)
 
-            # we don't have a choice
-            # we had to have on bad wait
-            if not results:
-                return outs_results
+        if not_suitable_tiles:
+            return not_suitable_tiles
 
-            return results
+        # we don't have a choice
+        # we had to have on bad wait
+        if not results:
+            return discard_options
 
-        return super(TanyaoStrategy, self).determine_what_to_discard(closed_hand,
-                                                                     outs_results,
-                                                                     shanten,
-                                                                     for_open_hand,
-                                                                     tile_for_open_hand,
-                                                                     hand_was_open)
+        return results
 
     def is_tile_suitable(self, tile):
         """

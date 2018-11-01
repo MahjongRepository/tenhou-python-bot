@@ -354,6 +354,27 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         discard = self.player.discard_tile()
         self.assertNotEqual(self._to_string([discard]), '7z')
 
+    @unittest.expectedFailure
+    def test_keep_yakuhai_pon(self):
+        # make sure yakuhai strategy is activated by adding 3 doras to the hand
+        table = Table()
+        player = table.player
+        table.add_dora_indicator(self._string_to_136_tile(man='9'))
+        table.add_dora_indicator(self._string_to_136_tile(man='3'))
+
+        tiles = self._string_to_136_array(man='11144', sou='567', pin='56', honors='777')
+        player.init_hand(tiles)
+
+        meld = self._make_meld(Meld.PON, man='111')
+        player.add_called_meld(meld)
+
+        strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
+
+        player.draw_tile(self._string_to_136_tile(man='4'))
+        discarded_tile = player.discard_tile()
+        self.assertNotEqual(self._to_string([discarded_tile]), '7z')
+
     # issue #88
     @unittest.expectedFailure
     def test_atodzuke_keep_yakuhai_wait(self):

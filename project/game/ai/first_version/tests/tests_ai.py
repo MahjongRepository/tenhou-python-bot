@@ -135,6 +135,73 @@ class AITestCase(unittest.TestCase, TestMixin):
         self.assertEqual(meld.type, Meld.CHI)
         self.assertEqual(self._to_string(meld.tiles), '345m')
 
+        table = Table()
+        table.has_open_tanyao = True
+        player = table.player
+        # add 3 doras so we are sure to go for tanyao
+        table.add_dora_indicator(self._string_to_136_tile(man='7'))
+        tiles = self._string_to_136_array(man='567888', pin='788', sou='3456')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(sou='4')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(meld.type, Meld.CHI)
+        self.assertEqual(self._to_string(meld.tiles), '456s')
+
+        tile = self._string_to_136_tile(sou='5')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(meld.type, Meld.CHI)
+        self.assertEqual(self._to_string(meld.tiles), '345s')
+
+        table = Table()
+        table.has_open_tanyao = True
+        player = table.player
+        # add 3 doras so we are sure to go for tanyao
+        table.add_dora_indicator(self._string_to_136_tile(man='7'))
+        tiles = self._string_to_136_array(man='567888', pin='788', sou='2345')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(sou='4')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(meld.type, Meld.CHI)
+        self.assertEqual(self._to_string(meld.tiles), '234s')
+
+    # issue #51
+    @unittest.expectedFailure
+    def test_chose_right_set_to_open_hand_dora(self):
+        table = Table()
+        table.has_open_tanyao = True
+        player = table.player
+        # add 3 doras so we are sure to go for tanyao
+        table.add_dora_indicator(self._string_to_136_tile(man='7'))
+        table.add_dora_indicator(self._string_to_136_tile(sou='1'))
+        tiles = self._string_to_136_array(man='3456788', sou='245888')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(sou='3')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(meld.type, Meld.CHI)
+        self.assertEqual(self._to_string(meld.tiles), '234s')
+
+        table = Table()
+        table.has_open_tanyao = True
+        player = table.player
+        # add 3 doras so we are sure to go for tanyao
+        table.add_dora_indicator(self._string_to_136_tile(man='7'))
+        table.add_dora_indicator(self._string_to_136_tile(sou='4'))
+        tiles = self._string_to_136_array(man='3456788', sou='245888')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(sou='3')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(meld.type, Meld.CHI)
+        self.assertEqual(self._to_string(meld.tiles), '345s')
+
     def test_not_open_hand_for_not_needed_set(self):
         """
         We don't need to open hand if it is not improve the hand.

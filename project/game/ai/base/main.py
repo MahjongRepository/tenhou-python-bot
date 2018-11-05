@@ -48,7 +48,7 @@ class InterfaceAI(object):
         """
         return True
 
-    def should_call_riichi(self):
+    def should_call_riichi(self, tile_to_discard):
         """
         When bot can call riichi this method will be called.
         You can check additional params here to decide should be riichi called or not

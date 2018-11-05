@@ -1,3 +1,5 @@
+import copy
+
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_honor, simplify, is_pair, is_chi
 
@@ -6,59 +8,65 @@ from game.ai.first_version.defence.kabe import KabeTile
 
 class Riichi:
 
-    def __init__(self, player):
-        self.player = player
-
-    def should_call_riichi(self):
+    def should_call_riichi(self, player, tile_to_discard):
         # empty waiting can be found in some cases
-        if not self.player.ai.waiting:
+        if not player.ai.waiting:
             return False
 
-        if self.player.ai.in_defence:
+        if player.ai.in_defence:
             return False
+
+        # This method is called before discarding a tile, so we are doing a dry-run of the situation we
+        # will be if we call riichi
+        player_copy = copy.deepcopy(player)
+        # Update table state for dry-run
+        is_tsumogiri = tile_to_discard == player_copy.last_draw
+        player_copy.table.add_discarded_tile(0, tile_to_discard, is_tsumogiri)
+        player_copy.tiles.remove(tile_to_discard)
 
         # don't call karaten riichi
-        count_tiles = self.player.ai.hand_builder.count_tiles(
-            self.player.ai.waiting,
-            TilesConverter.to_34_array(self.player.closed_hand)
+        count_tiles = player_copy.ai.hand_builder.count_tiles(
+            player_copy.ai.waiting,
+            TilesConverter.to_34_array(player_copy.closed_hand)
         )
         if count_tiles == 0:
             return False
 
         # It is daburi!
-        first_discard = self.player.round_step == 1
-        if first_discard and not self.player.table.meld_was_called:
+        first_discard = player_copy.round_step == 1
+        if first_discard and not player_copy.table.meld_was_called:
             return True
 
-        if len(self.player.ai.waiting) == 1:
-            return self._should_call_riichi_one_sided()
+        if len(player_copy.ai.waiting) == 1:
+            return self._should_call_riichi_one_sided(player_copy)
 
-        return self._should_call_riichi_many_sided()
+        return self._should_call_riichi_many_sided(player_copy)
 
-    def _should_call_riichi_one_sided(self):
-        count_tiles = self.player.ai.hand_builder.count_tiles(
-            self.player.ai.waiting,
-            TilesConverter.to_34_array(self.player.closed_hand)
+    @staticmethod
+    def _should_call_riichi_one_sided(player):
+        count_tiles = player.ai.hand_builder.count_tiles(
+            player.ai.waiting,
+            TilesConverter.to_34_array(player.closed_hand)
         )
-        waiting = self.player.ai.waiting[0]
-        hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=False)
+        waiting = player.ai.waiting[0]
+        hand_value = player.ai.estimate_hand_value(waiting, call_riichi=False)
 
-        tiles = self.player.closed_hand + [waiting * 4]
-        closed_melds = [x for x in self.player.melds if not x.opened]
+        tiles = player.closed_hand + [waiting * 4]
+        closed_melds = [x for x in player.melds if not x.opened]
         for meld in closed_melds:
             tiles.extend(meld.tiles[:3])
 
         tiles_34 = TilesConverter.to_34_array(tiles)
 
-        results = self.player.ai.hand_divider.divide_hand(tiles_34)
+        results = player.ai.hand_divider.divide_hand(tiles_34)
         result = results[0]
 
         # let's find suji-traps in our discard
-        suji_tiles = self.player.ai.defence.suji.find_suji_against_self(self.player)
+        suji_tiles = player.ai.defence.suji.find_suji_against_self(player)
         have_suji = waiting in suji_tiles
 
         # let's find kabe
-        kabe_tiles = self.player.ai.defence.kabe.find_all_kabe(tiles_34)
+        kabe_tiles = player.ai.defence.kabe.find_all_kabe(tiles_34)
         have_kabe = False
         for kabe in kabe_tiles:
             if waiting == kabe.tile_34 and kabe.kabe_type == KabeTile.STRONG_KABE:
@@ -70,10 +78,10 @@ class Riichi:
 
             # tanki honor is a good wait, let's damaten only if hand is already expensive
             if is_honor(waiting):
-                if self.player.is_dealer and min_cost < 12000:
+                if player.is_dealer and min_cost < 12000:
                     return True
 
-                if not self.player.is_dealer and min_cost < 8000:
+                if not player.is_dealer and min_cost < 8000:
                     return True
 
                 return False
@@ -97,10 +105,10 @@ class Riichi:
 
                     # don't riichi 2378 tanki if hand has good value
                     if simplified_waiting != 0 and simplified_waiting != 8:
-                        if self.player.is_dealer and min_cost >= 7700:
+                        if player.is_dealer and min_cost >= 7700:
                             return False
 
-                        if not self.player.is_dealer and min_cost >= 5200:
+                        if not player.is_dealer and min_cost >= 5200:
                             return False
 
                     # only riichi if we have suji-trab or there is kabe
@@ -135,10 +143,10 @@ class Riichi:
                     # if we have 2 tiles to wait for and hand cost is good without riichi,
                     # let's damaten
                     if count_tiles == 2:
-                        if self.player.is_dealer and min_cost >= 7700:
+                        if player.is_dealer and min_cost >= 7700:
                             return False
 
-                        if not self.player.is_dealer and min_cost >= 5200:
+                        if not player.is_dealer and min_cost >= 5200:
                             return False
 
                     # only riichi if we have suji-trab or there is kabe
@@ -164,11 +172,11 @@ class Riichi:
                     return False
 
                 # let's not riichi tanki on last suit tile if it's early
-                if count_tiles == 1 and self.player.round_step < 6:
+                if count_tiles == 1 and player.round_step < 6:
                     return False
 
                 # let's not riichi tanki 4, 5, 6 if it's early
-                if 3 <= simplified_waiting <= 5 and self.player.round_step < 6:
+                if 3 <= simplified_waiting <= 5 and player.round_step < 6:
                     return False
 
             # 1-sided wait means kanchan or penchan
@@ -177,26 +185,27 @@ class Riichi:
                 # it has all 4 tiles available or it
                 # it's not too early
                 if 4 <= simplified_waiting <= 6:
-                    return count_tiles == 4 or self.player.round_step >= 6
+                    return count_tiles == 4 or player.round_step >= 6
 
         return True
 
-    def _should_call_riichi_many_sided(self):
-        count_tiles = self.player.ai.hand_builder.count_tiles(
-            self.player.ai.waiting,
-            TilesConverter.to_34_array(self.player.closed_hand)
+    @staticmethod
+    def _should_call_riichi_many_sided(player):
+        count_tiles = player.ai.hand_builder.count_tiles(
+            player.ai.waiting,
+            TilesConverter.to_34_array(player.closed_hand)
         )
         hand_costs = []
         waits_with_yaku = 0
-        for waiting in self.player.ai.waiting:
-            hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=False)
+        for waiting in player.ai.waiting:
+            hand_value = player.ai.estimate_hand_value(waiting, call_riichi=False)
             if hand_value.error is None:
                 hand_costs.append(hand_value.cost['main'])
                 if hand_value.yaku is not None and hand_value.cost is not None:
                     waits_with_yaku += 1
 
         # if we have yaku on every wait
-        if waits_with_yaku == len(self.player.ai.waiting):
+        if waits_with_yaku == len(player.ai.waiting):
             min_cost = min(hand_costs)
 
             # let's not riichi this bad wait
@@ -205,29 +214,29 @@ class Riichi:
 
             # if wait is slighly better, we will riichi only a cheap hand
             if count_tiles <= 4:
-                if self.player.is_dealer and min_cost >= 7700:
+                if player.is_dealer and min_cost >= 7700:
                     return False
 
-                if not self.player.is_dealer and min_cost >= 5200:
+                if not player.is_dealer and min_cost >= 5200:
                     return False
 
                 return True
 
             # wait is even better, but still don't call riichi on damaten mangan
             if count_tiles <= 6:
-                if self.player.is_dealer and min_cost >= 11600:
+                if player.is_dealer and min_cost >= 11600:
                     return False
 
-                if not self.player.is_dealer and min_cost >= 7700:
+                if not player.is_dealer and min_cost >= 7700:
                     return False
 
                 return True
 
             # if wait is good we only damaten haneman
-            if self.player.is_dealer and min_cost >= 18000:
+            if player.is_dealer and min_cost >= 18000:
                 return False
 
-            if not self.player.is_dealer and min_cost >= 12000:
+            if not player.is_dealer and min_cost >= 12000:
                 return False
 
             return True

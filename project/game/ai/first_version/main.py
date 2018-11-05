@@ -54,7 +54,7 @@ class ImplementationAI(InterfaceAI):
         self.agari = Agari()
         self.shanten_calculator = Shanten()
         self.defence = DefenceHandler(player)
-        self.riichi = Riichi(player)
+        self.riichi = Riichi()
         self.hand_divider = HandDivider()
         self.finished_hand = HandCalculator()
         self.hand_builder = HandBuilder(player, self)
@@ -96,16 +96,20 @@ class ImplementationAI(InterfaceAI):
         # we called meld and we had discard tile that we wanted to discard
         if discard_tile is not None:
             if not self.last_discard_option:
-                return discard_tile
+                tile = discard_tile
+            else:
+                tile = self.hand_builder.process_discard_option(self.last_discard_option, self.player.closed_hand, True)
+        else:
+            tile = self.hand_builder.discard_tile(
+                self.player.tiles,
+                self.player.closed_hand,
+                self.player.meld_34_tiles,
+                print_log
+            )
 
-            return self.hand_builder.process_discard_option(self.last_discard_option, self.player.closed_hand, True)
+        with_riichi = self.should_call_riichi(tile)
 
-        return self.hand_builder.discard_tile(
-            self.player.tiles,
-            self.player.closed_hand,
-            self.player.meld_34_tiles,
-            print_log
-        )
+        return tile, with_riichi
 
     def try_to_call_meld(self, tile_136, is_kamicha_discard):
         tiles_136 = self.player.tiles[:] + [tile_136]
@@ -210,8 +214,8 @@ class ImplementationAI(InterfaceAI):
                                                         config)
         return result
 
-    def should_call_riichi(self):
-        return self.riichi.should_call_riichi()
+    def should_call_riichi(self, tile_to_discard):
+        return self.player.formal_riichi_conditions() and self.riichi.should_call_riichi(self.player, tile_to_discard)
 
     def should_call_kan(self, tile, open_kan, from_riichi=False):
         """

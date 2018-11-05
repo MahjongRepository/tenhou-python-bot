@@ -154,7 +154,7 @@ class ChinitsuStrategyTestCase(unittest.TestCase, TestMixin):
 
         tile = self._string_to_136_tile(sou='1')
         player.draw_tile(tile)
-        discard = player.discard_tile()
+        discard, _ = player.discard_tile()
         self.assertEqual(self._to_string([discard]), '1s')
 
     def test_open_suit_agari_no_yaku(self):

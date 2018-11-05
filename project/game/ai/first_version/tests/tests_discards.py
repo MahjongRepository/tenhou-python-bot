@@ -22,22 +22,22 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
         player.draw_tile(tile)
 
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '9m')
         self.assertEqual(player.ai.shanten, 2)
 
         player.draw_tile(self._string_to_136_tile(pin='4'))
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '1p')
         self.assertEqual(player.ai.shanten, 2)
 
         player.draw_tile(self._string_to_136_tile(pin='3'))
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '9p')
         self.assertEqual(player.ai.shanten, 1)
 
         player.draw_tile(self._string_to_136_tile(man='4'))
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '5m')
         self.assertEqual(player.ai.shanten, 0)
 
@@ -53,7 +53,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
         player.draw_tile(tile)
 
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         self.assertEqual(discarded_tile, tile)
 
         # add not red five pin
@@ -63,7 +63,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
         player.draw_tile(tile)
 
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         # WE DON'T NEED TO DISCARD RED FIVE
         self.assertNotEqual(discarded_tile, tile)
 
@@ -197,7 +197,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(sou='123456', pin='123456', man='9', honors='2')
         player.init_hand(tiles)
 
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '2z')
 
     def test_slide_set_to_keep_dora_in_hand(self):
@@ -211,7 +211,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         player.draw_tile(tile)
 
         # 2p is a dora, we had to keep it
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '4p')
 
     def test_keep_aka_dora_in_hand(self):
@@ -227,7 +227,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         player.draw_tile(FIVE_RED_SOU)
 
         # we had to keep red five and discard just 5s
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         self.assertNotEqual(discarded_tile, FIVE_RED_SOU)
 
     def test_dont_keep_honor_with_small_number_of_shanten(self):
@@ -238,7 +238,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
         player.draw_tile(self._string_to_136_tile(honors='7'))
 
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '7z')
 
     def test_prefer_valuable_tiles_with_almost_same_ukeire(self):
@@ -250,7 +250,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
         player.draw_tile(self._string_to_136_tile(sou='5'))
 
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '1s')
 
     def test_discard_less_valuable_isolated_tile_first(self):
@@ -262,7 +262,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
         player.draw_tile(self._string_to_136_tile(sou='7'))
 
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         # we have a choice what to discard: 9p or 8m
         # 9p is less valuable
         self.assertEqual(self._to_string([discarded_tile]), '9p')
@@ -271,7 +271,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(sou='2456', pin='129', man='234458')
         player.init_hand(tiles)
         player.draw_tile(self._string_to_136_tile(sou='7'))
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         # but if 9p is dora
         # let's discard 8m instead
         self.assertEqual(self._to_string([discarded_tile]), '8m')
@@ -285,7 +285,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
         player.draw_tile(self._string_to_136_tile(pin='6'))
 
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '3s')
 
     # There was a bug with count of live tiles that are used in melds,
@@ -305,7 +305,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
         player.draw_tile(self._string_to_136_tile(sou='5'))
 
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         # we should discard best ukeire option here - 2s
         self.assertEqual(self._to_string([discarded_tile]), '2s')
 
@@ -326,7 +326,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
         player.draw_tile(self._string_to_136_tile(sou='4'))
 
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         # double-pairs wait becomes better, because it has 4 tiles to wait for
         # against just 1 in ryanmen
         self.assertEqual(self._to_string([discarded_tile]), '3s')
@@ -339,7 +339,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='123567', pin='113788', sou='99')
         player.init_hand(tiles)
 
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '8p')
 
     def test_discard_tile_and_wrong_tiles_valuation(self):
@@ -356,7 +356,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='445567', pin='245678', sou='67')
         player.init_hand(tiles)
 
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '2p')
 
         table = Table()
@@ -366,5 +366,5 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='45667', pin='34677', sou='38', honors='22')
         player.init_hand(tiles)
 
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '8s')

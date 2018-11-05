@@ -122,11 +122,11 @@ class TenhouLogReproducer(object):
 
             # to rebuild all caches
             table.player.draw_tile(tile)
-            tile = table.player.discard_tile()
+            tile, _ = table.player.discard_tile()
 
             # real run, you can stop debugger here
             table.player.draw_tile(tile)
-            tile = table.player.discard_tile()
+            tile, _ = table.player.discard_tile()
 
             print('Discard: {}'.format(TilesConverter.to_one_line_string([tile])))
 

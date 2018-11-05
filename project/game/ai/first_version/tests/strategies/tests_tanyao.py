@@ -153,7 +153,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 
         tile = self._string_to_136_tile(pin='5')
         self.player.draw_tile(tile)
-        tile_to_discard = self.player.discard_tile()
+        tile_to_discard, _ = self.player.discard_tile()
 
         self.assertEqual(self._to_string([tile_to_discard]), '4z')
 
@@ -176,7 +176,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.player.add_called_meld(meld)
 
         self.player.draw_tile(self._string_to_136_tile(sou='1'))
-        discard = self.player.discard_tile()
+        discard, _ = self.player.discard_tile()
         # but for already open hand we cant do tsumo
         # because we don't have a yaku here
         # so, let's do tsumogiri
@@ -191,7 +191,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self._assert_tanyao(self.player)
 
         # discard 5p and riichi
-        discard = self.player.discard_tile()
+        discard, _ = self.player.discard_tile()
         self.assertEqual(self._to_string([discard]), '5p')
 
         meld = self._make_meld(Meld.CHI, man='234')
@@ -203,7 +203,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 
         # it is not a good idea to wait on 1-4, since we can't win on 1 with open hand
         # so let's continue to wait on 4 only
-        discard = self.player.discard_tile()
+        discard, _ = self.player.discard_tile()
         self.assertEqual(self._to_string([discard]), '2p')
 
         table = self._make_table()
@@ -217,7 +217,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         player.draw_tile(self._string_to_136_tile(sou='7'))
 
         # we can wait only on 1-4, so let's do it even if we can't get yaku on 1
-        discard = player.discard_tile()
+        discard, _ = player.discard_tile()
         self.assertEqual(self._to_string([discard]), '7s')
 
     def test_choose_correct_waiting_and_first_opened_meld(self):
@@ -229,7 +229,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         tile = self._string_to_136_tile(man='8')
         meld, tile_to_discard = self.player.try_to_call_meld(tile, False)
 
-        discard = self.player.discard_tile(tile_to_discard)
+        discard, _ = self.player.discard_tile(tile_to_discard)
         self.assertEqual(self._to_string([discard]), '2m')
 
     def test_we_dont_need_to_discard_terminals_from_closed_hand(self):
@@ -238,7 +238,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 
         tile = self._string_to_136_tile(pin='5')
         self.player.draw_tile(tile)
-        tile_to_discard = self.player.discard_tile()
+        tile_to_discard, _ = self.player.discard_tile()
 
         # our hand is closed, let's keep terminal for now
         self.assertEqual(self._to_string([tile_to_discard]), '8p')
@@ -274,7 +274,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='234578', sou='235', pin='2246')
         self.player.init_hand(tiles)
         self.player.draw_tile(self._string_to_136_tile(pin='5'))
-        discard = self.player.discard_tile()
+        discard, _ = self.player.discard_tile()
         self.assertEqual(self._to_string([discard]), '5m')
 
         # but with opened hand we don't need to count not suitable tiles as ukeire
@@ -282,7 +282,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.player.init_hand(tiles)
         self.player.add_called_meld(self._make_meld(Meld.CHI, man='234'))
         self.player.draw_tile(self._string_to_136_tile(pin='5'))
-        discard = self.player.discard_tile()
+        discard, _ = self.player.discard_tile()
         self.assertEqual(self._to_string([discard]), '8m')
 
     def test_determine_strategy_when_we_try_to_call_meld(self):
@@ -308,7 +308,7 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 
         tile = self._string_to_136_tile(man='1')
         self.player.draw_tile(tile)
-        discard = self.player.discard_tile()
+        discard, _ = self.player.discard_tile()
         self.assertEqual(self._to_string([discard]), '1m')
 
     # In case we are in temporary furiten, we can't call ron, but can still

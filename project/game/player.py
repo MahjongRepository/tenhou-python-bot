@@ -193,9 +193,11 @@ class Player(PlayerInterface):
         self.table.add_discarded_tile(0, tile_to_discard, is_tsumogiri)
         self.tiles.remove(tile_to_discard)
 
-        return tile_to_discard
+        with_riichi = self.should_call_riichi()
 
-    def can_call_riichi(self):
+        return tile_to_discard, with_riichi
+
+    def should_call_riichi(self):
         result = self.formal_riichi_conditions()
         return result and self.ai.should_call_riichi()
 
@@ -206,7 +208,7 @@ class Player(PlayerInterface):
             not self.in_riichi,
             not self.is_open_hand,
 
-            self.scores >= 1000,
+            self.scores is not None and self.scores >= 1000,
             self.table.count_of_remaining_tiles > 4
         ])
 

@@ -109,7 +109,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         meld = self._make_meld(Meld.CHI, sou='678')
         self.player.add_called_meld(meld)
 
-        discard = self.player.discard_tile()
+        discard, _ = self.player.discard_tile()
         self.assertEqual(self._to_string([discard]), '1p')
 
     def test_wrong_shanten_improvements_detection(self):
@@ -354,7 +354,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         tile = self._string_to_136_tile(honors='3')
         self.player.draw_tile(tile)
 
-        discard = self.player.discard_tile()
+        discard, _ = self.player.discard_tile()
         self.assertNotEqual(self._to_string([discard]), '7z')
 
     def test_keep_only_yakuhai_pon(self):
@@ -374,7 +374,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
 
         player.draw_tile(self._string_to_136_tile(man='4'))
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         self.assertNotEqual(self._to_string([discarded_tile]), '7z')
 
     def test_keep_only_yakuhai_pair(self):
@@ -396,7 +396,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
 
         player.draw_tile(self._string_to_136_tile(pin='1'))
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         self.assertNotEqual(self._to_string([discarded_tile]), '7z')
 
     def test_atodzuke_keep_yakuhai_wait(self):
@@ -420,7 +420,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
 
         player.draw_tile(self._string_to_136_tile(man='2'))
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '2m')
 
     # issue #98
@@ -516,5 +516,5 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
             table.add_discarded_tile(1, self._string_to_136_tile(sou='9'), False)
 
         player.draw_tile(self._string_to_136_tile(man='6'))
-        discarded_tile = player.discard_tile()
+        discarded_tile, _ = player.discard_tile()
         self.assertNotEqual(self._to_string([discarded_tile]), '6m')

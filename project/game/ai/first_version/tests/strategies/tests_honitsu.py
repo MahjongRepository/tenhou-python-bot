@@ -109,7 +109,7 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
 
         tile = self._string_to_136_tile(man='1')
         player.draw_tile(tile)
-        tile_to_discard = player.discard_tile()
+        tile_to_discard, _ = player.discard_tile()
 
         # we are in honitsu mode, so we should discard man suits
         self.assertEqual(self._to_string([tile_to_discard]), '1m')
@@ -124,7 +124,7 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
 
         player.draw_tile(self._string_to_136_tile(man='9'))
-        tile_to_discard = player.discard_tile()
+        tile_to_discard, _ = player.discard_tile()
 
         # we don't need to go for honitsu here
         # we already in tempai
@@ -144,7 +144,7 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         table.add_discarded_tile(1, self._string_to_136_tile(honors='3'), False)
         table.add_discarded_tile(1, self._string_to_136_tile(honors='3'), False)
 
-        tile_to_discard = player.discard_tile()
+        tile_to_discard, _ = player.discard_tile()
 
         # west was discarded three times, we don't need it
         self.assertEqual(self._to_string([tile_to_discard]), '3z')
@@ -158,7 +158,7 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='33', pin='12788999', sou='5', honors='23')
         player.init_hand(tiles)
         player.draw_tile(self._string_to_136_tile(honors='6'))
-        tile_to_discard = player.discard_tile()
+        tile_to_discard, _ = player.discard_tile()
 
         self.assertEqual(self._to_string([tile_to_discard]), '5s')
 
@@ -189,7 +189,7 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(sou='1122559', honors='134557', pin='4')
         player.init_hand(tiles)
 
-        tile = player.discard_tile()
+        tile, _ = player.discard_tile()
         self.assertEqual(self._to_string([tile]), '4p')
 
         tile = self._string_to_136_tile(honors='5')

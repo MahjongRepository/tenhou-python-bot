@@ -48,7 +48,7 @@ class FormalTempaiStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertNotEqual(meld, None)
         self.assertEqual(self._to_string(meld.tiles), '789m')
 
-        tile_to_discard = self.player.discard_tile()
+        tile_to_discard, _ = self.player.discard_tile()
         self.assertEqual(self._to_string([tile_to_discard]), '8s')
 
     # We shouldn't open when we are already in tempai expect for some

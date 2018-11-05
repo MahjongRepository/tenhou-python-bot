@@ -18,7 +18,7 @@ class ClientTestCase(unittest.TestCase):
         self.assertEqual(len(client.table.player.tiles), 14)
         self.assertEqual(client.table.count_of_remaining_tiles, 70)
 
-        tile = client.player.discard_tile()
+        tile, _ = client.player.discard_tile()
 
         self.assertEqual(len(client.table.player.tiles), 13)
         self.assertEqual(len(client.table.player.discards), 1)

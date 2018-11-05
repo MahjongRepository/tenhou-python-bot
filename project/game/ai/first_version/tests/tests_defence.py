@@ -112,10 +112,10 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         table.add_called_riichi(3)
 
-        discard = table.player.discard_tile()
+        discard, with_riichi = table.player.discard_tile()
         self.assertEqual(self._to_string([discard]), '9m')
         self.assertEqual(table.player.ai.in_defence, False)
-        self.assertEqual(table.player.can_call_riichi(), True)
+        self.assertEqual(with_riichi, True)
 
     def test_call_riichi_with_bad_wait_against_other_player_riichi(self):
         table = Table()
@@ -128,10 +128,10 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         table.add_called_riichi(3)
 
-        discard = table.player.discard_tile()
+        discard, with_riichi = table.player.discard_tile()
         self.assertEqual(self._to_string([discard]), '9m')
         self.assertEqual(table.player.ai.in_defence, True)
-        self.assertEqual(table.player.can_call_riichi(), False)
+        self.assertEqual(with_riichi, False)
 
     def test_should_go_for_defence_and_good_hand_with_drawn_tile(self):
         """
@@ -150,7 +150,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         table.add_called_riichi(3)
 
-        result = table.player.discard_tile()
+        result, _ = table.player.discard_tile()
         self.assertEqual(self._to_string([result]), '8m')
 
     def test_find_common_safe_tile_to_discard(self):
@@ -172,7 +172,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         table.get_player(1).temporary_safe_tiles = []
         table.get_player(2).temporary_safe_tiles = []
 
-        result = table.player.discard_tile()
+        result, _ = table.player.discard_tile()
 
         self.assertEqual(self._to_string([result]), '6s')
 
@@ -198,14 +198,14 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         table.get_player(1).temporary_safe_tiles = []
         table.get_player(2).temporary_safe_tiles = []
 
-        result = table.player.discard_tile()
+        result, _ = table.player.discard_tile()
         # second player is a dealer, let's fold against him
         self.assertEqual(self._to_string([result]), '9m')
 
         tiles = self._string_to_136_array(sou='234567', pin='348', man='234', honors='23')
         table.player.init_hand(tiles)
 
-        result = table.player.discard_tile()
+        result, _ = table.player.discard_tile()
         # there is no safe tiles against dealer, so let's fold against other players
         self.assertEqual(table.player.ai.in_defence, True)
         self.assertEqual(self._to_string([result]), '4m')
@@ -221,7 +221,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         table.add_called_riichi(1)
 
-        result = table.player.discard_tile()
+        result, _ = table.player.discard_tile()
 
         self.assertEqual(self._to_string([result]), '1z')
 
@@ -236,7 +236,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         table.add_called_riichi(1)
 
-        result = table.player.discard_tile()
+        result, _ = table.player.discard_tile()
 
         # discard of 2s will do less damage to our hand shape than 7p discard
         self.assertEqual(table.player.ai.in_defence, True)
@@ -321,7 +321,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         table.add_called_riichi(1)
         table.add_called_riichi(2)
 
-        result = table.player.discard_tile()
+        result, _ = table.player.discard_tile()
 
         self.assertEqual(self._to_string([result]), '1p')
 
@@ -336,7 +336,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         table.add_called_riichi(1)
 
-        result = table.player.discard_tile()
+        result, _ = table.player.discard_tile()
 
         self.assertEqual(self._to_string([result]), '5m')
 
@@ -354,9 +354,9 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         table.add_discarded_tile(1, self._string_to_136_tile(sou='1'), False)
         table.add_called_riichi(1)
 
-        result = table.player.discard_tile()
+        result, with_riichi = table.player.discard_tile()
 
-        self.assertEqual(table.player.can_call_riichi(), True)
+        self.assertEqual(with_riichi, True)
         self.assertEqual(self._to_string([result]), '1z')
 
     def test_mark_dora_as_dangerous_tile_for_suji(self):
@@ -371,7 +371,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         table.add_discarded_tile(1, self._string_to_136_tile(man='6'), False)
         table.add_called_riichi(1)
 
-        result = table.player.discard_tile()
+        result, _ = table.player.discard_tile()
 
         self.assertEqual(self._to_string([result]), '3m')
 
@@ -387,7 +387,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         table.add_called_riichi(1)
         table.add_discarded_tile(2, self._string_to_136_tile(honors='1'), False)
 
-        result = table.player.discard_tile()
+        result, _ = table.player.discard_tile()
 
         self.assertEqual(self._to_string([result]), '1z')
 
@@ -409,7 +409,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         table.add_discarded_tile(1, self._string_to_136_tile(man='1'), False)
         table.add_discarded_tile(1, self._string_to_136_tile(pin='5'), False)
 
-        result = table.player.discard_tile()
+        result, _ = table.player.discard_tile()
 
         # we can't discard pin and honor tiles against honitsu
         self.assertEqual(self._to_string([result]), '2s')
@@ -436,6 +436,6 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         table.add_discarded_tile(1, self._string_to_136_tile(honors='7'), False)
 
         table.player.draw_tile(self._string_to_136_tile(sou='9'))
-        result = table.player.discard_tile()
+        result, _ = table.player.discard_tile()
 
         self.assertEqual(self._to_string([result]), '3p')

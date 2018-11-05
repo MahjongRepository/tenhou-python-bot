@@ -291,7 +291,9 @@ class BaseStrategy(object):
                 'meld': meld
             })
 
-        final_results = sorted(final_results, key=lambda x: (x['discard_tile'].shanten, -x['discard_tile'].ukeire))
+        final_results = sorted(final_results, key=lambda x: (x['discard_tile'].shanten,
+                                                             -x['discard_tile'].ukeire,
+                                                             x['discard_tile'].valuation))
 
         DecisionsLogger.debug(log.MELD_PREPARE, 'Options with meld calling', context=final_results)
 

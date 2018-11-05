@@ -91,6 +91,47 @@ class YakuhaiStrategy(BaseStrategy):
 
         return False
 
+    def determine_what_to_discard(self, discard_options, hand, open_melds):
+        is_open_hand = len(open_melds) > 0
+
+        tiles_34 = TilesConverter.to_34_array(hand)
+
+        valued_pairs = [x for x in self.player.valued_honors if tiles_34[x] == 2]
+        valued_pons = [x for x in self.player.valued_honors if tiles_34[x] == 3]
+
+        acceptable_options = []
+        for item in discard_options:
+            if is_open_hand:
+                if len(valued_pons) == 0:
+                    # don't destroy our only yakuhai pair
+                    if len(valued_pairs) == 1 and item.tile_to_discard in valued_pairs:
+                        continue
+                elif len(valued_pons) == 1:
+                    # don't destroy our only yakuhai pon
+                    if item.tile_to_discard in valued_pons:
+                        continue
+
+                acceptable_options.append(item)
+
+        # we don't have a choice
+        if not acceptable_options:
+            return discard_options
+
+        preferred_options = []
+        for item in acceptable_options:
+            # ignore wait without yakuhai yaku if possible
+            if is_open_hand and len(valued_pons) == 0 and len(valued_pairs) == 1:
+                if item.shanten == 0:
+                    if valued_pairs[0] not in item.waiting:
+                        continue
+
+            preferred_options.append(item)
+
+        if not preferred_options:
+            return acceptable_options
+
+        return preferred_options
+
     def is_tile_suitable(self, tile):
         """
         For yakuhai we don't have any limits

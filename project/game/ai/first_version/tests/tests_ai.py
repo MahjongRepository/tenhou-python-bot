@@ -169,11 +169,10 @@ class AITestCase(unittest.TestCase, TestMixin):
         self.assertEqual(meld.type, Meld.CHI)
         self.assertEqual(self._to_string(meld.tiles), '234s')
 
-    # issue #51
-    @unittest.expectedFailure
     def test_chose_right_set_to_open_hand_dora(self):
         table = Table()
         table.has_open_tanyao = True
+        table.has_aka_dora = False
         player = table.player
         # add 3 doras so we are sure to go for tanyao
         table.add_dora_indicator(self._string_to_136_tile(man='7'))
@@ -189,10 +188,45 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         table = Table()
         table.has_open_tanyao = True
+        table.has_aka_dora = False
         player = table.player
         # add 3 doras so we are sure to go for tanyao
         table.add_dora_indicator(self._string_to_136_tile(man='7'))
         table.add_dora_indicator(self._string_to_136_tile(sou='4'))
+        tiles = self._string_to_136_array(man='3456788', sou='245888')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(sou='3')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(meld.type, Meld.CHI)
+        self.assertEqual(self._to_string(meld.tiles), '345s')
+
+        table = Table()
+        table.has_open_tanyao = True
+        table.has_aka_dora = True
+        player = table.player
+        # add 3 doras so we are sure to go for tanyao
+        table.add_dora_indicator(self._string_to_136_tile(man='7'))
+        # 5 from string is always aka
+        tiles = self._string_to_136_array(man='3456788', sou='245888')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(sou='3')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(meld.type, Meld.CHI)
+        self.assertEqual(self._to_string(meld.tiles), '345s')
+
+        table = Table()
+        table.has_open_tanyao = True
+        table.has_aka_dora = True
+        player = table.player
+        # add 3 doras so we are sure to go for tanyao
+        table.add_dora_indicator(self._string_to_136_tile(man='7'))
+        table.add_dora_indicator(self._string_to_136_tile(sou='1'))
+        table.add_dora_indicator(self._string_to_136_tile(sou='4'))
+        # double dora versus regular dora, we should keep double dora
         tiles = self._string_to_136_array(man='3456788', sou='245888')
         player.init_hand(tiles)
 

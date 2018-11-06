@@ -368,3 +368,86 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
         discarded_tile = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '8s')
+
+    # issue #61
+    @unittest.expectedFailure
+    def test_choose_correct_wait_finished_yaku(self):
+        table = Table()
+        player = table.player
+        player.round_step = 2
+
+        tiles = self._string_to_136_array(man='23478', sou='23488', pin='235')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(pin='4'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '5p')
+
+        tiles = self._string_to_136_array(man='34578', sou='34588', pin='235')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(pin='4'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '2p')
+
+        tiles = self._string_to_136_array(man='34578', sou='34588', pin='235')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(pin='4'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '2p')
+
+        tiles = self._string_to_136_array(man='3457', sou='233445588')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(man='8'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '2s')
+
+        tiles = self._string_to_136_array(man='3457', sou='223344588')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(man='8'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '5s')
+
+    # issue #61
+    @unittest.expectedFailure
+    def test_choose_correct_wait_yaku_versus_dora(self):
+        table = Table()
+        player = table.player
+        player.round_step = 2
+
+        table.add_dora_indicator(self._string_to_136_tile(pin='4'))
+
+        tiles = self._string_to_136_array(man='23478', sou='23488', pin='235')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(pin='4'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '5p')
+
+        table = Table()
+        player = table.player
+        player.round_step = 2
+
+        table.add_dora_indicator(self._string_to_136_tile(pin='1'))
+
+        tiles = self._string_to_136_array(man='23478', sou='23488', pin='235')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(pin='4'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '2p')
+
+    # issue #61
+    @unittest.expectedFailure
+    def test_choose_correct_wait_yaku_potentially(self):
+        table = Table()
+        player = table.player
+        player.round_step = 2
+
+        tiles = self._string_to_136_array(man='1134578', sou='567788')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(man='9'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '5s')
+
+        tiles = self._string_to_136_array(man='1134578', sou='556678')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(man='9'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '8s')

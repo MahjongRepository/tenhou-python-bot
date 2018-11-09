@@ -3,7 +3,7 @@ import copy
 from mahjong.constants import AKA_DORA_LIST
 from mahjong.shanten import Shanten
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_tile_strictly_isolated
+from mahjong.utils import is_tile_strictly_isolated, is_pair
 
 import utils.decisions_constants as log
 from game.ai.discard import DiscardOption
@@ -132,56 +132,101 @@ class HandBuilder:
             n += 4 - self.player.total_tiles(tile_34, tiles_34)
         return n
 
-    # FIXME: add special handling for tanki waits
+    def divide_hand(self, closed_hand, melds, waiting):
+        tiles = closed_hand + [waiting * 4]
+        closed_melds = [x for x in melds if not x.opened]
+        for meld in closed_melds:
+            tiles.extend(meld.tiles[:3])
+
+        tiles_34 = TilesConverter.to_34_array(tiles)
+
+        results = self.player.ai.hand_divider.divide_hand(tiles_34)
+        return results, tiles_34
+
+    def _choose_best_tanki_wait(self, discard_desc):
+        # FIXME: implement
+
+        return discard_desc[0]['discard_option']
+
     def _choose_best_discard_in_tempai(self, discard_options):
         # first of all we find tiles that have the best hand cost * ukeire value
-        best_cost_x_ukeire = 0
-        best_discard_options = []
+        call_riichi = not self.player.is_open_hand
+
+        discard_desc = []
+
         for discard_option in discard_options:
             tile = discard_option.find_tile_in_hand(self.player.closed_hand)
             # temporary remove discard option to estimate hand value
             self.player.tiles.remove(tile)
 
             cost_x_ukeire = 0
+            hand_cost = 0
             if len(discard_option.waiting) == 1:
                 waiting = discard_option.waiting[0]
-                hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=True)
+                hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=call_riichi)
                 if hand_value.error is None:
                     hand_cost = hand_value.cost['main']
                     cost_x_ukeire = hand_cost * discard_option.ukeire
+
+                # let's check if this is a tanki wait
+                results = self.divide_hand(self.player.closed_hand, self.player.melds, waiting)
+                result = results[0]
+
+                is_tanki = False
+                for hand_set in result:
+                    if waiting not in hand_set:
+                        continue
+
+                    if is_pair(hand_set):
+                        is_tanki = True
+                        break
+
+                discard_desc.append({
+                    'discard_option': discard_option,
+                    'hand_cost': hand_cost,
+                    'cost_x_ukeire': cost_x_ukeire,
+                    'is_tanki': is_tanki
+                })
             else:
                 cost_x_ukeire_sum = 0
                 for waiting in discard_option.waiting:
-                    hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=True)
+                    hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=call_riichi)
                     if hand_value.error is None:
                         cost_x_ukeire_sum += hand_value.cost['main'] * discard_option.ukeire
 
                 cost_x_ukeire = cost_x_ukeire_sum / len(discard_option.waiting)
 
-            if cost_x_ukeire == best_cost_x_ukeire:
-                best_discard_options.append(discard_option)
-
-            if cost_x_ukeire > best_cost_x_ukeire:
-                best_cost_x_ukeire = cost_x_ukeire
-                best_discard_options.clear()
-                best_discard_options.append(discard_option)
+                discard_desc.append({
+                    'discard_option': discard_option,
+                    'hand_cost': None,
+                    'cost_x_ukeire': cost_x_ukeire,
+                    'is_tanki': False
+                })
 
             # return tile back to hand
             self.player.tiles.append(tile)
 
-        # we only have one best option based on ukeire and cost, nothing more to do here
-        if len(best_discard_options) == 1:
-            return best_discard_options[0]
-
-        # if we have several options that give us similar wait
-        if len(best_discard_options) > 1:
-            # FIXME: 1. we find the safest tile to discard
-            # FIXME: 2. if safeness is the same, we try to discard non-dora tiles
-            return best_discard_options[0]
+        discard_desc = sorted(discard_desc, key=lambda k: k['cost_x_ukeire'], reverse=True)
+        best_discard_desc = [x for x in discard_desc if x['cost_x_ukeire'] == discard_desc[0]['cost_x_ukeire']]
+        num_tanki_waits = len([x for x in discard_desc if x['is_tanki'] == True])
 
         # if we don't have any good options, e.g. all our possible waits ara karaten
         # FIXME: in that case, discard the safest tile
-        return sorted(discard_options, key=lambda x: x.valuation)[0]
+        if discard_desc[0]['cost_x_ukeire'] == 0:
+            return sorted(discard_options, key=lambda x: x.valuation)[0]
+
+        # what if all our waits are tanki waits? we need a special handling for that case
+        if num_tanki_waits == len(discard_options):
+            return self._choose_best_tanki_wait(discard_desc)
+
+        # we only have one best option based on ukeire and cost, nothing more to do here
+        if len(best_discard_desc) == 1:
+            return best_discard_desc[0]['discard_option']
+
+        # if we have several options that give us similar wait
+        # FIXME: 1. we find the safest tile to discard
+        # FIXME: 2. if safeness is the same, we try to discard non-dora tiles
+        return best_discard_desc[0]['discard_option']
 
     def choose_tile_to_discard(self, tiles, closed_hand, open_sets_34, print_log=True):
         """

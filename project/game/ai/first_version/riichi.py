@@ -37,20 +37,14 @@ class Riichi:
 
     def _should_call_riichi_one_sided(self):
         count_tiles = self.player.ai.hand_builder.count_tiles(
-            self.player.ai.waiting,
-            TilesConverter.to_34_array(self.player.closed_hand)
+            self.player.ai.waiting, TilesConverter.to_34_array(self.player.closed_hand)
         )
         waiting = self.player.ai.waiting[0]
         hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=False)
 
-        tiles = self.player.closed_hand + [waiting * 4]
-        closed_melds = [x for x in self.player.melds if not x.opened]
-        for meld in closed_melds:
-            tiles.extend(meld.tiles[:3])
-
-        tiles_34 = TilesConverter.to_34_array(tiles)
-
-        results = self.player.ai.hand_divider.divide_hand(tiles_34)
+        results, tiles_34 = self.player.ai.hand_builder.divide_hand(self.player.closed_hand,
+                                                                    self.player.melds,
+                                                                    waiting)
         result = results[0]
 
         # let's find suji-traps in our discard

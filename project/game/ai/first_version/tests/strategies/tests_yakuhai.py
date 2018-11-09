@@ -110,7 +110,8 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         self.player.add_called_meld(meld)
 
         discard = self.player.discard_tile()
-        self.assertEqual(self._to_string([discard]), '1p')
+        self.assertNotEqual(self._to_string([discard]), '7z')
+        self.assertNotEqual(self._to_string([discard]), '5p')
 
     def test_wrong_shanten_improvements_detection(self):
         """

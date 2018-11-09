@@ -132,6 +132,57 @@ class HandBuilder:
             n += 4 - self.player.total_tiles(tile_34, tiles_34)
         return n
 
+    # FIXME: add special handling for tanki waits
+    def _choose_best_discard_in_tempai(self, discard_options):
+        # first of all we find tiles that have the best hand cost * ukeire value
+        best_cost_x_ukeire = 0
+        best_discard_options = []
+        for discard_option in discard_options:
+            tile = discard_option.find_tile_in_hand(self.player.closed_hand)
+            # temporary remove discard option to estimate hand value
+            self.player.tiles.remove(tile)
+
+            cost_x_ukeire = 0
+            if len(discard_option.waiting) == 1:
+                waiting = discard_option.waiting[0]
+                hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=True)
+                if hand_value.error is None:
+                    hand_cost = hand_value.cost['main']
+                    cost_x_ukeire = hand_cost * discard_option.ukeire
+            else:
+                cost_x_ukeire_sum = 0
+                for waiting in discard_option.waiting:
+                    hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=True)
+                    if hand_value.error is None:
+                        cost_x_ukeire_sum += hand_value.cost['main'] * discard_option.ukeire
+
+                cost_x_ukeire = cost_x_ukeire_sum / len(discard_option.waiting)
+
+            if cost_x_ukeire == best_cost_x_ukeire:
+                best_discard_options.append(discard_option)
+
+            if cost_x_ukeire > best_cost_x_ukeire:
+                best_cost_x_ukeire = cost_x_ukeire
+                best_discard_options.clear()
+                best_discard_options.append(discard_option)
+
+            # return tile back to hand
+            self.player.tiles.append(tile)
+
+        # we only have one best option based on ukeire and cost, nothing more to do here
+        if len(best_discard_options) == 1:
+            return best_discard_options[0]
+
+        # if we have several options that give us similar wait
+        if len(best_discard_options) > 1:
+            # FIXME: 1. we find the safest tile to discard
+            # FIXME: 2. if safeness is the same, we try to discard non-dora tiles
+            return best_discard_options[0]
+
+        # if we don't have any good options, e.g. all our possible waits ara karaten
+        # FIXME: in that case, discard the safest tile
+        return sorted(discard_options, key=lambda x: x.valuation)[0]
+
     def choose_tile_to_discard(self, tiles, closed_hand, open_sets_34, print_log=True):
         """
         Try to find best tile to discard, based on different rules
@@ -197,6 +248,11 @@ class HandBuilder:
             ukeire_field = 'ukeire'
             possible_options = sorted(possible_options, key=lambda x: -getattr(x, ukeire_field))
 
+        # tempai state has a special handling
+        if first_option.shanten == 0:
+            other_tiles_with_same_shanten = [x for x in possible_options if x.shanten == 0]
+            return self._choose_best_discard_in_tempai(other_tiles_with_same_shanten)
+
         tiles_without_dora = [x for x in possible_options if x.count_of_dora == 0]
 
         # we have only dora candidates to discard
@@ -224,7 +280,7 @@ class HandBuilder:
         else:
             best_option_without_dora = tiles_without_dora[0]
             ukeire_borders = self._choose_ukeire_borders(best_option_without_dora, 10, ukeire_field)
-            filtered_options = [best_option_without_dora]
+            filtered_options = []
             for discard_option in tiles_without_dora:
                 val = getattr(best_option_without_dora, ukeire_field) - ukeire_borders
                 if getattr(discard_option, ukeire_field) >= val:
@@ -243,8 +299,8 @@ class HandBuilder:
             # let's sort tiles by value and let's choose less valuable tile to discard
             return sorted(isolated_tiles, key=lambda x: x.valuation)[0]
 
-        # there are no isolated tiles
-        # let's discard tile with greater ukeire2
+        # there are no isolated tiles or we don't care about them
+        # let's discard tile with greater ukeire/ukeire2
         filtered_options = sorted(filtered_options, key=lambda x: -getattr(x, ukeire_field))
         first_option = filtered_options[0]
 
@@ -252,8 +308,8 @@ class HandBuilder:
                                         if getattr(x, ukeire_field) == getattr(first_option, ukeire_field)]
 
         # it will happen with shanten=1, all tiles will have ukeire_second == 0
+        # or in tempai we can have several tiles with same ukeire
         if other_tiles_with_same_ukeire:
-            # let's sort tiles by value and let's choose less valuable tile to discard
             return sorted(other_tiles_with_same_ukeire, key=lambda x: x.valuation)[0]
 
         # we have only one candidate to discard with greater ukeire

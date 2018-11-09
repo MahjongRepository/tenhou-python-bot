@@ -194,7 +194,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         table = Table()
         player = table.player
 
-        tiles = self._string_to_136_array(sou='123456', pin='123456', man='9', honors='2')
+        tiles = self._string_to_136_array(sou='123456', pin='123455', man='9', honors='2')
         player.init_hand(tiles)
 
         discarded_tile = player.discard_tile()
@@ -369,8 +369,6 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         discarded_tile = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '8s')
 
-    # issue #61
-    @unittest.expectedFailure
     def test_choose_correct_wait_finished_yaku(self):
         table = Table()
         player = table.player
@@ -406,8 +404,6 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         discarded_tile = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '5s')
 
-    # issue #61
-    @unittest.expectedFailure
     def test_choose_correct_wait_yaku_versus_dora(self):
         table = Table()
         player = table.player
@@ -427,14 +423,12 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
         table.add_dora_indicator(self._string_to_136_tile(pin='1'))
 
-        tiles = self._string_to_136_array(man='23478', sou='23488', pin='235')
+        tiles = self._string_to_136_array(man='34578', sou='34588', pin='235')
         player.init_hand(tiles)
         player.draw_tile(self._string_to_136_tile(pin='4'))
         discarded_tile = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '2p')
 
-    # issue #61
-    @unittest.expectedFailure
     def test_choose_correct_wait_yaku_potentially(self):
         table = Table()
         player = table.player

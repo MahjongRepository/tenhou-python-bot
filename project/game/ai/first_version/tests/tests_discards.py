@@ -445,3 +445,37 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         player.draw_tile(self._string_to_136_tile(man='9'))
         discarded_tile = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '8s')
+
+    def test_choose_better_tanki_honor(self):
+        table = Table()
+        player = table.player
+        player.round_step = 2
+        player.dealer_seat = 3
+
+        table.add_dora_indicator(self._string_to_136_tile(man='8'))
+
+        tiles = self._string_to_136_array(man='11447799', sou='556', honors='45')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(honors='4'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '6s')
+
+        tiles = self._string_to_136_array(man='11447799', sou='556', honors='45')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(honors='5'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '6s')
+
+        tiles = self._string_to_136_array(man='11447799', sou='556', honors='45')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(sou='6'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '5z')
+
+        tiles = self._string_to_136_array(man='11447799', sou='556', honors='34')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(sou='6'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '3z')
+
+    # TODO: more tests about tanki waiting selection

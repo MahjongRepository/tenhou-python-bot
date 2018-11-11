@@ -2,12 +2,15 @@ import copy
 
 from mahjong.constants import AKA_DORA_LIST
 from mahjong.shanten import Shanten
-from mahjong.tile import TilesConverter
-from mahjong.utils import is_tile_strictly_isolated, is_pair
+from mahjong.tile import TilesConverter, Tile
+from mahjong.utils import is_tile_strictly_isolated, is_pair, is_honor, simplify, is_chi
+from mahjong.meld import Meld
 
 import utils.decisions_constants as log
 from game.ai.discard import DiscardOption
 from utils.decisions_logger import DecisionsLogger
+
+from game.ai.first_version.defence.kabe import KabeTile
 
 
 class HandBuilder:
@@ -18,10 +21,83 @@ class HandBuilder:
         self.player = player
         self.ai = ai
 
-    def discard_tile(self, tiles, closed_hand, open_sets_34, print_log=True):
+    class TankiWait:
+        TANKI_WAIT_NON_YAKUHAI = 1
+        TANKI_WAIT_SELF_YAKUHAI = 2
+        TANKI_WAIT_ALL_YAKUHAI = 3
+        TANKI_WAIT_69_KABE = 4
+        TANKI_WAIT_69_SUJI = 5
+        TANKI_WAIT_69_RAW = 6
+        TANKI_WAIT_28_KABE = 7
+        TANKI_WAIT_28_SUJI = 8
+        TANKI_WAIT_28_RAW = 9
+        TANKI_WAIT_37_KABE = 10
+        TANKI_WAIT_37_SUJI = 11
+        TANKI_WAIT_37_RAW = 12
+        TANKI_WAIT_456_KABE = 13
+        TANKI_WAIT_456_SUJI = 14
+        TANKI_WAIT_456_RAW = 15
+
+        tanki_wait_same_ukeire_2_3_prio = {
+            TANKI_WAIT_NON_YAKUHAI: 15,
+            TANKI_WAIT_69_KABE: 14,
+            TANKI_WAIT_69_SUJI: 14,
+            TANKI_WAIT_SELF_YAKUHAI: 13,
+            TANKI_WAIT_ALL_YAKUHAI: 12,
+            TANKI_WAIT_28_KABE: 11,
+            TANKI_WAIT_28_SUJI: 11,
+            TANKI_WAIT_37_KABE: 10,
+            TANKI_WAIT_37_SUJI: 10,
+            TANKI_WAIT_69_RAW: 9,
+            TANKI_WAIT_456_KABE: 8,
+            TANKI_WAIT_456_SUJI: 8,
+            TANKI_WAIT_28_RAW: 7,
+            TANKI_WAIT_456_RAW: 6,
+            TANKI_WAIT_37_RAW: 5
+        }
+
+        tanki_wait_same_ukeire_1_prio = {
+            TANKI_WAIT_NON_YAKUHAI: 15,
+            TANKI_WAIT_SELF_YAKUHAI: 14,
+            TANKI_WAIT_ALL_YAKUHAI: 13,
+            TANKI_WAIT_69_KABE: 12,
+            TANKI_WAIT_69_SUJI: 12,
+            TANKI_WAIT_28_KABE: 11,
+            TANKI_WAIT_28_SUJI: 11,
+            TANKI_WAIT_37_KABE: 10,
+            TANKI_WAIT_37_SUJI: 10,
+            TANKI_WAIT_69_RAW: 9,
+            TANKI_WAIT_456_KABE: 8,
+            TANKI_WAIT_456_SUJI: 8,
+            TANKI_WAIT_28_RAW: 7,
+            TANKI_WAIT_456_RAW: 6,
+            TANKI_WAIT_37_RAW: 5
+        }
+
+        tanki_wait_diff_ukeire_prio = {
+            TANKI_WAIT_NON_YAKUHAI: 1,
+            TANKI_WAIT_SELF_YAKUHAI: 1,
+            TANKI_WAIT_ALL_YAKUHAI: 1,
+            TANKI_WAIT_69_KABE: 1,
+            TANKI_WAIT_69_SUJI: 1,
+            TANKI_WAIT_28_KABE: 0,
+            TANKI_WAIT_28_SUJI: 0,
+            TANKI_WAIT_37_KABE: 0,
+            TANKI_WAIT_37_SUJI: 0,
+            TANKI_WAIT_69_RAW: 0,
+            TANKI_WAIT_456_KABE: 0,
+            TANKI_WAIT_456_SUJI: 0,
+            TANKI_WAIT_28_RAW: 0,
+            TANKI_WAIT_456_RAW: 0,
+            TANKI_WAIT_37_RAW: 0
+        }
+
+    # FIXME: melds and open_sets_34 duplicate each other, get rid of open_sets_34
+    def discard_tile(self, tiles, closed_hand, melds, open_sets_34, print_log=True):
         selected_tile = self.choose_tile_to_discard(
             tiles,
             closed_hand,
+            melds,
             open_sets_34,
             print_log=print_log
         )
@@ -132,32 +208,113 @@ class HandBuilder:
             n += 4 - self.player.total_tiles(tile_34, tiles_34)
         return n
 
-    def divide_hand(self, closed_hand, melds, waiting):
-        tiles = closed_hand + [waiting * 4]
-        closed_melds = [x for x in melds if not x.opened]
-        for meld in closed_melds:
-            tiles.extend(meld.tiles[:3])
+    def divide_hand(self, tiles, waiting):
+        for i in range(0, 4):
+            if waiting * 4 + i not in tiles:
+                tiles += [waiting * 4 + i]
+                break
 
         tiles_34 = TilesConverter.to_34_array(tiles)
 
         results = self.player.ai.hand_divider.divide_hand(tiles_34)
+        if not results:
+            print("=============================================")
         return results, tiles_34
 
+    def check_suji_and_kabe(self, tiles_34, waiting):
+        # let's find suji-traps in our discard
+        suji_tiles = self.player.ai.defence.suji.find_suji_against_self(self.player)
+        have_suji = waiting in suji_tiles
+
+        # let's find kabe
+        kabe_tiles = self.player.ai.defence.kabe.find_all_kabe(tiles_34)
+        have_kabe = False
+        for kabe in kabe_tiles:
+            if waiting == kabe.tile_34 and kabe.kabe_type == KabeTile.STRONG_KABE:
+                have_kabe = True
+
+        return have_suji, have_kabe
+
     def _choose_best_tanki_wait(self, discard_desc):
-        # FIXME: implement
+        discard_desc = sorted(discard_desc, key=lambda k: k['hand_cost'], reverse=True)
 
-        return discard_desc[0]['discard_option']
+        # we are always choosing between exactly two tanki waits
+        assert len(discard_desc) == 2
 
-    def _choose_best_discard_in_tempai(self, discard_options):
+        discard_desc = [x for x in discard_desc if x['hand_cost'] != 0]
+
+        # we are guaranteed to have at least one wait with cost by caller logic
+        assert len(discard_desc) > 0
+
+        if len(discard_desc) == 1:
+            return discard_desc[0]['discard_option']
+
+        # if not 1 then 2
+        assert len(discard_desc) == 2
+
+        best_discard_desc = [x for x in discard_desc if x['hand_cost'] == discard_desc[0]['hand_cost']]
+
+        # first of all we choose the most expensive wait
+        if len(best_discard_desc) == 1:
+            return best_discard_desc[0]['discard_option']
+
+        best_ukeire = best_discard_desc[0]['discard_option'].ukeire
+        diff = best_ukeire - best_discard_desc[1]['discard_option'].ukeire
+        # if both tanki waits have the same ukeire
+        if diff == 0:
+            # case when we have 2 or 3 tiles to wait for
+            if best_ukeire == 2 or best_ukeire == 3:
+                best_discard_desc = sorted(best_discard_desc,
+                                           key=lambda k: self.TankiWait.tanki_wait_same_ukeire_2_3_prio[
+                                               k['tanki_type']],
+                                           reverse=True)
+                return best_discard_desc[0]['discard_option']
+
+            # case when we have 1 tile to wait for
+            if best_ukeire == 1:
+                best_discard_desc = sorted(best_discard_desc,
+                                           key=lambda k: self.TankiWait.tanki_wait_same_ukeire_1_prio[
+                                               k['tanki_type']],
+                                           reverse=True)
+                return best_discard_desc[0]['discard_option']
+
+            # should never reach here
+            assert False
+
+        # if one tanki wait has 1 more tile to wait than the other we only choose the latter one if it is
+        # a wind or alike and the first one is not
+        if diff == 1:
+            prio_0 = self.TankiWait.tanki_wait_diff_ukeire_prio[best_discard_desc[0]['tanki_type']]
+            prio_1 = self.TankiWait.tanki_wait_diff_ukeire_prio[best_discard_desc[1]['tanki_type']]
+            if prio_1 > prio_0:
+                return best_discard_desc[1]['discard_option']
+
+            return best_discard_desc[0]['discard_option']
+
+        if diff > 1:
+            return best_discard_desc[0]['discard_option']
+
+        # if everything is the same we just choose the first one
+        return best_discard_desc[0]['discard_option']
+
+    def _choose_best_discard_in_tempai(self, tiles, melds, discard_options):
         # first of all we find tiles that have the best hand cost * ukeire value
         call_riichi = not self.player.is_open_hand
 
         discard_desc = []
+        player_tiles_copy = self.player.tiles.copy()
+        player_melds_copy = self.player.melds.copy()
 
         for discard_option in discard_options:
             tile = discard_option.find_tile_in_hand(self.player.closed_hand)
             # temporary remove discard option to estimate hand value
+            self.player.tiles = tiles.copy()
             self.player.tiles.remove(tile)
+            # temporary replace melds
+            self.player.melds = melds.copy()
+            # for kabe/suji handling
+            discarded_tile = Tile(tile, False)
+            self.player.discards.append(discarded_tile)
 
             cost_x_ukeire = 0
             hand_cost = 0
@@ -169,8 +326,10 @@ class HandBuilder:
                     cost_x_ukeire = hand_cost * discard_option.ukeire
 
                 # let's check if this is a tanki wait
-                results = self.divide_hand(self.player.closed_hand, self.player.melds, waiting)
+                results, tiles_34 = self.divide_hand(self.player.tiles, waiting)
                 result = results[0]
+
+                tanki_type = None
 
                 is_tanki = False
                 for hand_set in result:
@@ -179,13 +338,47 @@ class HandBuilder:
 
                     if is_pair(hand_set):
                         is_tanki = True
+
+                        if is_honor(waiting):
+                            # TODO: differentiate between self honor and honor for all players
+                            if waiting in self.player.valued_honors:
+                                tanki_type = self.TankiWait.TANKI_WAIT_ALL_YAKUHAI
+                            else:
+                                tanki_type = self.TankiWait.TANKI_WAIT_NON_YAKUHAI
+                            break
+
+                        simplified_waiting = simplify(waiting)
+                        have_suji, have_kabe = self.check_suji_and_kabe(tiles_34, waiting)
+
+                        # TODO: not sure about suji/kabe priority, so we keep them same for now
+                        if 3 <= simplified_waiting <= 5:
+                            if have_suji or have_kabe:
+                                tanki_type = self.TankiWait.TANKI_WAIT_456_KABE
+                            else:
+                                tanki_type = self.TankiWait.TANKI_WAIT_456_RAW
+                        elif 2 <= simplified_waiting <= 6:
+                            if have_suji or have_kabe:
+                                tanki_type = self.TankiWait.TANKI_WAIT_37_KABE
+                            else:
+                                tanki_type = self.TankiWait.TANKI_WAIT_37_RAW
+                        elif 1 <= simplified_waiting <= 7:
+                            if have_suji or have_kabe:
+                                tanki_type = self.TankiWait.TANKI_WAIT_28_KABE
+                            else:
+                                tanki_type = self.TankiWait.TANKI_WAIT_28_RAW
+                        else:
+                            if have_suji or have_kabe:
+                                tanki_type = self.TankiWait.TANKI_WAIT_69_KABE
+                            else:
+                                tanki_type = self.TankiWait.TANKI_WAIT_69_RAW
                         break
 
                 discard_desc.append({
                     'discard_option': discard_option,
                     'hand_cost': hand_cost,
                     'cost_x_ukeire': cost_x_ukeire,
-                    'is_tanki': is_tanki
+                    'is_tanki': is_tanki,
+                    'tanki_type': tanki_type
                 })
             else:
                 cost_x_ukeire_sum = 0
@@ -200,11 +393,14 @@ class HandBuilder:
                     'discard_option': discard_option,
                     'hand_cost': None,
                     'cost_x_ukeire': cost_x_ukeire,
-                    'is_tanki': False
+                    'is_tanki': False,
+                    'tanki_type': None
                 })
 
-            # return tile back to hand
-            self.player.tiles.append(tile)
+            # reverse all temporary tile tweaks
+            self.player.tiles = player_tiles_copy
+            self.player.melds = player_melds_copy
+            self.player.discards.remove(discarded_tile)
 
         discard_desc = sorted(discard_desc, key=lambda k: k['cost_x_ukeire'], reverse=True)
         best_discard_desc = [x for x in discard_desc if x['cost_x_ukeire'] == discard_desc[0]['cost_x_ukeire']]
@@ -228,7 +424,8 @@ class HandBuilder:
         # FIXME: 2. if safeness is the same, we try to discard non-dora tiles
         return best_discard_desc[0]['discard_option']
 
-    def choose_tile_to_discard(self, tiles, closed_hand, open_sets_34, print_log=True):
+    # FIXME: melds and open_sets_34 duplicate each other, get rid of open_sets_34
+    def choose_tile_to_discard(self, tiles, closed_hand, melds, open_sets_34, print_log=True):
         """
         Try to find best tile to discard, based on different rules
         """
@@ -296,7 +493,7 @@ class HandBuilder:
         # tempai state has a special handling
         if first_option.shanten == 0:
             other_tiles_with_same_shanten = [x for x in possible_options if x.shanten == 0]
-            return self._choose_best_discard_in_tempai(other_tiles_with_same_shanten)
+            return self._choose_best_discard_in_tempai(tiles, melds, other_tiles_with_same_shanten)
 
         tiles_without_dora = [x for x in possible_options if x.count_of_dora == 0]
 

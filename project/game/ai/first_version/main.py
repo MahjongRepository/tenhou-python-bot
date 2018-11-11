@@ -103,6 +103,7 @@ class ImplementationAI(InterfaceAI):
         return self.hand_builder.discard_tile(
             self.player.tiles,
             self.player.closed_hand,
+            self.player.melds,
             self.player.meld_34_tiles,
             print_log
         )

@@ -158,11 +158,11 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(self._to_string([tile_to_discard]), '4z')
 
     def test_dont_count_pairs_in_already_opened_hand(self):
-        meld = self._make_meld(Meld.PON, sou='222')
-        self.player.add_called_meld(meld)
-
         tiles = self._string_to_136_array(man='33556788', sou='22266')
         self.player.init_hand(tiles)
+
+        meld = self._make_meld(Meld.PON, sou='222')
+        self.player.add_called_meld(meld)
 
         tile = self._string_to_136_tile(sou='6')
         meld, _ = self.player.try_to_call_meld(tile, False)

@@ -186,54 +186,24 @@ class BaseStrategy(object):
         if not possible_melds:
             return None, None
 
-        best_meld_34 = self._find_best_meld_to_open(possible_melds, new_tiles, closed_hand)
-        if best_meld_34:
-            # we need to calculate count of shanten with supposed meld
-            # to prevent bad hand openings
-            open_sets_34 = self.player.meld_34_tiles + [best_meld_34[:]]
+        chosen_meld = self._find_best_meld_to_open(possible_melds, new_tiles, closed_hand, tile)
+        selected_tile = chosen_meld['discard_tile']
+        meld = chosen_meld['meld']
 
-            meld_type = is_chi(best_meld_34) and Meld.CHI or Meld.PON
-            best_meld_34.remove(discarded_tile)
+        shanten = selected_tile.shanten
+        had_to_be_called = self.meld_had_to_be_called(tile)
+        had_to_be_called = had_to_be_called or selected_tile.had_to_be_discarded
 
-            first_tile = TilesConverter.find_34_tile_in_136_array(best_meld_34[0], closed_hand)
-            closed_hand.remove(first_tile)
+        # each strategy can use their own value to min shanten number
+        if shanten > self.min_shanten:
+            return None, None
 
-            second_tile = TilesConverter.find_34_tile_in_136_array(best_meld_34[1], closed_hand)
-            closed_hand.remove(second_tile)
+        # sometimes we had to call tile, even if it will not improve our hand
+        # otherwise we can call only with improvements of shanten
+        if not had_to_be_called and shanten >= self.player.ai.shanten:
+            return None, None
 
-            selected_tile = self.player.ai.hand_builder.choose_tile_to_discard(
-                new_tiles,
-                closed_hand,
-                open_sets_34,
-                print_log=False
-            )
-
-            shanten = selected_tile.shanten
-            had_to_be_called = self.meld_had_to_be_called(tile)
-            had_to_be_called = had_to_be_called or selected_tile.had_to_be_discarded
-
-            # each strategy can use their own value to min shanten number
-            if shanten > self.min_shanten:
-                return None, None
-
-            # sometimes we had to call tile, even if it will not improve our hand
-            # otherwise we can call only with improvements of shanten
-            if not had_to_be_called and shanten >= self.player.ai.shanten:
-                return None, None
-
-            tiles = [
-                first_tile,
-                second_tile,
-                tile
-            ]
-
-            meld = Meld()
-            meld.type = meld_type
-            meld.tiles = sorted(tiles)
-
-            return meld, selected_tile
-
-        return None, None
+        return meld, selected_tile
 
     def meld_had_to_be_called(self, tile):
         """
@@ -270,24 +240,47 @@ class BaseStrategy(object):
         self.dora_count_central += self.aka_dora_count
         self.dora_count_total = self.dora_count_central + self.dora_count_not_central
 
-    def _find_best_meld_to_open(self, possible_melds, new_tiles, closed_hand):
-        if len(possible_melds) == 1:
-            return possible_melds[0]
+    def _find_best_meld_to_open(self, possible_melds, new_tiles, closed_hand, discarded_tile):
+        discarded_tile_34 = discarded_tile // 4
 
         final_results = []
-        for meld in possible_melds:
-            open_sets_34 = self.player.meld_34_tiles + [meld]
+        for meld_34 in possible_melds:
+            meld_34_copy = meld_34.copy()
+            closed_hand_copy = closed_hand.copy()
+            open_sets_34 = self.player.meld_34_tiles + [meld_34]
+
+            meld_type = is_chi(meld_34_copy) and Meld.CHI or Meld.PON
+            meld_34_copy.remove(discarded_tile_34)
+
+            first_tile = TilesConverter.find_34_tile_in_136_array(meld_34_copy[0], closed_hand_copy)
+            closed_hand_copy.remove(first_tile)
+
+            second_tile = TilesConverter.find_34_tile_in_136_array(meld_34_copy[1], closed_hand_copy)
+            closed_hand_copy.remove(second_tile)
+
+            tiles = [
+                first_tile,
+                second_tile,
+                discarded_tile
+            ]
+
+            meld = Meld()
+            meld.type = meld_type
+            meld.tiles = sorted(tiles)
+
+            melds = self.player.melds + [meld]
 
             selected_tile = self.player.ai.hand_builder.choose_tile_to_discard(
                 new_tiles,
-                closed_hand,
+                closed_hand_copy,
+                melds,
                 open_sets_34,
                 print_log=False
             )
 
             final_results.append({
                 'discard_tile': selected_tile,
-                'meld_print': TilesConverter.to_one_line_string([meld[0] * 4, meld[1] * 4, meld[2] * 4]),
+                'meld_print': TilesConverter.to_one_line_string([meld_34[0] * 4, meld_34[1] * 4, meld_34[2] * 4]),
                 'meld': meld
             })
 
@@ -297,4 +290,4 @@ class BaseStrategy(object):
 
         DecisionsLogger.debug(log.MELD_PREPARE, 'Options with meld calling', context=final_results)
 
-        return final_results[0]['meld']
+        return final_results[0]

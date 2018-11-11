@@ -209,16 +209,16 @@ class HandBuilder:
         return n
 
     def divide_hand(self, tiles, waiting):
+        tiles_copy = tiles.copy()
+
         for i in range(0, 4):
-            if waiting * 4 + i not in tiles:
-                tiles += [waiting * 4 + i]
+            if waiting * 4 + i not in tiles_copy:
+                tiles_copy += [waiting * 4 + i]
                 break
 
-        tiles_34 = TilesConverter.to_34_array(tiles)
+        tiles_34 = TilesConverter.to_34_array(tiles_copy)
 
         results = self.player.ai.hand_divider.divide_hand(tiles_34)
-        if not results:
-            print("=============================================")
         return results, tiles_34
 
     def check_suji_and_kabe(self, tiles_34, waiting):

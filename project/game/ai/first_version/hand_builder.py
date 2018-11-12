@@ -305,6 +305,8 @@ class HandBuilder:
         player_tiles_copy = self.player.tiles.copy()
         player_melds_copy = self.player.melds.copy()
 
+        closed_tiles_34 = TilesConverter.to_34_array(self.player.closed_hand)
+
         for discard_option in discard_options:
             tile = discard_option.find_tile_in_hand(self.player.closed_hand)
             # temporary remove discard option to estimate hand value
@@ -348,7 +350,7 @@ class HandBuilder:
                             break
 
                         simplified_waiting = simplify(waiting)
-                        have_suji, have_kabe = self.check_suji_and_kabe(tiles_34, waiting)
+                        have_suji, have_kabe = self.check_suji_and_kabe(closed_tiles_34, waiting)
 
                         # TODO: not sure about suji/kabe priority, so we keep them same for now
                         if 3 <= simplified_waiting <= 5:

@@ -50,7 +50,9 @@ class Riichi:
         results, tiles_34 = self.player.ai.hand_builder.divide_hand(tiles, waiting)
         result = results[0]
 
-        have_suji, have_kabe = self.player.ai.hand_builder.check_suji_and_kabe(tiles_34, waiting)
+        closed_tiles_34 = TilesConverter.to_34_array(self.player.closed_hand)
+
+        have_suji, have_kabe = self.player.ai.hand_builder.check_suji_and_kabe(closed_tiles_34, waiting)
 
         # what if we have yaku
         if hand_value.yaku is not None and hand_value.cost is not None:

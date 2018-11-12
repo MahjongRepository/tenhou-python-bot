@@ -104,7 +104,6 @@ class ImplementationAI(InterfaceAI):
             self.player.tiles,
             self.player.closed_hand,
             self.player.melds,
-            self.player.meld_34_tiles,
             print_log
         )
 
@@ -285,7 +284,7 @@ class ImplementationAI(InterfaceAI):
                 previous_results, previous_shanten = self.hand_builder.find_discard_options(
                     tiles,
                     closed_hand_tiles,
-                    melds_34
+                    self.player.melds
                 )
                 previous_results = [x for x in previous_results if x.shanten == previous_shanten]
                 previous_waits_cnt = sorted(previous_results, key=lambda x: -x.ukeire)[0].ukeire

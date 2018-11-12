@@ -92,13 +92,11 @@ class HandBuilder:
             TANKI_WAIT_37_RAW: 0
         }
 
-    # FIXME: melds and open_sets_34 duplicate each other, get rid of open_sets_34
-    def discard_tile(self, tiles, closed_hand, melds, open_sets_34, print_log=True):
+    def discard_tile(self, tiles, closed_hand, melds, print_log=True):
         selected_tile = self.choose_tile_to_discard(
             tiles,
             closed_hand,
             melds,
-            open_sets_34,
             print_log=print_log
         )
 
@@ -157,15 +155,17 @@ class HandBuilder:
 
         return waiting, shanten
 
-    def find_discard_options(self, tiles, closed_hand, open_sets_34=None):
+    def find_discard_options(self, tiles, closed_hand, melds=None):
         """
         :param tiles: array of tiles in 136 format
         :param closed_hand: array of tiles in 136 format
-        :param open_sets_34: array of array with tiles in 34 format
+        :param melds:
         :return:
         """
-        if open_sets_34 is None:
-            open_sets_34 = []
+        if melds is None:
+            melds = []
+
+        open_sets_34 = [x.tiles_34 for x in melds]
 
         tiles_34 = TilesConverter.to_34_array(tiles)
         closed_tiles_34 = TilesConverter.to_34_array(closed_hand)
@@ -424,8 +424,7 @@ class HandBuilder:
         # FIXME: 2. if safeness is the same, we try to discard non-dora tiles
         return best_discard_desc[0]['discard_option']
 
-    # FIXME: melds and open_sets_34 duplicate each other, get rid of open_sets_34
-    def choose_tile_to_discard(self, tiles, closed_hand, melds, open_sets_34, print_log=True):
+    def choose_tile_to_discard(self, tiles, closed_hand, melds, print_log=True):
         """
         Try to find best tile to discard, based on different rules
         """
@@ -433,7 +432,7 @@ class HandBuilder:
         discard_options, _ = self.find_discard_options(
             tiles,
             closed_hand,
-            open_sets_34
+            melds
         )
 
         # our strategy can affect discard options
@@ -441,7 +440,7 @@ class HandBuilder:
             discard_options = self.ai.current_strategy.determine_what_to_discard(
                 discard_options,
                 closed_hand,
-                open_sets_34
+                melds
             )
 
         had_to_be_discarded_tiles = [x for x in discard_options if x.had_to_be_discarded]
@@ -598,7 +597,7 @@ class HandBuilder:
             results, shanten = self.find_discard_options(
                 tiles,
                 self.player.closed_hand,
-                self.player.meld_34_tiles
+                self.player.melds
             )
             results = [x for x in results if x.shanten == discard_option.shanten - 1]
 

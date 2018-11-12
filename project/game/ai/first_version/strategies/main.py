@@ -274,7 +274,6 @@ class BaseStrategy(object):
                 new_tiles,
                 closed_hand_copy,
                 melds,
-                open_sets_34,
                 print_log=False
             )
 

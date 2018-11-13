@@ -268,13 +268,12 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
 
         # let's skip first yakuhai early in the game
         tile = self._string_to_136_tile(honors='7')
-        # when we are melding tile it's already counted as discarded
-        self.table.add_discarded_tile(1, tile, False)
         meld, _ = self.player.try_to_call_meld(tile, True)
         self.assertEqual(meld, None)
 
-        # now the second one is out
+        # now one is out
         self.table.add_discarded_tile(1, tile, False)
+
         meld, _ = self.player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)
         self.assertEqual(self._to_string(meld.tiles), '777z')

@@ -650,3 +650,71 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
             self._string_to_136_tile(honors='2'),
             '5s'
         )
+
+    def _avoid_furiten_helper(self, tiles, furiten_tile, other_tile, tile_to_draw, tile_to_discard_str):
+        table = Table()
+        player = table.player
+        player.round_step = 2
+        player.dealer_seat = 3
+
+        player.init_hand(tiles)
+
+        player.add_discarded_tile(Tile(furiten_tile, True))
+
+        for i in range(0, 2):
+            table.add_discarded_tile(1, other_tile, False)
+
+        player.draw_tile(tile_to_draw)
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), tile_to_discard_str)
+
+    def test_avoid_furiten(self):
+        self._avoid_furiten_helper(
+            self._string_to_136_array(man='22336688', pin='99', honors='267'),
+            self._string_to_136_tile(honors='6'),
+            self._string_to_136_tile(honors='7'),
+            self._string_to_136_tile(honors='2'),
+            '6z'
+        )
+
+        self._avoid_furiten_helper(
+            self._string_to_136_array(man='22336688', pin='99', honors='267'),
+            self._string_to_136_tile(honors='7'),
+            self._string_to_136_tile(honors='6'),
+            self._string_to_136_tile(honors='2'),
+            '7z'
+        )
+
+    def _choose_furiten_over_karaten_helper(self, tiles, furiten_tile, karaten_tile, tile_to_draw, tile_to_discard_str):
+        table = Table()
+        player = table.player
+        player.round_step = 2
+        player.dealer_seat = 3
+
+        player.init_hand(tiles)
+
+        player.add_discarded_tile(Tile(furiten_tile, True))
+
+        for i in range(0, 3):
+            table.add_discarded_tile(1, karaten_tile, False)
+
+        player.draw_tile(tile_to_draw)
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), tile_to_discard_str)
+
+    def test_choose_furiten_over_karaten(self):
+        self._choose_furiten_over_karaten_helper(
+            self._string_to_136_array(man='22336688', pin='99', honors='267'),
+            self._string_to_136_tile(honors='6'),
+            self._string_to_136_tile(honors='7'),
+            self._string_to_136_tile(honors='2'),
+            '7z'
+        )
+
+        self._choose_furiten_over_karaten_helper(
+            self._string_to_136_array(man='22336688', pin='99', honors='267'),
+            self._string_to_136_tile(honors='7'),
+            self._string_to_136_tile(honors='6'),
+            self._string_to_136_tile(honors='2'),
+            '6z'
+        )

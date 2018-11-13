@@ -181,11 +181,13 @@ class HandBuilder:
             tiles_34[hand_tile] += 1
 
             if waiting:
+                wait_to_ukeire = dict(zip(waiting, [self.count_tiles([x], closed_tiles_34) for x in waiting]))
                 results.append(DiscardOption(player=self.player,
                                              shanten=shanten,
                                              tile_to_discard=hand_tile,
                                              waiting=waiting,
-                                             ukeire=self.count_tiles(waiting, closed_tiles_34)))
+                                             ukeire=self.count_tiles(waiting, closed_tiles_34),
+                                             wait_to_ukeire=wait_to_ukeire))
 
         if is_agari:
             shanten = Shanten.AGARI_STATE
@@ -252,6 +254,11 @@ class HandBuilder:
         # if not 1 then 2
         assert len(discard_desc) == 2
 
+        num_furiten_waits = len([x for x in discard_desc if x['is_furiten']])
+        # if we choose tanki, we always prefer non-furiten wait over furiten one, no matter what the cost is
+        if num_furiten_waits == 1:
+            return [x for x in discard_desc if not x['is_furiten']][0]['discard_option']
+
         best_discard_desc = [x for x in discard_desc if x['hand_cost'] == discard_desc[0]['hand_cost']]
 
         # first of all we choose the most expensive wait
@@ -297,6 +304,10 @@ class HandBuilder:
         # if everything is the same we just choose the first one
         return best_discard_desc[0]['discard_option']
 
+    def _is_furiten(self, tile_34):
+        discarded_tiles = [x.value // 4 for x in self.player.discards]
+        return tile_34 in discarded_tiles
+
     def _choose_best_discard_in_tempai(self, tiles, melds, discard_options):
         # first of all we find tiles that have the best hand cost * ukeire value
         call_riichi = not self.player.is_open_hand
@@ -318,14 +329,31 @@ class HandBuilder:
             discarded_tile = Tile(tile, False)
             self.player.discards.append(discarded_tile)
 
-            cost_x_ukeire = 0
             hand_cost = 0
             if len(discard_option.waiting) == 1:
                 waiting = discard_option.waiting[0]
-                hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=call_riichi)
+                is_furiten = self._is_furiten(waiting)
+
+                hand_cost_tsumo = 0
+                cost_x_ukeire_tsumo = 0
+                hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=call_riichi, is_tsumo=True)
                 if hand_value.error is None:
-                    hand_cost = hand_value.cost['main']
-                    cost_x_ukeire = hand_cost * discard_option.ukeire
+                    hand_cost_tsumo = hand_value.cost['main'] + 2 * hand_value.cost['additional']
+                    cost_x_ukeire_tsumo = hand_cost_tsumo * discard_option.ukeire
+
+                hand_cost_ron = 0
+                cost_x_ukeire_ron = 0
+                if not is_furiten:
+                    hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=call_riichi, is_tsumo=False)
+                    if hand_value.error is None:
+                        hand_cost_ron = hand_value.cost['main']
+                        cost_x_ukeire_ron = hand_cost_ron * discard_option.ukeire
+
+                # these are abstract numbers used to compare different waits
+                # some don't have yaku, some furiten, etc.
+                # so we use an abstract formula of 1 tsumo cost + 3 ron costs
+                hand_cost = hand_cost_tsumo + 3 * hand_cost_ron
+                cost_x_ukeire = cost_x_ukeire_tsumo + 3 * cost_x_ukeire_ron
 
                 # let's check if this is a tanki wait
                 results, tiles_34 = self.divide_hand(self.player.tiles, waiting)
@@ -379,22 +407,41 @@ class HandBuilder:
                     'discard_option': discard_option,
                     'hand_cost': hand_cost,
                     'cost_x_ukeire': cost_x_ukeire,
+                    'is_furiten': is_furiten,
                     'is_tanki': is_tanki,
                     'tanki_type': tanki_type
                 })
             else:
-                cost_x_ukeire_sum = 0
-                for waiting in discard_option.waiting:
-                    hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=call_riichi)
-                    if hand_value.error is None:
-                        cost_x_ukeire_sum += hand_value.cost['main'] * discard_option.ukeire
+                cost_x_ukeire_tsumo = 0
+                cost_x_ukeire_ron = 0
+                is_furiten = False
 
-                cost_x_ukeire = cost_x_ukeire_sum / len(discard_option.waiting)
+                for waiting in discard_option.waiting:
+                    is_furiten = is_furiten or self._is_furiten(waiting)
+
+                for waiting in discard_option.waiting:
+                    hand_value = self.player.ai.estimate_hand_value(waiting,
+                                                                    call_riichi=call_riichi,
+                                                                    is_tsumo=True)
+                    if hand_value.error is None:
+                        cost_x_ukeire_tsumo += (hand_value.cost['main']
+                                                + 2 * hand_value.cost['additional']
+                                                ) * discard_option.wait_to_ukeire[waiting]
+
+                    if not is_furiten:
+                        hand_value = self.player.ai.estimate_hand_value(waiting,
+                                                                        call_riichi=call_riichi,
+                                                                        is_tsumo=False)
+                        if hand_value.error is None:
+                            cost_x_ukeire_ron += hand_value.cost['main'] * discard_option.wait_to_ukeire[waiting]
+
+                cost_x_ukeire = cost_x_ukeire_tsumo + 3 * cost_x_ukeire_ron
 
                 discard_desc.append({
                     'discard_option': discard_option,
                     'hand_cost': None,
                     'cost_x_ukeire': cost_x_ukeire,
+                    'is_furiten': is_furiten,
                     'is_tanki': False,
                     'tanki_type': None
                 })
@@ -404,18 +451,20 @@ class HandBuilder:
             self.player.melds = player_melds_copy
             self.player.discards.remove(discarded_tile)
 
-        discard_desc = sorted(discard_desc, key=lambda k: k['cost_x_ukeire'], reverse=True)
-        best_discard_desc = [x for x in discard_desc if x['cost_x_ukeire'] == discard_desc[0]['cost_x_ukeire']]
-        num_tanki_waits = len([x for x in discard_desc if x['is_tanki'] == True])
+        discard_desc = sorted(discard_desc, key=lambda k: (k['cost_x_ukeire'], not k['is_furiten']), reverse=True)
 
         # if we don't have any good options, e.g. all our possible waits ara karaten
         # FIXME: in that case, discard the safest tile
         if discard_desc[0]['cost_x_ukeire'] == 0:
             return sorted(discard_options, key=lambda x: x.valuation)[0]
 
+        num_tanki_waits = len([x for x in discard_desc if x['is_tanki']])
+
         # what if all our waits are tanki waits? we need a special handling for that case
         if num_tanki_waits == len(discard_options):
             return self._choose_best_tanki_wait(discard_desc)
+
+        best_discard_desc = [x for x in discard_desc if x['cost_x_ukeire'] == discard_desc[0]['cost_x_ukeire']]
 
         # we only have one best option based on ukeire and cost, nothing more to do here
         if len(best_discard_desc) == 1:

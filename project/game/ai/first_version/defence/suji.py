@@ -71,21 +71,21 @@ class Suji(Defence):
             base = suji - suji_temp - 1
 
             if suji_temp == self.FIRST_SUJI:
-                result = [
+                result += [
                     base + 1,
                     base + 4,
                     base + 7
                 ]
 
             if suji_temp == self.SECOND_SUJI:
-                result = [
+                result += [
                     base + 2,
                     base + 5,
                     base + 8
                 ]
 
             if suji_temp == self.THIRD_SUJI:
-                result = [
+                result += [
                     base + 3,
                     base + 6,
                     base + 9

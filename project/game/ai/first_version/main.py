@@ -103,7 +103,7 @@ class ImplementationAI(InterfaceAI):
         return self.hand_builder.discard_tile(
             self.player.tiles,
             self.player.closed_hand,
-            self.player.meld_34_tiles,
+            self.player.melds,
             print_log
         )
 
@@ -177,11 +177,12 @@ class ImplementationAI(InterfaceAI):
 
         return self.current_strategy and True or False
 
-    def estimate_hand_value(self, win_tile, tiles=None, call_riichi=False):
+    def estimate_hand_value(self, win_tile, tiles=None, call_riichi=False, is_tsumo=False):
         """
         :param win_tile: 34 tile format
         :param tiles:
         :param call_riichi:
+        :param is_tsumo
         :return:
         """
         win_tile *= 4
@@ -200,7 +201,8 @@ class ImplementationAI(InterfaceAI):
             player_wind=self.player.player_wind,
             round_wind=self.player.table.round_wind_tile,
             has_aka_dora=self.player.table.has_aka_dora,
-            has_open_tanyao=self.player.table.has_open_tanyao
+            has_open_tanyao=self.player.table.has_open_tanyao,
+            is_tsumo=is_tsumo,
         )
 
         result = self.finished_hand.estimate_hand_value(tiles,
@@ -284,7 +286,7 @@ class ImplementationAI(InterfaceAI):
                 previous_results, previous_shanten = self.hand_builder.find_discard_options(
                     tiles,
                     closed_hand_tiles,
-                    melds_34
+                    self.player.melds
                 )
                 previous_results = [x for x in previous_results if x.shanten == previous_shanten]
                 previous_waits_cnt = sorted(previous_results, key=lambda x: -x.ukeire)[0].ukeire

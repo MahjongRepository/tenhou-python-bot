@@ -37,32 +37,22 @@ class Riichi:
 
     def _should_call_riichi_one_sided(self):
         count_tiles = self.player.ai.hand_builder.count_tiles(
-            self.player.ai.waiting,
-            TilesConverter.to_34_array(self.player.closed_hand)
+            self.player.ai.waiting, TilesConverter.to_34_array(self.player.closed_hand)
         )
         waiting = self.player.ai.waiting[0]
         hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=False)
 
-        tiles = self.player.closed_hand + [waiting * 4]
+        tiles = self.player.closed_hand.copy()
         closed_melds = [x for x in self.player.melds if not x.opened]
         for meld in closed_melds:
             tiles.extend(meld.tiles[:3])
 
-        tiles_34 = TilesConverter.to_34_array(tiles)
-
-        results = self.player.ai.hand_divider.divide_hand(tiles_34)
+        results, tiles_34 = self.player.ai.hand_builder.divide_hand(tiles, waiting)
         result = results[0]
 
-        # let's find suji-traps in our discard
-        suji_tiles = self.player.ai.defence.suji.find_suji_against_self(self.player)
-        have_suji = waiting in suji_tiles
+        closed_tiles_34 = TilesConverter.to_34_array(self.player.closed_hand)
 
-        # let's find kabe
-        kabe_tiles = self.player.ai.defence.kabe.find_all_kabe(tiles_34)
-        have_kabe = False
-        for kabe in kabe_tiles:
-            if waiting == kabe.tile_34 and kabe.kabe_type == KabeTile.STRONG_KABE:
-                have_kabe = True
+        have_suji, have_kabe = self.player.ai.hand_builder.check_suji_and_kabe(closed_tiles_34, waiting)
 
         # what if we have yaku
         if hand_value.yaku is not None and hand_value.cost is not None:

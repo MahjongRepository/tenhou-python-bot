@@ -4,6 +4,7 @@ import unittest
 from mahjong.constants import EAST, SOUTH, WEST, NORTH, HAKU, HATSU, CHUN, FIVE_RED_SOU, FIVE_RED_PIN
 from mahjong.tests_mixin import TestMixin
 from mahjong.meld import Meld
+from mahjong.tile import Tile
 
 from game.ai.discard import DiscardOption
 from game.ai.first_version.strategies.main import BaseStrategy
@@ -194,7 +195,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         table = Table()
         player = table.player
 
-        tiles = self._string_to_136_array(sou='123456', pin='123456', man='9', honors='2')
+        tiles = self._string_to_136_array(sou='123456', pin='123455', man='9', honors='2')
         player.init_hand(tiles)
 
         discarded_tile = player.discard_tile()
@@ -368,3 +369,352 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
         discarded_tile = player.discard_tile()
         self.assertEqual(self._to_string([discarded_tile]), '8s')
+
+    def test_choose_correct_wait_finished_yaku(self):
+        table = Table()
+        player = table.player
+        player.round_step = 2
+
+        tiles = self._string_to_136_array(man='23478', sou='23488', pin='235')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(pin='4'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '5p')
+
+        tiles = self._string_to_136_array(man='34578', sou='34588', pin='235')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(pin='4'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '2p')
+
+        tiles = self._string_to_136_array(man='34578', sou='34588', pin='235')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(pin='4'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '2p')
+
+        tiles = self._string_to_136_array(man='3457', sou='233445588')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(man='8'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '2s')
+
+        tiles = self._string_to_136_array(man='3457', sou='223344588')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(man='8'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '5s')
+
+    def test_choose_correct_wait_yaku_versus_dora(self):
+        table = Table()
+        player = table.player
+        player.round_step = 2
+
+        table.add_dora_indicator(self._string_to_136_tile(pin='4'))
+
+        tiles = self._string_to_136_array(man='23478', sou='23488', pin='235')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(pin='4'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '5p')
+
+        table = Table()
+        player = table.player
+        player.round_step = 2
+
+        table.add_dora_indicator(self._string_to_136_tile(pin='1'))
+
+        tiles = self._string_to_136_array(man='34578', sou='34588', pin='235')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(pin='4'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '2p')
+
+    def test_choose_correct_wait_yaku_potentially(self):
+        table = Table()
+        player = table.player
+        player.round_step = 2
+
+        tiles = self._string_to_136_array(man='1134578', sou='567788')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(man='9'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '5s')
+
+        tiles = self._string_to_136_array(man='1134578', sou='556678')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(man='9'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '8s')
+
+    def test_choose_better_tanki_honor(self):
+        table = Table()
+        player = table.player
+        player.round_step = 2
+        player.dealer_seat = 3
+
+        table.add_dora_indicator(self._string_to_136_tile(man='8'))
+
+        tiles = self._string_to_136_array(man='11447799', sou='556', honors='45')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(honors='4'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '6s')
+
+        tiles = self._string_to_136_array(man='11447799', sou='556', honors='45')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(honors='5'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '6s')
+
+        tiles = self._string_to_136_array(man='11447799', sou='556', honors='45')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(sou='6'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '5z')
+
+        tiles = self._string_to_136_array(man='11447799', sou='556', honors='34')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(sou='6'))
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '3z')
+
+    def _choose_tanki_with_kabe_helper(self, tiles, kabe_tiles, tile_to_draw, tile_to_discard_str):
+        table = Table()
+        player = table.player
+        player.round_step = 2
+        player.dealer_seat = 3
+
+        for tile in kabe_tiles:
+            for i in range(0, 4):
+                table.add_discarded_tile(1, tile, False)
+
+        player.init_hand(tiles)
+        player.draw_tile(tile_to_draw)
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), tile_to_discard_str)
+
+    def test_choose_tanki_with_kabe(self):
+        self._choose_tanki_with_kabe_helper(
+            self._string_to_136_array(sou='119', pin='224477', man='5669'),
+            [self._string_to_136_tile(sou='8')],
+            self._string_to_136_tile(man='5'),
+            '9m'
+        )
+
+        self._choose_tanki_with_kabe_helper(
+            self._string_to_136_array(sou='119', pin='224477', man='5669'),
+            [self._string_to_136_tile(man='8')],
+            self._string_to_136_tile(man='5'),
+            '9s'
+        )
+
+        self._choose_tanki_with_kabe_helper(
+            self._string_to_136_array(sou='118', pin='224477', man='5668'),
+            [self._string_to_136_tile(sou='7')],
+            self._string_to_136_tile(man='5'),
+            '8m'
+        )
+
+        self._choose_tanki_with_kabe_helper(
+            self._string_to_136_array(sou='118', pin='224477', man='5668'),
+            [self._string_to_136_tile(man='7')],
+            self._string_to_136_tile(man='5'),
+            '8s'
+        )
+
+        self._choose_tanki_with_kabe_helper(
+            self._string_to_136_array(sou='117', pin='224477', man='1157'),
+            [self._string_to_136_tile(sou='6'), self._string_to_136_tile(sou='9')],
+            self._string_to_136_tile(man='5'),
+            '7m'
+        )
+
+        self._choose_tanki_with_kabe_helper(
+            self._string_to_136_array(sou='117', pin='224477', man='1157'),
+            [self._string_to_136_tile(man='6'), self._string_to_136_tile(man='9')],
+            self._string_to_136_tile(man='5'),
+            '7s'
+        )
+
+        self._choose_tanki_with_kabe_helper(
+            self._string_to_136_array(sou='116', pin='224477', man='1126'),
+            [self._string_to_136_tile(sou='5'), self._string_to_136_tile(sou='7')],
+            self._string_to_136_tile(man='2'),
+            '6m'
+        )
+
+        self._choose_tanki_with_kabe_helper(
+            self._string_to_136_array(sou='116', pin='224477', man='1126'),
+            [self._string_to_136_tile(man='5'), self._string_to_136_tile(man='7')],
+            self._string_to_136_tile(man='2'),
+            '6s'
+        )
+
+        self._choose_tanki_with_kabe_helper(
+            self._string_to_136_array(sou='115', pin='224477', man='1125'),
+            [self._string_to_136_tile(sou='4'), self._string_to_136_tile(sou='6')],
+            self._string_to_136_tile(man='2'),
+            '5m'
+        )
+
+        self._choose_tanki_with_kabe_helper(
+            self._string_to_136_array(sou='115', pin='224477', man='1125'),
+            [self._string_to_136_tile(man='4'), self._string_to_136_tile(man='6')],
+            self._string_to_136_tile(man='2'),
+            '5s'
+        )
+
+    def _choose_tanki_with_suji_helper(self, tiles, suji_tiles, tile_to_draw, tile_to_discard_str):
+        table = Table()
+        player = table.player
+        player.round_step = 2
+        player.dealer_seat = 3
+
+        player.init_hand(tiles)
+
+        for tile in suji_tiles:
+            player.add_discarded_tile(Tile(tile, True))
+
+        player.draw_tile(tile_to_draw)
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), tile_to_discard_str)
+
+    def test_choose_tanki_with_suji(self):
+        self._choose_tanki_with_suji_helper(
+            self._string_to_136_array(man='22336688', sou='19', pin='99', honors='2'),
+            [self._string_to_136_tile(sou='6')],
+            self._string_to_136_tile(honors='2'),
+            '1s'
+        )
+
+        self._choose_tanki_with_suji_helper(
+            self._string_to_136_array(man='22336688', sou='19', pin='99', honors='2'),
+            [self._string_to_136_tile(sou='4')],
+            self._string_to_136_tile(honors='2'),
+            '9s'
+        )
+
+        self._choose_tanki_with_suji_helper(
+            self._string_to_136_array(man='22336688', sou='2', pin='299', honors='2'),
+            [self._string_to_136_tile(sou='5')],
+            self._string_to_136_tile(honors='2'),
+            '2p'
+        )
+
+        self._choose_tanki_with_suji_helper(
+            self._string_to_136_array(man='22336688', sou='2', pin='299', honors='2'),
+            [self._string_to_136_tile(pin='5')],
+            self._string_to_136_tile(honors='2'),
+            '2s'
+        )
+
+        self._choose_tanki_with_suji_helper(
+            self._string_to_136_array(man='22336688', sou='3', pin='399', honors='2'),
+            [self._string_to_136_tile(sou='6')],
+            self._string_to_136_tile(honors='2'),
+            '3p'
+        )
+
+        self._choose_tanki_with_suji_helper(
+            self._string_to_136_array(man='22336688', sou='3', pin='399', honors='2'),
+            [self._string_to_136_tile(pin='6')],
+            self._string_to_136_tile(honors='2'),
+            '3s'
+        )
+
+        self._choose_tanki_with_suji_helper(
+            self._string_to_136_array(man='22336688', sou='4', pin='499', honors='2'),
+            [self._string_to_136_tile(sou='1'), self._string_to_136_tile(sou='7')],
+            self._string_to_136_tile(honors='2'),
+            '4p'
+        )
+
+        self._choose_tanki_with_suji_helper(
+            self._string_to_136_array(man='22336688', sou='4', pin='499', honors='2'),
+            [self._string_to_136_tile(pin='1'), self._string_to_136_tile(pin='7')],
+            self._string_to_136_tile(honors='2'),
+            '4s'
+        )
+
+        self._choose_tanki_with_suji_helper(
+            self._string_to_136_array(man='22336688', sou='5', pin='599', honors='2'),
+            [self._string_to_136_tile(sou='2'), self._string_to_136_tile(sou='8')],
+            self._string_to_136_tile(honors='2'),
+            '5p'
+        )
+
+        self._choose_tanki_with_suji_helper(
+            self._string_to_136_array(man='22336688', sou='5', pin='599', honors='2'),
+            [self._string_to_136_tile(pin='2'), self._string_to_136_tile(pin='8')],
+            self._string_to_136_tile(honors='2'),
+            '5s'
+        )
+
+    def _avoid_furiten_helper(self, tiles, furiten_tile, other_tile, tile_to_draw, tile_to_discard_str):
+        table = Table()
+        player = table.player
+        player.round_step = 2
+        player.dealer_seat = 3
+
+        player.init_hand(tiles)
+
+        player.add_discarded_tile(Tile(furiten_tile, True))
+
+        for i in range(0, 2):
+            table.add_discarded_tile(1, other_tile, False)
+
+        player.draw_tile(tile_to_draw)
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), tile_to_discard_str)
+
+    def test_avoid_furiten(self):
+        self._avoid_furiten_helper(
+            self._string_to_136_array(man='22336688', pin='99', honors='267'),
+            self._string_to_136_tile(honors='6'),
+            self._string_to_136_tile(honors='7'),
+            self._string_to_136_tile(honors='2'),
+            '6z'
+        )
+
+        self._avoid_furiten_helper(
+            self._string_to_136_array(man='22336688', pin='99', honors='267'),
+            self._string_to_136_tile(honors='7'),
+            self._string_to_136_tile(honors='6'),
+            self._string_to_136_tile(honors='2'),
+            '7z'
+        )
+
+    def _choose_furiten_over_karaten_helper(self, tiles, furiten_tile, karaten_tile, tile_to_draw, tile_to_discard_str):
+        table = Table()
+        player = table.player
+        player.round_step = 2
+        player.dealer_seat = 3
+
+        player.init_hand(tiles)
+
+        player.add_discarded_tile(Tile(furiten_tile, True))
+
+        for i in range(0, 3):
+            table.add_discarded_tile(1, karaten_tile, False)
+
+        player.draw_tile(tile_to_draw)
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), tile_to_discard_str)
+
+    def test_choose_furiten_over_karaten(self):
+        self._choose_furiten_over_karaten_helper(
+            self._string_to_136_array(man='22336688', pin='99', honors='267'),
+            self._string_to_136_tile(honors='6'),
+            self._string_to_136_tile(honors='7'),
+            self._string_to_136_tile(honors='2'),
+            '7z'
+        )
+
+        self._choose_furiten_over_karaten_helper(
+            self._string_to_136_array(man='22336688', pin='99', honors='267'),
+            self._string_to_136_tile(honors='7'),
+            self._string_to_136_tile(honors='6'),
+            self._string_to_136_tile(honors='2'),
+            '6z'
+        )

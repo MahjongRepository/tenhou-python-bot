@@ -245,8 +245,12 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
     def test_find_impossible_waits_and_honor_tiles(self):
         table = Table()
 
-        tiles = self._string_to_136_array(honors='1133')
+        tiles = self._string_to_136_array(honors='1133', man='123', sou='456', pin='999')
         table.player.init_hand(tiles)
+
+        table.player.add_called_meld(self._make_meld(Meld.CHI, man='123'))
+        table.player.add_called_meld(self._make_meld(Meld.CHI, sou='456'))
+        table.player.add_called_meld(self._make_meld(Meld.PON, pin='999'))
 
         table.add_discarded_tile(1, self._string_to_136_tile(honors='1'), False)
         table.add_discarded_tile(1, self._string_to_136_tile(honors='3'), False)
@@ -262,8 +266,10 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
     def test_find_impossible_waits_and_kabe_technique(self):
         table = Table()
-        tiles = self._string_to_136_array(pin='11122777799')
+        tiles = self._string_to_136_array(pin='11122777799', man='999')
         table.player.init_hand(tiles)
+
+        table.player.add_called_meld(self._make_meld(Meld.PON, man='999'))
 
         table.add_discarded_tile(1, self._string_to_136_tile(pin='2'), False)
         table.add_discarded_tile(1, self._string_to_136_tile(pin='2'), False)
@@ -278,8 +284,11 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(self._to_string([x.value * 4 for x in result]), '19p')
 
         table = Table()
-        tiles = self._string_to_136_array(pin='33337777')
+        tiles = self._string_to_136_array(pin='33337777', man='888999')
         table.player.init_hand(tiles)
+
+        table.player.add_called_meld(self._make_meld(Meld.PON, man='888'))
+        table.player.add_called_meld(self._make_meld(Meld.PON, man='999'))
 
         table.add_discarded_tile(1, self._string_to_136_tile(pin='5'), False)
         table.add_discarded_tile(1, self._string_to_136_tile(pin='5'), False)
@@ -294,8 +303,10 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(self._to_string([x.value * 4 for x in result]), '5p')
 
         table = Table()
-        tiles = self._string_to_136_array(pin='33334446666')
+        tiles = self._string_to_136_array(pin='33334446666', man='999')
         table.player.init_hand(tiles)
+
+        table.player.add_called_meld(self._make_meld(Meld.PON, man='999'))
 
         table.add_discarded_tile(1, self._string_to_136_tile(pin='5'), False)
         table.add_discarded_tile(1, self._string_to_136_tile(pin='5'), False)

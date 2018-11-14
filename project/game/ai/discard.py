@@ -30,8 +30,10 @@ class DiscardOption(object):
     valuation = None
     # how danger this tile is
     danger = None
+    # wait to ukeire map
+    wait_to_ukeire = None
 
-    def __init__(self, player, tile_to_discard, shanten, waiting, ukeire, danger=100):
+    def __init__(self, player, tile_to_discard, shanten, waiting, ukeire, danger=100, wait_to_ukeire=None):
         """
         :param player:
         :param tile_to_discard: tile in 34 format
@@ -48,6 +50,7 @@ class DiscardOption(object):
         self.danger = danger
         self.had_to_be_saved = False
         self.had_to_be_discarded = False
+        self.wait_to_ukeire = wait_to_ukeire
 
         self.calculate_value()
 

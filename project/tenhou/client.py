@@ -366,8 +366,6 @@ class TenhouClient(Client):
                     if_tsumogiri = message[1].islower()
                     player_seat = self.decoder.get_enemy_seat(message)
 
-                    self.table.add_discarded_tile(player_seat, tile, if_tsumogiri)
-
                     # open hand suggestions
                     if 't=' in message:
                         # Possible t="" suggestions
@@ -418,6 +416,8 @@ class TenhouClient(Client):
                         # this meld will not improve our hand
                         else:
                             self._send_message('<N />')
+
+                    self.table.add_discarded_tile(player_seat, tile, if_tsumogiri)
 
                 if 'owari' in message:
                     values = self.decoder.parse_final_scores_and_uma(message)

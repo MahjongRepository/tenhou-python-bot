@@ -68,8 +68,13 @@ class PlayerInterface(object):
         # we already added chankan as a pon set
         if meld.type == Meld.CHANKAN:
             tile_34 = meld.tiles[0] // 4
+
             pon_set = [x for x in self.melds if x.type == Meld.PON and (x.tiles[0] // 4) == tile_34]
-            self.melds.remove(pon_set[0])
+
+            # when we are doing reconnect and we have called chankan set
+            # we will not have called pon set in the hand
+            if pon_set:
+                self.melds.remove(pon_set[0])
 
         self.melds.append(meld)
 

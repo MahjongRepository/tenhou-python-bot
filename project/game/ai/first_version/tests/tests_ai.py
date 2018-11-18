@@ -514,7 +514,6 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         self.assertEqual(player.should_call_kan(tile, False), None)
 
-
     def test_closed_kan_same_shanten_same_ukeire(self):
         table = Table()
         player = table.player
@@ -531,3 +530,18 @@ class AITestCase(unittest.TestCase, TestMixin):
         tile = self._string_to_136_tile(honors='3')
 
         self.assertEqual(player.should_call_kan(tile, False), Meld.KAN)
+
+    def test_kan_crash(self):
+        """
+        This was a crash in real game
+        related with open kan logic and agari without yaku state
+        """
+        table = Table()
+        table.count_of_remaining_tiles = 10
+
+        tiles = self._string_to_136_array(man='456', pin='78999', sou='666', honors='33')
+        table.player.init_hand(tiles)
+        table.player.add_called_meld(self._make_meld(Meld.PON, sou='666'))
+        tile = self._string_to_136_tile(pin='9')
+
+        self.assertEqual(table.player.should_call_kan(tile, False), None)

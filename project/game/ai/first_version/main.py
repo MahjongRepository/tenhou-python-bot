@@ -280,6 +280,7 @@ class ImplementationAI(InterfaceAI):
             else:
                 # if we can use or tile in the hand for the forms other than KAN
                 tiles.append(tile)
+
                 closed_hand_tiles.append(tile)
                 closed_hand_34[tile_34] += 1
 
@@ -288,7 +289,14 @@ class ImplementationAI(InterfaceAI):
                     closed_hand_tiles,
                     self.player.melds
                 )
+
                 previous_results = [x for x in previous_results if x.shanten == previous_shanten]
+
+                # it is possible that we don't have results here
+                # when we are in agari state (but without yaku)
+                if not previous_results:
+                    return None
+
                 previous_waits_cnt = sorted(previous_results, key=lambda x: -x.ukeire)[0].ukeire
 
                 # shanten calculator doesn't like working with kans, so we pretend it's a pon

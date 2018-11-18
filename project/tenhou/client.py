@@ -326,11 +326,7 @@ class TenhouClient(Client):
                     self._send_message('<NEXTREADY />')
 
                 # set was called
-                if '<N who=' in message:
-                    player_formatted_hand = ''
-                    if meld_tile:
-                        player_formatted_hand = main_player.format_hand_for_print(meld_tile)
-
+                if self.decoder.is_opened_set_message(message):
                     meld = self.decoder.parse_meld(message)
                     self.table.add_called_meld(meld.who, meld)
                     logger.info('Meld: {} by {}'.format(meld, meld.who))
@@ -349,8 +345,15 @@ class TenhouClient(Client):
                 ]
                 # we win by other player's discard
                 if any(i in message for i in win_suggestions):
-                    tile = self.decoder.parse_tile(message)
-                    enemy_seat = self.decoder.get_enemy_seat(message)
+                    # enemy called chankan and we can win there
+                    if self.decoder.is_opened_set_message(message):
+                        meld = self.decoder.parse_meld(message)
+                        tile = meld.called_tile
+                        enemy_seat = meld.who
+                    else:
+                        tile = self.decoder.parse_tile(message)
+                        enemy_seat = self.decoder.get_enemy_seat(message)
+
                     self._random_sleep(1, 2)
 
                     if main_player.should_call_win(tile, enemy_seat):

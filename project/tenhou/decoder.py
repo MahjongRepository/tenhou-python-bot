@@ -260,6 +260,9 @@ class TenhouDecoder(object):
 
         return False
 
+    def is_opened_set_message(self, message):
+        return '<N who=' in message
+
     def get_enemy_seat(self, message):
         player_sign = message.lower()[1]
         if player_sign == 'e':

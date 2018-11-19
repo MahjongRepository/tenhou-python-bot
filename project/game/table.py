@@ -112,7 +112,7 @@ class Table(object):
         tiles = meld.tiles[:]
         # called tile was already added to revealed array
         # because it was called on the discard
-        if meld.called_tile:
+        if meld.called_tile is not None:
             tiles.remove(meld.called_tile)
 
         # for chankan we already added 3 tiles

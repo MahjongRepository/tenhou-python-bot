@@ -40,7 +40,9 @@ class ClientTestCase(unittest.TestCase):
         client.player.tiles = [0]
         meld = Meld()
         meld.type = Meld.KAN
-        meld.called_tile = 0
+        # closed kan
+        meld.called_tile = None
+        meld.opened = False
         client.table.add_called_meld(0, meld)
 
         self.assertEqual(len(client.player.melds), 2)

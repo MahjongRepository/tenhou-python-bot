@@ -309,6 +309,10 @@ class HandBuilder:
         return tile_34 in discarded_tiles
 
     def _choose_best_discard_in_tempai(self, tiles, melds, discard_options):
+        # only 1 option, nothing to choose
+        if len(discard_options) == 1:
+            return discard_options[0]
+
         # first of all we find tiles that have the best hand cost * ukeire value
         call_riichi = not self.player.is_open_hand
 

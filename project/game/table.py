@@ -98,13 +98,17 @@ class Table(object):
     def add_called_meld(self, player_seat, meld):
         self.meld_was_called = True
 
-        # when opponent called meld it is means
-        # that he discards tile from hand, not from wall
-        self.count_of_remaining_tiles += 1
-
-        # we will decrease count of remaining tiles after called kan
-        # because we had to complement dead wall
-        if meld.type == Meld.KAN or meld.type == meld.CHANKAN:
+        # if meld was called from the other player, then we skip one draw from the wall
+        if meld.opened:
+            # but if it's an opened kan, player will get a tile from
+            # a dead wall, so total number of tiles in the wall is the same
+            # as if he just draws a tile
+            if meld.type != Meld.KAN:
+                self.count_of_remaining_tiles += 1
+        else:
+            # can't have a pon or chi from the hand
+            assert meld.type == Meld.KAN or meld.type == meld.CHANKAN
+            # player draws additional tile from the wall in case of closed kan or chankan
             self.count_of_remaining_tiles -= 1
 
         self.get_player(player_seat).add_called_meld(meld)

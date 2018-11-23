@@ -167,7 +167,9 @@ class TenhouDecoder(object):
 
         meld = Meld()
         meld.who = int(self.get_attribute_content(message, 'who'))
-        meld.from_who = data & 0x3
+        # 'from_who' is encoded relative the the 'who', so we want
+        # to convert it to be relative to our player
+        meld.from_who = ((data & 0x3) + meld.who) % 4
 
         if data & 0x4:
             self.parse_chi(data, meld)

@@ -322,7 +322,7 @@ class TenhouClient(Client):
 
                 # the end of round
                 if '<AGARI' in message or '<RYUUKYOKU' in message:
-                    self._random_sleep(6, 8)
+                    self._random_sleep(1, 2)
                     self._send_message('<NEXTREADY />')
 
                 # set was called

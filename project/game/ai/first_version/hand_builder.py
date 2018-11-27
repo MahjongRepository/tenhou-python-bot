@@ -635,23 +635,33 @@ class HandBuilder:
             return discard_option.find_tile_in_hand(closed_hand)
 
     def calculate_second_level_ukeire(self, discard_option):
-        closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
         not_suitable_tiles = self.ai.current_strategy and self.ai.current_strategy.not_suitable_tiles or []
 
+        tile_in_hand = discard_option.find_tile_in_hand(self.player.closed_hand)
+
         tiles = copy.copy(self.player.tiles)
-        tiles.remove(discard_option.find_tile_in_hand(self.player.closed_hand))
+        tiles.remove(tile_in_hand)
+
+        closed_hand = copy.copy(self.player.closed_hand)
+        closed_hand.remove(tile_in_hand)
 
         sum_tiles = 0
         for wait_34 in discard_option.waiting:
             if self.player.is_open_hand and wait_34 in not_suitable_tiles:
                 continue
 
+            if discard_option.wait_to_ukeire[wait_34] == 0:
+                continue
+
             wait_136 = wait_34 * 4
             tiles.append(wait_136)
+            closed_hand.append(wait_136)
+
+            closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
 
             results, shanten = self.find_discard_options(
                 tiles,
-                self.player.closed_hand,
+                closed_hand,
                 self.player.melds
             )
             results = [x for x in results if x.shanten == discard_option.shanten - 1]
@@ -663,6 +673,7 @@ class HandBuilder:
                 sum_tiles += best_one.ukeire * live_tiles
 
             tiles.remove(wait_136)
+            closed_hand.remove(wait_136)
 
         discard_option.ukeire_second = sum_tiles
 

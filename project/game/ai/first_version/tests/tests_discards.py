@@ -762,7 +762,6 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         tile = self._string_to_136_tile(man='4')
         discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
 
-        print('')
         player.ai.hand_builder.calculate_second_level_ukeire(discard_option)
 
         self.assertEqual(discard_option.ukeire_second, 108)

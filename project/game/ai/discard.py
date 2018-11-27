@@ -32,6 +32,8 @@ class DiscardOption(object):
     danger = None
     # wait to ukeire map
     wait_to_ukeire = None
+    # second level cost approximation for 1-shanten hands
+    second_level_cost = None
 
     def __init__(self, player, tile_to_discard, shanten, waiting, ukeire, danger=100, wait_to_ukeire=None):
         """

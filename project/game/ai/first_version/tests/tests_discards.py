@@ -719,7 +719,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
             '6z'
         )
 
-    def test_discard_tile_based_on_second_level_ukeire(self):
+    def test_discard_tile_based_on_second_level_ukeire_and_cost(self):
         table = Table()
         player = table.player
 
@@ -732,8 +732,11 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
         player.draw_tile(tile)
 
+        print("============================")
         discarded_tile = player.discard_tile()
-        self.assertEqual(self._to_string([discarded_tile]), '2p')
+        discard_correct = self._to_string([discarded_tile]) == '2p' or self._to_string([discarded_tile]) == '3p'
+        print("============================")
+        self.assertEqual(discard_correct, True)
 
     def test_calculate_second_level_ukeire(self):
         """
@@ -761,7 +764,30 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
         tile = self._string_to_136_tile(man='4')
         discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
-
         player.ai.hand_builder.calculate_second_level_ukeire(discard_option)
-
         self.assertEqual(discard_option.ukeire_second, 108)
+
+        tile = self._string_to_136_tile(man='3')
+        discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
+        player.ai.hand_builder.calculate_second_level_ukeire(discard_option)
+        self.assertEqual(discard_option.ukeire_second, 108)
+
+        tile = self._string_to_136_tile(pin='2')
+        discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
+        player.ai.hand_builder.calculate_second_level_ukeire(discard_option)
+        self.assertEqual(discard_option.ukeire_second, 96)
+
+        tile = self._string_to_136_tile(pin='3')
+        discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
+        player.ai.hand_builder.calculate_second_level_ukeire(discard_option)
+        self.assertEqual(discard_option.ukeire_second, 96)
+
+        tile = self._string_to_136_tile(pin='5')
+        discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
+        player.ai.hand_builder.calculate_second_level_ukeire(discard_option)
+        self.assertEqual(discard_option.ukeire_second, 96)
+
+        tile = self._string_to_136_tile(pin='6')
+        discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
+        player.ai.hand_builder.calculate_second_level_ukeire(discard_option)
+        self.assertEqual(discard_option.ukeire_second, 96)

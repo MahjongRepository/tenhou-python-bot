@@ -718,3 +718,51 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
             self._string_to_136_tile(honors='2'),
             '6z'
         )
+
+    def test_discard_tile_based_on_second_level_ukeire(self):
+        table = Table()
+        player = table.player
+
+        table.add_dora_indicator(self._string_to_136_tile(man='2'))
+        table.add_discarded_tile(1, self._string_to_136_tile(man='2'), False)
+
+        tiles = self._string_to_136_array(man='34678', pin='2356', sou='4467')
+        tile = self._string_to_136_tile(sou='8')
+
+        player.init_hand(tiles)
+        player.draw_tile(tile)
+
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '2p')
+
+    def test_calculate_second_level_ukeire(self):
+        """
+        There was a bug with 2356 form and second level ukeire
+        """
+        table = Table()
+        player = table.player
+
+        table.add_dora_indicator(self._string_to_136_tile(man='2'))
+        table.add_discarded_tile(1, self._string_to_136_tile(man='2'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='3'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(pin='3'), False)
+
+        tiles = self._string_to_136_array(man='34678', pin='2356', sou='4467')
+        tile = self._string_to_136_tile(sou='8')
+
+        player.init_hand(tiles)
+        player.draw_tile(tile)
+
+        discard_options, _ = player.ai.hand_builder.find_discard_options(
+            player.tiles,
+            player.closed_hand,
+            player.melds
+        )
+
+        tile = self._string_to_136_tile(man='4')
+        discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
+
+        print('')
+        player.ai.hand_builder.calculate_second_level_ukeire(discard_option)
+
+        self.assertEqual(discard_option.ukeire_second, 108)

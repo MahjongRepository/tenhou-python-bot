@@ -480,22 +480,28 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         meld = self._make_meld(Meld.PON, man='111')
         player.add_called_meld(meld)
 
-        strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
-        self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
-
         # 6 man is bad meld, we lose our second pair and so is 4 man
         tile = self._string_to_136_tile(man='6')
         meld, _ = player.try_to_call_meld(tile, True)
         self.assertEqual(meld, None)
 
+        strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
+
         tile = self._string_to_136_tile(man='4')
         meld, _ = player.try_to_call_meld(tile, True)
         self.assertEqual(meld, None)
+
+        strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
 
         # 7 pin is a good meld, we get to tempai keeping yakuhai wait
         tile = self._string_to_136_tile(pin='7')
         meld, _ = player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)
+
+        strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
 
     def test_atodzuke_choose_hidden_syanpon(self):
         # make sure yakuhai strategy is activated by adding 3 doras to the hand

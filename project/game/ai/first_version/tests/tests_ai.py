@@ -267,23 +267,34 @@ class AITestCase(unittest.TestCase, TestMixin):
         # add 3 doras so we are sure to go for tanyao
         table.add_dora_indicator(self._string_to_136_tile(man='2'))
 
+        # we draw a tile that will set tanyao as our selected strategy
         tiles = self._string_to_136_array(man='33355788', sou='3479', honors='3')
         player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(sou='7')
+        player.draw_tile(tile)
         self.assertNotEqual(player.ai.current_strategy, None)
         self.assertEqual(player.ai.current_strategy.type, BaseStrategy.TANYAO)
 
         # we draw a tile that will change our selected strategy
+        tiles = self._string_to_136_array(man='33355788', sou='3479', honors='3')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(sou='2')
+        meld, _ = player.try_to_call_meld(tile, False)
+        self.assertNotEqual(player.ai.current_strategy, None)
+        self.assertEqual(player.ai.current_strategy.type, BaseStrategy.TANYAO)
+        self.assertEqual(meld, None)
+
         tile = self._string_to_136_tile(sou='8')
         player.draw_tile(tile)
         self.assertEqual(player.ai.current_strategy, None)
 
+        # for already opened hand we don't need to give up on selected strategy
         tiles = self._string_to_136_array(man='33355788', sou='3479', honors='3')
         player.init_hand(tiles)
-        self.assertEqual(player.ai.current_strategy.type, BaseStrategy.TANYAO)
 
-        # for already opened hand we don't need to give up on selected strategy
-        meld = Meld()
-        meld.tiles = [1, 2, 3]
+        meld = self._make_meld(Meld.PON, man='333')
         player.add_called_meld(meld)
         tile = self._string_to_136_tile(sou='8')
         player.draw_tile(tile)

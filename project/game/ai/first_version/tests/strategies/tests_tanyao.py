@@ -224,10 +224,10 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='2337788', sou='222', pin='234')
         self.player.init_hand(tiles)
 
-        self._assert_tanyao(self.player)
-
         tile = self._string_to_136_tile(man='8')
         meld, tile_to_discard = self.player.try_to_call_meld(tile, False)
+
+        self._assert_tanyao(self.player)
 
         discard = self.player.discard_tile(tile_to_discard)
         self.assertEqual(self._to_string([discard]), '2m')

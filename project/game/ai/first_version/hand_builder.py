@@ -536,7 +536,7 @@ class HandBuilder:
 
         # 1-shanten hands have special handling - we can consider future hand cost here
         if first_option.shanten == 1:
-            return sorted(tiles_without_dora, key=lambda x: -x.second_level_cost)[0]
+            return sorted(tiles_without_dora, key=lambda x: (-x.second_level_cost, -x.ukeire_second, x.valuation))[0]
 
         if first_option.shanten == 2 or first_option.shanten == 3:
             # we filter 10% of options here
@@ -610,6 +610,7 @@ class HandBuilder:
 
     def calculate_second_level_ukeire(self, discard_option):
         not_suitable_tiles = self.ai.current_strategy and self.ai.current_strategy.not_suitable_tiles or []
+        call_riichi = not self.player.is_open_hand
 
         # we are going to do manipulations that require player hand to be updated
         # so we save original tiles here and restore it at the end of the function
@@ -624,13 +625,14 @@ class HandBuilder:
             if self.player.is_open_hand and wait_34 in not_suitable_tiles:
                 continue
 
-            if discard_option.wait_to_ukeire[wait_34] == 0:
+            closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
+            live_tiles = 4 - self.player.total_tiles(wait_34, closed_hand_34)
+
+            if live_tiles == 0:
                 continue
 
             wait_136 = wait_34 * 4
             self.player.tiles.append(wait_136)
-
-            closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
 
             results, shanten = self.find_discard_options(
                 self.player.tiles,
@@ -641,22 +643,25 @@ class HandBuilder:
 
             # let's take best ukeire here
             if results:
+                # TODO: find best one considering atodzuke
                 best_one = sorted(results, key=lambda x: -x.ukeire)[0]
-                live_tiles = 4 - self.player.total_tiles(wait_34, closed_hand_34)
                 sum_tiles += best_one.ukeire * live_tiles
+
+                has_atodzuke = False
+                if self.player.is_open_hand:
+                    for wait_34 in best_one.waiting:
+                        if wait_34 in not_suitable_tiles:
+                            has_atodzuke = True
 
                 # if we are going to have a tempai (on our second level) - let's also count its cost
                 if shanten == 0:
                     next_tile_in_hand = best_one.find_tile_in_hand(self.player.closed_hand)
                     self.player.tiles.remove(next_tile_in_hand)
-                    cost_x_ukeire, _ = self._estimate_cost_x_ukeire(best_one, True)
+                    cost_x_ukeire, _ = self._estimate_cost_x_ukeire(best_one, call_riichi=call_riichi)
+                    # we reduce tile valuation for atodzuke
+                    if has_atodzuke:
+                        cost_x_ukeire /= 2
                     sum_cost += cost_x_ukeire
-                    print("hand - tile - ukeire - tiles - cost_x_ukeire")
-                    print(TilesConverter.to_one_line_string(self.player.tiles))
-                    print(wait_34)
-                    print(best_one.ukeire)
-                    print(best_one.ukeire * live_tiles)
-                    print(cost_x_ukeire)
                     self.player.tiles.append(next_tile_in_hand)
 
             self.player.tiles.remove(wait_136)
@@ -708,8 +713,6 @@ class HandBuilder:
             if hand_value.error is None:
                 hand_cost_tsumo = hand_value.cost['main'] + 2 * hand_value.cost['additional']
                 cost_x_ukeire_tsumo += hand_cost_tsumo * discard_option.wait_to_ukeire[waiting]
-            else:
-                print("hand value error tsumo")
 
             if not is_furiten:
                 hand_value = self.player.ai.estimate_hand_value(waiting,
@@ -718,8 +721,6 @@ class HandBuilder:
                 if hand_value.error is None:
                     hand_cost_ron = hand_value.cost['main']
                     cost_x_ukeire_ron += hand_cost_ron * discard_option.wait_to_ukeire[waiting]
-                else:
-                    print("hand value error ron")
 
         # these are abstract numbers used to compare different waits
         # some don't have yaku, some furiten, etc.

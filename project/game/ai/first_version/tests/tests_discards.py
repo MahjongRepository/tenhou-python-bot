@@ -732,10 +732,8 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         player.init_hand(tiles)
         player.draw_tile(tile)
 
-        print("============================")
         discarded_tile = player.discard_tile()
         discard_correct = self._to_string([discarded_tile]) == '2p' or self._to_string([discarded_tile]) == '3p'
-        print("============================")
         self.assertEqual(discard_correct, True)
 
     def test_calculate_second_level_ukeire(self):

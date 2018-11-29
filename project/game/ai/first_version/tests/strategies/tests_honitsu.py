@@ -186,8 +186,9 @@ class HonitsuStrategyTestCase(unittest.TestCase, TestMixin):
         table = Table()
         player = table.player
 
-        tiles = self._string_to_136_array(sou='1122559', honors='134557', pin='4')
+        tiles = self._string_to_136_array(sou='1122559', honors='134557')
         player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(pin='4'))
 
         tile = player.discard_tile()
         self.assertEqual(self._to_string([tile]), '4p')

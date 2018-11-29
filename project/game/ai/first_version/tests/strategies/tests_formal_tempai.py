@@ -51,7 +51,7 @@ class FormalTempaiStrategyTestCase(unittest.TestCase, TestMixin):
         tile_to_discard = self.player.discard_tile()
         self.assertEqual(self._to_string([tile_to_discard]), '8s')
 
-    # We shouldn't open when we are already in tempai expect for some
+    # we shouldn't open when we are already in tempai expect for some
     # special cases
     def test_dont_meld_agari(self):
         strategy = FormalTempaiStrategy(BaseStrategy.FORMAL_TEMPAI, self.player)
@@ -67,10 +67,9 @@ class FormalTempaiStrategyTestCase(unittest.TestCase, TestMixin):
 
         tiles = self._string_to_136_array(man='23789', sou='456', pin='22299')
         self.player.init_hand(tiles)
+
         meld = self._make_meld(Meld.CHI, man='789')
         self.player.add_called_meld(meld)
-
-        self.assertEqual(strategy.should_activate_strategy(self.player.tiles), True)
 
         tile = self._string_to_136_tile(man='4')
         meld, _ = self.player.try_to_call_meld(tile, True)

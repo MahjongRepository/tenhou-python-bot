@@ -293,11 +293,14 @@ class AITestCase(unittest.TestCase, TestMixin):
         # for already opened hand we don't need to give up on selected strategy
         tiles = self._string_to_136_array(man='33355788', sou='3479', honors='3')
         player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(honors='5'))
+        player.discard_tile()
 
         meld = self._make_meld(Meld.PON, man='333')
         player.add_called_meld(meld)
         tile = self._string_to_136_tile(sou='8')
         player.draw_tile(tile)
+
         self.assertNotEqual(player.ai.current_strategy, None)
         self.assertEqual(player.ai.current_strategy.type, BaseStrategy.TANYAO)
 

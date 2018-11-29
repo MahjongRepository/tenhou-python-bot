@@ -48,6 +48,9 @@ class DefenceHandler(object):
             shanten = self.player.ai.shanten
             waiting = self.player.ai.waiting
 
+        if not waiting:
+            waiting = []
+
         # if we are in riichi, we can't defence
         if self.player.in_riichi:
             return False

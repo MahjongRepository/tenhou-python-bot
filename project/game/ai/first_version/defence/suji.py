@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from mahjong.utils import is_man, simplify, is_pin, is_sou, plus_dora, is_aka_dora
-from mahjong.tile import TilesConverter
 
 from game.ai.first_version.defence.defence import Defence, DefenceTile
 

@@ -25,7 +25,7 @@ class FormalTempaiStrategyTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(strategy.should_activate_strategy(self.player.tiles), False)
 
         # Let's move to 10th round step
-        for i in range(0, 10):
+        for _ in range(0, 10):
             self.player.add_discarded_tile(Tile(0, False))
 
         self.assertEqual(strategy.should_activate_strategy(self.player.tiles), False)
@@ -40,7 +40,7 @@ class FormalTempaiStrategyTestCase(unittest.TestCase, TestMixin):
         self.player.init_hand(tiles)
 
         # Let's move to 15th round step
-        for i in range(0, 15):
+        for _ in range(0, 15):
             self.player.add_discarded_tile(Tile(0, False))
 
         tile = self._string_to_136_tile(man='8')
@@ -60,7 +60,7 @@ class FormalTempaiStrategyTestCase(unittest.TestCase, TestMixin):
         self.player.init_hand(tiles)
 
         # Let's move to 15th round step
-        for i in range(0, 15):
+        for _ in range(0, 15):
             self.player.add_discarded_tile(Tile(0, False))
 
         self.assertEqual(strategy.should_activate_strategy(self.player.tiles), True)

@@ -486,7 +486,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
         player.dealer_seat = 3
 
         for tile in kabe_tiles:
-            for i in range(0, 4):
+            for _ in range(0, 4):
                 table.add_discarded_tile(1, tile, False)
 
         player.init_hand(tiles)
@@ -661,7 +661,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
         player.add_discarded_tile(Tile(furiten_tile, True))
 
-        for i in range(0, 2):
+        for _ in range(0, 2):
             table.add_discarded_tile(1, other_tile, False)
 
         player.draw_tile(tile_to_draw)
@@ -695,7 +695,7 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
         player.add_discarded_tile(Tile(furiten_tile, True))
 
-        for i in range(0, 3):
+        for _ in range(0, 3):
             table.add_discarded_tile(1, karaten_tile, False)
 
         player.draw_tile(tile_to_draw)

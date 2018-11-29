@@ -26,7 +26,14 @@ class TableTestCase(unittest.TestCase, TestMixin):
         dealer = 3
         scores = [250, 250, 250, 250]
 
-        table.init_round(round_wind_number, count_of_honba_sticks, count_of_riichi_sticks, dora_indicator, dealer, scores)
+        table.init_round(
+            round_wind_number,
+            count_of_honba_sticks,
+            count_of_riichi_sticks,
+            dora_indicator,
+            dealer,
+            scores
+        )
 
         self.assertEqual(table.round_wind_number, round_wind_number)
         self.assertEqual(table.count_of_honba_sticks, count_of_honba_sticks)
@@ -38,7 +45,14 @@ class TableTestCase(unittest.TestCase, TestMixin):
         dealer = 2
         table.player.in_tempai = True
         table.player.in_riichi = True
-        table.init_round(round_wind_number, count_of_honba_sticks, count_of_riichi_sticks, dora_indicator, dealer, scores)
+        table.init_round(
+            round_wind_number,
+            count_of_honba_sticks,
+            count_of_riichi_sticks,
+            dora_indicator,
+            dealer,
+            scores
+        )
 
         # test that we reinit round properly
         self.assertEqual(table.get_player(3).is_dealer, False)

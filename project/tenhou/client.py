@@ -495,7 +495,7 @@ class TenhouClient(Client):
                 # we can't use sleep(15), because we want to be able
                 # end thread in the middle of running
                 seconds_to_sleep = 15
-                for x in range(0, seconds_to_sleep * 2):
+                for _ in range(0, seconds_to_sleep * 2):
                     if self.game_is_continue:
                         sleep(0.5)
 

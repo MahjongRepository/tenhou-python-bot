@@ -1,16 +1,12 @@
-import copy
-
 from mahjong.constants import AKA_DORA_LIST
 from mahjong.shanten import Shanten
 from mahjong.tile import TilesConverter, Tile
-from mahjong.utils import is_tile_strictly_isolated, is_pair, is_honor, simplify, is_chi
-from mahjong.meld import Meld
+from mahjong.utils import is_tile_strictly_isolated, is_pair, is_honor, simplify
 
 import utils.decisions_constants as log
 from game.ai.discard import DiscardOption
-from utils.decisions_logger import DecisionsLogger
-
 from game.ai.first_version.defence.kabe import KabeTile
+from utils.decisions_logger import DecisionsLogger
 
 
 class HandBuilder:

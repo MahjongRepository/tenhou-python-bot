@@ -518,7 +518,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
         self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
 
-        for i in range(0, 4):
+        for _ in range(0, 4):
             table.add_discarded_tile(1, self._string_to_136_tile(sou='9'), False)
 
         player.draw_tile(self._string_to_136_tile(man='6'))

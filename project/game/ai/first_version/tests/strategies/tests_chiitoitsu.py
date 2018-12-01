@@ -16,18 +16,22 @@ class ChiitoitsuStrategyTestCase(unittest.TestCase, TestMixin):
         strategy = ChiitoitsuStrategy(BaseStrategy.CHIITOITSU, player)
 
         # obvious chiitoitsu, let's activate
-        tiles = self._string_to_136_array(sou='2266', man='3399', pin='289', honors='116')
+        tiles = self._string_to_136_array(sou='2266', man='3399', pin='289', honors='11')
         player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(honors='6'))
         self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
 
         # less than 5 pairs, don't activate
-        tiles = self._string_to_136_array(sou='2266', man='3389', pin='289', honors='116')
+        tiles = self._string_to_136_array(sou='2266', man='3389', pin='289', honors='11')
+        player.draw_tile(self._string_to_136_tile(honors='6'))
         player.init_hand(tiles)
         self.assertEqual(strategy.should_activate_strategy(player.tiles), False)
 
         # 5 pairs, but we are already tempai, let's no consider this hand as chiitoitsu
-        tiles = self._string_to_136_array(sou='234', man='223344', pin='55669')
+        tiles = self._string_to_136_array(sou='234', man='223344', pin='5669')
         player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(pin='5'))
+        player.discard_tile()
         self.assertEqual(strategy.should_activate_strategy(player.tiles), False)
 
         tiles = self._string_to_136_array(sou='234', man='22334455669')

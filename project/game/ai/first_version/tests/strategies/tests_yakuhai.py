@@ -480,22 +480,28 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         meld = self._make_meld(Meld.PON, man='111')
         player.add_called_meld(meld)
 
-        strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
-        self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
-
         # 6 man is bad meld, we lose our second pair and so is 4 man
         tile = self._string_to_136_tile(man='6')
         meld, _ = player.try_to_call_meld(tile, True)
         self.assertEqual(meld, None)
 
+        strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
+
         tile = self._string_to_136_tile(man='4')
         meld, _ = player.try_to_call_meld(tile, True)
         self.assertEqual(meld, None)
+
+        strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
 
         # 7 pin is a good meld, we get to tempai keeping yakuhai wait
         tile = self._string_to_136_tile(pin='7')
         meld, _ = player.try_to_call_meld(tile, True)
         self.assertNotEqual(meld, None)
+
+        strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
+        self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
 
     def test_atodzuke_choose_hidden_syanpon(self):
         # make sure yakuhai strategy is activated by adding 3 doras to the hand
@@ -512,9 +518,28 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
         self.assertEqual(strategy.should_activate_strategy(player.tiles), True)
 
-        for i in range(0, 4):
+        for _ in range(0, 4):
             table.add_discarded_tile(1, self._string_to_136_tile(sou='9'), False)
 
         player.draw_tile(self._string_to_136_tile(man='6'))
         discarded_tile = player.discard_tile()
         self.assertNotEqual(self._to_string([discarded_tile]), '6m')
+
+    def test_tempai_with_open_yakuhai_meld_and_yakuhai_pair_in_the_hand(self):
+        """
+        there was a bug where bot didn't handle tempai properly
+        with opened yakuhai pon and pair in the hand
+        56m555p6678s55z + [777z]
+        """
+        table = Table()
+        player = table.player
+
+        tiles = self._string_to_136_array(man='56', pin='555', sou='667', honors='55777')
+        player.init_hand(tiles)
+        player.add_called_meld(self._make_meld(Meld.PON, honors='777'))
+        player.draw_tile(self._string_to_136_tile(sou='8'))
+
+        player.ai.current_strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
+
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '6s')

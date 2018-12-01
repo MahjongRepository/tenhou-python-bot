@@ -112,7 +112,7 @@ class CallRiichiTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='22336688', sou='99', pin='99', honors='2')
         self.player.init_hand(tiles)
 
-        for i in range(0, 3):
+        for _ in range(0, 3):
             self.table.add_discarded_tile(1, self._string_to_136_tile(honors='2'), False)
             self.table.add_discarded_tile(1, self._string_to_136_tile(honors='3'), False)
 
@@ -130,7 +130,7 @@ class CallRiichiTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='222', sou='22278', pin='22789')
         self.player.init_hand(tiles)
 
-        for i in range(0, 4):
+        for _ in range(0, 4):
             self.table.add_discarded_tile(1, self._string_to_136_tile(sou='6'), False)
             self.table.add_discarded_tile(1, self._string_to_136_tile(sou='9'), False)
 
@@ -155,10 +155,10 @@ class CallRiichiTestCase(unittest.TestCase, TestMixin):
             self._string_to_136_tile(pin='1'),
         ])
 
-        for i in range(0, 3):
+        for _ in range(0, 3):
             self.table.add_discarded_tile(1, self._string_to_136_tile(honors='1'), False)
 
-        for i in range(0, 4):
+        for _ in range(0, 4):
             self.table.add_discarded_tile(1, self._string_to_136_tile(sou='8'), False)
 
         tiles = self._string_to_136_array(sou='1119', pin='234567', man='666')
@@ -173,7 +173,7 @@ class CallRiichiTestCase(unittest.TestCase, TestMixin):
             self._string_to_136_tile(man='1'),
         ])
 
-        for i in range(0, 3):
+        for _ in range(0, 3):
             self.table.add_discarded_tile(1, self._string_to_136_tile(honors='3'), False)
 
         tiles = self._string_to_136_array(man='22336688', sou='9', pin='99', honors='22')
@@ -189,7 +189,7 @@ class CallRiichiTestCase(unittest.TestCase, TestMixin):
             self._string_to_136_tile(man='1'),
         ])
 
-        for i in range(0, 3):
+        for _ in range(0, 3):
             self.table.add_discarded_tile(1, self._string_to_136_tile(honors='3'), False)
 
         tiles = self._string_to_136_array(man='22336688', sou='4', pin='99', honors='22')

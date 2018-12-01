@@ -220,14 +220,54 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
         discard = player.discard_tile()
         self.assertEqual(self._to_string([discard]), '7s')
 
+    def test_choose_balanced_ukeire_in_1_shanten(self):
+        table = self._make_table()
+        player = table.player
+
+        meld = self._make_meld(Meld.CHI, man='678')
+        player.add_called_meld(meld)
+
+        tiles = self._string_to_136_array(man='22678', sou='234568', pin='45')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(man='2'))
+
+        self._assert_tanyao(player)
+
+        # there are lost of options to avoid atodzuke and even if it is atodzuke,
+        # it is still a good one, so let's choose more efficient 8s discard instead of 2s
+        discard = player.discard_tile()
+        self.assertEqual(self._to_string([discard]), '8s')
+
+    def test_choose_pseudo_atodzuke(self):
+        table = self._make_table()
+        table.has_aka_dora = False
+        player = table.player
+
+        # one tile is dora indicator and 3 are out
+        # so this 1-4 wait is not atodzuke
+        for _ in range(0, 3):
+            table.add_discarded_tile(1, self._string_to_136_tile(pin='1'), False)
+
+        meld = self._make_meld(Meld.CHI, man='678')
+        player.add_called_meld(meld)
+
+        tiles = self._string_to_136_array(man='222678', sou='23488', pin='35')
+        player.init_hand(tiles)
+        player.draw_tile(self._string_to_136_tile(pin='2'))
+
+        self._assert_tanyao(player)
+
+        discard = player.discard_tile()
+        self.assertEqual(self._to_string([discard]), '5p')
+
     def test_choose_correct_waiting_and_first_opened_meld(self):
         tiles = self._string_to_136_array(man='2337788', sou='222', pin='234')
         self.player.init_hand(tiles)
 
-        self._assert_tanyao(self.player)
-
         tile = self._string_to_136_tile(man='8')
         meld, tile_to_discard = self.player.try_to_call_meld(tile, False)
+
+        self._assert_tanyao(self.player)
 
         discard = self.player.discard_tile(tile_to_discard)
         self.assertEqual(self._to_string([discard]), '2m')

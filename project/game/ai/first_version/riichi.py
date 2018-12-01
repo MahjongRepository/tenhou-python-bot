@@ -1,8 +1,6 @@
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_honor, simplify, is_pair, is_chi
 
-from game.ai.first_version.defence.kabe import KabeTile
-
 
 class Riichi:
 

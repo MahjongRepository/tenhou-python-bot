@@ -81,13 +81,9 @@ class ImplementationAI(InterfaceAI):
             'Hand: {}'.format(self.player.format_hand_for_print()),
         ])
 
-        # it will set correct hand shanten number and ukeire to the new hand
-        # tile will not be removed from the hand
-        self.discard_tile(None, print_log=False)
-        self.player.in_tempai = False
-
-        # Let's decide what we will do with our hand (like open for tanyao and etc.)
-        self.determine_strategy(self.player.tiles)
+        self.shanten = self.shanten_calculator.calculate_shanten(
+            TilesConverter.to_34_array(self.player.tiles)
+        )
 
     def draw_tile(self, tile_136):
         self.determine_strategy(self.player.tiles)

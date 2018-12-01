@@ -1,3 +1,9 @@
+# our core library
 mahjong==1.1.5
+
+# to send information about games to statistics server
 requests==2.20.1
-flake8==3.4.1
+
+# for dev needs
+flake8==3.6.0
+flake8-bugbear==18.8.0

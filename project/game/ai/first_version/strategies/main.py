@@ -247,7 +247,6 @@ class BaseStrategy(object):
         for meld_34 in possible_melds:
             meld_34_copy = meld_34.copy()
             closed_hand_copy = closed_hand.copy()
-            open_sets_34 = self.player.meld_34_tiles + [meld_34]
 
             meld_type = is_chi(meld_34_copy) and Meld.CHI or Meld.PON
             meld_34_copy.remove(discarded_tile_34)

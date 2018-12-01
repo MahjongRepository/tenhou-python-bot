@@ -1,16 +1,12 @@
-import copy
-
 from mahjong.constants import AKA_DORA_LIST
 from mahjong.shanten import Shanten
 from mahjong.tile import TilesConverter, Tile
-from mahjong.utils import is_tile_strictly_isolated, is_pair, is_honor, simplify, is_chi
-from mahjong.meld import Meld
+from mahjong.utils import is_tile_strictly_isolated, is_pair, is_honor, simplify
 
 import utils.decisions_constants as log
 from game.ai.discard import DiscardOption
-from utils.decisions_logger import DecisionsLogger
-
 from game.ai.first_version.defence.kabe import KabeTile
+from utils.decisions_logger import DecisionsLogger
 
 
 class HandBuilder:
@@ -202,11 +198,7 @@ class HandBuilder:
 
     def count_tiles(self, waiting, tiles_34):
         n = 0
-        not_suitable_tiles = self.ai.current_strategy and self.ai.current_strategy.not_suitable_tiles or []
         for tile_34 in waiting:
-            if self.player.is_open_hand and tile_34 in not_suitable_tiles:
-                continue
-
             n += 4 - self.player.total_tiles(tile_34, tiles_34)
         return n
 
@@ -304,15 +296,19 @@ class HandBuilder:
         # if everything is the same we just choose the first one
         return best_discard_desc[0]['discard_option']
 
-    def _is_furiten(self, tile_34):
+    def _is_waiting_furiten(self, tile_34):
         discarded_tiles = [x.value // 4 for x in self.player.discards]
         return tile_34 in discarded_tiles
 
-    def _choose_best_discard_in_tempai(self, tiles, melds, discard_options):
-        # only 1 option, nothing to choose
-        if len(discard_options) == 1:
-            return discard_options[0]
+    def _is_discard_option_furiten(self, discard_option):
+        is_furiten = False
 
+        for waiting in discard_option.waiting:
+            is_furiten = is_furiten or self._is_waiting_furiten(waiting)
+
+        return is_furiten
+
+    def _choose_best_discard_in_tempai(self, tiles, melds, discard_options):
         # first of all we find tiles that have the best hand cost * ukeire value
         call_riichi = not self.player.is_open_hand
 
@@ -333,31 +329,12 @@ class HandBuilder:
             discarded_tile = Tile(tile, False)
             self.player.discards.append(discarded_tile)
 
-            hand_cost = 0
+            is_furiten = self._is_discard_option_furiten(discard_option)
+
             if len(discard_option.waiting) == 1:
                 waiting = discard_option.waiting[0]
-                is_furiten = self._is_furiten(waiting)
 
-                hand_cost_tsumo = 0
-                cost_x_ukeire_tsumo = 0
-                hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=call_riichi, is_tsumo=True)
-                if hand_value.error is None:
-                    hand_cost_tsumo = hand_value.cost['main'] + 2 * hand_value.cost['additional']
-                    cost_x_ukeire_tsumo = hand_cost_tsumo * discard_option.ukeire
-
-                hand_cost_ron = 0
-                cost_x_ukeire_ron = 0
-                if not is_furiten:
-                    hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=call_riichi, is_tsumo=False)
-                    if hand_value.error is None:
-                        hand_cost_ron = hand_value.cost['main']
-                        cost_x_ukeire_ron = hand_cost_ron * discard_option.ukeire
-
-                # these are abstract numbers used to compare different waits
-                # some don't have yaku, some furiten, etc.
-                # so we use an abstract formula of 1 tsumo cost + 3 ron costs
-                hand_cost = hand_cost_tsumo + 3 * hand_cost_ron
-                cost_x_ukeire = cost_x_ukeire_tsumo + 3 * cost_x_ukeire_ron
+                cost_x_ukeire, hand_cost = self._estimate_cost_x_ukeire(discard_option, call_riichi)
 
                 # let's check if this is a tanki wait
                 results, tiles_34 = self.divide_hand(self.player.tiles, waiting)
@@ -416,30 +393,7 @@ class HandBuilder:
                     'tanki_type': tanki_type
                 })
             else:
-                cost_x_ukeire_tsumo = 0
-                cost_x_ukeire_ron = 0
-                is_furiten = False
-
-                for waiting in discard_option.waiting:
-                    is_furiten = is_furiten or self._is_furiten(waiting)
-
-                for waiting in discard_option.waiting:
-                    hand_value = self.player.ai.estimate_hand_value(waiting,
-                                                                    call_riichi=call_riichi,
-                                                                    is_tsumo=True)
-                    if hand_value.error is None:
-                        cost_x_ukeire_tsumo += (hand_value.cost['main']
-                                                + 2 * hand_value.cost['additional']
-                                                ) * discard_option.wait_to_ukeire[waiting]
-
-                    if not is_furiten:
-                        hand_value = self.player.ai.estimate_hand_value(waiting,
-                                                                        call_riichi=call_riichi,
-                                                                        is_tsumo=False)
-                        if hand_value.error is None:
-                            cost_x_ukeire_ron += hand_value.cost['main'] * discard_option.wait_to_ukeire[waiting]
-
-                cost_x_ukeire = cost_x_ukeire_tsumo + 3 * cost_x_ukeire_ron
+                cost_x_ukeire, _ = self._estimate_cost_x_ukeire(discard_option, call_riichi)
 
                 discard_desc.append({
                     'discard_option': discard_option,
@@ -544,6 +498,10 @@ class HandBuilder:
             ukeire_field = 'ukeire'
             possible_options = sorted(possible_options, key=lambda x: -getattr(x, ukeire_field))
 
+        # only one option - so we choose it
+        if len(possible_options) == 1:
+            return possible_options[0]
+
         # tempai state has a special handling
         if first_option.shanten == 0:
             other_tiles_with_same_shanten = [x for x in possible_options if x.shanten == 0]
@@ -564,8 +522,16 @@ class HandBuilder:
 
             return sorted(min_dora_list, key=lambda x: -getattr(x, ukeire_field))[0]
 
-        # we filter 10% of options here
+        # only one option - so we choose it
+        if len(tiles_without_dora) == 1:
+            return tiles_without_dora[0]
+
+        # 1-shanten hands have special handling - we can consider future hand cost here
+        if first_option.shanten == 1:
+            return sorted(tiles_without_dora, key=lambda x: (-x.second_level_cost, -x.ukeire_second, x.valuation))[0]
+
         if first_option.shanten == 2 or first_option.shanten == 3:
+            # we filter 10% of options here
             second_filter_percentage = 10
             filtered_options = self._filter_list_by_percentage(
                 tiles_without_dora,
@@ -635,22 +601,33 @@ class HandBuilder:
             return discard_option.find_tile_in_hand(closed_hand)
 
     def calculate_second_level_ukeire(self, discard_option):
-        closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
         not_suitable_tiles = self.ai.current_strategy and self.ai.current_strategy.not_suitable_tiles or []
+        call_riichi = not self.player.is_open_hand
 
-        tiles = copy.copy(self.player.tiles)
-        tiles.remove(discard_option.find_tile_in_hand(self.player.closed_hand))
+        # we are going to do manipulations that require player hand to be updated
+        # so we save original tiles here and restore it at the end of the function
+        player_tiles_original = self.player.tiles.copy()
+
+        tile_in_hand = discard_option.find_tile_in_hand(self.player.closed_hand)
+        self.player.tiles.remove(tile_in_hand)
 
         sum_tiles = 0
+        sum_cost = 0
         for wait_34 in discard_option.waiting:
             if self.player.is_open_hand and wait_34 in not_suitable_tiles:
                 continue
 
+            closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
+            live_tiles = 4 - self.player.total_tiles(wait_34, closed_hand_34)
+
+            if live_tiles == 0:
+                continue
+
             wait_136 = wait_34 * 4
-            tiles.append(wait_136)
+            self.player.tiles.append(wait_136)
 
             results, shanten = self.find_discard_options(
-                tiles,
+                self.player.tiles,
                 self.player.closed_hand,
                 self.player.melds
             )
@@ -658,15 +635,55 @@ class HandBuilder:
 
             # let's take best ukeire here
             if results:
-                best_one = sorted(results, key=lambda x: -x.ukeire)[0]
-                live_tiles = 4 - self.player.total_tiles(wait_34, closed_hand_34)
-                sum_tiles += best_one.ukeire * live_tiles
+                result_has_atodzuke = False
+                if self.player.is_open_hand:
+                    best_one = results[0]
+                    best_ukeire = 0
+                    for result in results:
+                        has_atodzuke = False
+                        ukeire = 0
+                        for wait_34 in result.waiting:
+                            if wait_34 in not_suitable_tiles:
+                                has_atodzuke = True
+                            else:
+                                ukeire += result.wait_to_ukeire[wait_34]
 
-            tiles.remove(wait_136)
+                        # let's consider atodzuke waits to be worse than non-atodzuke ones
+                        if has_atodzuke:
+                            ukeire /= 2
+
+                        if (ukeire > best_ukeire) or (ukeire >= best_ukeire and not has_atodzuke):
+                            best_ukeire = ukeire
+                            best_one = result
+                            result_has_atodzuke = has_atodzuke
+                else:
+                    best_one = sorted(results, key=lambda x: -x.ukeire)[0]
+                    best_ukeire = best_one.ukeire
+
+                sum_tiles += best_ukeire * live_tiles
+
+                # if we are going to have a tempai (on our second level) - let's also count its cost
+                if shanten == 0:
+                    next_tile_in_hand = best_one.find_tile_in_hand(self.player.closed_hand)
+                    self.player.tiles.remove(next_tile_in_hand)
+                    cost_x_ukeire, _ = self._estimate_cost_x_ukeire(best_one, call_riichi=call_riichi)
+                    # we reduce tile valuation for atodzuke
+                    if result_has_atodzuke:
+                        cost_x_ukeire /= 2
+                    sum_cost += cost_x_ukeire
+                    self.player.tiles.append(next_tile_in_hand)
+
+            self.player.tiles.remove(wait_136)
 
         discard_option.ukeire_second = sum_tiles
+        if discard_option.shanten == 1:
+            discard_option.second_level_cost = sum_cost
 
-    def _filter_list_by_percentage(self, items, attribute, percentage):
+        # restore original state of player hand
+        self.player.tiles = player_tiles_original
+
+    @staticmethod
+    def _filter_list_by_percentage(items, attribute, percentage):
         filtered_options = []
         first_option = items[0]
         ukeire_borders = round((getattr(first_option, attribute) / 100) * percentage)
@@ -675,7 +692,8 @@ class HandBuilder:
                 filtered_options.append(x)
         return filtered_options
 
-    def _choose_ukeire_borders(self, first_option, border_percentage, border_field):
+    @staticmethod
+    def _choose_ukeire_borders(first_option, border_percentage, border_field):
         ukeire_borders = round((getattr(first_option, border_field) / 100) * border_percentage)
 
         if first_option.shanten == 0 and ukeire_borders < 2:
@@ -688,3 +706,39 @@ class HandBuilder:
             ukeire_borders = 8
 
         return ukeire_borders
+
+    def _estimate_cost_x_ukeire(self, discard_option, call_riichi):
+        cost_x_ukeire_tsumo = 0
+        cost_x_ukeire_ron = 0
+        hand_cost_tsumo = 0
+        hand_cost_ron = 0
+
+        is_furiten = self._is_discard_option_furiten(discard_option)
+
+        for waiting in discard_option.waiting:
+            hand_value = self.player.ai.estimate_hand_value(waiting,
+                                                            call_riichi=call_riichi,
+                                                            is_tsumo=True)
+            if hand_value.error is None:
+                hand_cost_tsumo = hand_value.cost['main'] + 2 * hand_value.cost['additional']
+                cost_x_ukeire_tsumo += hand_cost_tsumo * discard_option.wait_to_ukeire[waiting]
+
+            if not is_furiten:
+                hand_value = self.player.ai.estimate_hand_value(waiting,
+                                                                call_riichi=call_riichi,
+                                                                is_tsumo=False)
+                if hand_value.error is None:
+                    hand_cost_ron = hand_value.cost['main']
+                    cost_x_ukeire_ron += hand_cost_ron * discard_option.wait_to_ukeire[waiting]
+
+        # these are abstract numbers used to compare different waits
+        # some don't have yaku, some furiten, etc.
+        # so we use an abstract formula of 1 tsumo cost + 3 ron costs
+        cost_x_ukeire = cost_x_ukeire_tsumo + 3 * cost_x_ukeire_ron
+
+        if len(discard_option.waiting) == 1:
+            hand_cost = hand_cost_tsumo + 3 * hand_cost_ron
+        else:
+            hand_cost = None
+
+        return cost_x_ukeire, hand_cost

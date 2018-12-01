@@ -84,9 +84,13 @@ class YakuhaiStrategy(BaseStrategy):
 
         for pair in self.valued_pairs:
             # last chance to get that yakuhai, let's go for it
-            if opportunity_to_meld_yakuhai and self.player.total_tiles(pair, player_closed_hand_tiles_34) == 3 and self.player.ai.shanten >= 1:
+            if (opportunity_to_meld_yakuhai and
+                    self.player.total_tiles(pair, player_closed_hand_tiles_34) == 3 and
+                    self.player.ai.shanten >= 1):
+
                 if pair not in self.last_chance_calls:
                     self.last_chance_calls.append(pair)
+
                 return True
 
         return False
@@ -97,7 +101,11 @@ class YakuhaiStrategy(BaseStrategy):
         tiles_34 = TilesConverter.to_34_array(hand)
 
         valued_pairs = [x for x in self.player.valued_honors if tiles_34[x] == 2]
+
+        # closed pon sets
         valued_pons = [x for x in self.player.valued_honors if tiles_34[x] == 3]
+        # open pon sets
+        valued_pons += [x for x in open_melds if x.type == Meld.PON and x.tiles[0] // 4 in self.player.valued_honors]
 
         acceptable_options = []
         for item in discard_options:

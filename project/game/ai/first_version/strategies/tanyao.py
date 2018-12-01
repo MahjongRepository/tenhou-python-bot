@@ -140,9 +140,13 @@ class TanyaoStrategy(BaseStrategy):
                 continue
 
             # there is no sense to wait 1-4 if we have open hand
-            all_waiting_are_fine = all([self.is_tile_suitable(x * 4) for x in item.waiting])
-            if all_waiting_are_fine:
-                results.append(item)
+            # but let's only avoid atodzuke tiles in tempai, the rest will be dealt with in
+            # generic logic
+            if item.shanten == 0:
+                all_waiting_are_fine = all(
+                    [(self.is_tile_suitable(x * 4) or item.wait_to_ukeire[x] == 0) for x in item.waiting])
+                if all_waiting_are_fine:
+                    results.append(item)
 
         if not_suitable_tiles:
             return not_suitable_tiles

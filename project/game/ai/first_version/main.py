@@ -44,7 +44,6 @@ class ImplementationAI(InterfaceAI):
 
     current_strategy = None
     last_discard_option = None
-    use_chitoitsu = False
 
     hand_cache = {}
 
@@ -70,7 +69,6 @@ class ImplementationAI(InterfaceAI):
 
         self.current_strategy = None
         self.last_discard_option = None
-        self.use_chitoitsu = False
 
         self.hand_cache = {}
 
@@ -81,9 +79,7 @@ class ImplementationAI(InterfaceAI):
             'Hand: {}'.format(self.player.format_hand_for_print()),
         ])
 
-        self.shanten = self.shanten_calculator.calculate_shanten(
-            TilesConverter.to_34_array(self.player.tiles)
-        )
+        self.shanten, _ = self.hand_builder.calculate_shanten(TilesConverter.to_34_array(self.player.tiles))
 
     def draw_tile(self, tile_136):
         self.determine_strategy(self.player.tiles)
@@ -111,11 +107,8 @@ class ImplementationAI(InterfaceAI):
             return None, None
 
         tiles_34 = TilesConverter.to_34_array(tiles_136)
-        previous_shanten = self.shanten_calculator.calculate_shanten(
-            tiles_34,
-            self.player.meld_34_tiles,
-            chiitoitsu=self.use_chitoitsu
-        )
+
+        previous_shanten, _ = self.hand_builder.calculate_shanten(tiles_34, self.player.meld_34_tiles)
 
         if previous_shanten == Shanten.AGARI_STATE and not self.current_strategy.can_meld_into_agari():
             return None, None
@@ -133,8 +126,6 @@ class ImplementationAI(InterfaceAI):
         return meld, discard_option
 
     def determine_strategy(self, tiles_136):
-        self.use_chitoitsu = False
-
         # for already opened hand we don't need to give up on selected strategy
         if self.player.is_open_hand and self.current_strategy:
             return False
@@ -160,8 +151,6 @@ class ImplementationAI(InterfaceAI):
                 self.current_strategy = strategy
 
         if self.current_strategy:
-            self.use_chitoitsu = self.current_strategy.type == BaseStrategy.CHIITOITSU
-
             if not old_strategy or self.current_strategy.type != old_strategy.type:
                 DecisionsLogger.debug(
                     log.STRATEGY_ACTIVATE,

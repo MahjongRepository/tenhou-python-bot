@@ -114,13 +114,35 @@ class HandBuilder:
 
         return self.process_discard_option(selected_tile, closed_hand, print_log=print_log)
 
+    def calculate_shanten(self, tiles_34, open_sets_34=None):
+        shanten_with_chiitoitsu = self.ai.shanten_calculator.calculate_shanten(tiles_34,
+                                                                               open_sets_34,
+                                                                               chiitoitsu=True)
+        shanten_without_chiitoitsu = self.ai.shanten_calculator.calculate_shanten(tiles_34,
+                                                                                  open_sets_34,
+                                                                                  chiitoitsu=False)
+
+        if shanten_with_chiitoitsu == 0 and shanten_without_chiitoitsu >= 1:
+            shanten = shanten_with_chiitoitsu
+            use_chiitoitsu = True
+        elif shanten_with_chiitoitsu == 1 and shanten_without_chiitoitsu >= 3:
+            shanten = shanten_with_chiitoitsu
+            use_chiitoitsu = True
+        else:
+            shanten = shanten_without_chiitoitsu
+            use_chiitoitsu = False
+
+        return shanten, use_chiitoitsu
+
     def calculate_waits(self, tiles_34, open_sets_34=None):
         """
         :param tiles_34: array of tiles in 34 formant, 13 of them (this is important)
         :param open_sets_34: array of array with tiles in 34 format
         :return: array of waits in 34 format and number of shanten
         """
-        shanten = self.ai.shanten_calculator.calculate_shanten(tiles_34, open_sets_34, chiitoitsu=self.ai.use_chitoitsu)
+
+        shanten, use_chiitoitsu = self.calculate_shanten(tiles_34, open_sets_34)
+
         waiting = []
         for j in range(0, 34):
             if tiles_34[j] == 4:
@@ -131,7 +153,7 @@ class HandBuilder:
             key = '{},{},{}'.format(
                 ''.join([str(x) for x in tiles_34]),
                 ';'.join([str(x) for x in open_sets_34]),
-                self.ai.use_chitoitsu and 1 or 0
+                use_chiitoitsu and 1 or 0
             )
 
             if key in self.ai.hand_cache:
@@ -140,7 +162,7 @@ class HandBuilder:
                 new_shanten = self.ai.shanten_calculator.calculate_shanten(
                     tiles_34,
                     open_sets_34,
-                    chiitoitsu=self.ai.use_chitoitsu
+                    chiitoitsu=use_chiitoitsu
                 )
                 self.ai.hand_cache[key] = new_shanten
 
@@ -188,10 +210,9 @@ class HandBuilder:
         if is_agari:
             shanten = Shanten.AGARI_STATE
         else:
-            shanten = self.ai.shanten_calculator.calculate_shanten(
+            shanten, _ = self.calculate_shanten(
                 tiles_34,
-                open_sets_34,
-                chiitoitsu=self.ai.use_chitoitsu
+                open_sets_34
             )
 
         return results, shanten

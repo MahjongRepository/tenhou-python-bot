@@ -50,3 +50,15 @@ class ChiitoitsuStrategyTestCase(unittest.TestCase, TestMixin):
         tile = self._string_to_136_tile(man='9')
         meld, _ = player.try_to_call_meld(tile, True)
         self.assertEqual(meld, None)
+
+    def test_keep_chiitoitsu_tempai(self):
+        table = Table()
+        player = table.player
+
+        tiles = self._string_to_136_array(sou='113355', man='22669', pin='99')
+        player.init_hand(tiles)
+
+        player.draw_tile(self._string_to_136_tile(man='6'))
+
+        discard = player.discard_tile()
+        self.assertEqual(self._to_string([discard]), '6m')

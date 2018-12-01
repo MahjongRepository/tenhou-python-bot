@@ -31,7 +31,7 @@ class ChiitoitsuStrategyTestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(sou='234', man='223344', pin='5669')
         player.init_hand(tiles)
         player.draw_tile(self._string_to_136_tile(pin='5'))
-        player.ai.shanten = 0
+        player.discard_tile()
         self.assertEqual(strategy.should_activate_strategy(player.tiles), False)
 
         tiles = self._string_to_136_array(sou='234', man='22334455669')

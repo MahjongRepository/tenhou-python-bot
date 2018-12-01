@@ -198,11 +198,7 @@ class HandBuilder:
 
     def count_tiles(self, waiting, tiles_34):
         n = 0
-        not_suitable_tiles = self.ai.current_strategy and self.ai.current_strategy.not_suitable_tiles or []
         for tile_34 in waiting:
-            if self.player.is_open_hand and tile_34 in not_suitable_tiles:
-                continue
-
             n += 4 - self.player.total_tiles(tile_34, tiles_34)
         return n
 
@@ -639,15 +635,32 @@ class HandBuilder:
 
             # let's take best ukeire here
             if results:
-                # TODO: find best one considering atodzuke
-                best_one = sorted(results, key=lambda x: -x.ukeire)[0]
-                sum_tiles += best_one.ukeire * live_tiles
-
-                has_atodzuke = False
+                result_has_atodzuke = False
                 if self.player.is_open_hand:
-                    for wait_34 in best_one.waiting:
-                        if wait_34 in not_suitable_tiles:
-                            has_atodzuke = True
+                    best_one = results[0]
+                    best_ukeire = 0
+                    for result in results:
+                        has_atodzuke = False
+                        ukeire = 0
+                        for wait_34 in result.waiting:
+                            if wait_34 in not_suitable_tiles:
+                                has_atodzuke = True
+                            else:
+                                ukeire += result.wait_to_ukeire[wait_34]
+
+                        # let's consider atodzuke waits to be worse than non-atodzuke ones
+                        if has_atodzuke:
+                            ukeire /= 2
+
+                        if (ukeire > best_ukeire) or (ukeire >= best_ukeire and not has_atodzuke):
+                            best_ukeire = ukeire
+                            best_one = result
+                            result_has_atodzuke = has_atodzuke
+                else:
+                    best_one = sorted(results, key=lambda x: -x.ukeire)[0]
+                    best_ukeire = best_one.ukeire
+
+                sum_tiles += best_ukeire * live_tiles
 
                 # if we are going to have a tempai (on our second level) - let's also count its cost
                 if shanten == 0:
@@ -655,7 +668,7 @@ class HandBuilder:
                     self.player.tiles.remove(next_tile_in_hand)
                     cost_x_ukeire, _ = self._estimate_cost_x_ukeire(best_one, call_riichi=call_riichi)
                     # we reduce tile valuation for atodzuke
-                    if has_atodzuke:
+                    if result_has_atodzuke:
                         cost_x_ukeire /= 2
                     sum_cost += cost_x_ukeire
                     self.player.tiles.append(next_tile_in_hand)

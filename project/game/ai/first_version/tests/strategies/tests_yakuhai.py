@@ -524,3 +524,22 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
         player.draw_tile(self._string_to_136_tile(man='6'))
         discarded_tile = player.discard_tile()
         self.assertNotEqual(self._to_string([discarded_tile]), '6m')
+
+    def test_tempai_with_open_yakuhai_meld_and_yakuhai_pair_in_the_hand(self):
+        """
+        there was a bug where bot didn't handle tempai properly
+        with opened yakuhai pon and pair in the hand
+        56m555p6678s55z + [777z]
+        """
+        table = Table()
+        player = table.player
+
+        tiles = self._string_to_136_array(man='56', pin='555', sou='667', honors='55777')
+        player.init_hand(tiles)
+        player.add_called_meld(self._make_meld(Meld.PON, honors='777'))
+        player.draw_tile(self._string_to_136_tile(sou='8'))
+
+        player.ai.current_strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
+
+        discarded_tile = player.discard_tile()
+        self.assertEqual(self._to_string([discarded_tile]), '6s')

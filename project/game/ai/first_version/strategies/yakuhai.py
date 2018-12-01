@@ -101,7 +101,11 @@ class YakuhaiStrategy(BaseStrategy):
         tiles_34 = TilesConverter.to_34_array(hand)
 
         valued_pairs = [x for x in self.player.valued_honors if tiles_34[x] == 2]
+
+        # closed pon sets
         valued_pons = [x for x in self.player.valued_honors if tiles_34[x] == 3]
+        # open pon sets
+        valued_pons += [x for x in open_melds if x.type == Meld.PON and x.tiles[0] // 4 in self.player.valued_honors]
 
         acceptable_options = []
         for item in discard_options:

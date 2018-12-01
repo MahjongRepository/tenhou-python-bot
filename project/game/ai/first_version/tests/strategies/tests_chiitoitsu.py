@@ -62,3 +62,35 @@ class ChiitoitsuStrategyTestCase(unittest.TestCase, TestMixin):
 
         discard = player.discard_tile()
         self.assertEqual(self._to_string([discard]), '6m')
+
+    def test_5_pairs_yakuhai_not_chiitoitsu(self):
+        table = Table()
+        player = table.player
+
+        table.add_dora_indicator(self._string_to_136_tile(sou='9'))
+        table.add_dora_indicator(self._string_to_136_tile(sou='1'))
+
+        tiles = self._string_to_136_array(sou='112233', pin='16678', honors='66')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(honors='6')
+        meld, _ = player.try_to_call_meld(tile, True)
+
+        self.assertNotEqual(player.ai.current_strategy.type, BaseStrategy.CHIITOITSU)
+
+        self.assertEqual(player.ai.current_strategy.type, BaseStrategy.YAKUHAI)
+
+        self.assertNotEqual(meld, None)
+
+    def chiitoitsu_tanyao_tempai(self):
+        table = Table()
+        player = table.player
+
+        tiles = self._string_to_136_array(sou='223344', pin='788', man='4577')
+        player.init_hand(tiles)
+
+        player.draw_tile(self._string_to_136_tile(man='4'))
+
+        discard = player.discard_tile()
+        discard_correct = self._to_string([discard]) == '7p' or self._to_string([discard]) == '5m'
+        self.assertEqual(discard_correct, True)

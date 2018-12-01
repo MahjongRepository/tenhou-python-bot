@@ -100,15 +100,15 @@ class ImplementationAI(InterfaceAI):
         )
 
     def try_to_call_meld(self, tile_136, is_kamicha_discard):
-        tiles_136 = self.player.tiles[:] + [tile_136]
+        tiles_136_previous = self.player.tiles[:]
+        tiles_136 = tiles_136_previous + [tile_136]
         self.determine_strategy(tiles_136)
 
         if not self.current_strategy:
             return None, None
 
-        tiles_34 = TilesConverter.to_34_array(tiles_136)
-
-        previous_shanten, _ = self.hand_builder.calculate_shanten(tiles_34, self.player.meld_34_tiles)
+        tiles_34_previous = TilesConverter.to_34_array(tiles_136_previous)
+        previous_shanten, _ = self.hand_builder.calculate_shanten(tiles_34_previous, self.player.meld_34_tiles)
 
         if previous_shanten == Shanten.AGARI_STATE and not self.current_strategy.can_meld_into_agari():
             return None, None
@@ -133,15 +133,15 @@ class ImplementationAI(InterfaceAI):
         old_strategy = self.current_strategy
         self.current_strategy = None
 
-        # order is important
-        strategies = [
-            ChinitsuStrategy(BaseStrategy.CHINITSU, self.player),
-            HonitsuStrategy(BaseStrategy.HONITSU, self.player),
-            YakuhaiStrategy(BaseStrategy.YAKUHAI, self.player),
-        ]
+        # order is important, we add strategies with the highest priority first
+        strategies = []
 
         if self.player.table.has_open_tanyao:
             strategies.append(TanyaoStrategy(BaseStrategy.TANYAO, self.player))
+
+        strategies.append(YakuhaiStrategy(BaseStrategy.YAKUHAI, self.player))
+        strategies.append(HonitsuStrategy(BaseStrategy.HONITSU, self.player))
+        strategies.append(ChinitsuStrategy(BaseStrategy.CHINITSU, self.player))
 
         strategies.append(ChiitoitsuStrategy(BaseStrategy.CHIITOITSU, self.player))
         strategies.append(FormalTempaiStrategy(BaseStrategy.FORMAL_TEMPAI, self.player))
@@ -149,6 +149,7 @@ class ImplementationAI(InterfaceAI):
         for strategy in strategies:
             if strategy.should_activate_strategy(tiles_136):
                 self.current_strategy = strategy
+                break
 
         if self.current_strategy:
             if not old_strategy or self.current_strategy.type != old_strategy.type:

@@ -762,30 +762,72 @@ class DiscardLogicTestCase(unittest.TestCase, TestMixin):
 
         tile = self._string_to_136_tile(man='4')
         discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
-        player.ai.hand_builder.calculate_second_level_ukeire(discard_option)
+        player.ai.hand_builder.calculate_second_level_ukeire(discard_option, player.tiles, player.melds)
         self.assertEqual(discard_option.ukeire_second, 108)
 
         tile = self._string_to_136_tile(man='3')
         discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
-        player.ai.hand_builder.calculate_second_level_ukeire(discard_option)
+        player.ai.hand_builder.calculate_second_level_ukeire(discard_option, player.tiles, player.melds)
         self.assertEqual(discard_option.ukeire_second, 108)
 
         tile = self._string_to_136_tile(pin='2')
         discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
-        player.ai.hand_builder.calculate_second_level_ukeire(discard_option)
+        player.ai.hand_builder.calculate_second_level_ukeire(discard_option, player.tiles, player.melds)
         self.assertEqual(discard_option.ukeire_second, 96)
 
         tile = self._string_to_136_tile(pin='3')
         discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
-        player.ai.hand_builder.calculate_second_level_ukeire(discard_option)
+        player.ai.hand_builder.calculate_second_level_ukeire(discard_option, player.tiles, player.melds)
         self.assertEqual(discard_option.ukeire_second, 96)
 
         tile = self._string_to_136_tile(pin='5')
         discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
-        player.ai.hand_builder.calculate_second_level_ukeire(discard_option)
+        player.ai.hand_builder.calculate_second_level_ukeire(discard_option, player.tiles, player.melds)
         self.assertEqual(discard_option.ukeire_second, 96)
 
         tile = self._string_to_136_tile(pin='6')
         discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
-        player.ai.hand_builder.calculate_second_level_ukeire(discard_option)
+        player.ai.hand_builder.calculate_second_level_ukeire(discard_option, player.tiles, player.melds)
         self.assertEqual(discard_option.ukeire_second, 96)
+
+    def test_choose_1_shanten_with_cost_possibility_draw(self):
+        table = Table()
+        player = table.player
+        table.add_dora_indicator(self._string_to_136_tile(sou='4'))
+
+        tiles = self._string_to_136_array(man='557', pin='468', sou='55577', honors='66')
+        player.init_hand(tiles)
+
+        meld = self._make_meld(Meld.PON, sou='555')
+        player.add_called_meld(meld)
+
+        tile = self._string_to_136_tile(sou='7')
+        player.draw_tile(tile)
+        discarded_tile = player.discard_tile()
+        self.assertNotEqual(player.ai.current_strategy, None)
+        self.assertEqual(player.ai.current_strategy.type, BaseStrategy.YAKUHAI)
+        self.assertEqual(self._to_string([discarded_tile]), '7m')
+
+    def test_choose_1_shanten_with_cost_possibility_meld(self):
+        table = Table()
+        player = table.player
+        table.add_dora_indicator(self._string_to_136_tile(sou='4'))
+
+        tiles = self._string_to_136_array(man='557', pin='468', sou='55577', honors='66')
+        player.init_hand(tiles)
+
+        meld = self._make_meld(Meld.PON, sou='555')
+        player.add_called_meld(meld)
+
+        tile = self._string_to_136_tile(sou='7')
+        meld, discard_option = player.try_to_call_meld(tile, False)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(meld.type, Meld.PON)
+        self.assertEqual(self._to_string(meld.tiles), '777s')
+
+        self.assertNotEqual(player.ai.current_strategy, None)
+        self.assertEqual(player.ai.current_strategy.type, BaseStrategy.YAKUHAI)
+
+        discarded_tile = discard_option.find_tile_in_hand(player.closed_hand)
+
+        self.assertEqual(self._to_string([discarded_tile]), '7m')

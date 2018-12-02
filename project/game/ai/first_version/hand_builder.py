@@ -505,7 +505,7 @@ class HandBuilder:
         if first_option.shanten in [1, 2, 3]:
             ukeire_field = 'ukeire_second'
             for x in possible_options:
-                self.calculate_second_level_ukeire(x)
+                self.calculate_second_level_ukeire(x, tiles, melds)
 
             possible_options = sorted(possible_options, key=lambda x: -getattr(x, ukeire_field))
 
@@ -621,7 +621,7 @@ class HandBuilder:
         else:
             return discard_option.find_tile_in_hand(closed_hand)
 
-    def calculate_second_level_ukeire(self, discard_option):
+    def calculate_second_level_ukeire(self, discard_option, tiles, melds):
         not_suitable_tiles = self.ai.current_strategy and self.ai.current_strategy.not_suitable_tiles or []
         call_riichi = not self.player.is_open_hand
 
@@ -630,6 +630,8 @@ class HandBuilder:
         player_tiles_original = self.player.tiles.copy()
 
         tile_in_hand = discard_option.find_tile_in_hand(self.player.closed_hand)
+
+        self.player.tiles = tiles.copy()
         self.player.tiles.remove(tile_in_hand)
 
         sum_tiles = 0
@@ -650,7 +652,7 @@ class HandBuilder:
             results, shanten = self.find_discard_options(
                 self.player.tiles,
                 self.player.closed_hand,
-                self.player.melds
+                melds
             )
             results = [x for x in results if x.shanten == discard_option.shanten - 1]
 

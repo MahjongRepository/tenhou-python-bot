@@ -44,7 +44,6 @@ class ImplementationAI(InterfaceAI):
 
     current_strategy = None
     last_discard_option = None
-    use_chitoitsu = False
 
     hand_cache = {}
 
@@ -70,7 +69,6 @@ class ImplementationAI(InterfaceAI):
 
         self.current_strategy = None
         self.last_discard_option = None
-        self.use_chitoitsu = False
 
         self.hand_cache = {}
 
@@ -81,9 +79,7 @@ class ImplementationAI(InterfaceAI):
             'Hand: {}'.format(self.player.format_hand_for_print()),
         ])
 
-        self.shanten = self.shanten_calculator.calculate_shanten(
-            TilesConverter.to_34_array(self.player.tiles)
-        )
+        self.shanten, _ = self.hand_builder.calculate_shanten(TilesConverter.to_34_array(self.player.tiles))
 
     def draw_tile(self, tile_136):
         self.determine_strategy(self.player.tiles)
@@ -104,18 +100,15 @@ class ImplementationAI(InterfaceAI):
         )
 
     def try_to_call_meld(self, tile_136, is_kamicha_discard):
-        tiles_136 = self.player.tiles[:] + [tile_136]
+        tiles_136_previous = self.player.tiles[:]
+        tiles_136 = tiles_136_previous + [tile_136]
         self.determine_strategy(tiles_136)
 
         if not self.current_strategy:
             return None, None
 
-        tiles_34 = TilesConverter.to_34_array(tiles_136)
-        previous_shanten = self.shanten_calculator.calculate_shanten(
-            tiles_34,
-            self.player.meld_34_tiles,
-            chiitoitsu=self.use_chitoitsu
-        )
+        tiles_34_previous = TilesConverter.to_34_array(tiles_136_previous)
+        previous_shanten, _ = self.hand_builder.calculate_shanten(tiles_34_previous, self.player.meld_34_tiles)
 
         if previous_shanten == Shanten.AGARI_STATE and not self.current_strategy.can_meld_into_agari():
             return None, None
@@ -133,8 +126,6 @@ class ImplementationAI(InterfaceAI):
         return meld, discard_option
 
     def determine_strategy(self, tiles_136):
-        self.use_chitoitsu = False
-
         # for already opened hand we don't need to give up on selected strategy
         if self.player.is_open_hand and self.current_strategy:
             return False
@@ -142,15 +133,15 @@ class ImplementationAI(InterfaceAI):
         old_strategy = self.current_strategy
         self.current_strategy = None
 
-        # order is important
-        strategies = [
-            ChinitsuStrategy(BaseStrategy.CHINITSU, self.player),
-            HonitsuStrategy(BaseStrategy.HONITSU, self.player),
-            YakuhaiStrategy(BaseStrategy.YAKUHAI, self.player),
-        ]
+        # order is important, we add strategies with the highest priority first
+        strategies = []
 
         if self.player.table.has_open_tanyao:
             strategies.append(TanyaoStrategy(BaseStrategy.TANYAO, self.player))
+
+        strategies.append(YakuhaiStrategy(BaseStrategy.YAKUHAI, self.player))
+        strategies.append(HonitsuStrategy(BaseStrategy.HONITSU, self.player))
+        strategies.append(ChinitsuStrategy(BaseStrategy.CHINITSU, self.player))
 
         strategies.append(ChiitoitsuStrategy(BaseStrategy.CHIITOITSU, self.player))
         strategies.append(FormalTempaiStrategy(BaseStrategy.FORMAL_TEMPAI, self.player))
@@ -158,10 +149,9 @@ class ImplementationAI(InterfaceAI):
         for strategy in strategies:
             if strategy.should_activate_strategy(tiles_136):
                 self.current_strategy = strategy
+                break
 
         if self.current_strategy:
-            self.use_chitoitsu = self.current_strategy.type == BaseStrategy.CHIITOITSU
-
             if not old_strategy or self.current_strategy.type != old_strategy.type:
                 DecisionsLogger.debug(
                     log.STRATEGY_ACTIVATE,

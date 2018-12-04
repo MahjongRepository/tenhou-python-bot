@@ -281,11 +281,13 @@ class TenhouClient(Client):
 
                         if kan_type == Meld.CHANKAN:
                             meld_type = 5
+                            logger.info('We upgraded pon to kan!')
                         else:
                             meld_type = 4
+                            logger.info('We called a closed kan set!')
 
                         self._send_message('<N type="{}" hai="{}" />'.format(meld_type, drawn_tile))
-                        logger.info('We called a closed kan\chankan set!')
+
                         continue
 
                     if not main_player.in_riichi:
@@ -345,7 +347,7 @@ class TenhouClient(Client):
                 ]
                 # we win by other player's discard
                 if any(i in message for i in win_suggestions):
-                    # enemy called chankan and we can win there
+                    # enemy called shouminkan and we can win there
                     if self.decoder.is_opened_set_message(message):
                         meld = self.decoder.parse_meld(message)
                         tile = meld.called_tile

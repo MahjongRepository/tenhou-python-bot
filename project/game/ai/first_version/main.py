@@ -248,11 +248,11 @@ class ImplementationAI(InterfaceAI):
 
         # let's check can we upgrade opened pon to the kan
         pon_melds = [x for x in self.player.meld_34_tiles if is_pon(x)]
-        has_chankan_candidate = False
+        has_shouminkan_candidate = False
         for meld in pon_melds:
             # tile is equal to our already opened pon
             if tile_34 in meld:
-                has_chankan_candidate = True
+                has_shouminkan_candidate = True
 
                 tiles.append(tile)
                 closed_hand_tiles.append(tile)
@@ -272,7 +272,7 @@ class ImplementationAI(InterfaceAI):
                 )
                 new_waits_count = self.hand_builder.count_tiles(new_waiting, tiles_34)
 
-        if not has_chankan_candidate:
+        if not has_shouminkan_candidate:
             # we don't have enough tiles in the hand
             if closed_hand_34[tile_34] != 3:
                 return None
@@ -312,7 +312,7 @@ class ImplementationAI(InterfaceAI):
             assert new_waits_count <= previous_waits_count
 
             if new_waits_count == previous_waits_count:
-                return has_chankan_candidate and Meld.CHANKAN or Meld.KAN
+                return has_shouminkan_candidate and Meld.CHANKAN or Meld.KAN
 
         return None
 

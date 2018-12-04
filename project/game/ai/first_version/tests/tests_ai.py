@@ -395,7 +395,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         meld, _ = player.try_to_call_meld(tile, True)
         self.assertIsNotNone(meld)
 
-    def test_call_chankan_and_bad_ukeire_after_call(self):
+    def test_call_upgrade_pon_and_bad_ukeire_after_call(self):
         table = Table()
         table.count_of_remaining_tiles = 10
 
@@ -411,9 +411,10 @@ class AITestCase(unittest.TestCase, TestMixin):
         self.assertEqual(len(table.player.tiles), 13)
         self.assertEqual(table.player.should_call_kan(tile, False), None)
 
-    def test_call_chankan_and_bad_ukeire_after_call_second(self):
+    def test_call_upgrade_pon_and_bad_ukeire_after_call_second_case(self):
         table = Table()
         table.count_of_remaining_tiles = 10
+        player = table.player
 
         tiles = self._string_to_136_array(man='3455567', sou='222', honors='666')
         table.player.init_hand(tiles)
@@ -424,7 +425,31 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         self.assertEqual(table.player.should_call_kan(tile, False), None)
 
-    def test_upgrade_opened_pon_to_kan(self):
+        player.draw_tile(tile)
+        discarded_tile = player.discard_tile()
+
+        self.assertEqual(self._to_string([discarded_tile]), '3m')
+
+    def test_call_upgrade_pon_and_bad_ukeire_after_call_third_case(self):
+        table = Table()
+        table.count_of_remaining_tiles = 10
+        player = table.player
+
+        tiles = self._string_to_136_array(man='67', pin='6', sou='1344478999')
+        table.player.init_hand(tiles)
+        table.player.add_called_meld(self._make_meld(Meld.PON, sou='444'))
+
+        tile = self._string_to_136_tile(sou='4')
+
+        # we don't want to call shouminkan here
+        self.assertEqual(table.player.should_call_kan(tile, False), None)
+
+        player.draw_tile(tile)
+        discarded_tile = player.discard_tile()
+
+        self.assertEqual(self._to_string([discarded_tile]), '6p')
+
+    def test_call_shouminkan(self):
         table = Table()
         table.count_of_remaining_tiles = 10
 
@@ -476,8 +501,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         tile = self._string_to_136_tile(sou='1')
         self.assertEqual(table.player.should_call_kan(tile, True), None)
 
-        # test case 2
-
+    def test_opened_kan_second_case(self):
         table = Table()
         table.count_of_remaining_tiles = 10
 
@@ -493,7 +517,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         tile = self._string_to_136_tile(sou='1')
         self.assertEqual(table.player.should_call_kan(tile, True), Meld.KAN)
 
-        # test case 3
+    def test_opened_kan_third_case(self):
         # we are in tempai already and there was a crash on 5s meld suggestion
 
         table = Table()

@@ -108,7 +108,7 @@ class Table(object):
         else:
             # can't have a pon or chi from the hand
             assert meld.type == Meld.KAN or meld.type == meld.CHANKAN
-            # player draws additional tile from the wall in case of closed kan or chankan
+            # player draws additional tile from the wall in case of closed kan or shouminkan
             self.count_of_remaining_tiles -= 1
 
         self.get_player(player_seat).add_called_meld(meld)
@@ -119,7 +119,7 @@ class Table(object):
         if meld.called_tile is not None:
             tiles.remove(meld.called_tile)
 
-        # for chankan we already added 3 tiles
+        # for shouminkan we already added 3 tiles
         if meld.type == meld.CHANKAN:
             tiles = [meld.tiles[0]]
 

@@ -395,7 +395,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         meld, _ = player.try_to_call_meld(tile, True)
         self.assertIsNotNone(meld)
 
-    def test_upgrade_opened_pon_to_kan(self):
+    def test_call_chankan_and_bad_ukeire_after_call(self):
         table = Table()
         table.count_of_remaining_tiles = 10
 
@@ -409,6 +409,31 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         self.assertEqual(len(table.player.melds), 1)
         self.assertEqual(len(table.player.tiles), 13)
+        self.assertEqual(table.player.should_call_kan(tile, False), None)
+
+    def test_call_chankan_and_bad_ukeire_after_call_second(self):
+        table = Table()
+        table.count_of_remaining_tiles = 10
+
+        tiles = self._string_to_136_array(man='3455567', sou='222', honors='666')
+        table.player.init_hand(tiles)
+        table.player.add_called_meld(self._make_meld(Meld.PON, man='555'))
+        table.player.add_called_meld(self._make_meld(Meld.PON, honors='666'))
+
+        tile = self._string_to_136_tile(man='5')
+
+        self.assertEqual(table.player.should_call_kan(tile, False), None)
+
+    def test_upgrade_opened_pon_to_kan(self):
+        table = Table()
+        table.count_of_remaining_tiles = 10
+
+        tiles = self._string_to_136_array(man='3455567', sou='222', honors='666')
+        table.player.init_hand(tiles)
+        table.player.add_called_meld(self._make_meld(Meld.PON, honors='666'))
+
+        tile = self._string_to_136_tile(honors='6')
+
         self.assertEqual(table.player.should_call_kan(tile, False), Meld.CHANKAN)
 
     def test_call_closed_kan(self):
@@ -451,6 +476,8 @@ class AITestCase(unittest.TestCase, TestMixin):
         tile = self._string_to_136_tile(sou='1')
         self.assertEqual(table.player.should_call_kan(tile, True), None)
 
+        # test case 2
+
         table = Table()
         table.count_of_remaining_tiles = 10
 
@@ -465,6 +492,24 @@ class AITestCase(unittest.TestCase, TestMixin):
         # our hand is open, in tempai and with a good wait
         tile = self._string_to_136_tile(sou='1')
         self.assertEqual(table.player.should_call_kan(tile, True), Meld.KAN)
+
+        # test case 3
+        # we are in tempai already and there was a crash on 5s meld suggestion
+
+        table = Table()
+        table.count_of_remaining_tiles = 10
+        table.add_dora_indicator(self._string_to_136_tile(honors='5'))
+
+        tiles = self._string_to_136_array(man='456', sou='55567678', honors='66')
+        table.player.init_hand(tiles)
+        table.player.add_called_meld(self._make_meld(Meld.CHI, sou='678'))
+
+        # to rebuild all caches
+        table.player.draw_tile(self._string_to_136_tile(pin='9'))
+        table.player.discard_tile()
+
+        tile = self._string_to_136_tile(sou='5')
+        self.assertEqual(table.player.should_call_kan(tile, True), None)
 
     def test_dont_call_kan_in_defence_mode(self):
         table = Table()

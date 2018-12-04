@@ -58,7 +58,7 @@ class InterfaceAI(object):
 
     def should_call_kan(self, tile, is_open_kan, from_riichi=False):
         """
-        When bot can call kan or chankan this method will be called
+        When bot can call kan or shouminkan this method will be called
         :param tile: 136 tile format
         :param is_open_kan: boolean
         :param from_riichi: boolean

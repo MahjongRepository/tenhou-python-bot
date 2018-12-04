@@ -236,71 +236,83 @@ class ImplementationAI(InterfaceAI):
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
 
         closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
-        pon_melds = [x for x in self.player.meld_34_tiles if is_pon(x)]
-
-        # let's check can we upgrade opened pon to the kan
-        if pon_melds:
-            for meld in pon_melds:
-                # tile is equal to our already opened pon,
-                # so let's call chankan!
-                if tile_34 in meld:
-                    return Meld.CHANKAN
 
         melds_34 = copy.copy(self.player.meld_34_tiles)
         tiles = copy.copy(self.player.tiles)
         closed_hand_tiles = copy.copy(self.player.closed_hand)
 
-        # we can try to call closed meld
-        if closed_hand_34[tile_34] == 3:
-            if open_kan or from_riichi:
-                # this 4 tiles can only be used in kan, no other options
-                previous_waiting, previous_shanten = self.hand_builder.calculate_waits(tiles_34, melds_34)
-                previous_waits_cnt = self.hand_builder.count_tiles(previous_waiting, closed_hand_34)
+        new_shanten = 0
+        previous_shanten = 0
+        new_waits_count = 0
+        previous_waits_count = 0
 
-                # shanten calculator doesn't like working with kans, so we pretend it's a pon
-                melds_34 += [[tile_34, tile_34, tile_34]]
-                closed_hand_34[tile_34] = 0
+        # let's check can we upgrade opened pon to the kan
+        pon_melds = [x for x in self.player.meld_34_tiles if is_pon(x)]
+        has_shouminkan_candidate = False
+        for meld in pon_melds:
+            # tile is equal to our already opened pon
+            if tile_34 in meld:
+                has_shouminkan_candidate = True
 
-                new_waiting, new_shanten = self.hand_builder.calculate_waits(tiles_34, melds_34)
-                new_waits_cnt = self.hand_builder.count_tiles(new_waiting, closed_hand_34)
-            else:
-                # if we can use or tile in the hand for the forms other than KAN
                 tiles.append(tile)
-
                 closed_hand_tiles.append(tile)
-                closed_hand_34[tile_34] += 1
 
-                previous_results, previous_shanten = self.hand_builder.find_discard_options(
+                previous_shanten, previous_waits_count = self._calculate_shanten_for_kan(
                     tiles,
                     closed_hand_tiles,
                     self.player.melds
                 )
 
-                previous_results = [x for x in previous_results if x.shanten == previous_shanten]
+                tiles_34 = TilesConverter.to_34_array(tiles)
+                tiles_34[tile_34] -= 1
 
-                # it is possible that we don't have results here
-                # when we are in agari state (but without yaku)
-                if not previous_results:
-                    return None
+                new_waiting, new_shanten = self.hand_builder.calculate_waits(
+                    tiles_34,
+                    self.player.meld_34_tiles
+                )
+                new_waits_count = self.hand_builder.count_tiles(new_waiting, tiles_34)
 
-                previous_waits_cnt = sorted(previous_results, key=lambda x: -x.ukeire)[0].ukeire
+        if not has_shouminkan_candidate:
+            # we don't have enough tiles in the hand
+            if closed_hand_34[tile_34] != 3:
+                return None
 
-                # shanten calculator doesn't like working with kans, so we pretend it's a pon
-                closed_hand_34[tile_34] = 0
-                melds_34 += [[tile_34, tile_34, tile_34]]
+            if open_kan or from_riichi:
+                # this 4 tiles can only be used in kan, no other options
+                previous_waiting, previous_shanten = self.hand_builder.calculate_waits(tiles_34, melds_34)
+                previous_waits_count = self.hand_builder.count_tiles(previous_waiting, closed_hand_34)
+            else:
+                tiles.append(tile)
+                closed_hand_tiles.append(tile)
 
-                new_waiting, new_shanten = self.hand_builder.calculate_waits(tiles_34, melds_34)
-                new_waits_cnt = self.hand_builder.count_tiles(new_waiting, closed_hand_34)
+                previous_shanten, previous_waits_count = self._calculate_shanten_for_kan(
+                    tiles,
+                    closed_hand_tiles,
+                    self.player.melds
+                )
 
-            # it is not possible to reduce number of shanten by calling a kan
-            assert new_shanten >= previous_shanten
+            # shanten calculator doesn't like working with kans, so we pretend it's a pon
+            melds_34 += [[tile_34, tile_34, tile_34]]
+            new_waiting, new_shanten = self.hand_builder.calculate_waits(tiles_34, melds_34)
 
-            # if shanten number is the same, we should only call kan if ukeire didn't become worse
-            if new_shanten == previous_shanten:
-                # we cannot improve ukeire by calling kan (not considering the tile we drew from the dead wall)
-                assert new_waits_cnt <= previous_waits_cnt
-                if new_waits_cnt == previous_waits_cnt:
-                    return Meld.KAN
+            closed_hand_34[tile_34] = 4
+            new_waits_count = self.hand_builder.count_tiles(new_waiting, closed_hand_34)
+
+        # it is possible that we don't have results here
+        # when we are in agari state (but without yaku)
+        if previous_shanten is None:
+            return None
+
+        # it is not possible to reduce number of shanten by calling a kan
+        assert new_shanten >= previous_shanten
+
+        # if shanten number is the same, we should only call kan if ukeire didn't become worse
+        if new_shanten == previous_shanten:
+            # we cannot improve ukeire by calling kan (not considering the tile we drew from the dead wall)
+            assert new_waits_count <= previous_waits_count
+
+            if new_waits_count == previous_waits_count:
+                return has_shouminkan_candidate and Meld.CHANKAN or Meld.KAN
 
         return None
 
@@ -324,3 +336,21 @@ class ImplementationAI(InterfaceAI):
         Return list of players except our bot
         """
         return self.player.table.players[1:]
+
+    def _calculate_shanten_for_kan(self, tiles, closed_hand_tiles, melds):
+        previous_results, previous_shanten = self.hand_builder.find_discard_options(
+            tiles,
+            closed_hand_tiles,
+            melds
+        )
+
+        previous_results = [x for x in previous_results if x.shanten == previous_shanten]
+
+        # it is possible that we don't have results here
+        # when we are in agari state (but without yaku)
+        if not previous_results:
+            return None, None
+
+        previous_waits_cnt = sorted(previous_results, key=lambda x: -x.ukeire)[0].ukeire
+
+        return previous_shanten, previous_waits_cnt

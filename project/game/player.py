@@ -65,13 +65,13 @@ class PlayerInterface(object):
         self.round_step = 0
 
     def add_called_meld(self, meld: Meld):
-        # we already added chankan as a pon set
+        # we already added shouminkan as a pon set
         if meld.type == Meld.CHANKAN:
             tile_34 = meld.tiles[0] // 4
 
             pon_set = [x for x in self.melds if x.type == Meld.PON and (x.tiles[0] // 4) == tile_34]
 
-            # when we are doing reconnect and we have called chankan set
+            # when we are doing reconnect and we have called shouminkan set
             # we will not have called pon set in the hand
             if pon_set:
                 self.melds.remove(pon_set[0])

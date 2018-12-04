@@ -413,22 +413,23 @@ class AITestCase(unittest.TestCase, TestMixin):
 
     def test_call_upgrade_pon_and_bad_ukeire_after_call_second_case(self):
         table = Table()
+        table.add_dora_indicator(self._string_to_136_tile(honors='5'))
         table.count_of_remaining_tiles = 10
         player = table.player
 
         tiles = self._string_to_136_array(man='3455567', sou='222', honors='666')
-        table.player.init_hand(tiles)
-        table.player.add_called_meld(self._make_meld(Meld.PON, man='555'))
-        table.player.add_called_meld(self._make_meld(Meld.PON, honors='666'))
+        player.init_hand(tiles)
+        player.add_called_meld(self._make_meld(Meld.PON, man='555'))
+        player.add_called_meld(self._make_meld(Meld.PON, honors='666'))
 
         tile = self._string_to_136_tile(man='5')
 
-        self.assertEqual(table.player.should_call_kan(tile, False), None)
+        self.assertEqual(player.should_call_kan(tile, False), None)
 
         player.draw_tile(tile)
         discarded_tile = player.discard_tile()
 
-        self.assertEqual(self._to_string([discarded_tile]), '3m')
+        self.assertEqual(self._to_string([discarded_tile]), '2s')
 
     def test_call_upgrade_pon_and_bad_ukeire_after_call_third_case(self):
         table = Table()
@@ -534,6 +535,7 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         tile = self._string_to_136_tile(sou='5')
         self.assertEqual(table.player.should_call_kan(tile, True), None)
+        self.assertEqual(table.player.try_to_call_meld(tile, True), (None, None))
 
     def test_dont_call_kan_in_defence_mode(self):
         table = Table()

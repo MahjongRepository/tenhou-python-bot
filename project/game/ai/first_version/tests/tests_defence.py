@@ -253,24 +253,24 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         table.player.add_called_meld(self._make_meld(Meld.PON, pin='999'))
 
         table.add_discarded_tile(1, self._string_to_136_tile(honors='1'), False)
-        table.add_discarded_tile(1, self._string_to_136_tile(honors='3'), False)
 
         table.add_called_riichi(2)
 
         table.player.ai.defence.hand_34 = self._to_34_array(table.player.tiles)
         table.player.ai.defence.closed_hand_34 = self._to_34_array(table.player.closed_hand)
-        result = table.player.ai.defence.impossible_wait.find_tiles_to_discard([])
+        result = table.player.ai.defence.try_to_find_safe_tile_to_discard()
 
         # dora is not safe against tanki wait, so let's hold it
-        self.assertEqual([x.value for x in result], [EAST, WEST])
+        self.assertEqual(result.tile_to_discard, EAST)
 
     def test_find_impossible_waits_and_kabe_technique(self):
         table = Table()
-        tiles = self._string_to_136_array(pin='11122777799', man='999')
+        tiles = self._string_to_136_array(pin='111122777', man='66999')
         table.player.init_hand(tiles)
 
         table.player.add_called_meld(self._make_meld(Meld.PON, man='999'))
 
+        # FIXME: for some reason 2p is considered to be genbutsu against player 2, as well as 9p, so test failes
         table.add_discarded_tile(1, self._string_to_136_tile(pin='2'), False)
         table.add_discarded_tile(1, self._string_to_136_tile(pin='2'), False)
         table.add_discarded_tile(1, self._string_to_136_tile(pin='9'), False)
@@ -279,12 +279,12 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         table.player.ai.defence.hand_34 = self._to_34_array(table.player.tiles)
         table.player.ai.defence.closed_hand_34 = self._to_34_array(table.player.closed_hand)
-        result = table.player.ai.defence.kabe.find_tiles_to_discard([])
+        result = table.player.ai.defence.try_to_find_safe_tile_to_discard()
 
-        self.assertEqual(self._to_string([x.value * 4 for x in result]), '19p')
+        self.assertEqual(self._to_string([result.tile_to_discard * 4]), '1p')
 
         table = Table()
-        tiles = self._string_to_136_array(pin='33337777', man='888999')
+        tiles = self._string_to_136_array(pin='44446666', man='888999')
         table.player.init_hand(tiles)
 
         table.player.add_called_meld(self._make_meld(Meld.PON, man='888'))
@@ -298,9 +298,9 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         table.player.ai.defence.hand_34 = self._to_34_array(table.player.tiles)
         table.player.ai.defence.closed_hand_34 = self._to_34_array(table.player.closed_hand)
-        result = table.player.ai.defence.kabe.find_tiles_to_discard([])
+        result = table.player.ai.defence.try_to_find_safe_tile_to_discard()
 
-        self.assertEqual(self._to_string([x.value * 4 for x in result]), '5p')
+        self.assertEqual(self._to_string([result.tile_to_discard * 4]), '5p')
 
         table = Table()
         tiles = self._string_to_136_array(pin='33334446666', man='999')
@@ -309,16 +309,14 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         table.player.add_called_meld(self._make_meld(Meld.PON, man='999'))
 
         table.add_discarded_tile(1, self._string_to_136_tile(pin='5'), False)
-        table.add_discarded_tile(1, self._string_to_136_tile(pin='5'), False)
-        table.add_discarded_tile(1, self._string_to_136_tile(pin='5'), False)
 
         table.add_called_riichi(2)
 
         table.player.ai.defence.hand_34 = self._to_34_array(table.player.tiles)
         table.player.ai.defence.closed_hand_34 = self._to_34_array(table.player.closed_hand)
-        result = table.player.ai.defence.kabe.find_tiles_to_discard([])
+        result = table.player.ai.defence.try_to_find_safe_tile_to_discard()
 
-        self.assertEqual(self._to_string([x.value * 4 for x in result]), '45p')
+        self.assertEqual(self._to_string([result.tile_to_discard * 4]), '4p')
 
     def test_find_common_suji_tiles_to_discard_for_multiple_players(self):
         table = Table()

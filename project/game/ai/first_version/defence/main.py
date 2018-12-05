@@ -1,9 +1,10 @@
+from mahjong.constants import EAST
 from mahjong.tile import TilesConverter
 from mahjong.utils import plus_dora, is_honor, is_aka_dora
+from mahjong.utils import simplify, is_man, is_pin, is_sou
 
 from game.ai.first_version.defence.defence import DefenceTile
 from game.ai.first_version.defence.enemy_analyzer import EnemyAnalyzer
-from game.ai.first_version.defence.impossible_wait import ImpossibleWait
 from game.ai.first_version.defence.kabe import Kabe
 from game.ai.first_version.defence.suji import Suji
 
@@ -13,7 +14,6 @@ class DefenceHandler(object):
     player = None
 
     # different strategies
-    impossible_wait = None
     kabe = None
     suji = None
 
@@ -25,7 +25,6 @@ class DefenceHandler(object):
         self.table = player.table
         self.player = player
 
-        self.impossible_wait = ImpossibleWait(self)
         self.kabe = Kabe(self)
         self.suji = Suji(self)
 
@@ -123,8 +122,20 @@ class DefenceHandler(object):
 
         threatening_players = self._get_threatening_players()
 
+        safe_tiles = []
+
         # safe tiles that can be safe based on the table situation
-        safe_tiles = self.impossible_wait.find_tiles_to_discard(threatening_players)
+        for tile_34 in range(0, 34):
+            if self.closed_hand_34[tile_34] == 0:
+                continue
+
+            is_safe = True
+
+            for enemy in threatening_players:
+                is_safe = is_safe and enemy.total_possible_forms_for_tile(tile_34) == 0
+
+            if is_safe:
+                safe_tiles.append(DefenceTile(tile_34, DefenceTile.SAFE))
 
         # first try to check common safe tiles to discard for all players
         if len(threatening_players) > 1:
@@ -201,7 +212,7 @@ class DefenceHandler(object):
     @property
     def analyzed_enemies(self):
         players = self.player.ai.enemy_players
-        return [EnemyAnalyzer(x) for x in players]
+        return [EnemyAnalyzer(self, x) for x in players]
 
     def _find_tile_to_discard(self, safe_tiles, discard_tiles):
         """
@@ -253,3 +264,36 @@ class DefenceHandler(object):
             if not player.chosen_suit(tile) and not is_honor(tile):
                 against_honitsu.append(tile)
         return against_honitsu
+
+    def suits_tiles(self, tiles_34):
+        """
+        Return tiles separated by suits
+        :param tiles_34:
+        :return:
+        """
+        suits = [
+            [0] * 9,
+            [0] * 9,
+            [0] * 9,
+        ]
+
+        for tile in range(0, EAST):
+            total_tiles = self.player.total_tiles(tile, tiles_34)
+            if not total_tiles:
+                continue
+
+            suit_index = None
+            simplified_tile = simplify(tile)
+
+            if is_man(tile):
+                suit_index = 0
+
+            if is_pin(tile):
+                suit_index = 1
+
+            if is_sou(tile):
+                suit_index = 2
+
+            suits[suit_index][simplified_tile] += total_tiles
+
+        return suits

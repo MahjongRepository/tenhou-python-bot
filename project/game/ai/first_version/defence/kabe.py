@@ -38,7 +38,7 @@ class Kabe(Defence):
         kabe_tiles_weak = []
         kabe_tiles_partial = []
 
-        suits = self._suits_tiles(tiles_34)
+        suits = self.defence.suits_tiles(tiles_34)
         for x in range(0, 3):
             suit = suits[x]
             # "kabe" - 4 revealed tiles
@@ -99,39 +99,6 @@ class Kabe(Defence):
                 results.append(DefenceTile(tile, DefenceTile.ALMOST_SAFE_TILE))
 
         return results
-
-    def _suits_tiles(self, tiles_34):
-        """
-        Return tiles separated by suits
-        :param tiles_34:
-        :return:
-        """
-        suits = [
-            [0] * 9,
-            [0] * 9,
-            [0] * 9,
-        ]
-
-        for tile in range(0, EAST):
-            total_tiles = self.player.total_tiles(tile, tiles_34)
-            if not total_tiles:
-                continue
-
-            suit_index = None
-            simplified_tile = simplify(tile)
-
-            if is_man(tile):
-                suit_index = 0
-
-            if is_pin(tile):
-                suit_index = 1
-
-            if is_sou(tile):
-                suit_index = 2
-
-            suits[suit_index][simplified_tile] += total_tiles
-
-        return suits
 
 
 class KabeTile(object):

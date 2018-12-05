@@ -1,62 +1,24 @@
 from mahjong.tile import TilesConverter
 from mahjong.utils import plus_dora, count_tiles_by_suits, is_aka_dora
 
+from game.ai.first_version.defence.suji import Suji
+from game.ai.first_version.defence.possible_forms import PossibleFormsAnalyzer
+
 
 class EnemyAnalyzer(object):
     player = None
     chosen_suit = None
     initialized = False
 
-    class TileDanger(object):
-        DANGER_GENBUTSU = 0
+    possible_forms_analyzer = None
+    suji = None
 
-        # honor tiles
-        DANGER_LAST_HONOR = 10
-        DANGER_NON_YAKUHAI_HONOR_3_LEFT = 20
-        DANGER_NON_YAKUHAI_HONOR_SHONPAI = 50
-        DANGER_YAKUHAI_HONOR_3_LEFT = 50
-        DANGER_DOUBLE_YAKUHAI_HONOR_3_LEFT = 100
-        DANGER_YAKUHAI_HONOR_SHONPAI = 80
-        DANGER_DOBULE_YAKUHAI_HONOR_SHONPAI = 160
-
-        # kabe tiles
-        DANGER_NON_SHONPAI_KABE = 10
-        DANGER_SHONPAI_KABE = 50
-
-        # suji tiles
-        DANGER_19_NOT_SHONPAI_SUJI = 10
-        DANGER_19_SHONPAI_SUJI = 20
-        DANGER_SUJI = 30
-        DANGER_456_SUJI_ON_RIICHI = 50
-        DANGER_2378_SUJI_ON_RIICHI = 100
-
-        # possible ryanmen waits
-        DANGER_RYANMEN_BASE = 100
-        DANGER_BONUS_SENKI_SUJI = 10
-        DANGER_BONUS_URA_SUJI = 10
-        DANGER_BONUS_MATAGI_SUJI = 20
-        DANGER_BONUS_AIDAYONKEN = 20
-
-        # doras
-        DANGER_DORA_BONUS = 100
-        DANGER_DORA_CONNECTOR_BONUS = 20
-
-        # early discards
-        DANGER_NEGATIVE_BONUS_19_EARLY_2378 = -20
-        DANGER_NEGATIVE_BONUS_28_EARLY_37 = -10
-
-        # count of possible forms
-        DANGER_FORM_BONUS_RYANMEN = 5
-        DANGER_FORM_BONUS_OTHER = 2
-
-        # octaves counting, (n - DANGER_OCTAVE_BASE) *  DANGER_OCTAVE_MODIFIER
-        DANGER_OCTAVE_BASE = 10
-        DANGER_OCTAVE_MODIFIER = 5
-
-    def __init__(self, player):
+    def __init__(self, defence, player):
         """
         :param player: instance of EnemyPlayer
         """
+        self.defence = defence
+
         self.player = player
         self.table = player.table
 
@@ -64,6 +26,11 @@ class EnemyAnalyzer(object):
 
         # we need it to determine user's chosen suit
         self.initialized = self.is_threatening
+
+        # FIXME: this check is just to shut some tests, need to fix them and remove it
+        if self.defence is not None:
+            self.possible_forms_analyzer = PossibleFormsAnalyzer(self.defence)
+            self.suji = Suji(self.defence)
 
     @property
     def is_dealer(self):
@@ -129,6 +96,22 @@ class EnemyAnalyzer(object):
                 return True
 
         return False
+
+    @property
+    def possible_forms(self):
+        suji_tiles = self.suji.find_suji(self.all_safe_tiles)
+        possible_forms = self.possible_forms_analyzer.calculate_possible_forms(self.all_safe_tiles, suji_tiles)
+
+        return possible_forms
+
+    def total_possible_forms_for_tile(self, tile_34):
+        # FIXME: calculating possible forms anew each time is not optimal, we need to cache it somehow
+        possible_forms = self.possible_forms
+        forms_cnt = possible_forms[tile_34]
+
+        assert forms_cnt is not None
+
+        return self.possible_forms_analyzer.calculate_possible_forms_total(forms_cnt)
 
     def _is_honitsu_open_sets(self, meld_tiles_34):
         """

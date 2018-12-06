@@ -71,7 +71,7 @@ class DefenceTile(object):
     ALMOST_SAFE_TILE = 10
     DANGER = 200
 
-    # how danger this tile is
+    # how dangerous this tile is
     danger = None
     # in 34 tile format
     value = None

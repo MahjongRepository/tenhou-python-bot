@@ -28,7 +28,7 @@ class PossibleFormsAnalyzer(object):
 
         return forms_count
 
-    def calculate_possible_forms(self, safe_tiles, suji_tiles):
+    def calculate_possible_forms(self, safe_tiles):
         possible_forms_34 = [None] * 34
 
         closed_hand_34 = TilesConverter.to_34_array(self.defence.player.closed_hand)
@@ -68,19 +68,18 @@ class PossibleFormsAnalyzer(object):
                     tiles_cnt_right = (4 - suit[y + 1])
                     forms_count[self.POSSIBLE_KANCHAN] = tiles_cnt_left * tiles_cnt_right
 
-                # we don't need to check ryanmens if this tile is suji
-                if tile_34_index in suji_tiles:
-                    continue
-
                 # ryanmen
                 if 0 <= y <= 2:
-                    forms_count[self.POSSIBLE_RYANMEN] = (4 - suit[y + 1]) * (4 - suit[y + 2])
+                    if not (tile_34_index + 3) in safe_tiles:
+                        forms_count[self.POSSIBLE_RYANMEN] = (4 - suit[y + 1]) * (4 - suit[y + 2])
                 elif 3 <= y <= 5:
-                    left_ryanmen = (4 - suit[y - 1]) * (4 - suit[y - 2])
-                    right_ryanmen = (4 - suit[y + 1]) * (4 - suit[y + 2])
-                    forms_count[self.POSSIBLE_RYANMEN] = left_ryanmen + right_ryanmen
+                    if not (tile_34_index - 3) in safe_tiles:
+                        forms_count[self.POSSIBLE_RYANMEN] += (4 - suit[y - 1]) * (4 - suit[y - 2])
+                    if not (tile_34_index + 3) in safe_tiles:
+                        forms_count[self.POSSIBLE_RYANMEN] += (4 - suit[y + 1]) * (4 - suit[y + 2])
                 else:
-                    forms_count[self.POSSIBLE_RYANMEN] = (4 - suit[y - 1]) * (4 - suit[y - 2])
+                    if not (tile_34_index - 3) in safe_tiles:
+                        forms_count[self.POSSIBLE_RYANMEN] = (4 - suit[y - 1]) * (4 - suit[y - 2])
 
         for tile_34_index in range(EAST, 34):
             if closed_hand_34[tile_34_index] == 0:

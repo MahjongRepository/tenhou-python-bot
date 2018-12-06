@@ -30,7 +30,6 @@ class EnemyAnalyzer(object):
         # FIXME: this check is just to shut some tests, need to fix them and remove it
         if self.defence is not None:
             self.possible_forms_analyzer = PossibleFormsAnalyzer(self.defence)
-            self.suji = Suji(self.defence)
 
     @property
     def is_dealer(self):
@@ -99,10 +98,7 @@ class EnemyAnalyzer(object):
 
     @property
     def possible_forms(self):
-        suji_tiles = self.suji.find_suji(self.all_safe_tiles)
-        possible_forms = self.possible_forms_analyzer.calculate_possible_forms(self.all_safe_tiles, suji_tiles)
-
-        return possible_forms
+        return self.possible_forms_analyzer.calculate_possible_forms(self.all_safe_tiles)
 
     def total_possible_forms_for_tile(self, tile_34):
         # FIXME: calculating possible forms anew each time is not optimal, we need to cache it somehow

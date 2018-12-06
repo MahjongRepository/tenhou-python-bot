@@ -12,9 +12,6 @@ class Riichi:
         if not self.player.ai.waiting:
             return False
 
-        if self.player.ai.in_defence:
-            return False
-
         # don't call karaten riichi
         count_tiles = self.player.ai.hand_builder.count_tiles(
             self.player.ai.waiting,

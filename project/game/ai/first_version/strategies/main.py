@@ -108,9 +108,6 @@ class BaseStrategy(object):
         if self.player.in_riichi:
             return None, None
 
-        if self.player.ai.in_defence:
-            return None, None
-
         closed_hand = self.player.closed_hand[:]
 
         # we can't open hand anymore

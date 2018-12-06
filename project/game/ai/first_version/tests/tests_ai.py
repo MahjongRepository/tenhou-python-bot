@@ -42,19 +42,6 @@ class AITestCase(unittest.TestCase, TestMixin):
         meld, _ = player.try_to_call_meld(tile, False)
         self.assertEqual(meld, None)
 
-    def test_not_open_hand_in_defence_mode(self):
-        table = Table()
-        player = table.player
-
-        tiles = self._string_to_136_array(sou='12368', pin='2358', honors='4455')
-        player.init_hand(tiles)
-
-        table.add_called_riichi(1)
-
-        tile = self._string_to_136_tile(honors='5')
-        meld, _ = player.try_to_call_meld(tile, False)
-        self.assertEqual(meld, None)
-
     def test_chose_right_set_to_open_hand(self):
         """
         Different test cases to open hand and chose correct set to open hand.
@@ -536,17 +523,6 @@ class AITestCase(unittest.TestCase, TestMixin):
         tile = self._string_to_136_tile(sou='5')
         self.assertEqual(table.player.should_call_kan(tile, True), None)
         self.assertEqual(table.player.try_to_call_meld(tile, True), (None, None))
-
-    def test_dont_call_kan_in_defence_mode(self):
-        table = Table()
-
-        tiles = self._string_to_136_array(man='12589', sou='111459', pin='12')
-        table.player.init_hand(tiles)
-
-        table.add_called_riichi(1)
-
-        tile = self._string_to_136_tile(sou='1')
-        self.assertEqual(table.player.should_call_kan(tile, False), None)
 
     def test_closed_kan_and_wrong_shanten_number_calculation(self):
         """

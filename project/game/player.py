@@ -142,7 +142,6 @@ class Player(PlayerInterface):
     tiles = None
     last_draw = None
     in_tempai = False
-    in_defence_mode = False
 
     def __init__(self, table, seat, dealer_seat):
         super().__init__(table, seat, dealer_seat)
@@ -155,7 +154,6 @@ class Player(PlayerInterface):
         self.tiles = []
         self.last_draw = None
         self.in_tempai = False
-        self.in_defence_mode = False
 
         if self.ai:
             self.ai.erase_state()
@@ -171,7 +169,6 @@ class Player(PlayerInterface):
             context=[
                 'Step: {}'.format(self.round_step),
                 'Hand: {}'.format(self.format_hand_for_print(tile_136)),
-                'In defence: {}'.format(self.ai.in_defence),
                 'Current strategy: {}'.format(self.ai.current_strategy)
             ]
         )

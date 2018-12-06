@@ -96,22 +96,6 @@ class HandBuilder:
             print_log=print_log
         )
 
-        # bot think that there is a threat on the table
-        # and better to fold
-        # if we can't find safe tiles, let's continue to build our hand
-        if self.ai.defence.should_go_to_defence_mode(selected_tile):
-            if not self.ai.in_defence:
-                DecisionsLogger.debug(log.DEFENCE_ACTIVATE)
-                self.ai.in_defence = True
-
-            defence_tile = self.ai.defence.try_to_find_safe_tile_to_discard()
-            if defence_tile:
-                return self.process_discard_option(defence_tile, closed_hand)
-        else:
-            if self.ai.in_defence:
-                DecisionsLogger.debug(log.DEFENCE_DEACTIVATE)
-            self.ai.in_defence = False
-
         return self.process_discard_option(selected_tile, closed_hand, print_log=print_log)
 
     def calculate_shanten(self, tiles_34, open_sets_34=None):

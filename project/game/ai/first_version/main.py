@@ -39,7 +39,6 @@ class ImplementationAI(InterfaceAI):
     shanten = 7
     ukeire = 0
     ukeire_second = 0
-    in_defence = False
     waiting = None
 
     current_strategy = None
@@ -64,7 +63,6 @@ class ImplementationAI(InterfaceAI):
         self.shanten = 7
         self.ukeire = 0
         self.ukeire_second = 0
-        self.in_defence = False
         self.waiting = None
 
         self.current_strategy = None
@@ -215,10 +213,6 @@ class ImplementationAI(InterfaceAI):
         if self.table.count_of_remaining_tiles <= 1:
             return None
 
-        # we don't need to add dora for other players
-        if self.player.ai.in_defence:
-            return None
-
         if open_kan:
             # we don't want to start open our hand from called kan
             if not self.player.is_open_hand:
@@ -325,10 +319,7 @@ class ImplementationAI(InterfaceAI):
         it is affect open hand decisions
         :return:
         """
-
-        if self.defence.should_go_to_defence_mode():
-            self.in_defence = True
-            DecisionsLogger.debug(log.DEFENCE_ACTIVATE)
+        pass
 
     @property
     def enemy_players(self):

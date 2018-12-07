@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-from mahjong.constants import EAST
-from mahjong.utils import simplify, is_man, is_pin, is_sou
-
-from game.ai.first_version.defence.defence import Defence, DefenceTile
 
 
-class Kabe(Defence):
+class Kabe:
+
+    def __init__(self, defence_handler):
+        self.defence = defence_handler
+        self.player = self.defence.player
+        self.table = self.defence.table
 
     def find_all_kabe(self, tiles_34):
         # all indices shifted to -1

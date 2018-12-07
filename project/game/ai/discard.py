@@ -3,6 +3,7 @@ from mahjong.constants import AKA_DORA_LIST
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_honor, simplify, plus_dora, is_aka_dora, is_sou, is_man, is_pin
 
+from game.ai.first_version.defence.defence import DefenceHandler
 from game.ai.first_version.strategies.main import BaseStrategy
 
 
@@ -35,7 +36,7 @@ class DiscardOption(object):
     # second level cost approximation for 1-shanten hands
     second_level_cost = None
 
-    def __init__(self, player, tile_to_discard, shanten, waiting, ukeire, danger=100, wait_to_ukeire=None):
+    def __init__(self, player, tile_to_discard, shanten, waiting, ukeire, wait_to_ukeire=None):
         """
         :param player:
         :param tile_to_discard: tile in 34 format
@@ -49,10 +50,11 @@ class DiscardOption(object):
         self.ukeire = ukeire
         self.ukeire_second = 0
         self.count_of_dora = 0
-        self.danger = danger
+        self.danger = DefenceHandler()
         self.had_to_be_saved = False
         self.had_to_be_discarded = False
         self.wait_to_ukeire = wait_to_ukeire
+        self.second_level_cost = 0
 
         self.calculate_value()
 
@@ -63,7 +65,9 @@ class DiscardOption(object):
             self.shanten,
             self.ukeire,
             self.ukeire_second,
-            self.valuation
+            self.valuation,
+            self.second_level_cost,
+            self.danger
         )
 
     def __repr__(self):

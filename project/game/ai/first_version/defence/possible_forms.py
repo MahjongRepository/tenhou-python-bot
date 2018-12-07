@@ -2,10 +2,10 @@
 from mahjong.constants import EAST
 from mahjong.tile import TilesConverter
 
-from game.ai.first_version.defence.defence import Defence, DefenceTile
+from game.ai.first_version.defence.defence import TileDanger
 
 
-class PossibleFormsAnalyzer(object):
+class PossibleFormsAnalyzer:
     POSSIBLE_TANKI = 1
     POSSIBLE_SYANPON = 2
     POSSIBLE_PENCHAN = 3
@@ -113,10 +113,10 @@ class PossibleFormsAnalyzer(object):
     def calculate_possible_forms_danger(forms_count):
         danger = 0
 
-        danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_TANKI] * Defence.TileDanger.DANGER_FORM_BONUS_OTHER
-        danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_SYANPON] * Defence.TileDanger.DANGER_FORM_BONUS_OTHER
-        danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_PENCHAN] * Defence.TileDanger.DANGER_FORM_BONUS_OTHER
-        danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_KANCHAN] * Defence.TileDanger.DANGER_FORM_BONUS_OTHER
-        danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_RYANMEN] * Defence.TileDanger.DANGER_FORM_BONUS_RYANMEN
+        danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_TANKI] * TileDanger.FORM_BONUS_OTHER
+        danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_SYANPON] * TileDanger.FORM_BONUS_OTHER
+        danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_PENCHAN] * TileDanger.FORM_BONUS_OTHER
+        danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_KANCHAN] * TileDanger.FORM_BONUS_OTHER
+        danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_RYANMEN] * TileDanger.FORM_BONUS_RYANMEN
 
         return danger

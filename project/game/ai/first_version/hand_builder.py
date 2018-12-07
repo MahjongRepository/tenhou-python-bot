@@ -199,6 +199,8 @@ class HandBuilder:
                 open_sets_34
             )
 
+        results = self.ai.defence.calculate_tiles_danger(results)
+
         return results, shanten
 
     def count_tiles(self, waiting, tiles_34):

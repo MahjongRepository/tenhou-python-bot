@@ -1,81 +1,87 @@
 # -*- coding: utf-8 -*-
 
 
-class Defence(object):
-    class TileDanger(object):
-        DANGER_GENBUTSU = 0
+class TileDanger:
+    GENBUTSU = {
+        'value': 0,
+        'description': 'Genbutsu'
+    }
+    IMPOSSIBLE_WAIT = {
+        'value': 0,
+        'description': 'Impossible wait'
+    }
 
-        # honor tiles
-        DANGER_LAST_HONOR = 10
-        DANGER_NON_YAKUHAI_HONOR_3_LEFT = 20
-        DANGER_NON_YAKUHAI_HONOR_SHONPAI = 50
-        DANGER_YAKUHAI_HONOR_3_LEFT = 50
-        DANGER_DOUBLE_YAKUHAI_HONOR_3_LEFT = 100
-        DANGER_YAKUHAI_HONOR_SHONPAI = 80
-        DANGER_DOBULE_YAKUHAI_HONOR_SHONPAI = 160
+    # FIXME
+    # change format for all remaining options
 
-        # kabe tiles
-        DANGER_NON_SHONPAI_KABE = 10
-        DANGER_SHONPAI_KABE = 50
+    # honor tiles
+    LAST_HONOR = 10
+    NON_YAKUHAI_HONOR_3_LEFT = 20
+    NON_YAKUHAI_HONOR_SHONPAI = 50
+    YAKUHAI_HONOR_3_LEFT = 50
+    DOUBLE_YAKUHAI_HONOR_3_LEFT = 100
+    YAKUHAI_HONOR_SHONPAI = 80
+    DOBULE_YAKUHAI_HONOR_SHONPAI = 160
 
-        # suji tiles
-        DANGER_19_NOT_SHONPAI_SUJI = 10
-        DANGER_19_SHONPAI_SUJI = 20
-        DANGER_SUJI = 30
-        DANGER_456_SUJI_ON_RIICHI = 50
-        DANGER_2378_SUJI_ON_RIICHI = 100
+    # kabe tiles
+    NON_SHONPAI_KABE = 10
+    SHONPAI_KABE = 50
 
-        # possible ryanmen waits
-        DANGER_RYANMEN_BASE = 100
-        DANGER_BONUS_SENKI_SUJI = 10
-        DANGER_BONUS_URA_SUJI = 10
-        DANGER_BONUS_MATAGI_SUJI = 20
-        DANGER_BONUS_AIDAYONKEN = 20
+    # suji tiles
+    SUJI_19_NOT_SHONPAI = 10
+    SUJI_19_SHONPAI = 20
+    SUJI = 30
+    SUJI_456_ON_RIICHI = 50
+    SUJI_2378_ON_RIICHI = 100
 
-        # doras
-        DANGER_DORA_BONUS = 100
-        DANGER_DORA_CONNECTOR_BONUS = 20
+    # possible ryanmen waits
+    RYANMEN_BASE = 100
+    BONUS_SENKI_SUJI = 10
+    BONUS_URA_SUJI = 10
+    BONUS_MATAGI_SUJI = 20
+    BONUS_AIDAYONKEN = 20
 
-        # early discards
-        DANGER_NEGATIVE_BONUS_19_EARLY_2378 = -20
-        DANGER_NEGATIVE_BONUS_28_EARLY_37 = -10
+    # doras
+    DORA_BONUS = 100
+    DORA_CONNECTOR_BONUS = 20
 
-        # count of possible forms
-        DANGER_FORM_BONUS_RYANMEN = 5
-        DANGER_FORM_BONUS_OTHER = 2
+    # early discards
+    NEGATIVE_BONUS_19_EARLY_2378 = -20
+    NEGATIVE_BONUS_28_EARLY_37 = -10
 
-        # octaves counting, (n - DANGER_OCTAVE_BASE) *  DANGER_OCTAVE_MODIFIER
-        DANGER_OCTAVE_BASE = 10
-        DANGER_OCTAVE_MODIFIER = 5
+    # count of possible forms
+    FORM_BONUS_RYANMEN = 5
+    FORM_BONUS_OTHER = 2
 
-    defence = None
+    # octaves counting, (n - OCTAVE_BASE) *  OCTAVE_MODIFIER
+    OCTAVE_BASE = 10
+    OCTAVE_MODIFIER = 5
 
-    def __init__(self, defence_handler):
-        self.defence = defence_handler
-        self.player = self.defence.player
-        self.table = self.defence.table
 
-    def find_tiles_to_discard(self, players):
+class DefenceHandler:
+    """
+    Place to keep information of tile danger level for each player
+    """
+    values = None
+
+    def __init__(self):
         """
-        Each strategy will try to find "safe" tiles to discard
-        for specified players
-        :param players:
-        :return: list of DefenceTile objects
+        all if a tile safe for everyone
+        1, 2, 3 is our opponents seats
         """
-        raise NotImplemented()
+        self.values = {
+            'all': [],
+            1: [],
+            2: [],
+            3: []
+        }
 
+    def __unicode__(self):
+        return self.values
 
-class DefenceTile(object):
-    # 100% safe tile
-    SAFE = 0
-    ALMOST_SAFE_TILE = 10
-    DANGER = 200
+    def set_danger(self, player, danger):
+        self.values[player] = danger
 
-    # how dangerous this tile is
-    danger = None
-    # in 34 tile format
-    value = None
-
-    def __init__(self, value, danger):
-        self.value = value
-        self.danger = danger
+    def get_danger(self, player):
+        # FIXME handle 'all' player there
+        return sum([x['value'] for x in self.values[player]])

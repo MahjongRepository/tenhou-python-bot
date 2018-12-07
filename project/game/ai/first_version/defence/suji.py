@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 from mahjong.utils import is_man, simplify, is_pin, is_sou, plus_dora, is_aka_dora
 
-from game.ai.first_version.defence.defence import Defence, DefenceTile
 
-
-class Suji(Defence):
+class Suji:
     # 1-4-7
     FIRST_SUJI = 1
     # 2-5-8
     SECOND_SUJI = 2
     # 3-6-9
     THIRD_SUJI = 3
+
+    def __init__(self, defence_handler):
+        self.defence = defence_handler
+        self.player = self.defence.player
+        self.table = self.defence.table
 
     def find_suji(self, safe_tiles_34):
         suji = []

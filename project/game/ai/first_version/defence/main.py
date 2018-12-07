@@ -3,23 +3,15 @@ from mahjong.utils import is_honor
 
 from game.ai.first_version.helpers.defence import TileDanger
 from game.ai.first_version.defence.enemy_analyzer import EnemyAnalyzer
-from game.ai.first_version.helpers.kabe import Kabe
 
 
 class DefenceHandler:
     table = None
     player = None
 
-    # cached values, that will be used by all strategies
-    hand_34 = None
-    closed_hand_34 = None
-
     def __init__(self, player):
         self.table = player.table
         self.player = player
-
-        self.hand_34 = None
-        self.closed_hand_34 = None
 
     def calculate_tiles_danger(self, discard_candidates):
         threatening_players = self._get_threatening_players()
@@ -78,19 +70,10 @@ class DefenceHandler:
         return [EnemyAnalyzer(self, x) for x in players]
 
     def _get_threatening_players(self):
-        """
-        For now it is just players in riichi,
-        later I will add players with opened valuable hands.
-        Sorted by threat level. Most threatening on the top
-        """
         result = []
         for player in self.analyzed_enemies:
             if player.is_threatening:
                 result.append(player)
-
-        # dealer is most threatening player
-        result = sorted(result, key=lambda x: x.player.is_dealer, reverse=True)
-
         return result
 
     def _mark_safe_tiles_against_honitsu(self, player):

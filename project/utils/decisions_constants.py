@@ -10,3 +10,5 @@ INIT_HAND = 'init_hand'
 
 MELD_CALL = 'meld'
 MELD_PREPARE = 'meld_prepare'
+
+DEFENCE_THREATENING_ENEMY = 'defence_threatening_enemy'

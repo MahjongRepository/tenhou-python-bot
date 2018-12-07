@@ -87,20 +87,24 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
 
         self.assertEqual(player.formal_riichi_conditions(), True)
 
-    def test_player_wind(self):
+    def test_players_wind(self):
         table = Table()
 
         player = table.player
         self.assertEqual(player.player_wind, EAST)
+        self.assertEqual(table.get_player(1).player_wind, SOUTH)
 
         player = Player(table, 0, 1)
         self.assertEqual(player.player_wind, NORTH)
+        self.assertEqual(table.get_player(1).player_wind, EAST)
 
         player = Player(table, 0, 2)
         self.assertEqual(player.player_wind, WEST)
+        self.assertEqual(table.get_player(1).player_wind, NORTH)
 
         player = Player(table, 0, 3)
         self.assertEqual(player.player_wind, SOUTH)
+        self.assertEqual(table.get_player(1).player_wind, WEST)
 
     def test_player_called_meld_and_closed_hand(self):
         table = Table()

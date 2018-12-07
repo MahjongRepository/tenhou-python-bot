@@ -95,13 +95,20 @@ class PlayerInterface(object):
     def player_wind(self):
         position = self.dealer_seat
         if position == 0:
-            return EAST
+            bot_wind = EAST
         elif position == 1:
-            return NORTH
+            bot_wind = NORTH
         elif position == 2:
-            return WEST
+            bot_wind = WEST
         else:
-            return SOUTH
+            bot_wind = SOUTH
+
+        print(position, self.seat, bot_wind)
+
+        if self.seat == 0:
+            return bot_wind
+
+        return EAST + (bot_wind - EAST + self.seat) % 4
 
     @property
     def is_dealer(self):
@@ -135,6 +142,10 @@ class PlayerInterface(object):
         for meld in melds:
             results.append([meld[0] // 4, meld[1] // 4, meld[2] // 4])
         return results
+
+    @property
+    def valued_honors(self):
+        return [CHUN, HAKU, HATSU, self.table.round_wind_tile, self.player_wind]
 
 
 class Player(PlayerInterface):
@@ -254,10 +265,6 @@ class Player(PlayerInterface):
     def closed_hand(self):
         tiles = self.tiles[:]
         return [item for item in tiles if item not in self.meld_tiles]
-
-    @property
-    def valued_honors(self):
-        return [CHUN, HAKU, HATSU, self.table.round_wind_tile, self.player_wind]
 
 
 class EnemyPlayer(PlayerInterface):

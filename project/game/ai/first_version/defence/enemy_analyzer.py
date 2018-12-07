@@ -1,8 +1,7 @@
 from mahjong.tile import TilesConverter
 from mahjong.utils import plus_dora, count_tiles_by_suits, is_aka_dora
 
-from game.ai.first_version.defence.suji import Suji
-from game.ai.first_version.defence.possible_forms import PossibleFormsAnalyzer
+from game.ai.first_version.helpers.possible_forms import PossibleFormsAnalyzer
 
 
 class EnemyAnalyzer(object):
@@ -14,22 +13,13 @@ class EnemyAnalyzer(object):
     suji = None
 
     def __init__(self, defence, player):
-        """
-        :param player: instance of EnemyPlayer
-        """
         self.defence = defence
 
         self.player = player
         self.table = player.table
-
         self.chosen_suit = None
-
-        # we need it to determine user's chosen suit
         self.initialized = self.is_threatening
-
-        # FIXME: this check is just to shut some tests, need to fix them and remove it
-        if self.defence is not None:
-            self.possible_forms_analyzer = PossibleFormsAnalyzer(self.defence)
+        self.possible_forms_analyzer = PossibleFormsAnalyzer(self.player)
 
     @property
     def is_dealer(self):

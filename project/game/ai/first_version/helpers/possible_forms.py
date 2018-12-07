@@ -2,7 +2,8 @@
 from mahjong.constants import EAST
 from mahjong.tile import TilesConverter
 
-from game.ai.first_version.defence.defence import TileDanger
+from game.ai.first_version.helpers.defence import TileDanger
+from utils.general import suits_tiles
 
 
 class PossibleFormsAnalyzer:
@@ -12,29 +13,16 @@ class PossibleFormsAnalyzer:
     POSSIBLE_KANCHAN = 4
     POSSIBLE_RYANMEN = 5
 
-    defence = None
-
-    def __init__(self, defence):
-        self.defence = defence
-
-    def _init_zero_forms_count(self):
-        forms_count = dict()
-
-        forms_count[self.POSSIBLE_TANKI] = 0
-        forms_count[self.POSSIBLE_SYANPON] = 0
-        forms_count[self.POSSIBLE_PENCHAN] = 0
-        forms_count[self.POSSIBLE_KANCHAN] = 0
-        forms_count[self.POSSIBLE_RYANMEN] = 0
-
-        return forms_count
+    def __init__(self, player):
+        self.player = player
 
     def calculate_possible_forms(self, safe_tiles):
         possible_forms_34 = [None] * 34
 
-        closed_hand_34 = TilesConverter.to_34_array(self.defence.player.closed_hand)
+        closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
 
         # first of all let's find suji for suits tiles
-        suits = self.defence.suits_tiles(closed_hand_34)
+        suits = suits_tiles(self.player, closed_hand_34)
         for x in range(0, 3):
             suit = suits[x]
 
@@ -88,7 +76,7 @@ class PossibleFormsAnalyzer:
             forms_count = self._init_zero_forms_count()
             possible_forms_34[tile_34_index] = forms_count
 
-            total_tiles = self.defence.player.total_tiles(x, closed_hand_34)
+            total_tiles = self.player.total_tiles(tile_34_index, closed_hand_34)
 
             # tanki
             forms_count[self.POSSIBLE_TANKI] = 4 - total_tiles
@@ -120,3 +108,14 @@ class PossibleFormsAnalyzer:
         danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_RYANMEN] * TileDanger.FORM_BONUS_RYANMEN
 
         return danger
+
+    def _init_zero_forms_count(self):
+        forms_count = dict()
+
+        forms_count[self.POSSIBLE_TANKI] = 0
+        forms_count[self.POSSIBLE_SYANPON] = 0
+        forms_count[self.POSSIBLE_PENCHAN] = 0
+        forms_count[self.POSSIBLE_KANCHAN] = 0
+        forms_count[self.POSSIBLE_RYANMEN] = 0
+
+        return forms_count

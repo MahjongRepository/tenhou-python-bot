@@ -1,21 +1,14 @@
-from mahjong.constants import EAST
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_honor
-from mahjong.utils import simplify, is_man, is_pin, is_sou
 
-from game.ai.first_version.defence.defence import TileDanger
+from game.ai.first_version.helpers.defence import TileDanger
 from game.ai.first_version.defence.enemy_analyzer import EnemyAnalyzer
-from game.ai.first_version.defence.kabe import Kabe
-from game.ai.first_version.defence.suji import Suji
+from game.ai.first_version.helpers.kabe import Kabe
 
 
 class DefenceHandler:
     table = None
     player = None
-
-    # different strategies
-    kabe = None
-    suji = None
 
     # cached values, that will be used by all strategies
     hand_34 = None
@@ -24,9 +17,6 @@ class DefenceHandler:
     def __init__(self, player):
         self.table = player.table
         self.player = player
-
-        self.kabe = Kabe(self)
-        self.suji = Suji(self)
 
         self.hand_34 = None
         self.closed_hand_34 = None
@@ -47,25 +37,22 @@ class DefenceHandler:
             if self.closed_hand_34[tile_34] == 0:
                 continue
 
-            is_safe = True
             for enemy in threatening_players:
-                is_safe = is_safe and enemy.total_possible_forms_for_tile(tile_34) == 0
-
-            if is_safe:
-                self._update_discard_candidate(
-                    tile_34,
-                    discard_candidates,
-                    'all',
-                    TileDanger.IMPOSSIBLE_WAIT
-                )
+                if enemy.total_possible_forms_for_tile(tile_34) == 0:
+                    self._update_discard_candidate(
+                        tile_34,
+                        discard_candidates,
+                        enemy.player.seat,
+                        TileDanger.IMPOSSIBLE_WAIT
+                    )
 
         # let's calculate danger level for every user
-        for analyzed_player in threatening_players:
-            for safe_tile_34 in analyzed_player.player.all_safe_tiles:
+        for enemy in threatening_players:
+            for safe_tile_34 in enemy.player.all_safe_tiles:
                 self._update_discard_candidate(
                     safe_tile_34,
                     discard_candidates,
-                    analyzed_player.player.seat,
+                    enemy.player.seat,
                     TileDanger.GENBUTSU
                 )
             # player_suji_tiles = self.suji.find_tiles_to_discard([player])
@@ -116,39 +103,6 @@ class DefenceHandler:
                 against_honitsu.append(tile)
 
         return against_honitsu
-
-    def _suits_tiles(self, tiles_34):
-        """
-        Return tiles separated by suits
-        :param tiles_34:
-        :return:
-        """
-        suits = [
-            [0] * 9,
-            [0] * 9,
-            [0] * 9,
-        ]
-
-        for tile in range(0, EAST):
-            total_tiles = self.player.total_tiles(tile, tiles_34)
-            if not total_tiles:
-                continue
-
-            suit_index = None
-            simplified_tile = simplify(tile)
-
-            if is_man(tile):
-                suit_index = 0
-
-            if is_pin(tile):
-                suit_index = 1
-
-            if is_sou(tile):
-                suit_index = 2
-
-            suits[suit_index][simplified_tile] += total_tiles
-
-        return suits
 
     def _update_discard_candidate(self, tile_34, discard_candidates, player, danger):
         for discard_candidate in discard_candidates:

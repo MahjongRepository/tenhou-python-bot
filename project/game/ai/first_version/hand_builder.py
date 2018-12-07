@@ -5,7 +5,7 @@ from mahjong.utils import is_tile_strictly_isolated, is_pair, is_honor, simplify
 
 import utils.decisions_constants as log
 from game.ai.discard import DiscardOption
-from game.ai.first_version.defence.kabe import KabeTile
+from game.ai.first_version.helpers.kabe import Kabe
 from utils.decisions_logger import DecisionsLogger
 
 
@@ -224,15 +224,16 @@ class HandBuilder:
 
     def check_suji_and_kabe(self, tiles_34, waiting):
         # let's find suji-traps in our discard
-        suji_tiles = self.player.ai.defence.suji.find_suji_against_self(self.player)
+        suji_tiles = self.player.ai.suji.find_suji([x.value for x in self.player.discards])
         have_suji = waiting in suji_tiles
 
         # let's find kabe
-        kabe_tiles = self.player.ai.defence.kabe.find_all_kabe(tiles_34)
+        kabe_tiles = self.player.ai.kabe.find_all_kabe(tiles_34)
         have_kabe = False
         for kabe in kabe_tiles:
-            if waiting == kabe.tile_34 and kabe.kabe_type == KabeTile.STRONG_KABE:
+            if waiting == kabe['tile'] and kabe['type'] == Kabe.STRONG_KABE:
                 have_kabe = True
+                break
 
         return have_suji, have_kabe
 

@@ -15,6 +15,8 @@ from mahjong.utils import is_pon
 from game.ai.base.main import InterfaceAI
 from game.ai.first_version.defence.main import DefenceHandler
 from game.ai.first_version.hand_builder import HandBuilder
+from game.ai.first_version.helpers.kabe import Kabe
+from game.ai.first_version.helpers.suji import Suji
 from game.ai.first_version.riichi import Riichi
 from game.ai.first_version.strategies.chiitoitsu import ChiitoitsuStrategy
 from game.ai.first_version.strategies.chinitsu import ChinitsuStrategy
@@ -56,6 +58,9 @@ class ImplementationAI(InterfaceAI):
         self.hand_divider = HandDivider()
         self.finished_hand = HandCalculator()
         self.hand_builder = HandBuilder(player, self)
+
+        self.suji = Suji(self.player)
+        self.kabe = Kabe(self.player)
 
         self.erase_state()
 

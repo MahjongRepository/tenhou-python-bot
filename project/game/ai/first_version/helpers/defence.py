@@ -66,11 +66,9 @@ class DefenceHandler:
 
     def __init__(self):
         """
-        all if a tile safe for everyone
         1, 2, 3 is our opponents seats
         """
         self.values = {
-            'all': [],
             1: [],
             2: [],
             3: []
@@ -80,8 +78,7 @@ class DefenceHandler:
         return self.values
 
     def set_danger(self, player, danger):
-        self.values[player] = danger
+        self.values[player].append(danger)
 
-    def get_danger(self, player):
-        # FIXME handle 'all' player there
+    def get_danger_total(self, player):
         return sum([x['value'] for x in self.values[player]])

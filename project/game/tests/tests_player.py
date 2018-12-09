@@ -89,20 +89,25 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
 
     def test_players_wind(self):
         table = Table()
-
         player = table.player
+
+        dealer_seat = 0
+        table.init_round(0, 0, 0, 0, dealer_seat, [])
         self.assertEqual(player.player_wind, EAST)
         self.assertEqual(table.get_player(1).player_wind, SOUTH)
 
-        player = Player(table, 0, 1)
+        dealer_seat = 1
+        table.init_round(0, 0, 0, 0, dealer_seat, [])
         self.assertEqual(player.player_wind, NORTH)
         self.assertEqual(table.get_player(1).player_wind, EAST)
 
-        player = Player(table, 0, 2)
+        dealer_seat = 2
+        table.init_round(0, 0, 0, 0, dealer_seat, [])
         self.assertEqual(player.player_wind, WEST)
         self.assertEqual(table.get_player(1).player_wind, NORTH)
 
-        player = Player(table, 0, 3)
+        dealer_seat = 3
+        table.init_round(0, 0, 0, 0, dealer_seat, [])
         self.assertEqual(player.player_wind, SOUTH)
         self.assertEqual(table.get_player(1).player_wind, WEST)
 

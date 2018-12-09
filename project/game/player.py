@@ -93,22 +93,16 @@ class PlayerInterface(object):
 
     @property
     def player_wind(self):
-        position = self.dealer_seat
+        shift = self.dealer_seat - self.seat
+        position = [0, 1, 2, 3][shift]
         if position == 0:
-            bot_wind = EAST
+            return EAST
         elif position == 1:
-            bot_wind = NORTH
+            return NORTH
         elif position == 2:
-            bot_wind = WEST
+            return WEST
         else:
-            bot_wind = SOUTH
-
-        print(position, self.seat, bot_wind)
-
-        if self.seat == 0:
-            return bot_wind
-
-        return EAST + (bot_wind - EAST + self.seat) % 4
+            return SOUTH
 
     @property
     def is_dealer(self):

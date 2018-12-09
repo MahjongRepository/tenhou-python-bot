@@ -1,5 +1,6 @@
 from mahjong.utils import plus_dora, count_tiles_by_suits, is_aka_dora
 
+from game.ai.first_version.defence.yaku_analyzer.tanyao import TanyaoAnalyzer
 from game.ai.first_version.defence.yaku_analyzer.yakuhai import YakuhaiAnalyzer
 from game.ai.first_version.helpers.possible_forms import PossibleFormsAnalyzer
 from utils.decisions_constants import DEFENCE_THREATENING_ENEMY
@@ -67,7 +68,8 @@ class EnemyAnalyzer(object):
         # is_honitsu_discards, discard_suit = self._is_honitsu_discards(discards_34)
 
         yaku_analyzers = [
-            YakuhaiAnalyzer(self.player)
+            YakuhaiAnalyzer(self.player),
+            TanyaoAnalyzer(self.player),
         ]
 
         meld_tiles = self.player.meld_tiles
@@ -92,19 +94,6 @@ class EnemyAnalyzer(object):
 
                 return True
 
-            # enemy has 2+ melds with 2+ doras
-            if len(self.player.melds) >= 2 and dora_count >= 2:
-                DecisionsLogger.debug(
-                    DEFENCE_THREATENING_ENEMY,
-                    'Enemy has 2+ melds with 2+ doras',
-                    context={
-                        'melds': self.player.melds,
-                        'dora_count': dora_count
-                    }
-                )
-
-                return True
-
             melds_han = 0
             active_yaku = []
             for x in yaku_analyzers:
@@ -112,10 +101,10 @@ class EnemyAnalyzer(object):
                     active_yaku.append(x.id)
                     melds_han += x.melds_han()
 
-            if melds_han + dora_count >= 3 and self.main_player.round_step > 6:
+            if melds_han + dora_count >= 3 and len(self.player.melds) >= 2:
                 DecisionsLogger.debug(
                     DEFENCE_THREATENING_ENEMY,
-                    'Enemy has 3+ han in open melds and round step is 6+',
+                    'Enemy has 3+ han in open 2+ melds',
                     context={
                         'melds': self.player.melds,
                         'dora_count': dora_count,
@@ -204,3 +193,52 @@ class EnemyAnalyzer(object):
             return True, suits[0]['function']
 
         return False, None
+
+    # def test_detect_enemy_tempai_and_riichi(self):
+    #     table = Table()
+    #
+    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).in_tempai, False)
+    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).is_threatening, False)
+    #
+    #     table.add_called_riichi(1)
+    #
+    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).in_tempai, True)
+    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).is_threatening, True)
+    #
+    # def test_detect_enemy_tempai_and_opened_sets(self):
+    #     table = Table()
+    #
+    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).in_tempai, False)
+    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).is_threatening, False)
+    #
+    #     table.add_called_meld(1, self._make_meld(Meld.CHI, sou='567'))
+    #     table.add_called_meld(1, self._make_meld(Meld.CHI, pin='123'))
+    #     table.add_called_meld(1, self._make_meld(Meld.CHI, man='345'))
+    #     table.add_called_meld(1, self._make_meld(Meld.PON, man='777'))
+    #
+    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).in_tempai, True)
+    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).is_threatening, False)
+    #
+    #     table.dora_indicators = [self._string_to_136_tile(man='6')]
+    #
+    #     # enemy opened the pon of dor, so better to fold against him
+    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).in_tempai, True)
+    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).is_threatening, True)
+    #
+    # def test_try_to_detect_honitsu_hand(self):
+    #     table = Table()
+    #
+    #     table.add_called_meld(1, self._make_meld(Meld.CHI, pin='567'))
+    #     table.add_called_meld(1, self._make_meld(Meld.CHI, pin='123'))
+    #     table.add_called_meld(1, self._make_meld(Meld.CHI, pin='345'))
+    #
+    #     table.add_discarded_tile(1, self._string_to_136_tile(sou='1'), False)
+    #     table.add_discarded_tile(1, self._string_to_136_tile(sou='5'), False)
+    #     table.add_discarded_tile(1, self._string_to_136_tile(sou='8'), False)
+    #     table.add_discarded_tile(1, self._string_to_136_tile(sou='9'), False)
+    #     table.add_discarded_tile(1, self._string_to_136_tile(man='1'), False)
+    #     table.add_discarded_tile(1, self._string_to_136_tile(man='1'), False)
+    #     table.add_discarded_tile(1, self._string_to_136_tile(pin='1'), False)
+    #
+    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).is_threatening, True)
+    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).chosen_suit, is_pin)

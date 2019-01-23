@@ -5,7 +5,6 @@ from mahjong.constants import EAST, NORTH, WEST, SOUTH
 from mahjong.meld import Meld
 from mahjong.tests_mixin import TestMixin
 
-from game.player import Player
 from game.table import Table
 
 

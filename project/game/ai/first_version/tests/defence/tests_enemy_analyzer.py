@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 import unittest
 
+from mahjong.constants import TERMINAL_INDICES, HONOR_INDICES
 from mahjong.meld import Meld
 from mahjong.tests_mixin import TestMixin
 
+from game.ai.first_version.defence.yaku_analyzer.honitsu import HonitsuAnalyzer
+from game.ai.first_version.defence.yaku_analyzer.tanyao import TanyaoAnalyzer
+from game.ai.first_version.defence.yaku_analyzer.yakuhai import YakuhaiAnalyzer
 from game.table import Table
 
 
@@ -85,3 +89,73 @@ class EnemyAnalyzerTestCase(unittest.TestCase, TestMixin):
         threatening_players = self.player.ai.defence._get_threatening_players()
         self.assertEqual(len(threatening_players), 1)
         self.assertEqual(threatening_players[0].player.seat, enemy_seat)
+
+    def test_is_threatening_and_honitsu_hand(self):
+        threatening_players = self.player.ai.defence._get_threatening_players()
+        self.assertEqual(len(threatening_players), 0)
+
+        enemy_seat = 1
+        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.PON, pin='567'))
+        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.CHI, pin='123'))
+        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.CHI, pin='345'))
+
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou='1'), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou='5'), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou='8'), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou='9'), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(man='1'), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(man='1'), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(pin='1'), False)
+
+        threatening_players = self.player.ai.defence._get_threatening_players()
+        self.assertEqual(len(threatening_players), 1)
+
+    def test_tanyao_dangerous_tiles(self):
+        tanyao = TanyaoAnalyzer(self.table.player)
+        dangerous_tiles = tanyao.get_dangerous_tiles()
+
+        self.assertEqual(len(dangerous_tiles), 21)
+        self.assertEqual(all([x in TERMINAL_INDICES for x in dangerous_tiles]), False)
+        self.assertEqual(all([x in HONOR_INDICES for x in dangerous_tiles]), False)
+
+    def test_yakuhai_dangerous_tiles(self):
+        yakuhai = YakuhaiAnalyzer(self.table.player)
+        dangerous_tiles = yakuhai.get_dangerous_tiles()
+
+        self.assertEqual(len(dangerous_tiles), 34)
+
+    def test_honitsu_dangerous_tiles(self):
+        enemy_seat = 2
+        honitsu = HonitsuAnalyzer(self.table.get_player(enemy_seat))
+
+        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.PON, pin='567'))
+        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.CHI, pin='123'))
+        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.CHI, pin='345'))
+
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou='1'), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou='5'), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou='8'), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou='9'), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(man='1'), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(man='1'), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(pin='1'), False)
+
+        self.assertTrue(honitsu.is_yaku_active())
+        dangerous_tiles = honitsu.get_dangerous_tiles()
+
+        # 9 from suit
+        # 7 from honors
+        self.assertEqual(len(dangerous_tiles), 16)
+
+    # def test_detect_enemy_tempai_and_riichi(self):
+    #     table = Table()
+    #
+    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).in_tempai, False)
+    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).is_threatening, False)
+    #
+    #     table.add_called_riichi(1)
+    #
+    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).in_tempai, True)
+    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).is_threatening, True)
+    #
+    #

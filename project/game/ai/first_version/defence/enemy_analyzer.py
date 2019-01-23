@@ -1,5 +1,6 @@
-from mahjong.utils import plus_dora, count_tiles_by_suits, is_aka_dora
+from mahjong.utils import plus_dora, is_aka_dora
 
+from game.ai.first_version.defence.yaku_analyzer.honitsu import HonitsuAnalyzer
 from game.ai.first_version.defence.yaku_analyzer.tanyao import TanyaoAnalyzer
 from game.ai.first_version.defence.yaku_analyzer.yakuhai import YakuhaiAnalyzer
 from game.ai.first_version.helpers.possible_forms import PossibleFormsAnalyzer
@@ -61,19 +62,13 @@ class EnemyAnalyzer(object):
             )
             return True
 
-        discards = self.player.discards
-        # discards_34 = TilesConverter.to_34_array([x.value for x in discards])
-
-        # is_honitsu_open_sets, open_hand_suit = False, None
-        # is_honitsu_discards, discard_suit = self._is_honitsu_discards(discards_34)
-
         yaku_analyzers = [
             YakuhaiAnalyzer(self.player),
             TanyaoAnalyzer(self.player),
+            HonitsuAnalyzer(self.player),
         ]
 
         meld_tiles = self.player.meld_tiles
-        # meld_tiles_34 = TilesConverter.to_34_array(meld_tiles)
         if meld_tiles:
             dora_count = sum([plus_dora(x, self.table.dora_indicators) for x in meld_tiles])
             # aka dora
@@ -115,20 +110,6 @@ class EnemyAnalyzer(object):
 
                 return True
 
-            # check that user has a discard and melds that looks like honitsu
-            # is_honitsu_open_sets, open_hand_suit = self._is_honitsu_open_sets(meld_tiles_34)
-        #
-        # if is_honitsu_open_sets:
-        #     for 2 opened melds we had to check discard, to be sure
-            # if len(self.player.melds) <= 2 and is_honitsu_discards and discard_suit == open_hand_suit:
-            #     self.chosen_suit = open_hand_suit
-            #     return True
-            #
-            # for 3+ opened melds there is no sense to check discard
-            # if len(self.player.melds) >= 3:
-            #     self.chosen_suit = open_hand_suit
-            #     return True
-
         return False
 
     @property
@@ -143,102 +124,3 @@ class EnemyAnalyzer(object):
         assert forms_cnt is not None
 
         return self.possible_forms_analyzer.calculate_possible_forms_total(forms_cnt)
-
-    def _is_honitsu_open_sets(self, meld_tiles_34):
-        """
-        Check that user opened all sets with same suit
-        :param meld_tiles_34:
-        :return:
-        """
-        total_sets = sum(meld_tiles_34) // 3
-        if total_sets < 2:
-            return False, None
-
-        result = count_tiles_by_suits(meld_tiles_34)
-
-        suits = [x for x in result if x['name'] != 'honor']
-        suits = sorted(suits, key=lambda x: x['count'], reverse=True)
-
-        # for honitsu we can have tiles only in one suit
-        if suits[1]['count'] == 0 and suits[2]['count'] == 0:
-            return True, suits[0]['function']
-
-        return False, None
-
-    def _is_honitsu_discards(self, discards_34):
-        """
-        Check that user opened all sets with same suit
-        :param discards_34:
-        :return:
-        """
-        total_discards = sum(discards_34)
-
-        # there is no sense to analyze earlier discards
-        if total_discards < 6:
-            return False, None
-
-        result = count_tiles_by_suits(discards_34)
-
-        honors = [x for x in result if x['name'] == 'honor'][0]
-        suits = [x for x in result if x['name'] != 'honor']
-        suits = sorted(suits, key=lambda x: x['count'], reverse=False)
-
-        less_suit = suits[0]['count']
-        percentage_of_less_suit = (less_suit / total_discards) * 100
-        percentage_of_honor_tiles = (honors['count'] / total_discards) * 100
-
-        # there is not too much one suit + honor tiles in the discard
-        # so we can tell that user trying to collect honitsu
-        if percentage_of_less_suit <= 20 and percentage_of_honor_tiles <= 30:
-            return True, suits[0]['function']
-
-        return False, None
-
-    # def test_detect_enemy_tempai_and_riichi(self):
-    #     table = Table()
-    #
-    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).in_tempai, False)
-    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).is_threatening, False)
-    #
-    #     table.add_called_riichi(1)
-    #
-    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).in_tempai, True)
-    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).is_threatening, True)
-    #
-    # def test_detect_enemy_tempai_and_opened_sets(self):
-    #     table = Table()
-    #
-    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).in_tempai, False)
-    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).is_threatening, False)
-    #
-    #     table.add_called_meld(1, self._make_meld(Meld.CHI, sou='567'))
-    #     table.add_called_meld(1, self._make_meld(Meld.CHI, pin='123'))
-    #     table.add_called_meld(1, self._make_meld(Meld.CHI, man='345'))
-    #     table.add_called_meld(1, self._make_meld(Meld.PON, man='777'))
-    #
-    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).in_tempai, True)
-    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).is_threatening, False)
-    #
-    #     table.dora_indicators = [self._string_to_136_tile(man='6')]
-    #
-    #     # enemy opened the pon of dor, so better to fold against him
-    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).in_tempai, True)
-    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).is_threatening, True)
-    #
-    # def test_try_to_detect_honitsu_hand(self):
-    #     table = Table()
-    #
-    #     table.add_called_meld(1, self._make_meld(Meld.CHI, pin='567'))
-    #     table.add_called_meld(1, self._make_meld(Meld.CHI, pin='123'))
-    #     table.add_called_meld(1, self._make_meld(Meld.CHI, pin='345'))
-    #
-    #     table.add_discarded_tile(1, self._string_to_136_tile(sou='1'), False)
-    #     table.add_discarded_tile(1, self._string_to_136_tile(sou='5'), False)
-    #     table.add_discarded_tile(1, self._string_to_136_tile(sou='8'), False)
-    #     table.add_discarded_tile(1, self._string_to_136_tile(sou='9'), False)
-    #     table.add_discarded_tile(1, self._string_to_136_tile(man='1'), False)
-    #     table.add_discarded_tile(1, self._string_to_136_tile(man='1'), False)
-    #     table.add_discarded_tile(1, self._string_to_136_tile(pin='1'), False)
-    #
-    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).is_threatening, True)
-    #     self.assertEqual(EnemyAnalyzer(None, table.get_player(1)).chosen_suit, is_pin)

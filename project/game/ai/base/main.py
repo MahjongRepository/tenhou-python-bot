@@ -20,7 +20,7 @@ class InterfaceAI(object):
         :param discard_tile: 136 tile format. Sometimes we want to discard specific tile
         :return: 136 tile format
         """
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def init_hand(self):
         """

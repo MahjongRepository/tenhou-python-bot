@@ -78,7 +78,7 @@ class BaseStrategy(object):
         :param tile: in 136 tiles format
         :return: boolean
         """
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def determine_what_to_discard(self, discard_options, hand, open_melds):
         first_option = sorted(discard_options, key=lambda x: x.shanten)[0]

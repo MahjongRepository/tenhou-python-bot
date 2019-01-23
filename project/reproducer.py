@@ -36,8 +36,8 @@ class TenhouLogReproducer(object):
 
         player_draw = draw_tags[self.player_position]
 
-        player_draw_regex = re.compile('^<[{}]+\d*'.format(''.join(player_draw)))
-        discard_regex = re.compile('^<[{}]+\d*'.format(''.join(discard_tags)))
+        player_draw_regex = re.compile(r'^<[{}]+\d*'.format(''.join(player_draw)))
+        discard_regex = re.compile(r'^<[{}]+\d*'.format(''.join(discard_tags)))
 
         table = Table()
         for tag in self.round_content:

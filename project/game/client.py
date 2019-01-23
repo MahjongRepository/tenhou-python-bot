@@ -9,16 +9,16 @@ class Client(object):
         self.table = Table()
 
     def connect(self):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def authenticate(self):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def start_game(self):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def end_game(self):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @property
     def player(self):

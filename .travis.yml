@@ -8,4 +8,6 @@ python:
 before_script:
   - cd project
 install: "pip install -r project/requirements.txt"
-script: "python -m unittest discover ."
+script:
+  - flake8 --config ../.flake8
+  - python -m unittest discover .

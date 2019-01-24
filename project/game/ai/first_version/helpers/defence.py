@@ -148,5 +148,5 @@ class DefenceHandler:
     def set_danger(self, player, danger):
         self.values[player].append(danger)
 
-    def get_danger_total(self, player):
+    def get_total_danger(self, player):
         return sum([x['value'] for x in self.values[player]])

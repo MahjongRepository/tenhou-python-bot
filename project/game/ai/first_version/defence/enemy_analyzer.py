@@ -10,21 +10,16 @@ from utils.decisions_logger import DecisionsLogger
 
 class EnemyAnalyzer(object):
     player = None
-    chosen_suit = None
-
     possible_forms_analyzer = None
 
-    def __init__(self, defence, player):
-        self.defence = defence
-
+    def __init__(self, player):
         # is enemy
         self.player = player
         self.table = player.table
+
         # is our bot
         self.main_player = self.table.player
-
-        self.chosen_suit = None
-        self.possible_forms_analyzer = PossibleFormsAnalyzer(self.player)
+        self.possible_forms_analyzer = PossibleFormsAnalyzer(self.main_player)
 
     @property
     def is_dealer(self):
@@ -112,15 +107,11 @@ class EnemyAnalyzer(object):
 
         return False
 
-    @property
-    def possible_forms(self):
-        return self.possible_forms_analyzer.calculate_possible_forms(self.all_safe_tiles)
-
     def total_possible_forms_for_tile(self, tile_34):
         # FIXME: calculating possible forms anew each time is not optimal, we need to cache it somehow
-        possible_forms = self.possible_forms
-        forms_cnt = possible_forms[tile_34]
+        possible_forms = self.possible_forms_analyzer.calculate_possible_forms(self.all_safe_tiles)
+        forms_count = possible_forms[tile_34]
 
-        assert forms_cnt is not None
+        assert forms_count is not None
 
-        return self.possible_forms_analyzer.calculate_possible_forms_total(forms_cnt)
+        return self.possible_forms_analyzer.calculate_possible_forms_total(forms_count)

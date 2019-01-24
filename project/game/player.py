@@ -229,14 +229,14 @@ class Player(PlayerInterface):
     def enemy_called_riichi(self, player_seat):
         self.ai.enemy_called_riichi(player_seat)
 
-    def total_tiles(self, tile, tiles_34):
+    def total_tiles(self, tile_34, closed_hand_34):
         """
         Return sum of all tiles (discarded + from melds + our hand)
-        :param tile: 34 tile format
-        :param tiles_34: cached list of tiles (to not build it for each iteration)
+        :param tile_34: 34 tile format
+        :param closed_hand_34: cached list of tiles (to not build it for each iteration)
         :return: int
         """
-        revealed_tiles = tiles_34[tile] + self.table.revealed_tiles[tile]
+        revealed_tiles = closed_hand_34[tile_34] + self.table.revealed_tiles[tile_34]
         assert revealed_tiles <= 4, 'we have only 4 tiles in the game'
         return revealed_tiles
 

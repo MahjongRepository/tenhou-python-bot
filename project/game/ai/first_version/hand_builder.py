@@ -199,8 +199,6 @@ class HandBuilder:
                 open_sets_34
             )
 
-        results = self.ai.defence.calculate_tiles_danger(results)
-
         return results, shanten
 
     def count_tiles(self, waiting, tiles_34):
@@ -450,6 +448,10 @@ class HandBuilder:
             tiles,
             closed_hand,
             melds
+        )
+
+        discard_options, is_threat = self.player.ai.defence.check_threat_and_mark_tiles_danger(
+            discard_options
         )
 
         # our strategy can affect discard options

@@ -149,4 +149,11 @@ class DefenceHandler:
         self.values[player].append(danger)
 
     def get_total_danger(self, player):
+        safe = [x for x in self.values[player] if
+                x['description'] == TileDanger.GENBUTSU['description'] or
+                x['description'] == TileDanger.IMPOSSIBLE_WAIT['description']]
+        # no matter what other metrics says, this tile is safe
+        if safe:
+            return 0
+
         return sum([x['value'] for x in self.values[player]])

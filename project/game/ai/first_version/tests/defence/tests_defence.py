@@ -10,12 +10,16 @@ from game.table import Table
 class DefenceTestCase(unittest.TestCase, TestMixin):
 
     def test_defence_and_impossible_wait(self):
+        enemy_seat = 1
+
         table = Table()
         player = table.player
 
         table.add_discarded_tile(0, self._string_to_136_tile(honors='1'), False)
         table.add_discarded_tile(0, self._string_to_136_tile(honors='1'), False)
         table.add_discarded_tile(0, self._string_to_136_tile(honors='1'), False)
+
+        table.add_called_riichi(enemy_seat)
 
         tiles = self._string_to_136_array(man='34678', pin='2356', honors='1555')
         tile = self._string_to_136_tile(sou='8')
@@ -29,7 +33,8 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
             player.melds
         )
 
-        enemy_seat = 1
+        discard_options, _ = player.ai.defence.check_threat_and_mark_tiles_danger(discard_options)
+
         discard_option = self._find_discard_option(discard_options, honors='1')
         self.assertEqual(len(discard_option.danger.values[enemy_seat]), 1)
         self.assertEqual(
@@ -38,13 +43,17 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         )
 
     def test_defence_and_third_honor(self):
+        enemy_seat = 1
+
         table = Table()
         player = table.player
 
         table.add_discarded_tile(0, self._string_to_136_tile(honors='1'), False)
         table.add_discarded_tile(0, self._string_to_136_tile(honors='1'), False)
 
-        tiles = self._string_to_136_array(man='34678', pin='2356', honors='1555')
+        table.add_called_riichi(enemy_seat)
+
+        tiles = self._string_to_136_array(man='11134', pin='1156', honors='1555')
         tile = self._string_to_136_tile(sou='8')
 
         player.init_hand(tiles)
@@ -55,8 +64,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
             player.closed_hand,
             player.melds
         )
-
-        enemy_seat = 1
+        discard_options, _ = player.ai.defence.check_threat_and_mark_tiles_danger(discard_options)
         discard_option = self._find_discard_option(discard_options, honors='1')
         self.assertEqual(len(discard_option.danger.values[enemy_seat]), 1)
         self.assertEqual(

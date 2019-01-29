@@ -107,6 +107,16 @@ class EnemyAnalyzer(object):
 
         return False
 
+    @property
+    def assumed_hand_cost(self):
+        # FIXME add real value
+        return 2000
+
+    @property
+    def number_of_unverified_suji(self):
+        # FIXME add real value
+        return 2
+
     def total_possible_forms_for_tile(self, tile_34):
         # FIXME: calculating possible forms anew each time is not optimal, we need to cache it somehow
         possible_forms = self.possible_forms_analyzer.calculate_possible_forms(self.all_safe_tiles)

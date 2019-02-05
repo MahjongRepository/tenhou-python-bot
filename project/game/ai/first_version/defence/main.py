@@ -7,19 +7,20 @@ from game.ai.first_version.defence.impossible_wait import ImpossibleWait
 from game.ai.first_version.defence.kabe import Kabe
 from game.ai.first_version.defence.suji import Suji
 
-
 import logging
 
 logger = logging.getLogger("ai")
 
 COUNTER_VALUES = {
     "dealer": 8500,
-    "player":6000,
+    "player": 6000,
 }
 
 COUNTER_RATIO = {
     "good_shape": [0.33 for i in range(12)] + [0.5 for i in range(12)],
     "bad_shape": [0.66 for i in range(25)],
+    "pro_good_shape": [0.2 for i in range(25)],
+    "pro_bad_shape": [0.33 for i in range(25)],
 }
 
 
@@ -58,10 +59,12 @@ class DefenceHandler(object):
         if discard_candidate:
             shanten = discard_candidate.shanten
             waiting = discard_candidate.waiting
+            wanted_tiles_count = discard_candidate.tiles_count
         # we have 13 tiles in hand (this is not our turn)
         else:
             shanten = self.player.ai.previous_shanten
             waiting = self.player.ai.waiting
+            wanted_tiles_count = self.player.ai.wanted_tiles_count
 
         # if we are in riichi or meld too much, we can't defence
         if self.player.in_riichi or self.player.pushing or len(self.player.melds) > 2:
@@ -72,9 +75,13 @@ class DefenceHandler(object):
         # no one is threatening, so we can build our hand
         if len(threatening_players) == 0:
             return False
+        else:
+            #logger.info("There are some threatening players! Now shanten is {}".format(shanten))
+            pass
 
         # more than 2 players are threatening, so defense is better
-        if len(threatening_players) > 1:
+        if len(threatening_players) >= 2:
+            #logger.info("Watch those players feed each other!")
             return True
 
         if shanten == 1:
@@ -89,6 +96,7 @@ class DefenceHandler(object):
 
         # our hand is not tempai, so better to fold it
         if shanten != 0:
+            #logger.info("Not prepared, ready to fold.")
             return True
 
         # we are in tempai, let's try to estimate hand value
@@ -109,12 +117,21 @@ class DefenceHandler(object):
 
         # probably we are with opened hand without yaku, let's fold it
         if not hands_estimated_cost:
+            logger.info("This hand cannot win, fold it.")
             return True
+
+        # Get the hand value
+        hand_value = sum(hands_estimated_cost) / len(hands_estimated_cost)
+        # EH: makes the calculation of hand value better by adding the remaining tile count
 
         # Get the shape for attacking
         hand_shape = "bad_shape"
-        if len(waiting) >= 2:
+        if wanted_tiles_count > 4:
             hand_shape = "good_shape"
+
+        # Check whether the player is in proactive mode
+        if "PROACTIVE" in self.player.play_state:
+            hand_shape = "pro_" + hand_shape
 
         # Get the current hand index
         hand_index = len(self.player.discards)
@@ -124,30 +141,29 @@ class DefenceHandler(object):
         if threatening_players[0].is_dealer:
             counter_player_type = "dealer"
 
-        # Get the hand value
-        hand_value = sum(hands_estimated_cost) / len(hands_estimated_cost)
-        # EH: makes the calculation of hand value better by adding the remaining tile count
-
         should_counter = hand_value > COUNTER_VALUES[counter_player_type] * COUNTER_RATIO[hand_shape][hand_index]
 
-        logger.info("Cowboy: Counter: Hand Value: {}    Hand Shape: {}    Hand Index: {}    Counter Player Type:    {} Should Counter: {}".format(hand_value, hand_shape, hand_index, counter_player_type, should_counter))
-
+        logger.info(
+            '''Cowboy: Counter: 
+            Hand Value: {}    Hand Shape: {}    
+            Hand Index: {}    Counter Player Type:    {} 
+            Should Counter: {}'''.format(
+                hand_value, hand_shape, hand_index, counter_player_type, should_counter))
 
         if should_counter:
-            # change state
-            if hand_shape == "good_shape":
-                self.player.play_state = "REACTIVE_GOODSHAPE"
-            else:
-                self.player.play_state = "REACTIVE_BADSHAPE"
+            # set state
+            if self.player.play_state in ["PREPARING", "DEFENCE"]:
+                if hand_shape == "good_shape":
+                    self.player.set_state("REACTIVE_GOODSHAPE")
+                else:
+                    self.player.set_state("REACTIVE_BADSHAPE")
             return False
         else:
             return True
 
-
-
         # our open hand in tempai, but it is cheap
         # so we can fold it
-        #if self.player.is_open_hand and max_cost < 7000:
+        # if self.player.is_open_hand and max_cost < 7000:
         #    return True
 
         # when we call riichi we can get ura dora,

@@ -59,6 +59,9 @@ class ImplementationAI(InterfaceAI):
         self.in_defence = False
         self.last_discard_option = None
 
+        # Added for cowboy
+        self.wanted_tiles_count = 0
+
     def init_hand(self):
         """
         Let's decide what we will do with our hand (like open for tanyao and etc.)
@@ -89,6 +92,8 @@ class ImplementationAI(InterfaceAI):
                                                self.player.closed_hand,
                                                self.player.open_hand_34_tiles)
 
+        logger.info("Shanten: {}".format(shanten))
+
         selected_tile = self.process_discard_options_and_select_tile_to_discard(results, shanten)
 
         # bot think that there is a threat on the table
@@ -98,13 +103,22 @@ class ImplementationAI(InterfaceAI):
             if not self.in_defence:
                 logger.info('We decided to fold against other players')
                 self.in_defence = True
-                self.player.play_state = "DEFENCE"
+                self.player.set_state("DEFENCE")
+            else:
+                logger.info("Player is alreay in defence")
 
             defence_tile = self.defence.try_to_find_safe_tile_to_discard(results)
             if defence_tile:
                 return self.process_discard_option(defence_tile, self.player.closed_hand)
         else:
             self.in_defence = False
+
+        # After adjusting the defence, time to update the state
+        if shanten == 0 and self.player.play_state == "PREPARING" and results:  # and results for debugging
+            if self.wanted_tiles_count > 4:
+                self.player.set_state("PROACTIVE_GOODSHAPE")
+            else:
+                self.player.set_state("PROACTIVE_BADSHAPE")
 
         return self.process_discard_option(selected_tile, self.player.closed_hand)
 
@@ -274,6 +288,7 @@ class ImplementationAI(InterfaceAI):
 
     def process_discard_option(self, discard_option, closed_hand, force_discard=False):
         self.waiting = discard_option.waiting
+        self.wanted_tiles_count = discard_option.tiles_count
         self.player.ai.previous_shanten = discard_option.shanten
         self.player.in_tempai = self.player.ai.previous_shanten == 0
 
@@ -325,17 +340,20 @@ class ImplementationAI(InterfaceAI):
         if not self.waiting:
             return False
 
-        if self.in_defence:
-            # Adjust whether counter
-            return self.defence.should_go_to_defence_mode()
+        should_attack = not self.defence.should_go_to_defence_mode()
 
-        # We are proactive, let's call reach!
-        if self.player.play_state == "PREPARING": # If not changed in defense actions
-            if len(self.waiting) >= 2:
-                self.player.play_state = "PROACTIVE_GOODSHAPE"
-            else:
-                self.player.play_state = "PROACTIVE_BADSHAPE"
-        return True
+        if should_attack:
+            # If we are proactive, let's set the state!
+            if self.player.play_state == "PREPARING": # If not changed in defense actions
+                if self.wanted_tiles_count > 4:
+                    self.player.set_state("PROACTIVE_GOODSHAPE")
+                else:
+                    self.player.set_state("PROACTIVE_BADSHAPE")
+            return True
+
+        else:
+            return False
+
 
         # Unreachable is fine
         waiting = self.waiting[0]
@@ -434,8 +452,12 @@ class ImplementationAI(InterfaceAI):
         it is affect open hand decisions
         :return:
         """
-        if self.defence.should_go_to_defence_mode():
-            self.in_defence = True
+        #if self.defence.should_go_to_defence_mode():
+        #    self.in_defence = True
+
+        # No need to check it here
+
+        pass
 
     @property
     def enemy_players(self):

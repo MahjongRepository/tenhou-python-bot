@@ -21,14 +21,14 @@ def set_up_logging():
     name_hash = hashlib.sha1(settings.USER_ID.encode('utf-8')).hexdigest()[:5]
 
     logger = logging.getLogger('tenhou')
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
 
     ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
+    ch.setLevel(logging.INFO)
 
     file_name = '{}_{}.log'.format(name_hash, datetime.datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
     fh = logging.FileHandler(os.path.join(logs_directory, file_name), encoding='utf-8')
-    fh.setLevel(logging.DEBUG)
+    fh.setLevel(logging.INFO)
 
     formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
     ch.setFormatter(formatter)
@@ -38,6 +38,6 @@ def set_up_logging():
     logger.addHandler(fh)
 
     logger = logging.getLogger('ai')
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
     logger.addHandler(ch)
     logger.addHandler(fh)

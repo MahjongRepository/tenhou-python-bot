@@ -272,7 +272,7 @@ class TenhouClient(Client):
                     drawn_tile = self.decoder.parse_tile(message)
 
                     if not main_player.in_riichi:
-                        logger.info('Hand: {}'.format(main_player.format_hand_for_print(drawn_tile)))
+                        # logger.info('Hand: {}'.format(main_player.format_hand_for_print(drawn_tile)))
 
                         self.player.draw_tile(drawn_tile)
                         sleep(TenhouClient.SLEEP_BETWEEN_ACTIONS)
@@ -284,11 +284,11 @@ class TenhouClient(Client):
                             else:
                                 meld_type = 4
                             self._send_message('<N type="{}" hai="{}" />'.format(meld_type, drawn_tile))
-                            logger.info('We called a closed kan\chankan set!')
+                            # logger.info('We called a closed kan\chankan set!')
                             continue
 
                         discarded_tile = self.player.discard_tile()
-                        logger.info('Discard: {}'.format(TilesConverter.to_one_line_string([discarded_tile])))
+                        # logger.info('Discard: {}'.format(TilesConverter.to_one_line_string([discarded_tile])))
 
                         can_call_riichi = main_player.can_call_riichi()
 
@@ -305,13 +305,13 @@ class TenhouClient(Client):
                     # tenhou format: <D p="133" />
                     self._send_message('<D p="{}"/>'.format(discarded_tile))
 
-                    logger.info('Remaining tiles: {}'.format(self.table.count_of_remaining_tiles))
+                    # logger.info('Remaining tiles: {}'.format(self.table.count_of_remaining_tiles))
 
                 # new dora indicator after kan
                 if '<DORA' in message:
                     tile = self.decoder.parse_dora_indicator(message)
                     self.table.add_dora_indicator(tile)
-                    logger.info('New dora indicator: {}'.format(TilesConverter.to_one_line_string([tile])))
+                    # logger.info('New dora indicator: {}'.format(TilesConverter.to_one_line_string([tile])))
 
                 if '<REACH' in message and 'step="1"' in message:
                     who_called_riichi = self.decoder.parse_who_called_riichi(message)
@@ -386,7 +386,7 @@ class TenhouClient(Client):
                             if self.player.should_call_kan(tile, True):
                                 # 2 is open kan
                                 self._send_message('<N type="2" />')
-                                logger.info('We called an open kan set!')
+                                # logger.info('We called an open kan set!')
                                 continue
 
                         # player with "g" discard is always our kamicha
@@ -532,9 +532,9 @@ class TenhouClient(Client):
 
         game_type = default_game_type
         # dan lobby, we can play here from 1 kyu
-        # and with 1600+ rate (added for Cowboy)
+        # and with 1400+ rate (added for Cowboy)
         # or after 3 dan
-        if (dan >= 9 and rate >= 1600) or dan >= 12:
+        if (dan >= 9 and rate >= 1400) or dan >= 12:
             game_type = '137'
 
         # upperdan lobby, we can play here from 4 dan and with 1800+ rate

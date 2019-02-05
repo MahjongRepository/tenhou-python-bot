@@ -6,6 +6,10 @@ from mahjong.utils import plus_dora, is_aka_dora
 
 from game.player import Player, EnemyPlayer
 
+import logging
+
+logger = logging.getLogger("ai")
+
 
 class Table(object):
     # our bot
@@ -52,11 +56,12 @@ class Table(object):
         self.dora_indicators = []
         self.add_dora_indicator(dora_indicator)
 
+        # set score before erase the states
+        self.set_players_scores(scores)
         # erase players state
         for player in self.players:
             player.erase_state()
             player.dealer_seat = dealer_seat
-        self.set_players_scores(scores)
 
         # 136 - total count of tiles
         # 14 - tiles in dead wall
@@ -125,7 +130,14 @@ class Table(object):
 
     def set_players_scores(self, scores, uma=None):
         for i in range(0, len(scores)):
-            self.get_player(i).scores = scores[i] * 100
+            old_score = self.get_player(i).scores
+            new_score = scores[i] * 100
+            if not old_score:
+                old_score = new_score
+            self.get_player(i).scores = new_score
+
+            if self.get_player(i) == self.player:
+                logger.info("Cowboy: Score: {} Score difference: {} Play State: {}".format(new_score, new_score-old_score, self.player.play_state))
 
             if uma:
                 self.get_player(i).uma = uma[i]

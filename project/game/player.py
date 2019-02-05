@@ -57,7 +57,7 @@ class PlayerInterface(object):
         self.melds = []
         self.in_riichi = False
         self.position = 0
-        self.scores = None
+        #self.scores = None
         self.uma = 0
 
     def add_called_meld(self, meld: Meld):
@@ -142,6 +142,12 @@ class Player(PlayerInterface):
 
         if self.ai:
             self.ai.erase_state()
+
+    def set_state(self, play_state):
+        logger.info("Set the player's state from {} to {}".format(self.play_state, play_state))
+        logger.info("Hand: {}".format(TilesConverter.to_one_line_string(self.closed_hand)))
+        logger.info("Outs: {} {}".format(self.ai.waiting, self.ai.wanted_tiles_count))
+        self.play_state = play_state
 
     def init_hand(self, tiles):
         self.tiles = tiles

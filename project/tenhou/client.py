@@ -532,7 +532,9 @@ class TenhouClient(Client):
 
         game_type = default_game_type
         # dan lobby, we can play here from 1 kyu
-        if dan >= 9:
+        # and with 1600+ rate (added for Cowboy)
+        # or after 3 dan
+        if (dan >= 9 and rate >= 1600) or dan >= 12:
             game_type = '137'
 
         # upperdan lobby, we can play here from 4 dan and with 1800+ rate

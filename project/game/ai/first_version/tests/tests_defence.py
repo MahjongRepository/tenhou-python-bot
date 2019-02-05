@@ -445,3 +445,5 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         result = table.player.discard_tile()
 
         self.assertEqual(self._to_string([result]), '3p')
+
+

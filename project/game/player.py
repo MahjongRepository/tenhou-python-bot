@@ -60,11 +60,6 @@ class PlayerInterface(object):
         self.scores = None
         self.uma = 0
 
-        # Added for cowboy
-        self.pushing = False
-        self.counter_value = 0
-        self.play_state = "Preparing"
-
     def add_called_meld(self, meld: Meld):
         # we already added chankan as a pon set
         if meld.type == Meld.CHANKAN:
@@ -131,7 +126,7 @@ class Player(PlayerInterface):
 
         # added for cowboy
         self.pushing = False
-        self.play_state = "Preparing" # EH: Change this to enum
+        self.play_state = "PREPARING" # EH: Change this to enum
         self.counter_value = 0
 
     def erase_state(self):
@@ -141,6 +136,9 @@ class Player(PlayerInterface):
         self.last_draw = None
         self.in_tempai = False
         self.in_defence_mode = False
+
+        # added for cowboy
+        self.play_state = "PREPARING"
 
         if self.ai:
             self.ai.erase_state()

@@ -21,6 +21,13 @@ from game.ai.first_version.strategies.yakuhai import YakuhaiStrategy
 
 logger = logging.getLogger('ai')
 
+'''
+Note: for state changes, 
+proactive states are in "should_call_riichi",
+reactive states are in "should_go_defence",
+defence state is in "discard_tile"
+'''
+
 
 class ImplementationAI(InterfaceAI):
     version = '0.3.2'
@@ -91,6 +98,7 @@ class ImplementationAI(InterfaceAI):
             if not self.in_defence:
                 logger.info('We decided to fold against other players')
                 self.in_defence = True
+                self.player.play_state = "DEFENCE"
 
             defence_tile = self.defence.try_to_find_safe_tile_to_discard(results)
             if defence_tile:
@@ -318,12 +326,18 @@ class ImplementationAI(InterfaceAI):
             return False
 
         if self.in_defence:
-            return False
+            # Adjust whether counter
+            return self.defence.should_go_to_defence_mode()
 
-        # we have a good wait, let's riichi
-        if len(self.waiting) > 1:
-            return True
+        # We are proactive, let's call reach!
+        if self.player.play_state == "PREPARING": # If not changed in defense actions
+            if len(self.waiting) >= 2:
+                self.player.play_state = "PROACTIVE_GOODSHAPE"
+            else:
+                self.player.play_state = "PROACTIVE_BADSHAPE"
+        return True
 
+        # Unreachable is fine
         waiting = self.waiting[0]
         tiles = self.player.closed_hand + [waiting * 4]
         closed_melds = [x for x in self.player.melds if not x.opened]

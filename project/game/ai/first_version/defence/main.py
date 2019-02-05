@@ -113,11 +113,11 @@ class DefenceHandler(object):
 
         # Get the shape for attacking
         hand_shape = "bad_shape"
-        if len(waiting) > 4:
+        if len(waiting) >= 2:
             hand_shape = "good_shape"
 
         # Get the current hand index
-        hand_index = self.player.discards
+        hand_index = len(self.player.discards)
 
         # Get the type of threatening player
         counter_player_type = "player"
@@ -128,12 +128,17 @@ class DefenceHandler(object):
         hand_value = sum(hands_estimated_cost) / len(hands_estimated_cost)
         # EH: makes the calculation of hand value better by adding the remaining tile count
 
-        should_counter = hand_value > COUNTER_VALUES[counter_player_type] * COUNTER_RATIO[hand_shape]
+        should_counter = hand_value > COUNTER_VALUES[counter_player_type] * COUNTER_RATIO[hand_shape][hand_index]
 
-        logger.info("Cowboy: Counter: Hand Value: {} Hand Shape: {} Hand Index: {} Counter Player Type: {} Should Counter: {}".format(hand_value, hand_shape, hand_index, counter_player_type, should_counter))
+        logger.info("Cowboy: Counter: Hand Value: {}    Hand Shape: {}    Hand Index: {}    Counter Player Type:    {} Should Counter: {}".format(hand_value, hand_shape, hand_index, counter_player_type, should_counter))
 
 
         if should_counter:
+            # change state
+            if hand_shape == "good_shape":
+                self.player.play_state = "REACTIVE_GOODSHAPE"
+            else:
+                self.player.play_state = "REACTIVE_BADSHAPE"
             return False
         else:
             return True

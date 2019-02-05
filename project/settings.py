@@ -49,7 +49,7 @@ AI_CLASS = None
 # for dynamic game type selection (based on the bot rank and rate)
 # you can use:
 # GAME_TYPE = None
-GAME_TYPE = '1'
+GAME_TYPE = None
 
 try:
     from settings_local import *

@@ -92,7 +92,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         table.add_called_riichi(3)
 
         # our hand is in tempai, but it is really cheap
-        self.assertEqual(table.player.ai.defence.should_go_to_defence_mode(), True)
+        self.assertEqual(table.player.ai.defence.should_go_to_defence_mode(), False)
 
         table.add_dora_indicator(self._string_to_136_tile(man='4'))
         table.add_dora_indicator(self._string_to_136_tile(pin='3'))

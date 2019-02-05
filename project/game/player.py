@@ -60,6 +60,11 @@ class PlayerInterface(object):
         self.scores = None
         self.uma = 0
 
+        # Added for cowboy
+        self.pushing = False
+        self.counter_value = 0
+        self.play_state = "Preparing"
+
     def add_called_meld(self, meld: Meld):
         # we already added chankan as a pon set
         if meld.type == Meld.CHANKAN:
@@ -123,6 +128,11 @@ class Player(PlayerInterface):
         super().__init__(table, seat, dealer_seat)
 
         self.ai = settings.AI_CLASS(self)
+
+        # added for cowboy
+        self.pushing = False
+        self.play_state = "Preparing" # EH: Change this to enum
+        self.counter_value = 0
 
     def erase_state(self):
         super().erase_state()

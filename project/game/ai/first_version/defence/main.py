@@ -8,6 +8,21 @@ from game.ai.first_version.defence.kabe import Kabe
 from game.ai.first_version.defence.suji import Suji
 
 
+import logging
+
+logger = logging.getLogger("ai")
+
+COUNTER_VALUES = {
+    "dealer": 8500,
+    "player":6000,
+}
+
+COUNTER_RATIO = {
+    "good_shape": [0.33 for i in range(12)] + [0.5 for i in range(12)],
+    "bad_shape": [0.66 for i in range(25)],
+}
+
+
 class DefenceHandler(object):
     table = None
     player = None
@@ -48,8 +63,8 @@ class DefenceHandler(object):
             shanten = self.player.ai.previous_shanten
             waiting = self.player.ai.waiting
 
-        # if we are in riichi, we can't defence
-        if self.player.in_riichi:
+        # if we are in riichi or meld too much, we can't defence
+        if self.player.in_riichi or self.player.pushing or len(self.player.melds) > 2:
             return False
 
         threatening_players = self._get_threatening_players()
@@ -57,6 +72,10 @@ class DefenceHandler(object):
         # no one is threatening, so we can build our hand
         if len(threatening_players) == 0:
             return False
+
+        # more than 2 players are threatening, so defense is better
+        if len(threatening_players) > 1:
+            return True
 
         if shanten == 1:
             # TODO calculate all possible hand costs for 1-2 shanten
@@ -92,19 +111,47 @@ class DefenceHandler(object):
         if not hands_estimated_cost:
             return True
 
-        max_cost = max(hands_estimated_cost)
+        # Get the shape for attacking
+        hand_shape = "bad_shape"
+        if len(waiting) > 4:
+            hand_shape = "good_shape"
+
+        # Get the current hand index
+        hand_index = self.player.discards
+
+        # Get the type of threatening player
+        counter_player_type = "player"
+        if threatening_players[0].is_dealer:
+            counter_player_type = "dealer"
+
+        # Get the hand value
+        hand_value = sum(hands_estimated_cost) / len(hands_estimated_cost)
+        # EH: makes the calculation of hand value better by adding the remaining tile count
+
+        should_counter = hand_value > COUNTER_VALUES[counter_player_type] * COUNTER_RATIO[hand_shape]
+
+        logger.info("Cowboy: Counter: Hand Value: {} Hand Shape: {} Hand Index: {} Counter Player Type: {} Should Counter: {}".format(hand_value, hand_shape, hand_index, counter_player_type, should_counter))
+
+
+        if should_counter:
+            return False
+        else:
+            return True
+
+
+
         # our open hand in tempai, but it is cheap
         # so we can fold it
-        if self.player.is_open_hand and max_cost < 7000:
-            return True
+        #if self.player.is_open_hand and max_cost < 7000:
+        #    return True
 
         # when we call riichi we can get ura dora,
         # so it is reasonable to riichi 3k+ hands
-        if not self.player.is_open_hand:
-            # there are a lot of chances that we will not win with a bad wait
-            # against other threatening players
-            if max_cost < 3000 or len(waiting) < 2:
-                return True
+        # if not self.player.is_open_hand:
+        #     # there are a lot of chances that we will not win with a bad wait
+        #     # against other threatening players
+        #     if max_cost < 3000 or len(waiting) < 2:
+        #         return True
 
         return False
 

@@ -137,7 +137,7 @@ class Table(object):
             self.get_player(i).scores = new_score
 
             if self.get_player(i) == self.player:
-                logger.info("Cowboy: Score: {} Score difference: {} Play State: {}".format(new_score, new_score-old_score, self.player.play_state))
+                logger.info("Cowboy: Score: {} Score difference: {} Play State: {} Latest change index: {}".format(new_score, new_score-old_score, self.player.play_state, self.player.latest_change_index))
 
             if uma:
                 self.get_player(i).uma = uma[i]

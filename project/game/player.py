@@ -127,6 +127,7 @@ class Player(PlayerInterface):
         # added for cowboy
         self.pushing = False
         self.play_state = "PREPARING" # EH: Change this to enum
+        self.latest_change_index = 0
         self.counter_value = 0
 
     def erase_state(self):
@@ -139,6 +140,7 @@ class Player(PlayerInterface):
 
         # added for cowboy
         self.play_state = "PREPARING"
+        self.latest_change_index = 0
 
         if self.ai:
             self.ai.erase_state()
@@ -146,8 +148,9 @@ class Player(PlayerInterface):
     def set_state(self, play_state):
         logger.info("Set the player's state from {} to {}".format(self.play_state, play_state))
         logger.info("Hand: {}".format(TilesConverter.to_one_line_string(self.closed_hand)))
-        logger.info("Outs: {} {}".format(self.ai.waiting, self.ai.wanted_tiles_count))
+        logger.info("Outs: {} {}".format(TilesConverter.to_one_line_string([out*4 for out in self.ai.waiting]), self.ai.wanted_tiles_count))
         self.play_state = play_state
+        self.latest_change_index = len(self.discards)
 
     def init_hand(self, tiles):
         self.tiles = tiles

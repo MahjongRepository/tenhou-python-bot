@@ -73,6 +73,8 @@ class ImplementationAI(InterfaceAI):
         self.in_defence = False
         self.last_discard_option = None
 
+        self.previous_shanten = 7
+
     def draw_tile(self, tile):
         """
         :param tile: 136 tile format
@@ -92,7 +94,9 @@ class ImplementationAI(InterfaceAI):
                                                self.player.closed_hand,
                                                self.player.open_hand_34_tiles)
 
-        logger.info("Shanten: {}".format(shanten))
+        if shanten < self.previous_shanten:
+            logger.info("Shanten: {}".format(shanten))
+            self.previous_shanten = shanten
 
         selected_tile = self.process_discard_options_and_select_tile_to_discard(results, shanten)
 
@@ -105,13 +109,17 @@ class ImplementationAI(InterfaceAI):
                 self.in_defence = True
                 self.player.set_state("DEFENCE")
             else:
-                logger.info("Player is alreay in defence")
+                #logger.info("Player is alreay in defence")
+                pass
 
             defence_tile = self.defence.try_to_find_safe_tile_to_discard(results)
             if defence_tile:
                 return self.process_discard_option(defence_tile, self.player.closed_hand)
         else:
             self.in_defence = False
+
+        # Process the discard option before changing the state
+        card2discard = self.process_discard_option(selected_tile, self.player.closed_hand)
 
         # After adjusting the defence, time to update the state
         if shanten == 0 and self.player.play_state == "PREPARING" and results:  # and results for debugging
@@ -120,7 +128,7 @@ class ImplementationAI(InterfaceAI):
             else:
                 self.player.set_state("PROACTIVE_BADSHAPE")
 
-        return self.process_discard_option(selected_tile, self.player.closed_hand)
+        return card2discard
 
     def process_discard_options_and_select_tile_to_discard(self, results, shanten, had_was_open=False):
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
@@ -336,14 +344,18 @@ class ImplementationAI(InterfaceAI):
         return result
 
     def should_call_riichi(self):
+        logger.info("Can call a reach!")
+
         # empty waiting can be found in some cases
         if not self.waiting:
+            logger.info("However it is impossible to win.")
             return False
 
         should_attack = not self.defence.should_go_to_defence_mode()
 
         if should_attack:
             # If we are proactive, let's set the state!
+            logger.info("Go for it!")
             if self.player.play_state == "PREPARING": # If not changed in defense actions
                 if self.wanted_tiles_count > 4:
                     self.player.set_state("PROACTIVE_GOODSHAPE")
@@ -352,10 +364,11 @@ class ImplementationAI(InterfaceAI):
             return True
 
         else:
+            logger.info("However it's better to fold.")
             return False
 
 
-        # Unreachable is fine
+        # These codes are unreachable, it is fine.
         waiting = self.waiting[0]
         tiles = self.player.closed_hand + [waiting * 4]
         closed_melds = [x for x in self.player.melds if not x.opened]

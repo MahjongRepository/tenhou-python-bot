@@ -304,6 +304,7 @@ class TenhouClient(Client):
 
                     # tenhou format: <D p="133" />
                     self._send_message('<D p="{}"/>'.format(discarded_tile))
+                    # logger.info('D: {}'.format(TilesConverter.to_one_line_string([discarded_tile])))
 
                     # logger.info('Remaining tiles: {}'.format(self.table.count_of_remaining_tiles))
 

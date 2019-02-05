@@ -81,7 +81,7 @@ class DefenceHandler(object):
 
         # more than 2 players are threatening, so defense is better
         if len(threatening_players) >= 2:
-            #logger.info("Watch those players feed each other!")
+            logger.info("Watch those players feed each other!")
             return True
 
         if shanten == 1:
@@ -152,6 +152,8 @@ class DefenceHandler(object):
 
         if should_counter:
             # set state
+            self.player.ai.waiting = waiting
+            self.player.ai.wanted_tiles_count = wanted_tiles_count
             if self.player.play_state in ["PREPARING", "DEFENCE"]:
                 if hand_shape == "good_shape":
                     self.player.set_state("REACTIVE_GOODSHAPE")

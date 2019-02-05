@@ -75,7 +75,8 @@ def main():
     parse_args_and_set_up_settings()
     set_up_logging()
 
-    connect_and_play()
+    for i in range(500):
+        connect_and_play()
 
 
 if __name__ == '__main__':

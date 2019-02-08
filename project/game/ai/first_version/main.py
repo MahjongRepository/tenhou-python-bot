@@ -61,6 +61,7 @@ class ImplementationAI(InterfaceAI):
 
         # Added for cowboy
         self.wanted_tiles_count = 0
+        self.pushing = False
 
     def init_hand(self):
         """
@@ -73,7 +74,9 @@ class ImplementationAI(InterfaceAI):
         self.in_defence = False
         self.last_discard_option = None
 
+        # Added for cowboy
         self.previous_shanten = 7
+        self.pushing = False
 
     def draw_tile(self, tile):
         """

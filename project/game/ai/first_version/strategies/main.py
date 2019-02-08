@@ -3,6 +3,10 @@ from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_man, is_pin, is_sou, is_pon, is_chi
 
+from mahjong.utils import plus_dora, is_honor, is_aka_dora
+import logging
+
+logger = logging.getLogger("ai")
 
 class BaseStrategy(object):
     YAKUHAI = 0
@@ -32,15 +36,34 @@ class BaseStrategy(object):
         Based on player hand and table situation
         we can determine should we use this strategy or not.
         For now default rule for all strategies: don't open hand with 5+ pairs
+        Also, open hand when (dora >= 1) or (shanten <= 2 and index<= 10) or (is_dealer)
         :return: boolean
         """
         if self.player.is_open_hand:
             return True
 
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
-        count_of_pairs = len([x for x in range(0, 34) if tiles_34[x] >= 2])
 
-        return count_of_pairs < 5
+        # Get count of pairs
+        count_of_pairs = len([x for x in range(0, 34) if tiles_34[x] >= 2])
+        if count_of_pairs >= 5:
+            return False
+
+        # Get count of dora
+        dora_count = sum([plus_dora(x, self.player.table.dora_indicators) for x in self.player.tiles])
+        # aka dora
+        dora_count += sum([1 for x in self.player.tiles if is_aka_dora(x, self.player.table.has_open_tanyao)])
+        # Get shanten
+        shanten = self.player.ai.previous_shanten
+        # Get hand index
+        hand_index = len(self.player.discards)
+
+        if (dora_count >= 1) or (shanten <= 2 and hand_index <= 10) or self.player.is_dealer:
+            return True
+        else:
+            return False
+
+
 
     def is_tile_suitable(self, tile):
         """

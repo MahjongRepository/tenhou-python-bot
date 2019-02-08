@@ -67,7 +67,7 @@ class DefenceHandler(object):
             wanted_tiles_count = self.player.ai.wanted_tiles_count
 
         # if we are in riichi or meld too much, we can't defence
-        if self.player.in_riichi or self.player.pushing or len(self.player.melds) > 2:
+        if self.player.in_riichi or self.player.ai.pushing or len(self.player.melds) >= 3:
             return False
 
         threatening_players = self._get_threatening_players()
@@ -159,6 +159,9 @@ class DefenceHandler(object):
                     self.player.set_state("REACTIVE_GOODSHAPE")
                 else:
                     self.player.set_state("REACTIVE_BADSHAPE")
+
+            self.player.ai.pushing = True
+
             return False
         else:
             return True

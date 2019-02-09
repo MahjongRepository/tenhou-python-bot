@@ -84,7 +84,6 @@ class YakuhaiStrategy(BaseStrategy):
         else:
             logger.info("Detect a possible meld: {}".format(meld))
             logger.info("This is yakuhai pon? {}".format(self._is_yakuhai_pon(meld)))
-            logger.info("This is yakuhai pon? {}".format(self._is_yakuhai_pon(meld)))
 
         has_yakuhai_pon = False
         for player_meld in self.player.melds:

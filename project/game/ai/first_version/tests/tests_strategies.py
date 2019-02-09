@@ -191,7 +191,7 @@ class YakuhaiStrategyTestCase(unittest.TestCase, TestMixin):
 
         tile = self._string_to_136_tile(honors='5')
         meld, discard_option = table.player.try_to_call_meld(tile, False)
-        self.assertNotEqual(meld, None)
+        self.assertNotEqual(meld, None, "Should call meld in this situation.")
 
         table.add_called_meld(0, meld)
         table.player.tiles.append(tile)

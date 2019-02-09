@@ -53,19 +53,24 @@ class TanyaoStrategy(BaseStrategy):
         if count_of_terminal_pairs > 1:
             return False
 
-        # 123 and 789 indices
+        # 1234 and 9876 indices
         indices = [
-            [0, 1, 2], [6, 7, 8],
-            [9, 10, 11], [15, 16, 17],
-            [18, 19, 20], [24, 25, 26]
+            [0, 1, 2, 3], [8, 7, 6, 5],
+            [9, 10, 11, 12], [17, 16, 15, 14],
+            [18, 19, 20, 21], [26, 25, 24, 23],
         ]
 
+        num_terminal_lugs = 0
         for index_set in indices:
-            first = tiles[index_set[0]]
-            second = tiles[index_set[1]]
-            third = tiles[index_set[2]]
-            if first >= 1 and second >= 1 and third >= 1:
-                return False
+            first = int(tiles[index_set[0]] >= 1)
+            second = int(tiles[index_set[1]] >= 1)
+            third = int(tiles[index_set[2]] >= 1)
+            fourth = int(tiles[index_set[3]] >= 1)
+            if (first + second >= 2) or (first + third >= 2) or ((second + third >= 2) and fourth == 0):
+                num_terminal_lugs += 1
+
+        if num_terminal_lugs >= 2:
+            return False
 
         return True
 

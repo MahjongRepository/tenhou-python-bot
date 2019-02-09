@@ -30,6 +30,7 @@ class YakuhaiStrategy(BaseStrategy):
     def is_tile_suitable(self, tile):
         """
         For yakuhai we don't have any limits
+        Cowboy: for yakuhai, if no yakuhai pon, no more tiles.
         :param tile: 136 tiles format
         :return: True
         """
@@ -69,6 +70,23 @@ class YakuhaiStrategy(BaseStrategy):
                                                                       tile_for_open_hand,
                                                                       hand_was_open)
 
+    def try_to_call_meld(self, tile, is_kamicha_discard):
+        # Don't call meld without yakuhai pon
+        meld, selected_tile = super(YakuhaiStrategy, self).try_to_call_meld(tile, is_kamicha_discard)
+
+        if not meld:
+            return None, None
+
+        has_yakuhai_pon = False
+        for player_meld in self.player.melds:
+            if self._is_yakuhai_pon(player_meld):
+                has_yakuhai_pon = True
+
+        if self._is_yakuhai_pon(meld) or has_yakuhai_pon:
+            return meld, selected_tile
+        else:
+            return None, None
+
     def meld_had_to_be_called(self, tile):
         # for closed hand we don't need to open hand with special conditions
         if not self.player.is_open_hand:
@@ -80,7 +98,7 @@ class YakuhaiStrategy(BaseStrategy):
 
         for meld in self.player.melds:
             # for big shanten number we don't need to check already opened pon set,
-            # because it will improve pur hand anyway
+            # because it will improve our hand anyway
             if self.player.ai.previous_shanten >= 1:
                 break
 

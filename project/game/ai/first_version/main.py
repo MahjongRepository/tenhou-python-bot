@@ -244,8 +244,8 @@ class ImplementationAI(InterfaceAI):
                 message = '{} switched to {} strategy'.format(self.player.name, self.current_strategy)
                 if old_strategy:
                     message += ' from {}'.format(old_strategy)
-                logger.debug(message)
-                logger.debug('With hand: {}'.format(TilesConverter.to_one_line_string(self.player.tiles)))
+                logger.info(message)
+                logger.info('With such a hand: {}'.format(TilesConverter.to_one_line_string(self.player.tiles)))
 
         if not self.current_strategy and old_strategy:
             logger.debug('{} gave up on {}'.format(self.player.name, old_strategy))

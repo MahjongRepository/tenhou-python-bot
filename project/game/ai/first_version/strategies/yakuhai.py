@@ -4,6 +4,10 @@ from mahjong.tile import TilesConverter
 
 from game.ai.first_version.strategies.main import BaseStrategy
 
+import logging
+
+logger = logging.getLogger("ai")
+
 
 class YakuhaiStrategy(BaseStrategy):
 
@@ -75,16 +79,24 @@ class YakuhaiStrategy(BaseStrategy):
         meld, selected_tile = super(YakuhaiStrategy, self).try_to_call_meld(tile, is_kamicha_discard)
 
         if not meld:
+            logger.info("This is a bad meld, don't call it.")
             return None, None
+        else:
+            logger.info("Detect a possible meld: {}".format(meld))
+            logger.info("This is yakuhai pon? {}".format(self._is_yakuhai_pon(meld)))
 
         has_yakuhai_pon = False
         for player_meld in self.player.melds:
             if self._is_yakuhai_pon(player_meld):
                 has_yakuhai_pon = True
 
+        logger.info("Player has yakuhai pon? {}".format(has_yakuhai_pon))
+
         if self._is_yakuhai_pon(meld) or has_yakuhai_pon:
+            logger.info("It's fine to call this meld.")
             return meld, selected_tile
         else:
+            logger.info("So it's better not calling it.")
             return None, None
 
     def meld_had_to_be_called(self, tile):

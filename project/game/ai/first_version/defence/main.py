@@ -8,6 +8,7 @@ from game.ai.first_version.defence.kabe import Kabe
 from game.ai.first_version.defence.suji import Suji
 
 import logging
+import copy
 
 logger = logging.getLogger("ai")
 
@@ -22,6 +23,8 @@ COUNTER_RATIO = {
     "pro_good_shape": [0.2 for i in range(25)],
     "pro_bad_shape": [0.33 for i in range(25)],
 }
+
+POSITION_RANK = [6, 2, -2, -6]
 
 
 class DefenceHandler(object):
@@ -47,6 +50,40 @@ class DefenceHandler(object):
 
         self.hand_34 = None
         self.closed_hand_34 = None
+
+    def get_rank_ev(self, hand_value, lose_estimation, win_lose_ratio):
+        current_ranking = [[p.name, p.scores] for p in self.table.get_players_sorted_by_scores()]
+        player_name = self.player.name
+
+        # Util function
+        def get_position(ranking):
+            for i in range(4):
+                if player_name == ranking[i][0]:
+                    return i
+
+        def get_new_ranking(ranking, score_diff):
+            new_ranking = copy.deepcopy(ranking)
+            for i in range(4):
+                if player_name == ranking[i][0]:
+                    new_ranking[i][1] += score_diff
+            new_ranking.sort(key=lambda x: x[1], reverse=True)
+            return new_ranking
+
+        # Get current position
+        current_position = get_position(current_ranking)
+
+        # Get estimated position
+        ## after win
+        win_ranking = get_new_ranking(current_ranking, hand_value)
+        win_position = get_position(win_ranking)
+        ## after lose
+        lose_ranking = get_new_ranking(current_ranking, -lose_estimation)
+        lose_position = get_position(lose_ranking)
+
+
+        rank_ev = (POSITION_RANK[win_position] - POSITION_RANK[current_position]) + (POSITION_RANK[lose_position] - POSITION_RANK[current_position]) * win_lose_ratio
+
+        return rank_ev
 
     def should_go_to_defence_mode(self, discard_candidate=None):
         """
@@ -141,14 +178,29 @@ class DefenceHandler(object):
         if threatening_players[0].is_dealer:
             counter_player_type = "dealer"
 
-        should_counter = hand_value > COUNTER_VALUES[counter_player_type] * COUNTER_RATIO[hand_shape][hand_index]
+        score_ev = hand_value - COUNTER_VALUES[counter_player_type] * COUNTER_RATIO[hand_shape][hand_index]
+        rank_ev = self.get_rank_ev(hand_value, COUNTER_VALUES[counter_player_type], COUNTER_RATIO[hand_shape][hand_index])
+
+        should_counter = False
+
+        if self.table.round_number < 3: # DEBUG: set this to 0 to debug rank ev calculation
+            # Before Round East 4, use score ev
+            if score_ev > 0:
+                should_counter = True
+        else:
+            if rank_ev > 0:
+                should_counter = True
+            elif rank_ev == 0 and score_ev > 0:
+                should_encounter = True
+
 
         logger.info(
             '''Cowboy: Counter: 
             Hand Value: {}    Hand Shape: {}    
-            Hand Index: {}    Counter Player Type:    {} 
+            Hand Index: {}    Counter Player Type: {}
+            Score EV: {}    Rank EV: {} 
             Should Counter: {}'''.format(
-                hand_value, hand_shape, hand_index, counter_player_type, should_counter))
+                hand_value, hand_shape, hand_index, counter_player_type, score_ev, rank_ev, should_counter))
 
         if should_counter:
             # set state

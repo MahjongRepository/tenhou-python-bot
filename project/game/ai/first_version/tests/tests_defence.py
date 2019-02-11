@@ -80,6 +80,8 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         When we have 13 tiles in hand and someone declared a riichi
         """
         table = Table()
+        table.set_players_names_and_ranks([{"name": "a", "rank": 1500},{"name": "b", "rank": 1500},{"name": "c", "rank": 1500},{"name": "d", "rank": 1500},])
+        table.set_players_scores([250, 250, 250, 250])
 
         tiles = self._string_to_136_array(sou='234678', pin='34789', man='77')
         table.player.init_hand(tiles)

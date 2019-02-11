@@ -366,6 +366,11 @@ class ImplementationAI(InterfaceAI):
             should_attack = False
             logger.info("A bad shape with no dora, don't call it.")
 
+        # If player is on the top, no need to call reach
+        if self.player == self.player.table.get_players_sorted_by_scores()[0]:
+            should_attack = False
+            logger.info("Player is in 1st position, no need to call reach.")
+
         if should_attack:
             # If we are proactive, let's set the state!
             logger.info("Go for it!")

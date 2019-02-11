@@ -10,6 +10,7 @@ from mahjong.meld import Meld
 from mahjong.shanten import Shanten
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_pair, is_pon
+from mahjong.utils import plus_dora, is_honor, is_aka_dora
 
 from game.ai.base.main import InterfaceAI
 from game.ai.discard import DiscardOption
@@ -355,6 +356,15 @@ class ImplementationAI(InterfaceAI):
             return False
 
         should_attack = not self.defence.should_go_to_defence_mode()
+
+        # For bad shape, at least 1 dora is required
+        # Get count of dora
+        dora_count = sum([plus_dora(x, self.player.table.dora_indicators) for x in self.player.tiles])
+        # aka dora
+        dora_count += sum([1 for x in self.player.tiles if is_aka_dora(x, self.player.table.has_open_tanyao)])
+        if self.wanted_tiles_count <= 4 and dora_count == 0 and not self.player.is_dealer:
+            should_attack = False
+            logger.info("A bad shape with no dora, don't call it.")
 
         if should_attack:
             # If we are proactive, let's set the state!

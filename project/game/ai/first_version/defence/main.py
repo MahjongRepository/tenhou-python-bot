@@ -103,8 +103,15 @@ class DefenceHandler(object):
             waiting = self.player.ai.waiting
             wanted_tiles_count = self.player.ai.wanted_tiles_count
 
+        # if we are the top, it's better to defence
+        if self.player == self.table.get_players_sorted_by_scores()[0] and self.player.scores > 30000:
+            logger.info("Player is at the 1st position, better to fold.")
+
+            return True
+
         # if we are in riichi or meld too much, we can't defence
         if self.player.in_riichi or self.player.ai.pushing or len(self.player.melds) >= 3:
+            logger.info("In reach or pushing state, cannot defence.")
             return False
 
         threatening_players = self._get_threatening_players()

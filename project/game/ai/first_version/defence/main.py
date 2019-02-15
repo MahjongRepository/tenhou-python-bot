@@ -51,9 +51,14 @@ class DefenceHandler(object):
         self.hand_34 = None
         self.closed_hand_34 = None
 
+        self.threatening_players = []
+
     def get_rank_ev(self, hand_value, lose_estimation, win_lose_ratio):
-        current_ranking = [[p.name, p.scores] for p in self.table.get_players_sorted_by_scores()]
+        raw_ranking = [[p.name, p.scores] for p in self.table.get_players_sorted_by_scores()]
         player_name = self.player.name
+        enemy_name = ""
+        if self.threatening_players:
+            enemy_name = self.threatening_players[0].player.name
 
         # Util function
         def get_position(ranking):
@@ -61,23 +66,31 @@ class DefenceHandler(object):
                 if player_name == ranking[i][0]:
                     return i
 
-        def get_new_ranking(ranking, score_diff):
+        def get_new_ranking(ranking, name1, name2="", score_diff=0):
             new_ranking = copy.deepcopy(ranking)
             for i in range(4):
-                if player_name == ranking[i][0]:
+                if name1 == ranking[i][0]:
                     new_ranking[i][1] += score_diff
+                if name2 == ranking[i][0]:
+                    new_ranking[i][1] -= score_diff
             new_ranking.sort(key=lambda x: x[1], reverse=True)
             return new_ranking
 
         # Get current position
+        current_ranking = get_new_ranking(raw_ranking, player_name, score_diff=-4000)
         current_position = get_position(current_ranking)
 
         # Get estimated position
+        ## adjusted ranking which the 4th position +4k
+        if self.player.name != raw_ranking[-1][0]:
+            adjusted_ranking = get_new_ranking(raw_ranking, raw_ranking[-1][0], score_diff=4000)
+        else:
+            adjusted_ranking = copy.deepcopy(raw_ranking)
         ## after win
-        win_ranking = get_new_ranking(current_ranking, hand_value)
+        win_ranking = get_new_ranking(adjusted_ranking, player_name, enemy_name, hand_value)
         win_position = get_position(win_ranking)
         ## after lose
-        lose_ranking = get_new_ranking(current_ranking, -lose_estimation)
+        lose_ranking = get_new_ranking(adjusted_ranking, player_name, enemy_name, -lose_estimation)
         lose_position = get_position(lose_ranking)
 
 
@@ -104,17 +117,24 @@ class DefenceHandler(object):
             wanted_tiles_count = self.player.ai.wanted_tiles_count
 
         # if we are the top, it's better to defence
-        if self.player == self.table.get_players_sorted_by_scores()[0] and self.player.scores > 30000:
-            logger.info("Player is at the 1st position, better to fold.")
+        # if self.player == self.table.get_players_sorted_by_scores()[0] and self.player.scores > 30000:
+        #     logger.info("Player is at the 1st position, better to fold.")
+        #     return True
 
-            return True
 
         # if we are in riichi or meld too much, we can't defence
         if self.player.in_riichi or self.player.ai.pushing or len(self.player.melds) >= 3:
             logger.info("In reach or pushing state, cannot defence.")
             return False
 
+        # if we are the at the 4st position, it's better to push
+        if self.player == self.table.get_players_sorted_by_scores()[-1] and self.table.round_number >= 3:
+            logger.info("Player is at the 4st position, better to push.")
+            self.ai.pushing = True
+            return False
+
         threatening_players = self._get_threatening_players()
+        self.threatening_players = threatening_players  # assign this for further calculation in other methods
 
         # no one is threatening, so we can build our hand
         if len(threatening_players) == 0:

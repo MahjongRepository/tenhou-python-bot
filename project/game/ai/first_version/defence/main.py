@@ -148,7 +148,7 @@ class DefenceHandler(object):
             logger.info("Watch those players feed each other!")
             return True
 
-        # if shanten == 1:
+        if shanten == 1:
         #     # When player is in 4th position, it's better to push in this situation
         #     if self.player == self.table.get_players_sorted_by_scores()[-1]:
         #         logger.info("Player is in 4th position, better to push.")

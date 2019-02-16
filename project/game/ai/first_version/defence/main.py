@@ -130,7 +130,7 @@ class DefenceHandler(object):
         # if we are the at the 4st position, it's better to push
         if self.player == self.table.get_players_sorted_by_scores()[-1] and self.table.round_number >= 3:
             logger.info("Player is at the 4st position, better to push.")
-            self.ai.pushing = True
+            self.player.ai.pushing = True
             return False
 
         threatening_players = self._get_threatening_players()

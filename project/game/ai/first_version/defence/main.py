@@ -6,6 +6,7 @@ from game.ai.first_version.defence.enemy_analyzer import EnemyAnalyzer
 from game.ai.first_version.defence.impossible_wait import ImpossibleWait
 from game.ai.first_version.defence.kabe import Kabe
 from game.ai.first_version.defence.suji import Suji
+from game.ai.discard import DiscardOption
 
 import logging
 import copy
@@ -131,6 +132,7 @@ class DefenceHandler(object):
         if self.player == self.table.get_players_sorted_by_scores()[-1] and self.table.round_number >= 3:
             logger.info("Player is at the 4st position, better to push.")
             self.player.ai.pushing = True
+            self.player.set_state("PUSHING")
             return False
 
         threatening_players = self._get_threatening_players()
@@ -191,6 +193,9 @@ class DefenceHandler(object):
 
         # Get the hand value
         hand_value = sum(hands_estimated_cost) / len(hands_estimated_cost)
+        hand_value += self.table.count_of_riichi_sticks * 1000
+        if self.player.is_dealer:
+            hand_value += 700  # EV for dealer combo
         # EH: makes the calculation of hand value better by adding the remaining tile count
 
         # Get the shape for attacking
@@ -346,6 +351,34 @@ class DefenceHandler(object):
                     return result
 
         # we wasn't able to find safe tile to discard
+        logger.info("No safe tiles, try to defence in other ways.")
+        # find triplets
+        for i,c in enumerate(self.closed_hand_34):
+            if c >= 3:
+                return DiscardOption(self.player, i, 7, [], 4)
+
+        # find pairs
+        for i,c in enumerate(self.closed_hand_34):
+            if c >= 2:
+                return DiscardOption(self.player, i, 7, [], 4)
+
+        # find honors
+        for i,c in enumerate(self.closed_hand_34[27:]):
+            if c >= 1:
+                return DiscardOption(self.player, i, 7, [], 4)
+
+        # find 19
+        for i,c in enumerate(self.closed_hand_34):
+            if i % 9 in [0, 8] and c >= 1:
+                return DiscardOption(self.player, i, 7, [], 4)
+
+        # find 28
+        for i,c in enumerate(self.closed_hand_34):
+            if i % 9 in [1, 7] and c >= 1:
+                return DiscardOption(self.player, i, 7, [], 4)
+
+        # we really wasn't able to find safe tile to discard
+        logger.info("Really cannot defence.")
         return None
 
     @property

@@ -218,6 +218,57 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(table.player.ai.in_defence, True)
         self.assertEqual(self._to_string([result]), '4m')
 
+    def test_find_tile_to_discard_when_no_safe_tile(self):
+        dealer = 2
+        dora = self._string_to_136_tile(honors='3')
+        table = Table()
+        table.init_round(0, 0, 0, dora, dealer, [])
+
+        tiles = self._string_to_136_array(sou='2234555', pin='11', man='11113')
+        table.player.init_hand(tiles)
+
+        table.add_discarded_tile(1, self._string_to_136_tile(man='8'), False)
+        table.add_discarded_tile(1, self._string_to_136_tile(man='9'), False)
+
+        table.add_discarded_tile(2, self._string_to_136_tile(man='8'), False)
+        table.add_discarded_tile(2, self._string_to_136_tile(man='9'), False)
+
+        table.add_called_riichi(1)
+        table.add_called_riichi(2)
+
+        # for this test we don't need temporary_safe_tiles
+        table.get_player(1).temporary_safe_tiles = []
+        table.get_player(2).temporary_safe_tiles = []
+
+        result = table.player.discard_tile()
+        # No safe tile to discard. So should discard 5s
+        self.assertEqual(self._to_string([result]), '1m')
+
+        tiles = self._string_to_136_array(sou='2234556', pin='11', man='34567')
+        table.player.init_hand(tiles)
+        result = table.player.discard_tile()
+        # No safe tile to discard. So should discard 1p
+        self.assertEqual(self._to_string([result]), '1p')
+
+        tiles = self._string_to_136_array(sou='2345678', pin='19', man='34567')
+        table.player.init_hand(tiles)
+        result = table.player.discard_tile()
+        # No safe tile to discard. So should discard 1p
+        self.assertEqual(self._to_string([result]), '1p')
+
+        # tiles = self._string_to_136_array(sou='2234555', pin='11', man='11113')
+        # table.player.init_hand(tiles)
+        # result = table.player.discard_tile()
+        # # No safe tile to discard. So should discard 5s
+        # self.assertEqual(self._to_string([result]), '1m')
+        # tiles = self._string_to_136_array(sou='234567', pin='348', man='234', honors='23')
+        # table.player.init_hand(tiles)
+        #
+        # result = table.player.discard_tile()
+        # # there is no safe tiles against dealer, so let's fold against other players
+        # self.assertEqual(table.player.ai.in_defence, True)
+        # self.assertEqual(self._to_string([result]), '4m')
+
     def test_try_to_discard_not_needed_tiles_first_in_defence_mode(self):
         table = Table()
 

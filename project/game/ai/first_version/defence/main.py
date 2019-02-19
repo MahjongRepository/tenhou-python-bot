@@ -439,3 +439,9 @@ class DefenceHandler(object):
             if not player.chosen_suit(tile) and not is_honor(tile):
                 against_honitsu.append(tile)
         return against_honitsu
+
+
+if __name__ == "__main__":
+    # Tests
+    print(COUNTER_RATIO)
+    print(COUNTER_RATIO["bad_shape"][12])

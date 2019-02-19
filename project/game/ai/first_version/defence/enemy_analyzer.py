@@ -65,7 +65,7 @@ class EnemyAnalyzer(object):
             dora_count += sum([1 for x in meld_tiles if is_aka_dora(x, self.table.has_open_tanyao)])
             # enemy has a lot of dora tiles in his opened sets
             # so better to fold against him
-            if dora_count >= 3:
+            if dora_count >= 3 and len(self.player.discards) > 10:
                 return True
 
             # check that user has a discard and melds that looks like honitsu

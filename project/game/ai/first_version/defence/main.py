@@ -20,12 +20,12 @@ COUNTER_VALUES = {
 
 COUNTER_RATIO = {
     "good_shape": [0.33 for i in range(12)] + [0.5 for i in range(12)],
-    "bad_shape": [0.66 for i in range(25)],
+    "bad_shape": [0.66 for i in range(6)] + [0.8 for i in range(6)] + [1 for i in range(12)],
     "pro_good_shape": [0.2 for i in range(25)],
     "pro_bad_shape": [0.33 for i in range(25)],
 }
 
-POSITION_RANK = [6, 2, -2, -6]
+POSITION_RANK = [6, 2, -2, -12]
 
 
 class DefenceHandler(object):

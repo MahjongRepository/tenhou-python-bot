@@ -6,7 +6,7 @@ TENHOU_PORT = 10080
 USER_ID = 'NoName'
 
 LOBBY = '0'
-WAITING_GAME_TIMEOUT_MINUTES = 10
+WAITING_GAME_TIMEOUT_MINUTES = 2
 
 # in tournament mode bot is not trying to search the game
 # it just sitting in the lobby and waiting for the game start

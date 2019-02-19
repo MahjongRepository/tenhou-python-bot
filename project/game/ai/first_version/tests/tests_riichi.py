@@ -11,8 +11,10 @@ class CallRiichiTestCase(unittest.TestCase, TestMixin):
     def test_dont_call_riichi_with_tanki_wait(self):
         table = Table()
         table.count_of_remaining_tiles = 60
+        table.set_players_scores([250, 250, 250, 250])
         player = table.player
-        player.scores = 25000
+        player.name = "AaronXu"
+        player.scores = 10000
 
         tiles = self._string_to_136_array(sou='123456', pin='123456', man='3')
         player.init_hand(tiles)

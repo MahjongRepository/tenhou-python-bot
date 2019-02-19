@@ -15,6 +15,7 @@ from mahjong.utils import plus_dora, is_honor, is_aka_dora
 from game.ai.base.main import InterfaceAI
 from game.ai.discard import DiscardOption
 from game.ai.first_version.defence.main import DefenceHandler
+from game.ai.first_version.defence.main import COUNTER_RATIO
 from game.ai.first_version.strategies.honitsu import HonitsuStrategy
 from game.ai.first_version.strategies.main import BaseStrategy
 from game.ai.first_version.strategies.tanyao import TanyaoStrategy
@@ -354,6 +355,43 @@ class ImplementationAI(InterfaceAI):
         if not self.waiting:
             logger.info("However it is impossible to win.")
             return False
+
+        # In pushing state, it's better to call it
+        if self.pushing:
+            logger.info("Go for it! The player is in pushing state.")
+            return True
+
+        # Get the rank EV after round 3
+        if self.table.round_number >= 3:  # DEBUG: set this to 0
+            try:
+                possible_hand_values = [self.estimate_hand_value(tile, call_riichi=True).cost["main"] for tile in self.waiting]
+            except Exception as e:
+                print(e)
+                possible_hand_values = [2000]
+            hand_value = sum(possible_hand_values) / len(possible_hand_values)
+            hand_value += self.table.count_of_riichi_sticks * 1000
+            if self.player.is_dealer:
+                hand_value += 700  # EV for dealer combo
+
+            lose_estimation = 6000 if self.player.is_dealer else 7000
+
+            hand_shape = "pro_bad_shape" if self.wanted_tiles_count <= 4 else "pro_good_shape"
+
+            rank_ev = self.defence.get_rank_ev(hand_value, lose_estimation, COUNTER_RATIO[hand_shape][len(self.player.discards)])
+
+            logger.info('''Cowboy: Proactive reach:
+            Hand value: {}    Hand shape: {}
+            Is dealer: {}    Current ranking: {}
+            '''.format(hand_value, hand_shape, self.player.is_dealer, self.table.get_players_sorted_by_scores()))
+
+            logger.info("Rank EV for proactive reach: {}".format(rank_ev))
+
+            if rank_ev < 0:
+                logger.info("It's better to fold.")
+                return False
+            else:
+                logger.info("Go for it!")
+                return True
 
         should_attack = not self.defence.should_go_to_defence_mode()
 

@@ -85,9 +85,6 @@ class YakuhaiStrategy(BaseStrategy):
             logger.info("Detect a possible meld: {}".format(meld))
             logger.info("This is yakuhai pon? {}".format(self._is_yakuhai_pon(meld)))
 
-        has_meld = len(self.player.melds) > 0
-        logger.info("Player has no meld? {}".format(not has_meld))
-
         has_yakuhai_pon = False
         for player_meld in self.player.melds:
             if self._is_yakuhai_pon(player_meld):
@@ -95,7 +92,7 @@ class YakuhaiStrategy(BaseStrategy):
 
         logger.info("Player has yakuhai pon? {}".format(has_yakuhai_pon))
 
-        if self._is_yakuhai_pon(meld) or has_yakuhai_pon or not has_meld:
+        if self._is_yakuhai_pon(meld) or has_yakuhai_pon:
             logger.info("It's fine to call this meld.")
             return meld, selected_tile
         else:

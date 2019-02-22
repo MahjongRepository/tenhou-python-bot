@@ -20,6 +20,10 @@ class TanyaoStrategy(BaseStrategy):
         if not result:
             return False
 
+        if len(self.player.discards) <= 6:
+            # Do not activate it too early
+            return False
+
         tiles = TilesConverter.to_34_array(self.player.tiles)
         count_of_terminal_pon_sets = 0
         count_of_terminal_pairs = 0
@@ -48,9 +52,9 @@ class TanyaoStrategy(BaseStrategy):
         if count_of_valued_pairs > 0:
             return False
 
-        # one pair is ok in tanyao pair
-        # but 2+ pairs can't be suitable
-        if count_of_terminal_pairs > 1:
+        # no pair is ok in tanyao pair
+        # but 1+ pairs can't be suitable
+        if count_of_terminal_pairs >= 1:
             return False
 
         # 1234 and 9876 indices
@@ -71,7 +75,7 @@ class TanyaoStrategy(BaseStrategy):
             if first + second + third >= 3:
                 num_terminal_lugs += 2
 
-        if num_terminal_lugs >= 2:
+        if num_terminal_lugs >= 1:
             return False
 
         return True

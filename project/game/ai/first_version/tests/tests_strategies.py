@@ -407,15 +407,15 @@ class TanyaoStrategyTestCase(unittest.TestCase, TestMixin):
 
         tiles = self._string_to_136_array(sou='234', man='3459', pin='233', honors='111')
         player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), False)
+        self.assertEqual(strategy.should_activate_strategy(), False, "no honors plz.")
 
         tiles = self._string_to_136_array(sou='234', man='3459', pin='233999')
         player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), False)
+        self.assertEqual(strategy.should_activate_strategy(), False, "no 19 plz.")
 
         tiles = self._string_to_136_array(sou='234', man='3459', pin='233444')
         player.init_hand(tiles)
-        self.assertEqual(strategy.should_activate_strategy(), True)
+        self.assertEqual(strategy.should_activate_strategy(), True, "It's fine.")
 
     def test_should_activate_strategy_and_terminal_pairs(self):
         table = self._make_table()

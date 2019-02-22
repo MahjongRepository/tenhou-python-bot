@@ -70,7 +70,7 @@ class TanyaoStrategy(BaseStrategy):
             second = int(tiles[index_set[1]] >= 1)
             third = int(tiles[index_set[2]] >= 1)
             fourth = int(tiles[index_set[3]] >= 1)
-            if (first + second >= 2) or (first + third >= 2) or ((second + third >= 2) and fourth == 0):
+            if ((first + second >= 2) or (first + third >= 2) or (second + third >= 2)) and fourth == 0:
                 num_terminal_lugs += 1
             if first + second + third >= 3:
                 num_terminal_lugs += 2

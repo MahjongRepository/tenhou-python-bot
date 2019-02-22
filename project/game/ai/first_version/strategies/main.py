@@ -3,7 +3,6 @@ from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_man, is_pin, is_sou, is_pon, is_chi
 
-from mahjong.utils import plus_dora, is_honor, is_aka_dora
 import logging
 
 logger = logging.getLogger("ai")
@@ -49,19 +48,9 @@ class BaseStrategy(object):
         if count_of_pairs >= 5:
             return False
 
-        # Get count of dora
-        dora_count = sum([plus_dora(x, self.player.table.dora_indicators) for x in self.player.tiles])
-        # aka dora
-        dora_count += sum([1 for x in self.player.tiles if is_aka_dora(x, self.player.table.has_open_tanyao)])
-        # Get shanten
-        shanten = self.player.ai.previous_shanten
-        # Get hand index
-        hand_index = len(self.player.discards)
+        return True
 
-        if (dora_count >= 1) or (shanten <= 2 and hand_index <= 10) or self.player.is_dealer:
-            return True
-        else:
-            return False
+
 
 
 

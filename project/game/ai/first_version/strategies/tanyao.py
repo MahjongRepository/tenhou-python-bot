@@ -3,6 +3,7 @@ from mahjong.constants import TERMINAL_INDICES, HONOR_INDICES
 from mahjong.tile import TilesConverter
 
 from game.ai.first_version.strategies.main import BaseStrategy
+from mahjong.utils import plus_dora, is_honor, is_aka_dora
 
 
 class TanyaoStrategy(BaseStrategy):
@@ -18,6 +19,18 @@ class TanyaoStrategy(BaseStrategy):
 
         result = super(TanyaoStrategy, self).should_activate_strategy()
         if not result:
+            return False
+
+        # Get count of dora
+        dora_count = sum([plus_dora(x, self.player.table.dora_indicators) for x in self.player.tiles])
+        # aka dora
+        dora_count += sum([1 for x in self.player.tiles if is_aka_dora(x, self.player.table.has_open_tanyao)])
+        # Get shanten
+        shanten = self.player.ai.previous_shanten
+        # Get hand index
+        hand_index = len(self.player.discards)
+
+        if not ((dora_count >= 1) or (shanten <= 2 and hand_index <= 10) or self.player.is_dealer):
             return False
 
         if len(self.player.discards) <= 6:

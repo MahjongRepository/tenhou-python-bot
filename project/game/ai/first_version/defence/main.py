@@ -353,6 +353,12 @@ class DefenceHandler(object):
         # we wasn't able to find safe tile to discard
         logger.info("No safe tiles, try to defence in other ways.")
         logger.info("With such a hand: {}".format(TilesConverter.to_one_line_string(self.player.closed_hand)))
+
+        # find honors
+        for i,c in enumerate(self.closed_hand_34[27:]):
+            if c >= 1:
+                return DiscardOption(self.player, i, 7, [], 4)
+
         # find triplets
         for i,c in enumerate(self.closed_hand_34):
             if c >= 3:
@@ -365,10 +371,6 @@ class DefenceHandler(object):
                 logger.info("Defence with pairs.")
                 return DiscardOption(self.player, i, 7, [], 4)
 
-        # find honors
-        for i,c in enumerate(self.closed_hand_34[27:]):
-            if c >= 1:
-                return DiscardOption(self.player, i, 7, [], 4)
 
         # find 19
         for i,c in enumerate(self.closed_hand_34):

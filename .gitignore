@@ -21,3 +21,6 @@ project/analytics/data/*
 
 # temporary files
 experiments
+
+*.prof
+profile.py

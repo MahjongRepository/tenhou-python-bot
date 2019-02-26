@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import logging
 import copy
+import utils.decisions_constants as log
 
 from mahjong.constants import EAST, SOUTH, WEST, NORTH, CHUN, HAKU, HATSU
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter, Tile
 
+from utils.decisions_logger import DecisionsLogger
 from utils.settings_handler import settings
 
 logger = logging.getLogger('tenhou')
@@ -16,6 +18,7 @@ class PlayerInterface(object):
     discards = None
     melds = None
     in_riichi = None
+    round_step = None
 
     # current player seat
     seat = 0
@@ -59,13 +62,19 @@ class PlayerInterface(object):
         self.position = 0
         self.scores = None
         self.uma = 0
+        self.round_step = 0
 
     def add_called_meld(self, meld: Meld):
-        # we already added chankan as a pon set
+        # we already added shouminkan as a pon set
         if meld.type == Meld.CHANKAN:
             tile_34 = meld.tiles[0] // 4
+
             pon_set = [x for x in self.melds if x.type == Meld.PON and (x.tiles[0] // 4) == tile_34]
-            self.melds.remove(pon_set[0])
+
+            # when we are doing reconnect and we have called shouminkan set
+            # we will not have called pon set in the hand
+            if pon_set:
+                self.melds.remove(pon_set[0])
 
         self.melds.append(meld)
 
@@ -78,6 +87,9 @@ class PlayerInterface(object):
         for player in self.table.players[1:]:
             if player.in_riichi and tile not in player.safe_tiles:
                 player.safe_tiles.append(tile)
+
+        # one discard == one round step
+        self.round_step += 1
 
     @property
     def player_wind(self):
@@ -111,6 +123,19 @@ class PlayerInterface(object):
             result.extend(meld.tiles)
         return result
 
+    @property
+    def meld_34_tiles(self):
+        """
+        Array of array with 34 tiles indices
+        :return: array
+        """
+        melds = [x.tiles for x in self.melds]
+        melds = copy.deepcopy(melds)
+        results = []
+        for meld in melds:
+            results.append([meld[0] // 4, meld[1] // 4, meld[2] // 4])
+        return results
+
 
 class Player(PlayerInterface):
     ai = None
@@ -140,14 +165,24 @@ class Player(PlayerInterface):
 
         self.ai.init_hand()
 
-    def draw_tile(self, tile):
-        self.last_draw = tile
-        self.tiles.append(tile)
+    def draw_tile(self, tile_136):
+        DecisionsLogger.debug(
+            log.DRAW,
+            context=[
+                'Step: {}'.format(self.round_step),
+                'Hand: {}'.format(self.format_hand_for_print(tile_136)),
+                'In defence: {}'.format(self.ai.in_defence),
+                'Current strategy: {}'.format(self.ai.current_strategy)
+            ]
+        )
+
+        self.last_draw = tile_136
+        self.tiles.append(tile_136)
 
         # we need sort it to have a better string presentation
         self.tiles = sorted(self.tiles)
 
-        self.ai.draw_tile(tile)
+        self.ai.draw_tile(tile_136)
 
     def discard_tile(self, discard_tile=None):
         """
@@ -180,14 +215,8 @@ class Player(PlayerInterface):
             self.table.count_of_remaining_tiles > 4
         ])
 
-    def should_call_kan(self, tile, open_kan):
-        """
-        Method will decide should we call a kan,
-        or upgrade pon to kan
-        :param tile: 136 tile format
-        :return:
-        """
-        return self.ai.should_call_kan(tile, open_kan)
+    def should_call_kan(self, tile, open_kan, from_riichi=False):
+        return self.ai.should_call_kan(tile, open_kan, from_riichi)
 
     def should_call_win(self, tile, enemy_seat):
         return self.ai.should_call_win(tile, enemy_seat)
@@ -205,25 +234,23 @@ class Player(PlayerInterface):
         :param tiles_34: cached list of tiles (to not build it for each iteration)
         :return: int
         """
-        return tiles_34[tile] + self.table.revealed_tiles[tile]
+        revealed_tiles = tiles_34[tile] + self.table.revealed_tiles[tile]
+        assert revealed_tiles <= 4, 'we have only 4 tiles in the game'
+        return revealed_tiles
 
-    def add_called_meld(self, meld: Meld):
-        # we had to remove tile from the hand for closed kan set
-        if (meld.type == Meld.KAN and not meld.opened) or meld.type == Meld.CHANKAN:
-            self.tiles.remove(meld.called_tile)
+    def format_hand_for_print(self, tile_136=None):
+        hand_string = '{}'.format(TilesConverter.to_one_line_string(self.closed_hand))
 
-        super().add_called_meld(meld)
+        if tile_136 is not None:
+            hand_string += ' + {}'.format(TilesConverter.to_one_line_string([tile_136]))
 
-    def format_hand_for_print(self, tile):
-        hand_string = '{} + {}'.format(
-            TilesConverter.to_one_line_string(self.closed_hand),
-            TilesConverter.to_one_line_string([tile])
-        )
-        if self.is_open_hand:
-            melds = []
-            for item in self.melds:
-                melds.append('{}'.format(TilesConverter.to_one_line_string(item.tiles)))
+        melds = []
+        for item in self.melds:
+            melds.append('{}'.format(TilesConverter.to_one_line_string(item.tiles)))
+
+        if melds:
             hand_string += ' [{}]'.format(', '.join(melds))
+
         return hand_string
 
     @property
@@ -232,21 +259,8 @@ class Player(PlayerInterface):
         return [item for item in tiles if item not in self.meld_tiles]
 
     @property
-    def open_hand_34_tiles(self):
-        """
-        Array of array with 34 tiles indices
-        :return: array
-        """
-        melds = [x.tiles for x in self.melds if x.opened]
-        melds = copy.deepcopy(melds)
-        results = []
-        for meld in melds:
-            results.append([meld[0] // 4, meld[1] // 4, meld[2] // 4])
-        return results
-
-    @property
     def valued_honors(self):
-        return [CHUN, HAKU, HATSU, self.table.round_wind, self.player_wind]
+        return [CHUN, HAKU, HATSU, self.table.round_wind_tile, self.player_wind]
 
 
 class EnemyPlayer(PlayerInterface):

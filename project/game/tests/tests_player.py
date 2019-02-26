@@ -7,7 +7,6 @@ from mahjong.tests_mixin import TestMixin
 
 from game.player import Player
 from game.table import Table
-from utils.settings_handler import settings
 
 
 class PlayerTestCase(unittest.TestCase, TestMixin):

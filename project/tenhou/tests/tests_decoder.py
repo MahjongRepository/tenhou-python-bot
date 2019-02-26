@@ -12,7 +12,7 @@ class TenhouDecoderTestCase(unittest.TestCase):
                   'hai="30,67,44,21,133,123,87,69,36,34,94,4,128"/>'
 
         values = decoder.parse_initial_values(message)
-        self.assertEqual(values['round_number'], 0)
+        self.assertEqual(values['round_wind_number'], 0)
         self.assertEqual(values['count_of_honba_sticks'], 2)
         self.assertEqual(values['count_of_riichi_sticks'], 3)
         self.assertEqual(values['dora_indicator'], 126)
@@ -124,7 +124,7 @@ class TenhouDecoderTestCase(unittest.TestCase):
         meld = decoder.parse_meld('<N who="3" m="13825" />')
 
         self.assertEqual(meld.who, 3)
-        self.assertEqual(meld.from_who, 1)
+        self.assertEqual(meld.from_who, 0)
         self.assertEqual(meld.type, Meld.KAN)
         self.assertEqual(meld.opened, True)
         self.assertEqual(meld.tiles, [52, 53, 54, 55])
@@ -174,7 +174,7 @@ class TenhouDecoderTestCase(unittest.TestCase):
     def test_reconnection_information(self):
         message = '<REINIT seed="0,0,1,4,3,59" ten="250,250,250,240" oya="0" ' \
                   'hai="1,2,4,13,17,20,46,47,53,71,76,81,85" ' \
-                  'm2="41513" ' \
+                  'm2="41515" ' \
                   'kawa0="120,28,128,131,18,75,74,27,69,130,64" ' \
                   'kawa1="117,121,123,129,103,72,83,125,62,84" ' \
                   'kawa2="33,114,122,107,31,105,78,9,68,73,38" ' \

@@ -19,6 +19,8 @@ AI_PACKAGE = 'first_version'
 # class will be loaded automatically
 AI_CLASS = None
 
+LOG_PREFIX = ''
+
 """
   Game type decoding:
 

@@ -45,8 +45,11 @@ class DefenceHandler(object):
             waiting = discard_candidate.waiting
         # we have 13 tiles in hand (this is not our turn)
         else:
-            shanten = self.player.ai.previous_shanten
+            shanten = self.player.ai.shanten
             waiting = self.player.ai.waiting
+
+        if not waiting:
+            waiting = []
 
         # if we are in riichi, we can't defence
         if self.player.in_riichi:
@@ -108,7 +111,13 @@ class DefenceHandler(object):
 
         return False
 
-    def try_to_find_safe_tile_to_discard(self, discard_results):
+    def try_to_find_safe_tile_to_discard(self):
+        discard_results, _ = self.player.ai.hand_builder.find_discard_options(
+            self.player.tiles,
+            self.player.closed_hand,
+            self.player.melds
+        )
+
         self.hand_34 = TilesConverter.to_34_array(self.player.tiles)
         self.closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
 
@@ -205,7 +214,7 @@ class DefenceHandler(object):
         if not was_safe_tiles:
             return None
 
-        final_results = sorted(discard_tiles, key=lambda x: (x.danger, x.shanten, -x.tiles_count, x.valuation))
+        final_results = sorted(discard_tiles, key=lambda x: (x.danger, x.shanten, -x.ukeire, x.valuation))
 
         return final_results[0]
 

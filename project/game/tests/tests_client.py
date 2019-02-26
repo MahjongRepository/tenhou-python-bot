@@ -25,7 +25,7 @@ class ClientTestCase(unittest.TestCase):
         self.assertFalse(tile in client.table.player.tiles)
         self.assertEqual(client.table.count_of_remaining_tiles, 69)
 
-    def test_call_meld(self):
+    def test_call_meld_closed_kan(self):
         client = Client()
 
         client.table.init_round(0, 0, 0, 0, 0, [0, 0, 0, 0])
@@ -40,12 +40,39 @@ class ClientTestCase(unittest.TestCase):
         client.player.tiles = [0]
         meld = Meld()
         meld.type = Meld.KAN
-        meld.called_tile = 0
+        # closed kan
+        meld.tiles = [0, 1, 2, 3]
+        meld.called_tile = None
+        meld.opened = False
         client.table.add_called_meld(0, meld)
 
         self.assertEqual(len(client.player.melds), 2)
-        # +1 for called meld
-        # -1 for called kan
+        # kan was closed, so -1
+        self.assertEqual(client.table.count_of_remaining_tiles, 70)
+
+    def test_call_meld_kan_from_player(self):
+        client = Client()
+
+        client.table.init_round(0, 0, 0, 0, 0, [0, 0, 0, 0])
+        self.assertEqual(client.table.count_of_remaining_tiles, 70)
+
+        meld = Meld()
+        client.table.add_called_meld(0, meld)
+
+        self.assertEqual(len(client.player.melds), 1)
+        self.assertEqual(client.table.count_of_remaining_tiles, 71)
+
+        client.player.tiles = [0]
+        meld = Meld()
+        meld.type = Meld.KAN
+        # closed kan
+        meld.tiles = [0, 1, 2, 3]
+        meld.called_tile = 0
+        meld.opened = True
+        client.table.add_called_meld(0, meld)
+
+        self.assertEqual(len(client.player.melds), 2)
+        # kan was called from another player, total number of remaining tiles stays the same
         self.assertEqual(client.table.count_of_remaining_tiles, 71)
 
     def test_enemy_discard(self):

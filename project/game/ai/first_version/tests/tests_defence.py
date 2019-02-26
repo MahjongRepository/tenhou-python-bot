@@ -150,12 +150,6 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
         table.add_called_riichi(3)
 
-        results, shanten = table.player.ai.calculate_outs(table.player.tiles,
-                                                          table.player.closed_hand,
-                                                          table.player.open_hand_34_tiles)
-        selected_tile = table.player.ai.process_discard_options_and_select_tile_to_discard(results, shanten)
-
-        self.assertEqual(table.player.ai.defence.should_go_to_defence_mode(selected_tile), False)
         result = table.player.discard_tile()
         self.assertEqual(self._to_string([result]), '8m')
 
@@ -251,8 +245,12 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
     def test_find_impossible_waits_and_honor_tiles(self):
         table = Table()
 
-        tiles = self._string_to_136_array(honors='1133')
+        tiles = self._string_to_136_array(honors='1133', man='123', sou='456', pin='999')
         table.player.init_hand(tiles)
+
+        table.player.add_called_meld(self._make_meld(Meld.CHI, man='123'))
+        table.player.add_called_meld(self._make_meld(Meld.CHI, sou='456'))
+        table.player.add_called_meld(self._make_meld(Meld.PON, pin='999'))
 
         table.add_discarded_tile(1, self._string_to_136_tile(honors='1'), False)
         table.add_discarded_tile(1, self._string_to_136_tile(honors='3'), False)
@@ -268,8 +266,10 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
 
     def test_find_impossible_waits_and_kabe_technique(self):
         table = Table()
-        tiles = self._string_to_136_array(pin='11122777799')
+        tiles = self._string_to_136_array(pin='11122777799', man='999')
         table.player.init_hand(tiles)
+
+        table.player.add_called_meld(self._make_meld(Meld.PON, man='999'))
 
         table.add_discarded_tile(1, self._string_to_136_tile(pin='2'), False)
         table.add_discarded_tile(1, self._string_to_136_tile(pin='2'), False)
@@ -284,8 +284,11 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(self._to_string([x.value * 4 for x in result]), '19p')
 
         table = Table()
-        tiles = self._string_to_136_array(pin='33337777')
+        tiles = self._string_to_136_array(pin='33337777', man='888999')
         table.player.init_hand(tiles)
+
+        table.player.add_called_meld(self._make_meld(Meld.PON, man='888'))
+        table.player.add_called_meld(self._make_meld(Meld.PON, man='999'))
 
         table.add_discarded_tile(1, self._string_to_136_tile(pin='5'), False)
         table.add_discarded_tile(1, self._string_to_136_tile(pin='5'), False)
@@ -300,8 +303,10 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(self._to_string([x.value * 4 for x in result]), '5p')
 
         table = Table()
-        tiles = self._string_to_136_array(pin='33334446666')
+        tiles = self._string_to_136_array(pin='33334446666', man='999')
         table.player.init_hand(tiles)
+
+        table.player.add_called_meld(self._make_meld(Meld.PON, man='999'))
 
         table.add_discarded_tile(1, self._string_to_136_tile(pin='5'), False)
         table.add_discarded_tile(1, self._string_to_136_tile(pin='5'), False)
@@ -423,7 +428,7 @@ class DefenceTestCase(unittest.TestCase, TestMixin):
     def test_defence_against_honitsu_second_case(self):
         table = Table()
 
-        tiles = self._string_to_136_array(sou='4', pin='223456', man='678', honors='66')
+        tiles = self._string_to_136_array(sou='4', pin='2223456', man='678', honors='66')
         table.player.init_hand(tiles)
 
         table.add_called_meld(1, self._make_meld(Meld.CHI, sou='789'))

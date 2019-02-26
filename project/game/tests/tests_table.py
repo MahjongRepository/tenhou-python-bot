@@ -19,16 +19,23 @@ class TableTestCase(unittest.TestCase, TestMixin):
     def test_init_round(self):
         table = Table()
 
-        round_number = 4
+        round_wind_number = 4
         count_of_honba_sticks = 2
         count_of_riichi_sticks = 3
         dora_indicator = 126
         dealer = 3
         scores = [250, 250, 250, 250]
 
-        table.init_round(round_number, count_of_honba_sticks, count_of_riichi_sticks, dora_indicator, dealer, scores)
+        table.init_round(
+            round_wind_number,
+            count_of_honba_sticks,
+            count_of_riichi_sticks,
+            dora_indicator,
+            dealer,
+            scores
+        )
 
-        self.assertEqual(table.round_number, round_number)
+        self.assertEqual(table.round_wind_number, round_wind_number)
         self.assertEqual(table.count_of_honba_sticks, count_of_honba_sticks)
         self.assertEqual(table.count_of_riichi_sticks, count_of_riichi_sticks)
         self.assertEqual(table.dora_indicators[0], dora_indicator)
@@ -38,7 +45,14 @@ class TableTestCase(unittest.TestCase, TestMixin):
         dealer = 2
         table.player.in_tempai = True
         table.player.in_riichi = True
-        table.init_round(round_number, count_of_honba_sticks, count_of_riichi_sticks, dora_indicator, dealer, scores)
+        table.init_round(
+            round_wind_number,
+            count_of_honba_sticks,
+            count_of_riichi_sticks,
+            dora_indicator,
+            dealer,
+            scores
+        )
 
         # test that we reinit round properly
         self.assertEqual(table.get_player(3).is_dealer, False)
@@ -176,16 +190,16 @@ class TableTestCase(unittest.TestCase, TestMixin):
         table = Table()
 
         table.init_round(0, 0, 0, 0, 0, [])
-        self.assertEqual(table.round_wind, EAST)
+        self.assertEqual(table.round_wind_tile, EAST)
 
         table.init_round(3, 0, 0, 0, 0, [])
-        self.assertEqual(table.round_wind, EAST)
+        self.assertEqual(table.round_wind_tile, EAST)
 
         table.init_round(7, 0, 0, 0, 0, [])
-        self.assertEqual(table.round_wind, SOUTH)
+        self.assertEqual(table.round_wind_tile, SOUTH)
 
         table.init_round(11, 0, 0, 0, 0, [])
-        self.assertEqual(table.round_wind, WEST)
+        self.assertEqual(table.round_wind_tile, WEST)
 
         table.init_round(12, 0, 0, 0, 0, [])
-        self.assertEqual(table.round_wind, NORTH)
+        self.assertEqual(table.round_wind_tile, NORTH)

@@ -41,8 +41,26 @@ class TenhouLogReproducer(object):
 
         table = Table()
         for tag in self.round_content:
+            if player_draw_regex.match(tag) and 'UN' not in tag:
+                print('Player draw')
+                tile = self.decoder.parse_tile(tag)
+                table.player.draw_tile(tile)
+
             if dry_run:
-                print(tag)
+                if self._is_draw(tag):
+                    print('<-', TilesConverter.to_one_line_string([self._parse_tile(tag)]), tag)
+                elif self._is_discard(tag):
+                    print('->', TilesConverter.to_one_line_string([self._parse_tile(tag)]), tag)
+                elif self._is_init_tag(tag):
+                    hands = {
+                        0: [int(x) for x in self._get_attribute_content(tag, 'hai0').split(',')],
+                        1: [int(x) for x in self._get_attribute_content(tag, 'hai1').split(',')],
+                        2: [int(x) for x in self._get_attribute_content(tag, 'hai2').split(',')],
+                        3: [int(x) for x in self._get_attribute_content(tag, 'hai3').split(',')],
+                    }
+                    print('Initial hand:', TilesConverter.to_one_line_string(hands[self.player_position]))
+                else:
+                    print(tag)
 
             if not dry_run and tag == self.stop_tag:
                 break
@@ -55,7 +73,7 @@ class TenhouLogReproducer(object):
                     shifted_scores.append(values['scores'][self._normalize_position(x, self.player_position)])
 
                 table.init_round(
-                    values['round_number'],
+                    values['round_wind_number'],
                     values['count_of_honba_sticks'],
                     values['count_of_riichi_sticks'],
                     values['dora_indicator'],
@@ -71,10 +89,6 @@ class TenhouLogReproducer(object):
                 ]
 
                 table.player.init_hand(hands[self.player_position])
-
-            if player_draw_regex.match(tag) and 'UN' not in tag:
-                tile = self.decoder.parse_tile(tag)
-                table.player.draw_tile(tile)
 
             if discard_regex.match(tag) and 'DORA' not in tag:
                 tile = self.decoder.parse_tile(tag)
@@ -122,7 +136,7 @@ class TenhouLogReproducer(object):
 
     def _parse_url(self, log_url):
         temp = log_url.split('?')[1].split('&')
-        log_id, player, round_number = '', 0, 0
+        log_id, player, round_wind = '', 0, 0
         for item in temp:
             item = item.split('=')
             if 'log' == item[0]:
@@ -130,8 +144,8 @@ class TenhouLogReproducer(object):
             if 'tw' == item[0]:
                 player = int(item[1])
             if 'ts' == item[0]:
-                round_number = int(item[1])
-        return log_id, player, round_number
+                round_wind = int(item[1])
+        return log_id, player, round_wind
 
     def _download_log_content(self, log_id):
         """
@@ -197,6 +211,35 @@ class TenhouLogReproducer(object):
                 tag = None
 
         return rounds[1:]
+
+    def _is_discard(self, tag):
+        skip_tags = ['<GO', '<FURITEN', '<DORA']
+        if any([x in tag for x in skip_tags]):
+            return False
+
+        match_discard = re.match(r"^<[defgDEFG]+\d*", tag)
+        if match_discard:
+            return True
+
+        return False
+
+    def _is_draw(self, tag):
+        match_discard = re.match(r"^<[tuvwTUVW]+\d*", tag)
+        if match_discard:
+            return True
+
+        return False
+
+    def _parse_tile(self, tag):
+        result = re.match(r'^<[defgtuvwDEFGTUVW]+\d*', tag).group()
+        return int(result[2:])
+
+    def _is_init_tag(self, tag):
+        return tag and 'INIT' in tag
+
+    def _get_attribute_content(self, tag, attribute_name):
+        result = re.findall(r'{}="([^"]*)"'.format(attribute_name), tag)
+        return result and result[0] or None
 
 
 class SocketMock(object):
@@ -292,7 +335,7 @@ def parse_args_and_start_reproducer():
         reproducer = TenhouLogReproducer(opts.online_log, opts.tag)
         reproducer.reproduce(opts.dry_run)
     else:
-        set_up_logging()
+        set_up_logging(save_to_file=False)
 
         client = TenhouClient(SocketMock(opts.local_log))
         try:

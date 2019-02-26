@@ -16,12 +16,15 @@ class Table(object):
     dora_indicators = None
 
     dealer_seat = 0
-    round_number = 0
+    round_number = -1
+    round_wind_number = 0
     count_of_riichi_sticks = 0
     count_of_honba_sticks = 0
 
     count_of_remaining_tiles = 0
     count_of_players = 4
+
+    meld_was_called = False
 
     # array of tiles in 34 format
     revealed_tiles = None
@@ -36,14 +39,36 @@ class Table(object):
 
     def __str__(self):
         dora_string = TilesConverter.to_one_line_string(self.dora_indicators)
-        return 'Round: {0}, Honba: {1}, Dora Indicators: {2}'.format(self.round_number,
-                                                                     self.count_of_honba_sticks,
-                                                                     dora_string)
 
-    def init_round(self, round_number, count_of_honba_sticks, count_of_riichi_sticks,
-                   dora_indicator, dealer_seat, scores):
+        round_settings = {
+            EAST:  ['e', 0],
+            SOUTH: ['s', 3],
+            WEST:  ['w', 7]
+        }.get(self.round_wind_tile)
+
+        round_string, round_diff = round_settings
+        display_round = '{}{}'.format(round_string, (self.round_wind_number + 1) - round_diff)
+
+        return 'Round: {}, Honba: {}, Dora Indicators: {}'.format(
+            display_round,
+            self.count_of_honba_sticks,
+            dora_string
+        )
+
+    def init_round(self,
+                   round_wind_number,
+                   count_of_honba_sticks,
+                   count_of_riichi_sticks,
+                   dora_indicator,
+                   dealer_seat,
+                   scores):
+
+        # we need it to properly display log for each round
+        self.round_number += 1
+
+        self.meld_was_called = False
         self.dealer_seat = dealer_seat
-        self.round_number = round_number
+        self.round_wind_number = round_wind_number
         self.count_of_honba_sticks = count_of_honba_sticks
         self.count_of_riichi_sticks = count_of_riichi_sticks
 
@@ -63,7 +88,7 @@ class Table(object):
         # 13 - tiles in each player hand
         self.count_of_remaining_tiles = 136 - 14 - self.count_of_players * 13
 
-        if round_number == 0 and count_of_honba_sticks == 0:
+        if round_wind_number == 0 and count_of_honba_sticks == 0:
             i = 0
             seats = [0, 1, 2, 3]
             for player in self.players:
@@ -71,13 +96,19 @@ class Table(object):
                 i += 1
 
     def add_called_meld(self, player_seat, meld):
-        # when opponent called meld it is means
-        # that he discards tile from hand, not from wall
-        self.count_of_remaining_tiles += 1
+        self.meld_was_called = True
 
-        # we will decrease count of remaining tiles after called kan
-        # because we had to complement dead wall
-        if meld.type == Meld.KAN or meld.type == meld.CHANKAN:
+        # if meld was called from the other player, then we skip one draw from the wall
+        if meld.opened:
+            # but if it's an opened kan, player will get a tile from
+            # a dead wall, so total number of tiles in the wall is the same
+            # as if he just draws a tile
+            if meld.type != Meld.KAN:
+                self.count_of_remaining_tiles += 1
+        else:
+            # can't have a pon or chi from the hand
+            assert meld.type == Meld.KAN or meld.type == meld.CHANKAN
+            # player draws additional tile from the wall in case of closed kan or shouminkan
             self.count_of_remaining_tiles -= 1
 
         self.get_player(player_seat).add_called_meld(meld)
@@ -85,10 +116,10 @@ class Table(object):
         tiles = meld.tiles[:]
         # called tile was already added to revealed array
         # because it was called on the discard
-        if meld.called_tile:
+        if meld.called_tile is not None:
             tiles.remove(meld.called_tile)
 
-        # for chankan we already added 3 tiles
+        # for shouminkan we already added 3 tiles
         if meld.type == meld.CHANKAN:
             tiles = [meld.tiles[0]]
 
@@ -102,15 +133,15 @@ class Table(object):
         if player_seat != 0:
             self.player.enemy_called_riichi(player_seat)
 
-    def add_discarded_tile(self, player_seat, tile, is_tsumogiri):
+    def add_discarded_tile(self, player_seat, tile_136, is_tsumogiri):
         """
         :param player_seat:
-        :param tile: 136 format tile
+        :param tile_136: 136 format tile
         :param is_tsumogiri: was tile discarded from hand or not
         """
         self.count_of_remaining_tiles -= 1
 
-        tile = Tile(tile, is_tsumogiri)
+        tile = Tile(tile_136, is_tsumogiri)
         self.get_player(player_seat).add_discarded_tile(tile)
 
         # cache already revealed tiles
@@ -150,12 +181,12 @@ class Table(object):
         return sorted(self.players, key=lambda x: (x.scores or 0, -x.first_seat), reverse=True)
 
     @property
-    def round_wind(self):
-        if self.round_number < 4:
+    def round_wind_tile(self):
+        if self.round_wind_number < 4:
             return EAST
-        elif 4 <= self.round_number < 8:
+        elif 4 <= self.round_wind_number < 8:
             return SOUTH
-        elif 8 <= self.round_number < 12:
+        elif 8 <= self.round_wind_number < 12:
             return WEST
         else:
             return NORTH

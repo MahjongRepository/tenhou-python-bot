@@ -18,16 +18,16 @@ class AITestCase(unittest.TestCase, TestMixin):
         tile = self._string_to_136_array(man='9')[0]
         player.init_hand(tiles)
         player.draw_tile(tile)
-
         player.discard_tile()
+
         self.assertEqual(player.in_tempai, False)
 
         tiles = self._string_to_136_array(sou='11145677', pin='345', man='56')
         tile = self._string_to_136_array(man='9')[0]
         player.init_hand(tiles)
         player.draw_tile(tile)
-
         player.discard_tile()
+
         self.assertEqual(player.in_tempai, True)
 
     def test_not_open_hand_in_riichi(self):
@@ -64,6 +64,10 @@ class AITestCase(unittest.TestCase, TestMixin):
         table.has_open_tanyao = True
         player = table.player
 
+        # add 3 doras so we are sure to go for tanyao
+        table.add_dora_indicator(self._string_to_136_tile(pin='2'))
+        table.add_dora_indicator(self._string_to_136_tile(pin='3'))
+
         tiles = self._string_to_136_array(man='23455', pin='3445678', honors='1')
         tile = self._string_to_136_tile(man='5')
         player.init_hand(tiles)
@@ -75,6 +79,8 @@ class AITestCase(unittest.TestCase, TestMixin):
 
         table = Table()
         player = table.player
+        # add 3 doras so we are sure to go for tanyao
+        table.add_dora_indicator(self._string_to_136_tile(man='5'))
         tiles = self._string_to_136_array(man='335666', pin='22', sou='345', honors='55')
         player.init_hand(tiles)
 
@@ -87,6 +93,9 @@ class AITestCase(unittest.TestCase, TestMixin):
         table = Table()
         table.has_open_tanyao = True
         player = table.player
+        # add 3 doras so we are sure to go for tanyao
+        table.add_dora_indicator(self._string_to_136_tile(man='1'))
+        table.add_dora_indicator(self._string_to_136_tile(man='4'))
         tiles = self._string_to_136_array(man='23557', pin='556788', honors='22')
         player.init_hand(tiles)
 
@@ -96,6 +105,137 @@ class AITestCase(unittest.TestCase, TestMixin):
         self.assertEqual(meld.type, Meld.PON)
         self.assertEqual(self._to_string(meld.tiles), '555p')
 
+        table = Table()
+        table.has_open_tanyao = True
+        player = table.player
+        # add 3 doras so we are sure to go for tanyao
+        table.add_dora_indicator(self._string_to_136_tile(man='4'))
+        table.add_dora_indicator(self._string_to_136_tile(pin='5'))
+        tiles = self._string_to_136_array(man='3556', pin='234668', sou='248')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(man='4')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(meld.type, Meld.CHI)
+        self.assertEqual(self._to_string(meld.tiles), '345m')
+
+        table = Table()
+        table.has_open_tanyao = True
+        player = table.player
+        # add 3 doras so we are sure to go for tanyao
+        table.add_dora_indicator(self._string_to_136_tile(man='4'))
+        table.add_dora_indicator(self._string_to_136_tile(pin='5'))
+        tiles = self._string_to_136_array(man='3445', pin='234668', sou='248')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(man='4')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(meld.type, Meld.CHI)
+        self.assertEqual(self._to_string(meld.tiles), '345m')
+
+        table = Table()
+        table.has_open_tanyao = True
+        player = table.player
+        # add 3 doras so we are sure to go for tanyao
+        table.add_dora_indicator(self._string_to_136_tile(man='7'))
+        tiles = self._string_to_136_array(man='567888', pin='788', sou='3456')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(sou='4')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(meld.type, Meld.CHI)
+        self.assertEqual(self._to_string(meld.tiles), '456s')
+
+        tile = self._string_to_136_tile(sou='5')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(meld.type, Meld.CHI)
+        self.assertEqual(self._to_string(meld.tiles), '345s')
+
+        table = Table()
+        table.has_open_tanyao = True
+        player = table.player
+        # add 3 doras so we are sure to go for tanyao
+        table.add_dora_indicator(self._string_to_136_tile(man='7'))
+        tiles = self._string_to_136_array(man='567888', pin='788', sou='2345')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(sou='4')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(meld.type, Meld.CHI)
+        self.assertEqual(self._to_string(meld.tiles), '234s')
+
+    def test_chose_right_set_to_open_hand_dora(self):
+        table = Table()
+        table.has_open_tanyao = True
+        table.has_aka_dora = False
+        player = table.player
+        # add 3 doras so we are sure to go for tanyao
+        table.add_dora_indicator(self._string_to_136_tile(man='7'))
+        table.add_dora_indicator(self._string_to_136_tile(sou='1'))
+        tiles = self._string_to_136_array(man='3456788', sou='245888')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(sou='3')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(meld.type, Meld.CHI)
+        self.assertEqual(self._to_string(meld.tiles), '234s')
+
+        table = Table()
+        table.has_open_tanyao = True
+        table.has_aka_dora = False
+        player = table.player
+        # add 3 doras so we are sure to go for tanyao
+        table.add_dora_indicator(self._string_to_136_tile(man='7'))
+        table.add_dora_indicator(self._string_to_136_tile(sou='4'))
+        tiles = self._string_to_136_array(man='3456788', sou='245888')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(sou='3')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(meld.type, Meld.CHI)
+        self.assertEqual(self._to_string(meld.tiles), '345s')
+
+        table = Table()
+        table.has_open_tanyao = True
+        table.has_aka_dora = True
+        player = table.player
+        # add 3 doras so we are sure to go for tanyao
+        table.add_dora_indicator(self._string_to_136_tile(man='7'))
+        # 5 from string is always aka
+        tiles = self._string_to_136_array(man='3456788', sou='245888')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(sou='3')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(meld.type, Meld.CHI)
+        self.assertEqual(self._to_string(meld.tiles), '345s')
+
+        table = Table()
+        table.has_open_tanyao = True
+        table.has_aka_dora = True
+        player = table.player
+        # add 3 doras so we are sure to go for tanyao
+        table.add_dora_indicator(self._string_to_136_tile(man='7'))
+        table.add_dora_indicator(self._string_to_136_tile(sou='1'))
+        table.add_dora_indicator(self._string_to_136_tile(sou='4'))
+        # double dora versus regular dora, we should keep double dora
+        tiles = self._string_to_136_array(man='3456788', sou='245888')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(sou='3')
+        meld, _ = player.try_to_call_meld(tile, True)
+        self.assertNotEqual(meld, None)
+        self.assertEqual(meld.type, Meld.CHI)
+        self.assertEqual(self._to_string(meld.tiles), '345s')
+
     def test_not_open_hand_for_not_needed_set(self):
         """
         We don't need to open hand if it is not improve the hand.
@@ -104,6 +244,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         table = Table()
         player = table.player
 
+        table.dora_indicators.append(self._string_to_136_tile(honors='7'))
         tiles = self._string_to_136_array(man='22457', sou='12234', pin='9', honors='55')
         player.init_hand(tiles)
 
@@ -123,25 +264,44 @@ class AITestCase(unittest.TestCase, TestMixin):
         table.has_open_tanyao = True
         player = table.player
 
+        # add 3 doras so we are sure to go for tanyao
+        table.add_dora_indicator(self._string_to_136_tile(man='2'))
+
+        # we draw a tile that will set tanyao as our selected strategy
         tiles = self._string_to_136_array(man='33355788', sou='3479', honors='3')
         player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(sou='7')
+        player.draw_tile(tile)
+        self.assertNotEqual(player.ai.current_strategy, None)
         self.assertEqual(player.ai.current_strategy.type, BaseStrategy.TANYAO)
 
         # we draw a tile that will change our selected strategy
+        tiles = self._string_to_136_array(man='33355788', sou='3479', honors='3')
+        player.init_hand(tiles)
+
+        tile = self._string_to_136_tile(sou='2')
+        meld, _ = player.try_to_call_meld(tile, False)
+        self.assertNotEqual(player.ai.current_strategy, None)
+        self.assertEqual(player.ai.current_strategy.type, BaseStrategy.TANYAO)
+        self.assertEqual(meld, None)
+
         tile = self._string_to_136_tile(sou='8')
         player.draw_tile(tile)
         self.assertEqual(player.ai.current_strategy, None)
 
+        # for already opened hand we don't need to give up on selected strategy
         tiles = self._string_to_136_array(man='33355788', sou='3479', honors='3')
         player.init_hand(tiles)
-        self.assertEqual(player.ai.current_strategy.type, BaseStrategy.TANYAO)
+        player.draw_tile(self._string_to_136_tile(honors='5'))
+        player.discard_tile()
 
-        # for already opened hand we don't need to give up on selected strategy
-        meld = Meld()
-        meld.tiles = [1, 2, 3]
+        meld = self._make_meld(Meld.PON, man='333')
         player.add_called_meld(meld)
         tile = self._string_to_136_tile(sou='8')
         player.draw_tile(tile)
+
+        self.assertNotEqual(player.ai.current_strategy, None)
         self.assertEqual(player.ai.current_strategy.type, BaseStrategy.TANYAO)
 
     def test_remaining_tiles_and_enemy_discard(self):
@@ -151,22 +311,22 @@ class AITestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='123456789', sou='167', honors='77')
         player.init_hand(tiles)
 
-        results, shanten = player.ai.calculate_outs(tiles, tiles)
+        results, shanten = player.ai.hand_builder.find_discard_options(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
-        self.assertEqual(result.tiles_count, 8)
+        self.assertEqual(result.ukeire, 8)
 
         player.table.add_discarded_tile(1, self._string_to_136_tile(sou='5'), False)
 
-        results, shanten = player.ai.calculate_outs(tiles, tiles)
+        results, shanten = player.ai.hand_builder.find_discard_options(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
-        self.assertEqual(result.tiles_count, 7)
+        self.assertEqual(result.ukeire, 7)
 
         player.table.add_discarded_tile(2, self._string_to_136_tile(sou='5'), False)
         player.table.add_discarded_tile(3, self._string_to_136_tile(sou='8'), False)
 
-        results, shanten = player.ai.calculate_outs(tiles, tiles)
+        results, shanten = player.ai.hand_builder.find_discard_options(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
-        self.assertEqual(result.tiles_count, 5)
+        self.assertEqual(result.ukeire, 5)
 
     def test_remaining_tiles_and_opened_meld(self):
         table = Table()
@@ -175,9 +335,9 @@ class AITestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='123456789', sou='167', honors='77')
         player.init_hand(tiles)
 
-        results, shanten = player.ai.calculate_outs(tiles, tiles)
+        results, shanten = player.ai.hand_builder.find_discard_options(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
-        self.assertEqual(result.tiles_count, 8)
+        self.assertEqual(result.ukeire, 8)
 
         # was discard and set was opened
         tile = self._string_to_136_tile(sou='8')
@@ -186,9 +346,9 @@ class AITestCase(unittest.TestCase, TestMixin):
         meld.called_tile = tile
         player.table.add_called_meld(3, meld)
 
-        results, shanten = player.ai.calculate_outs(tiles, tiles)
+        results, shanten = player.ai.hand_builder.find_discard_options(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
-        self.assertEqual(result.tiles_count, 5)
+        self.assertEqual(result.ukeire, 5)
 
         # was discard and set was opened
         tile = self._string_to_136_tile(sou='3')
@@ -197,9 +357,9 @@ class AITestCase(unittest.TestCase, TestMixin):
         meld.called_tile = tile
         player.table.add_called_meld(2, meld)
 
-        results, shanten = player.ai.calculate_outs(tiles, tiles)
+        results, shanten = player.ai.hand_builder.find_discard_options(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
-        self.assertEqual(result.tiles_count, 4)
+        self.assertEqual(result.ukeire, 4)
 
     def test_remaining_tiles_and_dora_indicators(self):
         table = Table()
@@ -208,15 +368,15 @@ class AITestCase(unittest.TestCase, TestMixin):
         tiles = self._string_to_136_array(man='123456789', sou='167', honors='77')
         player.init_hand(tiles)
 
-        results, shanten = player.ai.calculate_outs(tiles, tiles)
+        results, shanten = player.ai.hand_builder.find_discard_options(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
-        self.assertEqual(result.tiles_count, 8)
+        self.assertEqual(result.ukeire, 8)
 
         table.add_dora_indicator(self._string_to_136_tile(sou='8'))
 
-        results, shanten = player.ai.calculate_outs(tiles, tiles)
+        results, shanten = player.ai.hand_builder.find_discard_options(tiles, tiles)
         result = [x for x in results if x.tile_to_discard == self._string_to_34_tile(sou='1')][0]
-        self.assertEqual(result.tiles_count, 7)
+        self.assertEqual(result.ukeire, 7)
 
     def test_using_tiles_of_different_suit_for_chi(self):
         """
@@ -226,6 +386,7 @@ class AITestCase(unittest.TestCase, TestMixin):
         player = table.player
 
         # 16m2679p1348s111z
+        table.dora_indicators.append(self._string_to_136_tile(honors='4'))
         tiles = [0, 21, 41, 56, 61, 70, 74, 80, 84, 102, 108, 110, 111]
         player.init_hand(tiles)
 
@@ -234,124 +395,147 @@ class AITestCase(unittest.TestCase, TestMixin):
         meld, _ = player.try_to_call_meld(tile, True)
         self.assertIsNotNone(meld)
 
-    def test_upgrade_opened_pon_to_kan(self):
+    def test_call_upgrade_pon_and_bad_ukeire_after_call(self):
         table = Table()
-        player = table.player
+        table.count_of_remaining_tiles = 10
 
         tiles = self._string_to_136_array(man='34445', sou='123456', pin='89')
-        player.init_hand(tiles)
+        table.player.init_hand(tiles)
         tile = self._string_to_136_tile(man='4')
-        player.draw_tile(tile)
+
+        self.assertEqual(table.player.should_call_kan(tile, False), None)
+
+        table.player.add_called_meld(self._make_meld(Meld.PON, man='444'))
+
+        self.assertEqual(len(table.player.melds), 1)
+        self.assertEqual(len(table.player.tiles), 13)
+        self.assertEqual(table.player.should_call_kan(tile, False), None)
+
+    def test_call_upgrade_pon_and_bad_ukeire_after_call_second_case(self):
+        table = Table()
+        table.add_dora_indicator(self._string_to_136_tile(honors='5'))
+        table.count_of_remaining_tiles = 10
+        player = table.player
+
+        tiles = self._string_to_136_array(man='3455567', sou='222', honors='666')
+        player.init_hand(tiles)
+        player.add_called_meld(self._make_meld(Meld.PON, man='555'))
+        player.add_called_meld(self._make_meld(Meld.PON, honors='666'))
+
+        tile = self._string_to_136_tile(man='5')
 
         self.assertEqual(player.should_call_kan(tile, False), None)
 
-        player.add_called_meld(self._make_meld(Meld.PON, man='444'))
-
-        self.assertEqual(len(player.melds), 1)
-        self.assertEqual(len(player.tiles), 14)
-        self.assertEqual(player.should_call_kan(tile, False), Meld.CHANKAN)
-
-        player.discard_tile()
         player.draw_tile(tile)
-        player.add_called_meld(self._make_meld(Meld.CHANKAN, man='4444'))
+        discarded_tile = player.discard_tile()
 
-        self.assertEqual(len(player.melds), 1)
-        self.assertEqual(player.melds[0].type, Meld.CHANKAN)
-        self.assertEqual(len(player.tiles), 13)
+        self.assertEqual(self._to_string([discarded_tile]), '2s')
+
+    def test_call_upgrade_pon_and_bad_ukeire_after_call_third_case(self):
+        table = Table()
+        table.count_of_remaining_tiles = 10
+        player = table.player
+
+        tiles = self._string_to_136_array(man='67', pin='6', sou='1344478999')
+        table.player.init_hand(tiles)
+        table.player.add_called_meld(self._make_meld(Meld.PON, sou='444'))
+
+        tile = self._string_to_136_tile(sou='4')
+
+        # we don't want to call shouminkan here
+        self.assertEqual(table.player.should_call_kan(tile, False), None)
+
+        player.draw_tile(tile)
+        discarded_tile = player.discard_tile()
+
+        self.assertEqual(self._to_string([discarded_tile]), '6p')
+
+    def test_call_shouminkan(self):
+        table = Table()
+        table.count_of_remaining_tiles = 10
+
+        tiles = self._string_to_136_array(man='3455567', sou='222', honors='666')
+        table.player.init_hand(tiles)
+        table.player.add_called_meld(self._make_meld(Meld.PON, honors='666'))
+
+        tile = self._string_to_136_tile(honors='6')
+
+        self.assertEqual(table.player.should_call_kan(tile, False), Meld.CHANKAN)
 
     def test_call_closed_kan(self):
         table = Table()
-        player = table.player
+        table.count_of_remaining_tiles = 10
 
         tiles = self._string_to_136_array(man='12223', sou='111456', pin='12')
-        player.init_hand(tiles)
+        table.player.init_hand(tiles)
         tile = self._string_to_136_tile(man='2')
-        player.draw_tile(tile)
 
         # it is pretty stupid to call closed kan with 2m
-        self.assertEqual(player.should_call_kan(tile, False), None)
+        self.assertEqual(table.player.should_call_kan(tile, False), None)
 
         tiles = self._string_to_136_array(man='12223', sou='111456', pin='12')
-        player.init_hand(tiles)
+        table.player.init_hand(tiles)
         tile = self._string_to_136_tile(sou='1')
-        player.draw_tile(tile)
 
         # call closed kan with 1s is fine
-        self.assertEqual(player.should_call_kan(tile, False), Meld.KAN)
+        self.assertEqual(table.player.should_call_kan(tile, False), Meld.KAN)
 
     def test_opened_kan(self):
         table = Table()
-        player = table.player
+        table.count_of_remaining_tiles = 10
 
         tiles = self._string_to_136_array(man='299', sou='111456', pin='1', honors='111')
-        player.init_hand(tiles)
+        table.player.init_hand(tiles)
 
         # to rebuild all caches
-        player.draw_tile(self._string_to_136_tile(pin='9'))
-        player.discard_tile()
+        table.player.draw_tile(self._string_to_136_tile(pin='9'))
+        table.player.discard_tile()
 
         # our hand is closed, we don't need to call opened kan here
         tile = self._string_to_136_tile(sou='1')
-        self.assertEqual(player.should_call_kan(tile, True), None)
+        self.assertEqual(table.player.should_call_kan(tile, True), None)
 
-        player.add_called_meld(self._make_meld(Meld.PON, honors='111'))
+        table.player.add_called_meld(self._make_meld(Meld.PON, honors='111'))
 
         # our hand is open, but it is not tempai
         # we don't need to open kan here
         tile = self._string_to_136_tile(sou='1')
-        self.assertEqual(player.should_call_kan(tile, True), None)
+        self.assertEqual(table.player.should_call_kan(tile, True), None)
 
+    def test_opened_kan_second_case(self):
         table = Table()
-        player = table.player
+        table.count_of_remaining_tiles = 10
 
         tiles = self._string_to_136_array(man='2399', sou='111456', honors='111')
-        player.init_hand(tiles)
-        player.add_called_meld(self._make_meld(Meld.PON, honors='111'))
+        table.player.init_hand(tiles)
+        table.player.add_called_meld(self._make_meld(Meld.PON, honors='111'))
 
         # to rebuild all caches
-        player.draw_tile(self._string_to_136_tile(pin='9'))
-        player.discard_tile()
+        table.player.draw_tile(self._string_to_136_tile(pin='9'))
+        table.player.discard_tile()
 
         # our hand is open, in tempai and with a good wait
         tile = self._string_to_136_tile(sou='1')
-        self.assertEqual(player.should_call_kan(tile, True), Meld.KAN)
+        self.assertEqual(table.player.should_call_kan(tile, True), Meld.KAN)
 
-    def test_closed_kan_and_riichi(self):
+    def test_opened_kan_third_case(self):
+        # we are in tempai already and there was a crash on 5s meld suggestion
+
         table = Table()
-        table.count_of_remaining_tiles = 60
-        player = table.player
-        player.scores = 25000
+        table.count_of_remaining_tiles = 10
+        table.add_dora_indicator(self._string_to_136_tile(honors='5'))
 
-        kan_tiles = self._string_to_136_array(pin='7777')
-        tiles = self._string_to_136_array(pin='568', sou='1235788') + kan_tiles[:3]
-        player.init_hand(tiles)
+        tiles = self._string_to_136_array(man='456', sou='55567678', honors='66')
+        table.player.init_hand(tiles)
+        table.player.add_called_meld(self._make_meld(Meld.CHI, sou='678'))
 
-        # +3 to avoid tile duplication of 7 pin
-        tile = kan_tiles[3]
-        player.draw_tile(tile)
+        # to rebuild all caches
+        table.player.draw_tile(self._string_to_136_tile(pin='9'))
+        table.player.discard_tile()
 
-        kan_type = player.should_call_kan(tile, False)
-        self.assertEqual(kan_type, Meld.KAN)
-
-        meld = Meld()
-        meld.type = Meld.KAN
-        meld.tiles = kan_tiles
-        meld.called_tile = tile
-        meld.who = 0
-        meld.from_who = 0
-        meld.opened = False
-
-        # replacement from the dead wall
-        player.draw_tile(self._string_to_136_tile(pin='4'))
-        table.add_called_meld(meld.who, meld)
-        discard = player.discard_tile()
-
-        self.assertEqual(self._to_string([discard]), '8p')
-        self.assertEqual(player.can_call_riichi(), True)
-
-        # with closed kan we can't call riichi
-        player.melds[0].opened = True
-        self.assertEqual(player.can_call_riichi(), False)
+        tile = self._string_to_136_tile(sou='5')
+        self.assertEqual(table.player.should_call_kan(tile, True), None)
+        self.assertEqual(table.player.try_to_call_meld(tile, True), (None, None))
 
     def test_dont_call_kan_in_defence_mode(self):
         table = Table()
@@ -362,4 +546,87 @@ class AITestCase(unittest.TestCase, TestMixin):
         table.add_called_riichi(1)
 
         tile = self._string_to_136_tile(sou='1')
+        self.assertEqual(table.player.should_call_kan(tile, False), None)
+
+    def test_closed_kan_and_wrong_shanten_number_calculation(self):
+        """
+        Bot tried to call riichi with 567m666p14578s + [9999s] hand
+        """
+        table = Table()
+        player = table.player
+
+        tiles = self._string_to_136_array(man='56', sou='14578999', pin='666')
+        player.init_hand(tiles)
+        tile = self._string_to_136_tile(man='7')
+        player.melds.append(self._make_meld(Meld.KAN, False, sou='9999'))
+        player.draw_tile(tile)
+        player.discard_tile()
+
+        # bot not in the tempai, because all 9s in the closed kan
+        self.assertEqual(player.ai.shanten, 1)
+
+    def test_closed_kan_and_not_necessary_call(self):
+        """
+        Bot tried to call closed kan with 568m669p1478999s + 9s hand
+        """
+        table = Table()
+        player = table.player
+
+        tiles = self._string_to_136_array(man='568', sou='1478999', pin='669')
+        player.init_hand(tiles)
+        tile = self._string_to_136_tile(sou='9')
+
+        self.assertEqual(player.should_call_kan(tile, False), None)
+
+    def test_closed_kan_same_shanten_bad_ukeire(self):
+        """
+        Bot tried to call closed kan with 4557888899m2z + 333m melded hand
+        Shanten number is the same, but ukeire becomes much worse
+        """
+        table = Table()
+        player = table.player
+
+        table.add_dora_indicator(self._string_to_136_tile(honors='2'))
+        table.add_dora_indicator(self._string_to_136_tile(honors='4'))
+
+        table.count_of_remaining_tiles = 10
+
+        tiles = self._string_to_136_array(man='333455788899', honors='3')
+        player.init_hand(tiles)
+        player.melds.append(self._make_meld(Meld.PON, man='333'))
+
+        tile = self._string_to_136_tile(man='8')
+
+        self.assertEqual(player.should_call_kan(tile, False), None)
+
+    def test_closed_kan_same_shanten_same_ukeire(self):
+        table = Table()
+        player = table.player
+
+        table.add_dora_indicator(self._string_to_136_tile(honors='2'))
+        table.add_dora_indicator(self._string_to_136_tile(honors='4'))
+
+        table.count_of_remaining_tiles = 10
+
+        tiles = self._string_to_136_array(man='3334557889', honors='333')
+        player.init_hand(tiles)
+        player.melds.append(self._make_meld(Meld.PON, man='333'))
+
+        tile = self._string_to_136_tile(honors='3')
+
+        self.assertEqual(player.should_call_kan(tile, False), Meld.KAN)
+
+    def test_kan_crash(self):
+        """
+        This was a crash in real game
+        related with open kan logic and agari without yaku state
+        """
+        table = Table()
+        table.count_of_remaining_tiles = 10
+
+        tiles = self._string_to_136_array(man='456', pin='78999', sou='666', honors='33')
+        table.player.init_hand(tiles)
+        table.player.add_called_meld(self._make_meld(Meld.PON, sou='666'))
+        tile = self._string_to_136_tile(pin='9')
+
         self.assertEqual(table.player.should_call_kan(tile, False), None)

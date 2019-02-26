@@ -61,7 +61,7 @@ class TenhouDecoder(object):
         seed = self.get_attribute_content(message, 'seed').split(',')
         seed = [int(i) for i in seed]
 
-        round_number = seed[0]
+        round_wind_number = seed[0]
         count_of_honba_sticks = seed[1]
         count_of_riichi_sticks = seed[2]
         dora_indicator = seed[5]
@@ -71,7 +71,7 @@ class TenhouDecoder(object):
         scores = [int(i) for i in scores]
 
         return {
-            'round_number': round_number,
+            'round_wind_number': round_wind_number,
             'count_of_honba_sticks': count_of_honba_sticks,
             'count_of_riichi_sticks': count_of_riichi_sticks,
             'dora_indicator': dora_indicator,
@@ -167,7 +167,9 @@ class TenhouDecoder(object):
 
         meld = Meld()
         meld.who = int(self.get_attribute_content(message, 'who'))
-        meld.from_who = data & 0x3
+        # 'from_who' is encoded relative the the 'who', so we want
+        # to convert it to be relative to our player
+        meld.from_who = ((data & 0x3) + meld.who) % 4
 
         if data & 0x4:
             self.parse_chi(data, meld)
@@ -259,6 +261,9 @@ class TenhouDecoder(object):
             return True
 
         return False
+
+    def is_opened_set_message(self, message):
+        return '<N who=' in message
 
     def get_enemy_seat(self, message):
         player_sign = message.lower()[1]

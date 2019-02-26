@@ -27,7 +27,7 @@ from utils.decisions_logger import DecisionsLogger
 
 
 class ImplementationAI(InterfaceAI):
-    version = '0.4.0-dev'
+    version = '0.4.0'
 
     agari = None
     shanten_calculator = None

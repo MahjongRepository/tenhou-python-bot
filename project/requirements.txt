@@ -1,5 +1,5 @@
 # our core library
-mahjong==1.1.5
+mahjong==1.1.6
 
 # to send information about games to statistics server
 requests==2.20.1

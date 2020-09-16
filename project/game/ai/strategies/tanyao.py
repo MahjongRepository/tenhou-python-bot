@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from game.ai.first_version.strategies.main import BaseStrategy
+from game.ai.strategies.main import BaseStrategy
 from mahjong.constants import HONOR_INDICES, TERMINAL_INDICES
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_honor, is_tile_strictly_isolated

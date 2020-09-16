@@ -2,7 +2,6 @@
 import logging
 
 from tenhou.client import TenhouClient
-from utils.settings_handler import settings
 
 logger = logging.getLogger("tenhou")
 

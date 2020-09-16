@@ -3,11 +3,10 @@ import copy
 import logging
 
 import utils.decisions_constants as log
+from game.ai.main import MahjongAI
 from mahjong.constants import CHUN, EAST, HAKU, HATSU, NORTH, SOUTH, WEST
 from mahjong.meld import Meld
 from mahjong.tile import Tile, TilesConverter
-
-from game.ai.first_version.main import ImplementationAI
 from utils.decisions_logger import DecisionsLogger
 
 logger = logging.getLogger("tenhou")
@@ -150,7 +149,7 @@ class Player(PlayerInterface):
 
     def __init__(self, table, seat, dealer_seat):
         super().__init__(table, seat, dealer_seat)
-        self.ai = ImplementationAI(self)
+        self.ai = MahjongAI(self)
 
     def erase_state(self):
         super().erase_state()

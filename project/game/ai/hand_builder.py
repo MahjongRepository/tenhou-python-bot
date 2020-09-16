@@ -1,6 +1,6 @@
 import utils.decisions_constants as log
 from game.ai.discard import DiscardOption
-from game.ai.first_version.helpers.kabe import Kabe
+from game.ai.helpers.kabe import Kabe
 from mahjong.constants import AKA_DORA_LIST
 from mahjong.shanten import Shanten
 from mahjong.tile import Tile, TilesConverter

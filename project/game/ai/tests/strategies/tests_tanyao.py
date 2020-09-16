@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from game.ai.first_version.strategies.main import BaseStrategy
-from game.ai.first_version.strategies.tanyao import TanyaoStrategy
+from game.ai.strategies.main import BaseStrategy
+from game.ai.strategies.tanyao import TanyaoStrategy
 from game.table import Table
 from mahjong.constants import FIVE_RED_PIN
 from mahjong.meld import Meld

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from game.ai.first_version.helpers.defence import DefenceHandler
-from game.ai.first_version.strategies.main import BaseStrategy
+from game.ai.helpers.defence import DefenceHandler
+from game.ai.strategies.main import BaseStrategy
 from mahjong.constants import AKA_DORA_LIST
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_aka_dora, is_honor, is_man, is_pin, is_sou, plus_dora, simplify

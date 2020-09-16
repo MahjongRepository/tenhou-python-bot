@@ -2,19 +2,18 @@
 import copy
 
 import utils.decisions_constants as log
-from game.ai.base.main import InterfaceAI
-from game.ai.first_version.defence.main import DefenceHandler
-from game.ai.first_version.hand_builder import HandBuilder
-from game.ai.first_version.helpers.kabe import Kabe
-from game.ai.first_version.helpers.suji import Suji
-from game.ai.first_version.riichi import Riichi
-from game.ai.first_version.strategies.chiitoitsu import ChiitoitsuStrategy
-from game.ai.first_version.strategies.chinitsu import ChinitsuStrategy
-from game.ai.first_version.strategies.formal_tempai import FormalTempaiStrategy
-from game.ai.first_version.strategies.honitsu import HonitsuStrategy
-from game.ai.first_version.strategies.main import BaseStrategy
-from game.ai.first_version.strategies.tanyao import TanyaoStrategy
-from game.ai.first_version.strategies.yakuhai import YakuhaiStrategy
+from game.ai.defence.main import DefenceHandler
+from game.ai.hand_builder import HandBuilder
+from game.ai.helpers.kabe import Kabe
+from game.ai.helpers.suji import Suji
+from game.ai.riichi import Riichi
+from game.ai.strategies.chiitoitsu import ChiitoitsuStrategy
+from game.ai.strategies.chinitsu import ChinitsuStrategy
+from game.ai.strategies.formal_tempai import FormalTempaiStrategy
+from game.ai.strategies.honitsu import HonitsuStrategy
+from game.ai.strategies.main import BaseStrategy
+from game.ai.strategies.tanyao import TanyaoStrategy
+from game.ai.strategies.yakuhai import YakuhaiStrategy
 from mahjong.agari import Agari
 from mahjong.constants import AKA_DORA_LIST, DISPLAY_WINDS
 from mahjong.hand_calculating.divider import HandDivider
@@ -27,7 +26,7 @@ from mahjong.utils import is_pon
 from utils.decisions_logger import DecisionsLogger
 
 
-class ImplementationAI(InterfaceAI):
+class MahjongAI:
     version = "0.4.0"
 
     agari = None
@@ -48,7 +47,8 @@ class ImplementationAI(InterfaceAI):
     hand_cache = {}
 
     def __init__(self, player):
-        super(ImplementationAI, self).__init__(player)
+        self.player = player
+        self.table = player.table
 
         self.agari = Agari()
         self.shanten_calculator = Shanten()
@@ -58,8 +58,8 @@ class ImplementationAI(InterfaceAI):
         self.finished_hand = HandCalculator()
         self.hand_builder = HandBuilder(player, self)
 
-        self.suji = Suji(self.player)
-        self.kabe = Kabe(self.player)
+        self.suji = Suji(player)
+        self.kabe = Kabe(player)
 
         self.erase_state()
 
@@ -194,7 +194,7 @@ class ImplementationAI(InterfaceAI):
             options=OptionalRules(
                 has_aka_dora=self.player.table.has_aka_dora,
                 has_open_tanyao=self.player.table.has_open_tanyao,
-            )
+            ),
         )
 
         result = self.finished_hand.estimate_hand_value(

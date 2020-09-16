@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from game.ai.first_version.helpers.defence import TileDanger
+from game.ai.helpers.defence import TileDanger
 from game.table import Table
 from mahjong.tests_mixin import TestMixin
 

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from game.ai.first_version.strategies.main import BaseStrategy
-from game.ai.first_version.strategies.yakuhai import YakuhaiStrategy
+from game.ai.strategies.main import BaseStrategy
+from game.ai.strategies.yakuhai import YakuhaiStrategy
 from game.table import Table
 from mahjong.constants import EAST, SOUTH, WEST
 from mahjong.meld import Meld

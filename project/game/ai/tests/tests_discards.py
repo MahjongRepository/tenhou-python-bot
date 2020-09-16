@@ -2,8 +2,8 @@
 import unittest
 
 from game.ai.discard import DiscardOption
-from game.ai.first_version.strategies.main import BaseStrategy
-from game.ai.first_version.strategies.tanyao import TanyaoStrategy
+from game.ai.strategies.main import BaseStrategy
+from game.ai.strategies.tanyao import TanyaoStrategy
 from game.table import Table
 from mahjong.constants import CHUN, EAST, FIVE_RED_PIN, FIVE_RED_SOU, HAKU, HATSU, NORTH, SOUTH, WEST
 from mahjong.meld import Meld

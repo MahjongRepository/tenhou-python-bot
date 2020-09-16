@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from game.ai.first_version.strategies.chiitoitsu import ChiitoitsuStrategy
-from game.ai.first_version.strategies.main import BaseStrategy
+from game.ai.strategies.chiitoitsu import ChiitoitsuStrategy
+from game.ai.strategies.main import BaseStrategy
 from game.table import Table
 from mahjong.tests_mixin import TestMixin
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from game.ai.first_version.helpers.defence import TileDanger
+from game.ai.helpers.defence import TileDanger
 from mahjong.constants import EAST
 from mahjong.tile import TilesConverter
 from utils.general import suits_tiles

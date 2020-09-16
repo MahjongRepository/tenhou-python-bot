@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from game.ai.first_version.defence.yaku_analyzer.honitsu import HonitsuAnalyzer
-from game.ai.first_version.defence.yaku_analyzer.tanyao import TanyaoAnalyzer
-from game.ai.first_version.defence.yaku_analyzer.yakuhai import YakuhaiAnalyzer
+from game.ai.defence.yaku_analyzer.honitsu import HonitsuAnalyzer
+from game.ai.defence.yaku_analyzer.tanyao import TanyaoAnalyzer
+from game.ai.defence.yaku_analyzer.yakuhai import YakuhaiAnalyzer
 from game.table import Table
 from mahjong.constants import HONOR_INDICES, TERMINAL_INDICES
 from mahjong.meld import Meld

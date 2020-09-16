@@ -1,5 +1,5 @@
-from game.ai.first_version.defence.enemy_analyzer import EnemyAnalyzer
-from game.ai.first_version.helpers.defence import TileDanger
+from game.ai.defence.enemy_analyzer import EnemyAnalyzer
+from game.ai.helpers.defence import TileDanger
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_honor
 

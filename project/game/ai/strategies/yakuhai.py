@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from game.ai.first_version.strategies.main import BaseStrategy
+from game.ai.strategies.main import BaseStrategy
 from mahjong.constants import EAST, SOUTH
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter

@@ -1,7 +1,7 @@
-from game.ai.first_version.defence.yaku_analyzer.honitsu import HonitsuAnalyzer
-from game.ai.first_version.defence.yaku_analyzer.tanyao import TanyaoAnalyzer
-from game.ai.first_version.defence.yaku_analyzer.yakuhai import YakuhaiAnalyzer
-from game.ai.first_version.helpers.possible_forms import PossibleFormsAnalyzer
+from game.ai.defence.yaku_analyzer.honitsu import HonitsuAnalyzer
+from game.ai.defence.yaku_analyzer.tanyao import TanyaoAnalyzer
+from game.ai.defence.yaku_analyzer.yakuhai import YakuhaiAnalyzer
+from game.ai.helpers.possible_forms import PossibleFormsAnalyzer
 from mahjong.utils import is_aka_dora, plus_dora
 from utils.decisions_constants import DEFENCE_THREATENING_ENEMY
 from utils.decisions_logger import DecisionsLogger

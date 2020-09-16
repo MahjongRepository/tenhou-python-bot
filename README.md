@@ -122,10 +122,6 @@ They will override settings from default `settings.py` file
 2. Also you can override some default settings with command argument. 
 Use `python main.py -h` to check all available commands
 
-## Implement your own AI
-
-https://github.com/MahjongRepository/tenhou-python-bot/wiki/Implement-AI
-
 ## Round reproducer
 
 https://github.com/MahjongRepository/tenhou-python-bot/wiki/Round-reproducer

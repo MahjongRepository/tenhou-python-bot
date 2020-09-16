@@ -48,8 +48,6 @@ def parse_args_and_set_up_settings():
 
     parser.add_option("-c", "--championship", type="string", help="Tournament lobby to play.")
 
-    parser.add_option("-a", "--ai", type="string", default=settings.AI_PACKAGE, help="AI package")
-
     parser.add_option(
         "-s",
         "--settings",
@@ -64,7 +62,6 @@ def parse_args_and_set_up_settings():
     settings.GAME_TYPE = opts.game_type
     settings.LOBBY = opts.lobby
     settings.WAITING_GAME_TIMEOUT_MINUTES = opts.timeout
-    settings.AI_PACKAGE = opts.ai
 
     if opts.settings:
         module = __import__(opts.settings)
@@ -72,9 +69,6 @@ def parse_args_and_set_up_settings():
             # let's use only upper case settings
             if key.isupper():
                 settings.__setattr__(key, value)
-
-    # it is important to reload bot class
-    settings.load_ai_class()
 
     if opts.championship:
         settings.IS_TOURNAMENT = True

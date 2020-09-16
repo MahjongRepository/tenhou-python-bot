@@ -19,7 +19,7 @@ from mahjong.agari import Agari
 from mahjong.constants import AKA_DORA_LIST, DISPLAY_WINDS
 from mahjong.hand_calculating.divider import HandDivider
 from mahjong.hand_calculating.hand import HandCalculator
-from mahjong.hand_calculating.hand_config import HandConfig
+from mahjong.hand_calculating.hand_config import HandConfig, OptionalRules
 from mahjong.meld import Meld
 from mahjong.shanten import Shanten
 from mahjong.tile import TilesConverter
@@ -190,9 +190,11 @@ class ImplementationAI(InterfaceAI):
             is_riichi=call_riichi,
             player_wind=self.player.player_wind,
             round_wind=self.player.table.round_wind_tile,
-            has_aka_dora=self.player.table.has_aka_dora,
-            has_open_tanyao=self.player.table.has_open_tanyao,
             is_tsumo=is_tsumo,
+            options=OptionalRules(
+                has_aka_dora=self.player.table.has_aka_dora,
+                has_open_tanyao=self.player.table.has_open_tanyao,
+            )
         )
 
         result = self.finished_hand.estimate_hand_value(

@@ -1,11 +1,10 @@
-from mahjong.constants import AKA_DORA_LIST
-from mahjong.shanten import Shanten
-from mahjong.tile import TilesConverter, Tile
-from mahjong.utils import is_tile_strictly_isolated, is_pair, is_honor, simplify
-
 import utils.decisions_constants as log
 from game.ai.discard import DiscardOption
 from game.ai.first_version.helpers.kabe import Kabe
+from mahjong.constants import AKA_DORA_LIST
+from mahjong.shanten import Shanten
+from mahjong.tile import Tile, TilesConverter
+from mahjong.utils import is_honor, is_pair, is_tile_strictly_isolated, simplify
 from utils.decisions_logger import DecisionsLogger
 
 
@@ -49,7 +48,7 @@ class HandBuilder:
             TANKI_WAIT_456_SUJI: 8,
             TANKI_WAIT_28_RAW: 7,
             TANKI_WAIT_456_RAW: 6,
-            TANKI_WAIT_37_RAW: 5
+            TANKI_WAIT_37_RAW: 5,
         }
 
         tanki_wait_same_ukeire_1_prio = {
@@ -67,7 +66,7 @@ class HandBuilder:
             TANKI_WAIT_456_SUJI: 8,
             TANKI_WAIT_28_RAW: 7,
             TANKI_WAIT_456_RAW: 6,
-            TANKI_WAIT_37_RAW: 5
+            TANKI_WAIT_37_RAW: 5,
         }
 
         tanki_wait_diff_ukeire_prio = {
@@ -85,26 +84,19 @@ class HandBuilder:
             TANKI_WAIT_456_SUJI: 0,
             TANKI_WAIT_28_RAW: 0,
             TANKI_WAIT_456_RAW: 0,
-            TANKI_WAIT_37_RAW: 0
+            TANKI_WAIT_37_RAW: 0,
         }
 
     def discard_tile(self, tiles, closed_hand, melds, print_log=True):
-        selected_tile = self.choose_tile_to_discard(
-            tiles,
-            closed_hand,
-            melds,
-            print_log=print_log
-        )
+        selected_tile = self.choose_tile_to_discard(tiles, closed_hand, melds, print_log=print_log)
 
         return self.process_discard_option(selected_tile, closed_hand, print_log=print_log)
 
     def calculate_shanten(self, tiles_34, open_sets_34=None):
-        shanten_with_chiitoitsu = self.ai.shanten_calculator.calculate_shanten(tiles_34,
-                                                                               open_sets_34,
-                                                                               chiitoitsu=True)
-        shanten_without_chiitoitsu = self.ai.shanten_calculator.calculate_shanten(tiles_34,
-                                                                                  open_sets_34,
-                                                                                  chiitoitsu=False)
+        shanten_with_chiitoitsu = self.ai.shanten_calculator.calculate_shanten(tiles_34, open_sets_34, chiitoitsu=True)
+        shanten_without_chiitoitsu = self.ai.shanten_calculator.calculate_shanten(
+            tiles_34, open_sets_34, chiitoitsu=False
+        )
 
         if shanten_with_chiitoitsu == 0 and shanten_without_chiitoitsu >= 1:
             shanten = shanten_with_chiitoitsu
@@ -134,19 +126,15 @@ class HandBuilder:
 
             tiles_34[j] += 1
 
-            key = '{},{},{}'.format(
-                ''.join([str(x) for x in tiles_34]),
-                ';'.join([str(x) for x in open_sets_34]),
-                use_chiitoitsu and 1 or 0
+            key = "{},{},{}".format(
+                "".join([str(x) for x in tiles_34]), ";".join([str(x) for x in open_sets_34]), use_chiitoitsu and 1 or 0
             )
 
             if key in self.ai.hand_cache:
                 new_shanten = self.ai.hand_cache[key]
             else:
                 new_shanten = self.ai.shanten_calculator.calculate_shanten(
-                    tiles_34,
-                    open_sets_34,
-                    chiitoitsu=use_chiitoitsu
+                    tiles_34, open_sets_34, chiitoitsu=use_chiitoitsu
                 )
                 self.ai.hand_cache[key] = new_shanten
 
@@ -184,20 +172,21 @@ class HandBuilder:
 
             if waiting:
                 wait_to_ukeire = dict(zip(waiting, [self.count_tiles([x], closed_tiles_34) for x in waiting]))
-                results.append(DiscardOption(player=self.player,
-                                             shanten=shanten,
-                                             tile_to_discard=hand_tile,
-                                             waiting=waiting,
-                                             ukeire=self.count_tiles(waiting, closed_tiles_34),
-                                             wait_to_ukeire=wait_to_ukeire))
+                results.append(
+                    DiscardOption(
+                        player=self.player,
+                        shanten=shanten,
+                        tile_to_discard=hand_tile,
+                        waiting=waiting,
+                        ukeire=self.count_tiles(waiting, closed_tiles_34),
+                        wait_to_ukeire=wait_to_ukeire,
+                    )
+                )
 
         if is_agari:
             shanten = Shanten.AGARI_STATE
         else:
-            shanten, _ = self.calculate_shanten(
-                tiles_34,
-                open_sets_34
-            )
+            shanten, _ = self.calculate_shanten(tiles_34, open_sets_34)
 
         return results, shanten
 
@@ -229,78 +218,80 @@ class HandBuilder:
         kabe_tiles = self.player.ai.kabe.find_all_kabe(tiles_34)
         have_kabe = False
         for kabe in kabe_tiles:
-            if waiting == kabe['tile'] and kabe['type'] == Kabe.STRONG_KABE:
+            if waiting == kabe["tile"] and kabe["type"] == Kabe.STRONG_KABE:
                 have_kabe = True
                 break
 
         return have_suji, have_kabe
 
     def _choose_best_tanki_wait(self, discard_desc):
-        discard_desc = sorted(discard_desc, key=lambda k: k['hand_cost'], reverse=True)
+        discard_desc = sorted(discard_desc, key=lambda k: k["hand_cost"], reverse=True)
 
         # we are always choosing between exactly two tanki waits
         assert len(discard_desc) == 2
 
-        discard_desc = [x for x in discard_desc if x['hand_cost'] != 0]
+        discard_desc = [x for x in discard_desc if x["hand_cost"] != 0]
 
         # we are guaranteed to have at least one wait with cost by caller logic
         assert len(discard_desc) > 0
 
         if len(discard_desc) == 1:
-            return discard_desc[0]['discard_option']
+            return discard_desc[0]["discard_option"]
 
         # if not 1 then 2
         assert len(discard_desc) == 2
 
-        num_furiten_waits = len([x for x in discard_desc if x['is_furiten']])
+        num_furiten_waits = len([x for x in discard_desc if x["is_furiten"]])
         # if we choose tanki, we always prefer non-furiten wait over furiten one, no matter what the cost is
         if num_furiten_waits == 1:
-            return [x for x in discard_desc if not x['is_furiten']][0]['discard_option']
+            return [x for x in discard_desc if not x["is_furiten"]][0]["discard_option"]
 
-        best_discard_desc = [x for x in discard_desc if x['hand_cost'] == discard_desc[0]['hand_cost']]
+        best_discard_desc = [x for x in discard_desc if x["hand_cost"] == discard_desc[0]["hand_cost"]]
 
         # first of all we choose the most expensive wait
         if len(best_discard_desc) == 1:
-            return best_discard_desc[0]['discard_option']
+            return best_discard_desc[0]["discard_option"]
 
-        best_ukeire = best_discard_desc[0]['discard_option'].ukeire
-        diff = best_ukeire - best_discard_desc[1]['discard_option'].ukeire
+        best_ukeire = best_discard_desc[0]["discard_option"].ukeire
+        diff = best_ukeire - best_discard_desc[1]["discard_option"].ukeire
         # if both tanki waits have the same ukeire
         if diff == 0:
             # case when we have 2 or 3 tiles to wait for
             if best_ukeire == 2 or best_ukeire == 3:
-                best_discard_desc = sorted(best_discard_desc,
-                                           key=lambda k: self.TankiWait.tanki_wait_same_ukeire_2_3_prio[
-                                               k['tanki_type']],
-                                           reverse=True)
-                return best_discard_desc[0]['discard_option']
+                best_discard_desc = sorted(
+                    best_discard_desc,
+                    key=lambda k: self.TankiWait.tanki_wait_same_ukeire_2_3_prio[k["tanki_type"]],
+                    reverse=True,
+                )
+                return best_discard_desc[0]["discard_option"]
 
             # case when we have 1 tile to wait for
             if best_ukeire == 1:
-                best_discard_desc = sorted(best_discard_desc,
-                                           key=lambda k: self.TankiWait.tanki_wait_same_ukeire_1_prio[
-                                               k['tanki_type']],
-                                           reverse=True)
-                return best_discard_desc[0]['discard_option']
+                best_discard_desc = sorted(
+                    best_discard_desc,
+                    key=lambda k: self.TankiWait.tanki_wait_same_ukeire_1_prio[k["tanki_type"]],
+                    reverse=True,
+                )
+                return best_discard_desc[0]["discard_option"]
 
             # should never reach here
-            assert False
+            raise AssertionError("Can't chose tanki wait")
 
         # if one tanki wait has 1 more tile to wait than the other we only choose the latter one if it is
         # a wind or alike and the first one is not
         if diff == 1:
-            prio_0 = self.TankiWait.tanki_wait_diff_ukeire_prio[best_discard_desc[0]['tanki_type']]
-            prio_1 = self.TankiWait.tanki_wait_diff_ukeire_prio[best_discard_desc[1]['tanki_type']]
+            prio_0 = self.TankiWait.tanki_wait_diff_ukeire_prio[best_discard_desc[0]["tanki_type"]]
+            prio_1 = self.TankiWait.tanki_wait_diff_ukeire_prio[best_discard_desc[1]["tanki_type"]]
             if prio_1 > prio_0:
-                return best_discard_desc[1]['discard_option']
+                return best_discard_desc[1]["discard_option"]
 
-            return best_discard_desc[0]['discard_option']
+            return best_discard_desc[0]["discard_option"]
 
         if diff > 1:
-            return best_discard_desc[0]['discard_option']
+            return best_discard_desc[0]["discard_option"]
 
         # if everything is the same we just choose the first one
-        return best_discard_desc[0]['discard_option']
+        return best_discard_desc[0]["discard_option"]
 
     def _is_waiting_furiten(self, tile_34):
         discarded_tiles = [x.value // 4 for x in self.player.discards]
@@ -390,86 +381,77 @@ class HandBuilder:
                                 tanki_type = self.TankiWait.TANKI_WAIT_69_RAW
                         break
 
-                discard_desc.append({
-                    'discard_option': discard_option,
-                    'hand_cost': hand_cost,
-                    'cost_x_ukeire': cost_x_ukeire,
-                    'is_furiten': is_furiten,
-                    'is_tanki': is_tanki,
-                    'tanki_type': tanki_type
-                })
+                discard_desc.append(
+                    {
+                        "discard_option": discard_option,
+                        "hand_cost": hand_cost,
+                        "cost_x_ukeire": cost_x_ukeire,
+                        "is_furiten": is_furiten,
+                        "is_tanki": is_tanki,
+                        "tanki_type": tanki_type,
+                    }
+                )
             else:
                 cost_x_ukeire, _ = self._estimate_cost_x_ukeire(discard_option, call_riichi)
 
-                discard_desc.append({
-                    'discard_option': discard_option,
-                    'hand_cost': None,
-                    'cost_x_ukeire': cost_x_ukeire,
-                    'is_furiten': is_furiten,
-                    'is_tanki': False,
-                    'tanki_type': None
-                })
+                discard_desc.append(
+                    {
+                        "discard_option": discard_option,
+                        "hand_cost": None,
+                        "cost_x_ukeire": cost_x_ukeire,
+                        "is_furiten": is_furiten,
+                        "is_tanki": False,
+                        "tanki_type": None,
+                    }
+                )
 
             # reverse all temporary tile tweaks
             self.player.tiles = player_tiles_copy
             self.player.melds = player_melds_copy
             self.player.discards.remove(discarded_tile)
 
-        discard_desc = sorted(discard_desc, key=lambda k: (k['cost_x_ukeire'], not k['is_furiten']), reverse=True)
+        discard_desc = sorted(discard_desc, key=lambda k: (k["cost_x_ukeire"], not k["is_furiten"]), reverse=True)
 
         # if we don't have any good options, e.g. all our possible waits ara karaten
         # FIXME: in that case, discard the safest tile
-        if discard_desc[0]['cost_x_ukeire'] == 0:
+        if discard_desc[0]["cost_x_ukeire"] == 0:
             return sorted(discard_options, key=lambda x: x.valuation)[0]
 
-        num_tanki_waits = len([x for x in discard_desc if x['is_tanki']])
+        num_tanki_waits = len([x for x in discard_desc if x["is_tanki"]])
 
         # what if all our waits are tanki waits? we need a special handling for that case
         if num_tanki_waits == len(discard_options):
             return self._choose_best_tanki_wait(discard_desc)
 
-        best_discard_desc = [x for x in discard_desc if x['cost_x_ukeire'] == discard_desc[0]['cost_x_ukeire']]
+        best_discard_desc = [x for x in discard_desc if x["cost_x_ukeire"] == discard_desc[0]["cost_x_ukeire"]]
 
         # we only have one best option based on ukeire and cost, nothing more to do here
         if len(best_discard_desc) == 1:
-            return best_discard_desc[0]['discard_option']
+            return best_discard_desc[0]["discard_option"]
 
         # if we have several options that give us similar wait
         # FIXME: 1. we find the safest tile to discard
         # FIXME: 2. if safeness is the same, we try to discard non-dora tiles
-        return best_discard_desc[0]['discard_option']
+        return best_discard_desc[0]["discard_option"]
 
     def choose_tile_to_discard(self, tiles, closed_hand, melds, print_log=True):
         """
         Try to find best tile to discard, based on different rules
         """
 
-        discard_options, _ = self.find_discard_options(
-            tiles,
-            closed_hand,
-            melds
-        )
+        discard_options, _ = self.find_discard_options(tiles, closed_hand, melds)
 
-        discard_options, is_threat = self.player.ai.defence.check_threat_and_mark_tiles_danger(
-            discard_options
-        )
+        discard_options, is_threat = self.player.ai.defence.check_threat_and_mark_tiles_danger(discard_options)
 
         # our strategy can affect discard options
         if self.ai.current_strategy:
-            discard_options = self.ai.current_strategy.determine_what_to_discard(
-                discard_options,
-                closed_hand,
-                melds
-            )
+            discard_options = self.ai.current_strategy.determine_what_to_discard(discard_options, closed_hand, melds)
 
         had_to_be_discarded_tiles = [x for x in discard_options if x.had_to_be_discarded]
         if had_to_be_discarded_tiles:
             discard_options = sorted(had_to_be_discarded_tiles, key=lambda x: (x.shanten, -x.ukeire, x.valuation))
             DecisionsLogger.debug(
-                log.DISCARD_OPTIONS,
-                'Discard marked tiles first',
-                discard_options,
-                print_log=print_log
+                log.DISCARD_OPTIONS, "Discard marked tiles first", discard_options, print_log=print_log
             )
             return discard_options[0]
 
@@ -481,7 +463,7 @@ class HandBuilder:
         results_with_same_shanten = [x for x in discard_options if x.shanten == first_option.shanten]
 
         possible_options = [first_option]
-        ukeire_borders = self._choose_ukeire_borders(first_option, 20, 'ukeire')
+        ukeire_borders = self._choose_ukeire_borders(first_option, 20, "ukeire")
         for discard_option in results_with_same_shanten:
             # there is no sense to check already chosen tile
             if discard_option.tile_to_discard == first_option.tile_to_discard:
@@ -492,20 +474,16 @@ class HandBuilder:
                 possible_options.append(discard_option)
 
         if first_option.shanten in [1, 2, 3]:
-            ukeire_field = 'ukeire_second'
+            ukeire_field = "ukeire_second"
             for x in possible_options:
                 self.calculate_second_level_ukeire(x, tiles, melds)
 
             possible_options = sorted(possible_options, key=lambda x: -getattr(x, ukeire_field))
 
             filter_percentage = 20
-            possible_options = self._filter_list_by_percentage(
-                possible_options,
-                ukeire_field,
-                filter_percentage
-            )
+            possible_options = self._filter_list_by_percentage(possible_options, ukeire_field, filter_percentage)
         else:
-            ukeire_field = 'ukeire'
+            ukeire_field = "ukeire"
             possible_options = sorted(possible_options, key=lambda x: -getattr(x, ukeire_field))
 
         # only one option - so we choose it
@@ -521,11 +499,7 @@ class HandBuilder:
 
         # we have only dora candidates to discard
         if not tiles_without_dora:
-            DecisionsLogger.debug(
-                log.DISCARD_OPTIONS,
-                context=possible_options,
-                print_log=print_log
-            )
+            DecisionsLogger.debug(log.DISCARD_OPTIONS, context=possible_options, print_log=print_log)
 
             min_dora = min([x.count_of_dora for x in possible_options])
             min_dora_list = [x for x in possible_options if x.count_of_dora == min_dora]
@@ -544,9 +518,7 @@ class HandBuilder:
             # we filter 10% of options here
             second_filter_percentage = 10
             filtered_options = self._filter_list_by_percentage(
-                tiles_without_dora,
-                ukeire_field,
-                second_filter_percentage
+                tiles_without_dora, ukeire_field, second_filter_percentage
             )
         # we should also consider borders for 3+ shanten hands
         else:
@@ -558,11 +530,7 @@ class HandBuilder:
                 if getattr(discard_option, ukeire_field) >= val:
                     filtered_options.append(discard_option)
 
-        DecisionsLogger.debug(
-            log.DISCARD_OPTIONS,
-            context=possible_options,
-            print_log=print_log
-        )
+        DecisionsLogger.debug(log.DISCARD_OPTIONS, context=possible_options, print_log=print_log)
 
         closed_hand_34 = TilesConverter.to_34_array(closed_hand)
         isolated_tiles = [x for x in filtered_options if is_tile_strictly_isolated(closed_hand_34, x.tile_to_discard)]
@@ -576,8 +544,9 @@ class HandBuilder:
         filtered_options = sorted(filtered_options, key=lambda x: -getattr(x, ukeire_field))
         first_option = filtered_options[0]
 
-        other_tiles_with_same_ukeire = [x for x in filtered_options
-                                        if getattr(x, ukeire_field) == getattr(first_option, ukeire_field)]
+        other_tiles_with_same_ukeire = [
+            x for x in filtered_options if getattr(x, ukeire_field) == getattr(first_option, ukeire_field)
+        ]
 
         # it will happen with shanten=1, all tiles will have ukeire_second == 0
         # or in tempai we can have several tiles with same ukeire
@@ -589,10 +558,7 @@ class HandBuilder:
 
     def process_discard_option(self, discard_option, closed_hand, force_discard=False, print_log=True):
         if print_log:
-            DecisionsLogger.debug(
-                log.DISCARD,
-                context=discard_option
-            )
+            DecisionsLogger.debug(log.DISCARD, context=discard_option)
 
         self.player.in_tempai = discard_option.shanten == 0
         self.ai.waiting = discard_option.waiting
@@ -638,11 +604,7 @@ class HandBuilder:
             wait_136 = wait_34 * 4
             self.player.tiles.append(wait_136)
 
-            results, shanten = self.find_discard_options(
-                self.player.tiles,
-                self.player.closed_hand,
-                melds
-            )
+            results, shanten = self.find_discard_options(self.player.tiles, self.player.closed_hand, melds)
             results = [x for x in results if x.shanten == discard_option.shanten - 1]
 
             # let's take best ukeire here
@@ -728,19 +690,15 @@ class HandBuilder:
         is_furiten = self._is_discard_option_furiten(discard_option)
 
         for waiting in discard_option.waiting:
-            hand_value = self.player.ai.estimate_hand_value(waiting,
-                                                            call_riichi=call_riichi,
-                                                            is_tsumo=True)
+            hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=call_riichi, is_tsumo=True)
             if hand_value.error is None:
-                hand_cost_tsumo = hand_value.cost['main'] + 2 * hand_value.cost['additional']
+                hand_cost_tsumo = hand_value.cost["main"] + 2 * hand_value.cost["additional"]
                 cost_x_ukeire_tsumo += hand_cost_tsumo * discard_option.wait_to_ukeire[waiting]
 
             if not is_furiten:
-                hand_value = self.player.ai.estimate_hand_value(waiting,
-                                                                call_riichi=call_riichi,
-                                                                is_tsumo=False)
+                hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=call_riichi, is_tsumo=False)
                 if hand_value.error is None:
-                    hand_cost_ron = hand_value.cost['main']
+                    hand_cost_ron = hand_value.cost["main"]
                     cost_x_ukeire_ron += hand_cost_ron * discard_option.wait_to_ukeire[waiting]
 
         # these are abstract numbers used to compare different waits

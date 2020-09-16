@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from mahjong.meld import Meld
-
 from game.client import Client
+from mahjong.meld import Meld
 
 
 class ClientTestCase(unittest.TestCase):
-
     def test_discard_tile(self):
         client = Client()
 

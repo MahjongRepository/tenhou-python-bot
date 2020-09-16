@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from mahjong.utils import is_man, simplify, is_pin, is_sou
+from mahjong.utils import is_man, is_pin, is_sou, simplify
 
 
 class Suji:
@@ -68,24 +68,12 @@ class Suji:
             base = suji - suji_temp - 1
 
             if suji_temp == self.FIRST_SUJI:
-                result += [
-                    base + 1,
-                    base + 4,
-                    base + 7
-                ]
+                result += [base + 1, base + 4, base + 7]
 
             if suji_temp == self.SECOND_SUJI:
-                result += [
-                    base + 2,
-                    base + 5,
-                    base + 8
-                ]
+                result += [base + 2, base + 5, base + 8]
 
             if suji_temp == self.THIRD_SUJI:
-                result += [
-                    base + 3,
-                    base + 6,
-                    base + 9
-                ]
+                result += [base + 3, base + 6, base + 9]
 
         return result

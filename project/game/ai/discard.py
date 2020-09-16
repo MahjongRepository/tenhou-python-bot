@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-from mahjong.constants import AKA_DORA_LIST
-from mahjong.tile import TilesConverter
-from mahjong.utils import is_honor, simplify, plus_dora, is_aka_dora, is_sou, is_man, is_pin
-
 from game.ai.first_version.helpers.defence import DefenceHandler
 from game.ai.first_version.strategies.main import BaseStrategy
+from mahjong.constants import AKA_DORA_LIST
+from mahjong.tile import TilesConverter
+from mahjong.utils import is_aka_dora, is_honor, is_man, is_pin, is_sou, plus_dora, simplify
 
 
 class DiscardOption(object):
@@ -59,19 +58,13 @@ class DiscardOption(object):
         self.calculate_value()
 
     def __unicode__(self):
-        tile_format_136 = TilesConverter.to_one_line_string([self.tile_to_discard*4])
-        return 'tile={}, shanten={}, ukeire={}, ukeire2={}, valuation={}'.format(
-            tile_format_136,
-            self.shanten,
-            self.ukeire,
-            self.ukeire_second,
-            self.valuation,
-            self.second_level_cost,
-            self.danger
+        tile_format_136 = TilesConverter.to_one_line_string([self.tile_to_discard * 4])
+        return "tile={}, shanten={}, ukeire={}, ukeire2={}, valuation={}".format(
+            tile_format_136, self.shanten, self.ukeire, self.ukeire_second, self.valuation
         )
 
     def __repr__(self):
-        return '{}'.format(self.__unicode__())
+        return "{}".format(self.__unicode__())
 
     def find_tile_in_hand(self, closed_hand):
         """

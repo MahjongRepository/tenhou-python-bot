@@ -8,7 +8,8 @@ class ImplementationAI(InterfaceAI):
     """
     AI that will discard random tile from the hand
     """
-    version = 'random'
+
+    version = "random"
 
     def discard_tile(self, discard_tile):
         tile_to_discard = random.randrange(len(self.player.tiles) - 1)

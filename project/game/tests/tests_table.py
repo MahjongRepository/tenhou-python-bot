@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from mahjong.constants import FIVE_RED_MAN, FIVE_RED_PIN, FIVE_RED_SOU, EAST, SOUTH, WEST, NORTH
-from mahjong.tests_mixin import TestMixin
-
 from game.table import Table
+from mahjong.constants import EAST, FIVE_RED_MAN, FIVE_RED_PIN, FIVE_RED_SOU, NORTH, SOUTH, WEST
+from mahjong.tests_mixin import TestMixin
 
 
 class TableTestCase(unittest.TestCase, TestMixin):
-
     def test_init_hand(self):
         table = Table()
         tiles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
@@ -27,12 +25,7 @@ class TableTestCase(unittest.TestCase, TestMixin):
         scores = [250, 250, 250, 250]
 
         table.init_round(
-            round_wind_number,
-            count_of_honba_sticks,
-            count_of_riichi_sticks,
-            dora_indicator,
-            dealer,
-            scores
+            round_wind_number, count_of_honba_sticks, count_of_riichi_sticks, dora_indicator, dealer, scores
         )
 
         self.assertEqual(table.round_wind_number, round_wind_number)
@@ -46,12 +39,7 @@ class TableTestCase(unittest.TestCase, TestMixin):
         table.player.in_tempai = True
         table.player.in_riichi = True
         table.init_round(
-            round_wind_number,
-            count_of_honba_sticks,
-            count_of_riichi_sticks,
-            dora_indicator,
-            dealer,
-            scores
+            round_wind_number, count_of_honba_sticks, count_of_riichi_sticks, dora_indicator, dealer, scores
         )
 
         # test that we reinit round properly
@@ -119,61 +107,61 @@ class TableTestCase(unittest.TestCase, TestMixin):
         table.init_round(0, 0, 0, 0, 0, [])
 
         values = [
-            {'name': 'NoName', 'rank': u'新人'},
-            {'name': 'o2o2', 'rank': u'3級'},
-            {'name': 'shimmmmm', 'rank': u'三段'},
-            {'name': u'川海老', 'rank': u'9級'}
+            {"name": "NoName", "rank": "新人"},
+            {"name": "o2o2", "rank": "3級"},
+            {"name": "shimmmmm", "rank": "三段"},
+            {"name": "川海老", "rank": "9級"},
         ]
 
         table.set_players_names_and_ranks(values)
 
-        self.assertEqual(table.get_player(0).name, 'NoName')
-        self.assertEqual(table.get_player(0).rank, u'新人')
-        self.assertEqual(table.get_player(3).name, u'川海老')
-        self.assertEqual(table.get_player(3).rank, u'9級')
+        self.assertEqual(table.get_player(0).name, "NoName")
+        self.assertEqual(table.get_player(0).rank, "新人")
+        self.assertEqual(table.get_player(3).name, "川海老")
+        self.assertEqual(table.get_player(3).rank, "9級")
 
     def test_is_dora(self):
         table = Table()
         table.init_round(0, 0, 0, 0, 0, [])
 
-        table.dora_indicators = [self._string_to_136_tile(sou='1')]
-        self.assertTrue(table.is_dora(self._string_to_136_tile(sou='2')))
+        table.dora_indicators = [self._string_to_136_tile(sou="1")]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(sou="2")))
 
-        table.dora_indicators = [self._string_to_136_tile(sou='9')]
-        self.assertTrue(table.is_dora(self._string_to_136_tile(sou='1')))
+        table.dora_indicators = [self._string_to_136_tile(sou="9")]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(sou="1")))
 
-        table.dora_indicators = [self._string_to_136_tile(pin='9')]
-        self.assertTrue(table.is_dora(self._string_to_136_tile(pin='1')))
+        table.dora_indicators = [self._string_to_136_tile(pin="9")]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(pin="1")))
 
-        table.dora_indicators = [self._string_to_136_tile(man='9')]
-        self.assertTrue(table.is_dora(self._string_to_136_tile(man='1')))
+        table.dora_indicators = [self._string_to_136_tile(man="9")]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(man="1")))
 
-        table.dora_indicators = [self._string_to_136_tile(man='5')]
-        self.assertTrue(table.is_dora(self._string_to_136_tile(man='6')))
+        table.dora_indicators = [self._string_to_136_tile(man="5")]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(man="6")))
 
-        table.dora_indicators = [self._string_to_136_tile(honors='1')]
-        self.assertTrue(table.is_dora(self._string_to_136_tile(honors='2')))
+        table.dora_indicators = [self._string_to_136_tile(honors="1")]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(honors="2")))
 
-        table.dora_indicators = [self._string_to_136_tile(honors='2')]
-        self.assertTrue(table.is_dora(self._string_to_136_tile(honors='3')))
+        table.dora_indicators = [self._string_to_136_tile(honors="2")]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(honors="3")))
 
-        table.dora_indicators = [self._string_to_136_tile(honors='3')]
-        self.assertTrue(table.is_dora(self._string_to_136_tile(honors='4')))
+        table.dora_indicators = [self._string_to_136_tile(honors="3")]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(honors="4")))
 
-        table.dora_indicators = [self._string_to_136_tile(honors='4')]
-        self.assertTrue(table.is_dora(self._string_to_136_tile(honors='1')))
+        table.dora_indicators = [self._string_to_136_tile(honors="4")]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(honors="1")))
 
-        table.dora_indicators = [self._string_to_136_tile(honors='5')]
-        self.assertTrue(table.is_dora(self._string_to_136_tile(honors='6')))
+        table.dora_indicators = [self._string_to_136_tile(honors="5")]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(honors="6")))
 
-        table.dora_indicators = [self._string_to_136_tile(honors='6')]
-        self.assertTrue(table.is_dora(self._string_to_136_tile(honors='7')))
+        table.dora_indicators = [self._string_to_136_tile(honors="6")]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(honors="7")))
 
-        table.dora_indicators = [self._string_to_136_tile(honors='7')]
-        self.assertTrue(table.is_dora(self._string_to_136_tile(honors='5')))
+        table.dora_indicators = [self._string_to_136_tile(honors="7")]
+        self.assertTrue(table.is_dora(self._string_to_136_tile(honors="5")))
 
-        table.dora_indicators = [self._string_to_136_tile(pin='1')]
-        self.assertFalse(table.is_dora(self._string_to_136_tile(sou='2')))
+        table.dora_indicators = [self._string_to_136_tile(pin="1")]
+        self.assertFalse(table.is_dora(self._string_to_136_tile(sou="2")))
 
         table.has_open_tanyao = True
 

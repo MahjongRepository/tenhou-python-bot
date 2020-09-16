@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
+from game.ai.first_version.helpers.defence import TileDanger
 from mahjong.constants import EAST
 from mahjong.tile import TilesConverter
-
-from game.ai.first_version.helpers.defence import TileDanger
 from utils.general import suits_tiles
 
 
@@ -52,8 +51,8 @@ class PossibleFormsAnalyzer:
                     forms_count[self.POSSIBLE_PENCHAN] = (4 - suit[8]) * (4 - suit[7])
                 # kanchan
                 if 1 <= y <= 7:
-                    tiles_cnt_left = (4 - suit[y - 1])
-                    tiles_cnt_right = (4 - suit[y + 1])
+                    tiles_cnt_left = 4 - suit[y - 1]
+                    tiles_cnt_right = 4 - suit[y + 1]
                     forms_count[self.POSSIBLE_KANCHAN] = tiles_cnt_left * tiles_cnt_right
 
                 # ryanmen

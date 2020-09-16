@@ -4,7 +4,7 @@ from mahjong.utils import count_tiles_by_suits
 
 
 class HonitsuAnalyzer:
-    id = 'Honitsu'
+    id = "Honitsu"
 
     def __init__(self, player):
         self.player = player
@@ -44,17 +44,17 @@ class HonitsuAnalyzer:
 
         result = count_tiles_by_suits(discards_34)
 
-        honors = [x for x in result if x['name'] == 'honor'][0]
-        suits = [x for x in result if x['name'] != 'honor']
-        suits = sorted(suits, key=lambda x: x['count'], reverse=False)
+        honors = [x for x in result if x["name"] == "honor"][0]
+        suits = [x for x in result if x["name"] != "honor"]
+        suits = sorted(suits, key=lambda x: x["count"], reverse=False)
 
-        less_suit = suits[0]['count']
+        less_suit = suits[0]["count"]
         percentage_of_less_suit = (less_suit / total_discards) * 100
-        percentage_of_honor_tiles = (honors['count'] / total_discards) * 100
+        percentage_of_honor_tiles = (honors["count"] / total_discards) * 100
 
         # there is not too much one suit + honor tiles in the discard
         # so we can tell that user trying to collect honitsu
         if percentage_of_less_suit <= 20 and percentage_of_honor_tiles <= 30:
-            return suits[0]['function']
+            return suits[0]["function"]
 
         return None

@@ -3,7 +3,6 @@ from game.ai.first_version.strategies.main import BaseStrategy
 
 
 class FormalTempaiStrategy(BaseStrategy):
-
     def should_activate_strategy(self, tiles_136):
         """
         When we get closer to the end of the round, we start to consider

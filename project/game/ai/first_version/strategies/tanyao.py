@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-from mahjong.constants import TERMINAL_INDICES, HONOR_INDICES
-from mahjong.tile import TilesConverter
-from mahjong.utils import is_honor
-from mahjong.utils import is_tile_strictly_isolated
-
 from game.ai.first_version.strategies.main import BaseStrategy
+from mahjong.constants import HONOR_INDICES, TERMINAL_INDICES
+from mahjong.tile import TilesConverter
+from mahjong.utils import is_honor, is_tile_strictly_isolated
 
 
 class TanyaoStrategy(BaseStrategy):
@@ -25,8 +23,9 @@ class TanyaoStrategy(BaseStrategy):
         tiles = TilesConverter.to_34_array(self.player.tiles)
 
         closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
-        isolated_tiles = [x // 4 for x in self.player.tiles
-                          if is_tile_strictly_isolated(closed_hand_34, x // 4) or is_honor(x // 4)]
+        isolated_tiles = [
+            x // 4 for x in self.player.tiles if is_tile_strictly_isolated(closed_hand_34, x // 4) or is_honor(x // 4)
+        ]
 
         count_of_terminal_pon_sets = 0
         count_of_terminal_pairs = 0
@@ -84,11 +83,7 @@ class TanyaoStrategy(BaseStrategy):
             return False
 
         # 123 and 789 indices
-        indices = [
-            [0, 1, 2], [6, 7, 8],
-            [9, 10, 11], [15, 16, 17],
-            [18, 19, 20], [24, 25, 26]
-        ]
+        indices = [[0, 1, 2], [6, 7, 8], [9, 10, 11], [15, 16, 17], [18, 19, 20], [24, 25, 26]]
 
         for index_set in indices:
             first = tiles[index_set[0]]
@@ -125,11 +120,7 @@ class TanyaoStrategy(BaseStrategy):
         shanten = first_option.shanten
 
         if shanten > 1:
-            return super(TanyaoStrategy, self).determine_what_to_discard(
-                discard_options,
-                hand,
-                open_melds
-            )
+            return super(TanyaoStrategy, self).determine_what_to_discard(discard_options, hand, open_melds)
 
         results = []
         not_suitable_tiles = []
@@ -144,7 +135,8 @@ class TanyaoStrategy(BaseStrategy):
             # generic logic
             if item.shanten == 0:
                 all_waiting_are_fine = all(
-                    [(self.is_tile_suitable(x * 4) or item.wait_to_ukeire[x] == 0) for x in item.waiting])
+                    [(self.is_tile_suitable(x * 4) or item.wait_to_ukeire[x] == 0) for x in item.waiting]
+                )
                 if all_waiting_are_fine:
                     results.append(item)
 

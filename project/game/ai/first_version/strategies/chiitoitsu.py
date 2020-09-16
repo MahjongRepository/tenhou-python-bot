@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-from mahjong.tile import TilesConverter
-
 from game.ai.first_version.strategies.main import BaseStrategy
+from mahjong.tile import TilesConverter
 
 
 class ChiitoitsuStrategy(BaseStrategy):

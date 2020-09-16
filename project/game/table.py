@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-from mahjong.constants import EAST, SOUTH, WEST, NORTH
+from game.player import EnemyPlayer, Player
+from mahjong.constants import EAST, NORTH, SOUTH, WEST
 from mahjong.meld import Meld
-from mahjong.tile import TilesConverter, Tile
-from mahjong.utils import plus_dora, is_aka_dora
-
-from game.player import Player, EnemyPlayer
+from mahjong.tile import Tile, TilesConverter
+from mahjong.utils import is_aka_dora, plus_dora
 
 
 class Table(object):
@@ -40,28 +39,18 @@ class Table(object):
     def __str__(self):
         dora_string = TilesConverter.to_one_line_string(self.dora_indicators)
 
-        round_settings = {
-            EAST:  ['e', 0],
-            SOUTH: ['s', 3],
-            WEST:  ['w', 7]
-        }.get(self.round_wind_tile)
+        round_settings = {EAST: ["e", 0], SOUTH: ["s", 3], WEST: ["w", 7]}.get(self.round_wind_tile)
 
         round_string, round_diff = round_settings
-        display_round = '{}{}'.format(round_string, (self.round_wind_number + 1) - round_diff)
+        display_round = "{}{}".format(round_string, (self.round_wind_number + 1) - round_diff)
 
-        return 'Round: {}, Honba: {}, Dora Indicators: {}'.format(
-            display_round,
-            self.count_of_honba_sticks,
-            dora_string
+        return "Round: {}, Honba: {}, Dora Indicators: {}".format(
+            display_round, self.count_of_honba_sticks, dora_string
         )
 
-    def init_round(self,
-                   round_wind_number,
-                   count_of_honba_sticks,
-                   count_of_riichi_sticks,
-                   dora_indicator,
-                   dealer_seat,
-                   scores):
+    def init_round(
+        self, round_wind_number, count_of_honba_sticks, count_of_riichi_sticks, dora_indicator, dealer_seat, scores
+    ):
 
         # we need it to properly display log for each round
         self.round_number += 1
@@ -171,8 +160,8 @@ class Table(object):
 
     def set_players_names_and_ranks(self, values):
         for x in range(0, len(values)):
-            self.get_player(x).name = values[x]['name']
-            self.get_player(x).rank = values[x]['rank']
+            self.get_player(x).name = values[x]["name"]
+            self.get_player(x).rank = values[x]["rank"]
 
     def get_player(self, player_seat):
         return self.players[player_seat]
@@ -195,7 +184,9 @@ class Table(object):
         tile //= 4
         self.revealed_tiles[tile] += 1
 
-    def _init_players(self,):
+    def _init_players(
+        self,
+    ):
         self.player = Player(self, 0, self.dealer_seat)
 
         self.players = [self.player]

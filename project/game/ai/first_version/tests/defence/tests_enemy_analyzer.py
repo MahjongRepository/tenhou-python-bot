@@ -1,18 +1,16 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from mahjong.constants import TERMINAL_INDICES, HONOR_INDICES
-from mahjong.meld import Meld
-from mahjong.tests_mixin import TestMixin
-
 from game.ai.first_version.defence.yaku_analyzer.honitsu import HonitsuAnalyzer
 from game.ai.first_version.defence.yaku_analyzer.tanyao import TanyaoAnalyzer
 from game.ai.first_version.defence.yaku_analyzer.yakuhai import YakuhaiAnalyzer
 from game.table import Table
+from mahjong.constants import HONOR_INDICES, TERMINAL_INDICES
+from mahjong.meld import Meld
+from mahjong.tests_mixin import TestMixin
 
 
 class EnemyAnalyzerTestCase(unittest.TestCase, TestMixin):
-
     def setUp(self):
         self.table = Table()
         self.player = self.table.player
@@ -33,7 +31,7 @@ class EnemyAnalyzerTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(len(threatening_players), 0)
 
         enemy_seat = 2
-        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.PON, man='333'))
+        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.PON, man="333"))
         self.player.round_step = 7
 
         # simple pon it is no threat
@@ -41,7 +39,7 @@ class EnemyAnalyzerTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(len(threatening_players), 0)
 
         # dora pon it is threat
-        self.table.add_dora_indicator(self._string_to_136_tile(man='2'))
+        self.table.add_dora_indicator(self._string_to_136_tile(man="2"))
         threatening_players = self.player.ai.defence._get_threatening_players()
         self.assertEqual(len(threatening_players), 1)
         self.assertEqual(threatening_players[0].player.seat, enemy_seat)
@@ -55,8 +53,8 @@ class EnemyAnalyzerTestCase(unittest.TestCase, TestMixin):
         # south round
         self.table.round_wind_number = 4
 
-        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.PON, honors='222'))
-        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.CHI, man='123'))
+        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.PON, honors="222"))
+        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.CHI, man="123"))
         self.player.round_step = 2
 
         # double wind is not enough
@@ -65,7 +63,7 @@ class EnemyAnalyzerTestCase(unittest.TestCase, TestMixin):
 
         # with one dora in enemy melds we can start think about threat
         # it will be 3 han
-        self.table.add_dora_indicator(self._string_to_136_tile(man='1'))
+        self.table.add_dora_indicator(self._string_to_136_tile(man="1"))
         threatening_players = self.player.ai.defence._get_threatening_players()
         self.assertEqual(len(threatening_players), 1)
         self.assertEqual(threatening_players[0].player.seat, enemy_seat)
@@ -75,8 +73,8 @@ class EnemyAnalyzerTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(len(threatening_players), 0)
 
         enemy_seat = 2
-        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.PON, pin='234'))
-        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.CHI, sou='333'))
+        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.PON, pin="234"))
+        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.CHI, sou="333"))
         self.player.round_step = 2
 
         # tanyao without dor is not threat
@@ -84,8 +82,8 @@ class EnemyAnalyzerTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(len(threatening_players), 0)
 
         # and now it is threat
-        self.table.add_dora_indicator(self._string_to_136_tile(pin='1'))
-        self.table.add_dora_indicator(self._string_to_136_tile(pin='2'))
+        self.table.add_dora_indicator(self._string_to_136_tile(pin="1"))
+        self.table.add_dora_indicator(self._string_to_136_tile(pin="2"))
         threatening_players = self.player.ai.defence._get_threatening_players()
         self.assertEqual(len(threatening_players), 1)
         self.assertEqual(threatening_players[0].player.seat, enemy_seat)
@@ -95,17 +93,17 @@ class EnemyAnalyzerTestCase(unittest.TestCase, TestMixin):
         self.assertEqual(len(threatening_players), 0)
 
         enemy_seat = 1
-        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.PON, pin='567'))
-        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.CHI, pin='123'))
-        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.CHI, pin='345'))
+        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.PON, pin="567"))
+        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.CHI, pin="123"))
+        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.CHI, pin="345"))
 
-        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou='1'), False)
-        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou='5'), False)
-        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou='8'), False)
-        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou='9'), False)
-        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(man='1'), False)
-        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(man='1'), False)
-        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(pin='1'), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou="1"), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou="5"), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou="8"), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou="9"), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(man="1"), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(man="1"), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(pin="1"), False)
 
         threatening_players = self.player.ai.defence._get_threatening_players()
         self.assertEqual(len(threatening_players), 1)
@@ -128,17 +126,17 @@ class EnemyAnalyzerTestCase(unittest.TestCase, TestMixin):
         enemy_seat = 2
         honitsu = HonitsuAnalyzer(self.table.get_player(enemy_seat))
 
-        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.PON, pin='567'))
-        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.CHI, pin='123'))
-        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.CHI, pin='345'))
+        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.PON, pin="567"))
+        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.CHI, pin="123"))
+        self.table.add_called_meld(enemy_seat, self._make_meld(Meld.CHI, pin="345"))
 
-        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou='1'), False)
-        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou='5'), False)
-        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou='8'), False)
-        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou='9'), False)
-        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(man='1'), False)
-        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(man='1'), False)
-        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(pin='1'), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou="1"), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou="5"), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou="8"), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(sou="9"), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(man="1"), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(man="1"), False)
+        self.table.add_discarded_tile(enemy_seat, self._string_to_136_tile(pin="1"), False)
 
         self.assertTrue(honitsu.is_yaku_active())
         dangerous_tiles = honitsu.get_dangerous_tiles()

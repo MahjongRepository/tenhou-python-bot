@@ -1,8 +1,8 @@
-from mahjong.constants import TERMINAL_INDICES, HONOR_INDICES
+from mahjong.constants import HONOR_INDICES, TERMINAL_INDICES
 
 
 class TanyaoAnalyzer:
-    id = 'Tanyao'
+    id = "Tanyao"
 
     def __init__(self, player):
         self.player = player

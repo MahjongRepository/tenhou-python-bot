@@ -1,9 +1,8 @@
-from mahjong.utils import plus_dora, is_aka_dora
-
 from game.ai.first_version.defence.yaku_analyzer.honitsu import HonitsuAnalyzer
 from game.ai.first_version.defence.yaku_analyzer.tanyao import TanyaoAnalyzer
 from game.ai.first_version.defence.yaku_analyzer.yakuhai import YakuhaiAnalyzer
 from game.ai.first_version.helpers.possible_forms import PossibleFormsAnalyzer
+from mahjong.utils import is_aka_dora, plus_dora
 from utils.decisions_constants import DEFENCE_THREATENING_ENEMY
 from utils.decisions_logger import DecisionsLogger
 
@@ -51,10 +50,7 @@ class EnemyAnalyzer(object):
         :return: boolean
         """
         if self.player.in_riichi:
-            DecisionsLogger.debug(
-                DEFENCE_THREATENING_ENEMY,
-                'Enemy in riichi'
-            )
+            DecisionsLogger.debug(DEFENCE_THREATENING_ENEMY, "Enemy in riichi")
             return True
 
         yaku_analyzers = [
@@ -74,12 +70,12 @@ class EnemyAnalyzer(object):
             if len(self.player.melds) == 1 and self.main_player.round_step > 6 and dora_count >= 3:
                 DecisionsLogger.debug(
                     DEFENCE_THREATENING_ENEMY,
-                    'Enemy has one dora pon/kan and round step is 6+',
+                    "Enemy has one dora pon/kan and round step is 6+",
                     context={
-                        'melds': self.player.melds,
-                        'dora_count': dora_count,
-                        'round_step': self.main_player.round_step
-                    }
+                        "melds": self.player.melds,
+                        "dora_count": dora_count,
+                        "round_step": self.main_player.round_step,
+                    },
                 )
 
                 return True
@@ -94,13 +90,13 @@ class EnemyAnalyzer(object):
             if melds_han + dora_count >= 3 and len(self.player.melds) >= 2:
                 DecisionsLogger.debug(
                     DEFENCE_THREATENING_ENEMY,
-                    'Enemy has 3+ han in open 2+ melds',
+                    "Enemy has 3+ han in open 2+ melds",
                     context={
-                        'melds': self.player.melds,
-                        'dora_count': dora_count,
-                        'melds_han': melds_han,
-                        'active_yaku': active_yaku
-                    }
+                        "melds": self.player.melds,
+                        "dora_count": dora_count,
+                        "melds_han": melds_han,
+                        "active_yaku": active_yaku,
+                    },
                 )
 
                 return True

@@ -1,17 +1,7 @@
 # -*- coding: utf-8 -*-
 import copy
+
 import utils.decisions_constants as log
-
-from mahjong.agari import Agari
-from mahjong.constants import AKA_DORA_LIST, DISPLAY_WINDS
-from mahjong.hand_calculating.divider import HandDivider
-from mahjong.hand_calculating.hand import HandCalculator
-from mahjong.hand_calculating.hand_config import HandConfig
-from mahjong.meld import Meld
-from mahjong.shanten import Shanten
-from mahjong.tile import TilesConverter
-from mahjong.utils import is_pon
-
 from game.ai.base.main import InterfaceAI
 from game.ai.first_version.defence.main import DefenceHandler
 from game.ai.first_version.hand_builder import HandBuilder
@@ -25,11 +15,20 @@ from game.ai.first_version.strategies.honitsu import HonitsuStrategy
 from game.ai.first_version.strategies.main import BaseStrategy
 from game.ai.first_version.strategies.tanyao import TanyaoStrategy
 from game.ai.first_version.strategies.yakuhai import YakuhaiStrategy
+from mahjong.agari import Agari
+from mahjong.constants import AKA_DORA_LIST, DISPLAY_WINDS
+from mahjong.hand_calculating.divider import HandDivider
+from mahjong.hand_calculating.hand import HandCalculator
+from mahjong.hand_calculating.hand_config import HandConfig
+from mahjong.meld import Meld
+from mahjong.shanten import Shanten
+from mahjong.tile import TilesConverter
+from mahjong.utils import is_pon
 from utils.decisions_logger import DecisionsLogger
 
 
 class ImplementationAI(InterfaceAI):
-    version = '0.4.0'
+    version = "0.4.0"
 
     agari = None
     shanten_calculator = None
@@ -76,11 +75,14 @@ class ImplementationAI(InterfaceAI):
         self.hand_cache = {}
 
     def init_hand(self):
-        DecisionsLogger.debug(log.INIT_HAND, context=[
-            'Round  wind: {}'.format(DISPLAY_WINDS[self.table.round_wind_tile]),
-            'Player wind: {}'.format(DISPLAY_WINDS[self.player.player_wind]),
-            'Hand: {}'.format(self.player.format_hand_for_print()),
-        ])
+        DecisionsLogger.debug(
+            log.INIT_HAND,
+            context=[
+                "Round  wind: {}".format(DISPLAY_WINDS[self.table.round_wind_tile]),
+                "Player wind: {}".format(DISPLAY_WINDS[self.player.player_wind]),
+                "Hand: {}".format(self.player.format_hand_for_print()),
+            ],
+        )
 
         self.shanten, _ = self.hand_builder.calculate_shanten(TilesConverter.to_34_array(self.player.tiles))
 
@@ -95,12 +97,7 @@ class ImplementationAI(InterfaceAI):
 
             return self.hand_builder.process_discard_option(self.last_discard_option, self.player.closed_hand, True)
 
-        return self.hand_builder.discard_tile(
-            self.player.tiles,
-            self.player.closed_hand,
-            self.player.melds,
-            print_log
-        )
+        return self.hand_builder.discard_tile(self.player.tiles, self.player.closed_hand, self.player.melds, print_log)
 
     def try_to_call_meld(self, tile_136, is_kamicha_discard):
         tiles_136_previous = self.player.tiles[:]
@@ -120,11 +117,15 @@ class ImplementationAI(InterfaceAI):
         if discard_option:
             self.last_discard_option = discard_option
 
-            DecisionsLogger.debug(log.MELD_CALL, 'Try to call meld', context=[
-                'Hand: {}'.format(self.player.format_hand_for_print(tile_136)),
-                'Meld: {}'.format(meld),
-                'Discard after meld: {}'.format(discard_option)
-            ])
+            DecisionsLogger.debug(
+                log.MELD_CALL,
+                "Try to call meld",
+                context=[
+                    "Hand: {}".format(self.player.format_hand_for_print(tile_136)),
+                    "Meld: {}".format(meld),
+                    "Discard after meld: {}".format(discard_option),
+                ],
+            )
 
         return meld, discard_option
 
@@ -194,11 +195,9 @@ class ImplementationAI(InterfaceAI):
             is_tsumo=is_tsumo,
         )
 
-        result = self.finished_hand.estimate_hand_value(tiles,
-                                                        win_tile,
-                                                        self.player.melds,
-                                                        self.player.table.dora_indicators,
-                                                        config)
+        result = self.finished_hand.estimate_hand_value(
+            tiles, win_tile, self.player.melds, self.player.table.dora_indicators, config
+        )
         return result
 
     def should_call_riichi(self):
@@ -257,18 +256,13 @@ class ImplementationAI(InterfaceAI):
                 closed_hand_tiles.append(tile)
 
                 previous_shanten, previous_waits_count = self._calculate_shanten_for_kan(
-                    tiles,
-                    closed_hand_tiles,
-                    self.player.melds
+                    tiles, closed_hand_tiles, self.player.melds
                 )
 
                 tiles_34 = TilesConverter.to_34_array(tiles)
                 tiles_34[tile_34] -= 1
 
-                new_waiting, new_shanten = self.hand_builder.calculate_waits(
-                    tiles_34,
-                    self.player.meld_34_tiles
-                )
+                new_waiting, new_shanten = self.hand_builder.calculate_waits(tiles_34, self.player.meld_34_tiles)
                 new_waits_count = self.hand_builder.count_tiles(new_waiting, tiles_34)
 
         if not has_shouminkan_candidate:
@@ -285,9 +279,7 @@ class ImplementationAI(InterfaceAI):
                 closed_hand_tiles.append(tile)
 
                 previous_shanten, previous_waits_count = self._calculate_shanten_for_kan(
-                    tiles,
-                    closed_hand_tiles,
-                    self.player.melds
+                    tiles, closed_hand_tiles, self.player.melds
                 )
 
             # shanten calculator doesn't like working with kans, so we pretend it's a pon
@@ -334,11 +326,7 @@ class ImplementationAI(InterfaceAI):
         return self.player.table.players[1:]
 
     def _calculate_shanten_for_kan(self, tiles, closed_hand_tiles, melds):
-        previous_results, previous_shanten = self.hand_builder.find_discard_options(
-            tiles,
-            closed_hand_tiles,
-            melds
-        )
+        previous_results, previous_shanten = self.hand_builder.find_discard_options(tiles, closed_hand_tiles, melds)
 
         previous_results = [x for x in previous_results if x.shanten == previous_shanten]
 

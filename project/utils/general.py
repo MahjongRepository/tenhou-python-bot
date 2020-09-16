@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-import string
 import random
+import string
 
 from mahjong.constants import EAST
-from mahjong.utils import simplify, is_man, is_pin, is_sou
+from mahjong.utils import is_man, is_pin, is_sou, simplify
 
 
 def make_random_letters_and_digit_string(length=15):
     random_chars = string.ascii_lowercase + string.digits
-    return ''.join(random.choice(random_chars) for _ in range(length))
+    return "".join(random.choice(random_chars) for _ in range(length))
 
 
 def suits_tiles(player, tiles_34):

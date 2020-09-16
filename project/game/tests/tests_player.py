@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from mahjong.constants import EAST, NORTH, WEST, SOUTH
+from game.table import Table
+from mahjong.constants import EAST, NORTH, SOUTH, WEST
 from mahjong.meld import Meld
 from mahjong.tests_mixin import TestMixin
 
-from game.table import Table
-
 
 class PlayerTestCase(unittest.TestCase, TestMixin):
-
     def test_can_call_riichi_and_tempai(self):
         table = Table()
         player = table.player
@@ -114,11 +112,11 @@ class PlayerTestCase(unittest.TestCase, TestMixin):
         table = Table()
         player = table.player
 
-        tiles = self._string_to_136_array(sou='123678', pin='3599', honors='555')
+        tiles = self._string_to_136_array(sou="123678", pin="3599", honors="555")
         player.init_hand(tiles)
 
         self.assertEqual(len(player.closed_hand), 13)
 
-        player.add_called_meld(self._make_meld(Meld.PON, honors='555'))
+        player.add_called_meld(self._make_meld(Meld.PON, honors="555"))
 
         self.assertEqual(len(player.closed_hand), 10)

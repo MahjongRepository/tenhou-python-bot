@@ -1,9 +1,8 @@
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_honor, simplify, is_pair, is_chi
+from mahjong.utils import is_chi, is_honor, is_pair, simplify
 
 
 class Riichi:
-
     def __init__(self, player):
         self.player = player
 
@@ -14,8 +13,7 @@ class Riichi:
 
         # don't call karaten riichi
         count_tiles = self.player.ai.hand_builder.count_tiles(
-            self.player.ai.waiting,
-            TilesConverter.to_34_array(self.player.closed_hand)
+            self.player.ai.waiting, TilesConverter.to_34_array(self.player.closed_hand)
         )
         if count_tiles == 0:
             return False
@@ -51,7 +49,7 @@ class Riichi:
 
         # what if we have yaku
         if hand_value.yaku is not None and hand_value.cost is not None:
-            min_cost = hand_value.cost['main']
+            min_cost = hand_value.cost["main"]
 
             # tanki honor is a good wait, let's damaten only if hand is already expensive
             if is_honor(waiting):
@@ -168,15 +166,14 @@ class Riichi:
 
     def _should_call_riichi_many_sided(self):
         count_tiles = self.player.ai.hand_builder.count_tiles(
-            self.player.ai.waiting,
-            TilesConverter.to_34_array(self.player.closed_hand)
+            self.player.ai.waiting, TilesConverter.to_34_array(self.player.closed_hand)
         )
         hand_costs = []
         waits_with_yaku = 0
         for waiting in self.player.ai.waiting:
             hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=False)
             if hand_value.error is None:
-                hand_costs.append(hand_value.cost['main'])
+                hand_costs.append(hand_value.cost["main"])
                 if hand_value.yaku is not None and hand_value.cost is not None:
                     waits_with_yaku += 1
 

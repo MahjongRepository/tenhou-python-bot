@@ -8,6 +8,7 @@ class SettingsSingleton(object):
     Than override some settings with command arguments
     After this we not should change the object
     """
+
     instance = None
 
     def __init__(self):
@@ -22,14 +23,13 @@ class SettingsSingleton(object):
         return setattr(self.instance, key, value)
 
     def load_ai_class(self):
-        module = importlib.import_module('game.ai.{}.main'.format(self.AI_PACKAGE))
-        self.AI_CLASS = getattr(module, 'ImplementationAI')
+        module = importlib.import_module("game.ai.{}.main".format(self.AI_PACKAGE))
+        self.AI_CLASS = getattr(module, "ImplementationAI")
 
 
 class Settings(object):
-
     def __init__(self):
-        mod = importlib.import_module('settings')
+        mod = importlib.import_module("settings")
 
         for setting in dir(mod):
             setting_value = getattr(mod, setting)

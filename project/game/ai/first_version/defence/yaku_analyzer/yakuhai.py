@@ -1,5 +1,5 @@
 class YakuhaiAnalyzer:
-    id = 'Yakuhai'
+    id = "Yakuhai"
 
     def __init__(self, player):
         self.player = player

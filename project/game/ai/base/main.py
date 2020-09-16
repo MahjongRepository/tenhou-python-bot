@@ -5,7 +5,8 @@ class InterfaceAI(object):
     """
     Public interface of the bot AI
     """
-    version = 'none'
+
+    version = "none"
 
     player = None
     table = None

@@ -1,25 +1,25 @@
 # -*- coding: utf-8 -*-
 
-TENHOU_HOST = '133.242.10.78'
+TENHOU_HOST = "133.242.10.78"
 TENHOU_PORT = 10080
 
-USER_ID = 'NoName'
+USER_ID = "NoName"
 
-LOBBY = '0'
+LOBBY = "0"
 WAITING_GAME_TIMEOUT_MINUTES = 10
 
 # in tournament mode bot is not trying to search the game
 # it just sitting in the lobby and waiting for the game start
 IS_TOURNAMENT = False
 
-STAT_SERVER_URL = ''
-STAT_TOKEN = ''
+STAT_SERVER_URL = ""
+STAT_TOKEN = ""
 
-AI_PACKAGE = 'first_version'
+AI_PACKAGE = "first_version"
 # class will be loaded automatically
 AI_CLASS = None
 
-LOG_PREFIX = ''
+LOG_PREFIX = ""
 
 """
   Game type decoding:
@@ -51,7 +51,7 @@ LOG_PREFIX = ''
 # for dynamic game type selection (based on the bot rank and rate)
 # you can use:
 # GAME_TYPE = None
-GAME_TYPE = '1'
+GAME_TYPE = "1"
 
 try:
     from settings_local import *

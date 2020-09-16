@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
+from game.ai.first_version.strategies.main import BaseStrategy
 from mahjong.constants import EAST, SOUTH
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
-
-from game.ai.first_version.strategies.main import BaseStrategy
 
 
 class YakuhaiStrategy(BaseStrategy):
@@ -84,9 +83,11 @@ class YakuhaiStrategy(BaseStrategy):
 
         for pair in self.valued_pairs:
             # last chance to get that yakuhai, let's go for it
-            if (opportunity_to_meld_yakuhai and
-                    self.player.total_tiles(pair, player_closed_hand_tiles_34) == 3 and
-                    self.player.ai.shanten >= 1):
+            if (
+                opportunity_to_meld_yakuhai
+                and self.player.total_tiles(pair, player_closed_hand_tiles_34) == 3
+                and self.player.ai.shanten >= 1
+            ):
 
                 if pair not in self.last_chance_calls:
                     self.last_chance_calls.append(pair)

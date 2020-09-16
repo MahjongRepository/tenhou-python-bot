@@ -1,16 +1,15 @@
 import logging
 
-logger = logging.getLogger('ai')
+logger = logging.getLogger("ai")
 
 
 class DecisionsLogger:
-
     @staticmethod
-    def debug(message_id, message='', context=None, print_log=True):
+    def debug(message_id, message="", context=None, print_log=True):
         if not print_log:
             return
 
-        logger.debug('id={}'.format(message_id))
+        logger.debug("id={}".format(message_id))
 
         if message:
             logger.debug(message)

@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 import utils.decisions_constants as log
-
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_man, is_pin, is_sou, is_pon, is_chi, plus_dora, is_aka_dora, is_honor, is_terminal
-
+from mahjong.utils import is_aka_dora, is_chi, is_honor, is_man, is_pin, is_pon, is_sou, is_terminal, plus_dora
 from utils.decisions_logger import DecisionsLogger
 
 
@@ -17,12 +15,12 @@ class BaseStrategy(object):
     CHIITOITSU = 5
 
     TYPES = {
-        YAKUHAI: 'Yakuhai',
-        HONITSU: 'Honitsu',
-        TANYAO: 'Tanyao',
-        FORMAL_TEMPAI: 'Formal Tempai',
-        CHINITSU: 'Chinitsu',
-        CHIITOITSU: 'Chiitoitsu'
+        YAKUHAI: "Yakuhai",
+        HONITSU: "Honitsu",
+        TANYAO: "Tanyao",
+        FORMAL_TEMPAI: "Formal Tempai",
+        CHINITSU: "Chinitsu",
+        CHIITOITSU: "Chiitoitsu",
     }
 
     not_suitable_tiles = []
@@ -150,10 +148,7 @@ class BaseStrategy(object):
                 second_limit = second_index
 
             combinations = self.player.ai.hand_divider.find_valid_combinations(
-                closed_hand_34,
-                first_limit,
-                second_limit,
-                True
+                closed_hand_34, first_limit, second_limit, True
             )
 
         if combinations:
@@ -174,9 +169,11 @@ class BaseStrategy(object):
         # we can call melds only with allowed tiles
         validated_melds = []
         for meld in possible_melds:
-            if (self.is_tile_suitable(meld[0] * 4) and
-                    self.is_tile_suitable(meld[1] * 4) and
-                    self.is_tile_suitable(meld[2] * 4)):
+            if (
+                self.is_tile_suitable(meld[0] * 4)
+                and self.is_tile_suitable(meld[1] * 4)
+                and self.is_tile_suitable(meld[2] * 4)
+            ):
                 validated_melds.append(meld)
         possible_melds = validated_melds
 
@@ -184,8 +181,8 @@ class BaseStrategy(object):
             return None, None
 
         chosen_meld = self._find_best_meld_to_open(possible_melds, new_tiles, closed_hand, tile)
-        selected_tile = chosen_meld['discard_tile']
-        meld = chosen_meld['meld']
+        selected_tile = chosen_meld["discard_tile"]
+        meld = chosen_meld["meld"]
 
         shanten = selected_tile.shanten
         had_to_be_called = self.meld_had_to_be_called(tile)
@@ -254,11 +251,7 @@ class BaseStrategy(object):
             second_tile = TilesConverter.find_34_tile_in_136_array(meld_34_copy[1], closed_hand_copy)
             closed_hand_copy.remove(second_tile)
 
-            tiles = [
-                first_tile,
-                second_tile,
-                discarded_tile
-            ]
+            tiles = [first_tile, second_tile, discarded_tile]
 
             meld = Meld()
             meld.type = meld_type
@@ -267,22 +260,22 @@ class BaseStrategy(object):
             melds = self.player.melds + [meld]
 
             selected_tile = self.player.ai.hand_builder.choose_tile_to_discard(
-                new_tiles,
-                closed_hand_copy,
-                melds,
-                print_log=False
+                new_tiles, closed_hand_copy, melds, print_log=False
             )
 
-            final_results.append({
-                'discard_tile': selected_tile,
-                'meld_print': TilesConverter.to_one_line_string([meld_34[0] * 4, meld_34[1] * 4, meld_34[2] * 4]),
-                'meld': meld
-            })
+            final_results.append(
+                {
+                    "discard_tile": selected_tile,
+                    "meld_print": TilesConverter.to_one_line_string([meld_34[0] * 4, meld_34[1] * 4, meld_34[2] * 4]),
+                    "meld": meld,
+                }
+            )
 
-        final_results = sorted(final_results, key=lambda x: (x['discard_tile'].shanten,
-                                                             -x['discard_tile'].ukeire,
-                                                             x['discard_tile'].valuation))
+        final_results = sorted(
+            final_results,
+            key=lambda x: (x["discard_tile"].shanten, -x["discard_tile"].ukeire, x["discard_tile"].valuation),
+        )
 
-        DecisionsLogger.debug(log.MELD_PREPARE, 'Options with meld calling', context=final_results)
+        DecisionsLogger.debug(log.MELD_PREPARE, "Options with meld calling", context=final_results)
 
         return final_results[0]

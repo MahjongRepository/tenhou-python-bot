@@ -1,10 +1,17 @@
 # -*- coding: utf-8 -*-
-from mahjong.tile import TilesConverter
-from mahjong.utils import count_tiles_by_suits, is_tile_strictly_isolated
-from mahjong.utils import is_man, is_pin, is_sou, plus_dora, is_aka_dora, is_honor
-
-from game.ai.first_version.strategies.main import BaseStrategy
 from game.ai.first_version.strategies.honitsu import HonitsuStrategy
+from game.ai.first_version.strategies.main import BaseStrategy
+from mahjong.tile import TilesConverter
+from mahjong.utils import (
+    count_tiles_by_suits,
+    is_aka_dora,
+    is_honor,
+    is_man,
+    is_pin,
+    is_sou,
+    is_tile_strictly_isolated,
+    plus_dora,
+)
 
 
 class ChinitsuStrategy(BaseStrategy):
@@ -29,21 +36,21 @@ class ChinitsuStrategy(BaseStrategy):
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
         suits = count_tiles_by_suits(tiles_34)
 
-        suits = [x for x in suits if x['name'] != 'honor']
-        suits = sorted(suits, key=lambda x: x['count'], reverse=True)
+        suits = [x for x in suits if x["name"] != "honor"]
+        suits = sorted(suits, key=lambda x: x["count"], reverse=True)
         suit = suits[0]
 
         count_of_shuntsu_other_suits = 0
         count_of_koutsu_other_suits = 0
 
-        count_of_shuntsu_other_suits += HonitsuStrategy._count_of_shuntsu(tiles_34, suits[1]['function'])
-        count_of_shuntsu_other_suits += HonitsuStrategy._count_of_shuntsu(tiles_34, suits[2]['function'])
+        count_of_shuntsu_other_suits += HonitsuStrategy._count_of_shuntsu(tiles_34, suits[1]["function"])
+        count_of_shuntsu_other_suits += HonitsuStrategy._count_of_shuntsu(tiles_34, suits[2]["function"])
 
-        count_of_koutsu_other_suits += HonitsuStrategy._count_of_koutsu(tiles_34, suits[1]['function'])
-        count_of_koutsu_other_suits += HonitsuStrategy._count_of_koutsu(tiles_34, suits[2]['function'])
+        count_of_koutsu_other_suits += HonitsuStrategy._count_of_koutsu(tiles_34, suits[1]["function"])
+        count_of_koutsu_other_suits += HonitsuStrategy._count_of_koutsu(tiles_34, suits[2]["function"])
 
         # we need to have at least 9 tiles of one suit to fo for chinitsu
-        if suit['count'] < 9:
+        if suit["count"] < 9:
             return False
 
         # here we only check doras in different suits, we will deal
@@ -71,11 +78,11 @@ class ChinitsuStrategy(BaseStrategy):
                 return False
 
         # we are almost tempai, chinitsu is slower
-        if suit['count'] == 9 and self.player.ai.shanten == 1:
+        if suit["count"] == 9 and self.player.ai.shanten == 1:
             return False
 
         # only 10 tiles by 8th turn is too slow, considering alternative
-        if suit['count'] == 10 and self.player.ai.shanten == 1 and self.player.round_step > 8:
+        if suit["count"] == 10 and self.player.ai.shanten == 1 and self.player.round_step > 8:
             return False
 
         # if we have a pon of honors, let's not go for chinitsu
@@ -89,8 +96,13 @@ class ChinitsuStrategy(BaseStrategy):
             return False
 
         # if we have a pair of honor doras, let's not go for chinitsu
-        honor_doras_pairs = len([x for x in range(0, 34) if is_honor(x) and tiles_34[x] == 2
-                                 and plus_dora(x * 4, self.player.table.dora_indicators)])
+        honor_doras_pairs = len(
+            [
+                x
+                for x in range(0, 34)
+                if is_honor(x) and tiles_34[x] == 2 and plus_dora(x * 4, self.player.table.dora_indicators)
+            ]
+        )
         if honor_doras_pairs >= 1:
             return False
 
@@ -100,7 +112,7 @@ class ChinitsuStrategy(BaseStrategy):
         if honor_pairs >= 2:
             return False
         if honor_pairs == 1:
-            if suit['count'] < 11:
+            if suit["count"] < 11:
                 return False
             if self.player.round_step > 8:
                 return False
@@ -119,7 +131,7 @@ class ChinitsuStrategy(BaseStrategy):
             if self.dora_count_not_suitable >= 1:
                 return False
 
-        self.chosen_suit = suit['function']
+        self.chosen_suit = suit["function"]
 
         return True
 
@@ -165,12 +177,12 @@ class ChinitsuStrategy(BaseStrategy):
                 if not is_tile_strictly_isolated(tiles_34, tile_34):
                     dora_count_sou_not_isolated += dora_count
 
-        if suit['name'] == 'pin':
+        if suit["name"] == "pin":
             self.dora_count_suitable = dora_count_pin
             self.dora_count_not_suitable = dora_count_man_not_isolated + dora_count_sou_not_isolated
-        elif suit['name'] == 'sou':
+        elif suit["name"] == "sou":
             self.dora_count_suitable = dora_count_sou
             self.dora_count_not_suitable = dora_count_man_not_isolated + dora_count_pin_not_isolated
-        elif suit['name'] == 'man':
+        elif suit["name"] == "man":
             self.dora_count_suitable = dora_count_man
             self.dora_count_not_suitable = dora_count_sou_not_isolated + dora_count_pin_not_isolated

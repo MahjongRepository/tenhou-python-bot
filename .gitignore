@@ -4,6 +4,7 @@ env
 *.py[cod]
 __pycache__
 .DS_Store
+.pytest_cache
 logs
 project/settings_local.py
 project/*_settings.py

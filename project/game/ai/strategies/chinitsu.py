@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from game.ai.strategies.honitsu import HonitsuStrategy
 from game.ai.strategies.main import BaseStrategy
 from mahjong.tile import TilesConverter

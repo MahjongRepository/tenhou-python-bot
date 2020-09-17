@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 class TileDanger:
     GENBUTSU = {"value": 0, "description": "Genbutsu"}
     IMPOSSIBLE_WAIT = {"value": 0, "description": "Impossible wait"}

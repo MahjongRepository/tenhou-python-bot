@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from game.ai.strategies.main import BaseStrategy
 from mahjong.constants import HONOR_INDICES, TERMINAL_INDICES
 from mahjong.tile import TilesConverter

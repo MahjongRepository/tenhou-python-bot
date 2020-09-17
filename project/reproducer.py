@@ -14,7 +14,7 @@ from utils.logger import set_up_logging
 logger = logging.getLogger("tenhou")
 
 
-class TenhouLogReproducer(object):
+class TenhouLogReproducer:
     """
     The way to debug bot decisions that it made in real tenhou.net games
     """
@@ -242,7 +242,7 @@ class TenhouLogReproducer(object):
         return result and result[0] or None
 
 
-class SocketMock(object):
+class SocketMock:
     """
     Reproduce tenhou <-> bot communication
     """

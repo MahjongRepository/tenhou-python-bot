@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 import re
 from urllib.parse import unquote
 
 from mahjong.meld import Meld
 
 
-class TenhouDecoder(object):
+class TenhouDecoder:
     RANKS = [
         "新人",
         "9級",

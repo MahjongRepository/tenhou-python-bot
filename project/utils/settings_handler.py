@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 import importlib
 
 
-class SettingsSingleton(object):
+class SettingsSingleton:
     """
     Let's load a settings in the memory one time when the app starts
     Than override some settings with command arguments
@@ -22,7 +21,7 @@ class SettingsSingleton(object):
         return setattr(self.instance, key, value)
 
 
-class Settings(object):
+class Settings:
     def __init__(self):
         mod = importlib.import_module("settings")
 

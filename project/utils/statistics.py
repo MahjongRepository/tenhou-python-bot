@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 import requests
 from utils.settings_handler import settings
 
 
-class Statistics(object):
+class Statistics:
     """
     Send data to https://github.com/MahjongRepository/mahjong-stat/ project
     """

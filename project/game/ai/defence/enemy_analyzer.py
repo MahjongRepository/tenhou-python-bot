@@ -7,7 +7,7 @@ from utils.decisions_constants import DEFENCE_THREATENING_ENEMY
 from utils.decisions_logger import DecisionsLogger
 
 
-class EnemyAnalyzer(object):
+class EnemyAnalyzer:
     player = None
     possible_forms_analyzer = None
 

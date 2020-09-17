@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from game.ai.helpers.defence import TileDanger
 from mahjong.constants import EAST
 from mahjong.tile import TilesConverter

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from game.ai.helpers.defence import DefenceHandler
 from game.ai.strategies.main import BaseStrategy
 from mahjong.constants import AKA_DORA_LIST
@@ -6,7 +5,7 @@ from mahjong.tile import TilesConverter
 from mahjong.utils import is_aka_dora, is_honor, is_man, is_pin, is_sou, plus_dora, simplify
 
 
-class DiscardOption(object):
+class DiscardOption:
     DORA_VALUE = 10000
     DORA_FIRST_NEIGHBOUR = 1000
     DORA_SECOND_NEIGHBOUR = 100

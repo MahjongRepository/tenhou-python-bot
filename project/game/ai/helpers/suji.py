@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from mahjong.utils import is_man, is_pin, is_sou, simplify
 
 

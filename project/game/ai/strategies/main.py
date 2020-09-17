@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import utils.decisions_constants as log
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
@@ -6,7 +5,7 @@ from mahjong.utils import is_aka_dora, is_chi, is_honor, is_man, is_pin, is_pon,
 from utils.decisions_logger import DecisionsLogger
 
 
-class BaseStrategy(object):
+class BaseStrategy:
     YAKUHAI = 0
     HONITSU = 1
     TANYAO = 2

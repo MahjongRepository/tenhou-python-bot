@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import copy
 import logging
 
@@ -12,7 +11,7 @@ from utils.decisions_logger import DecisionsLogger
 logger = logging.getLogger("tenhou")
 
 
-class PlayerInterface(object):
+class PlayerInterface:
     table = None
     discards = None
     melds = None

@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
 from game.table import Table
 
 
-class Client(object):
+class Client:
     table = None
 
     def __init__(self):

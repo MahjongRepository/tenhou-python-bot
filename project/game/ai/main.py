@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import copy
 
 import utils.decisions_constants as log

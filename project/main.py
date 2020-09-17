@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Endpoint to run bot. It will play a game on tenhou.net
 """

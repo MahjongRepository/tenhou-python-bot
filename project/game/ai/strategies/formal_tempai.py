@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from game.ai.strategies.main import BaseStrategy
 
 

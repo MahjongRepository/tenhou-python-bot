@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from game.player import EnemyPlayer, Player
 from mahjong.constants import EAST, NORTH, SOUTH, WEST
 from mahjong.meld import Meld
@@ -6,7 +5,7 @@ from mahjong.tile import Tile, TilesConverter
 from mahjong.utils import is_aka_dora, plus_dora
 
 
-class Table(object):
+class Table:
     # our bot
     player = None
     # main bot + all other players

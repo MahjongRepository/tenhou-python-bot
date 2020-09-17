@@ -33,4 +33,4 @@ jobs:
       - name: Install libs
         run: pip install -r requirements/dev.txt
       - name: Run tests
-        run: make test
+        run: make tests

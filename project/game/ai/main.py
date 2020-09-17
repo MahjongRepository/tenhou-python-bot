@@ -26,7 +26,7 @@ from utils.decisions_logger import DecisionsLogger
 
 
 class MahjongAI:
-    version = "0.4.0"
+    version = "0.5.0-dev"
 
     agari = None
     shanten_calculator = None
@@ -154,12 +154,11 @@ class MahjongAI:
                 self.current_strategy = strategy
                 break
 
-        if self.current_strategy:
-            if not old_strategy or self.current_strategy.type != old_strategy.type:
-                DecisionsLogger.debug(
-                    log.STRATEGY_ACTIVATE,
-                    context=self.current_strategy,
-                )
+        if self.current_strategy and (not old_strategy or self.current_strategy.type != old_strategy.type):
+            DecisionsLogger.debug(
+                log.STRATEGY_ACTIVATE,
+                context=self.current_strategy,
+            )
 
         if not self.current_strategy and old_strategy:
             DecisionsLogger.debug(log.STRATEGY_DROP, context=old_strategy)
@@ -197,7 +196,11 @@ class MahjongAI:
         )
 
         result = self.finished_hand.estimate_hand_value(
-            tiles, win_tile, self.player.melds, self.player.table.dora_indicators, config
+            tiles,
+            win_tile,
+            self.player.melds,
+            self.player.table.dora_indicators,
+            config,
         )
         return result
 

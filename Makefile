@@ -7,5 +7,5 @@ lint:
 	black --check project/*
 	flake8 project/*
 
-test:
+tests:
 	PYTHONPATH=./project pytest

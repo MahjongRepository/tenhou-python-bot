@@ -18,7 +18,7 @@ class Riichi:
         if count_tiles == 0:
             return False
 
-        # It is daburi!
+        # it is daburi!
         first_discard = self.player.round_step == 1
         if first_discard and not self.player.table.meld_was_called:
             return True
@@ -155,12 +155,11 @@ class Riichi:
                     return False
 
             # 1-sided wait means kanchan or penchan
-            if is_chi(hand_set):
-                # let's only riichi this bad wait if
-                # it has all 4 tiles available or it
-                # it's not too early
-                if 4 <= simplified_waiting <= 6:
-                    return count_tiles == 4 or self.player.round_step >= 6
+            # let's only riichi this bad wait if
+            # it has all 4 tiles available or it
+            # it's not too early
+            if is_chi(hand_set) and 4 <= simplified_waiting <= 6:
+                return count_tiles == 4 or self.player.round_step >= 6
 
         return True
 
@@ -185,7 +184,7 @@ class Riichi:
             if count_tiles <= 2:
                 return False
 
-            # if wait is slighly better, we will riichi only a cheap hand
+            # if wait is slightly better, we will riichi only a cheap hand
             if count_tiles <= 4:
                 if self.player.is_dealer and min_cost >= 7700:
                     return False

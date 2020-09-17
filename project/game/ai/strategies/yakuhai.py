@@ -129,9 +129,8 @@ class YakuhaiStrategy(BaseStrategy):
         for item in acceptable_options:
             # ignore wait without yakuhai yaku if possible
             if is_open_hand and len(valued_pons) == 0 and len(valued_pairs) == 1:
-                if item.shanten == 0:
-                    if valued_pairs[0] not in item.waiting:
-                        continue
+                if item.shanten == 0 and valued_pairs[0] not in item.waiting:
+                    continue
 
             preferred_options.append(item)
 

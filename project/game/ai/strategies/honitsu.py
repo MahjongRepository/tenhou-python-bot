@@ -179,17 +179,14 @@ class HonitsuStrategy(BaseStrategy):
             if is_aka_dora(tile_136, self.player.table.has_aka_dora):
                 dora_count += 1
 
-            if is_man(tile_34):
-                if not is_tile_strictly_isolated(tiles_34, tile_34):
-                    dora_count_man_not_isolated += dora_count
+            if is_man(tile_34) and not is_tile_strictly_isolated(tiles_34, tile_34):
+                dora_count_man_not_isolated += dora_count
 
-            if is_pin(tile_34):
-                if not is_tile_strictly_isolated(tiles_34, tile_34):
-                    dora_count_pin_not_isolated += dora_count
+            if is_pin(tile_34) and not is_tile_strictly_isolated(tiles_34, tile_34):
+                dora_count_pin_not_isolated += dora_count
 
-            if is_sou(tile_34):
-                if not is_tile_strictly_isolated(tiles_34, tile_34):
-                    dora_count_sou_not_isolated += dora_count
+            if is_sou(tile_34) and not is_tile_strictly_isolated(tiles_34, tile_34):
+                dora_count_sou_not_isolated += dora_count
 
         if suit["name"] == "pin":
             self.dora_count_other_suits_not_isolated = dora_count_man_not_isolated + dora_count_sou_not_isolated

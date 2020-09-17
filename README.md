@@ -1,6 +1,6 @@
 ![Mahjong bot](https://github.com/MahjongRepository/tenhou-python-bot/workflows/Mahjong%20bot/badge.svg)
 
-Bot was tested with Python 3.5. With Python 2 it is not working.
+Bot was tested with Python 3.6+, we are not supporting Python 2.
 
 # What do we have here?
 

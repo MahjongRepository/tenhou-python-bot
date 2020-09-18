@@ -102,7 +102,7 @@ class TileDanger:
         "description": "Additional danger for tile being dora connector",
     }
 
-    # early discards - these are cosidered only if ryanmen is possible
+    # early discards - these are considered only if ryanmen is possible
     NEGATIVE_BONUS_19_EARLY_2378 = {
         "value": -20,
         "description": "Subtracted danger for 1 or 9 because of early 2, 3, 7 or 8 discard",
@@ -112,9 +112,12 @@ class TileDanger:
         "description": "Subtracted danger for 2 or 8 because of early 3 or 7 discard",
     }
 
-    # the following constants don't follow the logic of other constants, so they are not dictionaries
+    ###############
+    # The following constants don't follow the logic of other constants, so they are not dictionaries
+    ##############
 
     # count of possible forms
+    FORM_BONUS_DESCRIPTION = "Forms bonus"
     FORM_BONUS_RYANMEN = 5
     FORM_BONUS_OTHER = 2
 
@@ -139,18 +142,22 @@ class DefenceHandler:
     def __unicode__(self):
         return self.values
 
-    def set_danger(self, player, danger):
-        self.values[player].append(danger)
+    def set_danger(self, player_seat, danger):
+        self.values[player_seat].append(danger)
 
-    def get_total_danger(self, player):
+    def get_danger_reasons(self, player_seat):
+        return self.values[player_seat]
+
+    def get_total_danger(self, player_seat):
         safe = [
             x
-            for x in self.values[player]
+            for x in self.values[player_seat]
             if x["description"] == TileDanger.GENBUTSU["description"]
             or x["description"] == TileDanger.IMPOSSIBLE_WAIT["description"]
         ]
+
         # no matter what other metrics says, this tile is safe
         if safe:
             return 0
 
-        return sum([x["value"] for x in self.values[player]])
+        return sum([x["value"] for x in self.values[player_seat]])

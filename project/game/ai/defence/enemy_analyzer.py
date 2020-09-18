@@ -9,12 +9,13 @@ from utils.decisions_logger import DecisionsLogger
 
 class EnemyAnalyzer:
     player = None
-    possible_forms_analyzer = None
+    active_yaku = None
 
     def __init__(self, player):
         # is enemy
         self.player = player
         self.table = player.table
+        self.active_yaku = []
 
         # is our bot
         self.main_player = self.table.player
@@ -77,7 +78,6 @@ class EnemyAnalyzer:
                         "round_step": self.main_player.round_step,
                     },
                 )
-
                 return True
 
             melds_han = 0
@@ -85,6 +85,7 @@ class EnemyAnalyzer:
             for x in yaku_analyzers:
                 if x.is_yaku_active():
                     active_yaku.append(x.id)
+                    self.active_yaku.append([])
                     melds_han += x.melds_han()
 
             if melds_han + dora_count >= 3 and len(self.player.melds) >= 2:
@@ -98,7 +99,6 @@ class EnemyAnalyzer:
                         "active_yaku": active_yaku,
                     },
                 )
-
                 return True
 
         return False
@@ -112,12 +112,3 @@ class EnemyAnalyzer:
     def number_of_unverified_suji(self):
         # FIXME add real value
         return 2
-
-    def total_possible_forms_for_tile(self, tile_34):
-        # FIXME: calculating possible forms anew each time is not optimal, we need to cache it somehow
-        possible_forms = self.possible_forms_analyzer.calculate_possible_forms(self.all_safe_tiles)
-        forms_count = possible_forms[tile_34]
-
-        assert forms_count is not None
-
-        return self.possible_forms_analyzer.calculate_possible_forms_total(forms_count)

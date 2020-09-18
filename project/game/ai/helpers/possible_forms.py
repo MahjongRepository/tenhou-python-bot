@@ -86,34 +86,28 @@ class PossibleFormsAnalyzer:
     @staticmethod
     def calculate_possible_forms_total(forms_count):
         total = 0
-
         total += forms_count[PossibleFormsAnalyzer.POSSIBLE_TANKI]
         total += forms_count[PossibleFormsAnalyzer.POSSIBLE_SYANPON]
         total += forms_count[PossibleFormsAnalyzer.POSSIBLE_PENCHAN]
         total += forms_count[PossibleFormsAnalyzer.POSSIBLE_KANCHAN]
         total += forms_count[PossibleFormsAnalyzer.POSSIBLE_RYANMEN]
-
         return total
 
     @staticmethod
     def calculate_possible_forms_danger(forms_count):
         danger = 0
-
         danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_TANKI] * TileDanger.FORM_BONUS_OTHER
         danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_SYANPON] * TileDanger.FORM_BONUS_OTHER
         danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_PENCHAN] * TileDanger.FORM_BONUS_OTHER
         danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_KANCHAN] * TileDanger.FORM_BONUS_OTHER
         danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_RYANMEN] * TileDanger.FORM_BONUS_RYANMEN
-
         return danger
 
     def _init_zero_forms_count(self):
         forms_count = dict()
-
         forms_count[self.POSSIBLE_TANKI] = 0
         forms_count[self.POSSIBLE_SYANPON] = 0
         forms_count[self.POSSIBLE_PENCHAN] = 0
         forms_count[self.POSSIBLE_KANCHAN] = 0
         forms_count[self.POSSIBLE_RYANMEN] = 0
-
         return forms_count

@@ -8,4 +8,4 @@ lint:
 	flake8 project/*
 
 tests:
-	PYTHONPATH=./project pytest
+	PYTHONPATH=./project pytest -n 4

@@ -226,7 +226,7 @@ class Player(PlayerInterface):
     def enemy_called_riichi(self, player_seat):
         self.ai.enemy_called_riichi(player_seat)
 
-    def total_tiles(self, tile_34, closed_hand_34):
+    def number_of_revealed_tiles(self, tile_34, closed_hand_34):
         """
         Return sum of all tiles (discarded + from melds + our hand)
         :param tile_34: 34 tile format

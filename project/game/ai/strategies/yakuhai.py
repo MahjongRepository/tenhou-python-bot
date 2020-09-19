@@ -46,7 +46,10 @@ class YakuhaiStrategy(BaseStrategy):
         for pair in self.valued_pairs:
             # we have valued pair in the hand and there are enough tiles
             # in the wall
-            if opportunity_to_meld_yakuhai or self.player.total_tiles(pair, player_closed_hand_tiles_34) < 4:
+            if (
+                opportunity_to_meld_yakuhai
+                or self.player.number_of_revealed_tiles(pair, player_closed_hand_tiles_34) < 4
+            ):
                 has_valued_pair = True
                 break
 
@@ -84,7 +87,7 @@ class YakuhaiStrategy(BaseStrategy):
             # last chance to get that yakuhai, let's go for it
             if (
                 opportunity_to_meld_yakuhai
-                and self.player.total_tiles(pair, player_closed_hand_tiles_34) == 3
+                and self.player.number_of_revealed_tiles(pair, player_closed_hand_tiles_34) == 3
                 and self.player.ai.shanten >= 1
             ):
 

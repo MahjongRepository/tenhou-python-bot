@@ -13,9 +13,6 @@ class Suji:
         self.player = player
 
     def find_suji(self, tiles_136):
-        """
-        :param tiles_136: list of 136 ints. For example player discard.
-        """
         tiles_34 = list(set([x // 4 for x in tiles_136]))
 
         suji = []

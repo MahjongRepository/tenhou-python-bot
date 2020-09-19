@@ -1,8 +1,4 @@
 class TileDanger:
-    GENBUTSU = {
-        "value": 0,
-        "description": "Genbutsu",
-    }
     IMPOSSIBLE_WAIT = {
         "value": 0,
         "description": "Impossible wait",
@@ -22,7 +18,7 @@ class TileDanger:
         "description": "Shonpai non-yakuhai honor",
     }
     YAKUHAI_HONOR_SECOND = {
-        "value": 20,
+        "value": 50,
         "description": "Second yakuhai honor",
     }
     DOUBLE_YAKUHAI_HONOR_SECOND = {
@@ -33,7 +29,7 @@ class TileDanger:
         "value": 80,
         "description": "Shonpai yakuhai honor",
     }
-    DOBULE_YAKUHAI_HONOR_SHONPAI = {
+    DOUBLE_YAKUHAI_HONOR_SHONPAI = {
         "value": 160,
         "description": "Shonpai double-yakuhai honor",
     }
@@ -118,8 +114,11 @@ class TileDanger:
 
     # count of possible forms
     FORM_BONUS_DESCRIPTION = "Forms bonus"
+    FORM_BONUS_KANCHAN = 2
+    FORM_BONUS_PENCHAN = 2
+    FORM_BONUS_SYANPON = 8
+    FORM_BONUS_TANKI = 8
     FORM_BONUS_RYANMEN = 5
-    FORM_BONUS_OTHER = 2
 
     # octaves counting, (n - OCTAVE_BASE) *  OCTAVE_MODIFIER
     OCTAVE_BASE = 10
@@ -149,12 +148,7 @@ class DefenceHandler:
         return self.values[player_seat]
 
     def get_total_danger(self, player_seat):
-        safe = [
-            x
-            for x in self.values[player_seat]
-            if x["description"] == TileDanger.GENBUTSU["description"]
-            or x["description"] == TileDanger.IMPOSSIBLE_WAIT["description"]
-        ]
+        safe = [x for x in self.values[player_seat] if x["description"] == TileDanger.IMPOSSIBLE_WAIT["description"]]
 
         # no matter what other metrics says, this tile is safe
         if safe:

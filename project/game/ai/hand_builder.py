@@ -260,7 +260,7 @@ class HandBuilder:
     def count_tiles(self, waiting, tiles_34):
         n = 0
         for tile_34 in waiting:
-            n += 4 - self.player.total_tiles(tile_34, tiles_34)
+            n += 4 - self.player.number_of_revealed_tiles(tile_34, tiles_34)
         return n
 
     def divide_hand(self, tiles, waiting):
@@ -311,7 +311,7 @@ class HandBuilder:
                 continue
 
             closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
-            live_tiles = 4 - self.player.total_tiles(wait_34, closed_hand_34)
+            live_tiles = 4 - self.player.number_of_revealed_tiles(wait_34, closed_hand_34)
 
             if live_tiles == 0:
                 continue

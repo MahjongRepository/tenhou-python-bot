@@ -41,13 +41,21 @@ class PossibleFormsAnalyzer:
 
                 # tanki
                 forms_count[self.POSSIBLE_TANKI] = 4 - suit[y]
+
                 # syanpon
-                forms_count[self.POSSIBLE_SYANPON] = 3 - suit[y] if suit[y] < 3 else 0
+                if suit[y] == 1:
+                    forms_count[self.POSSIBLE_SYANPON] = 3
+                if suit[y] == 2:
+                    forms_count[self.POSSIBLE_SYANPON] = 1
+                else:
+                    forms_count[self.POSSIBLE_SYANPON] = 0
+
                 # penchan
                 if y == 2:
                     forms_count[self.POSSIBLE_PENCHAN] = (4 - suit[0]) * (4 - suit[1])
                 elif y == 6:
                     forms_count[self.POSSIBLE_PENCHAN] = (4 - suit[8]) * (4 - suit[7])
+
                 # kanchan
                 if 1 <= y <= 7:
                     tiles_cnt_left = 4 - suit[y - 1]
@@ -74,10 +82,11 @@ class PossibleFormsAnalyzer:
             forms_count = self._init_zero_forms_count()
             possible_forms_34[tile_34_index] = forms_count
 
-            total_tiles = self.player.total_tiles(tile_34_index, closed_hand_34)
+            total_tiles = self.player.number_of_revealed_tiles(tile_34_index, closed_hand_34)
 
             # tanki
             forms_count[self.POSSIBLE_TANKI] = 4 - total_tiles
+
             # syanpon
             forms_count[self.POSSIBLE_SYANPON] = 3 - total_tiles if total_tiles < 3 else 0
 
@@ -96,10 +105,10 @@ class PossibleFormsAnalyzer:
     @staticmethod
     def calculate_possible_forms_danger(forms_count):
         danger = 0
-        danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_TANKI] * TileDanger.FORM_BONUS_OTHER
-        danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_SYANPON] * TileDanger.FORM_BONUS_OTHER
-        danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_PENCHAN] * TileDanger.FORM_BONUS_OTHER
-        danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_KANCHAN] * TileDanger.FORM_BONUS_OTHER
+        danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_TANKI] * TileDanger.FORM_BONUS_TANKI
+        danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_SYANPON] * TileDanger.FORM_BONUS_SYANPON
+        danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_PENCHAN] * TileDanger.FORM_BONUS_PENCHAN
+        danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_KANCHAN] * TileDanger.FORM_BONUS_KANCHAN
         danger += forms_count[PossibleFormsAnalyzer.POSSIBLE_RYANMEN] * TileDanger.FORM_BONUS_RYANMEN
         return danger
 

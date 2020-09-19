@@ -21,7 +21,7 @@ def suits_tiles(player, tiles_34):
     ]
 
     for tile in range(0, EAST):
-        total_tiles = player.total_tiles(tile, tiles_34)
+        total_tiles = player.number_of_revealed_tiles(tile, tiles_34)
         if not total_tiles:
             continue
 

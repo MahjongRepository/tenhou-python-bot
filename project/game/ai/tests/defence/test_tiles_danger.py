@@ -1,5 +1,8 @@
+from copy import copy
+
 from game.ai.helpers.defence import TileDanger
 from game.table import Table
+from mahjong.constants import FIVE_RED_SOU
 from utils.test_helpers import find_discard_option, string_to_136_array, string_to_136_tile
 
 
@@ -203,8 +206,72 @@ def test_tile_danger_and_2_8_kabe_tiles():
     _assert_discard(player, enemy_seat, TileDanger.NON_SHONPAI_KABE, sou="5")
 
 
+def test_tile_danger_and_ryanmen_wait():
+    enemy_seat = 1
+    table = _create_table(enemy_seat, discards=[])
+    player = table.player
+
+    tiles = string_to_136_array(man="11134", pin="1156", honors="2555")
+    tile = string_to_136_tile(sou="5")
+    player.init_hand(tiles)
+    player.draw_tile(tile)
+
+    _assert_discard(player, enemy_seat, TileDanger.RYANMEN_BASE, sou="5")
+
+
+def test_tile_danger_and_dora():
+    enemy_seat = 1
+    table = _create_table(enemy_seat, discards=[])
+    table.add_dora_indicator(string_to_136_tile(sou="2"))
+    player = table.player
+
+    tiles = string_to_136_array(man="11134", pin="1156", honors="2555")
+    tile = string_to_136_tile(sou="3")
+    player.init_hand(tiles)
+    player.draw_tile(tile)
+
+    _assert_discard(player, enemy_seat, TileDanger.DORA_BONUS, sou="3")
+
+    table.add_dora_indicator(string_to_136_tile(sou="2"))
+    updated = copy(TileDanger.DORA_BONUS)
+    updated["value"] = 2 * TileDanger.DORA_BONUS["value"]
+    _assert_discard(player, enemy_seat, updated, sou="3")
+
+
+def test_tile_danger_and_aka_dora():
+    enemy_seat = 1
+    table = _create_table(enemy_seat, discards=[])
+    player = table.player
+
+    tiles = string_to_136_array(man="11134", pin="1156", honors="2555")
+    tile = FIVE_RED_SOU
+    player.init_hand(tiles)
+    player.draw_tile(tile)
+
+    _assert_discard(player, enemy_seat, TileDanger.DORA_BONUS, sou="5")
+
+
+def test_tile_total_danger():
+    enemy_seat = 1
+    table = _create_table(enemy_seat, discards=[])
+    table.add_dora_indicator(string_to_136_tile(sou="3"))
+    player = table.player
+
+    tiles = string_to_136_array(man="11134", pin="1156", honors="2555")
+    tile = string_to_136_tile(sou="4")
+    player.init_hand(tiles)
+    player.draw_tile(tile)
+
+    discard_options, _ = player.ai.hand_builder.find_discard_options(player.tiles, player.closed_hand, player.melds)
+    discard_options = player.ai.defence.check_threat_and_mark_tiles_danger(discard_options)
+    discard_option = find_discard_option(discard_options, sou="4")
+
+    assert discard_option.danger.get_total_danger(enemy_seat) == 388
+
+
 def _create_table(enemy_seat, discards):
     table = Table()
+    table.has_aka_dora = True
     for discard in discards:
         table.add_discarded_tile(0, discard, False)
     table.add_called_riichi(enemy_seat)
@@ -215,9 +282,11 @@ def _assert_discard(player, enemy_seat, tile_danger, sou="", pin="", man="", hon
     discard_options, _ = player.ai.hand_builder.find_discard_options(player.tiles, player.closed_hand, player.melds)
     discard_options = player.ai.defence.check_threat_and_mark_tiles_danger(discard_options)
     discard_option = find_discard_option(discard_options, sou=sou, pin=pin, man=man, honors=honors)
-    dangers = [
+    danger = [
         x
         for x in discard_option.danger.get_danger_reasons(enemy_seat)
-        if x["description"] != TileDanger.FORM_BONUS_DESCRIPTION
+        if x["description"] == tile_danger["description"]
     ]
-    assert dangers == [tile_danger]
+    assert len(danger) > 0
+    assert danger[0]["value"] == tile_danger["value"]
+    assert danger[0]["description"] == tile_danger["description"]

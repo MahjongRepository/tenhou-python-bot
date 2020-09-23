@@ -1,7 +1,7 @@
 import copy
 
 import utils.decisions_constants as log
-from game.ai.defence.main import DefenceHandler
+from game.ai.defence.main import TileDangerHandler
 from game.ai.hand_builder import HandBuilder
 from game.ai.helpers.kabe import Kabe
 from game.ai.helpers.suji import Suji
@@ -51,7 +51,7 @@ class MahjongAI:
 
         self.agari = Agari()
         self.shanten_calculator = Shanten()
-        self.defence = DefenceHandler(player)
+        self.defence = TileDangerHandler(player)
         self.riichi = Riichi(player)
         self.hand_divider = HandDivider()
         self.finished_hand = HandCalculator()

@@ -1,13 +1,14 @@
 from game.ai.defence.yaku_analyzer.honitsu import HonitsuAnalyzer
 from game.ai.defence.yaku_analyzer.tanyao import TanyaoAnalyzer
 from game.ai.defence.yaku_analyzer.yakuhai import YakuhaiAnalyzer
+from game.ai.helpers.defence import EnemyDanger
 from game.table import Table
 from mahjong.constants import HONOR_INDICES, TERMINAL_INDICES
 from mahjong.meld import Meld
 from utils.test_helpers import make_meld, string_to_136_tile
 
 
-def test_is_threatening_in_riichi():
+def test_is_threatening_and_riichi():
     table = Table()
 
     threatening_players = table.player.ai.defence._get_threatening_players()
@@ -19,6 +20,7 @@ def test_is_threatening_in_riichi():
     threatening_players = table.player.ai.defence._get_threatening_players()
     assert len(threatening_players) == 1
     assert threatening_players[0].player.seat == enemy_seat
+    assert threatening_players[0].threat_reason == EnemyDanger.THREAT_RIICHI
 
 
 def test_is_threatening_and_dora_pon():
@@ -35,11 +37,34 @@ def test_is_threatening_and_dora_pon():
     threatening_players = table.player.ai.defence._get_threatening_players()
     assert len(threatening_players) == 0
 
-    # dora pon it is threat
+    # dora pon is threat
     table.add_dora_indicator(string_to_136_tile(man="2"))
     threatening_players = table.player.ai.defence._get_threatening_players()
     assert len(threatening_players) == 1
     assert threatening_players[0].player.seat == enemy_seat
+    assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_OPEN_HAND_AND_MULTIPLE_DORA["id"]
+
+
+def test_is_threatening_and_closed_dora_kan():
+    table = Table()
+
+    threatening_players = table.player.ai.defence._get_threatening_players()
+    assert len(threatening_players) == 0
+
+    enemy_seat = 2
+    table.add_called_meld(enemy_seat, make_meld(Meld.KAN, is_open=False, man="3333"))
+    table.player.round_step = 7
+
+    # simple pon it is no threat
+    threatening_players = table.player.ai.defence._get_threatening_players()
+    assert len(threatening_players) == 0
+
+    # dora kan is threat
+    table.add_dora_indicator(string_to_136_tile(man="2"))
+    threatening_players = table.player.ai.defence._get_threatening_players()
+    assert len(threatening_players) == 1
+    assert threatening_players[0].player.seat == enemy_seat
+    assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_OPEN_HAND_AND_MULTIPLE_DORA["id"]
 
 
 def test_is_threatening_and_two_open_yakuhai_melds():
@@ -67,6 +92,7 @@ def test_is_threatening_and_two_open_yakuhai_melds():
     threatening_players = table.player.ai.defence._get_threatening_players()
     assert len(threatening_players) == 1
     assert threatening_players[0].player.seat == enemy_seat
+    assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
 
 
 def test_is_threatening_and_two_open_tanyao_melds():
@@ -90,6 +116,7 @@ def test_is_threatening_and_two_open_tanyao_melds():
     threatening_players = table.player.ai.defence._get_threatening_players()
     assert len(threatening_players) == 1
     assert threatening_players[0].player.seat == enemy_seat
+    assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
 
 
 def test_is_threatening_and_honitsu_hand():
@@ -113,6 +140,7 @@ def test_is_threatening_and_honitsu_hand():
 
     threatening_players = table.player.ai.defence._get_threatening_players()
     assert len(threatening_players) == 1
+    assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_HONITSU["id"]
 
 
 def test_tanyao_dangerous_tiles():

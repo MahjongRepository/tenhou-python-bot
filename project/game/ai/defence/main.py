@@ -1,3 +1,4 @@
+from copy import copy
 from typing import List
 
 from game.ai.defence.enemy_analyzer import EnemyAnalyzer
@@ -6,10 +7,10 @@ from game.ai.helpers.defence import TileDanger
 from game.ai.helpers.kabe import Kabe
 from game.ai.helpers.possible_forms import PossibleFormsAnalyzer
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_honor, is_terminal
+from mahjong.utils import is_aka_dora, is_honor, is_terminal, plus_dora
 
 
-class DefenceHandler:
+class TileDangerHandler:
     player = None
     _analyzed_enemies: List[EnemyAnalyzer] = None
 
@@ -29,6 +30,7 @@ class DefenceHandler:
         suji_tiles = self.player.ai.suji.find_suji([x.value for x in enemy.player.discards])
         for discard_option in discard_candidates:
             tile_34 = discard_option.tile_to_discard
+            tile_136 = discard_option.find_tile_in_hand(self.player.closed_hand)
             number_of_revealed_tiles = self.player.number_of_revealed_tiles(tile_34, closed_hand_34)
 
             # safe tiles that can be safe based on the table situation
@@ -41,7 +43,6 @@ class DefenceHandler:
                 )
                 continue
 
-            danger = None
             # honors
             if is_honor(tile_34):
                 danger = self._process_danger_for_honor(tile_34, enemy, number_of_revealed_tiles)
@@ -73,6 +74,29 @@ class DefenceHandler:
                     "forms_count": forms_count,
                 },
             )
+
+            if forms_count[PossibleFormsAnalyzer.POSSIBLE_RYANMEN] > 0:
+                self._update_discard_candidate(
+                    tile_34,
+                    discard_candidates,
+                    enemy.player.seat,
+                    TileDanger.RYANMEN_BASE,
+                )
+
+            dora_count = plus_dora(tile_136, self.player.table.dora_indicators)
+            if is_aka_dora(tile_136, self.player.table.has_aka_dora):
+                dora_count += 1
+
+            if dora_count > 0:
+                danger = copy(TileDanger.DORA_BONUS)
+                danger["value"] = dora_count * danger["value"]
+                danger["dora_count"] = dora_count
+                self._update_discard_candidate(
+                    tile_34,
+                    discard_candidates,
+                    enemy.player.seat,
+                    danger,
+                )
 
         return discard_candidates
 

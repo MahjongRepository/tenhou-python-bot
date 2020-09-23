@@ -57,10 +57,6 @@ class TileDanger:
         "value": 30,
         "description": "Default suji",
     }
-    SUJI_456_ON_RIICHI = {
-        "value": 50,
-        "description": "Suji on 4. 5 or 6 on riichi declaration",
-    }
     SUJI_2378_ON_RIICHI = {
         "value": 100,
         "description": "Suji on 2, 3, 7 or 8 on riichi declaration",
@@ -125,7 +121,26 @@ class TileDanger:
     OCTAVE_MODIFIER = 5
 
 
-class DefenceHandler:
+class EnemyDanger:
+    THREAT_RIICHI = {
+        "id": "threatening_riichi",
+        "description": "Enemy called riichi",
+    }
+    THREAT_OPEN_HAND_AND_MULTIPLE_DORA = {
+        "id": "threatening_open_hand_dora",
+        "description": "Enemy opened hand with 3+ dora and now is 6+ step",
+    }
+    THREAT_HONITSU = {
+        "id": "threatening_honitsu",
+        "description": "Enemy hand looks like honitsu",
+    }
+    THREAT_EXPENSIVE_OPEN_HAND = {
+        "id": "threatening_honitsu",
+        "description": "Enemy opened hand has 3+ han",
+    }
+
+
+class TileDangerHandler:
     """
     Place to keep information of tile danger level for each player
     """

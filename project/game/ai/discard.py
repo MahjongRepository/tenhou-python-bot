@@ -1,4 +1,4 @@
-from game.ai.helpers.defence import DefenceHandler
+from game.ai.helpers.defence import TileDangerHandler
 from game.ai.strategies.main import BaseStrategy
 from mahjong.constants import AKA_DORA_LIST
 from mahjong.tile import TilesConverter
@@ -48,7 +48,7 @@ class DiscardOption:
         self.ukeire = ukeire
         self.ukeire_second = 0
         self.count_of_dora = 0
-        self.danger = DefenceHandler()
+        self.danger = TileDangerHandler()
         self.had_to_be_saved = False
         self.had_to_be_discarded = False
         self.wait_to_ukeire = wait_to_ukeire

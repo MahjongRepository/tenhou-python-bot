@@ -4,11 +4,11 @@ from mahjong.utils import count_tiles_by_suits
 
 
 class HonitsuAnalyzer:
-    id = "Honitsu"
+    id = "honitsu"
+    chosen_suit = None
 
     def __init__(self, player):
         self.player = player
-
         self.chosen_suit = None
 
     def is_yaku_active(self):
@@ -18,16 +18,16 @@ class HonitsuAnalyzer:
     def melds_han(self):
         return self.player.is_open_hand and 2 or 3
 
-    def get_dangerous_tiles(self):
+    def get_safe_tiles_34(self):
         if not self.chosen_suit:
             return []
 
-        dangerous_tiles = HONOR_INDICES[:]
+        safe_tiles = HONOR_INDICES[:]
         for x in range(0, 34):
-            if self.chosen_suit(x):
-                dangerous_tiles.append(x)
+            if not self.chosen_suit(x):
+                safe_tiles.append(x)
 
-        return dangerous_tiles
+        return safe_tiles
 
     def _get_chosen_suit_from_discards(self):
         """

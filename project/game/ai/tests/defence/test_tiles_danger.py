@@ -3,7 +3,8 @@ from copy import copy
 from game.ai.helpers.defence import TileDanger
 from game.table import Table
 from mahjong.constants import FIVE_RED_SOU
-from utils.test_helpers import find_discard_option, string_to_136_array, string_to_136_tile
+from mahjong.meld import Meld
+from utils.test_helpers import find_discard_option, make_meld, string_to_136_array, string_to_136_tile
 
 
 def test_tile_danger_and_impossible_wait_fourth_honor():
@@ -269,6 +270,62 @@ def test_tile_total_danger():
     assert discard_option.danger.get_total_danger(enemy_seat) == 388
 
 
+def test_tile_danger_against_tanyao_threat():
+    table = Table()
+    player = table.player
+
+    enemy_seat = 2
+    table.add_called_meld(enemy_seat, make_meld(Meld.PON, pin="234"))
+    table.add_called_meld(enemy_seat, make_meld(Meld.CHI, sou="333"))
+    table.player.round_step = 2
+    table.add_dora_indicator(string_to_136_tile(pin="1"))
+    table.add_dora_indicator(string_to_136_tile(pin="2"))
+
+    threatening_players = table.player.ai.defence._get_threatening_players()
+    assert len(threatening_players) == 1
+    assert threatening_players[0].player.seat == enemy_seat
+
+    tiles = string_to_136_array(man="11134", pin="1569", honors="2555")
+    tile = string_to_136_tile(sou="4")
+    player.init_hand(tiles)
+    player.draw_tile(tile)
+
+    _assert_discard(player, enemy_seat, TileDanger.SAFE_AGAINST_THREATENING_HAND, man="1")
+    _assert_discard(player, enemy_seat, TileDanger.SAFE_AGAINST_THREATENING_HAND, pin="9")
+    _assert_discard(player, enemy_seat, TileDanger.SAFE_AGAINST_THREATENING_HAND, honors="2")
+    _assert_discard(player, enemy_seat, TileDanger.SAFE_AGAINST_THREATENING_HAND, pin="5", positive=False)
+
+
+def test_tile_danger_against_honitsu_threat():
+    table = Table()
+    player = table.player
+
+    enemy_seat = 1
+    table.add_called_meld(enemy_seat, make_meld(Meld.PON, pin="567"))
+    table.add_called_meld(enemy_seat, make_meld(Meld.CHI, pin="123"))
+    table.add_called_meld(enemy_seat, make_meld(Meld.CHI, pin="345"))
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="1"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="5"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="8"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="9"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="2"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="2"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="1"), False)
+
+    threatening_players = table.player.ai.defence._get_threatening_players()
+    assert len(threatening_players) == 1
+    assert threatening_players[0].player.seat == enemy_seat
+
+    tiles = string_to_136_array(man="11134", pin="1569", honors="2555")
+    tile = string_to_136_tile(sou="4")
+    player.init_hand(tiles)
+    player.draw_tile(tile)
+
+    _assert_discard(player, enemy_seat, TileDanger.SAFE_AGAINST_THREATENING_HAND, man="3")
+    _assert_discard(player, enemy_seat, TileDanger.SAFE_AGAINST_THREATENING_HAND, sou="4")
+    _assert_discard(player, enemy_seat, TileDanger.SAFE_AGAINST_THREATENING_HAND, pin="5", positive=False)
+
+
 def _create_table(enemy_seat, discards):
     table = Table()
     table.has_aka_dora = True
@@ -278,15 +335,19 @@ def _create_table(enemy_seat, discards):
     return table
 
 
-def _assert_discard(player, enemy_seat, tile_danger, sou="", pin="", man="", honors=""):
+def _assert_discard(player, enemy_seat, tile_danger, positive=True, sou="", pin="", man="", honors=""):
     discard_options, _ = player.ai.hand_builder.find_discard_options(player.tiles, player.closed_hand, player.melds)
     discard_options = player.ai.defence.check_threat_and_mark_tiles_danger(discard_options)
     discard_option = find_discard_option(discard_options, sou=sou, pin=pin, man=man, honors=honors)
+
     danger = [
         x
         for x in discard_option.danger.get_danger_reasons(enemy_seat)
         if x["description"] == tile_danger["description"]
     ]
-    assert len(danger) > 0
-    assert danger[0]["value"] == tile_danger["value"]
-    assert danger[0]["description"] == tile_danger["description"]
+    if positive:
+        assert len(danger) > 0
+        assert danger[0]["value"] == tile_danger["value"]
+        assert danger[0]["description"] == tile_danger["description"]
+    else:
+        assert len(danger) == 0

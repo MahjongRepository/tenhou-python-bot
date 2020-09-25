@@ -2,7 +2,7 @@ from mahjong.constants import HONOR_INDICES, TERMINAL_INDICES
 
 
 class TanyaoAnalyzer:
-    id = "Tanyao"
+    id = "tanyao"
 
     def __init__(self, player):
         self.player = player
@@ -22,6 +22,5 @@ class TanyaoAnalyzer:
                 suitable_melds.append(meld)
         return suitable_melds
 
-    def get_dangerous_tiles(self):
-        all_tiles_34 = range(0, 34)
-        return list(set(all_tiles_34) - set(TERMINAL_INDICES) - set(HONOR_INDICES))
+    def get_safe_tiles_34(self):
+        return TERMINAL_INDICES + HONOR_INDICES

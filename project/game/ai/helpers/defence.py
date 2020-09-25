@@ -3,62 +3,69 @@ class TileDanger:
         "value": 0,
         "description": "Impossible wait",
     }
+    SAFE_AGAINST_THREATENING_HAND = {
+        "value": 0,
+        "description": "Tile can't be used by analyzed threat",
+    }
+
+    # we need to to normalize values with form bonus
+    MULTIPLIER = 4
 
     # honor tiles
     HONOR_THIRD = {
-        "value": 10,
+        "value": 10 * MULTIPLIER,
         "description": "Third honor tile",
     }
     NON_YAKUHAI_HONOR_SECOND = {
-        "value": 20,
+        "value": 20 * MULTIPLIER,
         "description": "Second non-yakuhai honor",
     }
     NON_YAKUHAI_HONOR_SHONPAI = {
-        "value": 50,
+        "value": 50 * MULTIPLIER,
         "description": "Shonpai non-yakuhai honor",
     }
     YAKUHAI_HONOR_SECOND = {
-        "value": 50,
+        "value": 50 * MULTIPLIER,
         "description": "Second yakuhai honor",
     }
     DOUBLE_YAKUHAI_HONOR_SECOND = {
-        "value": 100,
+        "value": 100 * MULTIPLIER,
         "description": "Second double-yakuhai honor",
     }
     YAKUHAI_HONOR_SHONPAI = {
-        "value": 80,
+        "value": 80 * MULTIPLIER,
         "description": "Shonpai yakuhai honor",
     }
     DOUBLE_YAKUHAI_HONOR_SHONPAI = {
-        "value": 160,
+        "value": 160 * MULTIPLIER,
         "description": "Shonpai double-yakuhai honor",
     }
 
     # kabe tiles
     NON_SHONPAI_KABE = {
-        "value": 10,
+        "value": 10 * MULTIPLIER,
         "description": "Non-shonpai strong kabe tile",
     }
     SHONPAI_KABE = {
-        "value": 50,
+        "value": 50 * MULTIPLIER,
         "description": "Shonpai string kabe tile",
     }
 
     # suji tiles
     SUJI_19_NOT_SHONPAI = {
-        "value": 10,
+        "value": 10 * MULTIPLIER,
         "description": "Non-shonpai 1 or 9 with suji",
     }
     SUJI_19_SHONPAI = {
-        "value": 20,
+        "value": 20 * MULTIPLIER,
         "description": "Shonpai 1 or 9 with suji",
     }
     SUJI = {
-        "value": 30,
+        "value": 30 * MULTIPLIER,
         "description": "Default suji",
     }
     SUJI_2378_ON_RIICHI = {
-        "value": 100,
+        "value": 100 * MULTIPLIER,
         "description": "Suji on 2, 3, 7 or 8 on riichi declaration",
     }
 
@@ -163,10 +170,7 @@ class TileDangerHandler:
         return self.values[player_seat]
 
     def get_total_danger(self, player_seat):
-        safe = [x for x in self.values[player_seat] if x["description"] == TileDanger.IMPOSSIBLE_WAIT["description"]]
-
-        # no matter what other metrics says, this tile is safe
-        if safe:
-            return 0
-
         return sum([x["value"] for x in self.values[player_seat]])
+
+    def clear_danger(self, player_seat):
+        self.values[player_seat] = []

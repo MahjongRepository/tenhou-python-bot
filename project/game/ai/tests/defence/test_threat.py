@@ -1,11 +1,7 @@
-from game.ai.defence.yaku_analyzer.honitsu import HonitsuAnalyzer
-from game.ai.defence.yaku_analyzer.tanyao import TanyaoAnalyzer
-from game.ai.defence.yaku_analyzer.yakuhai import YakuhaiAnalyzer
 from game.ai.helpers.defence import EnemyDanger
 from game.table import Table
-from mahjong.constants import HONOR_INDICES, TERMINAL_INDICES
 from mahjong.meld import Meld
-from utils.test_helpers import make_meld, string_to_136_tile
+from utils.test_helpers import make_meld, string_to_136_array, string_to_136_tile
 
 
 def test_is_threatening_and_riichi():
@@ -38,28 +34,6 @@ def test_is_threatening_and_dora_pon():
     assert len(threatening_players) == 0
 
     # dora pon is threat
-    table.add_dora_indicator(string_to_136_tile(man="2"))
-    threatening_players = table.player.ai.defence._get_threatening_players()
-    assert len(threatening_players) == 1
-    assert threatening_players[0].player.seat == enemy_seat
-    assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_OPEN_HAND_AND_MULTIPLE_DORA["id"]
-
-
-def test_is_threatening_and_closed_dora_kan():
-    table = Table()
-
-    threatening_players = table.player.ai.defence._get_threatening_players()
-    assert len(threatening_players) == 0
-
-    enemy_seat = 2
-    table.add_called_meld(enemy_seat, make_meld(Meld.KAN, is_open=False, man="3333"))
-    table.player.round_step = 7
-
-    # simple pon it is no threat
-    threatening_players = table.player.ai.defence._get_threatening_players()
-    assert len(threatening_players) == 0
-
-    # dora kan is threat
     table.add_dora_indicator(string_to_136_tile(man="2"))
     threatening_players = table.player.ai.defence._get_threatening_players()
     assert len(threatening_players) == 1
@@ -143,47 +117,47 @@ def test_is_threatening_and_honitsu_hand():
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_HONITSU["id"]
 
 
-def test_tanyao_dangerous_tiles():
+def test_threatening_riichi_player_and_default_hand_cost():
     table = Table()
-
-    tanyao = TanyaoAnalyzer(table.player)
-    dangerous_tiles = tanyao.get_dangerous_tiles()
-
-    assert len(dangerous_tiles) == 21
-    assert all([(x in TERMINAL_INDICES) for x in dangerous_tiles]) is False
-    assert all([(x in HONOR_INDICES) for x in dangerous_tiles]) is False
-
-
-def test_yakuhai_dangerous_tiles():
-    table = Table()
-
-    yakuhai = YakuhaiAnalyzer(table.player)
-    dangerous_tiles = yakuhai.get_dangerous_tiles()
-
-    assert len(dangerous_tiles) == 34
-
-
-def test_honitsu_dangerous_tiles():
-    table = Table()
-
     enemy_seat = 2
-    honitsu = HonitsuAnalyzer(table.get_player(enemy_seat))
+    table.add_called_riichi(enemy_seat)
 
-    table.add_called_meld(enemy_seat, make_meld(Meld.PON, pin="567"))
-    table.add_called_meld(enemy_seat, make_meld(Meld.CHI, pin="123"))
-    table.add_called_meld(enemy_seat, make_meld(Meld.CHI, pin="345"))
+    # non dealer
+    threatening_player = table.player.ai.defence._get_threatening_players()[0]
+    assert threatening_player.player.seat == enemy_seat
+    assert threatening_player.calculate_hand_cost() == 3900
 
-    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="1"), False)
-    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="5"), False)
-    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="8"), False)
-    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="9"), False)
-    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="1"), False)
-    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="1"), False)
-    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="1"), False)
+    # dealer
+    threatening_player.player.dealer_seat = enemy_seat
+    assert threatening_player.calculate_hand_cost() == 5800
 
-    assert honitsu.is_yaku_active()
-    dangerous_tiles = honitsu.get_dangerous_tiles()
 
-    # 9 from suit
-    # 7 from honors
-    assert len(dangerous_tiles) == 16
+def test_threatening_riichi_player_and_not_early_hand_bonus():
+    table = Table()
+    enemy_seat = 2
+    table.add_called_riichi(enemy_seat)
+    discards = string_to_136_array(sou="1111222")
+    for discard in discards:
+        table.add_discarded_tile(enemy_seat, discard, False)
+
+    # +1 scale for riichi on 6+ turn
+    threatening_player = table.player.ai.defence._get_threatening_players()[0]
+    assert threatening_player.player.seat == enemy_seat
+    assert threatening_player.calculate_hand_cost() == 5200
+
+
+def test_threatening_riichi_player_and_not_visible_dora():
+    table = Table()
+    enemy_seat = 2
+    table.add_called_riichi(enemy_seat)
+    table.add_dora_indicator(string_to_136_tile(sou="2"))
+    table.has_aka_dora = True
+
+    discards = string_to_136_array(sou="33")
+    for discard in discards:
+        table.add_discarded_tile(enemy_seat, discard, False)
+
+    # +1 scale for riichi on 6+ turn
+    threatening_player = table.player.ai.defence._get_threatening_players()[0]
+    assert threatening_player.player.seat == enemy_seat
+    assert threatening_player.calculate_hand_cost() == 5200

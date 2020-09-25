@@ -25,13 +25,28 @@ class TileDangerHandler:
     ) -> List[DiscardOption]:
         closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
 
-        possible_forms = self.possible_forms_analyzer.calculate_possible_forms(enemy.all_safe_tiles)
+        safe_against_threat_34 = []
+        if enemy.threat_reason.get("active_yaku"):
+            for x in enemy.threat_reason.get("active_yaku"):
+                safe_against_threat_34.extend(x.get_safe_tiles_34())
+
+        possible_forms = self.possible_forms_analyzer.calculate_possible_forms(enemy.player.all_safe_tiles)
         kabe_tiles = self.player.ai.kabe.find_all_kabe(closed_hand_34)
         suji_tiles = self.player.ai.suji.find_suji([x.value for x in enemy.player.discards])
         for discard_option in discard_candidates:
             tile_34 = discard_option.tile_to_discard
             tile_136 = discard_option.find_tile_in_hand(self.player.closed_hand)
             number_of_revealed_tiles = self.player.number_of_revealed_tiles(tile_34, closed_hand_34)
+
+            # like 1-9 against tanya etc.
+            if tile_34 in safe_against_threat_34:
+                self._update_discard_candidate(
+                    tile_34,
+                    discard_candidates,
+                    enemy.player.seat,
+                    TileDanger.SAFE_AGAINST_THREATENING_HAND,
+                )
+                continue
 
             # safe tiles that can be safe based on the table situation
             if self.total_possible_forms_for_tile(possible_forms, tile_34) == 0:
@@ -177,7 +192,16 @@ class TileDangerHandler:
                 result.append(player)
         return result
 
-    def _update_discard_candidate(self, tile_34, discard_candidates, player, danger):
+    def _update_discard_candidate(self, tile_34, discard_candidates, player_seat, danger):
         for discard_candidate in discard_candidates:
             if discard_candidate.tile_to_discard == tile_34:
-                discard_candidate.danger.set_danger(player, danger)
+                # we found safe tile, in that case we can ignore all other metrics
+                if danger["value"] == 0:
+                    discard_candidate.danger.clear_danger(player_seat)
+
+                # let's put danger metrics to the tile only if there is no safe tiles in the hand
+                has_safe = (
+                    len([x for x in discard_candidate.danger.get_danger_reasons(player_seat) if x["value"] == 0]) == 1
+                )
+                if not has_safe:
+                    discard_candidate.danger.set_danger(player_seat, danger)

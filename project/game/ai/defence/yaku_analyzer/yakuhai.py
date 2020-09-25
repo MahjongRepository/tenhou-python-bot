@@ -1,5 +1,5 @@
 class YakuhaiAnalyzer:
-    id = "Yakuhai"
+    id = "yakuhai"
 
     def __init__(self, player):
         self.player = player
@@ -24,7 +24,5 @@ class YakuhaiAnalyzer:
                 suitable_melds.append(x)
         return suitable_melds
 
-    def get_dangerous_tiles(self):
-        # TODO maybe return here not the list of tiles,
-        # but the different danger level for each tile?
-        return range(0, 34)
+    def get_safe_tiles_34(self):
+        return []

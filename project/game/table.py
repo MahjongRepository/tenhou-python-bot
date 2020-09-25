@@ -132,7 +132,6 @@ class Table:
         tile = Tile(tile_136, is_tsumogiri)
         self.get_player(player_seat).add_discarded_tile(tile)
 
-        # cache already revealed tiles
         self._add_revealed_tile(tile.value)
 
     def add_dora_indicator(self, tile):
@@ -183,9 +182,7 @@ class Table:
         tile //= 4
         self.revealed_tiles[tile] += 1
 
-    def _init_players(
-        self,
-    ):
+    def _init_players(self):
         self.player = Player(self, 0, self.dealer_seat)
 
         self.players = [self.player]

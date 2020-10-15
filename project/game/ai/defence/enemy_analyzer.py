@@ -88,12 +88,21 @@ class EnemyAnalyzer:
     def calculate_hand_cost(self) -> int:
         if self.player.in_riichi:
             return self._calculate_assumed_hand_cost_for_riichi()
-        return 0
+        return self._calculate_assumed_hand_cost()
 
     @property
     def number_of_unverified_suji(self):
         # FIXME add real value
         return 2
+
+    def _calculate_assumed_hand_cost(self) -> int:
+        if self.player.is_dealer:
+            scale = [1000, 2900, 5800, 7700, 12000, 18000, 18000, 24000, 24000, 48000]
+        else:
+            scale = [1000, 2000, 3900, 5200, 8000, 12000, 12000, 16000, 16000, 32000]
+
+        han = self.threat_reason["dora_count"] + self.threat_reason["melds_han"]
+        return scale[han]
 
     def _calculate_assumed_hand_cost_for_riichi(self) -> int:
         scale_index = 1

@@ -39,6 +39,7 @@ def test_is_threatening_and_dora_pon():
     assert len(threatening_players) == 1
     assert threatening_players[0].player.seat == enemy_seat
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_OPEN_HAND_AND_MULTIPLE_DORA["id"]
+    assert threatening_players[0].calculate_hand_cost() == 8000
 
 
 def test_is_threatening_and_two_open_yakuhai_melds():
@@ -67,6 +68,7 @@ def test_is_threatening_and_two_open_yakuhai_melds():
     assert len(threatening_players) == 1
     assert threatening_players[0].player.seat == enemy_seat
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
+    assert threatening_players[0].calculate_hand_cost() == 5200
 
 
 def test_is_threatening_and_two_open_tanyao_melds():
@@ -91,6 +93,7 @@ def test_is_threatening_and_two_open_tanyao_melds():
     assert len(threatening_players) == 1
     assert threatening_players[0].player.seat == enemy_seat
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
+    assert threatening_players[0].calculate_hand_cost() == 5200
 
 
 def test_is_threatening_and_honitsu_hand():
@@ -115,6 +118,7 @@ def test_is_threatening_and_honitsu_hand():
     threatening_players = table.player.ai.defence._get_threatening_players()
     assert len(threatening_players) == 1
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_HONITSU["id"]
+    assert threatening_players[0].calculate_hand_cost() == 5200
 
 
 def test_threatening_riichi_player_and_default_hand_cost():

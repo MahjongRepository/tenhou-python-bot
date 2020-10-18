@@ -529,6 +529,7 @@ class TenhouClient(Client):
         logger.info("Player has {} rank and {} rate".format(TenhouDecoder.RANKS[dan], rate))
 
         game_type = default_game_type
+
         # dan lobby, we can play here from 1 kyu
         if dan >= 9:
             game_type = "137"
@@ -536,10 +537,6 @@ class TenhouClient(Client):
         # upperdan lobby, we can play here from 4 dan and with 1800+ rate
         if dan >= 13 and rate >= 1800:
             game_type = "41"
-
-        # phoenix lobby, we can play here from 7 dan and with 2000+ rate
-        if dan >= 16 and rate >= 2000:
-            game_type = "169"
 
         return game_type
 

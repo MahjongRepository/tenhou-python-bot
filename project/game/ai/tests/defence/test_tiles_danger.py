@@ -83,9 +83,7 @@ def test_tile_danger_and_forms_bonus():
     player.init_hand(tiles)
     player.draw_tile(tile)
 
-    discard_options, _ = player.ai.hand_builder.find_discard_options(player.tiles, player.closed_hand, player.melds)
-    discard_options = player.ai.defence.check_threat_and_mark_tiles_danger(discard_options)
-    discard_option = find_discard_option(discard_options, man="6")
+    discard_option = find_discard_option(player, man="6")
     form_bonus = [
         x
         for x in discard_option.danger.get_danger_reasons(enemy_seat)
@@ -263,11 +261,9 @@ def test_tile_total_danger():
     player.init_hand(tiles)
     player.draw_tile(tile)
 
-    discard_options, _ = player.ai.hand_builder.find_discard_options(player.tiles, player.closed_hand, player.melds)
-    discard_options = player.ai.defence.check_threat_and_mark_tiles_danger(discard_options)
-    discard_option = find_discard_option(discard_options, sou="4")
+    discard_option = find_discard_option(player, sou="4")
 
-    assert discard_option.danger.get_total_danger(enemy_seat) == 388
+    assert discard_option.danger.get_total_danger_for_player(enemy_seat) == 388
 
 
 def test_tile_danger_against_tanyao_threat():
@@ -283,7 +279,7 @@ def test_tile_danger_against_tanyao_threat():
 
     threatening_players = table.player.ai.defence._get_threatening_players()
     assert len(threatening_players) == 1
-    assert threatening_players[0].player.seat == enemy_seat
+    assert threatening_players[0].enemy.seat == enemy_seat
 
     tiles = string_to_136_array(man="11134", pin="1569", honors="2555")
     tile = string_to_136_tile(sou="4")
@@ -314,7 +310,7 @@ def test_tile_danger_against_honitsu_threat():
 
     threatening_players = table.player.ai.defence._get_threatening_players()
     assert len(threatening_players) == 1
-    assert threatening_players[0].player.seat == enemy_seat
+    assert threatening_players[0].enemy.seat == enemy_seat
 
     tiles = string_to_136_array(man="11134", pin="1569", honors="2555")
     tile = string_to_136_tile(sou="4")
@@ -336,9 +332,7 @@ def _create_table(enemy_seat, discards):
 
 
 def _assert_discard(player, enemy_seat, tile_danger, positive=True, sou="", pin="", man="", honors=""):
-    discard_options, _ = player.ai.hand_builder.find_discard_options(player.tiles, player.closed_hand, player.melds)
-    discard_options = player.ai.defence.check_threat_and_mark_tiles_danger(discard_options)
-    discard_option = find_discard_option(discard_options, sou=sou, pin=pin, man=man, honors=honors)
+    discard_option = find_discard_option(player, sou=sou, pin=pin, man=man, honors=honors)
 
     danger = [
         x

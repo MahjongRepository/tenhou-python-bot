@@ -1,3 +1,6 @@
+from typing import Optional
+
+
 class TileDanger:
     IMPOSSIBLE_WAIT = {
         "value": 0,
@@ -127,6 +130,9 @@ class TileDanger:
     OCTAVE_BASE = 10
     OCTAVE_MODIFIER = 5
 
+    DEFAULT_DANGER_BORDER = 20
+    IGNORE_DANGER = 1000000
+
 
 class EnemyDanger:
     THREAT_RIICHI = {
@@ -153,12 +159,16 @@ class TileDangerHandler:
     """
 
     values = None
+    weighted_cost: Optional[int] = None
+    danger_border: Optional[int] = None
 
     def __init__(self):
         """
         1, 2, 3 is our opponents seats
         """
         self.values = {1: [], 2: [], 3: []}
+        self.weighted_cost = 0
+        self.danger_border = 0
 
     def __unicode__(self):
         return self.values
@@ -169,8 +179,17 @@ class TileDangerHandler:
     def get_danger_reasons(self, player_seat):
         return self.values[player_seat]
 
-    def get_total_danger(self, player_seat):
+    def get_total_danger_for_player(self, player_seat):
         return sum([x["value"] for x in self.values[player_seat]])
+
+    def get_max_danger(self):
+        return max(
+            [
+                self.get_total_danger_for_player(1),
+                self.get_total_danger_for_player(2),
+                self.get_total_danger_for_player(3),
+            ]
+        )
 
     def clear_danger(self, player_seat):
         self.values[player_seat] = []

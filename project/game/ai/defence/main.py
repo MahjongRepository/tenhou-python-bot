@@ -21,18 +21,18 @@ class TileDangerHandler:
         self.possible_forms_analyzer = PossibleFormsAnalyzer(player)
 
     def calculate_tiles_danger(
-        self, discard_candidates: List[DiscardOption], enemy: EnemyAnalyzer
+        self, discard_candidates: List[DiscardOption], enemy_analyzer: EnemyAnalyzer
     ) -> List[DiscardOption]:
         closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
 
         safe_against_threat_34 = []
-        if enemy.threat_reason.get("active_yaku"):
-            for x in enemy.threat_reason.get("active_yaku"):
+        if enemy_analyzer.threat_reason.get("active_yaku"):
+            for x in enemy_analyzer.threat_reason.get("active_yaku"):
                 safe_against_threat_34.extend(x.get_safe_tiles_34())
 
-        possible_forms = self.possible_forms_analyzer.calculate_possible_forms(enemy.player.all_safe_tiles)
+        possible_forms = self.possible_forms_analyzer.calculate_possible_forms(enemy_analyzer.enemy.all_safe_tiles)
         kabe_tiles = self.player.ai.kabe.find_all_kabe(closed_hand_34)
-        suji_tiles = self.player.ai.suji.find_suji([x.value for x in enemy.player.discards])
+        suji_tiles = self.player.ai.suji.find_suji([x.value for x in enemy_analyzer.enemy.discards])
         for discard_option in discard_candidates:
             tile_34 = discard_option.tile_to_discard
             tile_136 = discard_option.find_tile_in_hand(self.player.closed_hand)
@@ -43,7 +43,7 @@ class TileDangerHandler:
                 self._update_discard_candidate(
                     tile_34,
                     discard_candidates,
-                    enemy.player.seat,
+                    enemy_analyzer.enemy.seat,
                     TileDanger.SAFE_AGAINST_THREATENING_HAND,
                 )
                 continue
@@ -53,14 +53,14 @@ class TileDangerHandler:
                 self._update_discard_candidate(
                     tile_34,
                     discard_candidates,
-                    enemy.player.seat,
+                    enemy_analyzer.enemy.seat,
                     TileDanger.IMPOSSIBLE_WAIT,
                 )
                 continue
 
             # honors
             if is_honor(tile_34):
-                danger = self._process_danger_for_honor(tile_34, enemy, number_of_revealed_tiles)
+                danger = self._process_danger_for_honor(tile_34, enemy_analyzer, number_of_revealed_tiles)
             # terminals
             elif is_terminal(tile_34):
                 danger = self._process_danger_for_terminal_tiles_and_kabe_suji(
@@ -74,7 +74,7 @@ class TileDangerHandler:
                 self._update_discard_candidate(
                     tile_34,
                     discard_candidates,
-                    enemy.player.seat,
+                    enemy_analyzer.enemy.seat,
                     danger,
                 )
 
@@ -82,7 +82,7 @@ class TileDangerHandler:
             self._update_discard_candidate(
                 tile_34,
                 discard_candidates,
-                enemy.player.seat,
+                enemy_analyzer.enemy.seat,
                 {
                     "value": self.possible_forms_analyzer.calculate_possible_forms_danger(forms_count),
                     "description": TileDanger.FORM_BONUS_DESCRIPTION,
@@ -94,7 +94,7 @@ class TileDangerHandler:
                 self._update_discard_candidate(
                     tile_34,
                     discard_candidates,
-                    enemy.player.seat,
+                    enemy_analyzer.enemy.seat,
                     TileDanger.RYANMEN_BASE,
                 )
 
@@ -109,17 +109,68 @@ class TileDangerHandler:
                 self._update_discard_candidate(
                     tile_34,
                     discard_candidates,
-                    enemy.player.seat,
+                    enemy_analyzer.enemy.seat,
                     danger,
                 )
 
         return discard_candidates
 
-    def check_threat_and_mark_tiles_danger(self, discard_candidates):
+    def calculate_danger_borders(self, discard_options, threatening_player):
+        for discard_option in discard_options:
+            danger_border = TileDanger.DEFAULT_DANGER_BORDER
+
+            # TODO add other shanten cases
+            if discard_option.shanten == 0:
+                threatening_player_hand_cost = threatening_player.threat_reason["assumed_hand_cost"]
+                threatening_danger_border = threatening_player.threat_reason["danger_border"]
+                hand_weighted_cost = self.player.ai.estimate_weighted_mean_hand_value(discard_option)
+                discard_option.danger.weighted_cost = hand_weighted_cost
+                cost_ratio = (hand_weighted_cost / threatening_player_hand_cost) * 100
+
+                # good wait
+                if discard_option.ukeire >= 6:
+                    if cost_ratio > 100:
+                        danger_border = TileDanger.IGNORE_DANGER
+                    elif cost_ratio > 70:
+                        danger_border = 200 - threatening_danger_border
+                    elif cost_ratio > 40:
+                        danger_border = 120 - threatening_danger_border
+                    else:
+                        danger_border = 60
+                # moderate wait
+                elif discard_option.ukeire >= 4:
+                    if cost_ratio >= 200:
+                        danger_border = 300 - threatening_danger_border
+                    elif cost_ratio >= 100:
+                        danger_border = 220 - threatening_danger_border
+                    elif cost_ratio >= 70:
+                        danger_border = 180 - threatening_danger_border
+                    elif cost_ratio >= 40:
+                        danger_border = 100 - threatening_danger_border
+                    else:
+                        danger_border = 50
+                # weak wait
+                else:
+                    if cost_ratio >= 200:
+                        danger_border = 250 - threatening_danger_border
+                    elif cost_ratio >= 100:
+                        danger_border = 200 - threatening_danger_border
+                    elif cost_ratio >= 70:
+                        danger_border = 150 - threatening_danger_border
+                    elif cost_ratio >= 40:
+                        danger_border = 60 - threatening_danger_border
+                    else:
+                        danger_border = 40
+
+            discard_option.danger.danger_border = danger_border
+        return discard_options
+
+    def mark_tiles_danger_for_threats(self, discard_options):
         threatening_players = self._get_threatening_players()
         for threatening_player in threatening_players:
-            discard_candidates = self.calculate_tiles_danger(discard_candidates, threatening_player)
-        return discard_candidates
+            discard_options = self.calculate_tiles_danger(discard_options, threatening_player)
+            discard_options = self.calculate_danger_borders(discard_options, threatening_player)
+        return discard_options, len(threatening_players) > 0
 
     def total_possible_forms_for_tile(self, possible_forms, tile_34):
         forms_count = possible_forms[tile_34]
@@ -162,7 +213,7 @@ class TileDangerHandler:
 
     def _process_danger_for_honor(self, tile_34, enemy, number_of_revealed_tiles):
         danger = None
-        number_of_yakuhai = enemy.player.valued_honors.count(tile_34)
+        number_of_yakuhai = enemy.enemy.valued_honors.count(tile_34)
 
         if number_of_revealed_tiles == 1:
             if number_of_yakuhai == 0:

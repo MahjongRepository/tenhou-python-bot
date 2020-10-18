@@ -22,11 +22,11 @@ class HandBuilder:
 
     def choose_tile_to_discard(self, tiles, closed_hand, melds, print_log=True):
         """
-        Try to find best tile to discard, based on different rules
+        Try to find best tile to discard, based on different evaluations
         """
 
         discard_options, _ = self.find_discard_options(tiles, closed_hand, melds)
-        discard_options = self.player.ai.defence.check_threat_and_mark_tiles_danger(discard_options)
+        discard_options, threat = self.player.ai.defence.mark_tiles_danger_for_threats(discard_options)
 
         # our strategy can affect discard options
         if self.ai.current_strategy:

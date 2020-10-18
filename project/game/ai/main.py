@@ -204,6 +204,20 @@ class MahjongAI:
         )
         return result
 
+    def estimate_weighted_mean_hand_value(self, discard_option):
+        weighted_hand_cost = 0
+        for waiting in discard_option.waiting:
+            tiles = copy.copy(self.player.tiles)
+            tiles.remove(discard_option.find_tile_in_hand(self.player.closed_hand))
+
+            hand_cost = self.estimate_hand_value(
+                waiting, tiles=tiles, call_riichi=not self.player.is_open_hand, is_tsumo=False
+            )
+
+            weighted_hand_cost += hand_cost.cost["main"] * discard_option.wait_to_ukeire[waiting]
+
+        return int(weighted_hand_cost / discard_option.ukeire)
+
     def should_call_riichi(self):
         return self.riichi.should_call_riichi()
 

@@ -11,106 +11,103 @@ class TileDanger:
         "description": "Tile can't be used by analyzed threat",
     }
 
-    # we need to to normalize values with form bonus
-    MULTIPLIER = 4
-
     # honor tiles
     HONOR_THIRD = {
-        "value": 10 * MULTIPLIER,
+        "value": 40,
         "description": "Third honor tile",
     }
     NON_YAKUHAI_HONOR_SECOND = {
-        "value": 20 * MULTIPLIER,
+        "value": 80,
         "description": "Second non-yakuhai honor",
     }
     NON_YAKUHAI_HONOR_SHONPAI = {
-        "value": 50 * MULTIPLIER,
+        "value": 200,
         "description": "Shonpai non-yakuhai honor",
     }
     YAKUHAI_HONOR_SECOND = {
-        "value": 50 * MULTIPLIER,
+        "value": 200,
         "description": "Second yakuhai honor",
     }
     DOUBLE_YAKUHAI_HONOR_SECOND = {
-        "value": 100 * MULTIPLIER,
+        "value": 400,
         "description": "Second double-yakuhai honor",
     }
     YAKUHAI_HONOR_SHONPAI = {
-        "value": 80 * MULTIPLIER,
+        "value": 320,
         "description": "Shonpai yakuhai honor",
     }
     DOUBLE_YAKUHAI_HONOR_SHONPAI = {
-        "value": 160 * MULTIPLIER,
+        "value": 640,
         "description": "Shonpai double-yakuhai honor",
     }
 
     # kabe tiles
     NON_SHONPAI_KABE = {
-        "value": 10 * MULTIPLIER,
+        "value": 40,
         "description": "Non-shonpai strong kabe tile",
     }
     SHONPAI_KABE = {
-        "value": 50 * MULTIPLIER,
+        "value": 200,
         "description": "Shonpai string kabe tile",
     }
 
     # suji tiles
     SUJI_19_NOT_SHONPAI = {
-        "value": 10 * MULTIPLIER,
+        "value": 40,
         "description": "Non-shonpai 1 or 9 with suji",
     }
     SUJI_19_SHONPAI = {
-        "value": 20 * MULTIPLIER,
+        "value": 80,
         "description": "Shonpai 1 or 9 with suji",
     }
     SUJI = {
-        "value": 30 * MULTIPLIER,
+        "value": 120,
         "description": "Default suji",
     }
     SUJI_2378_ON_RIICHI = {
-        "value": 100 * MULTIPLIER,
+        "value": 400,
         "description": "Suji on 2, 3, 7 or 8 on riichi declaration",
     }
 
     # possible ryanmen waits
     RYANMEN_BASE = {
-        "value": 100,
+        "value": 400,
         "description": "Base danger for possible ryanmen wait",
     }
     BONUS_SENKI_SUJI = {
-        "value": 10,
+        "value": 40,
         "description": "Additional danger for senki-suji pattern",
     }
     BONUS_URA_SUJI = {
-        "value": 10,
+        "value": 40,
         "description": "Additional danger for ura-suji pattern",
     }
     BONUS_MATAGI_SUJI = {
-        "value": 20,
+        "value": 80,
         "description": "Additinal danger for matagi-suji pattern",
     }
     BONUS_AIDAYONKEN = {
-        "value": 20,
+        "value": 80,
         "description": "Additional danger for aidayonken pattern",
     }
 
     # doras
     DORA_BONUS = {
-        "value": 100,
+        "value": 200,
         "description": "Additional danger for tile being a dora",
     }
     DORA_CONNECTOR_BONUS = {
-        "value": 20,
+        "value": 80,
         "description": "Additional danger for tile being dora connector",
     }
 
     # early discards - these are considered only if ryanmen is possible
     NEGATIVE_BONUS_19_EARLY_2378 = {
-        "value": -20,
+        "value": -80,
         "description": "Subtracted danger for 1 or 9 because of early 2, 3, 7 or 8 discard",
     }
     NEGATIVE_BONUS_28_EARLY_37 = {
-        "value": -10,
+        "value": -40,
         "description": "Subtracted danger for 2 or 8 because of early 3 or 7 discard",
     }
 
@@ -126,12 +123,31 @@ class TileDanger:
     FORM_BONUS_TANKI = 8
     FORM_BONUS_RYANMEN = 5
 
-    # octaves counting, (n - OCTAVE_BASE) *  OCTAVE_MODIFIER
-    OCTAVE_BASE = 10
-    OCTAVE_MODIFIER = 5
+    # suji counting, (SUJI_COUNT_BOUNDARY - n) *  SUJI_COUNT_MODIFIER
+    # We count how many ryanmen waits are still possible. Maximum n is 18, minimum is 1.
+    # If there are many possible ryanmens left, we consider situation less dangerous
+    # than if there are few possible ryanmens left.
+    # If n is 0, we don't consider this as a factor at all, because that means that wait is not ryanmen.
+    # Actually that should mean that non-ryanmen waits are now much more dangerous that before.
+    SUJI_COUNT_BOUNDARY = 10
+    SUJI_COUNT_MODIFIER = 20
 
-    DEFAULT_DANGER_BORDER = 20
+    DEFAULT_DANGER_BORDER = 80
     IGNORE_DANGER = 1000000
+
+    # acceptable danger bases
+    DANGER_BORDER_EXTREME = 1200
+    DANGER_BORDER_VERY_HIGH = 1000
+    DANGER_BORDER_HIGH = 800
+    DANGER_BORDER_UPPER_MEDIUM = 700
+    DANGER_BORDER_MEDIUM = 600
+    DANGER_BORDER_LOWER_MEDIUM = 500
+    DANGER_BORDER_UPPER_LOW = 400
+    DANGER_BORDER_LOW = 300
+    DANGER_BORDER_VERY_LOW = 200
+    DANGER_BORDER_EXTREMELY_LOW = 120
+    DANGER_BORDER_LOWEST = DEFAULT_DANGER_BORDER
+    DANGER_BORDER_BETAORI = 0
 
 
 class EnemyDanger:

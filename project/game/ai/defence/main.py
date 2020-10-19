@@ -132,35 +132,35 @@ class TileDangerHandler:
                     if cost_ratio > 100:
                         danger_border = TileDanger.IGNORE_DANGER
                     elif cost_ratio > 70:
-                        danger_border = 200 - threatening_danger_border
+                        danger_border = TileDanger.DANGER_BORDER_HIGH - threatening_danger_border
                     elif cost_ratio > 40:
-                        danger_border = 120 - threatening_danger_border
+                        danger_border = TileDanger.DANGER_BORDER_MEDIUM - threatening_danger_border
                     else:
-                        danger_border = 60
+                        danger_border = TileDanger.DANGER_BORDER_LOW
                 # moderate wait
                 elif discard_option.ukeire >= 4:
                     if cost_ratio >= 200:
-                        danger_border = 300 - threatening_danger_border
+                        danger_border = TileDanger.DANGER_BORDER_EXTREME - threatening_danger_border
                     elif cost_ratio >= 100:
-                        danger_border = 220 - threatening_danger_border
+                        danger_border = TileDanger.DANGER_BORDER_HIGH - threatening_danger_border
                     elif cost_ratio >= 70:
-                        danger_border = 180 - threatening_danger_border
+                        danger_border = TileDanger.DANGER_BORDER_UPPER_MEDIUM - threatening_danger_border
                     elif cost_ratio >= 40:
-                        danger_border = 100 - threatening_danger_border
+                        danger_border = TileDanger.DANGER_BORDER_UPPER_LOW - threatening_danger_border
                     else:
-                        danger_border = 50
+                        danger_border = TileDanger.DANGER_BORDER_VERY_LOW
                 # weak wait
                 else:
                     if cost_ratio >= 200:
-                        danger_border = 250 - threatening_danger_border
+                        danger_border = TileDanger.DANGER_BORDER_VERY_HIGH - threatening_danger_border
                     elif cost_ratio >= 100:
-                        danger_border = 200 - threatening_danger_border
+                        danger_border = TileDanger.DANGER_BORDER_UPPER_MEDIUM - threatening_danger_border
                     elif cost_ratio >= 70:
-                        danger_border = 150 - threatening_danger_border
+                        danger_border = TileDanger.DANGER_BORDER_MEDIUM - threatening_danger_border
                     elif cost_ratio >= 40:
-                        danger_border = 60 - threatening_danger_border
+                        danger_border = TileDanger.DANGER_BORDER_VERY_LOW - threatening_danger_border
                     else:
-                        danger_border = 40
+                        danger_border = TileDanger.DANGER_BORDER_EXTREMELY_LOW
 
             discard_option.danger.danger_border = danger_border
         return discard_options

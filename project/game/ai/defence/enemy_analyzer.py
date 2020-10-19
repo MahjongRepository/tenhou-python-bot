@@ -120,7 +120,7 @@ class EnemyAnalyzer:
         assert result >= 0, "number of unverified suji can't be less than 0"
         return result
 
-    def get_danger_border(self, unverified_suji_count: int) -> int:
+    def get_suji_count_danger_border(self, unverified_suji_count: int) -> int:
         return (10 - unverified_suji_count) * 5
 
     def _calculate_assumed_hand_cost(self) -> int:
@@ -168,7 +168,7 @@ class EnemyAnalyzer:
         danger["active_yaku"] = active_yaku
         danger["round_step"] = round_step
         danger["number_of_unverified_suji"] = self.number_of_unverified_suji
-        danger["danger_border"] = self.get_danger_border(danger["number_of_unverified_suji"])
+        danger["suji_count_danger_border"] = self.get_suji_count_danger_border(danger["number_of_unverified_suji"])
 
         self.threat_reason = danger
         self.threat_reason["assumed_hand_cost"] = self.assumed_hand_cost

@@ -122,7 +122,7 @@ class TileDangerHandler:
             # TODO add other shanten cases
             if discard_option.shanten == 0:
                 threatening_player_hand_cost = threatening_player.threat_reason["assumed_hand_cost"]
-                threatening_danger_border = threatening_player.threat_reason["danger_border"]
+                threatening_suji_coeff = threatening_player.threat_reason["suji_count_danger_border"]
                 hand_weighted_cost = self.player.ai.estimate_weighted_mean_hand_value(discard_option)
                 discard_option.danger.weighted_cost = hand_weighted_cost
                 cost_ratio = (hand_weighted_cost / threatening_player_hand_cost) * 100
@@ -132,33 +132,33 @@ class TileDangerHandler:
                     if cost_ratio > 100:
                         danger_border = TileDanger.IGNORE_DANGER
                     elif cost_ratio > 70:
-                        danger_border = TileDanger.DANGER_BORDER_HIGH - threatening_danger_border
+                        danger_border = TileDanger.DANGER_BORDER_HIGH - threatening_suji_coeff
                     elif cost_ratio > 40:
-                        danger_border = TileDanger.DANGER_BORDER_MEDIUM - threatening_danger_border
+                        danger_border = TileDanger.DANGER_BORDER_MEDIUM - threatening_suji_coeff
                     else:
                         danger_border = TileDanger.DANGER_BORDER_LOW
                 # moderate wait
                 elif discard_option.ukeire >= 4:
                     if cost_ratio >= 200:
-                        danger_border = TileDanger.DANGER_BORDER_EXTREME - threatening_danger_border
+                        danger_border = TileDanger.DANGER_BORDER_EXTREME - threatening_suji_coeff
                     elif cost_ratio >= 100:
-                        danger_border = TileDanger.DANGER_BORDER_HIGH - threatening_danger_border
+                        danger_border = TileDanger.DANGER_BORDER_HIGH - threatening_suji_coeff
                     elif cost_ratio >= 70:
-                        danger_border = TileDanger.DANGER_BORDER_UPPER_MEDIUM - threatening_danger_border
+                        danger_border = TileDanger.DANGER_BORDER_UPPER_MEDIUM - threatening_suji_coeff
                     elif cost_ratio >= 40:
-                        danger_border = TileDanger.DANGER_BORDER_UPPER_LOW - threatening_danger_border
+                        danger_border = TileDanger.DANGER_BORDER_UPPER_LOW - threatening_suji_coeff
                     else:
                         danger_border = TileDanger.DANGER_BORDER_VERY_LOW
                 # weak wait
                 else:
                     if cost_ratio >= 200:
-                        danger_border = TileDanger.DANGER_BORDER_VERY_HIGH - threatening_danger_border
+                        danger_border = TileDanger.DANGER_BORDER_VERY_HIGH - threatening_suji_coeff
                     elif cost_ratio >= 100:
-                        danger_border = TileDanger.DANGER_BORDER_UPPER_MEDIUM - threatening_danger_border
+                        danger_border = TileDanger.DANGER_BORDER_UPPER_MEDIUM - threatening_suji_coeff
                     elif cost_ratio >= 70:
-                        danger_border = TileDanger.DANGER_BORDER_MEDIUM - threatening_danger_border
+                        danger_border = TileDanger.DANGER_BORDER_MEDIUM - threatening_suji_coeff
                     elif cost_ratio >= 40:
-                        danger_border = TileDanger.DANGER_BORDER_VERY_LOW - threatening_danger_border
+                        danger_border = TileDanger.DANGER_BORDER_VERY_LOW - threatening_suji_coeff
                     else:
                         danger_border = TileDanger.DANGER_BORDER_EXTREMELY_LOW
 

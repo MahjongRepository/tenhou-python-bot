@@ -119,10 +119,16 @@ class TileDangerHandler:
         for discard_option in discard_options:
             danger_border = TileDanger.DEFAULT_DANGER_BORDER
 
-            # TODO add other shanten cases
+            # never push with zero chance to win
+            # FIXME: we may actually want to push it for tempai in ryukoku, so reconsider
+            if discard_option.ukeire == 0:
+                discard_option.danger_border = TileDanger.DANGER_BORDER_BETAORI
+                continue
+
+            threatening_player_hand_cost = threatening_player.threat_reason["assumed_hand_cost"]
+            threatening_suji_coeff = threatening_player.threat_reason["suji_count_danger_border"]
+
             if discard_option.shanten == 0:
-                threatening_player_hand_cost = threatening_player.threat_reason["assumed_hand_cost"]
-                threatening_suji_coeff = threatening_player.threat_reason["suji_count_danger_border"]
                 hand_weighted_cost = self.player.ai.estimate_weighted_mean_hand_value(discard_option)
                 discard_option.danger.weighted_cost = hand_weighted_cost
                 cost_ratio = (hand_weighted_cost / threatening_player_hand_cost) * 100
@@ -161,6 +167,61 @@ class TileDangerHandler:
                         danger_border = TileDanger.DANGER_BORDER_VERY_LOW - threatening_suji_coeff
                     else:
                         danger_border = TileDanger.DANGER_BORDER_EXTREMELY_LOW
+
+            if discard_option.shanten == 1:
+                hand_weighted_cost = discard_option.average_second_level_cost
+
+                # never push with zero chance to win
+                # FIXME: we may actually want to push it for tempai in ryukoku, so reconsider
+                if hand_weighted_cost is None or hand_weighted_cost == 0:
+                    discard_option.danger_border = TileDanger.DANGER_BORDER_BETAORI
+                    continue
+
+                discard_option.danger.weighted_cost = hand_weighted_cost
+                cost_ratio = (hand_weighted_cost / threatening_player_hand_cost) * 100
+
+                # good ukeire
+                if discard_option.ukeire >= 20:
+                    if cost_ratio >= 200:
+                        danger_border = TileDanger.DANGER_BORDER_EXTREME - threatening_suji_coeff
+                    elif cost_ratio >= 100:
+                        danger_border = TileDanger.DANGER_BORDER_VERY_HIGH - threatening_suji_coeff
+                    elif cost_ratio >= 50:
+                        danger_border = TileDanger.DANGER_BORDER_UPPER_MEDIUM - threatening_suji_coeff
+                    else:
+                        danger_border = TileDanger.DANGER_BORDER_LOW
+                # medium ukeire
+                if discard_option.ukeire >= 20:
+                    if cost_ratio >= 200:
+                        danger_border = TileDanger.DANGER_BORDER_VERY_HIGH - threatening_suji_coeff
+                    elif cost_ratio >= 100:
+                        danger_border = TileDanger.DANGER_BORDER_HIGH - threatening_suji_coeff
+                    elif cost_ratio >= 50:
+                        danger_border = TileDanger.DANGER_BORDER_MEDIUM - threatening_suji_coeff
+                    else:
+                        danger_border = TileDanger.DANGER_BORDER_VERY_LOW
+                # low ukeire
+                if discard_option.ukeire >= 12:
+                    if cost_ratio >= 200:
+                        danger_border = TileDanger.DANGER_BORDER_HIGH - threatening_suji_coeff
+                    elif cost_ratio >= 100:
+                        danger_border = TileDanger.DANGER_BORDER_MEDIUM - threatening_suji_coeff
+                    elif cost_ratio >= 50:
+                        danger_border = TileDanger.DANGER_BORDER_LOW - threatening_suji_coeff
+                    else:
+                        danger_border = TileDanger.DANGER_BORDER_EXTREMELY_LOW
+                # little to no ukeire
+                if discard_option.ukeire < 12:
+                    if cost_ratio >= 200:
+                        danger_border = TileDanger.DANGER_BORDER_UPPER_MEDIUM - threatening_suji_coeff
+                    elif cost_ratio >= 100:
+                        danger_border = TileDanger.DANGER_BORDER_LOWER_MEDIUM - threatening_suji_coeff
+                    else:
+                        danger_border = TileDanger.DANGER_BORDER_EXTREMELY_LOW
+
+            # TODO add 2 shanten case
+            if discard_option.shanten == 2:
+                discard_option.danger.danger_border = danger_border
 
             discard_option.danger.danger_border = danger_border
         return discard_options

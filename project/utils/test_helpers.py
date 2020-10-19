@@ -49,7 +49,13 @@ def tiles_to_string(tiles_136):
 
 def find_discard_option(player, sou="", pin="", man="", honors=""):
     discard_options, _ = player.ai.hand_builder.find_discard_options(player.tiles, player.closed_hand, player.melds)
-    discard_options, _ = player.ai.defence.mark_tiles_danger_for_threats(discard_options)
     tile = string_to_136_tile(sou=sou, pin=pin, man=man, honors=honors)
     discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
+
+    for x in discard_options:
+        if x.shanten in [1]:
+            player.ai.hand_builder.calculate_second_level_ukeire(x, player.tiles, player.melds)
+
+    discard_options, _ = player.ai.defence.mark_tiles_danger_for_threats(discard_options)
+
     return discard_option

@@ -33,6 +33,8 @@ class DiscardOption:
     wait_to_ukeire = None
     # second level cost approximation for 1-shanten hands
     second_level_cost = None
+    # second level average cost approximation for 1-shanten hands
+    average_second_level_cost = None
 
     def __init__(self, player, tile_to_discard, shanten, waiting, ukeire, wait_to_ukeire=None):
         """

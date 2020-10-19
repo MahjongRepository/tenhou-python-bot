@@ -318,6 +318,7 @@ class HandBuilder:
 
         sum_tiles = 0
         sum_cost = 0
+        average_costs = []
         for wait_34 in discard_option.waiting:
             if self.player.is_open_hand and wait_34 in not_suitable_tiles:
                 continue
@@ -368,6 +369,8 @@ class HandBuilder:
                     next_tile_in_hand = best_one.find_tile_in_hand(self.player.closed_hand)
                     self.player.tiles.remove(next_tile_in_hand)
                     cost_x_ukeire, _ = self._estimate_cost_x_ukeire(best_one, call_riichi=call_riichi)
+                    if best_ukeire != 0:
+                        average_costs.append((cost_x_ukeire / (best_ukeire * 4)))
                     # we reduce tile valuation for atodzuke
                     if result_has_atodzuke:
                         cost_x_ukeire /= 2
@@ -379,6 +382,10 @@ class HandBuilder:
         discard_option.ukeire_second = sum_tiles
         if discard_option.shanten == 1:
             discard_option.second_level_cost = sum_cost
+            if len(average_costs) > 0:
+                discard_option.average_second_level_cost = sum(average_costs) / len(average_costs)
+            else:
+                discard_option.average_second_level_cost = 0
 
         # restore original state of player hand
         self.player.tiles = player_tiles_original

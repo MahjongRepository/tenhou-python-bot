@@ -170,9 +170,6 @@ class TileDangerHandler:
         self.weighted_cost = 0
         self.danger_border = 0
 
-    def __unicode__(self):
-        return self.values
-
     def set_danger(self, player_seat, danger):
         self.values[player_seat].append(danger)
 

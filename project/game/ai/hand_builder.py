@@ -16,36 +16,43 @@ class HandBuilder:
         self.player = player
         self.ai = ai
 
-    def discard_tile(self, tiles, closed_hand, melds, print_log=True):
-        selected_tile = self.choose_tile_to_discard(tiles, closed_hand, melds, print_log=print_log)
-        return self.process_discard_option(selected_tile, closed_hand, print_log=print_log)
+    def discard_tile(self, tiles, closed_hand, melds):
+        selected_tile = self.choose_tile_to_discard(tiles, closed_hand, melds)
+        return self.process_discard_option(selected_tile, closed_hand)
 
-    def choose_tile_to_discard(self, tiles, closed_hand, melds, print_log=True):
+    def choose_tile_to_discard(self, tiles, closed_hand, melds):
         """
         Try to find best tile to discard, based on different evaluations
         """
-
         discard_options, _ = self.find_discard_options(tiles, closed_hand, melds)
-        discard_options, threat = self.player.ai.defence.mark_tiles_danger_for_threats(discard_options)
+        discard_options, threatening_players = self.player.ai.defence.mark_tiles_danger_for_threats(discard_options)
+
+        if threatening_players:
+            DecisionsLogger.debug(log.DEFENCE_THREATENING_ENEMY, "Threats", context=threatening_players)
+
+        DecisionsLogger.debug(log.DISCARD_OPTIONS, "All discard candidates", discard_options)
+
+        tiles_we_can_discard = [x for x in discard_options if x.danger.get_max_danger() <= x.danger.danger_border]
+        if not tiles_we_can_discard:
+            return self._chose_first_option_or_safe_tiles([], discard_options)
 
         # our strategy can affect discard options
         if self.ai.current_strategy:
-            discard_options = self.ai.current_strategy.determine_what_to_discard(discard_options, closed_hand, melds)
-
-        had_to_be_discarded_tiles = [x for x in discard_options if x.had_to_be_discarded]
-        if had_to_be_discarded_tiles:
-            discard_options = sorted(had_to_be_discarded_tiles, key=lambda x: (x.shanten, -x.ukeire, x.valuation))
-            DecisionsLogger.debug(
-                log.DISCARD_OPTIONS, "Discard marked tiles first", discard_options, print_log=print_log
+            tiles_we_can_discard = self.ai.current_strategy.determine_what_to_discard(
+                tiles_we_can_discard, closed_hand, melds
             )
-            return discard_options[0]
+
+        had_to_be_discarded_tiles = [x for x in tiles_we_can_discard if x.had_to_be_discarded]
+        if had_to_be_discarded_tiles:
+            tiles_we_can_discard = sorted(had_to_be_discarded_tiles, key=lambda x: (x.shanten, -x.ukeire, x.valuation))
+            return self._chose_first_option_or_safe_tiles(tiles_we_can_discard, discard_options)
 
         # remove needed tiles from discard options
-        discard_options = [x for x in discard_options if not x.had_to_be_saved]
+        tiles_we_can_discard = [x for x in tiles_we_can_discard if not x.had_to_be_saved]
 
-        discard_options = sorted(discard_options, key=lambda x: (x.shanten, -x.ukeire))
-        first_option = discard_options[0]
-        results_with_same_shanten = [x for x in discard_options if x.shanten == first_option.shanten]
+        tiles_we_can_discard = sorted(tiles_we_can_discard, key=lambda x: (x.shanten, -x.ukeire))
+        first_option = tiles_we_can_discard[0]
+        results_with_same_shanten = [x for x in tiles_we_can_discard if x.shanten == first_option.shanten]
 
         possible_options = [first_option]
         ukeire_borders = self._choose_ukeire_borders(first_option, 20, "ukeire")
@@ -84,12 +91,11 @@ class HandBuilder:
 
         # we have only dora candidates to discard
         if not tiles_without_dora:
-            DecisionsLogger.debug(log.DISCARD_OPTIONS, context=possible_options, print_log=print_log)
-
             min_dora = min([x.count_of_dora for x in possible_options])
             min_dora_list = [x for x in possible_options if x.count_of_dora == min_dora]
-
-            return sorted(min_dora_list, key=lambda x: -getattr(x, ukeire_field))[0]
+            return self._chose_first_option_or_safe_tiles(
+                sorted(min_dora_list, key=lambda x: -getattr(x, ukeire_field)), discard_options
+            )
 
         # only one option - so we choose it
         if len(tiles_without_dora) == 1:
@@ -97,7 +103,10 @@ class HandBuilder:
 
         # 1-shanten hands have special handling - we can consider future hand cost here
         if first_option.shanten == 1:
-            return sorted(tiles_without_dora, key=lambda x: (-x.second_level_cost, -x.ukeire_second, x.valuation))[0]
+            return self._chose_first_option_or_safe_tiles(
+                sorted(tiles_without_dora, key=lambda x: (-x.second_level_cost, -x.ukeire_second, x.valuation)),
+                discard_options,
+            )
 
         if first_option.shanten == 2 or first_option.shanten == 3:
             # we filter 10% of options here
@@ -115,19 +124,21 @@ class HandBuilder:
                 if getattr(discard_option, ukeire_field) >= val:
                     filtered_options.append(discard_option)
 
-        DecisionsLogger.debug(log.DISCARD_OPTIONS, context=possible_options, print_log=print_log)
+        DecisionsLogger.debug(log.DISCARD_OPTIONS, "Candidates after filtering by ukeire2", context=possible_options)
 
         closed_hand_34 = TilesConverter.to_34_array(closed_hand)
         isolated_tiles = [x for x in filtered_options if is_tile_strictly_isolated(closed_hand_34, x.tile_to_discard)]
         # isolated tiles should be discarded first
         if isolated_tiles:
             # let's sort tiles by value and let's choose less valuable tile to discard
-            return sorted(isolated_tiles, key=lambda x: x.valuation)[0]
+            return self._chose_first_option_or_safe_tiles(
+                sorted(isolated_tiles, key=lambda x: x.valuation), discard_options
+            )
 
         # there are no isolated tiles or we don't care about them
         # let's discard tile with greater ukeire/ukeire2
         filtered_options = sorted(filtered_options, key=lambda x: -getattr(x, ukeire_field))
-        first_option = filtered_options[0]
+        first_option = self._chose_first_option_or_safe_tiles(filtered_options, discard_options)
 
         other_tiles_with_same_ukeire = [
             x for x in filtered_options if getattr(x, ukeire_field) == getattr(first_option, ukeire_field)
@@ -136,14 +147,15 @@ class HandBuilder:
         # it will happen with shanten=1, all tiles will have ukeire_second == 0
         # or in tempai we can have several tiles with same ukeire
         if other_tiles_with_same_ukeire:
-            return sorted(other_tiles_with_same_ukeire, key=lambda x: x.valuation)[0]
+            return self._chose_first_option_or_safe_tiles(
+                sorted(other_tiles_with_same_ukeire, key=lambda x: x.valuation), discard_options
+            )
 
         # we have only one candidate to discard with greater ukeire
         return first_option
 
-    def process_discard_option(self, discard_option, closed_hand, force_discard=False, print_log=True):
-        if print_log:
-            DecisionsLogger.debug(log.DISCARD, context=discard_option)
+    def process_discard_option(self, discard_option, closed_hand, force_discard=False):
+        DecisionsLogger.debug(log.DISCARD, context=discard_option)
 
         self.player.in_tempai = discard_option.shanten == 0
         self.ai.waiting = discard_option.waiting
@@ -370,6 +382,12 @@ class HandBuilder:
 
         # restore original state of player hand
         self.player.tiles = player_tiles_original
+
+    def _chose_first_option_or_safe_tiles(self, chosen_candidates, all_discard_options):
+        if len(chosen_candidates):
+            return chosen_candidates[0]
+        DecisionsLogger.debug(log.DISCARD_SAFE_TILE, "There are only dangerous tiles. Discard safest tile.")
+        return sorted(all_discard_options, key=lambda x: x.danger.get_max_danger())[0]
 
     def _choose_best_tanki_wait(self, discard_desc):
         discard_desc = sorted(discard_desc, key=lambda k: k["hand_cost"], reverse=True)

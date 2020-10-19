@@ -88,7 +88,7 @@ class MahjongAI:
     def draw_tile(self, tile_136):
         self.determine_strategy(self.player.tiles)
 
-    def discard_tile(self, discard_tile, print_log=True):
+    def discard_tile(self, discard_tile):
         # we called meld and we had discard tile that we wanted to discard
         if discard_tile is not None:
             if not self.last_discard_option:
@@ -96,7 +96,7 @@ class MahjongAI:
 
             return self.hand_builder.process_discard_option(self.last_discard_option, self.player.closed_hand, True)
 
-        return self.hand_builder.discard_tile(self.player.tiles, self.player.closed_hand, self.player.melds, print_log)
+        return self.hand_builder.discard_tile(self.player.tiles, self.player.closed_hand, self.player.melds)
 
     def try_to_call_meld(self, tile_136, is_kamicha_discard):
         tiles_136_previous = self.player.tiles[:]
@@ -213,6 +213,9 @@ class MahjongAI:
             hand_cost = self.estimate_hand_value(
                 waiting, tiles=tiles, call_riichi=not self.player.is_open_hand, is_tsumo=False
             )
+
+            if not hand_cost.cost:
+                continue
 
             weighted_hand_cost += hand_cost.cost["main"] * discard_option.wait_to_ukeire[waiting]
 

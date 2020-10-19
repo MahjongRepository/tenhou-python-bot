@@ -2,6 +2,7 @@ DRAW = "draw"
 
 DISCARD_OPTIONS = "discard_options"
 DISCARD = "discard"
+DISCARD_SAFE_TILE = "discard_safe_tile"
 
 STRATEGY_ACTIVATE = "activate_strategy"
 STRATEGY_DROP = "drop_strategy"

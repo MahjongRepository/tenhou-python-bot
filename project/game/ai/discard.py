@@ -56,14 +56,22 @@ class DiscardOption:
 
         self.calculate_value()
 
-    def __unicode__(self):
-        tile_format_136 = TilesConverter.to_one_line_string([self.tile_to_discard * 4])
-        return "tile={}, shanten={}, ukeire={}, ukeire2={}, valuation={}".format(
-            tile_format_136, self.shanten, self.ukeire, self.ukeire_second, self.valuation
-        )
-
-    def __repr__(self):
-        return "{}".format(self.__unicode__())
+    def to_print(self):
+        data = {
+            "tile": TilesConverter.to_one_line_string([self.tile_to_discard * 4]),
+            "shanten": self.shanten,
+            "ukeire": self.ukeire,
+            "valuation": self.valuation,
+            "danger": {
+                "max_danger": self.danger.get_max_danger(),
+                "danger_border": self.danger.danger_border,
+                "weighted_cost": self.danger.weighted_cost,
+                "danger_reasons": self.danger.values,
+            },
+        }
+        if self.ukeire_second:
+            data["ukeire2"] = self.ukeire_second
+        return data
 
     def find_tile_in_hand(self, closed_hand):
         """

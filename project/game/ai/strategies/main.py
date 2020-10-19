@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import utils.decisions_constants as log
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
@@ -258,9 +260,7 @@ class BaseStrategy:
 
             melds = self.player.melds + [meld]
 
-            selected_tile = self.player.ai.hand_builder.choose_tile_to_discard(
-                new_tiles, closed_hand_copy, melds, print_log=False
-            )
+            selected_tile = self.player.ai.hand_builder.choose_tile_to_discard(new_tiles, closed_hand_copy, melds)
 
             final_results.append(
                 {
@@ -275,6 +275,9 @@ class BaseStrategy:
             key=lambda x: (x["discard_tile"].shanten, -x["discard_tile"].ukeire, x["discard_tile"].valuation),
         )
 
-        DecisionsLogger.debug(log.MELD_PREPARE, "Options with meld calling", context=final_results)
-
+        DecisionsLogger.debug(
+            log.MELD_PREPARE,
+            "Options with meld calling (use first one)",
+            context=deepcopy(final_results),
+        )
         return final_results[0]

@@ -170,7 +170,7 @@ class TileDangerHandler:
         for threatening_player in threatening_players:
             discard_options = self.calculate_tiles_danger(discard_options, threatening_player)
             discard_options = self.calculate_danger_borders(discard_options, threatening_player)
-        return discard_options, len(threatening_players) > 0
+        return discard_options, threatening_players
 
     def total_possible_forms_for_tile(self, possible_forms, tile_34):
         forms_count = possible_forms[tile_34]

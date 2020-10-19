@@ -166,14 +166,14 @@ class Player(PlayerInterface):
         self.ai.init_hand()
 
     def draw_tile(self, tile_136):
-        DecisionsLogger.debug(
-            log.DRAW,
-            context=[
-                "Step: {}".format(self.round_step),
-                "Hand: {}".format(self.format_hand_for_print(tile_136)),
-                "Current strategy: {}".format(self.ai.current_strategy),
-            ],
-        )
+        context = [
+            f"Step: {self.round_step}",
+            f"Hand: {self.format_hand_for_print(tile_136)}",
+        ]
+        if self.ai.current_strategy:
+            context.append(f"Current strategy: {self.ai.current_strategy}")
+
+        DecisionsLogger.debug(log.DRAW, context=context)
 
         self.last_draw = tile_136
         self.tiles.append(tile_136)

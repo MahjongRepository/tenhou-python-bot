@@ -7,7 +7,7 @@ from game.ai.helpers.defence import EnemyDanger
 from game.ai.helpers.possible_forms import PossibleFormsAnalyzer
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_aka_dora, plus_dora
-from utils.general import suits_tiles
+from utils.general import separate_tiles_by_suits
 
 
 class EnemyAnalyzer:
@@ -102,8 +102,7 @@ class EnemyAnalyzer:
     def number_of_unverified_suji(self) -> int:
         maximum_number_of_suji = 18
         verified_suji = 0
-        closed_hand_34 = TilesConverter.to_34_array(self.main_player.closed_hand)
-        suits = suits_tiles(self.main_player, closed_hand_34)
+        suits = separate_tiles_by_suits(TilesConverter.to_34_array([x * 4 for x in self.enemy.all_safe_tiles]))
         for suit in suits:
             # indices started from 0
             suji_indices = [[0, 3, 6], [1, 4, 7], [2, 5, 8]]

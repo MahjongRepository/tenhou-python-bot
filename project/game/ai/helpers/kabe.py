@@ -1,4 +1,4 @@
-from utils.general import suits_tiles
+from utils.general import revealed_suits_tiles
 
 
 class Kabe:
@@ -39,7 +39,7 @@ class Kabe:
         kabe_tiles_weak = []
         kabe_tiles_partial = []
 
-        suits = suits_tiles(self.player, tiles_34)
+        suits = revealed_suits_tiles(self.player, tiles_34)
         for x in range(0, 3):
             suit = suits[x]
 

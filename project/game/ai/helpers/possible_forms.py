@@ -1,7 +1,7 @@
 from game.ai.helpers.defence import TileDanger
 from mahjong.constants import EAST
 from mahjong.tile import TilesConverter
-from utils.general import suits_tiles
+from utils.general import revealed_suits_tiles
 
 
 class PossibleFormsAnalyzer:
@@ -20,7 +20,7 @@ class PossibleFormsAnalyzer:
         closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
 
         # first of all let's find suji for suits tiles
-        suits = suits_tiles(self.player, closed_hand_34)
+        suits = revealed_suits_tiles(self.player, closed_hand_34)
         for x in range(0, 3):
             suit = suits[x]
 

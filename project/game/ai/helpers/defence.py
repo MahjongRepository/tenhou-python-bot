@@ -21,23 +21,23 @@ class TileDanger:
         "description": "Second non-yakuhai honor",
     }
     NON_YAKUHAI_HONOR_SHONPAI = {
-        "value": 200,
+        "value": 160,
         "description": "Shonpai non-yakuhai honor",
     }
     YAKUHAI_HONOR_SECOND = {
-        "value": 200,
+        "value": 120,
         "description": "Second yakuhai honor",
     }
     DOUBLE_YAKUHAI_HONOR_SECOND = {
-        "value": 400,
+        "value": 200,
         "description": "Second double-yakuhai honor",
     }
     YAKUHAI_HONOR_SHONPAI = {
-        "value": 320,
+        "value": 240,
         "description": "Shonpai yakuhai honor",
     }
     DOUBLE_YAKUHAI_HONOR_SHONPAI = {
-        "value": 640,
+        "value": 480,
         "description": "Shonpai double-yakuhai honor",
     }
 

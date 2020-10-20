@@ -382,10 +382,10 @@ class HandBuilder:
         discard_option.ukeire_second = sum_tiles
         if discard_option.shanten == 1:
             discard_option.second_level_cost = sum_cost
-            if len(average_costs) > 0:
-                discard_option.average_second_level_cost = sum(average_costs) / len(average_costs)
-            else:
+            if not average_costs:
                 discard_option.average_second_level_cost = 0
+            else:
+                discard_option.average_second_level_cost = sum(average_costs) / len(average_costs)
 
         # restore original state of player hand
         self.player.tiles = player_tiles_original

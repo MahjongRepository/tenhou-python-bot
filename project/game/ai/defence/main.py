@@ -173,7 +173,7 @@ class TileDangerHandler:
 
                 # never push with zero chance to win
                 # FIXME: we may actually want to push it for tempai in ryukoku, so reconsider
-                if hand_weighted_cost is None or hand_weighted_cost == 0:
+                if not hand_weighted_cost:
                     discard_option.danger_border = TileDanger.DANGER_BORDER_BETAORI
                     continue
 

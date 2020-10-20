@@ -25,6 +25,13 @@ class HandBuilder:
         Try to find best tile to discard, based on different evaluations
         """
         discard_options, _ = self.find_discard_options(tiles, closed_hand, melds)
+
+        # FIXME: looks kinda hacky and also we calculate second level ukeire twice for some tiles
+        # we need to calculate ukeire2 beforehand for correct danger calculation
+        for discard_option in discard_options:
+            if discard_option.shanten == 1:
+                self.calculate_second_level_ukeire(discard_option, tiles, melds)
+
         discard_options, threatening_players = self.player.ai.defence.mark_tiles_danger_for_threats(discard_options)
 
         if threatening_players:

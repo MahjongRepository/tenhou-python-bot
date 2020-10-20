@@ -40,10 +40,10 @@ def test_parse_names_and_ranks():
         'rate="1500.00,1421.91,1790.94,1532.23" sx="m,m,m,m"/>'
     )
     values = decoder.parse_names_and_ranks(message)
-    assert values[0] == {"name": "NoName", "rank": TenhouDecoder.RANKS[0]}
-    assert values[1] == {"name": "o2o2", "rank": TenhouDecoder.RANKS[7]}
-    assert values[2] == {"name": "shimmmmm", "rank": TenhouDecoder.RANKS[12]}
-    assert values[3] == {"name": "川海老", "rank": TenhouDecoder.RANKS[1]}
+    assert values[0] == {"seat": 0, "name": "NoName", "rank": TenhouDecoder.RANKS[0]}
+    assert values[1] == {"seat": 1, "name": "o2o2", "rank": TenhouDecoder.RANKS[7]}
+    assert values[2] == {"seat": 2, "name": "shimmmmm", "rank": TenhouDecoder.RANKS[12]}
+    assert values[3] == {"seat": 3, "name": "川海老", "rank": TenhouDecoder.RANKS[1]}
 
 
 def test_parse_final_scores_and_uma():

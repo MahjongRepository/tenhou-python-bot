@@ -18,7 +18,6 @@ def parse_args_and_set_up_settings():
         default=settings.USER_ID,
         help="Tenhou's user id. Example: IDXXXXXXXX-XXXXXXXX. Default is {0}".format(settings.USER_ID),
     )
-
     parser.add_option(
         "-g",
         "--game_type",
@@ -26,7 +25,6 @@ def parse_args_and_set_up_settings():
         default=settings.GAME_TYPE,
         help="The game type in Tenhou.net. Examples: 1 or 9. Default is {0}".format(settings.GAME_TYPE),
     )
-
     parser.add_option(
         "-l",
         "--lobby",
@@ -34,7 +32,6 @@ def parse_args_and_set_up_settings():
         default=settings.LOBBY,
         help="Lobby to play. Default is {0}".format(settings.LOBBY),
     )
-
     parser.add_option(
         "-t",
         "--timeout",
@@ -44,9 +41,12 @@ def parse_args_and_set_up_settings():
         "If game is not started in timeout, script will be ended. "
         "Default is {0}".format(settings.WAITING_GAME_TIMEOUT_MINUTES),
     )
-
-    parser.add_option("-c", "--championship", type="string", help="Tournament lobby to play.")
-
+    parser.add_option(
+        "-c",
+        "--championship",
+        type="string",
+        help="Tournament lobby to play.",
+    )
     parser.add_option(
         "-s",
         "--settings",

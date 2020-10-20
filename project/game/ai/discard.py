@@ -55,6 +55,7 @@ class DiscardOption:
         self.had_to_be_discarded = False
         self.wait_to_ukeire = wait_to_ukeire
         self.second_level_cost = 0
+        self.average_second_level_cost = 0
 
         self.calculate_value()
 
@@ -73,6 +74,10 @@ class DiscardOption:
         }
         if self.ukeire_second:
             data["ukeire2"] = self.ukeire_second
+        if self.had_to_be_saved:
+            data["had_to_be_saved"] = self.had_to_be_saved
+        if self.had_to_be_discarded:
+            data["had_to_be_discarded"] = self.had_to_be_discarded
         return data
 
     def find_tile_in_hand(self, closed_hand):

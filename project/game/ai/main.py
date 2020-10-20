@@ -117,7 +117,7 @@ class MahjongAI:
 
             DecisionsLogger.debug(
                 log.MELD_CALL,
-                "Try to call meld",
+                "We decided to open hand",
                 context=[
                     f"Hand: {self.player.format_hand_for_print(tile_136)}",
                     f"Meld: {meld.serialize()}",

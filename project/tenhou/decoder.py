@@ -98,10 +98,26 @@ class TenhouDecoder:
         ranks = [int(i) for i in ranks.split(",")]
 
         return [
-            {"name": unquote(self.get_attribute_content(message, "n0")), "rank": TenhouDecoder.RANKS[ranks[0]]},
-            {"name": unquote(self.get_attribute_content(message, "n1")), "rank": TenhouDecoder.RANKS[ranks[1]]},
-            {"name": unquote(self.get_attribute_content(message, "n2")), "rank": TenhouDecoder.RANKS[ranks[2]]},
-            {"name": unquote(self.get_attribute_content(message, "n3")), "rank": TenhouDecoder.RANKS[ranks[3]]},
+            {
+                "seat": 0,
+                "name": unquote(self.get_attribute_content(message, "n0")),
+                "rank": TenhouDecoder.RANKS[ranks[0]],
+            },
+            {
+                "seat": 1,
+                "name": unquote(self.get_attribute_content(message, "n1")),
+                "rank": TenhouDecoder.RANKS[ranks[1]],
+            },
+            {
+                "seat": 2,
+                "name": unquote(self.get_attribute_content(message, "n2")),
+                "rank": TenhouDecoder.RANKS[ranks[2]],
+            },
+            {
+                "seat": 3,
+                "name": unquote(self.get_attribute_content(message, "n3")),
+                "rank": TenhouDecoder.RANKS[ranks[3]],
+            },
         ]
 
     def parse_log_link(self, message):

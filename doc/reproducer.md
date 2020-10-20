@@ -1,44 +1,133 @@
-## Round reproducer
+# Game reproducer
 
 We built the way to reproduce already played round. 
-This is really helpful when you want to reproduce table state and fix bot bad behaviour.
+
+This is really helpful when you want to reproduce table state and fix bot incorrect behaviour.
 
 There are two options to do it.
 
-### Reproduce from tenhou log link
+## Getting game meta information
 
-First you need to do dry run of the reproducer with command:
+It will be easier to find the round number to reproduce if you check the game meta-information first:
 
-```
-python reproducer.py -o "http://tenhou.net/0/?log=2017041516gm-0089-0000-23b4752d&tw=3&ts=2" -d
-```
-
-It will print all available tags in the round. For example we want to stop before 
-discard tile to other player ron, in given example we had to chose `<W59/>` tag as a stop tag.
-
-Next command will be:
-
-```
-python reproducer.py -o "http://tenhou.net/0/?log=2017041516gm-0089-0000-23b4752d&tw=3&ts=2" -t "<W59/>"
+Command:
+```bash
+python reproducer.py --log 2020102008gm-0001-7994-9438a8f4 --meta
 ```
 
-And output:
-
+Output:
+```json
+{
+  "players": [
+    {
+      "seat": 0,
+      "name": "Wanjirou",
+      "rank": "新人"
+    },
+    {
+      "seat": 1,
+      "name": "Kaavi",
+      "rank": "新人"
+    },
+    {
+      "seat": 2,
+      "name": "Xenia",
+      "rank": "新人"
+    },
+    {
+      "seat": 3,
+      "name": "Ichihime",
+      "rank": "新人"
+    }
+  ],
+  "game_rounds": [
+    {
+      "wind": 0,
+      "honba": 0,
+      "round_start_scores": [
+        250,
+        250,
+        250,
+        250
+      ]
+    },
+    {
+      "wind": 1,
+      "honba": 1,
+      "round_start_scores": [
+        235,
+        235,
+        265,
+        265
+      ]
+    },
+    {
+      "wind": 1,
+      "honba": 2,
+      "round_start_scores": [
+        221,
+        277,
+        251,
+        251
+      ]
+    },
+    {
+      "wind": 1,
+      "honba": 3,
+      "round_start_scores": [
+        221,
+        298,
+        230,
+        251
+      ]
+    },
+    {
+      "wind": 2,
+      "honba": 0,
+      "round_start_scores": [
+        320,
+        255,
+        197,
+        228
+      ]
+    },
+    {
+      "wind": 3,
+      "honba": 0,
+      "round_start_scores": [
+        290,
+        215,
+        137,
+        358
+      ]
+    }
+  ]
+}
 ```
-Hand: 268m28p23456677s + 6p
-Discard: 2m
+
+From this information player seat and wind number could be useful for the next command run.
+
+## Running the reproducing for the game
+
+To reproduce game situation you need to know:
+- log id
+- player seat number or player nickname
+- wind number (1-4 for east, 5-8 for south, 9-12 for west)
+- honba number
+- tile where to stop the game
+- action
+
+There are two supported actions for the reproducer:
+- `draw`. Sought tile will be added to the hand, then method `discard_tile()` will be called and after that reproducer will stop.
+- `enemy_discard`. After enemy discard method `try_to_call_meld()` will be called (if possible) and after that reproducer will stop.
+
+## Examples of usage
+
+```bash
+python reproducer.py --log 2020102008gm-0001-7994-9438a8f4 --player Wanjirou --wind 3 --honba 0 --tile 7p --action enemy_discard
 ```
 
-After this you can debug bot decisions.
-
-### Reproduce from our log
-
-Sometimes we had to debug `bot <-> server` communication. For this purpose we built this reproducer.
-
-Just use it with already played game:
-
-```
-python reproducer.py -l d6a5e_2017-04-13\ 09_54_01.log
+```bash
+python reproducer.py --log 2020102009gm-0001-7994-5e2f46c0 --player Kaavi --wind 3 --honba 1 --tile 5m --action draw
 ```
 
-It will send to the bot all commands that were send from tenhou in real game.

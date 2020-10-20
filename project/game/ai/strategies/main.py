@@ -254,10 +254,15 @@ class BaseStrategy:
             meld = MeldPrint()
             meld.type = meld_type
             meld.tiles = sorted(tiles)
-
             melds = self.player.melds + [meld]
 
-            selected_tile = self.player.ai.hand_builder.choose_tile_to_discard(new_tiles, closed_hand_copy, melds)
+            DecisionsLogger.debug(
+                log.MELD_HAND, f"Hand: {self._format_hand_for_print(new_tiles, discarded_tile, melds)}"
+            )
+
+            selected_tile = self.player.ai.hand_builder.choose_tile_to_discard(
+                new_tiles, closed_hand_copy, melds, for_open_hand=True
+            )
 
             final_results.append(
                 {
@@ -274,7 +279,12 @@ class BaseStrategy:
 
         DecisionsLogger.debug(
             log.MELD_PREPARE,
-            "Options with meld calling (use first one)",
+            "Tiles could be used for open meld",
             context=final_results,
         )
         return final_results[0]
+
+    def _format_hand_for_print(self, tiles, new_tile, melds):
+        hand_string = f"{TilesConverter.to_one_line_string(tiles)} + {TilesConverter.to_one_line_string([new_tile])}"
+        hand_string += " [{}]".format(", ".join([TilesConverter.to_one_line_string(x.tiles) for x in melds]))
+        return hand_string

@@ -20,7 +20,7 @@ class HandBuilder:
         selected_tile = self.choose_tile_to_discard(tiles, closed_hand, melds)
         return self.process_discard_option(selected_tile, closed_hand)
 
-    def choose_tile_to_discard(self, tiles, closed_hand, melds):
+    def choose_tile_to_discard(self, tiles, closed_hand, melds, for_open_hand=False):
         """
         Try to find best tile to discard, based on different evaluations
         """

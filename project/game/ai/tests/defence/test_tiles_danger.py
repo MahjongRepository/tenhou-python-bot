@@ -8,6 +8,20 @@ from utils.decisions_logger import MeldPrint
 from utils.test_helpers import find_discard_option, make_meld, string_to_136_array, string_to_136_tile
 
 
+def test_tile_danger_genbutsu():
+    enemy_seat = 1
+    table = _create_table(enemy_seat, discards=[])
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="6"), False)
+    player = table.player
+
+    tiles = string_to_136_array(man="11134", pin="1156", honors="2555")
+    tile = string_to_136_tile(sou="6")
+    player.init_hand(tiles)
+    player.draw_tile(tile)
+
+    _assert_discard(player, enemy_seat, TileDanger.SAFE_AGAINST_THREATENING_HAND, sou="6")
+
+
 def test_tile_danger_and_impossible_wait_fourth_honor():
     enemy_seat = 1
     table = _create_table(enemy_seat, discards=string_to_136_array(honors="111"))

@@ -26,6 +26,11 @@ class TileDangerHandler:
         closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
 
         safe_against_threat_34 = []
+
+        # First, add all genbutsu to the list
+        safe_against_threat_34.extend(list(set([x.value // 4 for x in enemy_analyzer.enemy.discards])))
+
+        # Then add tiles not suitable for yaku in enemy open hand
         if enemy_analyzer.threat_reason.get("active_yaku"):
             for x in enemy_analyzer.threat_reason.get("active_yaku"):
                 safe_against_threat_34.extend(x.get_safe_tiles_34())
@@ -38,7 +43,7 @@ class TileDangerHandler:
             tile_136 = discard_option.find_tile_in_hand(self.player.closed_hand)
             number_of_revealed_tiles = self.player.number_of_revealed_tiles(tile_34, closed_hand_34)
 
-            # like 1-9 against tanya etc.
+            # like 1-9 against tanyao etc.
             if tile_34 in safe_against_threat_34:
                 self._update_discard_candidate(
                     tile_34,

@@ -220,7 +220,7 @@ class MahjongAI:
             weighted_hand_cost += hand_cost.cost["main"] * discard_option.wait_to_ukeire[waiting]
             number_of_tiles += discard_option.wait_to_ukeire[waiting]
 
-        return int(weighted_hand_cost / number_of_tiles)
+        return number_of_tiles and int(weighted_hand_cost / number_of_tiles) or 0
 
     def should_call_riichi(self):
         return self.riichi.should_call_riichi()

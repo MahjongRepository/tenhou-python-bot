@@ -14,14 +14,14 @@ You can find it here: https://github.com/MahjongRepository/mahjong
 
 For research purposes we built a simple bot to play riichi mahjong on tenhou.net server.
 
-Here you can read about bot strength: https://github.com/MahjongRepository/tenhou-python-bot/wiki/Bot-versions
+Here you can read about bot played games statistic: [versions history](doc/versions.md)
 
 # For developers
 
 ## How to run it?
 
 1. `pip install -r requirements/dev.txt`
-2. Run `cd project && python main.py` it will connect to the tenhou.net and will play a game
+2. Run `cd project && python main.py` it will connect to the tenhou.net and will play a game.
 
 ## Configuration instructions
 
@@ -30,12 +30,6 @@ They will override settings from default `settings.py` file.
 2. Also, you can override some default settings with command arguments. 
 Use `python main.py -h` to check all available commands.
 
-## Round reproducer
+## Game reproducer
 
-It can be useful to debug bot crash or strange discards: https://github.com/MahjongRepository/tenhou-python-bot/wiki/Round-reproducer
-
-## Contribution to the project
-
-All PRs are welcomed anytime. Currently the project is in early stage and 
-I'm working on the different parts of it in the same time, so before making any 
-big changes it's better to check with me to avoid code duplication.
+It can be useful to debug bot errors or strange discards: [game reproducer](doc/reproducer.md)

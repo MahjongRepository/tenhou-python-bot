@@ -1,7 +1,7 @@
 from game.ai.strategies.main import BaseStrategy
 from mahjong.constants import EAST, SOUTH
-from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
+from utils.decisions_logger import MeldPrint
 
 
 class YakuhaiStrategy(BaseStrategy):
@@ -108,7 +108,9 @@ class YakuhaiStrategy(BaseStrategy):
         # closed pon sets
         valued_pons = [x for x in self.player.valued_honors if tiles_34[x] == 3]
         # open pon sets
-        valued_pons += [x for x in open_melds if x.type == Meld.PON and x.tiles[0] // 4 in self.player.valued_honors]
+        valued_pons += [
+            x for x in open_melds if x.type == MeldPrint.PON and x.tiles[0] // 4 in self.player.valued_honors
+        ]
 
         acceptable_options = []
         for item in discard_options:
@@ -195,4 +197,4 @@ class YakuhaiStrategy(BaseStrategy):
         return super(YakuhaiStrategy, self).try_to_call_meld(tile, is_kamicha_discard, tiles_136)
 
     def _is_yakuhai_pon(self, meld):
-        return meld.type == Meld.PON and meld.tiles[0] // 4 in self.player.valued_honors
+        return meld.type == MeldPrint.PON and meld.tiles[0] // 4 in self.player.valued_honors

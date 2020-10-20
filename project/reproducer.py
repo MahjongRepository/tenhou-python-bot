@@ -5,10 +5,10 @@ from optparse import OptionParser
 
 import requests
 from game.table import Table
-from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
 from tenhou.client import TenhouClient
 from tenhou.decoder import TenhouDecoder
+from utils.decisions_logger import MeldPrint
 from utils.logger import set_up_logging
 
 logger = logging.getLogger("tenhou")
@@ -107,7 +107,7 @@ class TenhouLogReproducer:
                 if player_seat == 0:
                     # we had to delete called tile from hand
                     # to have correct tiles count in the hand
-                    if meld.type != Meld.KAN and meld.type != Meld.CHANKAN:
+                    if meld.type != MeldPrint.KAN and meld.type != MeldPrint.CHANKAN:
                         table.player.draw_tile(meld.called_tile)
 
             if "<REACH" in tag and 'step="1"' in tag:

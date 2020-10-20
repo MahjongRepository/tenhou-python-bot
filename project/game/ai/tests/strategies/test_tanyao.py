@@ -2,7 +2,7 @@ from game.ai.strategies.main import BaseStrategy
 from game.ai.strategies.tanyao import TanyaoStrategy
 from game.table import Table
 from mahjong.constants import FIVE_RED_PIN
-from mahjong.meld import Meld
+from utils.decisions_logger import MeldPrint
 from utils.test_helpers import make_meld, string_to_136_array, string_to_136_tile, tiles_to_string
 
 
@@ -171,7 +171,7 @@ def test_dont_count_pairs_in_already_opened_hand():
     tiles = string_to_136_array(man="33556788", sou="22266")
     table.player.init_hand(tiles)
 
-    meld = make_meld(Meld.PON, sou="222")
+    meld = make_meld(MeldPrint.PON, sou="222")
     table.player.add_called_meld(meld)
 
     tile = string_to_136_tile(sou="6")
@@ -184,7 +184,7 @@ def test_we_cant_win_with_this_hand():
     table = _make_table()
     tiles = string_to_136_array(man="22277", sou="23", pin="233445")
     table.player.init_hand(tiles)
-    meld = make_meld(Meld.CHI, pin="234")
+    meld = make_meld(MeldPrint.CHI, pin="234")
     table.player.add_called_meld(meld)
 
     table.player.draw_tile(string_to_136_tile(sou="1"))
@@ -208,7 +208,7 @@ def test_choose_correct_waiting():
     discard = table.player.discard_tile()
     assert tiles_to_string([discard]) == "5p"
 
-    meld = make_meld(Meld.CHI, man="234")
+    meld = make_meld(MeldPrint.CHI, man="234")
     table.player.add_called_meld(meld)
 
     tiles = string_to_136_array(man="234888", sou="234", pin="3588")
@@ -223,7 +223,7 @@ def test_choose_correct_waiting():
     table = _make_table()
     player = table.player
 
-    meld = make_meld(Meld.CHI, man="678")
+    meld = make_meld(MeldPrint.CHI, man="678")
     player.add_called_meld(meld)
 
     tiles = string_to_136_array(man="222678", sou="234", pin="2388")
@@ -239,7 +239,7 @@ def test_choose_balanced_ukeire_in_1_shanten():
     table = _make_table()
     player = table.player
 
-    meld = make_meld(Meld.CHI, man="678")
+    meld = make_meld(MeldPrint.CHI, man="678")
     player.add_called_meld(meld)
 
     tiles = string_to_136_array(man="22678", sou="234568", pin="45")
@@ -264,7 +264,7 @@ def test_choose_pseudo_atodzuke():
     for _ in range(0, 3):
         table.add_discarded_tile(1, string_to_136_tile(pin="1"), False)
 
-    meld = make_meld(Meld.CHI, man="678")
+    meld = make_meld(MeldPrint.CHI, man="678")
     player.add_called_meld(meld)
 
     tiles = string_to_136_array(man="222678", sou="23488", pin="35")
@@ -348,7 +348,7 @@ def test_dont_count_terminal_tiles_in_ukeire():
     # but with opened hand we don't need to count not suitable tiles as ukeire
     tiles = string_to_136_array(man="234578", sou="235", pin="2246")
     table.player.init_hand(tiles)
-    table.player.add_called_meld(make_meld(Meld.CHI, man="234"))
+    table.player.add_called_meld(make_meld(MeldPrint.CHI, man="234"))
     table.player.draw_tile(string_to_136_tile(pin="5"))
     discard = table.player.discard_tile()
     assert tiles_to_string([discard]) == "8m"
@@ -375,7 +375,7 @@ def test_correct_discard_agari_no_yaku():
     tiles = string_to_136_array(man="23567", sou="456", pin="22244")
     table.player.init_hand(tiles)
 
-    meld = make_meld(Meld.CHI, man="567")
+    meld = make_meld(MeldPrint.CHI, man="567")
     table.player.add_called_meld(meld)
 
     tile = string_to_136_tile(man="1")
@@ -391,7 +391,7 @@ def test_dont_meld_agari():
     tiles = string_to_136_array(man="23567", sou="456", pin="22244")
     table.player.init_hand(tiles)
 
-    meld = make_meld(Meld.CHI, man="567")
+    meld = make_meld(MeldPrint.CHI, man="567")
     table.player.add_called_meld(meld)
 
     tile = string_to_136_tile(man="4")

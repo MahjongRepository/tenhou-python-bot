@@ -1,5 +1,5 @@
 from game.table import Table
-from mahjong.meld import Meld
+from utils.decisions_logger import MeldPrint
 from utils.test_helpers import find_discard_option, string_to_136_array, string_to_136_tile
 
 from project.utils.test_helpers import make_meld
@@ -35,7 +35,7 @@ def test_calculate_our_hand_cost_1_shanten():
 
     tile = string_to_136_tile(honors="1")
     player.init_hand(tiles)
-    player.add_called_meld(make_meld(Meld.PON, sou="222"))
+    player.add_called_meld(make_meld(MeldPrint.PON, sou="222"))
     player.draw_tile(tile)
 
     discard_option = find_discard_option(player, honors="1")
@@ -70,7 +70,7 @@ def test_calculate_our_hand_cost_1_shanten_karaten():
 
     tile = string_to_136_tile(honors="1")
     player.init_hand(tiles)
-    player.add_called_meld(make_meld(Meld.PON, sou="222"))
+    player.add_called_meld(make_meld(MeldPrint.PON, sou="222"))
     player.draw_tile(tile)
 
     # average cost should not change because of less waits

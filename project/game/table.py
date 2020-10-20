@@ -1,8 +1,8 @@
 from game.player import EnemyPlayer, Player
 from mahjong.constants import EAST, NORTH, SOUTH, WEST
-from mahjong.meld import Meld
 from mahjong.tile import Tile, TilesConverter
 from mahjong.utils import is_aka_dora, plus_dora
+from utils.decisions_logger import MeldPrint
 
 
 class Table:
@@ -91,11 +91,11 @@ class Table:
             # but if it's an opened kan, player will get a tile from
             # a dead wall, so total number of tiles in the wall is the same
             # as if he just draws a tile
-            if meld.type != Meld.KAN:
+            if meld.type != MeldPrint.KAN:
                 self.count_of_remaining_tiles += 1
         else:
             # can't have a pon or chi from the hand
-            assert meld.type == Meld.KAN or meld.type == meld.CHANKAN
+            assert meld.type == MeldPrint.KAN or meld.type == meld.CHANKAN
             # player draws additional tile from the wall in case of closed kan or shouminkan
             self.count_of_remaining_tiles -= 1
 

@@ -11,6 +11,9 @@ class HonitsuAnalyzer:
         self.player = player
         self.chosen_suit = None
 
+    def serialize(self):
+        return {"id": self.id, "chosen_suit": self.chosen_suit and self.chosen_suit.__name__}
+
     def is_yaku_active(self):
         self.chosen_suit = self._get_chosen_suit_from_discards()
         return self.chosen_suit and True or False

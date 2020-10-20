@@ -47,6 +47,6 @@ class ChiitoitsuStrategy(BaseStrategy):
         :param tile: 136 format tile
         :param is_kamicha_discard: boolean
         :param new_tiles:
-        :return: Meld and DiscardOption objects
+        :return: MeldPrint and DiscardOption objects
         """
         return None, None

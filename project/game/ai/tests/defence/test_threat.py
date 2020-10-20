@@ -1,6 +1,6 @@
 from game.ai.helpers.defence import EnemyDanger
 from game.table import Table
-from mahjong.meld import Meld
+from utils.decisions_logger import MeldPrint
 from utils.test_helpers import make_meld, string_to_136_array, string_to_136_tile
 
 
@@ -26,7 +26,7 @@ def test_is_threatening_and_dora_pon():
     assert len(threatening_players) == 0
 
     enemy_seat = 2
-    table.add_called_meld(enemy_seat, make_meld(Meld.PON, man="333"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, man="333"))
     table.player.round_step = 7
 
     # simple pon it is no threat
@@ -53,8 +53,8 @@ def test_is_threatening_and_two_open_yakuhai_melds():
     # south round
     table.round_wind_number = 4
 
-    table.add_called_meld(enemy_seat, make_meld(Meld.PON, honors="222"))
-    table.add_called_meld(enemy_seat, make_meld(Meld.CHI, man="123"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, honors="222"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.CHI, man="123"))
     table.player.round_step = 2
 
     # double wind is not enough
@@ -78,8 +78,8 @@ def test_is_threatening_and_two_open_tanyao_melds():
     assert len(threatening_players) == 0
 
     enemy_seat = 2
-    table.add_called_meld(enemy_seat, make_meld(Meld.PON, pin="234"))
-    table.add_called_meld(enemy_seat, make_meld(Meld.CHI, sou="333"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, pin="234"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.CHI, sou="333"))
     table.player.round_step = 2
 
     # tanyao without dor is not threat
@@ -103,9 +103,9 @@ def test_is_threatening_and_honitsu_hand():
     assert len(threatening_players) == 0
 
     enemy_seat = 1
-    table.add_called_meld(enemy_seat, make_meld(Meld.PON, pin="567"))
-    table.add_called_meld(enemy_seat, make_meld(Meld.CHI, pin="123"))
-    table.add_called_meld(enemy_seat, make_meld(Meld.CHI, pin="345"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, pin="567"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.CHI, pin="123"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.CHI, pin="345"))
 
     table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="1"), False)
     table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="5"), False)

@@ -1,10 +1,7 @@
-from copy import deepcopy
-
 import utils.decisions_constants as log
-from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_aka_dora, is_chi, is_honor, is_man, is_pin, is_pon, is_sou, is_terminal, plus_dora
-from utils.decisions_logger import DecisionsLogger
+from utils.decisions_logger import DecisionsLogger, MeldPrint
 
 
 class BaseStrategy:
@@ -98,11 +95,11 @@ class BaseStrategy:
     def try_to_call_meld(self, tile, is_kamicha_discard, new_tiles):
         """
         Determine should we call a meld or not.
-        If yes, it will return Meld object and tile to discard
+        If yes, it will return MeldPrint object and tile to discard
         :param tile: 136 format tile
         :param is_kamicha_discard: boolean
         :param new_tiles:
-        :return: Meld and DiscardOption objects
+        :return: MeldPrint and DiscardOption objects
         """
         if self.player.in_riichi:
             return None, None
@@ -243,7 +240,7 @@ class BaseStrategy:
             meld_34_copy = meld_34.copy()
             closed_hand_copy = closed_hand.copy()
 
-            meld_type = is_chi(meld_34_copy) and Meld.CHI or Meld.PON
+            meld_type = is_chi(meld_34_copy) and MeldPrint.CHI or MeldPrint.PON
             meld_34_copy.remove(discarded_tile_34)
 
             first_tile = TilesConverter.find_34_tile_in_136_array(meld_34_copy[0], closed_hand_copy)
@@ -254,7 +251,7 @@ class BaseStrategy:
 
             tiles = [first_tile, second_tile, discarded_tile]
 
-            meld = Meld()
+            meld = MeldPrint()
             meld.type = meld_type
             meld.tiles = sorted(tiles)
 
@@ -278,6 +275,6 @@ class BaseStrategy:
         DecisionsLogger.debug(
             log.MELD_PREPARE,
             "Options with meld calling (use first one)",
-            context=deepcopy(final_results),
+            context=final_results,
         )
         return final_results[0]

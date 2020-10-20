@@ -1,6 +1,6 @@
 from game.ai.strategies.main import BaseStrategy
 from game.table import Table
-from mahjong.meld import Meld
+from utils.decisions_logger import MeldPrint
 from utils.test_helpers import make_meld, string_to_34_tile, string_to_136_array, string_to_136_tile, tiles_to_string
 
 
@@ -57,7 +57,7 @@ def test_chose_right_set_to_open_hand():
 
     meld, _ = player.try_to_call_meld(tile, True)
     assert meld is not None
-    assert meld.type == Meld.PON
+    assert meld.type == MeldPrint.PON
     assert tiles_to_string(meld.tiles) == "555m"
 
     table = Table()
@@ -70,7 +70,7 @@ def test_chose_right_set_to_open_hand():
     tile = string_to_136_tile(man="4")
     meld, _ = player.try_to_call_meld(tile, True)
     assert meld is not None
-    assert meld.type == Meld.CHI
+    assert meld.type == MeldPrint.CHI
     assert tiles_to_string(meld.tiles) == "345m"
 
     table = Table()
@@ -85,7 +85,7 @@ def test_chose_right_set_to_open_hand():
     tile = string_to_136_tile(pin="5")
     meld, _ = player.try_to_call_meld(tile, True)
     assert meld is not None
-    assert meld.type == Meld.PON
+    assert meld.type == MeldPrint.PON
     assert tiles_to_string(meld.tiles) == "555p"
 
     table = Table()
@@ -100,7 +100,7 @@ def test_chose_right_set_to_open_hand():
     tile = string_to_136_tile(man="4")
     meld, _ = player.try_to_call_meld(tile, True)
     assert meld is not None
-    assert meld.type == Meld.CHI
+    assert meld.type == MeldPrint.CHI
     assert tiles_to_string(meld.tiles) == "345m"
 
     table = Table()
@@ -115,7 +115,7 @@ def test_chose_right_set_to_open_hand():
     tile = string_to_136_tile(man="4")
     meld, _ = player.try_to_call_meld(tile, True)
     assert meld is not None
-    assert meld.type == Meld.CHI
+    assert meld.type == MeldPrint.CHI
     assert tiles_to_string(meld.tiles) == "345m"
 
     table = Table()
@@ -129,13 +129,13 @@ def test_chose_right_set_to_open_hand():
     tile = string_to_136_tile(sou="4")
     meld, _ = player.try_to_call_meld(tile, True)
     assert meld is not None
-    assert meld.type == Meld.CHI
+    assert meld.type == MeldPrint.CHI
     assert tiles_to_string(meld.tiles) == "456s"
 
     tile = string_to_136_tile(sou="5")
     meld, _ = player.try_to_call_meld(tile, True)
     assert meld is not None
-    assert meld.type == Meld.CHI
+    assert meld.type == MeldPrint.CHI
     assert tiles_to_string(meld.tiles) == "345s"
 
     table = Table()
@@ -149,7 +149,7 @@ def test_chose_right_set_to_open_hand():
     tile = string_to_136_tile(sou="4")
     meld, _ = player.try_to_call_meld(tile, True)
     assert meld is not None
-    assert meld.type == Meld.CHI
+    assert meld.type == MeldPrint.CHI
     assert tiles_to_string(meld.tiles) == "234s"
 
 
@@ -167,7 +167,7 @@ def test_chose_right_set_to_open_hand_dora():
     tile = string_to_136_tile(sou="3")
     meld, _ = player.try_to_call_meld(tile, True)
     assert meld is not None
-    assert meld.type == Meld.CHI
+    assert meld.type == MeldPrint.CHI
     assert tiles_to_string(meld.tiles) == "234s"
 
     table = Table()
@@ -183,7 +183,7 @@ def test_chose_right_set_to_open_hand_dora():
     tile = string_to_136_tile(sou="3")
     meld, _ = player.try_to_call_meld(tile, True)
     assert meld is not None
-    assert meld.type == Meld.CHI
+    assert meld.type == MeldPrint.CHI
     assert tiles_to_string(meld.tiles) == "345s"
 
     table = Table()
@@ -199,7 +199,7 @@ def test_chose_right_set_to_open_hand_dora():
     tile = string_to_136_tile(sou="3")
     meld, _ = player.try_to_call_meld(tile, True)
     assert meld is not None
-    assert meld.type == Meld.CHI
+    assert meld.type == MeldPrint.CHI
     assert tiles_to_string(meld.tiles) == "345s"
 
     table = Table()
@@ -217,7 +217,7 @@ def test_chose_right_set_to_open_hand_dora():
     tile = string_to_136_tile(sou="3")
     meld, _ = player.try_to_call_meld(tile, True)
     assert meld is not None
-    assert meld.type == Meld.CHI
+    assert meld.type == MeldPrint.CHI
     assert tiles_to_string(meld.tiles) == "345s"
 
 
@@ -282,7 +282,7 @@ def test_chose_strategy_and_reset_strategy():
     player.draw_tile(string_to_136_tile(honors="5"))
     player.discard_tile()
 
-    meld = make_meld(Meld.PON, man="333")
+    meld = make_meld(MeldPrint.PON, man="333")
     player.add_called_meld(meld)
     tile = string_to_136_tile(sou="8")
     player.draw_tile(tile)
@@ -330,7 +330,7 @@ def test_remaining_tiles_and_opened_meld():
     # was discard and set was opened
     tile = string_to_136_tile(sou="8")
     player.table.add_discarded_tile(3, tile, False)
-    meld = make_meld(Meld.PON, sou="888")
+    meld = make_meld(MeldPrint.PON, sou="888")
     meld.called_tile = tile
     player.table.add_called_meld(3, meld)
 
@@ -341,7 +341,7 @@ def test_remaining_tiles_and_opened_meld():
     # was discard and set was opened
     tile = string_to_136_tile(sou="3")
     player.table.add_discarded_tile(2, tile, False)
-    meld = make_meld(Meld.PON, sou="345")
+    meld = make_meld(MeldPrint.PON, sou="345")
     meld.called_tile = tile
     player.table.add_called_meld(2, meld)
 
@@ -396,7 +396,7 @@ def test_call_upgrade_pon_and_bad_ukeire_after_call():
 
     assert table.player.should_call_kan(tile, False) is None
 
-    table.player.add_called_meld(make_meld(Meld.PON, man="444"))
+    table.player.add_called_meld(make_meld(MeldPrint.PON, man="444"))
 
     assert len(table.player.melds) == 1
     assert len(table.player.tiles) == 13
@@ -411,8 +411,8 @@ def test_call_upgrade_pon_and_bad_ukeire_after_call_second_case():
 
     tiles = string_to_136_array(man="3455567", sou="222", honors="666")
     player.init_hand(tiles)
-    player.add_called_meld(make_meld(Meld.PON, man="555"))
-    player.add_called_meld(make_meld(Meld.PON, honors="666"))
+    player.add_called_meld(make_meld(MeldPrint.PON, man="555"))
+    player.add_called_meld(make_meld(MeldPrint.PON, honors="666"))
 
     tile = string_to_136_tile(man="5")
 
@@ -431,7 +431,7 @@ def test_call_upgrade_pon_and_bad_ukeire_after_call_third_case():
 
     tiles = string_to_136_array(man="67", pin="6", sou="1344478999")
     table.player.init_hand(tiles)
-    table.player.add_called_meld(make_meld(Meld.PON, sou="444"))
+    table.player.add_called_meld(make_meld(MeldPrint.PON, sou="444"))
 
     tile = string_to_136_tile(sou="4")
 
@@ -450,11 +450,11 @@ def test_call_shouminkan():
 
     tiles = string_to_136_array(man="3455567", sou="222", honors="666")
     table.player.init_hand(tiles)
-    table.player.add_called_meld(make_meld(Meld.PON, honors="666"))
+    table.player.add_called_meld(make_meld(MeldPrint.PON, honors="666"))
 
     tile = string_to_136_tile(honors="6")
 
-    assert table.player.should_call_kan(tile, False) == Meld.CHANKAN
+    assert table.player.should_call_kan(tile, False) == MeldPrint.CHANKAN
 
 
 def test_call_closed_kan():
@@ -473,7 +473,7 @@ def test_call_closed_kan():
     tile = string_to_136_tile(sou="1")
 
     # call closed kan with 1s is fine
-    assert table.player.should_call_kan(tile, False) == Meld.KAN
+    assert table.player.should_call_kan(tile, False) == MeldPrint.KAN
 
 
 def test_opened_kan():
@@ -491,7 +491,7 @@ def test_opened_kan():
     tile = string_to_136_tile(sou="1")
     assert table.player.should_call_kan(tile, True) is None
 
-    table.player.add_called_meld(make_meld(Meld.PON, honors="111"))
+    table.player.add_called_meld(make_meld(MeldPrint.PON, honors="111"))
 
     # our hand is open, but it is not tempai
     # we don't need to open kan here
@@ -505,7 +505,7 @@ def test_opened_kan_second_case():
 
     tiles = string_to_136_array(man="2399", sou="111456", honors="111")
     table.player.init_hand(tiles)
-    table.player.add_called_meld(make_meld(Meld.PON, honors="111"))
+    table.player.add_called_meld(make_meld(MeldPrint.PON, honors="111"))
 
     # to rebuild all caches
     table.player.draw_tile(string_to_136_tile(pin="9"))
@@ -513,7 +513,7 @@ def test_opened_kan_second_case():
 
     # our hand is open, in tempai and with a good wait
     tile = string_to_136_tile(sou="1")
-    assert table.player.should_call_kan(tile, True) == Meld.KAN
+    assert table.player.should_call_kan(tile, True) == MeldPrint.KAN
 
 
 def test_opened_kan_third_case():
@@ -525,7 +525,7 @@ def test_opened_kan_third_case():
 
     tiles = string_to_136_array(man="456", sou="55567678", honors="66")
     table.player.init_hand(tiles)
-    table.player.add_called_meld(make_meld(Meld.CHI, sou="678"))
+    table.player.add_called_meld(make_meld(MeldPrint.CHI, sou="678"))
 
     # to rebuild all caches
     table.player.draw_tile(string_to_136_tile(pin="9"))
@@ -546,7 +546,7 @@ def test_closed_kan_and_wrong_shanten_number_calculation():
     tiles = string_to_136_array(man="56", sou="14578999", pin="666")
     player.init_hand(tiles)
     tile = string_to_136_tile(man="7")
-    player.melds.append(make_meld(Meld.KAN, False, sou="9999"))
+    player.melds.append(make_meld(MeldPrint.KAN, False, sou="9999"))
     player.draw_tile(tile)
     player.discard_tile()
 
@@ -583,7 +583,7 @@ def test_closed_kan_same_shanten_bad_ukeire():
 
     tiles = string_to_136_array(man="333455788899", honors="3")
     player.init_hand(tiles)
-    player.melds.append(make_meld(Meld.PON, man="333"))
+    player.melds.append(make_meld(MeldPrint.PON, man="333"))
 
     tile = string_to_136_tile(man="8")
 
@@ -601,11 +601,11 @@ def test_closed_kan_same_shanten_same_ukeire():
 
     tiles = string_to_136_array(man="3334557889", honors="333")
     player.init_hand(tiles)
-    player.melds.append(make_meld(Meld.PON, man="333"))
+    player.melds.append(make_meld(MeldPrint.PON, man="333"))
 
     tile = string_to_136_tile(honors="3")
 
-    assert player.should_call_kan(tile, False) == Meld.KAN
+    assert player.should_call_kan(tile, False) == MeldPrint.KAN
 
 
 def test_kan_crash():
@@ -618,7 +618,7 @@ def test_kan_crash():
 
     tiles = string_to_136_array(man="456", pin="78999", sou="666", honors="33")
     table.player.init_hand(tiles)
-    table.player.add_called_meld(make_meld(Meld.PON, sou="666"))
+    table.player.add_called_meld(make_meld(MeldPrint.PON, sou="666"))
     tile = string_to_136_tile(pin="9")
 
     assert table.player.should_call_kan(tile, False) is None

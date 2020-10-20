@@ -4,6 +4,9 @@ class YakuhaiAnalyzer:
     def __init__(self, player):
         self.player = player
 
+    def serialize(self):
+        return {"id": self.id}
+
     def is_yaku_active(self):
         return len(self.get_suitable_melds()) > 0
 

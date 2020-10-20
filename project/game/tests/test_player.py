@@ -1,6 +1,6 @@
 from game.table import Table
 from mahjong.constants import EAST, NORTH, SOUTH, WEST
-from mahjong.meld import Meld
+from utils.decisions_logger import MeldPrint
 from utils.test_helpers import make_meld, string_to_136_array
 
 
@@ -75,7 +75,7 @@ def test_can_call_riichi_and_open_hand():
     player.in_tempai = True
     player.in_riichi = False
     player.scores = 2000
-    player.melds = [Meld()]
+    player.melds = [MeldPrint()]
     player.table.count_of_remaining_tiles = 40
 
     assert player.formal_riichi_conditions() is False
@@ -119,6 +119,6 @@ def test_player_called_meld_and_closed_hand():
 
     assert len(player.closed_hand) == 13
 
-    player.add_called_meld(make_meld(Meld.PON, honors="555"))
+    player.add_called_meld(make_meld(MeldPrint.PON, honors="555"))
 
     assert len(player.closed_hand) == 10

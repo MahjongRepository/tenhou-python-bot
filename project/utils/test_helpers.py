@@ -1,5 +1,5 @@
-from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
+from utils.decisions_logger import MeldPrint
 
 
 def string_to_136_array(sou="", pin="", man="", honors=""):
@@ -33,7 +33,7 @@ def string_to_34_tile(sou="", pin="", man="", honors=""):
 
 def make_meld(meld_type, is_open=True, man="", pin="", sou="", honors=""):
     tiles = string_to_136_array(man=man, pin=pin, sou=sou, honors=honors)
-    meld = Meld(
+    meld = MeldPrint(
         meld_type=meld_type,
         tiles=tiles,
         opened=is_open,

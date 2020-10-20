@@ -3,8 +3,8 @@ from game.ai.strategies.main import BaseStrategy
 from game.ai.strategies.yakuhai import YakuhaiStrategy
 from game.table import Table
 from mahjong.constants import EAST, SOUTH, WEST
-from mahjong.meld import Meld
 from mahjong.tile import Tile
+from utils.decisions_logger import MeldPrint
 from utils.test_helpers import make_meld, string_to_136_array, string_to_136_tile, tiles_to_string
 
 
@@ -79,7 +79,7 @@ def test_force_yakuhai_pair_waiting_for_tempai_hand():
     tile = string_to_136_tile(man="7")
     meld, _ = table.player.try_to_call_meld(tile, True)
     assert meld is not None
-    assert meld.type == Meld.CHI
+    assert meld.type == MeldPrint.CHI
     assert tiles_to_string(meld.tiles) == "678m"
 
     table = Table()
@@ -104,7 +104,7 @@ def test_tempai_without_yaku():
 
     tile = string_to_136_tile(pin="5")
     table.player.draw_tile(tile)
-    meld = make_meld(Meld.CHI, sou="678")
+    meld = make_meld(MeldPrint.CHI, sou="678")
     table.player.add_called_meld(meld)
 
     discard = table.player.discard_tile()
@@ -124,9 +124,9 @@ def test_wrong_shanten_improvements_detection():
     tiles = string_to_136_array(sou="2345999", honors="114446")
     table.player.init_hand(tiles)
 
-    meld = make_meld(Meld.PON, sou="999")
+    meld = make_meld(MeldPrint.PON, sou="999")
     table.player.add_called_meld(meld)
-    meld = make_meld(Meld.PON, honors="444")
+    meld = make_meld(MeldPrint.PON, honors="444")
     table.player.add_called_meld(meld)
 
     tile = string_to_136_tile(sou="2")
@@ -388,7 +388,7 @@ def test_keep_only_yakuhai_pon():
     tiles = string_to_136_array(man="11144", sou="567", pin="56", honors="777")
     player.init_hand(tiles)
 
-    meld = make_meld(Meld.PON, man="111")
+    meld = make_meld(MeldPrint.PON, man="111")
     player.add_called_meld(meld)
 
     strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
@@ -411,7 +411,7 @@ def test_keep_only_yakuhai_pair():
     tiles = string_to_136_array(man="11144", sou="567", pin="156", honors="77")
     player.init_hand(tiles)
 
-    meld = make_meld(Meld.PON, man="111")
+    meld = make_meld(MeldPrint.PON, man="111")
     player.add_called_meld(meld)
 
     strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
@@ -431,7 +431,7 @@ def test_atodzuke_keep_yakuhai_wait():
     tiles = string_to_136_array(man="11144", sou="567", pin="567", honors="77")
     player.init_hand(tiles)
 
-    meld = make_meld(Meld.PON, man="111")
+    meld = make_meld(MeldPrint.PON, man="111")
     player.add_called_meld(meld)
 
     # two of 4 man tiles are already out, so it would seem our wait is worse, but we know
@@ -457,7 +457,7 @@ def test_atodzuke_dont_destroy_second_pair():
     tiles = string_to_136_array(man="111445", sou="468", pin="56", honors="77")
     player.init_hand(tiles)
 
-    meld = make_meld(Meld.PON, man="111")
+    meld = make_meld(MeldPrint.PON, man="111")
     player.add_called_meld(meld)
 
     strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
@@ -476,7 +476,7 @@ def test_atodzuke_dont_destroy_second_pair():
     tiles = string_to_136_array(man="111445", sou="468", pin="88", honors="77")
     player.init_hand(tiles)
 
-    meld = make_meld(Meld.PON, man="111")
+    meld = make_meld(MeldPrint.PON, man="111")
     player.add_called_meld(meld)
 
     strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
@@ -501,7 +501,7 @@ def test_atodzuke_dont_open_no_yaku_tempai():
     tiles = string_to_136_array(man="111445", sou="567", pin="56", honors="77")
     player.init_hand(tiles)
 
-    meld = make_meld(Meld.PON, man="111")
+    meld = make_meld(MeldPrint.PON, man="111")
     player.add_called_meld(meld)
 
     # 6 man is bad meld, we lose our second pair and so is 4 man
@@ -537,7 +537,7 @@ def test_atodzuke_choose_hidden_syanpon():
     tiles = string_to_136_array(man="111678", sou="56678", honors="77")
     player.init_hand(tiles)
 
-    meld = make_meld(Meld.PON, man="111")
+    meld = make_meld(MeldPrint.PON, man="111")
     player.add_called_meld(meld)
 
     strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
@@ -562,7 +562,7 @@ def test_tempai_with_open_yakuhai_meld_and_yakuhai_pair_in_the_hand():
 
     tiles = string_to_136_array(man="56", pin="555", sou="667", honors="55777")
     player.init_hand(tiles)
-    player.add_called_meld(make_meld(Meld.PON, honors="777"))
+    player.add_called_meld(make_meld(MeldPrint.PON, honors="777"))
     player.draw_tile(string_to_136_tile(sou="8"))
 
     player.ai.current_strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)

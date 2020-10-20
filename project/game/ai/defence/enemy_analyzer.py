@@ -22,7 +22,7 @@ class EnemyAnalyzer:
         self.main_player = self.table.player
         self.possible_forms_analyzer = PossibleFormsAnalyzer(self.main_player)
 
-    def to_print(self):
+    def serialize(self):
         return {"seat": self.enemy.seat, "threat_reason": self.threat_reason}
 
     @property

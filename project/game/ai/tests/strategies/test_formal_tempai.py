@@ -1,8 +1,8 @@
 from game.ai.strategies.formal_tempai import FormalTempaiStrategy
 from game.ai.strategies.main import BaseStrategy
 from game.table import Table
-from mahjong.meld import Meld
 from mahjong.tile import Tile
+from utils.decisions_logger import MeldPrint
 from utils.test_helpers import make_meld, string_to_136_array, string_to_136_tile, tiles_to_string
 
 
@@ -69,7 +69,7 @@ def test_dont_meld_agari():
     tiles = string_to_136_array(man="23789", sou="456", pin="22299")
     table.player.init_hand(tiles)
 
-    meld = make_meld(Meld.CHI, man="789")
+    meld = make_meld(MeldPrint.CHI, man="789")
     table.player.add_called_meld(meld)
 
     tile = string_to_136_tile(man="4")

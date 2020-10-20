@@ -1,7 +1,7 @@
 from game.ai.strategies.chinitsu import ChinitsuStrategy
 from game.ai.strategies.main import BaseStrategy
 from game.table import Table
-from mahjong.meld import Meld
+from utils.decisions_logger import MeldPrint
 from utils.test_helpers import make_meld, string_to_136_array, string_to_136_tile, tiles_to_string
 
 
@@ -127,7 +127,7 @@ def test_open_suit_same_shanten():
     tiles = string_to_136_array(man="1134556999", pin="3", sou="78")
     player.init_hand(tiles)
 
-    meld = make_meld(Meld.CHI, man="345")
+    meld = make_meld(MeldPrint.CHI, man="345")
     player.add_called_meld(meld)
 
     strategy = ChinitsuStrategy(BaseStrategy.CHINITSU, player)
@@ -146,7 +146,7 @@ def test_correct_discard_agari_no_yaku():
     tiles = string_to_136_array(man="111234677889", sou="1", pin="")
     player.init_hand(tiles)
 
-    meld = make_meld(Meld.CHI, man="789")
+    meld = make_meld(MeldPrint.CHI, man="789")
     player.add_called_meld(meld)
 
     tile = string_to_136_tile(sou="1")
@@ -164,7 +164,7 @@ def test_open_suit_agari_no_yaku():
     tiles = string_to_136_array(man="11123455589", pin="22")
     player.init_hand(tiles)
 
-    meld = make_meld(Meld.CHI, man="234")
+    meld = make_meld(MeldPrint.CHI, man="234")
     player.add_called_meld(meld)
 
     strategy = ChinitsuStrategy(BaseStrategy.CHINITSU, player)

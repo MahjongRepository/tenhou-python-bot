@@ -1,7 +1,7 @@
 from game.ai.strategies.honitsu import HonitsuStrategy
 from game.ai.strategies.main import BaseStrategy
 from game.table import Table
-from mahjong.meld import Meld
+from utils.decisions_logger import MeldPrint
 from utils.test_helpers import make_meld, string_to_136_array, string_to_136_tile, tiles_to_string
 
 
@@ -171,7 +171,7 @@ def test_open_yakuhai_same_shanten():
     tiles = string_to_136_array(man="34556778", pin="3", sou="78", honors="77")
     player.init_hand(tiles)
 
-    meld = make_meld(Meld.CHI, man="345")
+    meld = make_meld(MeldPrint.CHI, man="345")
     player.add_called_meld(meld)
 
     strategy = HonitsuStrategy(BaseStrategy.HONITSU, player)
@@ -209,7 +209,7 @@ def test_open_suit_same_shanten():
     tiles = string_to_136_array(man="1134556", pin="3", sou="78", honors="777")
     player.init_hand(tiles)
 
-    meld = make_meld(Meld.CHI, man="345")
+    meld = make_meld(MeldPrint.CHI, man="345")
     player.add_called_meld(meld)
 
     strategy = HonitsuStrategy(BaseStrategy.HONITSU, player)

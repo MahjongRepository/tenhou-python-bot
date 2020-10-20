@@ -3,8 +3,8 @@ from game.ai.strategies.main import BaseStrategy
 from game.ai.strategies.tanyao import TanyaoStrategy
 from game.table import Table
 from mahjong.constants import CHUN, EAST, FIVE_RED_PIN, FIVE_RED_SOU, HAKU, HATSU, NORTH, SOUTH, WEST
-from mahjong.meld import Meld
 from mahjong.tile import Tile
+from utils.decisions_logger import MeldPrint
 from utils.test_helpers import make_meld, string_to_34_tile, string_to_136_array, string_to_136_tile, tiles_to_string
 
 
@@ -342,9 +342,9 @@ def test_choose_best_option_with_melds():
     tiles = string_to_136_array(sou="245666789", honors="2266")
     player.init_hand(tiles)
 
-    meld = make_meld(Meld.PON, sou="666")
+    meld = make_meld(MeldPrint.PON, sou="666")
     player.add_called_meld(meld)
-    meld = make_meld(Meld.CHI, sou="789")
+    meld = make_meld(MeldPrint.CHI, sou="789")
     player.add_called_meld(meld)
 
     player.draw_tile(string_to_136_tile(sou="5"))
@@ -362,11 +362,11 @@ def test_choose_best_wait_with_melds():
     tiles = string_to_136_array(sou="1222233455599")
     player.init_hand(tiles)
 
-    meld = make_meld(Meld.CHI, sou="123")
+    meld = make_meld(MeldPrint.CHI, sou="123")
     player.add_called_meld(meld)
-    meld = make_meld(Meld.PON, sou="222")
+    meld = make_meld(MeldPrint.PON, sou="222")
     player.add_called_meld(meld)
-    meld = make_meld(Meld.PON, sou="555")
+    meld = make_meld(MeldPrint.PON, sou="555")
     player.add_called_meld(meld)
 
     player.draw_tile(string_to_136_tile(sou="4"))
@@ -787,7 +787,7 @@ def test_choose_1_shanten_with_cost_possibility_draw():
     tiles = string_to_136_array(man="557", pin="468", sou="55577", honors="66")
     player.init_hand(tiles)
 
-    meld = make_meld(Meld.PON, sou="555")
+    meld = make_meld(MeldPrint.PON, sou="555")
     player.add_called_meld(meld)
 
     tile = string_to_136_tile(sou="7")
@@ -806,13 +806,13 @@ def test_choose_1_shanten_with_cost_possibility_meld():
     tiles = string_to_136_array(man="557", pin="468", sou="55577", honors="66")
     player.init_hand(tiles)
 
-    meld = make_meld(Meld.PON, sou="555")
+    meld = make_meld(MeldPrint.PON, sou="555")
     player.add_called_meld(meld)
 
     tile = string_to_136_tile(sou="7")
     meld, discard_option = player.try_to_call_meld(tile, False)
     assert meld is not None
-    assert meld.type == Meld.PON
+    assert meld.type == MeldPrint.PON
     assert tiles_to_string(meld.tiles) == "777s"
 
     assert player.ai.current_strategy is not None

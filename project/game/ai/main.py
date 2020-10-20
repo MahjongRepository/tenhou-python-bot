@@ -18,11 +18,10 @@ from mahjong.constants import AKA_DORA_LIST, DISPLAY_WINDS
 from mahjong.hand_calculating.divider import HandDivider
 from mahjong.hand_calculating.hand import HandCalculator
 from mahjong.hand_calculating.hand_config import HandConfig, OptionalRules
-from mahjong.meld import Meld
 from mahjong.shanten import Shanten
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_pon
-from utils.decisions_logger import DecisionsLogger
+from utils.decisions_logger import DecisionsLogger, MeldPrint
 
 
 class MahjongAI:
@@ -77,9 +76,9 @@ class MahjongAI:
         DecisionsLogger.debug(
             log.INIT_HAND,
             context=[
-                "Round  wind: {}".format(DISPLAY_WINDS[self.table.round_wind_tile]),
-                "Player wind: {}".format(DISPLAY_WINDS[self.player.player_wind]),
-                "Hand: {}".format(self.player.format_hand_for_print()),
+                f"Round  wind: {DISPLAY_WINDS[self.table.round_wind_tile]}",
+                f"Player wind: {DISPLAY_WINDS[self.player.player_wind]}",
+                f"Hand: {self.player.format_hand_for_print()}",
             ],
         )
 
@@ -120,9 +119,9 @@ class MahjongAI:
                 log.MELD_CALL,
                 "Try to call meld",
                 context=[
-                    "Hand: {}".format(self.player.format_hand_for_print(tile_136)),
-                    "Meld: {}".format(meld),
-                    "Discard after meld: {}".format(discard_option),
+                    f"Hand: {self.player.format_hand_for_print(tile_136)}",
+                    f"Meld: {meld.serialize()}",
+                    f"Discard after meld: {discard_option.serialize()}",
                 ],
             )
 
@@ -324,7 +323,7 @@ class MahjongAI:
             assert new_waits_count <= previous_waits_count
 
             if new_waits_count == previous_waits_count:
-                return has_shouminkan_candidate and Meld.CHANKAN or Meld.KAN
+                return has_shouminkan_candidate and MeldPrint.CHANKAN or MeldPrint.KAN
 
         return None
 

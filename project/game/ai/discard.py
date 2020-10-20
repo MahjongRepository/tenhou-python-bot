@@ -58,7 +58,7 @@ class DiscardOption:
 
         self.calculate_value()
 
-    def to_print(self):
+    def serialize(self):
         data = {
             "tile": TilesConverter.to_one_line_string([self.tile_to_discard * 4]),
             "shanten": self.shanten,

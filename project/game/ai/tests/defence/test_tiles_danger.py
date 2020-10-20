@@ -4,7 +4,7 @@ import pytest
 from game.ai.helpers.defence import TileDanger
 from game.table import Table
 from mahjong.constants import FIVE_RED_SOU
-from mahjong.meld import Meld
+from utils.decisions_logger import MeldPrint
 from utils.test_helpers import find_discard_option, make_meld, string_to_136_array, string_to_136_tile
 
 
@@ -273,8 +273,8 @@ def test_tile_danger_against_tanyao_threat():
     player = table.player
 
     enemy_seat = 2
-    table.add_called_meld(enemy_seat, make_meld(Meld.PON, pin="234"))
-    table.add_called_meld(enemy_seat, make_meld(Meld.CHI, sou="333"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, pin="234"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.CHI, sou="333"))
     table.player.round_step = 2
     table.add_dora_indicator(string_to_136_tile(pin="1"))
     table.add_dora_indicator(string_to_136_tile(pin="2"))
@@ -299,9 +299,9 @@ def test_tile_danger_against_honitsu_threat():
     player = table.player
 
     enemy_seat = 1
-    table.add_called_meld(enemy_seat, make_meld(Meld.PON, pin="567"))
-    table.add_called_meld(enemy_seat, make_meld(Meld.CHI, pin="123"))
-    table.add_called_meld(enemy_seat, make_meld(Meld.CHI, pin="345"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, pin="567"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.CHI, pin="123"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.CHI, pin="345"))
     table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="1"), False)
     table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="5"), False)
     table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="8"), False)

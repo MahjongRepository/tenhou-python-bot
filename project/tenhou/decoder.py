@@ -1,7 +1,7 @@
 import re
 from urllib.parse import unquote
 
-from mahjong.meld import Meld
+from utils.decisions_logger import MeldPrint
 
 
 class TenhouDecoder:
@@ -160,7 +160,7 @@ class TenhouDecoder:
     def parse_meld(self, message):
         data = int(self.get_attribute_content(message, "m"))
 
-        meld = Meld()
+        meld = MeldPrint()
         meld.who = int(self.get_attribute_content(message, "who"))
         # 'from_who' is encoded relative the the 'who', so we want
         # to convert it to be relative to our player
@@ -178,7 +178,7 @@ class TenhouDecoder:
         return meld
 
     def parse_chi(self, data, meld):
-        meld.type = Meld.CHI
+        meld.type = MeldPrint.CHI
         t0, t1, t2 = (data >> 3) & 0x3, (data >> 5) & 0x3, (data >> 7) & 0x3
         base_and_called = data >> 10
         base = base_and_called // 3
@@ -194,18 +194,18 @@ class TenhouDecoder:
         base = base_and_called // 3
         called = base_and_called % 3
         if data & 0x8:
-            meld.type = Meld.PON
+            meld.type = MeldPrint.PON
             meld.tiles = [t0 + 4 * base, t1 + 4 * base, t2 + 4 * base]
             meld.called_tile = meld.tiles[called]
         else:
-            meld.type = Meld.CHANKAN
+            meld.type = MeldPrint.CHANKAN
             meld.tiles = [t0 + 4 * base, t1 + 4 * base, t2 + 4 * base, t4 + 4 * base]
             meld.called_tile = meld.tiles[3]
 
     def parse_kan(self, data, meld):
         base_and_called = data >> 8
         base = base_and_called // 4
-        meld.type = Meld.KAN
+        meld.type = MeldPrint.KAN
         meld.tiles = [4 * base, 1 + 4 * base, 2 + 4 * base, 3 + 4 * base]
         called = base_and_called % 4
         meld.called_tile = meld.tiles[called]
@@ -213,7 +213,7 @@ class TenhouDecoder:
         meld.opened = meld.who != meld.from_who
 
     def parse_nuki(self, data, meld):
-        meld.type = Meld.NUKI
+        meld.type = MeldPrint.NUKI
         meld.tiles = [data >> 8]
 
     def generate_auth_token(self, auth_string):

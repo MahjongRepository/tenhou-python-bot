@@ -7,9 +7,9 @@ from time import sleep
 from urllib.parse import quote
 
 from game.client import Client
-from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
 from tenhou.decoder import TenhouDecoder
+from utils.decisions_logger import MeldPrint
 from utils.settings_handler import settings
 from utils.statistics import Statistics
 
@@ -276,7 +276,7 @@ class TenhouClient(Client):
                     if kan_type:
                         self._random_sleep(1, 2)
 
-                        if kan_type == Meld.CHANKAN:
+                        if kan_type == MeldPrint.CHANKAN:
                             meld_type = 5
                             logger.info("We upgraded pon to kan!")
                         else:
@@ -328,12 +328,12 @@ class TenhouClient(Client):
                 if self.decoder.is_opened_set_message(message):
                     meld = self.decoder.parse_meld(message)
                     self.table.add_called_meld(meld.who, meld)
-                    logger.info("Meld: {} by {}".format(meld, meld.who))
+                    logger.info("MeldPrint: {} by {}".format(meld, meld.who))
 
                     # tenhou confirmed that we called a meld
                     # we had to do discard after this
                     if meld.who == 0:
-                        if meld.type != Meld.KAN and meld.type != Meld.CHANKAN:
+                        if meld.type != MeldPrint.KAN and meld.type != MeldPrint.CHANKAN:
                             discarded_tile = self.player.discard_tile(tile_to_discard)
 
                             self.player.tiles.append(meld_tile)
@@ -399,7 +399,7 @@ class TenhouClient(Client):
 
                             # 1 is pon
                             meld_type = "1"
-                            if meld.type == Meld.CHI:
+                            if meld.type == MeldPrint.CHI:
                                 # yeah it is 3, not 4
                                 # because of tenhou protocol
                                 meld_type = "3"

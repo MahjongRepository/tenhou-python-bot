@@ -1,5 +1,5 @@
 from game.client import Client
-from mahjong.meld import Meld
+from utils.decisions_logger import MeldPrint
 
 
 def test_discard_tile():
@@ -26,15 +26,15 @@ def test_call_meld_closed_kan():
     client.table.init_round(0, 0, 0, 0, 0, [0, 0, 0, 0])
     assert client.table.count_of_remaining_tiles == 70
 
-    meld = Meld()
+    meld = MeldPrint()
     client.table.add_called_meld(0, meld)
 
     assert len(client.player.melds) == 1
     assert client.table.count_of_remaining_tiles == 71
 
     client.player.tiles = [0]
-    meld = Meld()
-    meld.type = Meld.KAN
+    meld = MeldPrint()
+    meld.type = MeldPrint.KAN
     # closed kan
     meld.tiles = [0, 1, 2, 3]
     meld.called_tile = None
@@ -52,15 +52,15 @@ def test_call_meld_kan_from_player():
     client.table.init_round(0, 0, 0, 0, 0, [0, 0, 0, 0])
     assert client.table.count_of_remaining_tiles == 70
 
-    meld = Meld()
+    meld = MeldPrint()
     client.table.add_called_meld(0, meld)
 
     assert len(client.player.melds) == 1
     assert client.table.count_of_remaining_tiles == 71
 
     client.player.tiles = [0]
-    meld = Meld()
-    meld.type = Meld.KAN
+    meld = MeldPrint()
+    meld.type = MeldPrint.KAN
     # closed kan
     meld.tiles = [0, 1, 2, 3]
     meld.called_tile = 0

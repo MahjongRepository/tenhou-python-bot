@@ -4,9 +4,8 @@ import logging
 import utils.decisions_constants as log
 from game.ai.main import MahjongAI
 from mahjong.constants import CHUN, EAST, HAKU, HATSU, NORTH, SOUTH, WEST
-from mahjong.meld import Meld
 from mahjong.tile import Tile, TilesConverter
-from utils.decisions_logger import DecisionsLogger
+from utils.decisions_logger import DecisionsLogger, MeldPrint
 
 logger = logging.getLogger("tenhou")
 
@@ -62,12 +61,12 @@ class PlayerInterface:
         self.uma = 0
         self.round_step = 0
 
-    def add_called_meld(self, meld: Meld):
+    def add_called_meld(self, meld: MeldPrint):
         # we already added shouminkan as a pon set
-        if meld.type == Meld.CHANKAN:
+        if meld.type == MeldPrint.CHANKAN:
             tile_34 = meld.tiles[0] // 4
 
-            pon_set = [x for x in self.melds if x.type == Meld.PON and (x.tiles[0] // 4) == tile_34]
+            pon_set = [x for x in self.melds if x.type == MeldPrint.PON and (x.tiles[0] // 4) == tile_34]
 
             # when we are doing reconnect and we have called shouminkan set
             # we will not have called pon set in the hand

@@ -9,26 +9,12 @@ logger = logging.getLogger("ai")
 
 
 class DecisionsLogger:
-    green = "\u001b[32m"
-    cyan = "\u001b[36m"
-    reset = "\u001b[0m"
-
     @staticmethod
     def debug(message_id, message="", context=None):
-        logger.debug(
-            DecisionsLogger.colorize_message(
-                f"id={message_id}",
-                DecisionsLogger.green,
-            )
-        )
+        logger.debug(f"id={message_id}")
 
         if message:
-            logger.debug(
-                DecisionsLogger.colorize_message(
-                    message,
-                    DecisionsLogger.cyan,
-                )
-            )
+            logger.debug(f"msg={message}")
 
         if context:
             if isinstance(context, list):
@@ -62,10 +48,6 @@ class DecisionsLogger:
                         v[i] = v[i].serialize()
             elif hasattr(v, "serialize"):
                 d[k] = v.serialize()
-
-    @staticmethod
-    def colorize_message(message, color):
-        return f"{color}{message}{DecisionsLogger.reset}"
 
 
 class MeldPrint(Meld):

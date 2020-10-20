@@ -6,6 +6,27 @@ from logging.handlers import SysLogHandler
 
 from utils.settings_handler import settings
 
+LOG_FORMAT = "%(asctime)s %(levelname)s: %(message)s"
+
+
+class ColoredFormatter(logging.Formatter):
+    """
+    Apply only to the console handler.
+    """
+
+    green = "\u001b[32m"
+    cyan = "\u001b[36m"
+    reset = "\u001b[0m"
+
+    def format(self, record):
+        frmt = LOG_FORMAT
+        if record.getMessage().startswith("id="):
+            frmt = f"{ColoredFormatter.green}{frmt}{ColoredFormatter.reset}"
+        if record.getMessage().startswith("msg="):
+            frmt = f"{ColoredFormatter.cyan}{frmt}{ColoredFormatter.reset}"
+        formatter = logging.Formatter(frmt)
+        return formatter.format(record)
+
 
 def set_up_logging(save_to_file=True):
     """
@@ -20,7 +41,7 @@ def set_up_logging(save_to_file=True):
 
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
-    formatter = logging.Formatter("%(asctime)s %(levelname)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    formatter = ColoredFormatter(LOG_FORMAT, datefmt="%Y-%m-%d %H:%M:%S")
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
@@ -33,6 +54,9 @@ def set_up_logging(save_to_file=True):
         log_prefix = hashlib.sha1(settings.USER_ID.encode("utf-8")).hexdigest()[:5]
 
     if save_to_file:
+        formatter = logging.Formatter(LOG_FORMAT, datefmt="%Y-%m-%d %H:%M:%S")
+        ch.setFormatter(formatter)
+
         # we need it to distinguish different bots logs (if they were run in the same time)
         file_name = "{}_{}.log".format(log_prefix, datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S"))
 

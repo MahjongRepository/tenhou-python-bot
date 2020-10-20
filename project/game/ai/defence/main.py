@@ -28,7 +28,7 @@ class TileDangerHandler:
         safe_against_threat_34 = []
 
         # First, add all genbutsu to the list
-        safe_against_threat_34.extend(list(set([x.value // 4 for x in enemy_analyzer.enemy.discards])))
+        safe_against_threat_34.extend(list(set([x for x in enemy_analyzer.enemy.all_safe_tiles])))
 
         # Then add tiles not suitable for yaku in enemy open hand
         if enemy_analyzer.threat_reason.get("active_yaku"):

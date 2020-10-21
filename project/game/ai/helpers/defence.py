@@ -70,9 +70,13 @@ class TileDanger:
     }
 
     # possible ryanmen waits
-    RYANMEN_BASE = {
-        "value": 400,
-        "description": "Base danger for possible ryanmen wait",
+    RYANMEN_BASE_SINGLE = {
+        "value": 300,
+        "description": "Base danger for possible wait in a single ryanmen",
+    }
+    RYANMEN_BASE_DOUBLE = {
+        "value": 500,
+        "description": "Base danger for possible wait in two ryanmens",
     }
     BONUS_SENKI_SUJI = {
         "value": 40,

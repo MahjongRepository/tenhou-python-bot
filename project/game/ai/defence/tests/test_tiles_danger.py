@@ -230,7 +230,25 @@ def test_tile_danger_and_ryanmen_wait():
     player.init_hand(tiles)
     player.draw_tile(tile)
 
-    _assert_discard(player, enemy_seat, TileDanger.RYANMEN_BASE, sou="5")
+    _assert_discard(player, enemy_seat, TileDanger.RYANMEN_BASE_DOUBLE, sou="5")
+    player.discard_tile()
+
+    tile = string_to_136_tile(sou="9")
+    player.draw_tile(tile)
+
+    _assert_discard(player, enemy_seat, TileDanger.RYANMEN_BASE_SINGLE, sou="9")
+    player.discard_tile()
+
+    # if there is a kabe on one side, double-ryanmen becomes a single-ryanmen
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="7"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="7"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="7"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="7"), False)
+
+    tile = string_to_136_tile(sou="5")
+    player.draw_tile(tile)
+
+    _assert_discard(player, enemy_seat, TileDanger.RYANMEN_BASE_SINGLE, sou="5")
 
 
 def test_tile_danger_and_dora():

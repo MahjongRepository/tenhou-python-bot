@@ -95,12 +95,19 @@ class TileDangerHandler:
                 },
             )
 
-            if forms_count[PossibleFormsAnalyzer.POSSIBLE_RYANMEN] > 0:
+            if forms_count[PossibleFormsAnalyzer.POSSIBLE_RYANMEN_SIDES] == 1:
                 self._update_discard_candidate(
                     tile_34,
                     discard_candidates,
                     enemy_analyzer.enemy.seat,
-                    TileDanger.RYANMEN_BASE,
+                    TileDanger.RYANMEN_BASE_SINGLE,
+                )
+            elif forms_count[PossibleFormsAnalyzer.POSSIBLE_RYANMEN_SIDES] == 2:
+                self._update_discard_candidate(
+                    tile_34,
+                    discard_candidates,
+                    enemy_analyzer.enemy.seat,
+                    TileDanger.RYANMEN_BASE_DOUBLE,
                 )
 
             dora_count = plus_dora(tile_136, self.player.table.dora_indicators)

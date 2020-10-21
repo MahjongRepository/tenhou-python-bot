@@ -240,7 +240,47 @@ class TileDangerHandler:
                         danger_border = TileDanger.DANGER_BORDER_EXTREMELY_LOW
 
             if discard_option.shanten == 2:
-                danger_border = TileDanger.DEFAULT_DANGER_BORDER
+                if self.player.is_dealer:
+                    scale = [0, 1000, 2900, 5800, 7700, 12000, 18000, 18000, 24000, 24000, 48000]
+                else:
+                    scale = [0, 1000, 2000, 3900, 5200, 8000, 12000, 12000, 16000, 16000, 32000]
+
+                if self.player.is_open_hand:
+                    # FIXME: each strategy should have a han value, we should use it instead
+                    han = 1
+                else:
+                    # TODO: try to estimate yaku chances for closed hand
+                    han = 1
+
+                dora_count = sum([plus_dora(x, self.player.table.dora_indicators) for x in self.player.tiles])
+                dora_count += sum([1 for x in self.player.tiles if is_aka_dora(x, self.player.table.has_aka_dora)])
+
+                han += dora_count
+
+                hand_weighted_cost = scale[min(han, len(scale) - 1)]
+
+                discard_option.danger.weighted_cost = int(hand_weighted_cost)
+                cost_ratio = (hand_weighted_cost / threatening_player_hand_cost) * 100
+
+                # lots of ukeire
+                if discard_option.ukeire >= 40:
+                    if cost_ratio >= 200:
+                        danger_border = TileDanger.DANGER_BORDER_MEDIUM - threatening_suji_coeff
+                    elif cost_ratio >= 100:
+                        danger_border = TileDanger.DANGER_BORDER_LOW - threatening_suji_coeff
+                    else:
+                        danger_border = TileDanger.DANGER_BORDER_EXTREMELY_LOW
+                # very good ukeire
+                elif discard_option.ukeire >= 20:
+                    if cost_ratio >= 200:
+                        danger_border = TileDanger.DANGER_BORDER_LOWER_MEDIUM - threatening_suji_coeff
+                    elif cost_ratio >= 100:
+                        danger_border = TileDanger.DANGER_BORDER_VERY_LOW
+                    else:
+                        danger_border = TileDanger.DANGER_BORDER_EXTREMELY_LOW
+                # mediocre ukeire or worse
+                else:
+                    danger_border = TileDanger.DANGER_BORDER_EXTREMELY_LOW
 
             # TODO: tune down danger borders in case this is a late round of the current hand
 

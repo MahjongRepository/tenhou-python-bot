@@ -103,6 +103,7 @@ class MahjongAI:
         self.determine_strategy(tiles_136)
 
         if not self.current_strategy:
+            DecisionsLogger.debug(log.MELD_DEBUG, "We don't have active strategy. Abort melding.")
             return None, None
 
         tiles_34_previous = TilesConverter.to_34_array(tiles_136_previous)

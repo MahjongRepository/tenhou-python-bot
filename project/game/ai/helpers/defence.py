@@ -174,9 +174,9 @@ class TileDangerHandler:
     Place to keep information of tile danger level for each player
     """
 
-    values = None
-    weighted_cost: Optional[int] = None
-    danger_border: Optional[int] = None
+    values: dict
+    weighted_cost: Optional[int]
+    danger_border: dict
 
     def __init__(self):
         """
@@ -184,13 +184,19 @@ class TileDangerHandler:
         """
         self.values = {1: [], 2: [], 3: []}
         self.weighted_cost = 0
-        self.danger_border = 0
+        self.danger_border = {1: {}, 2: {}, 3: {}}
 
     def set_danger(self, player_seat, danger):
         self.values[player_seat].append(danger)
 
+    def set_danger_border(self, player_seat, danger_border: int, our_hand_cost: int):
+        self.danger_border[player_seat] = {"border": danger_border, "our_hand_cost": our_hand_cost}
+
     def get_danger_reasons(self, player_seat):
         return self.values[player_seat]
+
+    def get_danger_border(self, player_seat):
+        return self.danger_border[player_seat]
 
     def get_total_danger_for_player(self, player_seat):
         return sum([x["value"] for x in self.values[player_seat]])
@@ -204,5 +210,16 @@ class TileDangerHandler:
             ]
         )
 
+    def get_min_danger_border(self):
+        borders = []
+        if self.get_danger_border(1).get("border"):
+            borders.append(self.get_danger_border(1).get("border"))
+        if self.get_danger_border(2).get("border"):
+            borders.append(self.get_danger_border(2).get("border"))
+        if self.get_danger_border(3).get("border"):
+            borders.append(self.get_danger_border(3).get("border"))
+        return borders and min(borders) or 0
+
     def clear_danger(self, player_seat):
         self.values[player_seat] = []
+        self.danger_border[player_seat] = {}

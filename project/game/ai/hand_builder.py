@@ -39,7 +39,9 @@ class HandBuilder:
 
         DecisionsLogger.debug(log.DISCARD_OPTIONS, "All discard candidates", discard_options)
 
-        tiles_we_can_discard = [x for x in discard_options if x.danger.get_max_danger() <= x.danger.danger_border]
+        tiles_we_can_discard = [
+            x for x in discard_options if x.danger.get_max_danger() <= x.danger.get_min_danger_border()
+        ]
         if not tiles_we_can_discard:
             return self._chose_first_option_or_safe_tiles([], discard_options, for_open_hand)
 

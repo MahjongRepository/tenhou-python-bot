@@ -123,11 +123,14 @@ class TileDangerHandler:
     def calculate_danger_borders(self, discard_options, threatening_player):
         for discard_option in discard_options:
             danger_border = TileDanger.DEFAULT_DANGER_BORDER
+            hand_weighted_cost = 0
 
             # never push with zero chance to win
             # FIXME: we may actually want to push it for tempai in ryukoku, so reconsider
             if discard_option.ukeire == 0:
-                discard_option.danger_border = TileDanger.DANGER_BORDER_BETAORI
+                discard_option.danger.set_danger_border(
+                    threatening_player.enemy.seat, TileDanger.DANGER_BORDER_BETAORI, hand_weighted_cost
+                )
                 continue
 
             threatening_player_hand_cost = threatening_player.threat_reason["assumed_hand_cost"]
@@ -179,7 +182,9 @@ class TileDangerHandler:
                 # never push with zero chance to win
                 # FIXME: we may actually want to push it for tempai in ryukoku, so reconsider
                 if not hand_weighted_cost:
-                    discard_option.danger_border = TileDanger.DANGER_BORDER_BETAORI
+                    discard_option.danger.set_danger_border(
+                        threatening_player.enemy.seat, TileDanger.DANGER_BORDER_BETAORI, hand_weighted_cost
+                    )
                     continue
 
                 discard_option.danger.weighted_cost = int(hand_weighted_cost)
@@ -226,9 +231,11 @@ class TileDangerHandler:
 
             # TODO add 2 shanten case
             if discard_option.shanten == 2:
-                discard_option.danger.danger_border = danger_border
+                discard_option.danger.set_danger_border(
+                    threatening_player.enemy.seat, danger_border, hand_weighted_cost
+                )
 
-            discard_option.danger.danger_border = danger_border
+            discard_option.danger.set_danger_border(threatening_player.enemy.seat, danger_border, hand_weighted_cost)
         return discard_options
 
     def mark_tiles_danger_for_threats(self, discard_options):

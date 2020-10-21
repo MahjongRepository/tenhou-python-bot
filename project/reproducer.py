@@ -57,6 +57,9 @@ class TenhouLogReproducer:
         discard_regex = re.compile(r"^<[{}]+\d*".format("".join(discard_tags)))
 
         table = Table()
+        # TODO get this info from log content
+        table.has_aka_dora = True
+
         for tag in round_content:
             if player_draw_regex.match(tag) and "UN" not in tag:
                 tile = self.decoder.parse_tile(tag)

@@ -75,7 +75,7 @@ class EnemyAnalyzer:
         meld_tiles = self.enemy.meld_tiles
         dora_count = sum([plus_dora(x, self.table.dora_indicators) for x in meld_tiles])
         # + aka dora
-        dora_count += sum([1 for x in meld_tiles if is_aka_dora(x, self.table.has_open_tanyao)])
+        dora_count += sum([1 for x in meld_tiles if is_aka_dora(x, self.table.has_aka_dora)])
 
         # enemy has one dora pon/kan
         # and there is 6+ round step

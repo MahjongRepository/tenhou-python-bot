@@ -41,7 +41,7 @@ class HandBuilder:
 
         tiles_we_can_discard = [x for x in discard_options if x.danger.get_max_danger() <= x.danger.danger_border]
         if not tiles_we_can_discard:
-            return self._chose_first_option_or_safe_tiles([], discard_options)
+            return self._chose_first_option_or_safe_tiles([], discard_options, for_open_hand)
 
         # our strategy can affect discard options
         if self.ai.current_strategy:
@@ -52,7 +52,7 @@ class HandBuilder:
         had_to_be_discarded_tiles = [x for x in tiles_we_can_discard if x.had_to_be_discarded]
         if had_to_be_discarded_tiles:
             tiles_we_can_discard = sorted(had_to_be_discarded_tiles, key=lambda x: (x.shanten, -x.ukeire, x.valuation))
-            return self._chose_first_option_or_safe_tiles(tiles_we_can_discard, discard_options)
+            return self._chose_first_option_or_safe_tiles(tiles_we_can_discard, discard_options, for_open_hand)
 
         # remove needed tiles from discard options
         tiles_we_can_discard = [x for x in tiles_we_can_discard if not x.had_to_be_saved]
@@ -101,7 +101,7 @@ class HandBuilder:
             min_dora = min([x.count_of_dora for x in possible_options])
             min_dora_list = [x for x in possible_options if x.count_of_dora == min_dora]
             return self._chose_first_option_or_safe_tiles(
-                sorted(min_dora_list, key=lambda x: -getattr(x, ukeire_field)), discard_options
+                sorted(min_dora_list, key=lambda x: -getattr(x, ukeire_field)), discard_options, for_open_hand
             )
 
         # only one option - so we choose it
@@ -113,6 +113,7 @@ class HandBuilder:
             return self._chose_first_option_or_safe_tiles(
                 sorted(tiles_without_dora, key=lambda x: (-x.second_level_cost, -x.ukeire_second, x.valuation)),
                 discard_options,
+                for_open_hand,
             )
 
         if first_option.shanten == 2 or first_option.shanten == 3:
@@ -139,13 +140,13 @@ class HandBuilder:
         if isolated_tiles:
             # let's sort tiles by value and let's choose less valuable tile to discard
             return self._chose_first_option_or_safe_tiles(
-                sorted(isolated_tiles, key=lambda x: x.valuation), discard_options
+                sorted(isolated_tiles, key=lambda x: x.valuation), discard_options, for_open_hand
             )
 
         # there are no isolated tiles or we don't care about them
         # let's discard tile with greater ukeire/ukeire2
         filtered_options = sorted(filtered_options, key=lambda x: -getattr(x, ukeire_field))
-        first_option = self._chose_first_option_or_safe_tiles(filtered_options, discard_options)
+        first_option = self._chose_first_option_or_safe_tiles(filtered_options, discard_options, for_open_hand)
 
         other_tiles_with_same_ukeire = [
             x for x in filtered_options if getattr(x, ukeire_field) == getattr(first_option, ukeire_field)
@@ -155,7 +156,7 @@ class HandBuilder:
         # or in tempai we can have several tiles with same ukeire
         if other_tiles_with_same_ukeire:
             return self._chose_first_option_or_safe_tiles(
-                sorted(other_tiles_with_same_ukeire, key=lambda x: x.valuation), discard_options
+                sorted(other_tiles_with_same_ukeire, key=lambda x: x.valuation), discard_options, for_open_hand
             )
 
         # we have only one candidate to discard with greater ukeire
@@ -397,9 +398,15 @@ class HandBuilder:
         # restore original state of player hand
         self.player.tiles = player_tiles_original
 
-    def _chose_first_option_or_safe_tiles(self, chosen_candidates, all_discard_options):
+    def _chose_first_option_or_safe_tiles(self, chosen_candidates, all_discard_options, for_open_hand):
+        # it looks like everything is fine
         if len(chosen_candidates):
             return chosen_candidates[0]
+        # we don't want to open hand in that case
+        elif for_open_hand:
+            return None
+
+        # we can't discard effective tile from the hand, let's fold
         DecisionsLogger.debug(log.DISCARD_SAFE_TILE, "There are only dangerous tiles. Discard safest tile.")
         return sorted(all_discard_options, key=lambda x: x.danger.get_max_danger())[0]
 

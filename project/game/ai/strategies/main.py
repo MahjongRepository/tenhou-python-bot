@@ -1,6 +1,17 @@
 import utils.decisions_constants as log
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_aka_dora, is_chi, is_honor, is_man, is_pin, is_pon, is_sou, is_terminal, plus_dora
+from mahjong.utils import (
+    is_aka_dora,
+    is_chi,
+    is_honor,
+    is_man,
+    is_pin,
+    is_pon,
+    is_sou,
+    is_terminal,
+    plus_dora,
+    simplify,
+)
 from utils.decisions_logger import DecisionsLogger, MeldPrint
 
 
@@ -178,7 +189,11 @@ class BaseStrategy:
         if not possible_melds:
             return None, None
 
-        chosen_meld = self._find_best_meld_to_open(possible_melds, new_tiles, closed_hand, tile)
+        chosen_meld = self._find_best_meld_to_open(tile, possible_melds, new_tiles, closed_hand, tile)
+        # we didn't find a good discard candidate after open meld
+        if not chosen_meld:
+            return None, None
+
         selected_tile = chosen_meld["discard_tile"]
         meld = chosen_meld["meld"]
 
@@ -232,7 +247,7 @@ class BaseStrategy:
         self.dora_count_central += self.aka_dora_count
         self.dora_count_total = self.dora_count_central + self.dora_count_not_central
 
-    def _find_best_meld_to_open(self, possible_melds, new_tiles, closed_hand, discarded_tile):
+    def _find_best_meld_to_open(self, call_tile_136, possible_melds, new_tiles, closed_hand, discarded_tile):
         discarded_tile_34 = discarded_tile // 4
 
         final_results = []
@@ -264,6 +279,36 @@ class BaseStrategy:
                 new_tiles, closed_hand_copy, melds, for_open_hand=True
             )
 
+            # we can't find a good discard candidate, so let's skip this
+            if not selected_tile:
+                continue
+
+            # kuikae
+            # we can't discard the same tile
+            # or tile from the same suji
+            if not is_honor(selected_tile.tile_to_discard):
+                call_tile_34 = call_tile_136 // 4
+
+                if is_sou(selected_tile.tile_to_discard) and is_sou(call_tile_34):
+                    same_suit = True
+                elif is_man(selected_tile.tile_to_discard) and is_man(call_tile_34):
+                    same_suit = True
+                elif is_pin(selected_tile.tile_to_discard) and is_pin(call_tile_34):
+                    same_suit = True
+                else:
+                    same_suit = False
+
+                if same_suit:
+                    simplified_call = simplify(call_tile_136 // 4)
+                    simplified_discard = simplify(selected_tile.tile_to_discard)
+                    if simplified_discard in [simplified_call - 3, simplified_call, simplified_call + 3]:
+                        tile_str = TilesConverter.to_one_line_string([selected_tile.tile_to_discard * 4])
+                        DecisionsLogger.debug(
+                            log.MELD_DEBUG,
+                            f"Kuikae discard {tile_str} candidate. Abort this tile melding.",
+                        )
+                        continue
+
             final_results.append(
                 {
                     "discard_tile": selected_tile,
@@ -271,6 +316,10 @@ class BaseStrategy:
                     "meld": meld,
                 }
             )
+
+        if not final_results:
+            DecisionsLogger.debug(log.MELD_DEBUG, "There are no good discards after melding.")
+            return None
 
         final_results = sorted(
             final_results,

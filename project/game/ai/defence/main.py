@@ -182,7 +182,7 @@ class TileDangerHandler:
                     discard_option.danger_border = TileDanger.DANGER_BORDER_BETAORI
                     continue
 
-                discard_option.danger.weighted_cost = hand_weighted_cost
+                discard_option.danger.weighted_cost = int(hand_weighted_cost)
                 cost_ratio = (hand_weighted_cost / threatening_player_hand_cost) * 100
 
                 # good ukeire

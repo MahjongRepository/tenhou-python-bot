@@ -53,7 +53,7 @@ def test_calculate_our_hand_cost_1_shanten():
     discard_option = find_discard_option(player, honors="1")
     cost = discard_option.average_second_level_cost
 
-    assert cost == 8737.5
+    assert cost == 8737
 
 
 def test_calculate_our_hand_cost_1_shanten_karaten():

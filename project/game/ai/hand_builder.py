@@ -393,7 +393,7 @@ class HandBuilder:
             if not average_costs:
                 discard_option.average_second_level_cost = 0
             else:
-                discard_option.average_second_level_cost = sum(average_costs) / len(average_costs)
+                discard_option.average_second_level_cost = int(sum(average_costs) / len(average_costs))
 
         # restore original state of player hand
         self.player.tiles = player_tiles_original

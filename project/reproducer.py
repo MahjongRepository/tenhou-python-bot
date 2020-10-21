@@ -59,6 +59,7 @@ class TenhouLogReproducer:
         table = Table()
         # TODO get this info from log content
         table.has_aka_dora = True
+        table.has_open_tanyao = True
 
         for tag in round_content:
             if player_draw_regex.match(tag) and "UN" not in tag:

@@ -460,7 +460,7 @@ class TenhouClient(Client):
         if success:
             logger.info("End of the game")
         else:
-            logger.error("Game was ended without success")
+            logger.error(f"Game was ended without success, log_id={self.statistics.game_id}")
 
     def _send_message(self, message):
         # tenhou requires an empty byte in the end of each sending message

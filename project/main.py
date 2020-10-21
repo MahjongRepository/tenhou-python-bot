@@ -78,6 +78,14 @@ def main():
     parse_args_and_set_up_settings()
     set_up_logging()
 
+    if settings.SENTRY_URL:
+        import sentry_sdk
+
+        sentry_sdk.init(
+            settings.SENTRY_URL,
+            traces_sample_rate=1.0,
+        )
+
     connect_and_play()
 
 

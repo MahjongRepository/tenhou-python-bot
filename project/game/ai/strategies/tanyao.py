@@ -81,6 +81,8 @@ class TanyaoStrategy(BaseStrategy):
         if count_of_not_suitable_not_isolated_tiles >= 2 and self.player.ai.shanten == 1:
             return False
 
+        # TODO: don't open from good 1-shanten into tanyao 1-shaten with same ukeire or worse
+
         # 123 and 789 indices
         indices = [[0, 1, 2], [6, 7, 8], [9, 10, 11], [15, 16, 17], [18, 19, 20], [24, 25, 26]]
 

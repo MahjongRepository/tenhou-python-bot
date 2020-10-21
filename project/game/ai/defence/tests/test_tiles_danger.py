@@ -104,7 +104,7 @@ def test_tile_danger_and_forms_bonus():
         for x in discard_option.danger.get_danger_reasons(enemy_seat)
         if x["description"] == TileDanger.FORM_BONUS_DESCRIPTION
     ][0]
-    assert form_bonus["value"] == 196
+    assert form_bonus["value"] == 308
 
 
 def test_tile_danger_and_yakuhai_honor_second():

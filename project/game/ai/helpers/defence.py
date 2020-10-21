@@ -117,11 +117,11 @@ class TileDanger:
 
     # count of possible forms
     FORM_BONUS_DESCRIPTION = "Forms bonus"
-    FORM_BONUS_KANCHAN = 2
-    FORM_BONUS_PENCHAN = 2
-    FORM_BONUS_SYANPON = 8
-    FORM_BONUS_TANKI = 8
-    FORM_BONUS_RYANMEN = 5
+    FORM_BONUS_KANCHAN = 3
+    FORM_BONUS_PENCHAN = 3
+    FORM_BONUS_SYANPON = 12
+    FORM_BONUS_TANKI = 12
+    FORM_BONUS_RYANMEN = 8
 
     # suji counting, (SUJI_COUNT_BOUNDARY - n) *  SUJI_COUNT_MODIFIER
     # We count how many ryanmen waits are still possible. Maximum n is 18, minimum is 1.

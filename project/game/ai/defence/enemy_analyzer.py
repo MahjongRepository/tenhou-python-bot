@@ -65,6 +65,10 @@ class EnemyAnalyzer:
         active_yaku = []
         for x in yaku_analyzers:
             if x.is_yaku_active():
+                # tanyao and yakuhai can't be used together
+                if x.id == TanyaoAnalyzer.id and YakuhaiAnalyzer.id in [x.id for x in active_yaku]:
+                    continue
+
                 active_yaku.append(x)
                 melds_han += x.melds_han()
 

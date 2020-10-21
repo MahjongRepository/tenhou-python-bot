@@ -144,15 +144,19 @@ class Riichi:
                         if not self.player.is_dealer and min_cost >= 5200:
                             return False
 
+                    # if we have more than two tiles to wait for and we have kabe or suji - insta riichi
+                    if count_tiles > 2 and (have_suji or have_kabe):
+                        return True
+
                     # 2 and 8 are good waits but not in every condition
                     if simplified_waiting == 1 or simplified_waiting == 7:
-                        # waits for 2 or 8 is instariichi in case we are the dealer
-                        if self.player.is_dealer:
+                        # waits for 2 or 8 is instariichi in case we are the dealer and it's not too late
+                        if self.player.is_dealer and min_cost <= 18000 and self.player.round_step < 12:
                             return True
 
                         # if we are not dealer let's riichi if we have more that 2 tiles to wait for
-                        # and our hand costs more than 2600
-                        if count_tiles > 2 and min_cost >= 2600:
+                        # and our hand costs more than 2600 and it's pretty early - let's just riichi
+                        if count_tiles > 2 and 2600 <= min_cost <= 7700 and self.player.round_step < 7:
                             return True
 
                     # otherwise only riichi if we have suji-trab or there is kabe

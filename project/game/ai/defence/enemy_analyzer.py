@@ -3,7 +3,7 @@ from copy import copy
 from game.ai.defence.yaku_analyzer.honitsu import HonitsuAnalyzer
 from game.ai.defence.yaku_analyzer.tanyao import TanyaoAnalyzer
 from game.ai.defence.yaku_analyzer.yakuhai import YakuhaiAnalyzer
-from game.ai.helpers.defence import EnemyDanger
+from game.ai.helpers.defence import EnemyDanger, TileDanger
 from game.ai.helpers.possible_forms import PossibleFormsAnalyzer
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_aka_dora, plus_dora
@@ -124,7 +124,7 @@ class EnemyAnalyzer:
         return result
 
     def get_suji_count_danger_border(self, unverified_suji_count: int) -> int:
-        return (10 - unverified_suji_count) * 5
+        return (TileDanger.SUJI_COUNT_BOUNDARY - unverified_suji_count) * TileDanger.SUJI_COUNT_MODIFIER
 
     def _calculate_assumed_hand_cost(self) -> int:
         if self.enemy.is_dealer:

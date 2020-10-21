@@ -5,7 +5,7 @@ from copy import deepcopy
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
 
-logger = logging.getLogger("ai")
+logger = logging.getLogger()
 
 
 class DecisionsLogger:

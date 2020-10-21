@@ -13,7 +13,7 @@ from utils.decisions_logger import MeldPrint
 from utils.settings_handler import settings
 from utils.statistics import Statistics
 
-logger = logging.getLogger("tenhou")
+logger = logging.getLogger()
 
 
 class TenhouClient(Client):

@@ -7,7 +7,7 @@ from mahjong.constants import CHUN, EAST, HAKU, HATSU, NORTH, SOUTH, WEST
 from mahjong.tile import Tile, TilesConverter
 from utils.decisions_logger import DecisionsLogger, MeldPrint
 
-logger = logging.getLogger("tenhou")
+logger = logging.getLogger()
 
 
 class PlayerInterface:

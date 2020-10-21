@@ -94,11 +94,31 @@ class Riichi:
 
                 # tanki wait with chiitoitsu
                 if is_pair(hand_set) and is_chiitoitsu:
-                    # chiitoitsu on last suit tile is no the best
+                    # chiitoitsu on last suit tile is not the best
                     if count_tiles == 1:
                         return False
 
-                    # only riichi if we have suji-trab or there is kabe
+                    # early riichi on 19 tanki is good
+                    if (simplified_waiting == 0 or simplified_waiting == 8) and self.player.round_step < 7:
+                        return True
+
+                    # riichi on 19 tanki is good later too if we have 3 tiles to wait for
+                    if (
+                        (simplified_waiting == 0 or simplified_waiting == 8)
+                        and self.player.round_step < 12
+                        and count_tiles == 3
+                    ):
+                        return True
+
+                    # riichi on 28 tanki is good if we have 3 tiles to wait for
+                    if (
+                        (simplified_waiting == 1 or simplified_waiting == 7)
+                        and self.player.round_step < 12
+                        and count_tiles == 3
+                    ):
+                        return True
+
+                    # otherwise only riichi if we have suji-trab or there is kabe
                     if not have_suji and not have_kabe:
                         return False
 

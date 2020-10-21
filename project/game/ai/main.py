@@ -224,7 +224,14 @@ class MahjongAI:
         return number_of_tiles and int(weighted_hand_cost / number_of_tiles) or 0
 
     def should_call_riichi(self):
-        return self.riichi.should_call_riichi()
+        should_riichi = self.riichi.should_call_riichi()
+
+        if should_riichi:
+            DecisionsLogger.debug(log.RIICHI, "Decided to riichi.")
+        else:
+            DecisionsLogger.debug(log.RIICHI, "Decided to stay damaten.")
+
+        return should_riichi
 
     def should_call_kan(self, tile, open_kan, from_riichi=False):
         """

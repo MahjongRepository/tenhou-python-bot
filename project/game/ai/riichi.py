@@ -124,7 +124,18 @@ class Riichi:
                         if not self.player.is_dealer and min_cost >= 5200:
                             return False
 
-                    # only riichi if we have suji-trab or there is kabe
+                    # 2 and 8 are good waits but not in every condition
+                    if simplified_waiting == 1 or simplified_waiting == 7:
+                        # waits for 2 or 8 is instariichi in case we are the dealer
+                        if self.player.is_dealer:
+                            return True
+
+                        # if we are not dealer let's riichi if we have more that 2 tiles to wait for
+                        # and our hand costs more than 2600
+                        if count_tiles > 2 and min_cost >= 2600:
+                            return True
+
+                    # otherwise only riichi if we have suji-trab or there is kabe
                     if not have_suji and not have_kabe:
                         return False
 

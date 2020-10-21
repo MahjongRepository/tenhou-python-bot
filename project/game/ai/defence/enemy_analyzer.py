@@ -147,7 +147,7 @@ class EnemyAnalyzer:
             scale_index += 1
 
         total_dora_in_game = len(self.table.dora_indicators) * 4 + (3 * int(self.table.has_aka_dora))
-        visible_tiles = TilesConverter.to_136_array(self.table.revealed_tiles) + self.main_player.closed_hand
+        visible_tiles = self.table.revealed_tiles_136 + self.main_player.closed_hand
         visible_dora_tiles = sum([plus_dora(x, self.table.dora_indicators) for x in visible_tiles])
         visible_dora_tiles += sum([int(is_aka_dora(x, self.table.has_aka_dora)) for x in visible_tiles])
         live_dora_tiles = total_dora_in_game - visible_dora_tiles

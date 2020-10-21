@@ -26,6 +26,7 @@ class Table:
 
     # array of tiles in 34 format
     revealed_tiles = None
+    revealed_tiles_136 = None
 
     has_open_tanyao = False
     has_aka_dora = False
@@ -34,6 +35,7 @@ class Table:
         self._init_players()
         self.dora_indicators = []
         self.revealed_tiles = [0] * 34
+        self.revealed_tiles_136 = []
 
     def __str__(self):
         dora_string = TilesConverter.to_one_line_string(self.dora_indicators)
@@ -61,6 +63,7 @@ class Table:
         self.count_of_riichi_sticks = count_of_riichi_sticks
 
         self.revealed_tiles = [0] * 34
+        self.revealed_tiles_136 = []
 
         self.dora_indicators = []
         self.add_dora_indicator(dora_indicator)
@@ -132,7 +135,7 @@ class Table:
         tile = Tile(tile_136, is_tsumogiri)
         self.get_player(player_seat).add_discarded_tile(tile)
 
-        self._add_revealed_tile(tile.value)
+        self._add_revealed_tile(tile_136)
 
     def add_dora_indicator(self, tile):
         self.dora_indicators.append(tile)
@@ -179,6 +182,8 @@ class Table:
             return NORTH
 
     def _add_revealed_tile(self, tile):
+        self.revealed_tiles_136.append(tile)
+
         tile //= 4
         self.revealed_tiles[tile] += 1
 

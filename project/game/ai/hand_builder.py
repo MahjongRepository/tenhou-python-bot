@@ -79,13 +79,13 @@ class HandBuilder:
             for x in possible_options:
                 self.calculate_second_level_ukeire(x, tiles, melds)
 
-            possible_options = sorted(possible_options, key=lambda x: -getattr(x, ukeire_field))
+            possible_options = sorted(possible_options, key=lambda x: (-getattr(x, ukeire_field), x.valuation))
 
             filter_percentage = 20
             possible_options = self._filter_list_by_percentage(possible_options, ukeire_field, filter_percentage)
         else:
             ukeire_field = "ukeire"
-            possible_options = sorted(possible_options, key=lambda x: -getattr(x, ukeire_field))
+            possible_options = sorted(possible_options, key=lambda x: (-getattr(x, ukeire_field), x.valuation))
 
         # only one option - so we choose it
         if len(possible_options) == 1:
@@ -103,7 +103,9 @@ class HandBuilder:
             min_dora = min([x.count_of_dora for x in possible_options])
             min_dora_list = [x for x in possible_options if x.count_of_dora == min_dora]
             return self._chose_first_option_or_safe_tiles(
-                sorted(min_dora_list, key=lambda x: -getattr(x, ukeire_field)), discard_options, for_open_hand
+                sorted(min_dora_list, key=lambda x: (-getattr(x, ukeire_field), x.valuation)),
+                discard_options,
+                for_open_hand,
             )
 
         # only one option - so we choose it
@@ -147,7 +149,7 @@ class HandBuilder:
 
         # there are no isolated tiles or we don't care about them
         # let's discard tile with greater ukeire/ukeire2
-        filtered_options = sorted(filtered_options, key=lambda x: -getattr(x, ukeire_field))
+        filtered_options = sorted(filtered_options, key=lambda x: (-getattr(x, ukeire_field), x.valuation))
         first_option = self._chose_first_option_or_safe_tiles(filtered_options, discard_options, for_open_hand)
 
         other_tiles_with_same_ukeire = [

@@ -43,7 +43,7 @@ class HandBuilder:
             x for x in discard_options if x.danger.get_max_danger() <= x.danger.get_min_danger_border()
         ]
         if not tiles_we_can_discard:
-            return self._chose_first_option_or_safe_tiles([], discard_options, for_open_hand)
+            return self._chose_first_option_or_safe_tiles([], discard_options, for_open_hand, lambda x: ())
 
         # our strategy can affect discard options
         if self.ai.current_strategy:
@@ -53,8 +53,14 @@ class HandBuilder:
 
         had_to_be_discarded_tiles = [x for x in tiles_we_can_discard if x.had_to_be_discarded]
         if had_to_be_discarded_tiles:
-            tiles_we_can_discard = sorted(had_to_be_discarded_tiles, key=lambda x: (x.shanten, -x.ukeire, x.valuation))
-            return self._chose_first_option_or_safe_tiles(tiles_we_can_discard, discard_options, for_open_hand)
+
+            def sorting_lambda(x):
+                return (x.shanten, -x.ukeire, x.valuation)
+
+            tiles_we_can_discard = sorted(had_to_be_discarded_tiles, key=sorting_lambda)
+            return self._chose_first_option_or_safe_tiles(
+                tiles_we_can_discard, discard_options, for_open_hand, sorting_lambda
+            )
 
         # remove needed tiles from discard options
         tiles_we_can_discard = [x for x in tiles_we_can_discard if not x.had_to_be_saved]
@@ -64,7 +70,9 @@ class HandBuilder:
         results_with_same_shanten = [x for x in tiles_we_can_discard if x.shanten == first_option.shanten]
 
         possible_options = [first_option]
-        ukeire_borders = self._choose_ukeire_borders(first_option, 20, "ukeire")
+        ukeire_borders = self._choose_ukeire_borders(
+            first_option, DiscardOption.UKEIRE_FIRST_FILTER_PERCENTAGE, "ukeire"
+        )
         for discard_option in results_with_same_shanten:
             # there is no sense to check already chosen tile
             if discard_option.tile_to_discard == first_option.tile_to_discard:
@@ -80,9 +88,9 @@ class HandBuilder:
                 self.calculate_second_level_ukeire(x, tiles, melds)
 
             possible_options = sorted(possible_options, key=lambda x: (-getattr(x, ukeire_field), x.valuation))
-
-            filter_percentage = 20
-            possible_options = self._filter_list_by_percentage(possible_options, ukeire_field, filter_percentage)
+            possible_options = self._filter_list_by_percentage(
+                possible_options, ukeire_field, DiscardOption.UKEIRE_FIRST_FILTER_PERCENTAGE
+            )
         else:
             ukeire_field = "ukeire"
             possible_options = sorted(possible_options, key=lambda x: (-getattr(x, ukeire_field), x.valuation))
@@ -102,10 +110,15 @@ class HandBuilder:
         if not tiles_without_dora:
             min_dora = min([x.count_of_dora for x in possible_options])
             min_dora_list = [x for x in possible_options if x.count_of_dora == min_dora]
+
+            def sorting_lambda(x):
+                return (-getattr(x, ukeire_field), x.valuation)
+
             return self._chose_first_option_or_safe_tiles(
-                sorted(min_dora_list, key=lambda x: (-getattr(x, ukeire_field), x.valuation)),
+                sorted(min_dora_list, key=sorting_lambda),
                 discard_options,
                 for_open_hand,
+                sorting_lambda,
             )
 
         # only one option - so we choose it
@@ -114,22 +127,27 @@ class HandBuilder:
 
         # 1-shanten hands have special handling - we can consider future hand cost here
         if first_option.shanten == 1:
+
+            def sorting_lambda(x):
+                return (-x.second_level_cost, -x.ukeire_second, x.valuation)
+
             return self._chose_first_option_or_safe_tiles(
-                sorted(tiles_without_dora, key=lambda x: (-x.second_level_cost, -x.ukeire_second, x.valuation)),
+                sorted(tiles_without_dora, key=sorting_lambda),
                 discard_options,
                 for_open_hand,
+                sorting_lambda,
             )
 
         if first_option.shanten == 2 or first_option.shanten == 3:
-            # we filter 10% of options here
-            second_filter_percentage = 10
             filtered_options = self._filter_list_by_percentage(
-                tiles_without_dora, ukeire_field, second_filter_percentage
+                tiles_without_dora, ukeire_field, DiscardOption.UKEIRE_SECOND_FILTER_PERCENTAGE
             )
         # we should also consider borders for 3+ shanten hands
         else:
             best_option_without_dora = tiles_without_dora[0]
-            ukeire_borders = self._choose_ukeire_borders(best_option_without_dora, 10, ukeire_field)
+            ukeire_borders = self._choose_ukeire_borders(
+                best_option_without_dora, DiscardOption.UKEIRE_SECOND_FILTER_PERCENTAGE, ukeire_field
+            )
             filtered_options = []
             for discard_option in tiles_without_dora:
                 val = getattr(best_option_without_dora, ukeire_field) - ukeire_borders
@@ -142,15 +160,27 @@ class HandBuilder:
         isolated_tiles = [x for x in filtered_options if is_tile_strictly_isolated(closed_hand_34, x.tile_to_discard)]
         # isolated tiles should be discarded first
         if isolated_tiles:
+
+            def sorting_lambda(x):
+                return (x.valuation,)
+
             # let's sort tiles by value and let's choose less valuable tile to discard
             return self._chose_first_option_or_safe_tiles(
-                sorted(isolated_tiles, key=lambda x: x.valuation), discard_options, for_open_hand
+                sorted(isolated_tiles, key=sorting_lambda),
+                discard_options,
+                for_open_hand,
+                sorting_lambda,
             )
 
         # there are no isolated tiles or we don't care about them
         # let's discard tile with greater ukeire/ukeire2
-        filtered_options = sorted(filtered_options, key=lambda x: (-getattr(x, ukeire_field), x.valuation))
-        first_option = self._chose_first_option_or_safe_tiles(filtered_options, discard_options, for_open_hand)
+        def sorting_lambda(x):
+            return (-getattr(x, ukeire_field), x.valuation)
+
+        filtered_options = sorted(filtered_options, key=sorting_lambda)
+        first_option = self._chose_first_option_or_safe_tiles(
+            filtered_options, discard_options, for_open_hand, sorting_lambda
+        )
 
         other_tiles_with_same_ukeire = [
             x for x in filtered_options if getattr(x, ukeire_field) == getattr(first_option, ukeire_field)
@@ -159,8 +189,15 @@ class HandBuilder:
         # it will happen with shanten=1, all tiles will have ukeire_second == 0
         # or in tempai we can have several tiles with same ukeire
         if other_tiles_with_same_ukeire:
+
+            def sorting_lambda(x):
+                return (x.valuation,)
+
             return self._chose_first_option_or_safe_tiles(
-                sorted(other_tiles_with_same_ukeire, key=lambda x: x.valuation), discard_options, for_open_hand
+                sorted(other_tiles_with_same_ukeire, key=sorting_lambda),
+                discard_options,
+                for_open_hand,
+                sorting_lambda,
             )
 
         # we have only one candidate to discard with greater ukeire
@@ -402,17 +439,33 @@ class HandBuilder:
         # restore original state of player hand
         self.player.tiles = player_tiles_original
 
-    def _chose_first_option_or_safe_tiles(self, chosen_candidates, all_discard_options, for_open_hand):
+    def _chose_first_option_or_safe_tiles(self, chosen_candidates, all_discard_options, for_open_hand, sorting_lambda):
         # it looks like everything is fine
         if len(chosen_candidates):
-            return chosen_candidates[0]
+            # try to discard safest tile for calculated ukeire border
+            candidate = chosen_candidates[0]
+            ukeire_border = max(
+                [
+                    round((candidate.ukeire / 100) * DiscardOption.UKEIRE_DANGER_FILTER_PERCENTAGE),
+                    DiscardOption.MIN_UKEIRE_DANGER_BORDER,
+                ]
+            )
+
+            options_to_chose = sorted(
+                [x for x in chosen_candidates if x.ukeire >= x.ukeire - ukeire_border],
+                key=lambda x: (x.danger.get_max_danger(),) + sorting_lambda(x),
+            )
+
+            DecisionsLogger.debug(log.DISCARD_OPTIONS, "All discard candidates", options_to_chose)
+
+            return options_to_chose[0]
         # we don't want to open hand in that case
         elif for_open_hand:
             return None
 
         # we can't discard effective tile from the hand, let's fold
         DecisionsLogger.debug(log.DISCARD_SAFE_TILE, "There are only dangerous tiles. Discard safest tile.")
-        return sorted(all_discard_options, key=lambda x: x.danger.get_max_danger())[0]
+        return sorted(all_discard_options, key=lambda x: (x.danger.get_max_danger(),) + sorting_lambda(x))[0]
 
     def _choose_best_tanki_wait(self, discard_desc):
         discard_desc = sorted(discard_desc, key=lambda k: k["hand_cost"], reverse=True)
@@ -638,14 +691,14 @@ class HandBuilder:
     def _choose_ukeire_borders(first_option, border_percentage, border_field):
         ukeire_borders = round((getattr(first_option, border_field) / 100) * border_percentage)
 
-        if first_option.shanten == 0 and ukeire_borders < 2:
-            ukeire_borders = 2
+        if first_option.shanten == 0 and ukeire_borders < DiscardOption.MIN_UKEIRE_TEMPAI_BORDER:
+            ukeire_borders = DiscardOption.MIN_UKEIRE_TEMPAI_BORDER
 
-        if first_option.shanten == 1 and ukeire_borders < 4:
-            ukeire_borders = 4
+        if first_option.shanten == 1 and ukeire_borders < DiscardOption.MIN_UKEIRE_SHANTEN_1_BORDER:
+            ukeire_borders = DiscardOption.MIN_UKEIRE_SHANTEN_1_BORDER
 
-        if first_option.shanten >= 2 and ukeire_borders < 8:
-            ukeire_borders = 8
+        if first_option.shanten >= 2 and ukeire_borders < DiscardOption.MIN_UKEIRE_SHANTEN_2_BORDER:
+            ukeire_borders = DiscardOption.MIN_UKEIRE_SHANTEN_2_BORDER
 
         return ukeire_borders
 

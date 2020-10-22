@@ -176,7 +176,7 @@ def test_tile_danger_and_terminal_suji_tiles():
     _assert_discard(player, enemy_seat, TileDanger.SUJI_19_SHONPAI, sou="9")
 
     table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="6"), False)
-    player.discard_tile()
+    player.discard_tile(string_to_136_tile(honors="5"))
     player.draw_tile(tile)
     # 9 sou is not shonpai anymore
     _assert_discard(player, enemy_seat, TileDanger.SUJI_19_NOT_SHONPAI, sou="9")

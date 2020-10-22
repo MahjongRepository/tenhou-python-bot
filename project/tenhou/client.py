@@ -188,7 +188,7 @@ class TenhouClient(Client):
         # sometimes it happens and we need to end process
         # and try again later
         if self.looking_for_game:
-            logger.error("Game is not started. Can't find the game")
+            logger.info("Game is not started. Can't find the game")
             self.end_game()
             return
 

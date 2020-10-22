@@ -95,6 +95,10 @@ class TenhouDecoder:
 
     def parse_names_and_ranks(self, message):
         ranks = self.get_attribute_content(message, "dan")
+        # reconnection tag like '<UN n3="%4B%61%61%76%69" />'
+        if not ranks:
+            return None
+
         ranks = [int(i) for i in ranks.split(",")]
 
         return [

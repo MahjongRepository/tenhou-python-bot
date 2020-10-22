@@ -30,7 +30,9 @@ class TenhouLogReproducer:
         for round_item in self.rounds:
             for tag in round_item:
                 if "<UN" in tag:
-                    meta_information["players"] = self.decoder.parse_names_and_ranks(tag)
+                    players = self.decoder.parse_names_and_ranks(tag)
+                    if players:
+                        meta_information["players"] = self.decoder.parse_names_and_ranks(tag)
 
                 if "INIT" in tag:
                     init_values = self.decoder.parse_initial_values(tag)

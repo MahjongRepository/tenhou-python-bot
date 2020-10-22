@@ -73,7 +73,9 @@ class TileDangerHandler:
                 )
             # 2-8 tiles
             else:
-                danger = self._process_danger_for_2_8_tiles_and_kabe(tile_34, number_of_revealed_tiles, kabe_tiles)
+                danger = self._process_danger_for_2_8_tiles_suji_and_kabe(
+                    tile_34, number_of_revealed_tiles, suji_tiles, kabe_tiles
+                )
 
             if danger:
                 self._update_discard_candidate(
@@ -331,13 +333,19 @@ class TileDangerHandler:
 
         return None
 
-    def _process_danger_for_2_8_tiles_and_kabe(self, tile_34, number_of_revealed_tiles, kabe_tiles):
+    def _process_danger_for_2_8_tiles_suji_and_kabe(self, tile_34, number_of_revealed_tiles, suji_tiles, kabe_tiles):
         have_strong_kabe = [x for x in kabe_tiles if tile_34 == x["tile"] and x["type"] == Kabe.STRONG_KABE]
         if have_strong_kabe:
             if number_of_revealed_tiles == 1:
                 return TileDanger.SHONPAI_KABE
             else:
                 return TileDanger.NON_SHONPAI_KABE
+
+        # TODO: first check if danger reason is riichi and if riichi was declared on suji tile (for 2378)
+        have_suji = [x for x in suji_tiles if tile_34 == x]
+        if have_suji:
+            return TileDanger.SUJI
+
         return None
 
     def _process_danger_for_honor(self, tile_34, enemy, number_of_revealed_tiles):

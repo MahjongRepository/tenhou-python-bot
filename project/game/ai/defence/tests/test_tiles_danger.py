@@ -220,6 +220,35 @@ def test_tile_danger_and_2_8_kabe_tiles():
     _assert_discard(player, enemy_seat, TileDanger.NON_SHONPAI_KABE, sou="5")
 
 
+def test_tile_danger_and_2_8_suji_tiles():
+    enemy_seat = 1
+    table = _create_table(enemy_seat, discards=[])
+    player = table.player
+
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="4"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="5"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="6"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="2"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="3"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="8"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="9"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="1"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="7"), False)
+
+    tiles = string_to_136_array(sou="2378", pin="4", man="56", honors="233555")
+    tile = string_to_136_tile(honors="3")
+    player.init_hand(tiles)
+    player.draw_tile(tile)
+
+    _assert_discard(player, enemy_seat, TileDanger.SUJI, sou="2")
+    _assert_discard(player, enemy_seat, TileDanger.SUJI, sou="3")
+    _assert_discard(player, enemy_seat, TileDanger.SUJI, sou="7")
+    _assert_discard(player, enemy_seat, TileDanger.SUJI, sou="8")
+    _assert_discard(player, enemy_seat, TileDanger.SUJI, pin="4")
+    _assert_discard(player, enemy_seat, TileDanger.SUJI, man="5")
+    _assert_discard(player, enemy_seat, TileDanger.SUJI, man="6")
+
+
 def test_tile_danger_and_ryanmen_wait():
     enemy_seat = 1
     table = _create_table(enemy_seat, discards=[])

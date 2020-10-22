@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
+from game.ai.helpers.defence import TileDangerHandler
+from game.ai.strategies.main import BaseStrategy
 from mahjong.constants import AKA_DORA_LIST
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_honor, simplify, plus_dora, is_aka_dora, is_sou, is_man, is_pin
-
-from game.ai.first_version.strategies.main import BaseStrategy
+from mahjong.utils import is_aka_dora, is_honor, is_man, is_pin, is_sou, plus_dora, simplify
 
 
-class DiscardOption(object):
+class DiscardOption:
     DORA_VALUE = 10000
     DORA_FIRST_NEIGHBOUR = 1000
     DORA_SECOND_NEIGHBOUR = 100
@@ -34,8 +33,10 @@ class DiscardOption(object):
     wait_to_ukeire = None
     # second level cost approximation for 1-shanten hands
     second_level_cost = None
+    # second level average cost approximation for 1-shanten hands
+    average_second_level_cost = None
 
-    def __init__(self, player, tile_to_discard, shanten, waiting, ukeire, danger=100, wait_to_ukeire=None):
+    def __init__(self, player, tile_to_discard, shanten, waiting, ukeire, wait_to_ukeire=None):
         """
         :param player:
         :param tile_to_discard: tile in 34 format
@@ -49,25 +50,35 @@ class DiscardOption(object):
         self.ukeire = ukeire
         self.ukeire_second = 0
         self.count_of_dora = 0
-        self.danger = danger
+        self.danger = TileDangerHandler()
         self.had_to_be_saved = False
         self.had_to_be_discarded = False
         self.wait_to_ukeire = wait_to_ukeire
+        self.second_level_cost = 0
+        self.average_second_level_cost = 0
 
         self.calculate_value()
 
-    def __unicode__(self):
-        tile_format_136 = TilesConverter.to_one_line_string([self.tile_to_discard*4])
-        return 'tile={}, shanten={}, ukeire={}, ukeire2={}, valuation={}'.format(
-            tile_format_136,
-            self.shanten,
-            self.ukeire,
-            self.ukeire_second,
-            self.valuation
-        )
-
-    def __repr__(self):
-        return '{}'.format(self.__unicode__())
+    def serialize(self):
+        data = {
+            "tile": TilesConverter.to_one_line_string([self.tile_to_discard * 4]),
+            "shanten": self.shanten,
+            "ukeire": self.ukeire,
+            "valuation": self.valuation,
+            "danger": {
+                "max_danger": self.danger.get_max_danger(),
+                "danger_border": self.danger.danger_border,
+                "weighted_cost": self.danger.weighted_cost,
+                "danger_reasons": self.danger.values,
+            },
+        }
+        if self.ukeire_second:
+            data["ukeire2"] = self.ukeire_second
+        if self.had_to_be_saved:
+            data["had_to_be_saved"] = self.had_to_be_saved
+        if self.had_to_be_discarded:
+            data["had_to_be_discarded"] = self.had_to_be_discarded
+        return data
 
     def find_tile_in_hand(self, closed_hand):
         """

@@ -1,19 +1,16 @@
-# -*- coding: utf-8 -*-
-import logging
 import copy
+import logging
+
 import utils.decisions_constants as log
+from game.ai.main import MahjongAI
+from mahjong.constants import CHUN, EAST, HAKU, HATSU, NORTH, SOUTH, WEST
+from mahjong.tile import Tile, TilesConverter
+from utils.decisions_logger import DecisionsLogger, MeldPrint
 
-from mahjong.constants import EAST, SOUTH, WEST, NORTH, CHUN, HAKU, HATSU
-from mahjong.meld import Meld
-from mahjong.tile import TilesConverter, Tile
-
-from utils.decisions_logger import DecisionsLogger
-from utils.settings_handler import settings
-
-logger = logging.getLogger('tenhou')
+logger = logging.getLogger()
 
 
-class PlayerInterface(object):
+class PlayerInterface:
     table = None
     discards = None
     melds = None
@@ -32,8 +29,8 @@ class PlayerInterface(object):
     scores = None
     uma = 0
 
-    name = ''
-    rank = ''
+    name = ""
+    rank = ""
 
     def __init__(self, table, seat, dealer_seat):
         self.table = table
@@ -43,13 +40,13 @@ class PlayerInterface(object):
         self.erase_state()
 
     def __str__(self):
-        result = u'{0}'.format(self.name)
+        result = "{0}".format(self.name)
         if self.scores is not None:
-            result += u' ({:,d})'.format(int(self.scores))
+            result += " ({:,d})".format(int(self.scores))
             if self.uma:
-                result += u' {0}'.format(self.uma)
+                result += " {0}".format(self.uma)
         else:
-            result += u' ({0})'.format(self.rank)
+            result += " ({0})".format(self.rank)
         return result
 
     def __repr__(self):
@@ -64,12 +61,12 @@ class PlayerInterface(object):
         self.uma = 0
         self.round_step = 0
 
-    def add_called_meld(self, meld: Meld):
+    def add_called_meld(self, meld: MeldPrint):
         # we already added shouminkan as a pon set
-        if meld.type == Meld.CHANKAN:
+        if meld.type == MeldPrint.CHANKAN:
             tile_34 = meld.tiles[0] // 4
 
-            pon_set = [x for x in self.melds if x.type == Meld.PON and (x.tiles[0] // 4) == tile_34]
+            pon_set = [x for x in self.melds if x.type == MeldPrint.PON and (x.tiles[0] // 4) == tile_34]
 
             # when we are doing reconnect and we have called shouminkan set
             # we will not have called pon set in the hand
@@ -93,7 +90,8 @@ class PlayerInterface(object):
 
     @property
     def player_wind(self):
-        position = self.dealer_seat
+        shift = self.dealer_seat - self.seat
+        position = [0, 1, 2, 3][shift]
         if position == 0:
             return EAST
         elif position == 1:
@@ -136,18 +134,20 @@ class PlayerInterface(object):
             results.append([meld[0] // 4, meld[1] // 4, meld[2] // 4])
         return results
 
+    @property
+    def valued_honors(self):
+        return [CHUN, HAKU, HATSU, self.table.round_wind_tile, self.player_wind]
+
 
 class Player(PlayerInterface):
     ai = None
     tiles = None
     last_draw = None
     in_tempai = False
-    in_defence_mode = False
 
     def __init__(self, table, seat, dealer_seat):
         super().__init__(table, seat, dealer_seat)
-
-        self.ai = settings.AI_CLASS(self)
+        self.ai = MahjongAI(self)
 
     def erase_state(self):
         super().erase_state()
@@ -155,7 +155,6 @@ class Player(PlayerInterface):
         self.tiles = []
         self.last_draw = None
         self.in_tempai = False
-        self.in_defence_mode = False
 
         if self.ai:
             self.ai.erase_state()
@@ -166,15 +165,14 @@ class Player(PlayerInterface):
         self.ai.init_hand()
 
     def draw_tile(self, tile_136):
-        DecisionsLogger.debug(
-            log.DRAW,
-            context=[
-                'Step: {}'.format(self.round_step),
-                'Hand: {}'.format(self.format_hand_for_print(tile_136)),
-                'In defence: {}'.format(self.ai.in_defence),
-                'Current strategy: {}'.format(self.ai.current_strategy)
-            ]
-        )
+        context = [
+            f"Step: {self.round_step}",
+            f"Hand: {self.format_hand_for_print(tile_136)}",
+        ]
+        if self.ai.current_strategy:
+            context.append(f"Current strategy: {self.ai.current_strategy}")
+
+        DecisionsLogger.debug(log.DRAW, context=context)
 
         self.last_draw = tile_136
         self.tiles.append(tile_136)
@@ -205,15 +203,15 @@ class Player(PlayerInterface):
         return result and self.ai.should_call_riichi()
 
     def formal_riichi_conditions(self):
-        return all([
-            self.in_tempai,
-
-            not self.in_riichi,
-            not self.is_open_hand,
-
-            self.scores >= 1000,
-            self.table.count_of_remaining_tiles > 4
-        ])
+        return all(
+            [
+                self.in_tempai,
+                not self.in_riichi,
+                not self.is_open_hand,
+                self.scores >= 1000,
+                self.table.count_of_remaining_tiles > 4,
+            ]
+        )
 
     def should_call_kan(self, tile, open_kan, from_riichi=False):
         return self.ai.should_call_kan(tile, open_kan, from_riichi)
@@ -227,29 +225,29 @@ class Player(PlayerInterface):
     def enemy_called_riichi(self, player_seat):
         self.ai.enemy_called_riichi(player_seat)
 
-    def total_tiles(self, tile, tiles_34):
+    def number_of_revealed_tiles(self, tile_34, closed_hand_34):
         """
         Return sum of all tiles (discarded + from melds + our hand)
-        :param tile: 34 tile format
-        :param tiles_34: cached list of tiles (to not build it for each iteration)
+        :param tile_34: 34 tile format
+        :param closed_hand_34: cached list of tiles (to not build it for each iteration)
         :return: int
         """
-        revealed_tiles = tiles_34[tile] + self.table.revealed_tiles[tile]
-        assert revealed_tiles <= 4, 'we have only 4 tiles in the game'
+        revealed_tiles = closed_hand_34[tile_34] + self.table.revealed_tiles[tile_34]
+        assert revealed_tiles <= 4, "we have only 4 tiles in the game"
         return revealed_tiles
 
     def format_hand_for_print(self, tile_136=None):
-        hand_string = '{}'.format(TilesConverter.to_one_line_string(self.closed_hand))
+        hand_string = "{}".format(TilesConverter.to_one_line_string(self.closed_hand))
 
         if tile_136 is not None:
-            hand_string += ' + {}'.format(TilesConverter.to_one_line_string([tile_136]))
+            hand_string += " + {}".format(TilesConverter.to_one_line_string([tile_136]))
 
         melds = []
         for item in self.melds:
-            melds.append('{}'.format(TilesConverter.to_one_line_string(item.tiles)))
+            melds.append("{}".format(TilesConverter.to_one_line_string(item.tiles)))
 
         if melds:
-            hand_string += ' [{}]'.format(', '.join(melds))
+            hand_string += " [{}]".format(", ".join(melds))
 
         return hand_string
 
@@ -257,10 +255,6 @@ class Player(PlayerInterface):
     def closed_hand(self):
         tiles = self.tiles[:]
         return [item for item in tiles if item not in self.meld_tiles]
-
-    @property
-    def valued_honors(self):
-        return [CHUN, HAKU, HATSU, self.table.round_wind_tile, self.player_wind]
 
 
 class EnemyPlayer(PlayerInterface):

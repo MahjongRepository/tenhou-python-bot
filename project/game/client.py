@@ -1,24 +1,23 @@
-# -*- coding: utf-8 -*-
 from game.table import Table
 
 
-class Client(object):
+class Client:
     table = None
 
     def __init__(self):
         self.table = Table()
 
     def connect(self):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def authenticate(self):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def start_game(self):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def end_game(self):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @property
     def player(self):

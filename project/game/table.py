@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
-from mahjong.constants import EAST, SOUTH, WEST, NORTH
-from mahjong.meld import Meld
-from mahjong.tile import TilesConverter, Tile
-from mahjong.utils import plus_dora, is_aka_dora
-
-from game.player import Player, EnemyPlayer
+from game.player import EnemyPlayer, Player
+from mahjong.constants import EAST, NORTH, SOUTH, WEST
+from mahjong.tile import Tile, TilesConverter
+from mahjong.utils import is_aka_dora, plus_dora
+from utils.decisions_logger import MeldPrint
 
 
-class Table(object):
+class Table:
     # our bot
     player = None
     # main bot + all other players
@@ -28,6 +26,7 @@ class Table(object):
 
     # array of tiles in 34 format
     revealed_tiles = None
+    revealed_tiles_136 = None
 
     has_open_tanyao = False
     has_aka_dora = False
@@ -36,32 +35,23 @@ class Table(object):
         self._init_players()
         self.dora_indicators = []
         self.revealed_tiles = [0] * 34
+        self.revealed_tiles_136 = []
 
     def __str__(self):
         dora_string = TilesConverter.to_one_line_string(self.dora_indicators)
 
-        round_settings = {
-            EAST:  ['e', 0],
-            SOUTH: ['s', 3],
-            WEST:  ['w', 7]
-        }.get(self.round_wind_tile)
+        round_settings = {EAST: ["e", 0], SOUTH: ["s", 3], WEST: ["w", 7]}.get(self.round_wind_tile)
 
         round_string, round_diff = round_settings
-        display_round = '{}{}'.format(round_string, (self.round_wind_number + 1) - round_diff)
+        display_round = "{}{}".format(round_string, (self.round_wind_number + 1) - round_diff)
 
-        return 'Round: {}, Honba: {}, Dora Indicators: {}'.format(
-            display_round,
-            self.count_of_honba_sticks,
-            dora_string
+        return "Round: {}, Honba: {}, Dora Indicators: {}".format(
+            display_round, self.count_of_honba_sticks, dora_string
         )
 
-    def init_round(self,
-                   round_wind_number,
-                   count_of_honba_sticks,
-                   count_of_riichi_sticks,
-                   dora_indicator,
-                   dealer_seat,
-                   scores):
+    def init_round(
+        self, round_wind_number, count_of_honba_sticks, count_of_riichi_sticks, dora_indicator, dealer_seat, scores
+    ):
 
         # we need it to properly display log for each round
         self.round_number += 1
@@ -73,6 +63,7 @@ class Table(object):
         self.count_of_riichi_sticks = count_of_riichi_sticks
 
         self.revealed_tiles = [0] * 34
+        self.revealed_tiles_136 = []
 
         self.dora_indicators = []
         self.add_dora_indicator(dora_indicator)
@@ -103,11 +94,11 @@ class Table(object):
             # but if it's an opened kan, player will get a tile from
             # a dead wall, so total number of tiles in the wall is the same
             # as if he just draws a tile
-            if meld.type != Meld.KAN:
+            if meld.type != MeldPrint.KAN:
                 self.count_of_remaining_tiles += 1
         else:
             # can't have a pon or chi from the hand
-            assert meld.type == Meld.KAN or meld.type == meld.CHANKAN
+            assert meld.type == MeldPrint.KAN or meld.type == meld.CHANKAN
             # player draws additional tile from the wall in case of closed kan or shouminkan
             self.count_of_remaining_tiles -= 1
 
@@ -144,8 +135,7 @@ class Table(object):
         tile = Tile(tile_136, is_tsumogiri)
         self.get_player(player_seat).add_discarded_tile(tile)
 
-        # cache already revealed tiles
-        self._add_revealed_tile(tile.value)
+        self._add_revealed_tile(tile_136)
 
     def add_dora_indicator(self, tile):
         self.dora_indicators.append(tile)
@@ -171,8 +161,8 @@ class Table(object):
 
     def set_players_names_and_ranks(self, values):
         for x in range(0, len(values)):
-            self.get_player(x).name = values[x]['name']
-            self.get_player(x).rank = values[x]['rank']
+            self.get_player(x).name = values[x]["name"]
+            self.get_player(x).rank = values[x]["rank"]
 
     def get_player(self, player_seat):
         return self.players[player_seat]
@@ -192,10 +182,12 @@ class Table(object):
             return NORTH
 
     def _add_revealed_tile(self, tile):
+        self.revealed_tiles_136.append(tile)
+
         tile //= 4
         self.revealed_tiles[tile] += 1
 
-    def _init_players(self,):
+    def _init_players(self):
         self.player = Player(self, 0, self.dealer_seat)
 
         self.players = [self.player]

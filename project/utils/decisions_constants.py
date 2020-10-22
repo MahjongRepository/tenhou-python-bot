@@ -1,15 +1,19 @@
-DRAW = 'draw'
+DRAW = "draw"
 
-DISCARD_OPTIONS = 'discard_options'
-DISCARD = 'discard'
+DISCARD_OPTIONS = "discard_options"
+DISCARD = "discard"
+DISCARD_SAFE_TILE = "discard_safe_tile"
 
-DEFENCE_ACTIVATE = 'activate_defence'
-DEFENCE_DEACTIVATE = 'deactivate_defence'
+STRATEGY_ACTIVATE = "activate_strategy"
+STRATEGY_DROP = "drop_strategy"
 
-STRATEGY_ACTIVATE = 'activate_strategy'
-STRATEGY_DROP = 'drop_strategy'
+INIT_HAND = "init_hand"
 
-INIT_HAND = 'init_hand'
+MELD_CALL = "meld"
+MELD_PREPARE = "meld_prepare"
+MELD_HAND = "meld_hand"
+MELD_DEBUG = "meld_debug"
 
-MELD_CALL = 'meld'
-MELD_PREPARE = 'meld_prepare'
+RIICHI = "riichi"
+
+DEFENCE_THREATENING_ENEMY = "defence_threatening_enemy"

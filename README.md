@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.org/MahjongRepository/tenhou-python-bot.svg?branch=master)](https://travis-ci.org/MahjongRepository/tenhou-python-bot)
+![Mahjong bot](https://github.com/MahjongRepository/tenhou-python-bot/workflows/Mahjong%20bot/badge.svg)
 
-For now only **Python 3.5+** is supported.
+Bot was tested with Python 3.6+, we are not supporting Python 2.
 
 # What do we have here?
 
@@ -14,124 +14,22 @@ You can find it here: https://github.com/MahjongRepository/mahjong
 
 For research purposes we built a simple bot to play riichi mahjong on tenhou.net server.
 
-### 0.4.0 version
-
-Version with various improvements in hand building and melds calling.
-
-This version had played ~1000 games (hanchans) and achieved fourth dan (四段) a couple of times. 
-
-Stable rank was a second dan (二段) and stable rate was ~R1600.
-
-Stat:
-
-|   | Result |
-| --- | --- |
-| Average position | 2.53 |
-| Win rate | 19.21% |
-| Feed rate | 11.78% |
-| Riichi rate | 18.48% |
-| Call rate | 24.41% |
-
-| Places |  |
-| --- | --- |
-| First | 20.92% |
-| Second | 27.46% |
-| Third| 30.17% |
-| Fourth | 21.45% |
-| Bankruptcy | 6.19% |
-
-The number of fourth places was decreased.
-
-### 0.3.2 version
-
-Version with various improvements.
-
-This version had played 600 games (hanchans) and achieved fourth dan (四段) once.
-
-Stable rank was a first dan (初段).
-
-Stat:
-
-|   | Result |
-| --- | --- |
-| Average position | 2.53 |
-| Win rate | 19.97% |
-| Feed rate | 10.88% |
-| Riichi rate | 15.80% |
-| Call rate | 36.39% |
-
-| Places |  |
-| --- | --- |
-| First | 22.41% |
-| Second | 25.52% |
-| Third| 28.28% |
-| Fourth | 23.79% |
-| Bankruptcy | 4.48% |
-
-### 0.2.5 version
-
-This version is much smarter than 0.0.x versions. It can open hand, go to defence and build hand effective (all supported features you can find in releases description).
-
-This version had played 375 games (hanchans) and achieved second dan (二段).
-
-Rate was somewhere around R1500.
-
-Stat:
-
-|   | Result |
-| --- | --- |
-| Average position | 2.65 |
-| Win rate | 18.60% |
-| Feed rate | 10.59% |
-| Riichi rate | 15.64% |
-| Call rate | 34.89% |
-
-### 0.0.5 version
-
-It can reach a tempai and call a riichi. It doesn't know about dora, yaku, defence and etc. 
-Only about tempai and riichi so far.
-
-This version had played 335 games (hanchans) and achieved only first dan (初段) on the tenhou.net so far
-(and lost it later, and achieved it again...).
-
-Rate was somewhere around R1350.
-
-Stat:
-
-|   | Result |
-| --- | --- |
-| Average position | 2.78 |
-| Win rate | 20.73% |
-| Feed rate | 19.40% |
-| Riichi rate | 36.17% |
-| Call rate | 0% |
-
-So, even with the current simple logic it can play and win.
+Here you can read about bot played games statistic: [versions history](doc/versions.md)
 
 # For developers
 
 ## How to run it?
 
-1. `pip install -r requirements.txt`
-2. Run `python main.py` it will connect to the tenhou.net and will play a game
+1. `pip install -r requirements/dev.txt`
+2. Run `cd project && python main.py` it will connect to the tenhou.net and will play a game.
 
 ## Configuration instructions
 
 1. Put your own settings to the `project/settings_local.py` file. 
-They will override settings from default `settings.py` file
-2. Also you can override some default settings with command argument. 
-Use `python main.py -h` to check all available commands
+They will override settings from default `settings.py` file.
+2. Also, you can override some default settings with command arguments. 
+Use `python main.py -h` to check all available commands.
 
-## Implement your own AI
+## Game reproducer
 
-https://github.com/MahjongRepository/tenhou-python-bot/wiki/Implement-AI
-
-## Round reproducer
-
-https://github.com/MahjongRepository/tenhou-python-bot/wiki/Round-reproducer
-
-## Contribution to the project
-
-All PRs are welcomed anytime. Currently the project is in early stage and 
-I'm working on the different parts of it in the same time, so before making any 
-big changes it's better to check with me to avoid code duplication.
+It can be useful to debug bot errors or strange discards: [game reproducer](doc/reproducer.md)

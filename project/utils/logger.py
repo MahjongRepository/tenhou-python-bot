@@ -1,43 +1,74 @@
-# -*- coding: utf-8 -*-
-
 import datetime
+import hashlib
 import logging
 import os
-import hashlib
+from logging.handlers import SysLogHandler
 
 from utils.settings_handler import settings
+
+LOG_FORMAT = "%(asctime)s %(levelname)s: %(message)s"
+DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+
+
+class ColoredFormatter(logging.Formatter):
+    """
+    Apply only to the console handler.
+    """
+
+    green = "\u001b[32m"
+    cyan = "\u001b[36m"
+    reset = "\u001b[0m"
+
+    def format(self, record):
+        format_style = self._fmt
+
+        if record.getMessage().startswith("id="):
+            format_style = f"{ColoredFormatter.green}{format_style}{ColoredFormatter.reset}"
+        if record.getMessage().startswith("msg="):
+            format_style = f"{ColoredFormatter.cyan}{format_style}{ColoredFormatter.reset}"
+
+        formatter = logging.Formatter(format_style)
+        return formatter.format(record)
 
 
 def set_up_logging(save_to_file=True):
     """
     Logger for tenhou communication and AI output
     """
-    logs_directory = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'logs')
+    logs_directory = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "logs")
     if not os.path.exists(logs_directory):
         os.mkdir(logs_directory)
 
-    logger = logging.getLogger('tenhou')
-    logger.setLevel(logging.DEBUG)
-
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    formatter = ColoredFormatter(LOG_FORMAT, datefmt=DATE_FORMAT)
     ch.setFormatter(formatter)
+
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
     logger.addHandler(ch)
 
-    ai_logger = logging.getLogger('ai')
-    ai_logger.setLevel(logging.DEBUG)
-    ai_logger.addHandler(ch)
+    log_prefix = settings.LOG_PREFIX
+    if not log_prefix:
+        log_prefix = hashlib.sha1(settings.USER_ID.encode("utf-8")).hexdigest()[:5]
 
     if save_to_file:
-        # we need it to distinguish different bots logs (if they were run in the same time)
-        log_prefix = settings.LOG_PREFIX
-        if not log_prefix:
-            log_prefix = hashlib.sha1(settings.USER_ID.encode('utf-8')).hexdigest()[:5]
-        file_name = '{}_{}.log'.format(log_prefix, datetime.datetime.now().strftime('%Y-%m-%d_%H_%M_%S'))
+        formatter = logging.Formatter(LOG_FORMAT, datefmt=DATE_FORMAT)
 
-        fh = logging.FileHandler(os.path.join(logs_directory, file_name), encoding='utf-8')
+        # we need it to distinguish different bots logs (if they were run in the same time)
+        file_name = "{}_{}.log".format(log_prefix, datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S"))
+
+        fh = logging.FileHandler(os.path.join(logs_directory, file_name), encoding="utf-8")
         fh.setLevel(logging.DEBUG)
         fh.setFormatter(formatter)
         logger.addHandler(fh)
-        ai_logger.addHandler(fh)
+
+    if settings.PAPERTRAIL_HOST_AND_PORT:
+        syslog = SysLogHandler(address=settings.PAPERTRAIL_HOST_AND_PORT)
+        game_id = hashlib.sha1(datetime.datetime.now().strftime("%Y-%m-%d %H").encode("utf-8")).hexdigest()[:8]
+        game_id = f"BOT_{log_prefix}_{game_id}"
+
+        formatter = ColoredFormatter(f"%(asctime)s {game_id}: %(message)s", datefmt=DATE_FORMAT)
+        syslog.setFormatter(formatter)
+
+        logger.addHandler(syslog)

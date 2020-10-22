@@ -1,0 +1,36 @@
+name: Mahjong bot
+
+on:
+  push:
+    branches: [master, dev]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.7'
+      - name: Install libs
+        run: pip install -r requirements/dev.txt
+      - name: Lint files
+        run: make lint
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install libs
+        run: pip install -r requirements/dev.txt
+      - name: Run tests
+        run: make tests

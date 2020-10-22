@@ -306,8 +306,6 @@ class TenhouClient(Client):
                     self._send_message('<D p="{}"/>'.format(discarded_tile))
                     logger.info("Discard: {}".format(TilesConverter.to_one_line_string([discarded_tile])))
 
-                    logger.info("Remaining tiles: {}".format(self.table.count_of_remaining_tiles))
-
                 # new dora indicator after kan
                 if "<DORA" in message:
                     tile = self.decoder.parse_dora_indicator(message)

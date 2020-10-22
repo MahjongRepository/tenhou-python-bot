@@ -63,6 +63,7 @@ class TenhouLogReproducer:
         table.has_aka_dora = True
         table.has_open_tanyao = True
         draw_tile_seen_number = 0
+        enemy_discard_seen_number = 0
         for tag in round_content:
             if player_draw_regex.match(tag) and "UN" not in tag:
                 tile = self.decoder.parse_tile(tag)
@@ -79,6 +80,7 @@ class TenhouLogReproducer:
 
                         if not table.player.in_riichi:
                             table.player.discard_tile()
+                            table.player.can_call_riichi()
 
                         return
 
@@ -121,10 +123,13 @@ class TenhouLogReproducer:
                     table.add_discarded_tile(player_seat, tile, is_tsumogiri=False)
 
                     # is it time to stop?
-                    if action == "enemy_discard" and TilesConverter.to_one_line_string([tile]) == needed_tile:
-                        is_kamicha_discard = player_seat == 1
-                        table.player.try_to_call_meld(tile, is_kamicha_discard)
-                        return
+                    found_tile = TilesConverter.to_one_line_string([tile]) == needed_tile
+                    if action == "enemy_discard" and found_tile:
+                        enemy_discard_seen_number += 1
+                        if enemy_discard_seen_number == tile_number_to_stop:
+                            is_kamicha_discard = player_seat == 1
+                            table.player.try_to_call_meld(tile, is_kamicha_discard)
+                            return
 
             if "<N who=" in tag:
                 meld = self.decoder.parse_meld(tag)

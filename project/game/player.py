@@ -167,6 +167,7 @@ class Player(PlayerInterface):
     def draw_tile(self, tile_136):
         context = [
             f"Step: {self.round_step}",
+            f"Remaining tiles: {self.table.count_of_remaining_tiles}",
             f"Hand: {self.format_hand_for_print(tile_136)}",
         ]
         if self.ai.current_strategy:

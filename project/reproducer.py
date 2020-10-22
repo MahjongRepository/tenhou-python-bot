@@ -72,6 +72,9 @@ class TenhouLogReproducer:
                 if action == "draw" and found_tile:
                     draw_tile_seen_number += 1
                     if draw_tile_seen_number == tile_number_to_stop:
+                        # TODO suggest it only when it possible to open kan
+                        table.player.should_call_kan(tile, False, table.player.in_riichi)
+
                         table.player.draw_tile(tile)
 
                         if not table.player.in_riichi:

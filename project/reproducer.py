@@ -182,7 +182,7 @@ class TenhouLogReproducer:
             with open(log_file, "r") as f:
                 return f.read()
         else:
-            url = "http://e.mjv.jp/0/log/?{0}".format(log_id)
+            url = f"http://tenhou.net/0/log/?{log_id}"
             response = requests.get(url)
 
             with open(log_file, "w") as f:

@@ -11,7 +11,7 @@ from tenhou.decoder import TenhouDecoder
 from utils.decisions_logger import MeldPrint
 from utils.logger import set_up_logging
 
-logger = logging.getLogger()
+logger = logging.getLogger("bot")
 
 
 class TenhouLogReproducer:

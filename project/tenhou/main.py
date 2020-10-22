@@ -2,7 +2,7 @@ import logging
 
 from tenhou.client import TenhouClient
 
-logger = logging.getLogger()
+logger = logging.getLogger("bot")
 
 
 def connect_and_play():

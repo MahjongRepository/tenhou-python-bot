@@ -44,7 +44,7 @@ def set_up_logging(save_to_file=True):
     formatter = ColoredFormatter(LOG_FORMAT, datefmt=DATE_FORMAT)
     ch.setFormatter(formatter)
 
-    logger = logging.getLogger()
+    logger = logging.getLogger("bot")
     logger.setLevel(logging.DEBUG)
     logger.addHandler(ch)
 

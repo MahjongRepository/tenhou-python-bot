@@ -46,7 +46,7 @@ class TenhouLogReproducer:
 
         return meta_information
 
-    def reproduce(self, player, wind, honba, needed_tile, action):
+    def reproduce(self, player, wind, honba, needed_tile, action, tile_number_to_stop):
         player_position = self._find_player_position(player)
         round_content = self._find_needed_round(wind, honba)
 
@@ -62,10 +62,23 @@ class TenhouLogReproducer:
         # TODO get this info from log content
         table.has_aka_dora = True
         table.has_open_tanyao = True
-
+        draw_tile_seen_number = 0
         for tag in round_content:
             if player_draw_regex.match(tag) and "UN" not in tag:
                 tile = self.decoder.parse_tile(tag)
+
+                # is it time to stop reproducing?
+                found_tile = TilesConverter.to_one_line_string([tile]) == needed_tile
+                if action == "draw" and found_tile:
+                    draw_tile_seen_number += 1
+                    if draw_tile_seen_number == tile_number_to_stop:
+                        table.player.draw_tile(tile)
+
+                        if not table.player.in_riichi:
+                            table.player.discard_tile()
+
+                        return
+
                 table.player.draw_tile(tile)
 
             if "INIT" in tag:
@@ -99,12 +112,7 @@ class TenhouLogReproducer:
                 player_seat = self._normalize_position(player_position, discard_tags.index(player_sign))
 
                 if player_seat == 0:
-                    # is it time to stop?
-                    if action == "draw" and TilesConverter.to_one_line_string([table.player.last_draw]) == needed_tile:
-                        table.player.discard_tile()
-                        return
-                    else:
-                        table.player.discard_tile(tile)
+                    table.player.discard_tile(tile)
                 else:
                     # TODO detect is_tsumogiri correctly
                     table.add_discarded_tile(player_seat, tile, is_tsumogiri=False)
@@ -294,6 +302,12 @@ def parse_args_and_start_reproducer():
         help='Tile where to stop in "2s", "5m" format',
     )
     parser.add_option(
+        "--n",
+        type="int",
+        default=1,
+        help="On what discarded tile we need to stop",
+    )
+    parser.add_option(
         "--action",
         type="string",
         default="draw",
@@ -307,13 +321,7 @@ def parse_args_and_start_reproducer():
         meta_information = reproducer.print_meta_info()
         logger.debug(json.dumps(meta_information, indent=2, ensure_ascii=False))
     else:
-        reproducer.reproduce(
-            opts.player,
-            opts.wind,
-            opts.honba,
-            opts.tile,
-            opts.action,
-        )
+        reproducer.reproduce(opts.player, opts.wind, opts.honba, opts.tile, opts.action, opts.n)
 
 
 def main():

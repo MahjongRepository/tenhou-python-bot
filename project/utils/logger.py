@@ -35,10 +35,6 @@ def set_up_logging(save_to_file=True):
     """
     Logger for tenhou communication and AI output
     """
-    logs_directory = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "logs")
-    if not os.path.exists(logs_directory):
-        os.mkdir(logs_directory)
-
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
     formatter = ColoredFormatter(LOG_FORMAT, datefmt=DATE_FORMAT)
@@ -53,6 +49,10 @@ def set_up_logging(save_to_file=True):
         log_prefix = hashlib.sha1(settings.USER_ID.encode("utf-8")).hexdigest()[:5]
 
     if save_to_file:
+        logs_directory = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "logs")
+        if not os.path.exists(logs_directory):
+            os.mkdir(logs_directory)
+
         formatter = logging.Formatter(LOG_FORMAT, datefmt=DATE_FORMAT)
 
         # we need it to distinguish different bots logs (if they were run in the same time)

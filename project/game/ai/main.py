@@ -293,7 +293,7 @@ class MahjongAI:
                 tiles_34[tile_34] -= 1
 
                 new_waiting, new_shanten = self.hand_builder.calculate_waits(tiles_34, self.player.meld_34_tiles)
-                new_waits_count = self.hand_builder.count_tiles(new_waiting, tiles_34)
+                new_waits_count = self.hand_builder.count_tiles(new_waiting, closed_hand_34)
 
         if not has_shouminkan_candidate:
             # we don't have enough tiles in the hand

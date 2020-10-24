@@ -473,7 +473,7 @@ class TenhouClient(Client):
             message = self.socket.recv(4096)
             logger.debug("Get: {}".format(message.decode("utf-8").replace("\x00", " ")))
             return message.decode("utf-8")
-        except:
+        except Exception:
             return ""
 
     def _get_multiple_messages(self):

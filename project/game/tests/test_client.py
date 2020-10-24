@@ -17,7 +17,6 @@ def test_discard_tile():
     assert len(client.table.player.tiles) == 13
     assert len(client.table.player.discards) == 1
     assert not (tile in client.table.player.tiles)
-    assert client.table.count_of_remaining_tiles == 69
 
 
 def test_call_meld_closed_kan():

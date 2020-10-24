@@ -67,6 +67,7 @@ class TenhouLogReproducer:
         for tag in round_content:
             if player_draw_regex.match(tag) and "UN" not in tag:
                 tile = self.decoder.parse_tile(tag)
+                table.count_of_remaining_tiles -= 1
 
                 # is it time to stop reproducing?
                 found_tile = TilesConverter.to_one_line_string([tile]) == needed_tile
@@ -110,6 +111,9 @@ class TenhouLogReproducer:
                 ]
 
                 table.player.init_hand(hands[player_position])
+
+            if "DORA hai" in tag:
+                table.dora_indicators.append(int(self._get_attribute_content(tag, 'hai')))
 
             if discard_regex.match(tag) and "DORA" not in tag:
                 tile = self.decoder.parse_tile(tag)

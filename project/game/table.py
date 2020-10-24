@@ -94,7 +94,7 @@ class Table:
             # but if it's an opened kan, player will get a tile from
             # a dead wall, so total number of tiles in the wall is the same
             # as if he just draws a tile
-            if meld.type != MeldPrint.KAN:
+            if meld.type != MeldPrint.KAN and meld.type != meld.CHANKAN:
                 self.count_of_remaining_tiles += 1
         else:
             # can't have a pon or chi from the hand
@@ -130,7 +130,8 @@ class Table:
         :param tile_136: 136 format tile
         :param is_tsumogiri: was tile discarded from hand or not
         """
-        self.count_of_remaining_tiles -= 1
+        if player_seat != 0:
+            self.count_of_remaining_tiles -= 1
 
         tile = Tile(tile_136, is_tsumogiri)
         self.get_player(player_seat).add_discarded_tile(tile)

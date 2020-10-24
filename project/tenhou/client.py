@@ -269,6 +269,7 @@ class TenhouClient(Client):
                         continue
 
                     drawn_tile = self.decoder.parse_tile(message)
+                    self.table.count_of_remaining_tiles -= 1
 
                     logger.info("Drawn tile: {}".format(TilesConverter.to_one_line_string([drawn_tile])))
 

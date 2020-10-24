@@ -42,6 +42,7 @@ class TenhouClient(Client):
             TenhouClient._random_sleep = lambda x, y, z: 0
         else:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.socket.settimeout(1)
 
         self.socket.connect((settings.TENHOU_HOST, settings.TENHOU_PORT))
 
@@ -468,17 +469,21 @@ class TenhouClient(Client):
         self.socket.sendall(message.encode())
 
     def _read_message(self):
-        message = self.socket.recv(2048)
-        logger.debug("Get: {}".format(message.decode("utf-8").replace("\x00", " ")))
-        return message.decode("utf-8")
+        try:
+            message = self.socket.recv(2048)
+            logger.debug("Get: {}".format(message.decode("utf-8").replace("\x00", " ")))
+            return message.decode("utf-8")
+        except:
+            return ""
 
     def _get_multiple_messages(self):
         # tenhou can send multiple messages in one request
         messages = self._read_message()
+        if not messages:
+            return []
         messages = messages.split("\x00")
         # last message always is empty after split, so let's exclude it
         messages = messages[0:-1]
-
         return messages
 
     def _send_keep_alive_ping(self):

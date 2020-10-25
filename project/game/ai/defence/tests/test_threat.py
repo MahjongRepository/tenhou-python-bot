@@ -167,6 +167,89 @@ def test_threatening_riichi_player_and_not_visible_dora():
     assert threatening_player.assumed_hand_cost == 5200
 
 
+def test_threatening_riichi_player_with_kan():
+    table = Table()
+    enemy_seat = 2
+    table.add_called_riichi(enemy_seat)
+
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.KAN, is_open=False, man="3333"))
+
+    # non dealer
+    threatening_player = table.player.ai.defence._get_threatening_players()[0]
+    assert threatening_player.enemy.seat == enemy_seat
+    assert threatening_player.assumed_hand_cost == 5200
+
+    # dealer
+    threatening_player.enemy.dealer_seat = enemy_seat
+    assert threatening_player.assumed_hand_cost == 7700
+
+
+def test_threatening_riichi_player_with_kan_aka():
+    table = Table()
+    enemy_seat = 2
+    table.add_called_riichi(enemy_seat)
+    table.has_aka_dora = True
+
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.KAN, is_open=False, man="5555"))
+
+    # non dealer
+    threatening_player = table.player.ai.defence._get_threatening_players()[0]
+    assert threatening_player.enemy.seat == enemy_seat
+    assert threatening_player.assumed_hand_cost == 8000
+
+    # dealer
+    threatening_player.enemy.dealer_seat = enemy_seat
+    assert threatening_player.assumed_hand_cost == 12000
+
+
+def test_threatening_riichi_player_with_dora_kan():
+    table = Table()
+    enemy_seat = 2
+    table.add_called_riichi(enemy_seat)
+
+    table.add_dora_indicator(string_to_136_tile(man="2"))
+
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.KAN, is_open=False, man="3333"))
+
+    # non dealer
+    threatening_player = table.player.ai.defence._get_threatening_players()[0]
+    assert threatening_player.enemy.seat == enemy_seat
+    assert threatening_player.assumed_hand_cost == 16000
+
+    # dealer
+    threatening_player.enemy.dealer_seat = enemy_seat
+    assert threatening_player.assumed_hand_cost == 24000
+
+
+def test_threatening_riichi_player_with_yakuhai_kan():
+    table = Table()
+    enemy_seat = 2
+    table.round_wind_number = 1
+    table.add_called_riichi(enemy_seat)
+
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.KAN, is_open=False, honors="1111"))
+
+    # non dealer
+    threatening_player = table.player.ai.defence._get_threatening_players()[0]
+    assert threatening_player.enemy.seat == enemy_seat
+    assert threatening_player.assumed_hand_cost == 8000
+
+
+def test_threatening_riichi_player_with_double_yakuhai_kan():
+    table = Table()
+    enemy_seat = 2
+    table.round_wind_number = 1
+    table.add_called_riichi(enemy_seat)
+
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.KAN, is_open=False, honors="1111"))
+
+    # non dealer
+    threatening_player = table.player.ai.defence._get_threatening_players()[0]
+    threatening_player.enemy.dealer_seat = enemy_seat
+    assert threatening_player.enemy.seat == enemy_seat
+    assert threatening_player.assumed_hand_cost == 18000
+
+
 def test_number_of_unverified_suji():
     table = Table()
     enemy_seat = 2

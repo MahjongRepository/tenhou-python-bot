@@ -5,6 +5,7 @@ from game.ai.defence.yaku_analyzer.tanyao import TanyaoAnalyzer
 from game.ai.defence.yaku_analyzer.yakuhai import YakuhaiAnalyzer
 from game.ai.helpers.defence import EnemyDanger, TileDanger
 from game.ai.helpers.possible_forms import PossibleFormsAnalyzer
+from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_aka_dora, plus_dora
 from utils.general import separate_tiles_by_suits
@@ -156,8 +157,25 @@ class EnemyAnalyzer:
         if live_dora_tiles >= 4:
             scale_index += 1
 
-        if scale_index > len(scale):
-            scale_index = len(scale)
+        # if enemy has closed kan, his hand is more expensive on average
+        for meld in self.enemy.melds:
+            # if he is in riichi he can only have closed kan
+            assert meld.type == Meld.KAN and not meld.opened
+
+            # plus one just because of riichi with kan
+            scale_index += 1
+
+            # higher danger for doras
+            for tile in meld.tiles:
+                scale_index += plus_dora(tile, self.table.dora_indicators)
+                scale_index += int(is_aka_dora(tile, self.table.has_aka_dora))
+
+            # higher danger for yakuhai
+            tile_34 = meld.tiles[0] // 4
+            scale_index += len([x for x in self.enemy.valued_honors if x == tile_34])
+
+        if scale_index > len(scale) - 1:
+            scale_index = len(scale) - 1
 
         return scale[scale_index]
 

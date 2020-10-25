@@ -468,7 +468,7 @@ class HandBuilder:
         return sorted(all_discard_options, key=lambda x: (x.danger.get_max_danger(),) + sorting_lambda(x))[0]
 
     def _choose_best_tanki_wait(self, discard_desc):
-        discard_desc = sorted(discard_desc, key=lambda k: k["hand_cost"], reverse=True)
+        discard_desc = sorted(discard_desc, key=lambda k: (k["hand_cost"], -k["max_danger"]), reverse=True)
 
         # we are always choosing between exactly two tanki waits
         assert len(discard_desc) == 2
@@ -503,7 +503,7 @@ class HandBuilder:
             if best_ukeire == 2 or best_ukeire == 3:
                 best_discard_desc = sorted(
                     best_discard_desc,
-                    key=lambda k: TankiWait.tanki_wait_same_ukeire_2_3_prio[k["tanki_type"]],
+                    key=lambda k: (TankiWait.tanki_wait_same_ukeire_2_3_prio[k["tanki_type"]], -k["max_danger"]),
                     reverse=True,
                 )
                 return best_discard_desc[0]["discard_option"]
@@ -512,7 +512,7 @@ class HandBuilder:
             if best_ukeire == 1:
                 best_discard_desc = sorted(
                     best_discard_desc,
-                    key=lambda k: TankiWait.tanki_wait_same_ukeire_1_prio[k["tanki_type"]],
+                    key=lambda k: (TankiWait.tanki_wait_same_ukeire_1_prio[k["tanki_type"]], -k["max_danger"]),
                     reverse=True,
                 )
                 return best_discard_desc[0]["discard_option"]
@@ -632,6 +632,7 @@ class HandBuilder:
                         "is_furiten": is_furiten,
                         "is_tanki": is_tanki,
                         "tanki_type": tanki_type,
+                        "max_danger": discard_option.danger.get_max_danger(),
                     }
                 )
             else:
@@ -645,6 +646,7 @@ class HandBuilder:
                         "is_furiten": is_furiten,
                         "is_tanki": False,
                         "tanki_type": None,
+                        "max_danger": discard_option.danger.get_max_danger(),
                     }
                 )
 
@@ -653,12 +655,13 @@ class HandBuilder:
             self.player.melds = player_melds_copy
             self.player.discards.remove(discarded_tile)
 
-        discard_desc = sorted(discard_desc, key=lambda k: (k["cost_x_ukeire"], not k["is_furiten"]), reverse=True)
+        discard_desc = sorted(
+            discard_desc, key=lambda k: (k["cost_x_ukeire"], not k["is_furiten"], -k["max_danger"]), reverse=True
+        )
 
         # if we don't have any good options, e.g. all our possible waits ara karaten
-        # FIXME: in that case, discard the safest tile
         if discard_desc[0]["cost_x_ukeire"] == 0:
-            return sorted(discard_options, key=lambda x: x.valuation)[0]
+            return sorted(discard_options, key=lambda x: (-x.danger.get_max_danger(), x.valuation))[0]
 
         num_tanki_waits = len([x for x in discard_desc if x["is_tanki"]])
 
@@ -667,14 +670,13 @@ class HandBuilder:
             return self._choose_best_tanki_wait(discard_desc)
 
         best_discard_desc = [x for x in discard_desc if x["cost_x_ukeire"] == discard_desc[0]["cost_x_ukeire"]]
+        best_discard_desc = sorted(best_discard_desc, key=lambda k: (-k["max_danger"]))
 
         # we only have one best option based on ukeire and cost, nothing more to do here
         if len(best_discard_desc) == 1:
             return best_discard_desc[0]["discard_option"]
 
         # if we have several options that give us similar wait
-        # FIXME: 1. we find the safest tile to discard
-        # FIXME: 2. if safeness is the same, we try to discard non-dora tiles
         return best_discard_desc[0]["discard_option"]
 
     @staticmethod

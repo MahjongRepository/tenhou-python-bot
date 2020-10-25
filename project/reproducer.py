@@ -74,6 +74,8 @@ class TenhouLogReproducer:
                 if action == "draw" and found_tile:
                     draw_tile_seen_number += 1
                     if draw_tile_seen_number == tile_number_to_stop:
+                        logger.info("Stop on player draw")
+
                         # TODO suggest it only when it possible to open kan
                         table.player.should_call_kan(tile, False, table.player.in_riichi)
 
@@ -123,17 +125,23 @@ class TenhouLogReproducer:
                 if player_seat == 0:
                     table.player.discard_tile(tile)
                 else:
-                    # TODO detect is_tsumogiri correctly
-                    table.add_discarded_tile(player_seat, tile, is_tsumogiri=False)
-
                     # is it time to stop?
                     found_tile = TilesConverter.to_one_line_string([tile]) == needed_tile
+                    is_kamicha_discard = player_seat == 1
+                    count_of_tiles_in_hand = TilesConverter.to_34_array(table.player.closed_hand)[tile // 4]
+                    # toimen discarded 5s and we don't have enough tiles in hand to call pon/kan
+                    if count_of_tiles_in_hand < 2 and not is_kamicha_discard:
+                        found_tile = False
+
                     if action == "enemy_discard" and found_tile:
                         enemy_discard_seen_number += 1
                         if enemy_discard_seen_number == tile_number_to_stop:
-                            is_kamicha_discard = player_seat == 1
+                            logger.info("Stop on enemy discard")
                             table.player.try_to_call_meld(tile, is_kamicha_discard)
                             return
+
+                    # TODO detect is_tsumogiri correctly
+                    table.add_discarded_tile(player_seat, tile, is_tsumogiri=False)
 
             if "<N who=" in tag:
                 meld = self.decoder.parse_meld(tag)

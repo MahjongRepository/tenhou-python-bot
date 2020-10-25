@@ -1,7 +1,9 @@
+import utils.decisions_constants as log
 from game.ai.strategies.main import BaseStrategy
 from mahjong.constants import HONOR_INDICES, TERMINAL_INDICES
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_honor, is_tile_strictly_isolated
+from utils.decisions_logger import DecisionsLogger
 
 
 class TanyaoStrategy(BaseStrategy):
@@ -159,3 +161,14 @@ class TanyaoStrategy(BaseStrategy):
         """
         tile //= 4
         return tile not in self.not_suitable_tiles
+
+    def validate_meld(self, chosen_meld_dict):
+        selected_tile = chosen_meld_dict["discard_tile"]
+        if selected_tile.shanten == 1 and selected_tile.ukeire >= 8:
+            print(selected_tile.shanten, selected_tile.ukeire)
+            DecisionsLogger.debug(
+                log.MELD_DEBUG, "We have a good 1 shanten tanyao hand, let's not open it without tempai."
+            )
+            return False
+
+        return True

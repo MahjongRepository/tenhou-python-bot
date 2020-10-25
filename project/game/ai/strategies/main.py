@@ -189,13 +189,16 @@ class BaseStrategy:
         if not possible_melds:
             return None, None
 
-        chosen_meld = self._find_best_meld_to_open(tile, possible_melds, new_tiles, closed_hand, tile)
+        chosen_meld_dict = self._find_best_meld_to_open(tile, possible_melds, new_tiles, closed_hand, tile)
         # we didn't find a good discard candidate after open meld
-        if not chosen_meld:
+        if not chosen_meld_dict:
             return None, None
 
-        selected_tile = chosen_meld["discard_tile"]
-        meld = chosen_meld["meld"]
+        if not self.validate_meld(chosen_meld_dict):
+            return None, None
+
+        selected_tile = chosen_meld_dict["discard_tile"]
+        meld = chosen_meld_dict["meld"]
 
         shanten = selected_tile.shanten
         had_to_be_called = self.meld_had_to_be_called(tile)
@@ -211,6 +214,12 @@ class BaseStrategy:
             return None, None
 
         return meld, selected_tile
+
+    def validate_meld(self, chosen_meld_dict):
+        """
+        In some cased we want additionally check that meld is suitable to the strategy
+        """
+        return True
 
     def meld_had_to_be_called(self, tile):
         """
@@ -291,7 +300,8 @@ class BaseStrategy:
             if not all_tiles_are_suitable and self.is_tile_suitable(selected_tile.tile_to_discard * 4):
                 DecisionsLogger.debug(
                     log.MELD_DEBUG,
-                    "We have tiles in our hand that are not suitable to current strategy, but we are going to discard tile that we need. Abort melding.",
+                    "We have tiles in our hand that are not suitable to current strategy, "
+                    "but we are going to discard tile that we need. Abort melding.",
                 )
                 continue
 

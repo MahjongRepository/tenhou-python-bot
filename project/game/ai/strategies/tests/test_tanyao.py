@@ -1,7 +1,7 @@
 from game.ai.strategies.main import BaseStrategy
 from game.ai.strategies.tanyao import TanyaoStrategy
 from game.table import Table
-from mahjong.constants import FIVE_RED_PIN
+from mahjong.constants import FIVE_RED_PIN, FIVE_RED_SOU
 from utils.decisions_logger import MeldPrint
 from utils.test_helpers import make_meld, string_to_136_array, string_to_136_tile, tiles_to_string
 
@@ -395,6 +395,30 @@ def test_dont_meld_agari():
     table.player.add_called_meld(meld)
 
     tile = string_to_136_tile(man="4")
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is None
+
+
+def test_dont_open_tanyao_with_good_one_shanten_hand_and_without_tempai():
+    table = _make_table()
+    table.has_aka_dora = True
+    table.add_dora_indicator(string_to_136_tile(pin="2"))
+    tiles = string_to_136_array(man="3488", sou="3478", pin="1345") + [FIVE_RED_SOU]  # aka dora
+    table.player.init_hand(tiles)
+
+    # tile is not suitable to our strategy
+    tile = string_to_136_tile(sou="9")
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is None
+
+    # after meld we are tempai
+    tile = string_to_136_tile(sou="6")
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is not None
+    assert tiles_to_string(meld.tiles) == "678s"
+
+    # we have a good one shanten and after meld we are not tempai, abort melding
+    tile = FIVE_RED_SOU + 1  # not aka dora
     meld, _ = table.player.try_to_call_meld(tile, True)
     assert meld is None
 

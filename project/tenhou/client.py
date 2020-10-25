@@ -57,6 +57,8 @@ class TenhouClient(Client):
 
         # we reconnected to the game
         if "<GO" in auth_message:
+            self._send_keep_alive_ping()
+
             logger.info("Successfully reconnected")
             self.reconnected_messages = messages
 
@@ -425,7 +427,7 @@ class TenhouClient(Client):
                     self.game_is_continue = False
 
             # socket was closed by tenhou
-            if self._count_of_empty_messages >= 5:
+            if self._count_of_empty_messages >= 10:
                 logger.error("We are getting empty messages from socket. Probably socket connection was closed")
                 self.end_game(False)
                 return

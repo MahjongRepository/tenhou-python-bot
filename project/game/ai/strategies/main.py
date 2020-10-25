@@ -250,6 +250,10 @@ class BaseStrategy:
     def _find_best_meld_to_open(self, call_tile_136, possible_melds, new_tiles, closed_hand, discarded_tile):
         discarded_tile_34 = discarded_tile // 4
 
+        all_tiles_are_suitable = True
+        for tile_136 in closed_hand:
+            all_tiles_are_suitable &= self.is_tile_suitable(tile_136)
+
         final_results = []
         for meld_34 in possible_melds:
             meld_34_copy = meld_34.copy()
@@ -281,6 +285,14 @@ class BaseStrategy:
 
             # we can't find a good discard candidate, so let's skip this
             if not selected_tile:
+                DecisionsLogger.debug(log.MELD_DEBUG, "Can't find discard candidate after meld. Abort melding.")
+                continue
+
+            if not all_tiles_are_suitable and self.is_tile_suitable(selected_tile.tile_to_discard * 4):
+                DecisionsLogger.debug(
+                    log.MELD_DEBUG,
+                    "We have tiles in our hand that are not suitable to current strategy, but we are going to discard tile that we need. Abort melding.",
+                )
                 continue
 
             # kuikae
@@ -305,7 +317,7 @@ class BaseStrategy:
                         tile_str = TilesConverter.to_one_line_string([selected_tile.tile_to_discard * 4])
                         DecisionsLogger.debug(
                             log.MELD_DEBUG,
-                            f"Kuikae discard {tile_str} candidate. Abort this tile melding.",
+                            f"Kuikae discard {tile_str} candidate. Abort melding.",
                         )
                         continue
 

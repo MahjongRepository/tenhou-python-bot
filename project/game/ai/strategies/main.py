@@ -289,7 +289,7 @@ class BaseStrategy:
             )
 
             selected_tile = self.player.ai.hand_builder.choose_tile_to_discard(
-                new_tiles, closed_hand_copy, melds, for_open_hand=True
+                new_tiles, closed_hand_copy, melds, after_meld=True
             )
 
             # we can't find a good discard candidate, so let's skip this

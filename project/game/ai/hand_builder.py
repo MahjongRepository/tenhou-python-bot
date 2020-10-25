@@ -20,7 +20,7 @@ class HandBuilder:
         selected_tile = self.choose_tile_to_discard(tiles, closed_hand, melds)
         return self.process_discard_option(selected_tile, closed_hand)
 
-    def choose_tile_to_discard(self, tiles, closed_hand, melds, for_open_hand=False):
+    def choose_tile_to_discard(self, tiles, closed_hand, melds, after_meld=False):
         """
         Try to find best tile to discard, based on different evaluations
         """
@@ -43,7 +43,7 @@ class HandBuilder:
             x for x in discard_options if x.danger.get_max_danger() <= x.danger.get_min_danger_border()
         ]
         if not tiles_we_can_discard:
-            return self._chose_first_option_or_safe_tiles([], discard_options, for_open_hand, lambda x: ())
+            return self._chose_first_option_or_safe_tiles([], discard_options, after_meld, lambda x: ())
 
         # our strategy can affect discard options
         if self.ai.current_strategy:
@@ -59,7 +59,7 @@ class HandBuilder:
 
             tiles_we_can_discard = sorted(had_to_be_discarded_tiles, key=sorting_lambda)
             return self._chose_first_option_or_safe_tiles(
-                tiles_we_can_discard, discard_options, for_open_hand, sorting_lambda
+                tiles_we_can_discard, discard_options, after_meld, sorting_lambda
             )
 
         # remove needed tiles from discard options
@@ -117,7 +117,7 @@ class HandBuilder:
             return self._chose_first_option_or_safe_tiles(
                 sorted(min_dora_list, key=sorting_lambda),
                 discard_options,
-                for_open_hand,
+                after_meld,
                 sorting_lambda,
             )
 
@@ -134,7 +134,7 @@ class HandBuilder:
             return self._chose_first_option_or_safe_tiles(
                 sorted(tiles_without_dora, key=sorting_lambda),
                 discard_options,
-                for_open_hand,
+                after_meld,
                 sorting_lambda,
             )
 
@@ -168,7 +168,7 @@ class HandBuilder:
             return self._chose_first_option_or_safe_tiles(
                 sorted(isolated_tiles, key=sorting_lambda),
                 discard_options,
-                for_open_hand,
+                after_meld,
                 sorting_lambda,
             )
 
@@ -179,7 +179,7 @@ class HandBuilder:
 
         filtered_options = sorted(filtered_options, key=sorting_lambda)
         first_option = self._chose_first_option_or_safe_tiles(
-            filtered_options, discard_options, for_open_hand, sorting_lambda
+            filtered_options, discard_options, after_meld, sorting_lambda
         )
 
         other_tiles_with_same_ukeire = [
@@ -196,7 +196,7 @@ class HandBuilder:
             return self._chose_first_option_or_safe_tiles(
                 sorted(other_tiles_with_same_ukeire, key=sorting_lambda),
                 discard_options,
-                for_open_hand,
+                after_meld,
                 sorting_lambda,
             )
 
@@ -439,7 +439,7 @@ class HandBuilder:
         # restore original state of player hand
         self.player.tiles = player_tiles_original
 
-    def _chose_first_option_or_safe_tiles(self, chosen_candidates, all_discard_options, for_open_hand, sorting_lambda):
+    def _chose_first_option_or_safe_tiles(self, chosen_candidates, all_discard_options, after_meld, sorting_lambda):
         # it looks like everything is fine
         if len(chosen_candidates):
             # try to discard safest tile for calculated ukeire border
@@ -460,7 +460,7 @@ class HandBuilder:
 
             return options_to_chose[0]
         # we don't want to open hand in that case
-        elif for_open_hand:
+        elif after_meld:
             return None
 
         # we can't discard effective tile from the hand, let's fold

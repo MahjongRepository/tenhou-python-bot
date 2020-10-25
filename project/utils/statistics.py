@@ -10,14 +10,20 @@ class Statistics:
     game_id = ""
     username = ""
 
-    def send_statistics(self):
+    def send_start_game(self):
         url = settings.STAT_SERVER_URL
         if not url or not self.game_id:
             return False
-
-        url = "{0}/api/v1/tenhou/game/add/".format(url)
+        url = "{0}/api/v1/tenhou/game/start/".format(url)
         data = {"id": self.game_id, "username": self.username}
+        result = requests.post(url, data, headers={"Token": settings.STAT_TOKEN}, timeout=2)
+        return result.status_code == 200 and result.json()["success"]
 
-        result = requests.post(url, data, headers={"Token": settings.STAT_TOKEN})
-
+    def send_end_game(self):
+        url = settings.STAT_SERVER_URL
+        if not url or not self.game_id:
+            return False
+        url = "{0}/api/v1/tenhou/game/finish/".format(url)
+        data = {"id": self.game_id, "username": self.username}
+        result = requests.post(url, data, headers={"Token": settings.STAT_TOKEN}, timeout=2)
         return result.status_code == 200 and result.json()["success"]

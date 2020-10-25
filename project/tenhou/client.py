@@ -172,6 +172,13 @@ class TenhouClient(Client):
 
                         self.statistics.game_id = game_id
 
+                        if settings.STAT_SERVER_URL:
+                            try:
+                                result = self.statistics.send_start_game()
+                                logger.info(f"Send start game event: {result}")
+                            except Exception as e:
+                                logger.error("Send start game event error", exc_info=e)
+
                     if "<UN" in message:
                         values = self.decoder.parse_names_and_ranks(message)
                         self.table.set_players_names_and_ranks(values)
@@ -442,8 +449,11 @@ class TenhouClient(Client):
         # let's wait one minute before the statistics update
         if settings.STAT_SERVER_URL:
             sleep(60)
-            result = self.statistics.send_statistics()
-            logger.info("Statistics sent: {}".format(result))
+            try:
+                result = self.statistics.send_end_game()
+                logger.info("Statistics sent: {}".format(result))
+            except Exception as e:
+                logger.error("Send end game event error", exc_info=e)
 
     def end_game(self, success=True):
         self.game_is_continue = False

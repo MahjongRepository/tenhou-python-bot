@@ -65,8 +65,7 @@ def set_up_logging(save_to_file=True):
 
     if settings.PAPERTRAIL_HOST_AND_PORT:
         syslog = SysLogHandler(address=settings.PAPERTRAIL_HOST_AND_PORT)
-        game_id = hashlib.sha1(datetime.datetime.now().strftime("%Y-%m-%d %H").encode("utf-8")).hexdigest()[:8]
-        game_id = f"BOT_{log_prefix}_{game_id}"
+        game_id = f"BOT_{log_prefix}"
 
         formatter = ColoredFormatter(f"%(asctime)s {game_id}: %(message)s", datefmt=DATE_FORMAT)
         syslog.setFormatter(formatter)

@@ -8,13 +8,13 @@ from utils.test_helpers import make_meld, string_to_136_array, string_to_136_til
 def test_is_threatening_and_riichi():
     table = Table()
 
-    threatening_players = table.player.ai.defence._get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 0
 
     enemy_seat = 2
     table.add_called_riichi(enemy_seat)
 
-    threatening_players = table.player.ai.defence._get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 1
     assert threatening_players[0].enemy.seat == enemy_seat
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_RIICHI["id"]
@@ -23,7 +23,7 @@ def test_is_threatening_and_riichi():
 def test_is_threatening_and_dora_pon():
     table = Table()
 
-    threatening_players = table.player.ai.defence._get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 0
 
     enemy_seat = 2
@@ -31,12 +31,12 @@ def test_is_threatening_and_dora_pon():
     table.player.round_step = 7
 
     # simple pon it is no threat
-    threatening_players = table.player.ai.defence._get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 0
 
     # dora pon is threat
     table.add_dora_indicator(string_to_136_tile(man="2"))
-    threatening_players = table.player.ai.defence._get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 1
     assert threatening_players[0].enemy.seat == enemy_seat
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_OPEN_HAND_AND_MULTIPLE_DORA["id"]
@@ -46,7 +46,7 @@ def test_is_threatening_and_dora_pon():
 def test_is_threatening_and_two_open_yakuhai_melds():
     table = Table()
 
-    threatening_players = table.player.ai.defence._get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 0
 
     # south player
@@ -59,13 +59,13 @@ def test_is_threatening_and_two_open_yakuhai_melds():
     table.player.round_step = 2
 
     # double wind is not enough
-    threatening_players = table.player.ai.defence._get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 0
 
     # with one dora in enemy melds we can start think about threat
     # it will be 3 han
     table.add_dora_indicator(string_to_136_tile(man="1"))
-    threatening_players = table.player.ai.defence._get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 1
     assert threatening_players[0].enemy.seat == enemy_seat
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
@@ -75,7 +75,7 @@ def test_is_threatening_and_two_open_yakuhai_melds():
 def test_is_threatening_and_two_open_tanyao_melds():
     table = Table()
 
-    threatening_players = table.player.ai.defence._get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 0
 
     enemy_seat = 2
@@ -84,13 +84,13 @@ def test_is_threatening_and_two_open_tanyao_melds():
     table.player.round_step = 2
 
     # tanyao without dor is not threat
-    threatening_players = table.player.ai.defence._get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 0
 
     # and now it is threat
     table.add_dora_indicator(string_to_136_tile(pin="1"))
     table.add_dora_indicator(string_to_136_tile(pin="2"))
-    threatening_players = table.player.ai.defence._get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 1
     assert threatening_players[0].enemy.seat == enemy_seat
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
@@ -101,7 +101,7 @@ def test_is_threatening_and_honitsu_hand():
     table = Table()
     table.add_dora_indicator(string_to_136_tile(pin="1"))
 
-    threatening_players = table.player.ai.defence._get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 0
 
     enemy_seat = 1
@@ -117,7 +117,7 @@ def test_is_threatening_and_honitsu_hand():
     table.add_discarded_tile(enemy_seat, string_to_136_tile(man="1"), False)
     table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="1"), False)
 
-    threatening_players = table.player.ai.defence._get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 1
     print(threatening_players[0].threat_reason)
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
@@ -131,7 +131,7 @@ def test_threatening_riichi_player_and_default_hand_cost():
     table.add_called_riichi(enemy_seat)
 
     # non dealer
-    threatening_player = table.player.ai.defence._get_threatening_players()[0]
+    threatening_player = table.player.ai.defence.get_threatening_players()[0]
     assert threatening_player.enemy.seat == enemy_seat
     assert threatening_player.assumed_hand_cost == 3900
 
@@ -149,7 +149,7 @@ def test_threatening_riichi_player_and_not_early_hand_bonus():
         table.add_discarded_tile(enemy_seat, discard, False)
 
     # +1 scale for riichi on 6+ turn
-    threatening_player = table.player.ai.defence._get_threatening_players()[0]
+    threatening_player = table.player.ai.defence.get_threatening_players()[0]
     assert threatening_player.enemy.seat == enemy_seat
     assert threatening_player.assumed_hand_cost == 5200
 
@@ -166,7 +166,7 @@ def test_threatening_riichi_player_and_not_visible_dora():
         table.add_discarded_tile(enemy_seat, discard, False)
 
     # +1 scale for riichi on 6+ turn
-    threatening_player = table.player.ai.defence._get_threatening_players()[0]
+    threatening_player = table.player.ai.defence.get_threatening_players()[0]
     assert threatening_player.enemy.seat == enemy_seat
     assert threatening_player.assumed_hand_cost == 5200
 
@@ -179,7 +179,7 @@ def test_threatening_riichi_player_with_kan():
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.KAN, is_open=False, man="3333"))
 
     # non dealer
-    threatening_player = table.player.ai.defence._get_threatening_players()[0]
+    threatening_player = table.player.ai.defence.get_threatening_players()[0]
     assert threatening_player.enemy.seat == enemy_seat
     assert threatening_player.assumed_hand_cost == 5200
 
@@ -197,7 +197,7 @@ def test_threatening_riichi_player_with_kan_aka():
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.KAN, is_open=False, man="5555"))
 
     # non dealer
-    threatening_player = table.player.ai.defence._get_threatening_players()[0]
+    threatening_player = table.player.ai.defence.get_threatening_players()[0]
     assert threatening_player.enemy.seat == enemy_seat
     assert threatening_player.assumed_hand_cost == 8000
 
@@ -216,7 +216,7 @@ def test_threatening_riichi_player_with_dora_kan():
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.KAN, is_open=False, man="3333"))
 
     # non dealer
-    threatening_player = table.player.ai.defence._get_threatening_players()[0]
+    threatening_player = table.player.ai.defence.get_threatening_players()[0]
     assert threatening_player.enemy.seat == enemy_seat
     assert threatening_player.assumed_hand_cost == 16000
 
@@ -234,7 +234,7 @@ def test_threatening_riichi_player_with_yakuhai_kan():
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.KAN, is_open=False, honors="1111"))
 
     # non dealer
-    threatening_player = table.player.ai.defence._get_threatening_players()[0]
+    threatening_player = table.player.ai.defence.get_threatening_players()[0]
     assert threatening_player.enemy.seat == enemy_seat
     assert threatening_player.assumed_hand_cost == 8000
 
@@ -248,7 +248,7 @@ def test_threatening_riichi_player_with_double_yakuhai_kan():
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.KAN, is_open=False, honors="1111"))
 
     # non dealer
-    threatening_player = table.player.ai.defence._get_threatening_players()[0]
+    threatening_player = table.player.ai.defence.get_threatening_players()[0]
     threatening_player.enemy.dealer_seat = enemy_seat
     assert threatening_player.enemy.seat == enemy_seat
     assert threatening_player.assumed_hand_cost == 18000
@@ -259,7 +259,7 @@ def test_number_of_unverified_suji():
     enemy_seat = 2
     table.add_called_riichi(enemy_seat)
 
-    threatening_player = table.player.ai.defence._get_threatening_players()[0]
+    threatening_player = table.player.ai.defence.get_threatening_players()[0]
     assert threatening_player.number_of_unverified_suji == 18
 
     table.add_discarded_tile(0, string_to_136_tile(sou="4"), True)

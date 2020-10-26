@@ -26,11 +26,16 @@ class HandBuilder:
         """
         discard_options, _ = self.find_discard_options(tiles, closed_hand, melds)
 
-        # FIXME: looks kinda hacky and also we calculate second level ukeire twice for some tiles
+        min_shanten = min([x.shanten for x in discard_options])
+
+        one_shanten_ukeire2_calculated_beforehand = False
+        # FIXME: this is hacky and takes too much time! refactor
         # we need to calculate ukeire2 beforehand for correct danger calculation
-        for discard_option in discard_options:
-            if discard_option.shanten == 1:
-                self.calculate_second_level_ukeire(discard_option, tiles, melds)
+        if self.player.ai.defence.get_threatening_players() and min_shanten != 0:
+            for discard_option in discard_options:
+                if discard_option.shanten == 1:
+                    self.calculate_second_level_ukeire(discard_option, tiles, melds)
+                    one_shanten_ukeire2_calculated_beforehand = True
 
         discard_options, threatening_players = self.player.ai.defence.mark_tiles_danger_for_threats(discard_options)
 
@@ -84,8 +89,10 @@ class HandBuilder:
 
         if first_option.shanten in [1, 2, 3]:
             ukeire_field = "ukeire_second"
-            for x in possible_options:
-                self.calculate_second_level_ukeire(x, tiles, melds)
+            # FIXME: see hack at the start of the function, sometimes we have already calculated it
+            if not (first_option.shanten == 1 and one_shanten_ukeire2_calculated_beforehand):
+                for x in possible_options:
+                    self.calculate_second_level_ukeire(x, tiles, melds)
 
             possible_options = sorted(possible_options, key=lambda x: (-getattr(x, ukeire_field), x.valuation))
             possible_options = self._filter_list_by_percentage(

@@ -130,6 +130,8 @@ class TileDangerHandler:
         return discard_candidates
 
     def calculate_danger_borders(self, discard_options, threatening_player):
+        min_shanten = min([x.shanten for x in discard_options])
+
         for discard_option in discard_options:
             danger_border = DangerBorder.BETAORI
             hand_weighted_cost = 0
@@ -187,7 +189,11 @@ class TileDangerHandler:
                         danger_border = DangerBorder.EXTREMELY_LOW
 
             if discard_option.shanten == 1:
-                hand_weighted_cost = discard_option.average_second_level_cost
+                # FIXME: temporary solution to avoid too much ukeire2 calculation
+                if min_shanten == 0:
+                    hand_weighted_cost = 2000
+                else:
+                    hand_weighted_cost = discard_option.average_second_level_cost
 
                 # never push with zero chance to win
                 # FIXME: we may actually want to push it for tempai in ryukoku, so reconsider
@@ -300,8 +306,15 @@ class TileDangerHandler:
             discard_option.danger.set_danger_border(threatening_player.enemy.seat, danger_border, hand_weighted_cost)
         return discard_options
 
+    def get_threatening_players(self):
+        result = []
+        for player in self.analyzed_enemies:
+            if player.is_threatening:
+                result.append(player)
+        return result
+
     def mark_tiles_danger_for_threats(self, discard_options):
-        threatening_players = self._get_threatening_players()
+        threatening_players = self.get_threatening_players()
         for threatening_player in threatening_players:
             discard_options = self.calculate_tiles_danger(discard_options, threatening_player)
             discard_options = self.calculate_danger_borders(discard_options, threatening_player)
@@ -394,13 +407,6 @@ class TileDangerHandler:
             danger = TileDanger.HONOR_THIRD
 
         return danger
-
-    def _get_threatening_players(self):
-        result = []
-        for player in self.analyzed_enemies:
-            if player.is_threatening:
-                result.append(player)
-        return result
 
     def _update_discard_candidate(self, tile_34, discard_candidates, player_seat, danger):
         for discard_candidate in discard_candidates:

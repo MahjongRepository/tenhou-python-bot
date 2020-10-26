@@ -298,6 +298,11 @@ class TileDangerHandler:
                 else:
                     danger_border = DangerBorder.BETAORI
 
+            # if we could have chosen tempai, pushing 1 or more shanten is usually
+            # a pretty bad idea, so tune down
+            if discard_option.shanten != 0 and min_shanten == 0:
+                danger_border = DangerBorder.tune_down(danger_border, 2)
+
             danger_border = DangerBorder.tune_for_round(self.player, danger_border, shanten)
             # FIXME: suji coef should increase/decrease target danger, not danger border
             if danger_border >= DangerBorder.VERY_LOW:

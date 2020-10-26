@@ -166,6 +166,24 @@ class DangerBorder:
     LOWEST = 80
     BETAORI = 0
 
+    one_step_down_dict = dict(
+        {
+            IGNORE: EXTREME,
+            EXTREME: VERY_HIGH,
+            VERY_HIGH: HIGH,
+            HIGH: UPPER_MEDIUM,
+            UPPER_MEDIUM: MEDIUM,
+            MEDIUM: LOWER_MEDIUM,
+            LOWER_MEDIUM: UPPER_LOW,
+            UPPER_LOW: LOW,
+            LOW: VERY_LOW,
+            VERY_LOW: EXTREMELY_LOW,
+            EXTREMELY_LOW: LOWEST,
+            LOWEST: BETAORI,
+            BETAORI: BETAORI,
+        }
+    )
+
     late_danger_dict = dict(
         {
             IGNORE: IGNORE,
@@ -201,6 +219,13 @@ class DangerBorder:
             BETAORI: BETAORI,
         }
     )
+
+    @staticmethod
+    def tune_down(danger_border, steps):
+        for _ in range(steps):
+            danger_border = DangerBorder.one_step_down_dict[danger_border]
+
+        return danger_border
 
     @staticmethod
     def tune_for_round(player, danger_border, shanten):

@@ -368,13 +368,15 @@ class HandBuilder:
         not_suitable_tiles = self.ai.current_strategy and self.ai.current_strategy.not_suitable_tiles or []
         call_riichi = not self.player.is_open_hand
 
-        # we are going to do manipulations that require player hand to be updated
-        # so we save original tiles here and restore it at the end of the function
+        # we are going to do manipulations that require player hand and discards to be updated
+        # so we save original tiles and discards here and restore it at the end of the function
         player_tiles_original = self.player.tiles.copy()
+        player_discards_original = self.player.discards.copy()
 
         tile_in_hand = discard_option.find_tile_in_hand(self.player.closed_hand)
 
         self.player.tiles = tiles.copy()
+        self.player.discards.append(Tile(tile_in_hand, False))
         self.player.tiles.remove(tile_in_hand)
 
         sum_tiles = 0
@@ -427,8 +429,12 @@ class HandBuilder:
 
                 # if we are going to have a tempai (on our second level) - let's also count its cost
                 if shanten == 0:
+                    # temporary update players hand and discards for calculations
                     next_tile_in_hand = best_one.find_tile_in_hand(self.player.closed_hand)
+                    tile_for_discard = Tile(next_tile_in_hand, False)
                     self.player.tiles.remove(next_tile_in_hand)
+                    self.player.discards.append(tile_for_discard)
+
                     cost_x_ukeire, _ = self._estimate_cost_x_ukeire(best_one, call_riichi=call_riichi)
                     if best_ukeire != 0:
                         average_costs.append((cost_x_ukeire / (best_ukeire * 4)))
@@ -436,7 +442,10 @@ class HandBuilder:
                     if result_has_atodzuke:
                         cost_x_ukeire /= 2
                     sum_cost += cost_x_ukeire
+
+                    # restore original players hand and discard state
                     self.player.tiles.append(next_tile_in_hand)
+                    self.player.discards.remove(tile_for_discard)
 
             self.player.tiles.remove(wait_136)
 
@@ -448,8 +457,9 @@ class HandBuilder:
             else:
                 discard_option.average_second_level_cost = int(sum(average_costs) / len(average_costs))
 
-        # restore original state of player hand
+        # restore original state of player hand and discards
         self.player.tiles = player_tiles_original
+        self.player.discards = player_discards_original
 
     def _decide_if_use_chiitoitsu(self, shanten_with_chiitoitsu, shanten_without_chiitoitsu):
         # if it's late get 1-shanten for chiitoitsu instead of 2-shanten for another hand

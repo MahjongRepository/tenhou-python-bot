@@ -136,22 +136,82 @@ class TileDanger:
     SUJI_COUNT_BOUNDARY = 10
     SUJI_COUNT_MODIFIER = 20
 
-    # acceptable danger bases
-    DANGER_BORDER_EXTREME = 1200
-    DANGER_BORDER_VERY_HIGH = 1000
-    DANGER_BORDER_HIGH = 800
-    DANGER_BORDER_UPPER_MEDIUM = 700
-    DANGER_BORDER_MEDIUM = 600
-    DANGER_BORDER_LOWER_MEDIUM = 500
-    DANGER_BORDER_UPPER_LOW = 400
-    DANGER_BORDER_LOW = 300
-    DANGER_BORDER_VERY_LOW = 200
-    DANGER_BORDER_EXTREMELY_LOW = 120
-    DANGER_BORDER_LOWEST = 80
-    DANGER_BORDER_BETAORI = 0
+    # borders indicating late round
+    ALMOST_LATE_ROUND = 10
+    LATE_ROUND = 12
+    VERY_LATE_ROUND = 16
 
-    DEFAULT_DANGER_BORDER = DANGER_BORDER_BETAORI
-    IGNORE_DANGER = 1000000
+
+class DangerBorder:
+    IGNORE = 1000000
+    EXTREME = 1200
+    VERY_HIGH = 1000
+    HIGH = 800
+    UPPER_MEDIUM = 700
+    MEDIUM = 600
+    LOWER_MEDIUM = 500
+    UPPER_LOW = 400
+    LOW = 300
+    VERY_LOW = 200
+    EXTREMELY_LOW = 120
+    LOWEST = 80
+    BETAORI = 0
+
+    late_danger_dict = dict(
+        {
+            IGNORE: IGNORE,
+            EXTREME: VERY_HIGH,
+            VERY_HIGH: HIGH,
+            HIGH: UPPER_MEDIUM,
+            UPPER_MEDIUM: MEDIUM,
+            MEDIUM: LOWER_MEDIUM,
+            LOWER_MEDIUM: UPPER_LOW,
+            UPPER_LOW: LOW,
+            LOW: VERY_LOW,
+            VERY_LOW: EXTREMELY_LOW,
+            EXTREMELY_LOW: LOWEST,
+            LOWEST: BETAORI,
+            BETAORI: BETAORI,
+        }
+    )
+
+    very_late_danger_dict = dict(
+        {
+            IGNORE: VERY_HIGH,
+            EXTREME: HIGH,
+            VERY_HIGH: UPPER_MEDIUM,
+            HIGH: MEDIUM,
+            UPPER_MEDIUM: LOWER_MEDIUM,
+            MEDIUM: UPPER_LOW,
+            LOWER_MEDIUM: LOW,
+            UPPER_LOW: VERY_LOW,
+            LOW: EXTREMELY_LOW,
+            VERY_LOW: LOWEST,
+            EXTREMELY_LOW: BETAORI,
+            LOWEST: BETAORI,
+            BETAORI: BETAORI,
+        }
+    )
+
+    @staticmethod
+    def tune_for_round(player, danger_border, shanten):
+        danger_border_dict = None
+
+        if shanten == 0 or shanten == 1:
+            if len(player.discards) > TileDanger.LATE_ROUND:
+                danger_border_dict = DangerBorder.late_danger_dict
+            if len(player.discards) > TileDanger.VERY_LATE_ROUND:
+                danger_border_dict = DangerBorder.very_late_danger_dict
+        elif shanten == 2:
+            if len(player.discards) > TileDanger.ALMOST_LATE_ROUND:
+                danger_border = DangerBorder.late_danger_dict
+            if len(player.discards) > TileDanger.LATE_ROUND:
+                return DangerBorder.BETAORI
+
+        if not danger_border_dict:
+            return danger_border
+
+        return danger_border_dict[danger_border]
 
 
 class EnemyDanger:

@@ -3,7 +3,7 @@ from typing import List
 
 from game.ai.defence.enemy_analyzer import EnemyAnalyzer
 from game.ai.discard import DiscardOption
-from game.ai.helpers.defence import TileDanger
+from game.ai.helpers.defence import DangerBorder, TileDanger
 from game.ai.helpers.kabe import Kabe
 from game.ai.helpers.possible_forms import PossibleFormsAnalyzer
 from mahjong.tile import TilesConverter
@@ -131,14 +131,15 @@ class TileDangerHandler:
 
     def calculate_danger_borders(self, discard_options, threatening_player):
         for discard_option in discard_options:
-            danger_border = TileDanger.DEFAULT_DANGER_BORDER
+            danger_border = DangerBorder.BETAORI
             hand_weighted_cost = 0
+            shanten = discard_option.shanten
 
             # never push with zero chance to win
             # FIXME: we may actually want to push it for tempai in ryukoku, so reconsider
             if discard_option.ukeire == 0:
                 discard_option.danger.set_danger_border(
-                    threatening_player.enemy.seat, TileDanger.DANGER_BORDER_BETAORI, hand_weighted_cost
+                    threatening_player.enemy.seat, DangerBorder.BETAORI, hand_weighted_cost
                 )
                 continue
 
@@ -153,37 +154,37 @@ class TileDangerHandler:
                 # good wait
                 if discard_option.ukeire >= 6:
                     if cost_ratio > 100:
-                        danger_border = TileDanger.IGNORE_DANGER
+                        danger_border = DangerBorder.IGNORE
                     elif cost_ratio > 70:
-                        danger_border = TileDanger.DANGER_BORDER_HIGH - threatening_suji_coeff
+                        danger_border = DangerBorder.HIGH
                     elif cost_ratio > 40:
-                        danger_border = TileDanger.DANGER_BORDER_MEDIUM - threatening_suji_coeff
+                        danger_border = DangerBorder.MEDIUM
                     else:
-                        danger_border = TileDanger.DANGER_BORDER_LOW - threatening_suji_coeff
+                        danger_border = DangerBorder.LOW
                 # moderate wait
                 elif discard_option.ukeire >= 4:
                     if cost_ratio >= 200:
-                        danger_border = TileDanger.DANGER_BORDER_EXTREME - threatening_suji_coeff
+                        danger_border = DangerBorder.EXTREME
                     elif cost_ratio >= 100:
-                        danger_border = TileDanger.DANGER_BORDER_HIGH - threatening_suji_coeff
+                        danger_border = DangerBorder.HIGH
                     elif cost_ratio >= 70:
-                        danger_border = TileDanger.DANGER_BORDER_UPPER_MEDIUM - threatening_suji_coeff
+                        danger_border = DangerBorder.UPPER_MEDIUM
                     elif cost_ratio >= 40:
-                        danger_border = TileDanger.DANGER_BORDER_UPPER_LOW - threatening_suji_coeff
+                        danger_border = DangerBorder.UPPER_LOW
                     else:
-                        danger_border = TileDanger.DANGER_BORDER_VERY_LOW
+                        danger_border = DangerBorder.VERY_LOW
                 # weak wait
                 else:
                     if cost_ratio >= 200:
-                        danger_border = TileDanger.DANGER_BORDER_VERY_HIGH - threatening_suji_coeff
+                        danger_border = DangerBorder.VERY_HIGH
                     elif cost_ratio >= 100:
-                        danger_border = TileDanger.DANGER_BORDER_UPPER_MEDIUM - threatening_suji_coeff
+                        danger_border = DangerBorder.UPPER_MEDIUM
                     elif cost_ratio >= 70:
-                        danger_border = TileDanger.DANGER_BORDER_MEDIUM - threatening_suji_coeff
+                        danger_border = DangerBorder.MEDIUM
                     elif cost_ratio >= 40:
-                        danger_border = TileDanger.DANGER_BORDER_VERY_LOW - threatening_suji_coeff
+                        danger_border = DangerBorder.VERY_LOW
                     else:
-                        danger_border = TileDanger.DANGER_BORDER_EXTREMELY_LOW
+                        danger_border = DangerBorder.EXTREMELY_LOW
 
             if discard_option.shanten == 1:
                 hand_weighted_cost = discard_option.average_second_level_cost
@@ -192,7 +193,7 @@ class TileDangerHandler:
                 # FIXME: we may actually want to push it for tempai in ryukoku, so reconsider
                 if not hand_weighted_cost:
                     discard_option.danger.set_danger_border(
-                        threatening_player.enemy.seat, TileDanger.DANGER_BORDER_BETAORI, hand_weighted_cost
+                        threatening_player.enemy.seat, DangerBorder.BETAORI, hand_weighted_cost
                     )
                     continue
 
@@ -202,51 +203,51 @@ class TileDangerHandler:
                 # lots of ukeire
                 if discard_option.ukeire >= 28:
                     if cost_ratio >= 200:
-                        danger_border = TileDanger.DANGER_BORDER_EXTREME - threatening_suji_coeff
+                        danger_border = DangerBorder.EXTREME
                     elif cost_ratio >= 100:
-                        danger_border = TileDanger.DANGER_BORDER_VERY_HIGH - threatening_suji_coeff
+                        danger_border = DangerBorder.VERY_HIGH
                     elif cost_ratio >= 50:
-                        danger_border = TileDanger.DANGER_BORDER_HIGH - threatening_suji_coeff
+                        danger_border = DangerBorder.HIGH
                     else:
-                        danger_border = TileDanger.DANGER_BORDER_LOWER_MEDIUM - threatening_suji_coeff
+                        danger_border = DangerBorder.LOWER_MEDIUM
                 # very good ukeire
                 elif discard_option.ukeire >= 20:
                     if cost_ratio >= 200:
-                        danger_border = TileDanger.DANGER_BORDER_EXTREME - threatening_suji_coeff
+                        danger_border = DangerBorder.EXTREME
                     elif cost_ratio >= 100:
-                        danger_border = TileDanger.DANGER_BORDER_VERY_HIGH - threatening_suji_coeff
+                        danger_border = DangerBorder.VERY_HIGH
                     elif cost_ratio >= 50:
-                        danger_border = TileDanger.DANGER_BORDER_UPPER_MEDIUM - threatening_suji_coeff
+                        danger_border = DangerBorder.UPPER_MEDIUM
                     else:
-                        danger_border = TileDanger.DANGER_BORDER_UPPER_LOW - threatening_suji_coeff
+                        danger_border = DangerBorder.UPPER_LOW
                 # good ukeire
                 elif discard_option.ukeire >= 12:
                     if cost_ratio >= 200:
-                        danger_border = TileDanger.DANGER_BORDER_HIGH - threatening_suji_coeff
+                        danger_border = DangerBorder.HIGH
                     elif cost_ratio >= 100:
-                        danger_border = TileDanger.DANGER_BORDER_UPPER_MEDIUM - threatening_suji_coeff
+                        danger_border = DangerBorder.UPPER_MEDIUM
                     elif cost_ratio >= 50:
-                        danger_border = TileDanger.DANGER_BORDER_LOWER_MEDIUM - threatening_suji_coeff
+                        danger_border = DangerBorder.LOWER_MEDIUM
                     else:
-                        danger_border = TileDanger.DANGER_BORDER_LOW - threatening_suji_coeff
+                        danger_border = DangerBorder.LOW
                 # mediocre ukeire
                 elif discard_option.ukeire >= 7:
                     if cost_ratio >= 200:
-                        danger_border = TileDanger.DANGER_BORDER_UPPER_MEDIUM - threatening_suji_coeff
+                        danger_border = DangerBorder.UPPER_MEDIUM
                     elif cost_ratio >= 100:
-                        danger_border = TileDanger.DANGER_BORDER_MEDIUM - threatening_suji_coeff
+                        danger_border = DangerBorder.MEDIUM
                     elif cost_ratio >= 50:
-                        danger_border = TileDanger.DANGER_BORDER_LOWER_MEDIUM - threatening_suji_coeff
+                        danger_border = DangerBorder.LOWER_MEDIUM
                     else:
-                        danger_border = TileDanger.DANGER_BORDER_VERY_LOW
+                        danger_border = DangerBorder.VERY_LOW
                 # very low ukeire
                 else:
                     if cost_ratio >= 200:
-                        danger_border = TileDanger.DANGER_BORDER_MEDIUM - threatening_suji_coeff
+                        danger_border = DangerBorder.MEDIUM
                     elif cost_ratio >= 100:
-                        danger_border = TileDanger.DANGER_BORDER_UPPER_LOW - threatening_suji_coeff
+                        danger_border = DangerBorder.UPPER_LOW
                     else:
-                        danger_border = TileDanger.DANGER_BORDER_EXTREMELY_LOW
+                        danger_border = DangerBorder.EXTREMELY_LOW
 
             if discard_option.shanten == 2:
                 if self.player.is_dealer:
@@ -274,24 +275,27 @@ class TileDangerHandler:
                 # lots of ukeire
                 if discard_option.ukeire >= 40:
                     if cost_ratio >= 200:
-                        danger_border = TileDanger.DANGER_BORDER_MEDIUM - threatening_suji_coeff
+                        danger_border = DangerBorder.MEDIUM
                     elif cost_ratio >= 100:
-                        danger_border = TileDanger.DANGER_BORDER_LOW - threatening_suji_coeff
+                        danger_border = DangerBorder.LOW
                     else:
-                        danger_border = TileDanger.DANGER_BORDER_EXTREMELY_LOW
+                        danger_border = DangerBorder.EXTREMELY_LOW
                 # very good ukeire
                 elif discard_option.ukeire >= 20:
                     if cost_ratio >= 200:
-                        danger_border = TileDanger.DANGER_BORDER_LOWER_MEDIUM - threatening_suji_coeff
+                        danger_border = DangerBorder.LOWER_MEDIUM
                     elif cost_ratio >= 100:
-                        danger_border = TileDanger.DANGER_BORDER_VERY_LOW
+                        danger_border = DangerBorder.VERY_LOW
                     else:
-                        danger_border = TileDanger.DANGER_BORDER_EXTREMELY_LOW
+                        danger_border = DangerBorder.BETAORI
                 # mediocre ukeire or worse
                 else:
-                    danger_border = TileDanger.DANGER_BORDER_EXTREMELY_LOW
+                    danger_border = DangerBorder.BETAORI
 
-            # TODO: tune down danger borders in case this is a late round of the current hand
+            danger_border = DangerBorder.tune_for_round(self.player, danger_border, shanten)
+            # FIXME: suji coef should increase/decrease target danger, not danger border
+            if danger_border >= DangerBorder.VERY_LOW:
+                danger_border -= threatening_suji_coeff
 
             discard_option.danger.set_danger_border(threatening_player.enemy.seat, danger_border, hand_weighted_cost)
         return discard_options

@@ -452,8 +452,14 @@ class HandBuilder:
         self.player.tiles = player_tiles_original
 
     def _decide_if_use_chiitoitsu(self, shanten_with_chiitoitsu, shanten_without_chiitoitsu):
+        # if it's late get 1-shanten for chiitoitsu instead of 2-shanten for another hand
+        if len(self.player.discards) <= 10:
+            border_shanten_without_chiitoitsu = 3
+        else:
+            border_shanten_without_chiitoitsu = 2
+
         if (shanten_with_chiitoitsu == 0 and shanten_without_chiitoitsu >= 1) or (
-            shanten_with_chiitoitsu == 1 and shanten_without_chiitoitsu >= 3
+            shanten_with_chiitoitsu == 1 and shanten_without_chiitoitsu >= border_shanten_without_chiitoitsu
         ):
             shanten = shanten_with_chiitoitsu
             use_chiitoitsu = True

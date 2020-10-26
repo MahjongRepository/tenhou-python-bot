@@ -228,24 +228,16 @@ class HandBuilder:
             tiles_34, open_sets_34, chiitoitsu=False
         )
 
-        if (shanten_with_chiitoitsu == 0 and shanten_without_chiitoitsu >= 1) or (
-            shanten_with_chiitoitsu == 1 and shanten_without_chiitoitsu >= 3
-        ):
-            shanten = shanten_with_chiitoitsu
-            use_chiitoitsu = True
-        else:
-            shanten = shanten_without_chiitoitsu
-            use_chiitoitsu = False
+        return self._decide_if_use_chiitoitsu(shanten_with_chiitoitsu, shanten_without_chiitoitsu)
 
-        return shanten, use_chiitoitsu
-
-    def calculate_waits(self, tiles_34, open_sets_34=None):
+    def calculate_waits(self, tiles_34, open_sets_34=None, use_chiitoitsu=False):
         """
         :param tiles_34: array of tiles in 34 formant, 13 of them (this is important)
         :param open_sets_34: array of array with tiles in 34 format
+        :param use_chiitoitsu: if we should consider chiitoitsu hand or not
         :return: array of waits in 34 format and number of shanten
         """
-        shanten, use_chiitoitsu = self.calculate_shanten(tiles_34, open_sets_34)
+        shanten = self.ai.shanten_calculator.calculate_shanten(tiles_34, open_sets_34, chiitoitsu=use_chiitoitsu)
 
         waiting = []
         for j in range(0, 34):
@@ -289,13 +281,32 @@ class HandBuilder:
         closed_tiles_34 = TilesConverter.to_34_array(closed_hand)
         is_agari = self.ai.agari.is_agari(tiles_34, self.player.meld_34_tiles)
 
+        # we decide beforehand if we need to consider chiitoitsu for all of our possible discards
+        min_shanten_with_chiitoitsu = 7
+        min_shanten_without_chiitoitsu = 7
+
+        for hand_tile in range(0, 34):
+            if not closed_tiles_34[hand_tile]:
+                continue
+
+            shanten, use_chiitoitsu = self.calculate_shanten(tiles_34, open_sets_34)
+            if use_chiitoitsu and shanten < min_shanten_with_chiitoitsu:
+                min_shanten_with_chiitoitsu = shanten
+            elif not use_chiitoitsu and shanten < min_shanten_without_chiitoitsu:
+                min_shanten_without_chiitoitsu = shanten
+
+        min_shanten, use_chiitoitsu = self._decide_if_use_chiitoitsu(
+            min_shanten_with_chiitoitsu, min_shanten_without_chiitoitsu
+        )
+
         results = []
         for hand_tile in range(0, 34):
             if not closed_tiles_34[hand_tile]:
                 continue
 
             tiles_34[hand_tile] -= 1
-            waiting, shanten = self.calculate_waits(tiles_34, open_sets_34)
+            waiting, shanten = self.calculate_waits(tiles_34, open_sets_34, use_chiitoitsu)
+            assert shanten >= min_shanten
             tiles_34[hand_tile] += 1
 
             if waiting:
@@ -314,7 +325,8 @@ class HandBuilder:
         if is_agari:
             shanten = Shanten.AGARI_STATE
         else:
-            shanten, _ = self.calculate_shanten(tiles_34, open_sets_34)
+            shanten = self.ai.shanten_calculator.calculate_shanten(tiles_34, open_sets_34, chiitoitsu=use_chiitoitsu)
+            assert shanten >= min_shanten
 
         return results, shanten
 
@@ -438,6 +450,18 @@ class HandBuilder:
 
         # restore original state of player hand
         self.player.tiles = player_tiles_original
+
+    def _decide_if_use_chiitoitsu(self, shanten_with_chiitoitsu, shanten_without_chiitoitsu):
+        if (shanten_with_chiitoitsu == 0 and shanten_without_chiitoitsu >= 1) or (
+            shanten_with_chiitoitsu == 1 and shanten_without_chiitoitsu >= 3
+        ):
+            shanten = shanten_with_chiitoitsu
+            use_chiitoitsu = True
+        else:
+            shanten = shanten_without_chiitoitsu
+            use_chiitoitsu = False
+
+        return shanten, use_chiitoitsu
 
     def _chose_first_option_or_safe_tiles(self, chosen_candidates, all_discard_options, after_meld, sorting_lambda):
         # it looks like everything is fine

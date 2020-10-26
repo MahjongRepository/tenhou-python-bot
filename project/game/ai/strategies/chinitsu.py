@@ -80,8 +80,12 @@ class ChinitsuStrategy(BaseStrategy):
         if suit["count"] == 9 and self.player.ai.shanten == 1:
             return False
 
-        # only 10 tiles by 8th turn is too slow, considering alternative
+        # only 10 tiles by 9th turn is too slow, considering alternative
         if suit["count"] == 10 and self.player.ai.shanten == 1 and self.player.round_step > 8:
+            return False
+
+        # only 11 tiles or less by 12th turn is too slow, considering alternative
+        if suit["count"] <= 11 and self.player.round_step > 11:
             return False
 
         # if we have a pon of honors, let's not go for chinitsu

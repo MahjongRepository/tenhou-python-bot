@@ -51,9 +51,12 @@ class HonitsuStrategy(BaseStrategy):
         self._calculate_not_suitable_tiles_cnt(tiles_34, suit["function"])
         self._initialize_honitsu_dora_count(tiles_136, suit)
 
-        # let's not go for honitsu if we have 5 or more non-isolated
-        # tiles in other suits
+        # let's not go for honitsu if we have 5 or more tiles in other suits
         if self.tiles_count_other_suits >= 5:
+            return False
+
+        # 12th turn is too late and we still have too many tiles in other suits
+        if self.tiles_count_other_suits >= 3 and self.player.round_step > 11:
             return False
 
         # let's not go for honitsu if we have 2 or more non-isolated doras

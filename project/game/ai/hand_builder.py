@@ -493,7 +493,7 @@ class HandBuilder:
 
             options_to_chose = sorted(
                 [x for x in chosen_candidates if x.ukeire >= x.ukeire - ukeire_border],
-                key=lambda x: (x.danger.get_max_danger(),) + sorting_lambda(x),
+                key=lambda x: (x.danger.get_sum_danger(),) + sorting_lambda(x),
             )
 
             DecisionsLogger.debug(log.DISCARD_OPTIONS, "All discard candidates", options_to_chose)
@@ -505,10 +505,10 @@ class HandBuilder:
 
         # we can't discard effective tile from the hand, let's fold
         DecisionsLogger.debug(log.DISCARD_SAFE_TILE, "There are only dangerous tiles. Discard safest tile.")
-        return sorted(all_discard_options, key=lambda x: (x.danger.get_max_danger(),) + sorting_lambda(x))[0]
+        return sorted(all_discard_options, key=lambda x: (x.danger.get_sum_danger(),) + sorting_lambda(x))[0]
 
     def _choose_best_tanki_wait(self, discard_desc):
-        discard_desc = sorted(discard_desc, key=lambda k: (k["hand_cost"], -k["max_danger"]), reverse=True)
+        discard_desc = sorted(discard_desc, key=lambda k: (k["hand_cost"], -k["sum_danger"]), reverse=True)
 
         # we are always choosing between exactly two tanki waits
         assert len(discard_desc) == 2
@@ -543,7 +543,7 @@ class HandBuilder:
             if best_ukeire == 2 or best_ukeire == 3:
                 best_discard_desc = sorted(
                     best_discard_desc,
-                    key=lambda k: (TankiWait.tanki_wait_same_ukeire_2_3_prio[k["tanki_type"]], -k["max_danger"]),
+                    key=lambda k: (TankiWait.tanki_wait_same_ukeire_2_3_prio[k["tanki_type"]], -k["sum_danger"]),
                     reverse=True,
                 )
                 return best_discard_desc[0]["discard_option"]
@@ -552,7 +552,7 @@ class HandBuilder:
             if best_ukeire == 1:
                 best_discard_desc = sorted(
                     best_discard_desc,
-                    key=lambda k: (TankiWait.tanki_wait_same_ukeire_1_prio[k["tanki_type"]], -k["max_danger"]),
+                    key=lambda k: (TankiWait.tanki_wait_same_ukeire_1_prio[k["tanki_type"]], -k["sum_danger"]),
                     reverse=True,
                 )
                 return best_discard_desc[0]["discard_option"]
@@ -673,6 +673,7 @@ class HandBuilder:
                         "is_tanki": is_tanki,
                         "tanki_type": tanki_type,
                         "max_danger": discard_option.danger.get_max_danger(),
+                        "sum_danger": discard_option.danger.get_sum_danger(),
                     }
                 )
             else:
@@ -687,6 +688,7 @@ class HandBuilder:
                         "is_tanki": False,
                         "tanki_type": None,
                         "max_danger": discard_option.danger.get_max_danger(),
+                        "sum_danger": discard_option.danger.get_sum_danger(),
                     }
                 )
 
@@ -696,12 +698,12 @@ class HandBuilder:
             self.player.discards.remove(discarded_tile)
 
         discard_desc = sorted(
-            discard_desc, key=lambda k: (k["cost_x_ukeire"], not k["is_furiten"], -k["max_danger"]), reverse=True
+            discard_desc, key=lambda k: (k["cost_x_ukeire"], not k["is_furiten"], -k["sum_danger"]), reverse=True
         )
 
         # if we don't have any good options, e.g. all our possible waits ara karaten
         if discard_desc[0]["cost_x_ukeire"] == 0:
-            return sorted(discard_options, key=lambda x: (-x.danger.get_max_danger(), x.valuation))[0]
+            return sorted(discard_options, key=lambda x: (-x.danger.get_sum_danger(), x.valuation))[0]
 
         num_tanki_waits = len([x for x in discard_desc if x["is_tanki"]])
 
@@ -710,7 +712,7 @@ class HandBuilder:
             return self._choose_best_tanki_wait(discard_desc)
 
         best_discard_desc = [x for x in discard_desc if x["cost_x_ukeire"] == discard_desc[0]["cost_x_ukeire"]]
-        best_discard_desc = sorted(best_discard_desc, key=lambda k: (-k["max_danger"]))
+        best_discard_desc = sorted(best_discard_desc, key=lambda k: (-k["sum_danger"]))
 
         # we only have one best option based on ukeire and cost, nothing more to do here
         if len(best_discard_desc) == 1:

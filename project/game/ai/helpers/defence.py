@@ -279,6 +279,15 @@ class TileDangerHandler:
             ]
         )
 
+    def get_sum_danger(self):
+        return sum(
+            [
+                self.get_total_danger_for_player(1),
+                self.get_total_danger_for_player(2),
+                self.get_total_danger_for_player(3),
+            ]
+        )
+
     def get_min_danger_border(self):
         borders = []
         if self.get_danger_border(1).get("border"):

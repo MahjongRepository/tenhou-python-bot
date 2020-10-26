@@ -16,7 +16,7 @@ class Statistics:
             return False
         url = "{0}/api/v1/tenhou/game/start/".format(url)
         data = {"id": self.game_id, "username": self.username}
-        result = requests.post(url, data, headers={"Token": settings.STAT_TOKEN}, timeout=2)
+        result = requests.post(url, data, headers={"Token": settings.STAT_TOKEN}, timeout=5)
         return result.status_code == 200 and result.json()["success"]
 
     def send_end_game(self):
@@ -25,5 +25,5 @@ class Statistics:
             return False
         url = "{0}/api/v1/tenhou/game/finish/".format(url)
         data = {"id": self.game_id, "username": self.username}
-        result = requests.post(url, data, headers={"Token": settings.STAT_TOKEN}, timeout=2)
+        result = requests.post(url, data, headers={"Token": settings.STAT_TOKEN}, timeout=5)
         return result.status_code == 200 and result.json()["success"]

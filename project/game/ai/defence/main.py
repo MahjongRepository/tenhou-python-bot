@@ -325,9 +325,9 @@ class TileDangerHandler:
         have_strong_kabe = [x for x in kabe_tiles if tile_34 == x["tile"] and x["type"] == Kabe.STRONG_KABE]
         if have_strong_kabe:
             if number_of_revealed_tiles == 1:
-                return TileDanger.SHONPAI_KABE
+                return TileDanger.SHONPAI_KABE_STRONG
             else:
-                return TileDanger.NON_SHONPAI_KABE
+                return TileDanger.NON_SHONPAI_KABE_STRONG
 
         if tile_34 in suji_tiles:
             if number_of_revealed_tiles == 1:
@@ -343,9 +343,16 @@ class TileDangerHandler:
         have_strong_kabe = [x for x in kabe_tiles if tile_34 == x["tile"] and x["type"] == Kabe.STRONG_KABE]
         if have_strong_kabe:
             if number_of_revealed_tiles == 1:
-                return TileDanger.SHONPAI_KABE
+                return TileDanger.SHONPAI_KABE_STRONG
             else:
-                return TileDanger.NON_SHONPAI_KABE
+                return TileDanger.NON_SHONPAI_KABE_STRONG
+
+        have_weak_kabe = [x for x in kabe_tiles if tile_34 == x["tile"] and x["type"] == Kabe.WEAK_KABE]
+        if have_weak_kabe:
+            if number_of_revealed_tiles == 1:
+                return TileDanger.SHONPAI_KABE_WEAK
+            else:
+                return TileDanger.NON_SHONPAI_KABE_WEAK
 
         # only consider suji if there is no kabe
         have_suji = [x for x in suji_tiles if tile_34 == x]

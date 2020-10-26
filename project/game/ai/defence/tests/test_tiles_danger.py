@@ -209,12 +209,12 @@ def test_tile_danger_and_terminal_kabe_tiles():
     player.draw_tile(tile)
 
     # 1 sou is shonpai
-    _assert_discard(player, enemy_seat, TileDanger.SHONPAI_KABE, sou="1")
+    _assert_discard(player, enemy_seat, TileDanger.SHONPAI_KABE_STRONG, sou="1")
 
     player.discard_tile()
     player.draw_tile(tile)
     # 1 sou is not shonpai anymore
-    _assert_discard(player, enemy_seat, TileDanger.NON_SHONPAI_KABE, sou="1")
+    _assert_discard(player, enemy_seat, TileDanger.NON_SHONPAI_KABE_STRONG, sou="1")
 
 
 def test_tile_danger_and_2_8_kabe_tiles():
@@ -224,18 +224,39 @@ def test_tile_danger_and_2_8_kabe_tiles():
     )
     player = table.player
 
-    tiles = string_to_136_array(man="11134", pin="1156", honors="2555")
+    tiles = string_to_136_array(sou="123789", pin="116", honors="2555")
     tile = string_to_136_tile(sou="5")
     player.init_hand(tiles)
     player.draw_tile(tile)
 
-    # 1 sou is shonpai
-    _assert_discard(player, enemy_seat, TileDanger.SHONPAI_KABE, sou="5")
+    # 5 sou is shonpai
+    _assert_discard(player, enemy_seat, TileDanger.SHONPAI_KABE_STRONG, sou="5")
 
     player.discard_tile()
     player.draw_tile(tile)
-    # 1 sou is not shonpai anymore
-    _assert_discard(player, enemy_seat, TileDanger.NON_SHONPAI_KABE, sou="5")
+    # 5 sou is not shonpai anymore
+    _assert_discard(player, enemy_seat, TileDanger.NON_SHONPAI_KABE_STRONG, sou="5")
+
+    # check all weak kabe
+    _assert_discard(player, enemy_seat, TileDanger.SHONPAI_KABE_WEAK, sou="2")
+    _assert_discard(player, enemy_seat, TileDanger.SHONPAI_KABE_WEAK, sou="3")
+    _assert_discard(player, enemy_seat, TileDanger.SHONPAI_KABE_WEAK, sou="7")
+    _assert_discard(player, enemy_seat, TileDanger.SHONPAI_KABE_WEAK, sou="8")
+
+    player.discard_tile()
+    player.draw_tile(string_to_136_tile(sou="2"))
+    _assert_discard(player, enemy_seat, TileDanger.NON_SHONPAI_KABE_WEAK, sou="2")
+
+    player.discard_tile()
+    player.draw_tile(string_to_136_tile(sou="3"))
+    _assert_discard(player, enemy_seat, TileDanger.NON_SHONPAI_KABE_WEAK, sou="3")
+
+    player.discard_tile()
+    player.draw_tile(string_to_136_tile(sou="7"))
+    _assert_discard(player, enemy_seat, TileDanger.NON_SHONPAI_KABE_WEAK, sou="7")
+    player.discard_tile()
+    player.draw_tile(string_to_136_tile(sou="8"))
+    _assert_discard(player, enemy_seat, TileDanger.NON_SHONPAI_KABE_WEAK, sou="8")
 
 
 def test_tile_danger_and_2_8_suji_tiles():

@@ -42,13 +42,22 @@ class TileDanger:
     }
 
     # kabe tiles
-    NON_SHONPAI_KABE = {
+    NON_SHONPAI_KABE_STRONG = {
         "value": 40,
         "description": "Non-shonpai strong kabe tile",
     }
-    SHONPAI_KABE = {
+    SHONPAI_KABE_STRONG = {
         "value": 200,
-        "description": "Shonpai string kabe tile",
+        "description": "Shonpai strong kabe tile",
+    }
+    NON_SHONPAI_KABE_WEAK = {
+        "value": 80,
+        "description": "Non-shonpai weak kabe tile",
+    }
+    # weak shonpai kabe is actually less suspicious then a strong one
+    SHONPAI_KABE_WEAK = {
+        "value": 120,
+        "description": "Shonpai weak kabe tile",
     }
 
     # suji tiles

@@ -7,7 +7,7 @@ from game.ai.helpers.defence import DangerBorder, TileDanger
 from game.ai.helpers.kabe import Kabe
 from game.ai.helpers.possible_forms import PossibleFormsAnalyzer
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_aka_dora, is_honor, is_terminal, plus_dora
+from mahjong.utils import is_aka_dora, is_honor, is_terminal, plus_dora, simplify
 
 
 class TileDangerHandler:
@@ -74,7 +74,7 @@ class TileDangerHandler:
             # 2-8 tiles
             else:
                 danger = self._process_danger_for_2_8_tiles_suji_and_kabe(
-                    tile_34, number_of_revealed_tiles, suji_tiles, kabe_tiles
+                    enemy_analyzer, tile_34, number_of_revealed_tiles, suji_tiles, kabe_tiles
                 )
 
             if danger:
@@ -337,7 +337,9 @@ class TileDangerHandler:
 
         return None
 
-    def _process_danger_for_2_8_tiles_suji_and_kabe(self, tile_34, number_of_revealed_tiles, suji_tiles, kabe_tiles):
+    def _process_danger_for_2_8_tiles_suji_and_kabe(
+        self, enemy_analyzer, tile_34, number_of_revealed_tiles, suji_tiles, kabe_tiles
+    ):
         have_strong_kabe = [x for x in kabe_tiles if tile_34 == x["tile"] and x["type"] == Kabe.STRONG_KABE]
         if have_strong_kabe:
             if number_of_revealed_tiles == 1:
@@ -345,9 +347,18 @@ class TileDangerHandler:
             else:
                 return TileDanger.NON_SHONPAI_KABE
 
-        # TODO: first check if danger reason is riichi and if riichi was declared on suji tile (for 2378)
+        # only consider suji if there is no kabe
         have_suji = [x for x in suji_tiles if tile_34 == x]
         if have_suji:
+            if enemy_analyzer.enemy.riichi_tile_136 is not None:
+                enemy_riichi_tile_34 = enemy_analyzer.enemy.riichi_tile_136 // 4
+                riichi_on_suji = [x for x in suji_tiles if enemy_riichi_tile_34 == x]
+
+                # if it's 2378, then check if riichi was on suji tile
+                if simplify(tile_34) <= 2 or simplify(tile_34) >= 6:
+                    if 3 <= simplify(enemy_riichi_tile_34) <= 5 and riichi_on_suji:
+                        return TileDanger.SUJI_2378_ON_RIICHI
+
             return TileDanger.SUJI
 
         return None

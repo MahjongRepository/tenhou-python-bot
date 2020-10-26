@@ -10,7 +10,7 @@ from utils.test_helpers import find_discard_option, make_meld, string_to_136_arr
 
 def test_tile_danger_genbutsu():
     enemy_seat = 1
-    table = _create_table(enemy_seat, discards=[])
+    table = _create_table(enemy_seat, discards=[], riichi_tile=string_to_136_tile(honors="7"))
     table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="6"), False)
     player = table.player
 
@@ -24,7 +24,9 @@ def test_tile_danger_genbutsu():
 
 def test_tile_danger_and_impossible_wait_fourth_honor():
     enemy_seat = 1
-    table = _create_table(enemy_seat, discards=string_to_136_array(honors="111"))
+    table = _create_table(
+        enemy_seat, discards=string_to_136_array(honors="111"), riichi_tile=string_to_136_tile(honors="7")
+    )
     player = table.player
 
     tiles = string_to_136_array(man="34678", pin="2356", honors="1555")
@@ -37,7 +39,9 @@ def test_tile_danger_and_impossible_wait_fourth_honor():
 
 def test_tile_danger_and_impossible_wait_latest_tile_behind_kabe():
     enemy_seat = 1
-    table = _create_table(enemy_seat, discards=string_to_136_array(sou="1112222"))
+    table = _create_table(
+        enemy_seat, discards=string_to_136_array(sou="1112222"), riichi_tile=string_to_136_tile(honors="7")
+    )
     player = table.player
 
     tiles = string_to_136_array(man="34678", pin="2356", honors="1555")
@@ -50,7 +54,9 @@ def test_tile_danger_and_impossible_wait_latest_tile_behind_kabe():
 
 def test_tile_danger_and_honor_third():
     enemy_seat = 1
-    table = _create_table(enemy_seat, discards=string_to_136_array(honors="11"))
+    table = _create_table(
+        enemy_seat, discards=string_to_136_array(honors="11"), riichi_tile=string_to_136_tile(honors="7")
+    )
     player = table.player
 
     tiles = string_to_136_array(man="11134", pin="1156", honors="1555")
@@ -64,7 +70,9 @@ def test_tile_danger_and_honor_third():
 
 def test_tile_danger_and_non_yakuhai_honor_second():
     enemy_seat = 1
-    table = _create_table(enemy_seat, discards=string_to_136_array(honors="4"))
+    table = _create_table(
+        enemy_seat, discards=string_to_136_array(honors="4"), riichi_tile=string_to_136_tile(honors="7")
+    )
     player = table.player
 
     tiles = string_to_136_array(man="11134", pin="1156", honors="4555")
@@ -77,7 +85,7 @@ def test_tile_danger_and_non_yakuhai_honor_second():
 
 def test_tile_danger_and_non_yakuhai_honor_shonpai():
     enemy_seat = 1
-    table = _create_table(enemy_seat, discards=[])
+    table = _create_table(enemy_seat, discards=[], riichi_tile=string_to_136_tile(honors="7"))
     player = table.player
 
     tiles = string_to_136_array(man="11134", pin="1156", honors="4555")
@@ -90,7 +98,9 @@ def test_tile_danger_and_non_yakuhai_honor_shonpai():
 
 def test_tile_danger_and_forms_bonus():
     enemy_seat = 1
-    table = _create_table(enemy_seat, discards=string_to_136_array(man="9999"))
+    table = _create_table(
+        enemy_seat, discards=string_to_136_array(man="9999"), riichi_tile=string_to_136_tile(honors="7")
+    )
     player = table.player
 
     tiles = string_to_136_array(man="11134", pin="1156", honors="4555")
@@ -109,7 +119,9 @@ def test_tile_danger_and_forms_bonus():
 
 def test_tile_danger_and_yakuhai_honor_second():
     enemy_seat = 1
-    table = _create_table(enemy_seat, discards=string_to_136_array(honors="6"))
+    table = _create_table(
+        enemy_seat, discards=string_to_136_array(honors="6"), riichi_tile=string_to_136_tile(honors="7")
+    )
     player = table.player
 
     tiles = string_to_136_array(man="11134", pin="1156", honors="5556")
@@ -122,7 +134,9 @@ def test_tile_danger_and_yakuhai_honor_second():
 
 def test_tile_danger_and_double_yakuhai_honor_second():
     enemy_seat = 1
-    table = _create_table(enemy_seat, discards=string_to_136_array(honors="2"))
+    table = _create_table(
+        enemy_seat, discards=string_to_136_array(honors="2"), riichi_tile=string_to_136_tile(honors="7")
+    )
     table.round_wind_number = 5
     player = table.player
 
@@ -136,7 +150,7 @@ def test_tile_danger_and_double_yakuhai_honor_second():
 
 def test_tile_danger_and_yakuhai_honor_shonpai():
     enemy_seat = 1
-    table = _create_table(enemy_seat, discards=[])
+    table = _create_table(enemy_seat, discards=[], riichi_tile=string_to_136_tile(honors="7"))
     player = table.player
 
     tiles = string_to_136_array(man="11134", pin="1156", honors="5556")
@@ -149,7 +163,7 @@ def test_tile_danger_and_yakuhai_honor_shonpai():
 
 def test_tile_danger_and_double_yakuhai_honor_shonpai():
     enemy_seat = 1
-    table = _create_table(enemy_seat, discards=[])
+    table = _create_table(enemy_seat, discards=[], riichi_tile=string_to_136_tile(honors="7"))
     table.round_wind_number = 5
     player = table.player
 
@@ -163,7 +177,7 @@ def test_tile_danger_and_double_yakuhai_honor_shonpai():
 
 def test_tile_danger_and_terminal_suji_tiles():
     enemy_seat = 1
-    table = _create_table(enemy_seat, discards=[])
+    table = _create_table(enemy_seat, discards=[], riichi_tile=string_to_136_tile(honors="7"))
     table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="6"), False)
     player = table.player
 
@@ -184,7 +198,9 @@ def test_tile_danger_and_terminal_suji_tiles():
 
 def test_tile_danger_and_terminal_kabe_tiles():
     enemy_seat = 1
-    table = _create_table(enemy_seat, discards=string_to_136_array(sou="2222"))
+    table = _create_table(
+        enemy_seat, discards=string_to_136_array(sou="2222"), riichi_tile=string_to_136_tile(honors="7")
+    )
     player = table.player
 
     tiles = string_to_136_array(man="11134", pin="1156", honors="2555")
@@ -203,7 +219,9 @@ def test_tile_danger_and_terminal_kabe_tiles():
 
 def test_tile_danger_and_2_8_kabe_tiles():
     enemy_seat = 1
-    table = _create_table(enemy_seat, discards=string_to_136_array(sou="44446666"))
+    table = _create_table(
+        enemy_seat, discards=string_to_136_array(sou="44446666"), riichi_tile=string_to_136_tile(honors="7")
+    )
     player = table.player
 
     tiles = string_to_136_array(man="11134", pin="1156", honors="2555")
@@ -222,7 +240,7 @@ def test_tile_danger_and_2_8_kabe_tiles():
 
 def test_tile_danger_and_2_8_suji_tiles():
     enemy_seat = 1
-    table = _create_table(enemy_seat, discards=[])
+    table = _create_table(enemy_seat, discards=[], riichi_tile=string_to_136_tile(honors="7"))
     player = table.player
 
     table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="4"), False)
@@ -249,9 +267,50 @@ def test_tile_danger_and_2_8_suji_tiles():
     _assert_discard(player, enemy_seat, TileDanger.SUJI, man="6")
 
 
+def test_tile_danger_and_suji_7_on_riichi():
+    enemy_seat = 1
+    table = _create_table(enemy_seat, discards=[], riichi_tile=string_to_136_tile(sou="4"))
+    player = table.player
+
+    tiles = string_to_136_array(sou="2378", pin="4", man="56", honors="233555")
+    tile = string_to_136_tile(honors="3")
+    player.init_hand(tiles)
+    player.draw_tile(tile)
+
+    _assert_discard(player, enemy_seat, TileDanger.SUJI_2378_ON_RIICHI, sou="7")
+
+
+def test_tile_danger_and_suji_2_on_riichi():
+    enemy_seat = 1
+    table = _create_table(enemy_seat, discards=[], riichi_tile=string_to_136_tile(sou="5"))
+    player = table.player
+
+    tiles = string_to_136_array(sou="2378", pin="4", man="56", honors="233555")
+    tile = string_to_136_tile(honors="3")
+    player.init_hand(tiles)
+    player.draw_tile(tile)
+
+    _assert_discard(player, enemy_seat, TileDanger.SUJI_2378_ON_RIICHI, sou="8")
+
+
+def test_tile_danger_and_suji_4_on_riichi():
+    enemy_seat = 1
+    table = _create_table(enemy_seat, discards=[], riichi_tile=string_to_136_tile(pin="7"))
+    player = table.player
+
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="1"), False)
+
+    tiles = string_to_136_array(sou="2378", pin="4", man="56", honors="233555")
+    tile = string_to_136_tile(honors="3")
+    player.init_hand(tiles)
+    player.draw_tile(tile)
+
+    _assert_discard(player, enemy_seat, TileDanger.SUJI, pin="4")
+
+
 def test_tile_danger_and_ryanmen_wait():
     enemy_seat = 1
-    table = _create_table(enemy_seat, discards=[])
+    table = _create_table(enemy_seat, discards=[], riichi_tile=string_to_136_tile(honors="7"))
     player = table.player
 
     tiles = string_to_136_array(man="11134", pin="1156", honors="2555")
@@ -282,7 +341,7 @@ def test_tile_danger_and_ryanmen_wait():
 
 def test_tile_danger_and_dora():
     enemy_seat = 1
-    table = _create_table(enemy_seat, discards=[])
+    table = _create_table(enemy_seat, discards=[], riichi_tile=string_to_136_tile(honors="7"))
     table.add_dora_indicator(string_to_136_tile(sou="2"))
     player = table.player
 
@@ -301,7 +360,7 @@ def test_tile_danger_and_dora():
 
 def test_tile_danger_and_aka_dora():
     enemy_seat = 1
-    table = _create_table(enemy_seat, discards=[])
+    table = _create_table(enemy_seat, discards=[], riichi_tile=string_to_136_tile(honors="7"))
     player = table.player
 
     tiles = string_to_136_array(man="11134", pin="1156", honors="2555")
@@ -315,7 +374,7 @@ def test_tile_danger_and_aka_dora():
 @pytest.mark.skip("Skipped until danger values tuning is finished")
 def test_tile_total_danger():
     enemy_seat = 1
-    table = _create_table(enemy_seat, discards=[])
+    table = _create_table(enemy_seat, discards=[], riichi_tile=string_to_136_tile(honors="7"))
     table.add_dora_indicator(string_to_136_tile(sou="3"))
     player = table.player
 
@@ -386,12 +445,13 @@ def test_tile_danger_against_honitsu_threat():
     _assert_discard(player, enemy_seat, TileDanger.SAFE_AGAINST_THREATENING_HAND, pin="5", positive=False)
 
 
-def _create_table(enemy_seat, discards):
+def _create_table(enemy_seat, discards, riichi_tile):
     table = Table()
     table.has_aka_dora = True
     for discard in discards:
         table.add_discarded_tile(0, discard, False)
     table.add_called_riichi(enemy_seat)
+    table.add_discarded_tile(enemy_seat, riichi_tile, False)
     return table
 
 

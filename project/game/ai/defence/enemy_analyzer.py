@@ -136,6 +136,8 @@ class EnemyAnalyzer:
         else:
             scale = [1000, 2000, 3900, 5200, 8000, 12000, 12000, 16000, 16000, 32000]
         han = self.threat_reason.get("dora_count", 0) + self.threat_reason.get("melds_han", 0)
+        if han > len(scale) - 1:
+            han = len(scale) - 1
         return scale[han]
 
     def _calculate_assumed_hand_cost_for_riichi(self) -> int:

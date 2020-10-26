@@ -357,6 +357,7 @@ def test_tile_danger_against_tanyao_threat():
 
 def test_tile_danger_against_honitsu_threat():
     table = Table()
+    table.add_dora_indicator(string_to_136_tile(pin="1"))
     player = table.player
 
     enemy_seat = 1

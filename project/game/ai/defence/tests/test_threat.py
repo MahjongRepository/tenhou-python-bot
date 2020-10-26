@@ -1,3 +1,4 @@
+from game.ai.defence.yaku_analyzer.honitsu import HonitsuAnalyzer
 from game.ai.helpers.defence import EnemyDanger
 from game.table import Table
 from utils.decisions_logger import MeldPrint
@@ -98,6 +99,7 @@ def test_is_threatening_and_two_open_tanyao_melds():
 
 def test_is_threatening_and_honitsu_hand():
     table = Table()
+    table.add_dora_indicator(string_to_136_tile(pin="1"))
 
     threatening_players = table.player.ai.defence._get_threatening_players()
     assert len(threatening_players) == 0
@@ -117,8 +119,10 @@ def test_is_threatening_and_honitsu_hand():
 
     threatening_players = table.player.ai.defence._get_threatening_players()
     assert len(threatening_players) == 1
-    assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_HONITSU["id"]
+    print(threatening_players[0].threat_reason)
+    assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
     assert threatening_players[0].assumed_hand_cost == 5200
+    assert threatening_players[0].threat_reason["active_yaku"][0].id == HonitsuAnalyzer.id
 
 
 def test_threatening_riichi_player_and_default_hand_cost():

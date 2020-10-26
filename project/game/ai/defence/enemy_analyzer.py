@@ -57,21 +57,24 @@ class EnemyAnalyzer:
             return False
 
         yaku_analyzers = [
-            YakuhaiAnalyzer(self.enemy),
-            TanyaoAnalyzer(self.enemy),
             HonitsuAnalyzer(self.enemy),
+            YakuhaiAnalyzer(self.enemy),
         ]
 
         melds_han = 0
         active_yaku = []
         for x in yaku_analyzers:
             if x.is_yaku_active():
-                # tanyao and yakuhai can't be used together
-                if x.id == TanyaoAnalyzer.id and YakuhaiAnalyzer.id in [x.id for x in active_yaku]:
-                    continue
-
                 active_yaku.append(x)
                 melds_han += x.melds_han()
+
+        # let's not stack tanyao with other yaku for now
+        # it is not compatible with yakuhai and it is probably will not compatible with honitsu
+        if not active_yaku:
+            tanyao_analyzer = TanyaoAnalyzer(self.enemy)
+            if tanyao_analyzer.is_yaku_active():
+                active_yaku.append(tanyao_analyzer)
+                melds_han += tanyao_analyzer.melds_han()
 
         meld_tiles = self.enemy.meld_tiles
         dora_count = sum([plus_dora(x, self.table.dora_indicators) for x in meld_tiles])

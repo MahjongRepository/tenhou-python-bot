@@ -163,10 +163,6 @@ class EnemyDanger:
         "id": "threatening_open_hand_dora",
         "description": "Enemy opened hand with 3+ dora and now is 6+ step",
     }
-    THREAT_HONITSU = {
-        "id": "threatening_honitsu",
-        "description": "Enemy hand looks like honitsu",
-    }
     THREAT_EXPENSIVE_OPEN_HAND = {
         "id": "threatening_3_han_meld",
         "description": "Enemy opened hand has 3+ han",

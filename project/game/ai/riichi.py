@@ -231,11 +231,19 @@ class Riichi:
 
             # wait is even better, but still don't call riichi on damaten mangan
             if count_tiles <= 6:
-                if self.player.is_dealer and min_cost >= 11600:
-                    return False
+                # if it's early riichi more readily
+                if self.player.round_step > 6:
+                    if self.player.is_dealer and min_cost >= 11600:
+                        return False
 
-                if not self.player.is_dealer and min_cost >= 7700:
-                    return False
+                    if not self.player.is_dealer and min_cost >= 7700:
+                        return False
+                else:
+                    if self.player.is_dealer and min_cost >= 18000:
+                        return False
+
+                    if not self.player.is_dealer and min_cost >= 12000:
+                        return False
 
                 return True
 

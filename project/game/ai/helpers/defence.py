@@ -168,7 +168,7 @@ class EnemyDanger:
         "description": "Enemy hand looks like honitsu",
     }
     THREAT_EXPENSIVE_OPEN_HAND = {
-        "id": "threatening_honitsu",
+        "id": "threatening_3_han_meld",
         "description": "Enemy opened hand has 3+ han",
     }
 

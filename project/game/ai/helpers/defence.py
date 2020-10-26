@@ -74,7 +74,7 @@ class TileDanger:
         "description": "Default suji",
     }
     SUJI_2378_ON_RIICHI = {
-        "value": 400,
+        "value": 300,
         "description": "Suji on 2, 3, 7 or 8 on riichi declaration",
     }
 

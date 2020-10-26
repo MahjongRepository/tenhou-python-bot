@@ -32,8 +32,11 @@ class TileDangerHandler:
 
         # Then add tiles not suitable for yaku in enemy open hand
         if enemy_analyzer.threat_reason.get("active_yaku"):
-            for x in enemy_analyzer.threat_reason.get("active_yaku"):
-                safe_against_threat_34.extend(x.get_safe_tiles_34())
+            safe_against_yaku = set.intersection(
+                *[set(x.get_safe_tiles_34()) for x in enemy_analyzer.threat_reason.get("active_yaku")]
+            )
+            if safe_against_yaku:
+                safe_against_threat_34.extend(list(safe_against_yaku))
 
         possible_forms = self.possible_forms_analyzer.calculate_possible_forms(enemy_analyzer.enemy.all_safe_tiles)
         kabe_tiles = self.player.ai.kabe.find_all_kabe(closed_hand_34)

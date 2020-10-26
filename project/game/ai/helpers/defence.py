@@ -204,7 +204,7 @@ class DangerBorder:
                 danger_border_dict = DangerBorder.very_late_danger_dict
         elif shanten == 2:
             if len(player.discards) > TileDanger.ALMOST_LATE_ROUND:
-                danger_border = DangerBorder.late_danger_dict
+                danger_border_dict = DangerBorder.late_danger_dict
             if len(player.discards) > TileDanger.LATE_ROUND:
                 return DangerBorder.BETAORI
 

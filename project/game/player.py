@@ -265,11 +265,14 @@ class EnemyPlayer(PlayerInterface):
     # so, for example kamicha discard will be a safe tile for all players
     temporary_safe_tiles = None
 
+    riichi_tile_136 = None
+
     def erase_state(self):
         super().erase_state()
 
         self.safe_tiles = []
         self.temporary_safe_tiles = []
+        self.riichi_tile_136 = None
 
     def add_discarded_tile(self, tile: Tile):
         super().add_discarded_tile(tile)

@@ -31,6 +31,8 @@ class Table:
     has_open_tanyao = False
     has_aka_dora = False
 
+    latest_riichi_player_seat = None
+
     def __init__(self):
         self._init_players()
         self.dora_indicators = []
@@ -86,6 +88,8 @@ class Table:
                 player.first_seat = seats[i - dealer_seat]
                 i += 1
 
+        self.latest_riichi_player_seat = None
+
     def add_called_meld(self, player_seat, meld):
         self.meld_was_called = True
 
@@ -123,6 +127,7 @@ class Table:
         # we had to check will we go for defence or not
         if player_seat != 0:
             self.player.enemy_called_riichi(player_seat)
+            self.latest_riichi_player_seat = player_seat
 
     def add_discarded_tile(self, player_seat, tile_136, is_tsumogiri):
         """
@@ -134,9 +139,14 @@ class Table:
             self.count_of_remaining_tiles -= 1
 
         tile = Tile(tile_136, is_tsumogiri)
-        self.get_player(player_seat).add_discarded_tile(tile)
+        player = self.get_player(player_seat)
+        player.add_discarded_tile(tile)
 
         self._add_revealed_tile(tile_136)
+
+        if self.latest_riichi_player_seat == player_seat:
+            self.latest_riichi_player_seat = None
+            player.riichi_tile_136 = tile_136
 
     def add_dora_indicator(self, tile):
         self.dora_indicators.append(tile)

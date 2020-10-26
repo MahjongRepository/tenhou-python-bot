@@ -1,11 +1,15 @@
 from mahjong.constants import HONOR_INDICES
 from mahjong.tile import TilesConverter
-from mahjong.utils import count_tiles_by_suits
+from mahjong.utils import count_tiles_by_suits, is_honor
 
 
 class HonitsuAnalyzer:
     id = "honitsu"
     chosen_suit = None
+
+    MIN_DISCARD = 6
+    LESS_SUIT_PERCENTAGE_BORDER = 20
+    HONORS_PERCENTAGE_BORDER = 30
 
     def __init__(self, player):
         self.player = player
@@ -16,7 +20,19 @@ class HonitsuAnalyzer:
 
     def is_yaku_active(self):
         self.chosen_suit = self._get_chosen_suit_from_discards()
-        return self.chosen_suit and True or False
+        if not self.chosen_suit:
+            return False
+
+        all_melds_from_chosen_suit = True
+        for meld in self.player.melds:
+            tile = meld.tiles[0]
+            tile_34 = tile // 4
+            if is_honor(tile_34):
+                continue
+
+            all_melds_from_chosen_suit &= self.chosen_suit(tile_34)
+
+        return all_melds_from_chosen_suit
 
     def melds_han(self):
         return self.player.is_open_hand and 2 or 3
@@ -42,7 +58,7 @@ class HonitsuAnalyzer:
         total_discards = sum(discards_34)
 
         # there is no sense to analyze earlier discards
-        if total_discards < 6:
+        if total_discards < HonitsuAnalyzer.MIN_DISCARD:
             return None
 
         result = count_tiles_by_suits(discards_34)
@@ -57,7 +73,10 @@ class HonitsuAnalyzer:
 
         # there is not too much one suit + honor tiles in the discard
         # so we can tell that user trying to collect honitsu
-        if percentage_of_less_suit <= 20 and percentage_of_honor_tiles <= 30:
+        if (
+            percentage_of_less_suit <= HonitsuAnalyzer.LESS_SUIT_PERCENTAGE_BORDER
+            and percentage_of_honor_tiles <= HonitsuAnalyzer.HONORS_PERCENTAGE_BORDER
+        ):
             return suits[0]["function"]
 
         return None

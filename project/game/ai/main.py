@@ -226,13 +226,15 @@ class MahjongAI:
             tiles.remove(discard_option.find_tile_in_hand(self.player.closed_hand))
 
             hand_cost = self.estimate_hand_value(
-                waiting, tiles=tiles, call_riichi=not self.player.is_open_hand, is_tsumo=False
+                waiting, tiles=tiles, call_riichi=not self.player.is_open_hand, is_tsumo=True
             )
 
             if not hand_cost.cost:
                 continue
 
-            weighted_hand_cost += hand_cost.cost["main"] * discard_option.wait_to_ukeire[waiting]
+            weighted_hand_cost += (
+                hand_cost.cost["main"] + 2 * hand_cost.cost["additional"]
+            ) * discard_option.wait_to_ukeire[waiting]
             number_of_tiles += discard_option.wait_to_ukeire[waiting]
 
         return number_of_tiles and int(weighted_hand_cost / number_of_tiles) or 0

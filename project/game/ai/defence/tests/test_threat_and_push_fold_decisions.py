@@ -19,7 +19,7 @@ def test_calculate_our_hand_cost():
     player.draw_tile(tile)
 
     discard_option = find_discard_option(player, honors="1")
-    assert discard_option.danger.weighted_cost == 4557
+    assert discard_option.danger.weighted_cost == 6128
 
 
 def test_calculate_our_hand_cost_1_shanten():

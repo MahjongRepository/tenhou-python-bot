@@ -302,6 +302,12 @@ class BaseStrategy:
         self.dora_count_central += self.aka_dora_count
         self.dora_count_total = self.dora_count_central + self.dora_count_not_central
 
+    def balance_our_hand_cost_and_count_of_waits(self, hand_cost: int, count_waits: int):
+        """
+        For some strategies you want to balance calculated hand cost and count of waits
+        """
+        return hand_cost, count_waits
+
     def _find_best_meld_to_open(self, call_tile_136, possible_melds, new_tiles, closed_hand, discarded_tile):
         discarded_tile_34 = discarded_tile // 4
 

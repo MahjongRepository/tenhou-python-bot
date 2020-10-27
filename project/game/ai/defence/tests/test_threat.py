@@ -289,3 +289,34 @@ def test_number_of_unverified_suji():
     assert threatening_player.number_of_unverified_suji == 2
     table.add_discarded_tile(0, string_to_136_tile(pin="6"), True)
     assert threatening_player.number_of_unverified_suji == 0
+
+
+def test_is_threatening_and_late_game_step():
+    table = Table()
+
+    threatening_players = table.player.ai.defence.get_threatening_players()
+    assert len(threatening_players) == 0
+
+    table.player.round_step = EnemyDanger.LATE_ROUND_BORDER
+
+    threatening_players = table.player.ai.defence.get_threatening_players()
+    assert len(threatening_players) == 3
+    assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_LATE_ROUND["id"]
+    assert threatening_players[1].threat_reason["id"] == EnemyDanger.THREAT_LATE_ROUND["id"]
+    assert threatening_players[2].threat_reason["id"] == EnemyDanger.THREAT_LATE_ROUND["id"]
+    assert threatening_players[2].threat_reason["assumed_hand_cost"] == EnemyDanger.LATE_ROUND_HAND_COST
+
+    table.add_called_riichi(1)
+
+    # if there is riichi, let's not trigger late round threat for enemies with closed hands
+    threatening_players = table.player.ai.defence.get_threatening_players()
+    assert len(threatening_players) == 1
+    assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_RIICHI["id"]
+
+    table.add_called_meld(2, make_meld(MeldPrint.PON, pin="444"))
+
+    # enemy with open hand will be triggered as threat
+    threatening_players = table.player.ai.defence.get_threatening_players()
+    assert len(threatening_players) == 2
+    assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_RIICHI["id"]
+    assert threatening_players[1].threat_reason["id"] == EnemyDanger.THREAT_LATE_ROUND["id"]

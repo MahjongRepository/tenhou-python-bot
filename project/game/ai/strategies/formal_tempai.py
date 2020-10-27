@@ -1,11 +1,7 @@
-from game.ai.helpers.defence import EnemyDanger
 from game.ai.strategies.main import BaseStrategy
 
 
 class FormalTempaiStrategy(BaseStrategy):
-    LATE_ROUND_OUR_HAND_COST = 1000
-    LATE_ROUND_COUNT_OF_WAITS = 4
-
     def should_activate_strategy(self, tiles_136):
         """
         When we get closer to the end of the round, we start to consider
@@ -74,10 +70,3 @@ class FormalTempaiStrategy(BaseStrategy):
         :return: True
         """
         return True
-
-    def balance_our_hand_cost_and_count_of_waits(self, hand_cost: int, count_waits: int):
-        if self.player.round_step < EnemyDanger.LATE_ROUND_BORDER:
-            return hand_cost, count_waits
-        hand_cost = max([hand_cost, FormalTempaiStrategy.LATE_ROUND_OUR_HAND_COST])
-        count_waits = max([count_waits, FormalTempaiStrategy.LATE_ROUND_COUNT_OF_WAITS])
-        return hand_cost, count_waits

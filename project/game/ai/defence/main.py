@@ -153,16 +153,11 @@ class TileDangerHandler:
 
             if discard_option.shanten == 0:
                 hand_weighted_cost = self.player.ai.estimate_weighted_mean_hand_value(discard_option)
-                count_of_waits = discard_option.ukeire
-                hand_weighted_cost, count_of_waits = self.balance_our_hand_cost_and_count_of_waits_with_strategy_rules(
-                    hand_weighted_cost, count_of_waits
-                )
-
                 discard_option.danger.weighted_cost = hand_weighted_cost
                 cost_ratio = (hand_weighted_cost / threatening_player_hand_cost) * 100
 
                 # good wait
-                if count_of_waits >= 6:
+                if discard_option.ukeire >= 6:
                     if cost_ratio >= 100:
                         danger_border = DangerBorder.IGNORE
                     elif cost_ratio >= 70:
@@ -174,7 +169,7 @@ class TileDangerHandler:
                     else:
                         danger_border = DangerBorder.LOW
                 # moderate wait
-                elif count_of_waits >= 4:
+                elif discard_option.ukeire >= 4:
                     if cost_ratio >= 200:
                         danger_border = DangerBorder.EXTREME
                     elif cost_ratio >= 100:
@@ -188,7 +183,7 @@ class TileDangerHandler:
                     else:
                         danger_border = DangerBorder.VERY_LOW
                 # weak wait
-                elif count_of_waits >= 2:
+                elif discard_option.ukeire >= 2:
                     if cost_ratio >= 200:
                         danger_border = DangerBorder.VERY_HIGH
                     elif cost_ratio >= 100:
@@ -219,11 +214,6 @@ class TileDangerHandler:
                 else:
                     hand_weighted_cost = discard_option.average_second_level_cost
 
-                count_of_waits = discard_option.ukeire
-                hand_weighted_cost, count_of_waits = self.balance_our_hand_cost_and_count_of_waits_with_strategy_rules(
-                    hand_weighted_cost, count_of_waits
-                )
-
                 # never push with zero chance to win
                 # FIXME: we may actually want to push it for tempai in ryukoku, so reconsider
                 if not hand_weighted_cost:
@@ -236,7 +226,7 @@ class TileDangerHandler:
                 cost_ratio = (hand_weighted_cost / threatening_player_hand_cost) * 100
 
                 # lots of ukeire
-                if count_of_waits >= 28:
+                if discard_option.ukeire >= 28:
                     if cost_ratio >= 200:
                         danger_border = DangerBorder.EXTREME
                     elif cost_ratio >= 100:
@@ -246,7 +236,7 @@ class TileDangerHandler:
                     else:
                         danger_border = DangerBorder.LOWER_MEDIUM
                 # very good ukeire
-                elif count_of_waits >= 20:
+                elif discard_option.ukeire >= 20:
                     if cost_ratio >= 200:
                         danger_border = DangerBorder.EXTREME
                     elif cost_ratio >= 100:
@@ -256,7 +246,7 @@ class TileDangerHandler:
                     else:
                         danger_border = DangerBorder.UPPER_LOW
                 # good ukeire
-                elif count_of_waits >= 12:
+                elif discard_option.ukeire >= 12:
                     if cost_ratio >= 200:
                         danger_border = DangerBorder.HIGH
                     elif cost_ratio >= 100:
@@ -266,7 +256,7 @@ class TileDangerHandler:
                     else:
                         danger_border = DangerBorder.LOW
                 # mediocre ukeire
-                elif count_of_waits >= 7:
+                elif discard_option.ukeire >= 7:
                     if cost_ratio >= 200:
                         danger_border = DangerBorder.UPPER_MEDIUM
                     elif cost_ratio >= 100:
@@ -303,15 +293,12 @@ class TileDangerHandler:
                 han += dora_count
 
                 hand_weighted_cost = scale[min(han, len(scale) - 1)]
-                count_of_waits = discard_option.ukeire
-                hand_weighted_cost, count_of_waits = self.balance_our_hand_cost_and_count_of_waits_with_strategy_rules(
-                    hand_weighted_cost, count_of_waits
-                )
+
                 discard_option.danger.weighted_cost = int(hand_weighted_cost)
                 cost_ratio = (hand_weighted_cost / threatening_player_hand_cost) * 100
 
                 # lots of ukeire
-                if count_of_waits >= 40:
+                if discard_option.ukeire >= 40:
                     if cost_ratio >= 200:
                         danger_border = DangerBorder.MEDIUM
                     elif cost_ratio >= 100:
@@ -319,7 +306,7 @@ class TileDangerHandler:
                     else:
                         danger_border = DangerBorder.EXTREMELY_LOW
                 # very good ukeire
-                elif count_of_waits >= 20:
+                elif discard_option.ukeire >= 20:
                     if cost_ratio >= 200:
                         danger_border = DangerBorder.LOWER_MEDIUM
                     elif cost_ratio >= 100:
@@ -361,11 +348,6 @@ class TileDangerHandler:
         forms_count = possible_forms[tile_34]
         assert forms_count is not None
         return self.possible_forms_analyzer.calculate_possible_forms_total(forms_count)
-
-    def balance_our_hand_cost_and_count_of_waits_with_strategy_rules(self, hand_cost: int, count_waits: int):
-        if self.player.ai.current_strategy:
-            return self.player.ai.current_strategy.balance_our_hand_cost_and_count_of_waits(hand_cost, count_waits)
-        return hand_cost, count_waits
 
     @property
     def analyzed_enemies(self):

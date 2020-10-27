@@ -261,13 +261,6 @@ class EnemyDanger:
         "id": "threatening_3_han_meld",
         "description": "Enemy opened hand has 3+ han",
     }
-    THREAT_LATE_ROUND = {
-        "id": "threatening_late_round",
-        "description": "Enemy could be in tempai",
-    }
-
-    LATE_ROUND_BORDER = 12
-    LATE_ROUND_HAND_COST = 2000
 
 
 class TileDangerHandler:

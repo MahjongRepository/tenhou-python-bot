@@ -52,6 +52,9 @@ class EnemyAnalyzer:
             return True
 
         melds = self.enemy.melds
+        # we can't analyze closed hands for now
+        if not melds:
+            return False
 
         yaku_analyzers = [
             HonitsuAnalyzer(self.enemy),
@@ -92,17 +95,6 @@ class EnemyAnalyzer:
             )
             return True
 
-        other_enemies_in_riichi = any([x.enemy.in_riichi for x in self.main_player.ai.defence.analyzed_enemies])
-        # if there is enemy with riichi
-        # let's not trigger late round threat for enemies with closed hands
-        # use `.melds` instead of `.is_open_hand` here, to add threat to enemies with closed kan melds as well
-        if round_step >= EnemyDanger.LATE_ROUND_BORDER and (not other_enemies_in_riichi or self.enemy.melds):
-            self._create_danger_reason(
-                EnemyDanger.THREAT_LATE_ROUND,
-                round_step=round_step,
-            )
-            return True
-
         return False
 
     @property
@@ -112,19 +104,7 @@ class EnemyAnalyzer:
         """
         if self.enemy.in_riichi:
             return self._calculate_assumed_hand_cost_for_riichi()
-
-        not_riichi_hand_cost = self._calculate_assumed_hand_cost()
-
-        # let's assume that enemy is in damaten
-        # and he doesn't have dora, kan etc. in hand
-        # so use late round hand cost in that case
-        if (
-            not_riichi_hand_cost < EnemyDanger.LATE_ROUND_HAND_COST
-            and self.threat_reason["id"] == EnemyDanger.THREAT_LATE_ROUND["id"]
-        ):
-            return EnemyDanger.LATE_ROUND_HAND_COST
-
-        return not_riichi_hand_cost
+        return self._calculate_assumed_hand_cost()
 
     @property
     def number_of_unverified_suji(self) -> int:

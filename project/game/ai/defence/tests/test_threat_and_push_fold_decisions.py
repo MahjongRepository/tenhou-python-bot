@@ -1,4 +1,5 @@
 from game.table import Table
+from mahjong.constants import FIVE_RED_MAN
 from utils.decisions_logger import MeldPrint
 from utils.test_helpers import find_discard_option, string_to_136_array, string_to_136_tile
 
@@ -100,3 +101,54 @@ def test_calculate_our_hand_cost_1_shanten_karaten():
     cost = discard_option.average_second_level_cost
 
     assert cost == 0
+
+
+def test_dont_open_bad_hand_if_there_are_expensive_threat():
+    table = Table()
+    table.add_dora_indicator(string_to_136_tile(man="4"))
+    player = table.player
+    player.round_step = 10
+    table.has_open_tanyao = True
+    table.has_aka_dora = True
+
+    enemy_seat = 1
+    table.add_called_riichi(enemy_seat)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(honors="4"), True)
+
+    tiles = string_to_136_array(sou="22499", pin="27", man="3344", honors="4") + [FIVE_RED_MAN]
+    player.init_hand(tiles)
+    tile = string_to_136_tile(man="4")
+
+    # cheap enemy tempai (5200), let's push this hand
+    meld, _ = player.try_to_call_meld(tile, False)
+    assert meld is not None
+
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.KAN, is_open=False, honors="1111"))
+    # enemy hand is more expensive now (12000)
+    # in this case let's not open this hand
+    meld, _ = player.try_to_call_meld(tile, False)
+    assert meld is None
+
+
+def test_dont_open_bad_hand_if_there_are_multiple_threats():
+    table = Table()
+    table.add_dora_indicator(string_to_136_tile(man="4"))
+    player = table.player
+    player.round_step = 10
+    table.has_open_tanyao = True
+    table.has_aka_dora = True
+
+    table.add_called_riichi(1)
+    table.add_discarded_tile(1, string_to_136_tile(honors="4"), True)
+
+    table.add_called_riichi(2)
+    table.add_discarded_tile(2, string_to_136_tile(honors="4"), True)
+
+    tiles = string_to_136_array(sou="22499", pin="27", man="3344", honors="4") + [FIVE_RED_MAN]
+    player.init_hand(tiles)
+    tile = string_to_136_tile(man="4")
+
+    # there are multiple threats with (5200+) hands
+    # let's not push in that case
+    meld, _ = player.try_to_call_meld(tile, False)
+    assert meld is None

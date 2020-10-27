@@ -194,9 +194,6 @@ class BaseStrategy:
         if not chosen_meld_dict:
             return None, None
 
-        if not self.validate_meld(chosen_meld_dict):
-            return None, None
-
         selected_tile = chosen_meld_dict["discard_tile"]
         meld = chosen_meld_dict["meld"]
 
@@ -206,14 +203,63 @@ class BaseStrategy:
 
         # each strategy can use their own value to min shanten number
         if shanten > self.min_shanten:
+            DecisionsLogger.debug(
+                log.MELD_DEBUG,
+                "After meld shanten is too high for our strategy. Abort melding.",
+            )
             return None, None
 
         # sometimes we had to call tile, even if it will not improve our hand
         # otherwise we can call only with improvements of shanten
         if not had_to_be_called and shanten >= self.player.ai.shanten:
+            DecisionsLogger.debug(
+                log.MELD_DEBUG,
+                "Meld is not improving hand shanten. Abort melding.",
+            )
+            return None, None
+
+        if not self.validate_meld(chosen_meld_dict):
+            DecisionsLogger.debug(
+                log.MELD_DEBUG,
+                "Meld is suitable for strategy logic. Abort melding.",
+            )
+            return None, None
+
+        if not self.should_push_against_threats(chosen_meld_dict):
+            DecisionsLogger.debug(
+                log.MELD_DEBUG,
+                "Meld is too dangerous to call. Abort melding.",
+            )
             return None, None
 
         return meld, selected_tile
+
+    def should_push_against_threats(self, chosen_meld_dict) -> bool:
+        selected_tile = chosen_meld_dict["discard_tile"]
+
+        if selected_tile.shanten <= 1:
+            return True
+
+        threats = self.player.ai.defence.get_threatening_players()
+        if not threats:
+            return True
+
+        if len(threats) == 1:
+            threat_hand_cost = threats[0].threat_reason["assumed_hand_cost"]
+            # expensive threat
+            # and our hand is not good
+            # let's not open this
+            if threat_hand_cost >= 7700:
+                return False
+        else:
+            min_threat_hand_cost = min([x.threat_reason["assumed_hand_cost"] for x in threats])
+            # 2+ threats
+            # and they are not cheap
+            # so, let's skip opening of bad hand
+            if min_threat_hand_cost >= 5200:
+                return False
+
+        return True
 
     def validate_meld(self, chosen_meld_dict):
         """

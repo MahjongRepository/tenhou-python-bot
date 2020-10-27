@@ -163,11 +163,13 @@ class TileDangerHandler:
 
                 # good wait
                 if count_of_waits >= 6:
-                    if cost_ratio > 100:
+                    if cost_ratio >= 100:
                         danger_border = DangerBorder.IGNORE
-                    elif cost_ratio > 70:
-                        danger_border = DangerBorder.HIGH
-                    elif cost_ratio > 40:
+                    elif cost_ratio >= 70:
+                        danger_border = DangerBorder.VERY_HIGH
+                    elif cost_ratio >= 50:
+                        danger_border = DangerBorder.UPPER_MEDIUM
+                    elif cost_ratio >= 30:
                         danger_border = DangerBorder.MEDIUM
                     else:
                         danger_border = DangerBorder.LOW
@@ -176,23 +178,37 @@ class TileDangerHandler:
                     if cost_ratio >= 200:
                         danger_border = DangerBorder.EXTREME
                     elif cost_ratio >= 100:
-                        danger_border = DangerBorder.HIGH
+                        danger_border = DangerBorder.VERY_HIGH
                     elif cost_ratio >= 70:
                         danger_border = DangerBorder.UPPER_MEDIUM
-                    elif cost_ratio >= 40:
+                    elif cost_ratio >= 50:
+                        danger_border = DangerBorder.LOWER_MEDIUM
+                    elif cost_ratio >= 30:
                         danger_border = DangerBorder.UPPER_LOW
                     else:
                         danger_border = DangerBorder.VERY_LOW
                 # weak wait
-                else:
+                elif count_of_waits >= 2:
                     if cost_ratio >= 200:
                         danger_border = DangerBorder.VERY_HIGH
                     elif cost_ratio >= 100:
                         danger_border = DangerBorder.UPPER_MEDIUM
                     elif cost_ratio >= 70:
                         danger_border = DangerBorder.MEDIUM
-                    elif cost_ratio >= 40:
-                        danger_border = DangerBorder.VERY_LOW
+                    elif cost_ratio >= 50:
+                        danger_border = DangerBorder.UPPER_LOW
+                    elif cost_ratio >= 30:
+                        danger_border = DangerBorder.LOW
+                    else:
+                        danger_border = DangerBorder.EXTREMELY_LOW
+                # waiting for 1 tile basically
+                else:
+                    if cost_ratio >= 200:
+                        danger_border = DangerBorder.UPPER_MEDIUM
+                    elif cost_ratio >= 100:
+                        danger_border = DangerBorder.LOWER_MEDIUM
+                    elif cost_ratio >= 50:
+                        danger_border = DangerBorder.LOW
                     else:
                         danger_border = DangerBorder.EXTREMELY_LOW
 

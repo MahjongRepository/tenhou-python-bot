@@ -266,8 +266,8 @@ class EnemyDanger:
         "description": "Enemy could be in tempai",
     }
 
-    LATE_ROUND_BORDER = 12
-    LATE_ROUND_HAND_COST = 2000
+    LATE_ROUND_BORDER = 14
+    LATE_ROUND_HAND_COST = 1000
 
 
 class TileDangerHandler:

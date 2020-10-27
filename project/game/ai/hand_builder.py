@@ -257,13 +257,13 @@ class HandBuilder:
                 "".join([str(x) for x in tiles_34]), ";".join([str(x) for x in open_sets_34]), use_chiitoitsu and 1 or 0
             )
 
-            if key in self.ai.hand_cache:
-                new_shanten = self.ai.hand_cache[key]
+            if key in self.ai.hand_cache_shanten:
+                new_shanten = self.ai.hand_cache_shanten[key]
             else:
                 new_shanten = self.ai.shanten_calculator.calculate_shanten(
                     tiles_34, open_sets_34, chiitoitsu=use_chiitoitsu
                 )
-                self.ai.hand_cache[key] = new_shanten
+                self.ai.hand_cache_shanten[key] = new_shanten
 
             if new_shanten == shanten - 1:
                 waiting.append(j)

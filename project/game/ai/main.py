@@ -42,7 +42,8 @@ class MahjongAI:
     current_strategy = None
     last_discard_option = None
 
-    hand_cache = {}
+    hand_cache_shanten = {}
+    hand_cache_estimation = {}
 
     def __init__(self, player):
         self.player = player
@@ -70,7 +71,8 @@ class MahjongAI:
         self.current_strategy = None
         self.last_discard_option = None
 
-        self.hand_cache = {}
+        self.hand_cache_shanten = {}
+        self.hand_cache_estimation = {}
 
     def init_hand(self):
         DecisionsLogger.debug(
@@ -195,6 +197,15 @@ class MahjongAI:
             ),
         )
 
+        cache_key = "{}.{}.{}.{}".format(
+            TilesConverter.to_one_line_string(tiles),
+            call_riichi and 1 or 0,
+            is_tsumo and 1 or 0,
+            ','.join([';'.join([str(x) for x in sorted(x.tiles)]) for x in self.player.melds])
+        )
+        if self.hand_cache_estimation.get(cache_key):
+            return self.hand_cache_estimation.get(cache_key)
+
         result = self.finished_hand.estimate_hand_value(
             tiles,
             win_tile,
@@ -202,6 +213,8 @@ class MahjongAI:
             self.player.table.dora_indicators,
             config,
         )
+
+        self.hand_cache_estimation[cache_key] = result
         return result
 
     def estimate_weighted_mean_hand_value(self, discard_option):

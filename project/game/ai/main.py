@@ -197,11 +197,12 @@ class MahjongAI:
             ),
         )
 
-        cache_key = "{}.{}.{}.{}".format(
+        cache_key = "{}.{}.{}.{}.{}".format(
             TilesConverter.to_one_line_string(tiles),
             call_riichi and 1 or 0,
             is_tsumo and 1 or 0,
-            ','.join([';'.join([str(x) for x in sorted(x.tiles)]) for x in self.player.melds])
+            ",".join([";".join([str(x) for x in sorted(x.tiles)]) for x in self.player.melds]),
+            ",".join([str(x) for x in self.player.table.dora_indicators]),
         )
         if self.hand_cache_estimation.get(cache_key):
             return self.hand_cache_estimation.get(cache_key)

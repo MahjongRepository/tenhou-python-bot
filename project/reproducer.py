@@ -101,7 +101,7 @@ class TenhouLogReproducer:
                     values["count_of_honba_sticks"],
                     values["count_of_riichi_sticks"],
                     values["dora_indicator"],
-                    self._normalize_position(player_position, values["dealer"]),
+                    self._normalize_position(values["dealer"], player_position),
                     shifted_scores,
                 )
 

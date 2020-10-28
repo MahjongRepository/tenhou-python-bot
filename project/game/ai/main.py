@@ -1,5 +1,3 @@
-import copy
-
 import utils.decisions_constants as log
 from game.ai.defence.main import TileDangerHandler
 from game.ai.hand_builder import HandBuilder
@@ -182,7 +180,7 @@ class MahjongAI:
             win_tile += 1
 
         if not tiles:
-            tiles = copy.copy(self.player.tiles)
+            tiles = self.player.tiles[:]
 
         tiles += [win_tile]
 
@@ -222,7 +220,7 @@ class MahjongAI:
         weighted_hand_cost = 0
         number_of_tiles = 0
         for waiting in discard_option.waiting:
-            tiles = copy.copy(self.player.tiles)
+            tiles = self.player.tiles[:]
             tiles.remove(discard_option.find_tile_in_hand(self.player.closed_hand))
 
             hand_cost = self.estimate_hand_value(
@@ -281,9 +279,9 @@ class MahjongAI:
 
         closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
 
-        melds_34 = copy.copy(self.player.meld_34_tiles)
-        tiles = copy.copy(self.player.tiles)
-        closed_hand_tiles = copy.copy(self.player.closed_hand)
+        melds_34 = self.player.meld_34_tiles[:]
+        tiles = self.player.tiles[:]
+        closed_hand_tiles = self.player.closed_hand[:]
 
         new_shanten = 0
         previous_shanten = 0

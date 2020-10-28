@@ -17,6 +17,8 @@ SENTRY_URL = ""
 
 LOG_PREFIX = ""
 
+PRINT_LOGS = True
+
 """
   Game type decoding:
 

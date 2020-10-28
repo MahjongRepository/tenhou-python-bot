@@ -35,7 +35,7 @@ class Riichi:
         waiting = self.player.ai.waiting[0]
         hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=False)
 
-        tiles = self.player.closed_hand.copy()
+        tiles = self.player.closed_hand[:]
         closed_melds = [x for x in self.player.melds if not x.opened]
         for meld in closed_melds:
             tiles.extend(meld.tiles[:3])

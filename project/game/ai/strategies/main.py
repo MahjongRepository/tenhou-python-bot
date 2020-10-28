@@ -311,8 +311,8 @@ class BaseStrategy:
 
         final_results = []
         for meld_34 in possible_melds:
-            meld_34_copy = meld_34.copy()
-            closed_hand_copy = closed_hand.copy()
+            meld_34_copy = meld_34[:]
+            closed_hand_copy = closed_hand[:]
 
             meld_type = is_chi(meld_34_copy) and MeldPrint.CHI or MeldPrint.PON
             meld_34_copy.remove(discarded_tile_34)

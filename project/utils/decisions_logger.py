@@ -4,6 +4,7 @@ from copy import deepcopy
 
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
+from utils.settings_handler import settings
 
 logger = logging.getLogger("bot")
 
@@ -11,6 +12,9 @@ logger = logging.getLogger("bot")
 class DecisionsLogger:
     @staticmethod
     def debug(message_id, message="", context=None):
+        if not settings.PRINT_LOGS:
+            return None
+
         logger.debug(f"id={message_id}")
 
         if message:

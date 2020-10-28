@@ -1,4 +1,3 @@
-import copy
 import logging
 
 import utils.decisions_constants as log
@@ -127,8 +126,7 @@ class PlayerInterface:
         Array of array with 34 tiles indices
         :return: array
         """
-        melds = [x.tiles for x in self.melds]
-        melds = copy.deepcopy(melds)
+        melds = [x.tiles[:] for x in self.melds]
         results = []
         for meld in melds:
             results.append([meld[0] // 4, meld[1] // 4, meld[2] // 4])

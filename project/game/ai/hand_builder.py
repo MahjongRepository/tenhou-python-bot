@@ -344,7 +344,7 @@ class HandBuilder:
         return n
 
     def divide_hand(self, tiles, waiting):
-        tiles_copy = tiles.copy()
+        tiles_copy = tiles[:]
 
         for i in range(0, 4):
             if waiting * 4 + i not in tiles_copy:
@@ -377,12 +377,12 @@ class HandBuilder:
 
         # we are going to do manipulations that require player hand and discards to be updated
         # so we save original tiles and discards here and restore it at the end of the function
-        player_tiles_original = self.player.tiles.copy()
-        player_discards_original = self.player.discards.copy()
+        player_tiles_original = self.player.tiles[:]
+        player_discards_original = self.player.discards[:]
 
         tile_in_hand = discard_option.find_tile_in_hand(self.player.closed_hand)
 
-        self.player.tiles = tiles.copy()
+        self.player.tiles = tiles[:]
         self.player.discards.append(Tile(tile_in_hand, False))
         self.player.tiles.remove(tile_in_hand)
 
@@ -600,18 +600,18 @@ class HandBuilder:
         call_riichi = not self.player.is_open_hand
 
         discard_desc = []
-        player_tiles_copy = self.player.tiles.copy()
-        player_melds_copy = self.player.melds.copy()
+        player_tiles_copy = self.player.tiles[:]
+        player_melds_copy = self.player.melds[:]
 
         closed_tiles_34 = TilesConverter.to_34_array(self.player.closed_hand)
 
         for discard_option in discard_options:
             tile = discard_option.find_tile_in_hand(self.player.closed_hand)
             # temporary remove discard option to estimate hand value
-            self.player.tiles = tiles.copy()
+            self.player.tiles = tiles[:]
             self.player.tiles.remove(tile)
             # temporary replace melds
-            self.player.melds = melds.copy()
+            self.player.melds = melds[:]
             # for kabe/suji handling
             discarded_tile = Tile(tile, False)
             self.player.discards.append(discarded_tile)

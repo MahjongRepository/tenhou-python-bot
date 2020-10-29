@@ -18,6 +18,8 @@ class HonitsuStrategy(BaseStrategy):
 
     chosen_suit = None
 
+    tiles_count_our_suit = 0
+    dora_count_our_suit = 0
     dora_count_other_suits_not_isolated = 0
     tiles_count_other_suits = 0
     tiles_count_other_suits_not_isolated = 0
@@ -48,7 +50,7 @@ class HonitsuStrategy(BaseStrategy):
         count_of_koutsu_other_suits += self._count_of_koutsu(tiles_34, suits[1]["function"])
         count_of_koutsu_other_suits += self._count_of_koutsu(tiles_34, suits[2]["function"])
 
-        self._calculate_not_suitable_tiles_cnt(tiles_34, suit["function"])
+        self._calculate_suitable_and_not_suitable_tiles_cnt(tiles_34, suit["function"])
         self._initialize_honitsu_dora_count(tiles_136, suit)
 
         # let's not go for honitsu if we have 5 or more tiles in other suits
@@ -68,8 +70,8 @@ class HonitsuStrategy(BaseStrategy):
         # we have a mangan anyway, let's go for fastest hand
         valued_pons = [x for x in self.player.valued_honors if tiles_34[x] >= 3]
         for pon in valued_pons:
-            dora_count = plus_dora(pon * 4, self.player.table.dora_indicators)
-            if dora_count > 0:
+            dora_count_valued_pons = plus_dora(pon * 4, self.player.table.dora_indicators)
+            if dora_count_valued_pons > 0:
                 return False
 
         valued_pairs = len([x for x in self.player.valued_honors if tiles_34[x] == 2])
@@ -84,6 +86,25 @@ class HonitsuStrategy(BaseStrategy):
         unvalued_singles = len(
             [x for x in range(0, 34) if is_honor(x) and x not in self.player.valued_honors and tiles_34[x] == 1]
         )
+
+        # what's the point of honitsu if there is not a single honor pair
+        if honor_pairs_or_pons == 0:
+            return False
+
+        # let's not go for honitsu nomi
+        if not valued_pairs and not valued_pons:
+            # this is not honitsu, maybe it will be pinfu one day
+            if self.tiles_count_our_suit <= 7 and honor_pairs_or_pons < 2:
+                return False
+
+            # also looks more like pinfu
+            if self.tiles_count_other_suits >= 4:
+                return False
+
+            # so-so, let's just not go for honitsu nomi
+            if self.tiles_count_our_suit <= 9 and honor_pairs_or_pons == 1:
+                if not self.dora_count_our_suit and not honor_doras_pairs_or_pons:
+                    return False
 
         # if we have some decent amount of not isolated tiles in other suits
         # we may not rush for honitsu considering other conditions
@@ -153,22 +174,28 @@ class HonitsuStrategy(BaseStrategy):
 
         return False
 
-    def _calculate_not_suitable_tiles_cnt(self, tiles_34, suit):
+    def _calculate_suitable_and_not_suitable_tiles_cnt(self, tiles_34, suit):
         self.tiles_count_other_suits = 0
         self.tiles_count_other_suits_not_isolated = 0
 
         for x in range(0, 34):
-            tile = tiles_34[x]
-            if not tile:
+            tile_count = tiles_34[x]
+            if not tile_count:
                 continue
 
-            if not suit(x) and not is_honor(x):
-                self.tiles_count_other_suits += tile
+            if suit(x):
+                self.tiles_count_our_suit += tile_count
+            elif not is_honor(x):
+                self.tiles_count_other_suits += tile_count
                 if not is_tile_strictly_isolated(tiles_34, x):
-                    self.tiles_count_other_suits_not_isolated += tile
+                    self.tiles_count_other_suits_not_isolated += tile_count
 
     def _initialize_honitsu_dora_count(self, tiles_136, suit):
         tiles_34 = TilesConverter.to_34_array(tiles_136)
+
+        dora_count_man = 0
+        dora_count_pin = 0
+        dora_count_sou = 0
 
         dora_count_man_not_isolated = 0
         dora_count_pin_not_isolated = 0
@@ -182,20 +209,29 @@ class HonitsuStrategy(BaseStrategy):
             if is_aka_dora(tile_136, self.player.table.has_aka_dora):
                 dora_count += 1
 
-            if is_man(tile_34) and not is_tile_strictly_isolated(tiles_34, tile_34):
-                dora_count_man_not_isolated += dora_count
+            if is_man(tile_34):
+                dora_count_man += dora_count
+                if not is_tile_strictly_isolated(tiles_34, tile_34):
+                    dora_count_man_not_isolated += dora_count
 
-            if is_pin(tile_34) and not is_tile_strictly_isolated(tiles_34, tile_34):
-                dora_count_pin_not_isolated += dora_count
+            if is_pin(tile_34):
+                dora_count_pin += dora_count
+                if not is_tile_strictly_isolated(tiles_34, tile_34):
+                    dora_count_pin_not_isolated += dora_count
 
-            if is_sou(tile_34) and not is_tile_strictly_isolated(tiles_34, tile_34):
-                dora_count_sou_not_isolated += dora_count
+            if is_sou(tile_34):
+                dora_count_sou += dora_count
+                if not is_tile_strictly_isolated(tiles_34, tile_34):
+                    dora_count_sou_not_isolated += dora_count
 
         if suit["name"] == "pin":
+            self.dora_count_our_suit = dora_count_pin
             self.dora_count_other_suits_not_isolated = dora_count_man_not_isolated + dora_count_sou_not_isolated
         elif suit["name"] == "sou":
+            self.dora_count_our_suit = dora_count_sou
             self.dora_count_other_suits_not_isolated = dora_count_man_not_isolated + dora_count_pin_not_isolated
         elif suit["name"] == "man":
+            self.dora_count_our_suit = dora_count_man
             self.dora_count_other_suits_not_isolated = dora_count_sou_not_isolated + dora_count_pin_not_isolated
 
     @staticmethod

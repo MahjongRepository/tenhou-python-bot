@@ -86,17 +86,17 @@ def test_open_hand_and_discard_tiles_logic():
     table = Table()
     player = table.player
 
-    tiles = string_to_136_array(sou="112235589", man="23", honors="22")
+    tiles = string_to_136_array(sou="112235589", man="23", honors="66")
     player.init_hand(tiles)
 
     # we don't need to call meld even if it improves our hand,
-    # because we are aim for honitsu
+    # because we are aim for honitsu or pinfu
     tile = string_to_136_tile(man="1")
     meld, _ = player.try_to_call_meld(tile, False)
     assert meld is None
 
     # any honor tile is suitable
-    tile = string_to_136_tile(honors="2")
+    tile = string_to_136_tile(honors="6")
     meld, discard_option = player.try_to_call_meld(tile, False)
     assert meld is not None
     assert tiles_to_string([(discard_option.tile_to_discard * 4)]) == "2m"
@@ -154,12 +154,27 @@ def test_discard_not_effective_tiles_first():
     player.scores = 25000
     table.count_of_remaining_tiles = 100
 
-    tiles = string_to_136_array(man="33", pin="12788999", sou="5", honors="23")
+    tiles = string_to_136_array(man="33", pin="12788999", sou="5", honors="77")
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(honors="6"))
     tile_to_discard = player.discard_tile()
 
     assert tiles_to_string([tile_to_discard]) == "5s"
+
+
+def test_discard_not_effective_tiles_first_not_honitsu():
+    table = Table()
+    player = table.player
+    player.scores = 25000
+    table.count_of_remaining_tiles = 100
+
+    tiles = string_to_136_array(man="33", pin="12788999", sou="5", honors="23")
+    player.init_hand(tiles)
+    player.draw_tile(string_to_136_tile(honors="6"))
+    tile_to_discard = player.discard_tile()
+
+    # this is not really a honitsu
+    assert tiles_to_string([tile_to_discard]) == "2z" or tiles_to_string([tile_to_discard]) == "3z"
 
 
 def test_open_yakuhai_same_shanten():

@@ -154,6 +154,9 @@ class TenhouLogReproducer:
                     if meld.type != MeldPrint.KAN and meld.type != MeldPrint.CHANKAN:
                         table.player.draw_tile(meld.called_tile)
 
+                    if meld.type == MeldPrint.CHANKAN:
+                        table.player.tiles.remove(meld.called_tile)
+
             if "<REACH" in tag and 'step="1"' in tag:
                 who_called_riichi = self._normalize_position(player_position, self.decoder.parse_who_called_riichi(tag))
                 table.add_called_riichi(who_called_riichi)

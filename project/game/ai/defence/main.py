@@ -170,7 +170,9 @@ class TileDangerHandler:
                         danger_border = DangerBorder.LOW
                 # moderate wait
                 elif discard_option.ukeire >= 4:
-                    if cost_ratio >= 200:
+                    if cost_ratio >= 400:
+                        danger_border = DangerBorder.IGNORE
+                    elif cost_ratio >= 200:
                         danger_border = DangerBorder.EXTREME
                     elif cost_ratio >= 100:
                         danger_border = DangerBorder.VERY_HIGH
@@ -184,7 +186,9 @@ class TileDangerHandler:
                         danger_border = DangerBorder.VERY_LOW
                 # weak wait
                 elif discard_option.ukeire >= 2:
-                    if cost_ratio >= 200:
+                    if cost_ratio >= 400:
+                        danger_border = DangerBorder.EXTREME
+                    elif cost_ratio >= 200:
                         danger_border = DangerBorder.VERY_HIGH
                     elif cost_ratio >= 100:
                         danger_border = DangerBorder.UPPER_MEDIUM
@@ -198,7 +202,9 @@ class TileDangerHandler:
                         danger_border = DangerBorder.EXTREMELY_LOW
                 # waiting for 1 tile basically
                 else:
-                    if cost_ratio >= 200:
+                    if cost_ratio >= 400:
+                        danger_border = DangerBorder.HIGH
+                    elif cost_ratio >= 200:
                         danger_border = DangerBorder.UPPER_MEDIUM
                     elif cost_ratio >= 100:
                         danger_border = DangerBorder.LOWER_MEDIUM
@@ -227,52 +233,75 @@ class TileDangerHandler:
 
                 # lots of ukeire
                 if discard_option.ukeire >= 28:
-                    if cost_ratio >= 200:
+                    if cost_ratio >= 400:
+                        danger_border = DangerBorder.IGNORE
+                    elif cost_ratio >= 200:
                         danger_border = DangerBorder.EXTREME
                     elif cost_ratio >= 100:
                         danger_border = DangerBorder.VERY_HIGH
                     elif cost_ratio >= 50:
-                        danger_border = DangerBorder.HIGH
-                    else:
-                        danger_border = DangerBorder.LOWER_MEDIUM
-                # very good ukeire
-                elif discard_option.ukeire >= 20:
-                    if cost_ratio >= 200:
-                        danger_border = DangerBorder.EXTREME
-                    elif cost_ratio >= 100:
-                        danger_border = DangerBorder.VERY_HIGH
-                    elif cost_ratio >= 50:
-                        danger_border = DangerBorder.UPPER_MEDIUM
-                    else:
-                        danger_border = DangerBorder.UPPER_LOW
-                # good ukeire
-                elif discard_option.ukeire >= 12:
-                    if cost_ratio >= 200:
-                        danger_border = DangerBorder.HIGH
-                    elif cost_ratio >= 100:
-                        danger_border = DangerBorder.UPPER_MEDIUM
-                    elif cost_ratio >= 50:
-                        danger_border = DangerBorder.LOWER_MEDIUM
-                    else:
-                        danger_border = DangerBorder.LOW
-                # mediocre ukeire
-                elif discard_option.ukeire >= 7:
-                    if cost_ratio >= 200:
-                        danger_border = DangerBorder.UPPER_MEDIUM
-                    elif cost_ratio >= 100:
                         danger_border = DangerBorder.MEDIUM
-                    elif cost_ratio >= 50:
-                        danger_border = DangerBorder.LOWER_MEDIUM
-                    else:
-                        danger_border = DangerBorder.VERY_LOW
-                # very low ukeire
-                else:
-                    if cost_ratio >= 200:
-                        danger_border = DangerBorder.MEDIUM
-                    elif cost_ratio >= 100:
+                    elif cost_ratio >= 20:
                         danger_border = DangerBorder.UPPER_LOW
                     else:
                         danger_border = DangerBorder.EXTREMELY_LOW
+                # very good ukeire
+                elif discard_option.ukeire >= 20:
+                    if cost_ratio >= 400:
+                        danger_border = DangerBorder.IGNORE
+                    elif cost_ratio >= 200:
+                        danger_border = DangerBorder.EXTREME
+                    elif cost_ratio >= 100:
+                        danger_border = DangerBorder.VERY_HIGH
+                    elif cost_ratio >= 50:
+                        danger_border = DangerBorder.LOWER_MEDIUM
+                    elif cost_ratio >= 20:
+                        danger_border = DangerBorder.LOW
+                    else:
+                        danger_border = DangerBorder.EXTREMELY_LOW
+                # good ukeire
+                elif discard_option.ukeire >= 12:
+                    if cost_ratio >= 400:
+                        danger_border = DangerBorder.VERY_HIGH
+                    elif cost_ratio >= 200:
+                        danger_border = DangerBorder.HIGH
+                    elif cost_ratio >= 100:
+                        danger_border = DangerBorder.UPPER_MEDIUM
+                    elif cost_ratio >= 50:
+                        danger_border = DangerBorder.UPPER_LOW
+                    elif cost_ratio >= 20:
+                        danger_border = DangerBorder.VERY_LOW
+                    else:
+                        danger_border = DangerBorder.BETAORI
+                # mediocre ukeire
+                elif discard_option.ukeire >= 7:
+                    if cost_ratio >= 400:
+                        danger_border = DangerBorder.HIGH
+                    elif cost_ratio >= 200:
+                        danger_border = DangerBorder.UPPER_MEDIUM
+                    elif cost_ratio >= 100:
+                        danger_border = DangerBorder.LOWER_MEDIUM
+                    elif cost_ratio >= 50:
+                        danger_border = DangerBorder.VERY_LOW
+                    elif cost_ratio >= 20:
+                        danger_border = DangerBorder.LOWEST
+                    else:
+                        danger_border = DangerBorder.BETAORI
+                # very low ukeire
+                elif discard_option.ukeire >= 3:
+                    if cost_ratio >= 400:
+                        danger_border = DangerBorder.MEDIUM
+                    elif cost_ratio >= 200:
+                        danger_border = DangerBorder.UPPER_LOW
+                    elif cost_ratio >= 100:
+                        danger_border = DangerBorder.VERY_LOW
+                    elif cost_ratio >= 50:
+                        danger_border = DangerBorder.LOWEST
+                    else:
+                        danger_border = DangerBorder.BETAORI
+                # little to no ukeire
+                else:
+                    danger_border = DangerBorder.BETAORI
 
             if discard_option.shanten == 2:
                 if self.player.is_dealer:
@@ -299,18 +328,22 @@ class TileDangerHandler:
 
                 # lots of ukeire
                 if discard_option.ukeire >= 40:
-                    if cost_ratio >= 200:
+                    if cost_ratio >= 400:
+                        danger_border = DangerBorder.HIGH
+                    elif cost_ratio >= 200:
                         danger_border = DangerBorder.MEDIUM
                     elif cost_ratio >= 100:
-                        danger_border = DangerBorder.LOW
-                    else:
                         danger_border = DangerBorder.EXTREMELY_LOW
+                    else:
+                        danger_border = DangerBorder.BETAORI
                 # very good ukeire
                 elif discard_option.ukeire >= 20:
-                    if cost_ratio >= 200:
-                        danger_border = DangerBorder.LOWER_MEDIUM
+                    if cost_ratio >= 400:
+                        danger_border = DangerBorder.UPPER_MEDIUM
+                    elif cost_ratio >= 200:
+                        danger_border = DangerBorder.LOW
                     elif cost_ratio >= 100:
-                        danger_border = DangerBorder.VERY_LOW
+                        danger_border = DangerBorder.LOWEST
                     else:
                         danger_border = DangerBorder.BETAORI
                 # mediocre ukeire or worse

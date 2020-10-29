@@ -111,6 +111,23 @@ class TileDanger:
         "description": "Shonpai weak kabe tile",
     }
 
+    NON_SHONPAI_KABE_STRONG_OPEN_HAND = {
+        "value": 60,
+        "description": "Non-shonpai strong kabe tile (against open hand)",
+    }
+    SHONPAI_KABE_STRONG_OPEN_HAND = {
+        "value": 300,
+        "description": "Shonpai strong kabe tile (against open hand)",
+    }
+    NON_SHONPAI_KABE_WEAK_OPEN_HAND = {
+        "value": 120,
+        "description": "Non-shonpai weak kabe tile (against open hand)",
+    }
+    SHONPAI_KABE_WEAK_OPEN_HAND = {
+        "value": 200,
+        "description": "Shonpai weak kabe tile (against open hand)",
+    }
+
     # suji tiles
     SUJI_19_NOT_SHONPAI = {
         "value": 40,
@@ -127,6 +144,19 @@ class TileDanger:
     SUJI_2378_ON_RIICHI = {
         "value": 300,
         "description": "Suji on 2, 3, 7 or 8 on riichi declaration",
+    }
+
+    SUJI_19_NOT_SHONPAI_OPEN_HAND = {
+        "value": 100,
+        "description": "Non-shonpai 1 or 9 with suji (against open hand)",
+    }
+    SUJI_19_SHONPAI_OPEN_HAND = {
+        "value": 200,
+        "description": "Shonpai 1 or 9 with suji (against open hand)",
+    }
+    SUJI_OPEN_HAND = {
+        "value": 160,
+        "description": "Default suji (against open hand)",
     }
 
     # possible ryanmen waits

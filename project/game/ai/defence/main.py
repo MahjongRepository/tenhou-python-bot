@@ -68,11 +68,11 @@ class TileDangerHandler:
 
             # honors
             if is_honor(tile_34):
-                danger = self._process_danger_for_honor(tile_34, enemy_analyzer, number_of_revealed_tiles)
+                danger = self._process_danger_for_honor(enemy_analyzer, tile_34, number_of_revealed_tiles)
             # terminals
             elif is_terminal(tile_34):
                 danger = self._process_danger_for_terminal_tiles_and_kabe_suji(
-                    tile_34, number_of_revealed_tiles, kabe_tiles, suji_tiles
+                    enemy_analyzer, tile_34, number_of_revealed_tiles, kabe_tiles, suji_tiles
                 )
             # 2-8 tiles
             else:
@@ -390,20 +390,32 @@ class TileDangerHandler:
         return self._analyzed_enemies
 
     def _process_danger_for_terminal_tiles_and_kabe_suji(
-        self, tile_34, number_of_revealed_tiles, kabe_tiles, suji_tiles
+        self, enemy_analyzer, tile_34, number_of_revealed_tiles, kabe_tiles, suji_tiles
     ):
         have_strong_kabe = [x for x in kabe_tiles if tile_34 == x["tile"] and x["type"] == Kabe.STRONG_KABE]
         if have_strong_kabe:
-            if number_of_revealed_tiles == 1:
-                return TileDanger.SHONPAI_KABE_STRONG
+            if enemy_analyzer.enemy.is_open_hand:
+                if number_of_revealed_tiles == 1:
+                    return TileDanger.SHONPAI_KABE_STRONG_OPEN_HAND
+                else:
+                    return TileDanger.NON_SHONPAI_KABE_STRONG_OPEN_HAND
             else:
-                return TileDanger.NON_SHONPAI_KABE_STRONG
+                if number_of_revealed_tiles == 1:
+                    return TileDanger.SHONPAI_KABE_STRONG
+                else:
+                    return TileDanger.NON_SHONPAI_KABE_STRONG
 
         if tile_34 in suji_tiles:
-            if number_of_revealed_tiles == 1:
-                return TileDanger.SUJI_19_SHONPAI
+            if enemy_analyzer.enemy.is_open_hand:
+                if number_of_revealed_tiles == 1:
+                    return TileDanger.SUJI_19_SHONPAI_OPEN_HAND
+                else:
+                    return TileDanger.SUJI_19_NOT_SHONPAI_OPEN_HAND
             else:
-                return TileDanger.SUJI_19_NOT_SHONPAI
+                if number_of_revealed_tiles == 1:
+                    return TileDanger.SUJI_19_SHONPAI
+                else:
+                    return TileDanger.SUJI_19_NOT_SHONPAI
 
         return None
 
@@ -412,17 +424,29 @@ class TileDangerHandler:
     ):
         have_strong_kabe = [x for x in kabe_tiles if tile_34 == x["tile"] and x["type"] == Kabe.STRONG_KABE]
         if have_strong_kabe:
-            if number_of_revealed_tiles == 1:
-                return TileDanger.SHONPAI_KABE_STRONG
+            if enemy_analyzer.enemy.is_open_hand:
+                if number_of_revealed_tiles == 1:
+                    return TileDanger.SHONPAI_KABE_STRONG_OPEN_HAND
+                else:
+                    return TileDanger.NON_SHONPAI_KABE_STRONG_OPEN_HAND
             else:
-                return TileDanger.NON_SHONPAI_KABE_STRONG
+                if number_of_revealed_tiles == 1:
+                    return TileDanger.SHONPAI_KABE_STRONG
+                else:
+                    return TileDanger.NON_SHONPAI_KABE_STRONG
 
         have_weak_kabe = [x for x in kabe_tiles if tile_34 == x["tile"] and x["type"] == Kabe.WEAK_KABE]
         if have_weak_kabe:
-            if number_of_revealed_tiles == 1:
-                return TileDanger.SHONPAI_KABE_WEAK
+            if enemy_analyzer.enemy.is_open_hand:
+                if number_of_revealed_tiles == 1:
+                    return TileDanger.SHONPAI_KABE_WEAK_OPEN_HAND
+                else:
+                    return TileDanger.NON_SHONPAI_KABE_WEAK_OPEN_HAND
             else:
-                return TileDanger.NON_SHONPAI_KABE_WEAK
+                if number_of_revealed_tiles == 1:
+                    return TileDanger.SHONPAI_KABE_WEAK
+                else:
+                    return TileDanger.NON_SHONPAI_KABE_WEAK
 
         # only consider suji if there is no kabe
         have_suji = [x for x in suji_tiles if tile_34 == x]
@@ -435,12 +459,14 @@ class TileDangerHandler:
                 if simplify(tile_34) <= 2 or simplify(tile_34) >= 6:
                     if 3 <= simplify(enemy_riichi_tile_34) <= 5 and riichi_on_suji:
                         return TileDanger.SUJI_2378_ON_RIICHI
+            elif enemy_analyzer.enemy.is_open_hand:
+                return TileDanger.SUJI_OPEN_HAND
 
             return TileDanger.SUJI
 
         return None
 
-    def _process_danger_for_honor(self, tile_34, enemy_analyzer, number_of_revealed_tiles):
+    def _process_danger_for_honor(self, enemy_analyzer, tile_34, number_of_revealed_tiles):
         danger = None
         number_of_yakuhai = enemy_analyzer.enemy.valued_honors.count(tile_34)
 

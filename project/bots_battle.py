@@ -4,20 +4,15 @@ from random import random
 import game.bots_battle
 from game.bots_battle.game_manager import GameManager
 from game.bots_battle.local_client import LocalClient
+from game.config.battle import BattleConfig
 from terminaltables import AsciiTable
 from tqdm import trange
 from utils.logger import DATE_FORMAT, LOG_FORMAT
-
-TOTAL_GAMES = 1
 
 logger = logging.getLogger("game")
 
 
 def main():
-    # initial seed
-    random_value = random()
-    game.bots_battle.game_manager.shuffle_seed = lambda: random_value
-
     clients = [LocalClient() for _ in range(0, 4)]
     manager = GameManager(clients)
 
@@ -34,8 +29,15 @@ def main():
             "called_rounds": 0,
         }
 
-    for x in trange(TOTAL_GAMES):
-        logger.info("Hanchan #{0}".format(x + 1))
+    for i in trange(BattleConfig.TOTAL_GAMES):
+        logger.info("Hanchan #{0}".format(i + 1))
+
+        if i < len(BattleConfig.SEEDS):
+            seed_value = BattleConfig.SEEDS[i]
+        else:
+            seed_value = random()
+
+        game.bots_battle.game_manager.shuffle_seed = lambda: seed_value
 
         result = manager.play_game(total_results)
 
@@ -56,10 +58,6 @@ def main():
 
         table = AsciiTable(table_data)
         print(table.table)
-
-        # rebuild seed value
-        random_value = random()
-        game.bots_battle.game_manager.shuffle_seed = lambda: random_value
 
     table_data = [
         ["Player", "AI", "Average place", "Win rate", "Feed rate", "Riichi rate", "Call rate"],

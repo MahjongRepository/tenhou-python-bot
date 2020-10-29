@@ -337,7 +337,7 @@ class TenhouClient(Client):
                 if self.decoder.is_opened_set_message(message):
                     meld = self.decoder.parse_meld(message)
                     self.table.add_called_meld(meld.who, meld)
-                    logger.info("MeldPrint: {} by {}".format(meld, meld.who))
+                    logger.info("Meld: {} by {}".format(meld, meld.who))
 
                     # tenhou confirmed that we called a meld
                     # we had to do discard after this

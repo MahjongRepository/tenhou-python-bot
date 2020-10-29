@@ -33,7 +33,7 @@ class Riichi:
             self.player.ai.waiting, TilesConverter.to_34_array(self.player.closed_hand)
         )
         waiting = self.player.ai.waiting[0]
-        hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=False)
+        hand_value = self.player.ai.estimate_hand_value_or_get_from_cache(waiting, call_riichi=False)
 
         tiles = self.player.closed_hand[:]
         closed_melds = [x for x in self.player.melds if not x.opened]
@@ -234,7 +234,7 @@ class Riichi:
         hand_costs = []
         waits_with_yaku = 0
         for waiting in self.player.ai.waiting:
-            hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=False)
+            hand_value = self.player.ai.estimate_hand_value_or_get_from_cache(waiting, call_riichi=False)
             if hand_value.error is None:
                 hand_costs.append(hand_value.cost["main"])
                 if hand_value.yaku is not None and hand_value.cost is not None:

@@ -5,6 +5,7 @@ from mahjong.constants import AKA_DORA_LIST
 from mahjong.shanten import Shanten
 from mahjong.tile import Tile, TilesConverter
 from mahjong.utils import is_honor, is_pair, is_tile_strictly_isolated, simplify
+from utils.cache import build_shanten_cache_key
 from utils.decisions_logger import DecisionsLogger
 
 
@@ -229,12 +230,13 @@ class HandBuilder:
         else:
             return discard_option.find_tile_in_hand(closed_hand)
 
-    def calculate_shanten(self, tiles_34, open_sets_34=None):
-        shanten_with_chiitoitsu = self.ai.shanten_calculator.calculate_shanten(tiles_34, open_sets_34, chiitoitsu=True)
-        shanten_without_chiitoitsu = self.ai.shanten_calculator.calculate_shanten(
-            tiles_34, open_sets_34, chiitoitsu=False
+    def calculate_shanten_and_decide_hand_structure(self, tiles_34, open_sets_34=None):
+        shanten_with_chiitoitsu = self.ai.calculate_shanten_or_get_from_cache(
+            tiles_34, open_sets_34, use_chiitoitsu=True
         )
-
+        shanten_without_chiitoitsu = self.ai.calculate_shanten_or_get_from_cache(
+            tiles_34, open_sets_34, use_chiitoitsu=False
+        )
         return self._decide_if_use_chiitoitsu(shanten_with_chiitoitsu, shanten_without_chiitoitsu)
 
     def calculate_waits(self, tiles_34, open_sets_34=None, use_chiitoitsu=False):
@@ -244,7 +246,7 @@ class HandBuilder:
         :param use_chiitoitsu: if we should consider chiitoitsu hand or not
         :return: array of waits in 34 format and number of shanten
         """
-        shanten = self.ai.shanten_calculator.calculate_shanten(tiles_34, open_sets_34, chiitoitsu=use_chiitoitsu)
+        shanten = self.ai.calculate_shanten_or_get_from_cache(tiles_34, open_sets_34, use_chiitoitsu=use_chiitoitsu)
 
         waiting = []
         for j in range(0, 34):
@@ -253,15 +255,12 @@ class HandBuilder:
 
             tiles_34[j] += 1
 
-            key = "{},{},{}".format(
-                "".join([str(x) for x in tiles_34]), ";".join([str(x) for x in open_sets_34]), use_chiitoitsu and 1 or 0
-            )
-
+            key = build_shanten_cache_key(tiles_34, open_sets_34, use_chiitoitsu)
             if key in self.ai.hand_cache_shanten:
                 new_shanten = self.ai.hand_cache_shanten[key]
             else:
-                new_shanten = self.ai.shanten_calculator.calculate_shanten(
-                    tiles_34, open_sets_34, chiitoitsu=use_chiitoitsu
+                new_shanten = self.ai.calculate_shanten_or_get_from_cache(
+                    tiles_34, open_sets_34, use_chiitoitsu=use_chiitoitsu
                 )
                 self.ai.hand_cache_shanten[key] = new_shanten
 
@@ -296,7 +295,7 @@ class HandBuilder:
             if not closed_tiles_34[hand_tile]:
                 continue
 
-            shanten, use_chiitoitsu = self.calculate_shanten(tiles_34, open_sets_34)
+            shanten, use_chiitoitsu = self.calculate_shanten_and_decide_hand_structure(tiles_34, open_sets_34)
             if use_chiitoitsu and shanten < min_shanten_with_chiitoitsu:
                 min_shanten_with_chiitoitsu = shanten
             elif not use_chiitoitsu and shanten < min_shanten_without_chiitoitsu:
@@ -332,7 +331,7 @@ class HandBuilder:
         if is_agari:
             shanten = Shanten.AGARI_STATE
         else:
-            shanten = self.ai.shanten_calculator.calculate_shanten(tiles_34, open_sets_34, chiitoitsu=use_chiitoitsu)
+            shanten = self.ai.calculate_shanten_or_get_from_cache(tiles_34, open_sets_34, use_chiitoitsu=use_chiitoitsu)
             assert shanten >= min_shanten
 
         return results, shanten
@@ -762,13 +761,17 @@ class HandBuilder:
         is_furiten = self._is_discard_option_furiten(discard_option)
 
         for waiting in discard_option.waiting:
-            hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=call_riichi, is_tsumo=True)
+            hand_value = self.player.ai.estimate_hand_value_or_get_from_cache(
+                waiting, call_riichi=call_riichi, is_tsumo=True
+            )
             if hand_value.error is None:
                 hand_cost_tsumo = hand_value.cost["main"] + 2 * hand_value.cost["additional"]
                 cost_x_ukeire_tsumo += hand_cost_tsumo * discard_option.wait_to_ukeire[waiting]
 
             if not is_furiten:
-                hand_value = self.player.ai.estimate_hand_value(waiting, call_riichi=call_riichi, is_tsumo=False)
+                hand_value = self.player.ai.estimate_hand_value_or_get_from_cache(
+                    waiting, call_riichi=call_riichi, is_tsumo=False
+                )
                 if hand_value.error is None:
                     hand_cost_ron = hand_value.cost["main"]
                     cost_x_ukeire_ron += hand_cost_ron * discard_option.wait_to_ukeire[waiting]

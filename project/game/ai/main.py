@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 import utils.decisions_constants as log
 from game.ai.defence.main import TileDangerHandler
 from game.ai.hand_builder import HandBuilder
@@ -19,6 +21,7 @@ from mahjong.hand_calculating.hand_config import HandConfig, OptionalRules
 from mahjong.shanten import Shanten
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_pon
+from utils.cache import build_estimate_hand_value_cache_key, build_shanten_cache_key
 from utils.decisions_logger import DecisionsLogger, MeldPrint
 
 
@@ -82,7 +85,9 @@ class MahjongAI:
             ],
         )
 
-        self.shanten, _ = self.hand_builder.calculate_shanten(TilesConverter.to_34_array(self.player.tiles))
+        self.shanten, _ = self.hand_builder.calculate_shanten_and_decide_hand_structure(
+            TilesConverter.to_34_array(self.player.tiles)
+        )
 
     def draw_tile(self, tile_136):
         self.determine_strategy(self.player.tiles)
@@ -107,7 +112,9 @@ class MahjongAI:
             return None, None
 
         tiles_34_previous = TilesConverter.to_34_array(tiles_136_previous)
-        previous_shanten, _ = self.hand_builder.calculate_shanten(tiles_34_previous, self.player.meld_34_tiles)
+        previous_shanten, _ = self.hand_builder.calculate_shanten_and_decide_hand_structure(
+            tiles_34_previous, self.player.meld_34_tiles
+        )
 
         if previous_shanten == Shanten.AGARI_STATE and not self.current_strategy.can_meld_into_agari():
             return None, None
@@ -165,24 +172,23 @@ class MahjongAI:
 
         return self.current_strategy and True or False
 
-    def estimate_hand_value(self, win_tile, tiles=None, call_riichi=False, is_tsumo=False):
-        """
-        :param win_tile: 34 tile format
-        :param tiles:
-        :param call_riichi:
-        :param is_tsumo
-        :return:
-        """
-        win_tile *= 4
+    def estimate_hand_value_or_get_from_cache(self, win_tile_34, tiles=None, call_riichi=False, is_tsumo=False):
+        win_tile_136 = win_tile_34 * 4
 
         # we don't need to think, that our waiting is aka dora
-        if win_tile in AKA_DORA_LIST:
-            win_tile += 1
+        if win_tile_136 in AKA_DORA_LIST:
+            win_tile_136 += 1
 
         if not tiles:
             tiles = self.player.tiles[:]
 
-        tiles += [win_tile]
+        tiles += [win_tile_136]
+
+        cache_key = build_estimate_hand_value_cache_key(
+            tiles, call_riichi, is_tsumo, self.player.melds, self.player.table.dora_indicators
+        )
+        if self.hand_cache_estimation.get(cache_key):
+            return self.hand_cache_estimation.get(cache_key)
 
         config = HandConfig(
             is_riichi=call_riichi,
@@ -195,19 +201,9 @@ class MahjongAI:
             ),
         )
 
-        cache_key = "{}.{}.{}.{}.{}".format(
-            TilesConverter.to_one_line_string(tiles),
-            call_riichi and 1 or 0,
-            is_tsumo and 1 or 0,
-            ",".join([";".join([str(x) for x in sorted(x.tiles)]) for x in self.player.melds]),
-            ",".join([str(x) for x in self.player.table.dora_indicators]),
-        )
-        if self.hand_cache_estimation.get(cache_key):
-            return self.hand_cache_estimation.get(cache_key)
-
         result = self.finished_hand.estimate_hand_value(
             tiles,
-            win_tile,
+            win_tile_136,
             self.player.melds,
             self.player.table.dora_indicators,
             config,
@@ -223,7 +219,7 @@ class MahjongAI:
             tiles = self.player.tiles[:]
             tiles.remove(discard_option.find_tile_in_hand(self.player.closed_hand))
 
-            hand_cost = self.estimate_hand_value(
+            hand_cost = self.estimate_hand_value_or_get_from_cache(
                 waiting, tiles=tiles, call_riichi=not self.player.is_open_hand, is_tsumo=True
             )
 
@@ -367,6 +363,20 @@ class MahjongAI:
         :return:
         """
         pass
+
+    def calculate_shanten_or_get_from_cache(
+        self, tiles_34: List[int], open_sets_34: Optional[List[List[int]]], use_chiitoitsu: bool
+    ):
+        """
+        Sometimes we are calculating shanten for the same hand multiple times
+        to save some resources let's cache previous calculations
+        """
+        key = build_shanten_cache_key(tiles_34, open_sets_34, use_chiitoitsu)
+        if key in self.hand_cache_shanten:
+            return self.hand_cache_shanten[key]
+        result = self.shanten_calculator.calculate_shanten(tiles_34, open_sets_34, chiitoitsu=use_chiitoitsu)
+        self.hand_cache_shanten[key] = result
+        return result
 
     @property
     def enemy_players(self):

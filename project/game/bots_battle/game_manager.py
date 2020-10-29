@@ -184,23 +184,9 @@ class GameManager:
                 # but our hand doesn't contain any yaku
                 # in that case we can't call ron
                 if not current_client.player.in_riichi:
-                    config = HandConfig(
-                        is_riichi=False,
-                        player_wind=current_client.player.player_wind,
-                        round_wind=current_client.player.table.round_wind_number,
+                    result = current_client.player.ai.estimate_hand_value_or_get_from_cache(
+                        draw_tile // 4,
                         is_tsumo=True,
-                        options=OptionalRules(
-                            has_aka_dora=True,
-                            has_open_tanyao=True,
-                        ),
-                    )
-
-                    result = self.finished_hand.estimate_hand_value(
-                        tiles=tiles + [draw_tile],
-                        win_tile=draw_tile,
-                        melds=current_client.player.melds,
-                        dora_indicators=self.dora_indicators,
-                        config=config,
                     )
                     can_win = result.error is None
 
@@ -435,32 +421,21 @@ class GameManager:
                 return False
 
         tiles = client.player.tiles
-        # it can be situation when we are in the tempai
+        is_agari = self.agari.is_agari(TilesConverter.to_34_array(tiles + [win_tile]), client.player.meld_34_tiles)
+        if not is_agari:
+            return False
+
+        # it can be situation when we are in agari state
         # but our hand doesn't contain any yaku
         # in that case we can't call ron
         if not client.player.in_riichi:
-            config = HandConfig(
-                is_riichi=False,
-                player_wind=client.player.player_wind,
-                round_wind=client.player.table.round_wind_number,
+            result = client.player.ai.estimate_hand_value_or_get_from_cache(
+                win_tile // 4,
                 is_tsumo=False,
-                options=OptionalRules(
-                    has_aka_dora=True,
-                    has_open_tanyao=True,
-                ),
-            )
-
-            result = self.finished_hand.estimate_hand_value(
-                tiles=tiles + [win_tile],
-                win_tile=win_tile,
-                melds=client.player.melds,
-                dora_indicators=self.dora_indicators,
-                config=config,
             )
             return result.error is None
 
-        is_ron = self.agari.is_agari(TilesConverter.to_34_array(tiles + [win_tile]), client.player.meld_34_tiles)
-        return is_ron
+        return True
 
     def call_riichi(self, client):
         client.player.in_riichi = True

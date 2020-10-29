@@ -407,25 +407,58 @@ class TileDangerHandler:
 
         return None
 
-    def _process_danger_for_honor(self, tile_34, enemy, number_of_revealed_tiles):
+    def _process_danger_for_honor(self, tile_34, enemy_analyzer, number_of_revealed_tiles):
         danger = None
-        number_of_yakuhai = enemy.enemy.valued_honors.count(tile_34)
+        number_of_yakuhai = enemy_analyzer.enemy.valued_honors.count(tile_34)
 
-        if number_of_revealed_tiles == 1:
-            if number_of_yakuhai == 0:
-                danger = TileDanger.NON_YAKUHAI_HONOR_SHONPAI
-            if number_of_yakuhai == 1:
-                danger = TileDanger.YAKUHAI_HONOR_SHONPAI
-            if number_of_yakuhai == 2:
-                danger = TileDanger.DOUBLE_YAKUHAI_HONOR_SHONPAI
+        if len(enemy_analyzer.enemy.discards) <= 6:
+            if number_of_revealed_tiles == 1:
+                if number_of_yakuhai == 0:
+                    danger = TileDanger.NON_YAKUHAI_HONOR_SHONPAI_EARLY
+                if number_of_yakuhai == 1:
+                    danger = TileDanger.YAKUHAI_HONOR_SHONPAI_EARLY
+                if number_of_yakuhai == 2:
+                    danger = TileDanger.DOUBLE_YAKUHAI_HONOR_SHONPAI_EARLY
 
-        if number_of_revealed_tiles == 2:
-            if number_of_yakuhai == 0:
-                danger = TileDanger.NON_YAKUHAI_HONOR_SECOND
-            if number_of_yakuhai == 1:
-                danger = TileDanger.YAKUHAI_HONOR_SECOND
-            if number_of_yakuhai == 2:
-                danger = TileDanger.DOUBLE_YAKUHAI_HONOR_SECOND
+            if number_of_revealed_tiles == 2:
+                if number_of_yakuhai == 0:
+                    danger = TileDanger.NON_YAKUHAI_HONOR_SECOND_EARLY
+                if number_of_yakuhai == 1:
+                    danger = TileDanger.YAKUHAI_HONOR_SECOND_EARLY
+                if number_of_yakuhai == 2:
+                    danger = TileDanger.DOUBLE_YAKUHAI_HONOR_SECOND_EARLY
+        elif len(enemy_analyzer.enemy.discards) <= 12:
+            if number_of_revealed_tiles == 1:
+                if number_of_yakuhai == 0:
+                    danger = TileDanger.NON_YAKUHAI_HONOR_SHONPAI_MID
+                if number_of_yakuhai == 1:
+                    danger = TileDanger.YAKUHAI_HONOR_SHONPAI_MID
+                if number_of_yakuhai == 2:
+                    danger = TileDanger.DOUBLE_YAKUHAI_HONOR_SHONPAI_MID
+
+            if number_of_revealed_tiles == 2:
+                if number_of_yakuhai == 0:
+                    danger = TileDanger.NON_YAKUHAI_HONOR_SECOND_MID
+                if number_of_yakuhai == 1:
+                    danger = TileDanger.YAKUHAI_HONOR_SECOND_MID
+                if number_of_yakuhai == 2:
+                    danger = TileDanger.DOUBLE_YAKUHAI_HONOR_SECOND_MID
+        else:
+            if number_of_revealed_tiles == 1:
+                if number_of_yakuhai == 0:
+                    danger = TileDanger.NON_YAKUHAI_HONOR_SHONPAI_LATE
+                if number_of_yakuhai == 1:
+                    danger = TileDanger.YAKUHAI_HONOR_SHONPAI_LATE
+                if number_of_yakuhai == 2:
+                    danger = TileDanger.DOUBLE_YAKUHAI_HONOR_SHONPAI_LATE
+
+            if number_of_revealed_tiles == 2:
+                if number_of_yakuhai == 0:
+                    danger = TileDanger.NON_YAKUHAI_HONOR_SECOND_LATE
+                if number_of_yakuhai == 1:
+                    danger = TileDanger.YAKUHAI_HONOR_SECOND_LATE
+                if number_of_yakuhai == 2:
+                    danger = TileDanger.DOUBLE_YAKUHAI_HONOR_SECOND_LATE
 
         if number_of_revealed_tiles == 3:
             danger = TileDanger.HONOR_THIRD

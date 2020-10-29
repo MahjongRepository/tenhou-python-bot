@@ -80,7 +80,7 @@ def test_tile_danger_and_non_yakuhai_honor_second():
     player.init_hand(tiles)
     player.draw_tile(tile)
 
-    _assert_discard(player, enemy_seat, TileDanger.NON_YAKUHAI_HONOR_SECOND, honors="4")
+    _assert_discard(player, enemy_seat, TileDanger.NON_YAKUHAI_HONOR_SECOND_EARLY, honors="4")
 
 
 def test_tile_danger_and_non_yakuhai_honor_shonpai():
@@ -93,7 +93,7 @@ def test_tile_danger_and_non_yakuhai_honor_shonpai():
     player.init_hand(tiles)
     player.draw_tile(tile)
 
-    _assert_discard(player, enemy_seat, TileDanger.NON_YAKUHAI_HONOR_SHONPAI, honors="4")
+    _assert_discard(player, enemy_seat, TileDanger.NON_YAKUHAI_HONOR_SHONPAI_EARLY, honors="4")
 
 
 def test_tile_danger_and_forms_bonus():
@@ -129,7 +129,7 @@ def test_tile_danger_and_yakuhai_honor_second():
     player.init_hand(tiles)
     player.draw_tile(tile)
 
-    _assert_discard(player, enemy_seat, TileDanger.YAKUHAI_HONOR_SECOND, honors="6")
+    _assert_discard(player, enemy_seat, TileDanger.YAKUHAI_HONOR_SECOND_EARLY, honors="6")
 
 
 def test_tile_danger_and_double_yakuhai_honor_second():
@@ -145,7 +145,7 @@ def test_tile_danger_and_double_yakuhai_honor_second():
     player.init_hand(tiles)
     player.draw_tile(tile)
 
-    _assert_discard(player, enemy_seat, TileDanger.DOUBLE_YAKUHAI_HONOR_SECOND, honors="2")
+    _assert_discard(player, enemy_seat, TileDanger.DOUBLE_YAKUHAI_HONOR_SECOND_EARLY, honors="2")
 
 
 def test_tile_danger_and_yakuhai_honor_shonpai():
@@ -158,7 +158,7 @@ def test_tile_danger_and_yakuhai_honor_shonpai():
     player.init_hand(tiles)
     player.draw_tile(tile)
 
-    _assert_discard(player, enemy_seat, TileDanger.YAKUHAI_HONOR_SHONPAI, honors="6")
+    _assert_discard(player, enemy_seat, TileDanger.YAKUHAI_HONOR_SHONPAI_EARLY, honors="6")
 
 
 def test_tile_danger_and_double_yakuhai_honor_shonpai():
@@ -172,7 +172,7 @@ def test_tile_danger_and_double_yakuhai_honor_shonpai():
     player.init_hand(tiles)
     player.draw_tile(tile)
 
-    _assert_discard(player, enemy_seat, TileDanger.DOUBLE_YAKUHAI_HONOR_SHONPAI, honors="2")
+    _assert_discard(player, enemy_seat, TileDanger.DOUBLE_YAKUHAI_HONOR_SHONPAI_EARLY, honors="2")
 
 
 def test_tile_danger_and_terminal_suji_tiles():

@@ -14,31 +14,82 @@ class TileDanger:
     # honor tiles
     HONOR_THIRD = {
         "value": 40,
-        "description": "Third honor tile",
+        "description": "Third honor tile (early game)",
     }
-    NON_YAKUHAI_HONOR_SECOND = {
-        "value": 80,
-        "description": "Second non-yakuhai honor",
+
+    NON_YAKUHAI_HONOR_SECOND_EARLY = {
+        "value": 60,
+        "description": "Second non-yakuhai honor (early game)",
     }
-    NON_YAKUHAI_HONOR_SHONPAI = {
-        "value": 160,
-        "description": "Shonpai non-yakuhai honor",
-    }
-    YAKUHAI_HONOR_SECOND = {
+    NON_YAKUHAI_HONOR_SHONPAI_EARLY = {
         "value": 120,
-        "description": "Second yakuhai honor",
+        "description": "Shonpai non-yakuhai honor (early game)",
     }
-    DOUBLE_YAKUHAI_HONOR_SECOND = {
-        "value": 200,
-        "description": "Second double-yakuhai honor",
+    YAKUHAI_HONOR_SECOND_EARLY = {
+        "value": 80,
+        "description": "Second yakuhai honor (early game)",
     }
-    YAKUHAI_HONOR_SHONPAI = {
+    YAKUHAI_HONOR_SHONPAI_EARLY = {
+        "value": 160,
+        "description": "Shonpai yakuhai honor (early game)",
+    }
+    DOUBLE_YAKUHAI_HONOR_SECOND_EARLY = {
+        "value": 120,
+        "description": "Second double-yakuhai honor (early game)",
+    }
+    DOUBLE_YAKUHAI_HONOR_SHONPAI_EARLY = {
         "value": 240,
-        "description": "Shonpai yakuhai honor",
+        "description": "Shonpai double-yakuhai honor (early game)",
     }
-    DOUBLE_YAKUHAI_HONOR_SHONPAI = {
+
+    NON_YAKUHAI_HONOR_SECOND_MID = {
+        "value": 80,
+        "description": "Second non-yakuhai honor (mid game)",
+    }
+    NON_YAKUHAI_HONOR_SHONPAI_MID = {
+        "value": 160,
+        "description": "Shonpai non-yakuhai honor (mid game)",
+    }
+    YAKUHAI_HONOR_SECOND_MID = {
+        "value": 120,
+        "description": "Second yakuhai honor (mid game)",
+    }
+    DOUBLE_YAKUHAI_HONOR_SECOND_MID = {
+        "value": 200,
+        "description": "Second double-yakuhai honor (mid game)",
+    }
+    YAKUHAI_HONOR_SHONPAI_MID = {
+        "value": 240,
+        "description": "Shonpai yakuhai honor (mid game)",
+    }
+    DOUBLE_YAKUHAI_HONOR_SHONPAI_MID = {
         "value": 480,
-        "description": "Shonpai double-yakuhai honor",
+        "description": "Shonpai double-yakuhai honor (mid game)",
+    }
+
+    NON_YAKUHAI_HONOR_SECOND_LATE = {
+        "value": 160,
+        "description": "Second non-yakuhai honor (late game)",
+    }
+    NON_YAKUHAI_HONOR_SHONPAI_LATE = {
+        "value": 240,
+        "description": "Shonpai non-yakuhai honor (late game)",
+    }
+    YAKUHAI_HONOR_SECOND_LATE = {
+        "value": 200,
+        "description": "Second yakuhai honor (late game)",
+    }
+    DOUBLE_YAKUHAI_HONOR_SECOND_LATE = {
+        "value": 300,
+        "description": "Second double-yakuhai honor (late game)",
+    }
+    YAKUHAI_HONOR_SHONPAI_LATE = {
+        "value": 400,
+        "description": "Shonpai yakuhai honor (late game)",
+    }
+    DOUBLE_YAKUHAI_HONOR_SHONPAI_LATE = {
+        "value": 600,
+        "description": "Shonpai double-yakuhai honor (late game)",
     }
 
     # kabe tiles

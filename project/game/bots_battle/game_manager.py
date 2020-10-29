@@ -526,7 +526,7 @@ class GameManager:
             config = HandConfig(
                 is_riichi=winner.player.in_riichi,
                 player_wind=winner.player.player_wind,
-                round_wind=winner.player.table.round_wind_number,
+                round_wind=winner.player.table.round_wind_tile,
                 is_tsumo=is_tsumo,
                 is_tenhou=is_tenhou,
                 is_renhou=is_renhou,

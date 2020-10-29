@@ -719,7 +719,7 @@ class HandBuilder:
             return self._choose_best_tanki_wait(discard_desc)
 
         best_discard_desc = [x for x in discard_desc if x["cost_x_ukeire"] == discard_desc[0]["cost_x_ukeire"]]
-        best_discard_desc = sorted(best_discard_desc, key=lambda k: (-k["sum_danger"]))
+        best_discard_desc = sorted(best_discard_desc, key=lambda k: (k["sum_danger"]))
 
         # we only have one best option based on ukeire and cost, nothing more to do here
         if len(best_discard_desc) == 1:

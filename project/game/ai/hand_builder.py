@@ -423,12 +423,20 @@ class HandBuilder:
                         if has_atodzuke:
                             ukeire /= 2
 
+                        # FIXME consider sorting by cost_x_ukeire as well
                         if (ukeire > best_ukeire) or (ukeire >= best_ukeire and not has_atodzuke):
                             best_ukeire = ukeire
                             best_one = result
                             result_has_atodzuke = has_atodzuke
                 else:
-                    best_one = sorted(results, key=lambda x: -x.ukeire)[0]
+                    if shanten == 0:
+                        # FIXME save cost_x_ukeire to not calculate it twice
+                        best_one = sorted(
+                            results,
+                            key=lambda x: (-x.ukeire, -self._estimate_cost_x_ukeire(x, call_riichi=call_riichi)[0]),
+                        )[0]
+                    else:
+                        best_one = sorted(results, key=lambda x: -x.ukeire)[0]
                     best_ukeire = best_one.ukeire
 
                 sum_tiles += best_ukeire * live_tiles

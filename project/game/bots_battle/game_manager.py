@@ -59,7 +59,6 @@ class GameManager:
         self.dora_indicators = []
         self.discards = []
         self.clients = clients
-        self._set_client_names()
 
         self.agari = Agari()
         self.finished_hand = HandCalculator()
@@ -739,33 +738,6 @@ class GameManager:
             is_game_end = True
 
         return is_game_end
-
-    def _set_client_names(self):
-        """
-        For better tests output
-        """
-        seed(shuffle_seed())
-
-        names = [
-            "Sato",
-            "Suzuki",
-            "Takahashi",
-            "Tanaka",
-            "Watanabe",
-            "Ito",
-            "Yamamoto",
-            "Nakamura",
-            "Kobayashi",
-            "Kato",
-            "Yoshida",
-            "Yamada",
-        ]
-
-        for client in self.clients:
-            name = names[randint(0, len(names) - 1)]
-            names.remove(name)
-
-            client.player.name = name
 
     def _get_current_client(self) -> Client:
         return self.clients[self.current_client_seat]

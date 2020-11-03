@@ -7,9 +7,10 @@ class LocalClient(Client):
     is_daburi = False
     is_ippatsu = False
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, bot_config):
+        super().__init__(bot_config)
         self.id = make_random_letters_and_digit_string()
+        self.player.name = bot_config.name
 
     def connect(self):
         pass

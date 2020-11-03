@@ -1,6 +1,8 @@
 import logging
+from typing import Optional
 
 import utils.decisions_constants as log
+from game.ai.configs.default import BotDefaultConfig
 from game.ai.main import MahjongAI
 from mahjong.constants import CHUN, EAST, HAKU, HATSU, NORTH, SOUTH, WEST
 from mahjong.tile import Tile, TilesConverter
@@ -138,14 +140,16 @@ class PlayerInterface:
 
 
 class Player(PlayerInterface):
-    ai = None
+    ai: Optional[MahjongAI] = None
+    config: Optional[BotDefaultConfig] = None
     tiles = None
     last_draw = None
     in_tempai = False
 
-    def __init__(self, table, seat, dealer_seat):
+    def __init__(self, table, seat, dealer_seat, bot_config: Optional[BotDefaultConfig]):
         super().__init__(table, seat, dealer_seat)
         self.ai = MahjongAI(self)
+        self.config = bot_config or BotDefaultConfig()
 
     def erase_state(self):
         super().erase_state()

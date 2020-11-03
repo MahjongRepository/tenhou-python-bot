@@ -30,18 +30,19 @@ class HandBuilder:
         min_shanten = min([x.shanten for x in discard_options])
 
         one_shanten_ukeire2_calculated_beforehand = False
-        # FIXME: this is hacky and takes too much time! refactor
-        # we need to calculate ukeire2 beforehand for correct danger calculation
-        if self.player.ai.defence.get_threatening_players() and min_shanten != 0:
-            for discard_option in discard_options:
-                if discard_option.shanten == 1:
-                    self.calculate_second_level_ukeire(discard_option, tiles, melds)
-                    one_shanten_ukeire2_calculated_beforehand = True
+        if self.player.config.FEATURE_DEFENCE_ENABLED:
+            # FIXME: this is hacky and takes too much time! refactor
+            # we need to calculate ukeire2 beforehand for correct danger calculation
+            if self.player.ai.defence.get_threatening_players() and min_shanten != 0:
+                for discard_option in discard_options:
+                    if discard_option.shanten == 1:
+                        self.calculate_second_level_ukeire(discard_option, tiles, melds)
+                        one_shanten_ukeire2_calculated_beforehand = True
 
-        discard_options, threatening_players = self.player.ai.defence.mark_tiles_danger_for_threats(discard_options)
+            discard_options, threatening_players = self.player.ai.defence.mark_tiles_danger_for_threats(discard_options)
 
-        if threatening_players:
-            DecisionsLogger.debug(log.DEFENCE_THREATENING_ENEMY, "Threats", context=threatening_players)
+            if threatening_players:
+                DecisionsLogger.debug(log.DEFENCE_THREATENING_ENEMY, "Threats", context=threatening_players)
 
         DecisionsLogger.debug(log.DISCARD_OPTIONS, "All discard candidates", discard_options)
 

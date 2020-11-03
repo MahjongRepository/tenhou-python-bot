@@ -4,8 +4,8 @@ from game.table import Table
 class Client:
     table = None
 
-    def __init__(self):
-        self.table = Table()
+    def __init__(self, bot_config=None):
+        self.table = Table(bot_config)
 
     def connect(self):
         raise NotImplementedError()

@@ -231,6 +231,14 @@ class TileDanger:
     LATE_ROUND = 12
     VERY_LATE_ROUND = 16
 
+    @staticmethod
+    def make_unverified_suji_coeff(value):
+        return {"value": value, "description": "Additional bonus for number of unverified suji"}
+
+    @staticmethod
+    def is_safe(danger):
+        return danger == TileDanger.IMPOSSIBLE_WAIT or danger == TileDanger.SAFE_AGAINST_THREATENING_HAND
+
 
 class DangerBorder:
     IGNORE = 1000000
@@ -374,7 +382,9 @@ class TileDangerHandler:
         return self.danger_border[player_seat]
 
     def get_total_danger_for_player(self, player_seat):
-        return sum([x["value"] for x in self.values[player_seat]])
+        total = sum([x["value"] for x in self.values[player_seat]])
+        assert total >= 0
+        return total
 
     def get_max_danger(self):
         return max(

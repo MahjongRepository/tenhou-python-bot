@@ -100,6 +100,7 @@ class TileDangerHandler:
                 },
             )
 
+            # for ryanmen waits we also account for number of dangerous suji tiles
             if forms_count[PossibleFormsAnalyzer.POSSIBLE_RYANMEN_SIDES] == 1:
                 self._update_discard_candidate(
                     tile_34,
@@ -107,12 +108,24 @@ class TileDangerHandler:
                     enemy_analyzer.enemy.seat,
                     TileDanger.RYANMEN_BASE_SINGLE,
                 )
+                self._update_discard_candidate(
+                    tile_34,
+                    discard_candidates,
+                    enemy_analyzer.enemy.seat,
+                    TileDanger.make_unverified_suji_coeff(enemy_analyzer.unverified_suji_coeff),
+                )
             elif forms_count[PossibleFormsAnalyzer.POSSIBLE_RYANMEN_SIDES] == 2:
                 self._update_discard_candidate(
                     tile_34,
                     discard_candidates,
                     enemy_analyzer.enemy.seat,
                     TileDanger.RYANMEN_BASE_DOUBLE,
+                )
+                self._update_discard_candidate(
+                    tile_34,
+                    discard_candidates,
+                    enemy_analyzer.enemy.seat,
+                    TileDanger.make_unverified_suji_coeff(enemy_analyzer.unverified_suji_coeff),
                 )
 
             dora_count = plus_dora(tile_136, self.player.table.dora_indicators)
@@ -149,7 +162,6 @@ class TileDangerHandler:
                 continue
 
             threatening_player_hand_cost = threatening_player.threat_reason["assumed_hand_cost"]
-            threatening_suji_coeff = threatening_player.threat_reason["suji_count_danger_border"]
 
             if discard_option.shanten == 0:
                 hand_weighted_cost = self.player.ai.estimate_weighted_mean_hand_value(discard_option)
@@ -356,9 +368,6 @@ class TileDangerHandler:
                 danger_border = DangerBorder.tune_down(danger_border, 2)
 
             danger_border = DangerBorder.tune_for_round(self.player, danger_border, shanten)
-            # FIXME: suji coef should increase/decrease target danger, not danger border
-            if danger_border >= DangerBorder.VERY_LOW:
-                danger_border -= threatening_suji_coeff
 
             discard_option.danger.set_danger_border(threatening_player.enemy.seat, danger_border, hand_weighted_cost)
         return discard_options
@@ -528,12 +537,13 @@ class TileDangerHandler:
         for discard_candidate in discard_candidates:
             if discard_candidate.tile_to_discard == tile_34:
                 # we found safe tile, in that case we can ignore all other metrics
-                if danger["value"] == 0:
+                if TileDanger.is_safe(danger):
                     discard_candidate.danger.clear_danger(player_seat)
 
-                # let's put danger metrics to the tile only if there is no safe tiles in the hand
-                has_safe = (
-                    len([x for x in discard_candidate.danger.get_danger_reasons(player_seat) if x["value"] == 0]) == 1
+                # let's put danger metrics to the tile only if we are not yet sure that tile is already safe
+                is_known_to_be_safe = (
+                    len([x for x in discard_candidate.danger.get_danger_reasons(player_seat) if TileDanger.is_safe(x)])
+                    > 0
                 )
-                if not has_safe:
+                if not is_known_to_be_safe:
                     discard_candidate.danger.set_danger(player_seat, danger)

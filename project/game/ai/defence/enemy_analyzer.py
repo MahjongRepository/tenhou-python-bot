@@ -127,7 +127,12 @@ class EnemyAnalyzer:
         assert result >= 0, "number of unverified suji can't be less than 0"
         return result
 
-    def get_suji_count_danger_border(self, unverified_suji_count: int) -> int:
+    @property
+    def unverified_suji_coeff(self) -> int:
+        return self.calculate_suji_count_coeff(self.number_of_unverified_suji)
+
+    @staticmethod
+    def calculate_suji_count_coeff(unverified_suji_count: int) -> int:
         return (TileDanger.SUJI_COUNT_BOUNDARY - unverified_suji_count) * TileDanger.SUJI_COUNT_MODIFIER
 
     def _calculate_assumed_hand_cost(self) -> int:
@@ -187,14 +192,12 @@ class EnemyAnalyzer:
     def _create_danger_reason(
         self, danger_reason, melds=None, dora_count=0, melds_han=0, active_yaku=None, round_step=None
     ):
-        danger = copy(danger_reason)
-        danger["melds"] = melds
-        danger["dora_count"] = dora_count
-        danger["melds_han"] = melds_han
-        danger["active_yaku"] = active_yaku
-        danger["round_step"] = round_step
-        danger["number_of_unverified_suji"] = self.number_of_unverified_suji
-        danger["suji_count_danger_border"] = self.get_suji_count_danger_border(danger["number_of_unverified_suji"])
+        new_danger_reason = copy(danger_reason)
+        new_danger_reason["melds"] = melds
+        new_danger_reason["dora_count"] = dora_count
+        new_danger_reason["melds_han"] = melds_han
+        new_danger_reason["active_yaku"] = active_yaku
+        new_danger_reason["round_step"] = round_step
 
-        self.threat_reason = danger
+        self.threat_reason = new_danger_reason
         self.threat_reason["assumed_hand_cost"] = self.assumed_hand_cost

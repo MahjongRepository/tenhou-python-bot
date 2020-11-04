@@ -165,7 +165,6 @@ class TanyaoStrategy(BaseStrategy):
     def validate_meld(self, chosen_meld_dict):
         selected_tile = chosen_meld_dict["discard_tile"]
         if selected_tile.shanten == 1 and selected_tile.ukeire >= 8:
-            print(selected_tile.shanten, selected_tile.ukeire)
             DecisionsLogger.debug(
                 log.MELD_DEBUG, "We have a good 1 shanten tanyao hand, let's not open it without tempai."
             )

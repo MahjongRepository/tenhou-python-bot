@@ -119,7 +119,6 @@ def test_is_threatening_and_honitsu_hand():
 
     threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 1
-    print(threatening_players[0].threat_reason)
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
     assert threatening_players[0].assumed_hand_cost == 5200
     assert threatening_players[0].threat_reason["active_yaku"][0].id == HonitsuAnalyzer.id

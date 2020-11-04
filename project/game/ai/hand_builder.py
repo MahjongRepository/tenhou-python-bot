@@ -249,20 +249,31 @@ class HandBuilder:
         shanten = self.ai.calculate_shanten_or_get_from_cache(tiles_34, open_sets_34, use_chiitoitsu=use_chiitoitsu)
 
         waiting = []
-        for j in range(0, 34):
-            if tiles_34[j] == 4:
+        for tile_index in range(0, 34):
+            if tiles_34[tile_index] == 4:
                 continue
 
-            tiles_34[j] += 1
+            tiles_34[tile_index] += 1
+
+            skip_isolated_tile = True
+            if tiles_34[tile_index] == 4:
+                skip_isolated_tile = False
+            if use_chiitoitsu and tiles_34[tile_index] == 3:
+                skip_isolated_tile = False
+
+            # there is no need to check single isolated tile
+            if skip_isolated_tile and is_tile_strictly_isolated(tiles_34, tile_index):
+                tiles_34[tile_index] -= 1
+                continue
 
             new_shanten = self.ai.calculate_shanten_or_get_from_cache(
                 tiles_34, open_sets_34, use_chiitoitsu=use_chiitoitsu
             )
 
             if new_shanten == shanten - 1:
-                waiting.append(j)
+                waiting.append(tile_index)
 
-            tiles_34[j] -= 1
+            tiles_34[tile_index] -= 1
 
         return waiting, shanten
 

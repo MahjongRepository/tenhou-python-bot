@@ -5,7 +5,6 @@ from mahjong.constants import AKA_DORA_LIST
 from mahjong.shanten import Shanten
 from mahjong.tile import Tile, TilesConverter
 from mahjong.utils import is_honor, is_pair, is_tile_strictly_isolated, simplify
-from utils.cache import build_shanten_cache_key
 from utils.decisions_logger import DecisionsLogger
 
 
@@ -256,14 +255,9 @@ class HandBuilder:
 
             tiles_34[j] += 1
 
-            key = build_shanten_cache_key(tiles_34, open_sets_34, use_chiitoitsu)
-            if key in self.ai.hand_cache_shanten:
-                new_shanten = self.ai.hand_cache_shanten[key]
-            else:
-                new_shanten = self.ai.calculate_shanten_or_get_from_cache(
-                    tiles_34, open_sets_34, use_chiitoitsu=use_chiitoitsu
-                )
-                self.ai.hand_cache_shanten[key] = new_shanten
+            new_shanten = self.ai.calculate_shanten_or_get_from_cache(
+                tiles_34, open_sets_34, use_chiitoitsu=use_chiitoitsu
+            )
 
             if new_shanten == shanten - 1:
                 waiting.append(j)

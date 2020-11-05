@@ -374,7 +374,13 @@ class MahjongAI:
         key = build_shanten_cache_key(tiles_34, open_sets_34, use_chiitoitsu)
         if key in self.hand_cache_shanten:
             return self.hand_cache_shanten[key]
-        result = self.shanten_calculator.calculate_shanten(tiles_34, open_sets_34, chiitoitsu=use_chiitoitsu)
+        if use_chiitoitsu and not open_sets_34:
+            result = self.shanten_calculator.calculate_shanten_for_chiitoitsu_hand(tiles_34)
+        else:
+            result = self.shanten_calculator.calculate_shanten_for_regular_hand(
+                tiles_34,
+                open_sets_34,
+            )
         self.hand_cache_shanten[key] = result
         return result
 

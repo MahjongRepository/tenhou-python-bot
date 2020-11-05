@@ -1,4 +1,5 @@
 import logging
+import os
 from optparse import OptionParser
 from random import random
 
@@ -17,6 +18,13 @@ def main(number_of_games):
     clients = [LocalClient(BattleConfig.CLIENTS_CONFIGS[x]()) for x in range(0, 4)]
     manager = GameManager(clients)
 
+    seeds = []
+    seed_file = "seeds.txt"
+    if os.path.exists(seed_file):
+        with open(seed_file, "r") as f:
+            seeds = f.read().split("\n")
+            seeds = [float(x.strip()) for x in seeds if x.strip()]
+
     total_results = {}
     for client in clients:
         total_results[client.id] = {
@@ -27,14 +35,17 @@ def main(number_of_games):
             "win_rounds": 0,
             "riichi_rounds": 0,
             "called_rounds": 0,
+            "average_place": 0,
+            "win_rate": 0,
+            "riichi_rate": 0,
+            "call_rate": 0,
+            "feed_rate": 0,
         }
 
     for i in trange(number_of_games):
         try:
-            logger.info(f"Hanchan #{i + 1}")
-
-            if i < len(BattleConfig.SEEDS):
-                seed_value = BattleConfig.SEEDS[i]
+            if i < len(seeds):
+                seed_value = seeds[i]
             else:
                 seed_value = random()
 
@@ -66,6 +77,9 @@ def main(number_of_games):
 
     # recalculate stat values
     for item in total_results.values():
+        if not item["positions"]:
+            continue
+
         played_rounds = item["played_rounds"]
         lose_rounds = item["lose_rounds"]
         win_rounds = item["win_rounds"]

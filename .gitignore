@@ -16,6 +16,7 @@ socket_mock.py
 *.db
 temp
 *.log
+seeds.txt
 
 project/game/data/*
 project/analytics/data/*

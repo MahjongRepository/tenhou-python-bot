@@ -98,11 +98,11 @@ class Table:
             # but if it's an opened kan, player will get a tile from
             # a dead wall, so total number of tiles in the wall is the same
             # as if he just draws a tile
-            if meld.type != MeldPrint.KAN and meld.type != meld.CHANKAN:
+            if meld.type != MeldPrint.KAN and meld.type != meld.SHOUMINKAN:
                 self.count_of_remaining_tiles += 1
         else:
             # can't have a pon or chi from the hand
-            assert meld.type == MeldPrint.KAN or meld.type == meld.CHANKAN
+            assert meld.type == MeldPrint.KAN or meld.type == meld.SHOUMINKAN
             # player draws additional tile from the wall in case of closed kan or shouminkan
             self.count_of_remaining_tiles -= 1
 
@@ -115,7 +115,7 @@ class Table:
             tiles.remove(meld.called_tile)
 
         # for shouminkan we already added 3 tiles
-        if meld.type == meld.CHANKAN:
+        if meld.type == meld.SHOUMINKAN:
             tiles = [meld.tiles[0]]
 
         for tile in tiles:

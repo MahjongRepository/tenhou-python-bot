@@ -218,7 +218,7 @@ class TenhouDecoder:
             meld.tiles = [t0 + 4 * base, t1 + 4 * base, t2 + 4 * base]
             meld.called_tile = meld.tiles[called]
         else:
-            meld.type = MeldPrint.CHANKAN
+            meld.type = MeldPrint.SHOUMINKAN
             meld.tiles = [t0 + 4 * base, t1 + 4 * base, t2 + 4 * base, t4 + 4 * base]
             meld.called_tile = meld.tiles[3]
 

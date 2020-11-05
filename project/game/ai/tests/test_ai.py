@@ -454,7 +454,7 @@ def test_call_shouminkan():
 
     tile = string_to_136_tile(honors="6")
 
-    assert table.player.should_call_kan(tile, False) == MeldPrint.CHANKAN
+    assert table.player.should_call_kan(tile, False) == MeldPrint.SHOUMINKAN
 
 
 def test_call_closed_kan():

@@ -64,7 +64,7 @@ class PlayerInterface:
 
     def add_called_meld(self, meld: MeldPrint):
         # we already added shouminkan as a pon set
-        if meld.type == MeldPrint.CHANKAN:
+        if meld.type == MeldPrint.SHOUMINKAN:
             tile_34 = meld.tiles[0] // 4
 
             pon_set = [x for x in self.melds if x.type == MeldPrint.PON and (x.tiles[0] // 4) == tile_34]

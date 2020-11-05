@@ -141,7 +141,7 @@ def test_parse_called_chakan():
     meld = decoder.parse_meld('<N who="3" m="18547" />')
 
     assert meld.who == 3
-    assert meld.type == MeldPrint.CHANKAN
+    assert meld.type == MeldPrint.SHOUMINKAN
     assert meld.opened is True
     assert meld.tiles == [48, 49, 50, 51]
 

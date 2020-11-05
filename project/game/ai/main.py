@@ -347,7 +347,7 @@ class MahjongAI:
             assert new_waits_count <= previous_waits_count
 
             if new_waits_count == previous_waits_count:
-                kan_type = has_shouminkan_candidate and MeldPrint.CHANKAN or MeldPrint.KAN
+                kan_type = has_shouminkan_candidate and MeldPrint.SHOUMINKAN or MeldPrint.KAN
                 DecisionsLogger.debug(log.KAN_DEBUG, f"Open kan type='{kan_type}'")
                 return kan_type
 

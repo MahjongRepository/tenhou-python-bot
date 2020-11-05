@@ -287,7 +287,7 @@ class TenhouClient(Client):
                     if kan_type:
                         self._random_sleep(1, 2)
 
-                        if kan_type == MeldPrint.CHANKAN:
+                        if kan_type == MeldPrint.SHOUMINKAN:
                             meld_type = 5
                             logger.info("We upgraded pon to kan!")
                         else:
@@ -342,7 +342,7 @@ class TenhouClient(Client):
                     # tenhou confirmed that we called a meld
                     # we had to do discard after this
                     if meld.who == 0:
-                        if meld.type != MeldPrint.KAN and meld.type != MeldPrint.CHANKAN:
+                        if meld.type != MeldPrint.KAN and meld.type != MeldPrint.SHOUMINKAN:
                             discarded_tile = self.player.discard_tile(tile_to_discard)
 
                             self.player.tiles.append(meld_tile)

@@ -151,10 +151,10 @@ class TenhouLogReproducer:
                 if player_seat == 0:
                     # we had to delete called tile from hand
                     # to have correct tiles count in the hand
-                    if meld.type != MeldPrint.KAN and meld.type != MeldPrint.CHANKAN:
+                    if meld.type != MeldPrint.KAN and meld.type != MeldPrint.SHOUMINKAN:
                         table.player.draw_tile(meld.called_tile)
 
-                    if meld.type == MeldPrint.CHANKAN:
+                    if meld.type == MeldPrint.SHOUMINKAN:
                         table.player.tiles.remove(meld.called_tile)
 
             if "<REACH" in tag and 'step="1"' in tag:

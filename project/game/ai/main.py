@@ -75,6 +75,9 @@ class MahjongAI:
         self.hand_cache_shanten = {}
         self.hand_cache_estimation = {}
 
+        # to erase hand cache
+        self.finished_hand = HandCalculator()
+
     def init_hand(self):
         DecisionsLogger.debug(
             log.INIT_HAND,
@@ -207,6 +210,7 @@ class MahjongAI:
             self.player.melds,
             self.player.table.dora_indicators,
             config,
+            use_hand_divider_cache=True,
         )
 
         self.hand_cache_estimation[cache_key] = result

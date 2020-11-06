@@ -1,7 +1,8 @@
+from game.ai.defence.yaku_analyzer.yaku_analyzer import YakuAnalyzer
 from mahjong.constants import HONOR_INDICES, TERMINAL_INDICES
 
 
-class TanyaoAnalyzer:
+class TanyaoAnalyzer(YakuAnalyzer):
     id = "tanyao"
 
     def __init__(self, player):

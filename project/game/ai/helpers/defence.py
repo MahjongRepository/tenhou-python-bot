@@ -205,6 +205,16 @@ class TileDanger:
         "description": "Subtracted danger for 2 or 8 because of early 3 or 7 discard",
     }
 
+    # bonus danger for different yaku
+    HONITSU_THIRD_HONOR_BONUS_DANGER = {
+        "value": 80,
+        "description": "Additional danger for third honor against honitsu hands",
+    }
+    HONITSU_FIRST_SECOND_HONOR_BONUS_DANGER = {
+        "value": 160,
+        "description": "Additional danger for shonpai or second honor against honitsu hands",
+    }
+
     ###############
     # The following constants don't follow the logic of other constants, so they are not dictionaries
     ##############

@@ -1,4 +1,7 @@
-class YakuhaiAnalyzer:
+from game.ai.defence.yaku_analyzer.yaku_analyzer import YakuAnalyzer
+
+
+class YakuhaiAnalyzer(YakuAnalyzer):
     id = "yakuhai"
 
     def __init__(self, player):
@@ -26,6 +29,3 @@ class YakuhaiAnalyzer:
             if tile_34 in self.player.valued_honors:
                 suitable_melds.append(x)
         return suitable_melds
-
-    def get_safe_tiles_34(self):
-        return []

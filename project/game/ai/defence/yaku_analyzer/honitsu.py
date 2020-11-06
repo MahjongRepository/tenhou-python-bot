@@ -1,9 +1,11 @@
+from game.ai.defence.yaku_analyzer.yaku_analyzer import YakuAnalyzer
+from game.ai.helpers.defence import TileDanger
 from mahjong.constants import HONOR_INDICES
 from mahjong.tile import TilesConverter
 from mahjong.utils import count_tiles_by_suits, is_honor
 
 
-class HonitsuAnalyzer:
+class HonitsuAnalyzer(YakuAnalyzer):
     id = "honitsu"
     chosen_suit = None
 
@@ -47,6 +49,17 @@ class HonitsuAnalyzer:
                 safe_tiles.append(x)
 
         return safe_tiles
+
+    def get_bonus_danger(self, tile_34, number_of_revealed_tiles):
+        if is_honor(tile_34):
+            if number_of_revealed_tiles == 4:
+                return None
+            elif number_of_revealed_tiles == 3:
+                return TileDanger.HONITSU_THIRD_HONOR_BONUS_DANGER
+            else:
+                return TileDanger.HONITSU_FIRST_SECOND_HONOR_BONUS_DANGER
+
+        return None
 
     def _get_chosen_suit_from_discards(self):
         """

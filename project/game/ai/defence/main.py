@@ -143,6 +143,17 @@ class TileDangerHandler:
                     danger,
                 )
 
+            if enemy_analyzer.threat_reason.get("active_yaku"):
+                for yaku_analyzer in enemy_analyzer.threat_reason.get("active_yaku"):
+                    danger = yaku_analyzer.get_bonus_danger(tile_34, number_of_revealed_tiles)
+                    if danger:
+                        self._update_discard_candidate(
+                            tile_34,
+                            discard_candidates,
+                            enemy_analyzer.enemy.seat,
+                            danger,
+                        )
+
         return discard_candidates
 
     def calculate_danger_borders(self, discard_options, threatening_player):

@@ -1,6 +1,7 @@
 from game.ai.defence.yaku_analyzer.honitsu import HonitsuAnalyzer
 from game.ai.helpers.defence import EnemyDanger
 from game.table import Table
+from mahjong.utils import is_honor
 from utils.decisions_logger import MeldPrint
 from utils.test_helpers import make_meld, string_to_136_array, string_to_136_tile
 
@@ -71,6 +72,10 @@ def test_is_threatening_and_two_open_yakuhai_melds():
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
     assert threatening_players[0].assumed_hand_cost == 5200
 
+    for tile_34 in range(0, 34):
+        bonus_danger = threatening_players[0].threat_reason.get("active_yaku")[0].get_bonus_danger(tile_34, 1)
+        assert bonus_danger is None
+
 
 def test_is_threatening_and_two_open_tanyao_melds():
     table = Table()
@@ -95,6 +100,10 @@ def test_is_threatening_and_two_open_tanyao_melds():
     assert threatening_players[0].enemy.seat == enemy_seat
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
     assert threatening_players[0].assumed_hand_cost == 5200
+
+    for tile_34 in range(0, 34):
+        bonus_danger = threatening_players[0].threat_reason.get("active_yaku")[0].get_bonus_danger(tile_34, 1)
+        assert bonus_danger is None
 
 
 def test_is_threatening_and_honitsu_hand():
@@ -122,6 +131,13 @@ def test_is_threatening_and_honitsu_hand():
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
     assert threatening_players[0].assumed_hand_cost == 5200
     assert threatening_players[0].threat_reason["active_yaku"][0].id == HonitsuAnalyzer.id
+
+    for tile_34 in range(0, 34):
+        bonus_danger = threatening_players[0].threat_reason.get("active_yaku")[0].get_bonus_danger(tile_34, 1)
+        if is_honor(tile_34):
+            assert bonus_danger is not None
+        else:
+            assert bonus_danger is None
 
 
 def test_threatening_riichi_player_and_default_hand_cost():

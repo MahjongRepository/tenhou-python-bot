@@ -9,22 +9,22 @@ from utils.decisions_logger import MeldPrint
 class ToitoiAnalyzer(YakuAnalyzer):
     id = "toitoi"
 
-    def __init__(self, player):
-        self.player = player
+    def __init__(self, enemy):
+        self.enemy = enemy
 
     def serialize(self):
         return {"id": self.id}
 
     def is_yaku_active(self):
-        if len(self.player.melds) < 2:
+        if len(self.enemy.melds) < 2:
             return False
 
-        for meld in self.player.melds:
+        for meld in self.enemy.melds:
             if meld.type == MeldPrint.CHI:
                 return False
 
-        if len(self.player.discards) < 10:
-            return len(self.player.melds) >= 3
+        if len(self.enemy.discards) < 10:
+            return len(self.enemy.melds) >= 3
 
         return True
 
@@ -38,12 +38,12 @@ class ToitoiAnalyzer(YakuAnalyzer):
     def get_bonus_danger(self, tile_136, number_of_revealed_tiles):
         bonus_danger = []
         tile_34 = tile_136 // 4
-        number_of_yakuhai = self.player.valued_honors.count(tile_34)
+        number_of_yakuhai = self.enemy.valued_honors.count(tile_34)
 
         # shonpai tiles
         if number_of_revealed_tiles == 1:
             # aka doras don't get additional danger against toitoi, they just get their regular one
-            dora_count = plus_dora(tile_136, self.player.table.dora_indicators)
+            dora_count = plus_dora(tile_136, self.enemy.table.dora_indicators)
             if dora_count > 0:
                 danger = copy(TileDanger.TOITOI_SHONPAI_DORA_BONUS_DANGER)
                 danger["value"] = dora_count * danger["value"]

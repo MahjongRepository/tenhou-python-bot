@@ -5,8 +5,8 @@ from mahjong.constants import HONOR_INDICES, TERMINAL_INDICES
 class TanyaoAnalyzer(YakuAnalyzer):
     id = "tanyao"
 
-    def __init__(self, player):
-        self.player = player
+    def __init__(self, enemy):
+        self.enemy = enemy
 
     def serialize(self):
         return {"id": self.id}
@@ -19,7 +19,7 @@ class TanyaoAnalyzer(YakuAnalyzer):
 
     def _get_suitable_melds(self):
         suitable_melds = []
-        for meld in self.player.melds:
+        for meld in self.enemy.melds:
             tiles_34 = [x // 4 for x in meld.tiles]
             not_suitable_tiles = TERMINAL_INDICES + HONOR_INDICES
             if not any(x in not_suitable_tiles for x in tiles_34):

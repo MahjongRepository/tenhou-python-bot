@@ -4,8 +4,8 @@ from game.ai.defence.yaku_analyzer.yaku_analyzer import YakuAnalyzer
 class YakuhaiAnalyzer(YakuAnalyzer):
     id = "yakuhai"
 
-    def __init__(self, player):
-        self.player = player
+    def __init__(self, enemy):
+        self.enemy = enemy
 
     def serialize(self):
         return {"id": self.id}
@@ -19,13 +19,13 @@ class YakuhaiAnalyzer(YakuAnalyzer):
         for x in suitable_melds:
             tile_34 = x.tiles[0] // 4
             # we need to do that to support double winds yakuhais
-            han += len([x for x in self.player.valued_honors if x == tile_34])
+            han += len([x for x in self.enemy.valued_honors if x == tile_34])
         return han
 
     def _get_suitable_melds(self):
         suitable_melds = []
-        for x in self.player.melds:
+        for x in self.enemy.melds:
             tile_34 = x.tiles[0] // 4
-            if tile_34 in self.player.valued_honors:
+            if tile_34 in self.enemy.valued_honors:
                 suitable_melds.append(x)
         return suitable_melds

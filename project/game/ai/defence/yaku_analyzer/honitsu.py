@@ -13,8 +13,8 @@ class HonitsuAnalyzer(YakuAnalyzer):
     LESS_SUIT_PERCENTAGE_BORDER = 20
     HONORS_PERCENTAGE_BORDER = 30
 
-    def __init__(self, player):
-        self.player = player
+    def __init__(self, enemy):
+        self.enemy = enemy
         self.chosen_suit = None
 
     def serialize(self):
@@ -26,7 +26,7 @@ class HonitsuAnalyzer(YakuAnalyzer):
             return False
 
         all_melds_from_chosen_suit = True
-        for meld in self.player.melds:
+        for meld in self.enemy.melds:
             tile = meld.tiles[0]
             tile_34 = tile // 4
             if is_honor(tile_34):
@@ -37,7 +37,7 @@ class HonitsuAnalyzer(YakuAnalyzer):
         return all_melds_from_chosen_suit
 
     def melds_han(self):
-        return self.player.is_open_hand and 2 or 3
+        return self.enemy.is_open_hand and 2 or 3
 
     def get_safe_tiles_34(self):
         if not self.chosen_suit:
@@ -68,7 +68,7 @@ class HonitsuAnalyzer(YakuAnalyzer):
         Check that user opened all sets with same suit
         :return: None or chosen suit function
         """
-        discards = [x.value for x in self.player.discards]
+        discards = [x.value for x in self.enemy.discards]
         discards_34 = TilesConverter.to_34_array(discards)
         total_discards = sum(discards_34)
 

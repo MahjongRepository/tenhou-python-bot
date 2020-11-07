@@ -137,13 +137,16 @@ class EnemyAnalyzer:
 
     def _calculate_assumed_hand_cost(self) -> int:
         if self.enemy.is_dealer:
-            scale = [1000, 2900, 5800, 7700, 12000, 18000, 18000, 24000, 24000, 48000]
+            scale = [1000, 2900, 5800, 12000, 12000, 18000, 18000, 24000, 24000, 24000, 36000, 36000, 48000]
         else:
-            scale = [1000, 2000, 3900, 5200, 8000, 12000, 12000, 16000, 16000, 32000]
+            scale = [1000, 2000, 3900, 8000, 8000, 12000, 12000, 16000, 16000, 16000, 24000, 24000, 32000]
         han = self.threat_reason.get("dora_count", 0) + self.threat_reason.get("melds_han", 0)
         if han > len(scale) - 1:
             han = len(scale) - 1
-        return scale[han]
+        elif han == 0:
+            han = 1
+
+        return scale[han - 1]
 
     def _calculate_assumed_hand_cost_for_riichi(self) -> int:
         scale_index = 1

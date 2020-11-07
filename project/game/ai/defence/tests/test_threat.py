@@ -70,7 +70,7 @@ def test_is_threatening_and_two_open_yakuhai_melds():
     assert len(threatening_players) == 1
     assert threatening_players[0].enemy.seat == enemy_seat
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
-    assert threatening_players[0].assumed_hand_cost == 5200
+    assert threatening_players[0].assumed_hand_cost == 3900
 
     for tile_34 in range(0, 34):
         bonus_danger = threatening_players[0].threat_reason.get("active_yaku")[0].get_bonus_danger(tile_34, 1)
@@ -99,7 +99,7 @@ def test_is_threatening_and_two_open_tanyao_melds():
     assert len(threatening_players) == 1
     assert threatening_players[0].enemy.seat == enemy_seat
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
-    assert threatening_players[0].assumed_hand_cost == 5200
+    assert threatening_players[0].assumed_hand_cost == 3900
 
     for tile_34 in range(0, 34):
         bonus_danger = threatening_players[0].threat_reason.get("active_yaku")[0].get_bonus_danger(tile_34, 1)
@@ -129,7 +129,7 @@ def test_is_threatening_and_honitsu_hand():
     threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 1
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
-    assert threatening_players[0].assumed_hand_cost == 5200
+    assert threatening_players[0].assumed_hand_cost == 3900
     assert threatening_players[0].threat_reason["active_yaku"][0].id == HonitsuAnalyzer.id
 
     for tile_34 in range(0, 34):

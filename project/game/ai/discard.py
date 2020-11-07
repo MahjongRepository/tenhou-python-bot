@@ -2,7 +2,7 @@ from game.ai.helpers.defence import TileDangerHandler
 from game.ai.strategies.main import BaseStrategy
 from mahjong.constants import AKA_DORA_LIST
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_aka_dora, is_honor, is_man, is_pin, is_sou, plus_dora, simplify
+from mahjong.utils import is_honor, is_man, is_pin, is_sou, plus_dora, simplify
 
 
 class DiscardOption:
@@ -170,11 +170,15 @@ class DiscardOption:
                 if simplified_tile + 2 == simplified_dora or simplified_tile - 2 == simplified_dora:
                     value += DiscardOption.DORA_SECOND_NEIGHBOUR
 
-        count_of_dora = plus_dora(self.tile_to_discard * 4, self.player.table.dora_indicators)
-
         tile_136 = self.find_tile_in_hand(self.player.closed_hand)
-        if is_aka_dora(tile_136, self.player.table.has_aka_dora):
-            count_of_dora += 1
+        # it possible when we are calculating discard options for kan
+        # because we are not adding this tile to the hand
+        if tile_136:
+            count_of_dora = plus_dora(
+                tile_136, self.player.table.dora_indicators, add_aka_dora=self.player.table.has_aka_dora
+            )
+        else:
+            count_of_dora = plus_dora(self.tile_to_discard * 4, self.player.table.dora_indicators, add_aka_dora=False)
 
         self.count_of_dora = count_of_dora
         value += count_of_dora * DiscardOption.DORA_VALUE

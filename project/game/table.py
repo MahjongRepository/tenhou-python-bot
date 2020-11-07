@@ -1,7 +1,7 @@
 from game.player import EnemyPlayer, Player
 from mahjong.constants import EAST, NORTH, SOUTH, WEST
 from mahjong.tile import Tile, TilesConverter
-from mahjong.utils import is_aka_dora, plus_dora
+from mahjong.utils import plus_dora
 from utils.decisions_logger import MeldPrint
 
 
@@ -28,8 +28,9 @@ class Table:
     revealed_tiles = None
     revealed_tiles_136 = None
 
-    has_open_tanyao = False
-    has_aka_dora = False
+    # bot is playing mainly with ari-ari rules, so we can have them as default
+    has_open_tanyao = True
+    has_aka_dora = True
 
     latest_riichi_player_seat = None
 
@@ -153,7 +154,7 @@ class Table:
         self._add_revealed_tile(tile)
 
     def is_dora(self, tile):
-        return plus_dora(tile, self.dora_indicators) or is_aka_dora(tile, self.has_open_tanyao)
+        return plus_dora(tile, self.dora_indicators, add_aka_dora=self.has_aka_dora)
 
     def set_players_scores(self, scores, uma=None):
         for i in range(0, len(scores)):

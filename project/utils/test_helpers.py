@@ -3,12 +3,7 @@ from utils.decisions_logger import MeldPrint
 
 
 def string_to_136_array(sou="", pin="", man="", honors=""):
-    return TilesConverter.string_to_136_array(
-        sou=sou,
-        pin=pin,
-        man=man,
-        honors=honors,
-    )
+    return TilesConverter.string_to_136_array(sou=sou, pin=pin, man=man, honors=honors, has_aka_dora=True)
 
 
 def string_to_136_tile(sou="", pin="", man="", honors=""):
@@ -21,12 +16,7 @@ def string_to_136_tile(sou="", pin="", man="", honors=""):
 
 
 def string_to_34_tile(sou="", pin="", man="", honors=""):
-    item = TilesConverter.string_to_136_array(
-        sou=sou,
-        pin=pin,
-        man=man,
-        honors=honors,
-    )
+    item = TilesConverter.string_to_136_array(sou=sou, pin=pin, man=man, honors=honors, has_aka_dora=True)
     item[0] //= 4
     return item[0]
 

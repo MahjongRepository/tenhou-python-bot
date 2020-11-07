@@ -7,7 +7,7 @@ from game.ai.helpers.defence import DangerBorder, TileDanger
 from game.ai.helpers.kabe import Kabe
 from game.ai.helpers.possible_forms import PossibleFormsAnalyzer
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_aka_dora, is_honor, is_terminal, plus_dora, simplify
+from mahjong.utils import is_honor, is_terminal, plus_dora, simplify
 
 
 class TileDangerHandler:
@@ -128,9 +128,9 @@ class TileDangerHandler:
                     TileDanger.make_unverified_suji_coeff(enemy_analyzer.unverified_suji_coeff),
                 )
 
-            dora_count = plus_dora(tile_136, self.player.table.dora_indicators)
-            if is_aka_dora(tile_136, self.player.table.has_aka_dora):
-                dora_count += 1
+            dora_count = plus_dora(
+                tile_136, self.player.table.dora_indicators, add_aka_dora=self.player.table.has_aka_dora
+            )
 
             if dora_count > 0:
                 danger = copy(TileDanger.DORA_BONUS)
@@ -339,8 +339,12 @@ class TileDangerHandler:
                     # TODO: try to estimate yaku chances for closed hand
                     han = 1
 
-                dora_count = sum([plus_dora(x, self.player.table.dora_indicators) for x in self.player.tiles])
-                dora_count += sum([1 for x in self.player.tiles if is_aka_dora(x, self.player.table.has_aka_dora)])
+                dora_count = sum(
+                    [
+                        plus_dora(x, self.player.table.dora_indicators, add_aka_dora=self.player.table.has_aka_dora)
+                        for x in self.player.tiles
+                    ]
+                )
 
                 han += dora_count
 

@@ -193,7 +193,7 @@ def test_chose_right_set_to_open_hand_dora():
     # add 3 doras so we are sure to go for tanyao
     table.add_dora_indicator(string_to_136_tile(man="7"))
     # 5 from string is always aka
-    tiles = string_to_136_array(man="3456788", sou="245888")
+    tiles = string_to_136_array(man="3456788", sou="240888")
     player.init_hand(tiles)
 
     tile = string_to_136_tile(sou="3")

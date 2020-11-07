@@ -8,7 +8,7 @@ from game.ai.helpers.defence import EnemyDanger, TileDanger
 from game.ai.helpers.possible_forms import PossibleFormsAnalyzer
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_aka_dora, plus_dora
+from mahjong.utils import plus_dora
 from utils.general import separate_tiles_by_suits
 
 
@@ -79,9 +79,9 @@ class EnemyAnalyzer:
                 melds_han += tanyao_analyzer.melds_han()
 
         meld_tiles = self.enemy.meld_tiles
-        dora_count = sum([plus_dora(x, self.table.dora_indicators) for x in meld_tiles])
-        # + aka dora
-        dora_count += sum([1 for x in meld_tiles if is_aka_dora(x, self.table.has_aka_dora)])
+        dora_count = sum(
+            [plus_dora(x, self.table.dora_indicators, add_aka_dora=self.table.has_aka_dora) for x in meld_tiles]
+        )
 
         # enemy has one dora pon/kan
         # and there is 6+ round step
@@ -164,8 +164,9 @@ class EnemyAnalyzer:
 
         total_dora_in_game = len(self.table.dora_indicators) * 4 + (3 * int(self.table.has_aka_dora))
         visible_tiles = self.table.revealed_tiles_136 + self.main_player.closed_hand
-        visible_dora_tiles = sum([plus_dora(x, self.table.dora_indicators) for x in visible_tiles])
-        visible_dora_tiles += sum([int(is_aka_dora(x, self.table.has_aka_dora)) for x in visible_tiles])
+        visible_dora_tiles = sum(
+            [plus_dora(x, self.table.dora_indicators, add_aka_dora=self.table.has_aka_dora) for x in visible_tiles]
+        )
         live_dora_tiles = total_dora_in_game - visible_dora_tiles
         assert live_dora_tiles >= 0, "Live dora tiles can't be less than 0"
         # there are too many live dora tiles, let's increase hand cost
@@ -182,8 +183,7 @@ class EnemyAnalyzer:
 
             # higher danger for doras
             for tile in meld.tiles:
-                scale_index += plus_dora(tile, self.table.dora_indicators)
-                scale_index += int(is_aka_dora(tile, self.table.has_aka_dora))
+                scale_index += plus_dora(tile, self.table.dora_indicators, add_aka_dora=self.table.has_aka_dora)
 
             # higher danger for yakuhai
             tile_34 = meld.tiles[0] // 4

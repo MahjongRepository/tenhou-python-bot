@@ -357,6 +357,7 @@ def test_dont_count_terminal_tiles_in_ukeire():
 def test_determine_strategy_when_we_try_to_call_meld():
     table = _make_table()
     table.has_aka_dora = True
+    table.player.round_step = 10
 
     table.add_dora_indicator(string_to_136_tile(sou="5"))
     tiles = string_to_136_array(man="66678", sou="6888", pin="5588")
@@ -405,6 +406,7 @@ def test_dont_open_tanyao_with_good_one_shanten_hand_and_without_tempai():
     table.add_dora_indicator(string_to_136_tile(pin="2"))
     tiles = string_to_136_array(man="3488", sou="3478", pin="1345") + [FIVE_RED_SOU]  # aka dora
     table.player.init_hand(tiles)
+    table.player.round_step = 10
 
     # tile is not suitable to our strategy
     tile = string_to_136_tile(sou="9")

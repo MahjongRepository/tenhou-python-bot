@@ -1,17 +1,6 @@
 import utils.decisions_constants as log
 from mahjong.tile import TilesConverter
-from mahjong.utils import (
-    is_aka_dora,
-    is_chi,
-    is_honor,
-    is_man,
-    is_pin,
-    is_pon,
-    is_sou,
-    is_terminal,
-    plus_dora,
-    simplify,
-)
+from mahjong.utils import is_chi, is_honor, is_man, is_pin, is_pon, is_sou, is_terminal, plus_dora, simplify
 from utils.decisions_logger import DecisionsLogger, MeldPrint
 
 
@@ -283,10 +272,9 @@ class BaseStrategy:
         for tile_136 in tiles_136:
             tile_34 = tile_136 // 4
 
-            dora_count = plus_dora(tile_136, self.player.table.dora_indicators)
-
-            if is_aka_dora(tile_136, self.player.table.has_aka_dora):
-                self.aka_dora_count += 1
+            dora_count = plus_dora(
+                tile_136, self.player.table.dora_indicators, add_aka_dora=self.player.table.has_aka_dora
+            )
 
             if not dora_count:
                 continue

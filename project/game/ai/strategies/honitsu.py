@@ -2,7 +2,6 @@ from game.ai.strategies.main import BaseStrategy
 from mahjong.tile import TilesConverter
 from mahjong.utils import (
     count_tiles_by_suits,
-    is_aka_dora,
     is_honor,
     is_man,
     is_pin,
@@ -204,10 +203,9 @@ class HonitsuStrategy(BaseStrategy):
         for tile_136 in tiles_136:
             tile_34 = tile_136 // 4
 
-            dora_count = plus_dora(tile_136, self.player.table.dora_indicators)
-
-            if is_aka_dora(tile_136, self.player.table.has_aka_dora):
-                dora_count += 1
+            dora_count = plus_dora(
+                tile_136, self.player.table.dora_indicators, add_aka_dora=self.player.table.has_aka_dora
+            )
 
             if is_man(tile_34):
                 dora_count_man += dora_count

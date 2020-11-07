@@ -230,7 +230,7 @@ def test_threatening_riichi_player_with_kan_aka():
     table.add_called_riichi(enemy_seat)
     table.has_aka_dora = True
 
-    table.add_called_meld(enemy_seat, make_meld(MeldPrint.KAN, is_open=False, man="5555"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.KAN, is_open=False, man="5505"))
 
     # non dealer
     threatening_player = table.player.ai.defence.get_threatening_players()[0]

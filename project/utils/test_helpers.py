@@ -21,8 +21,9 @@ def string_to_34_tile(sou="", pin="", man="", honors=""):
     return item[0]
 
 
-def make_meld(meld_type, is_open=True, man="", pin="", sou="", honors=""):
-    tiles = string_to_136_array(man=man, pin=pin, sou=sou, honors=honors)
+def make_meld(meld_type, is_open=True, man="", pin="", sou="", honors="", tiles=None):
+    if not tiles:
+        tiles = string_to_136_array(man=man, pin=pin, sou=sou, honors=honors)
     meld = MeldPrint(
         meld_type=meld_type,
         tiles=tiles,
@@ -38,7 +39,7 @@ def tiles_to_string(tiles_136):
 
 
 def find_discard_option(player, sou="", pin="", man="", honors=""):
-    discard_options, _ = player.ai.hand_builder.find_discard_options(player.tiles, player.closed_hand, player.melds)
+    discard_options, _ = player.ai.hand_builder.find_discard_options(player.tiles, player.closed_hand)
     tile = string_to_136_tile(sou=sou, pin=pin, man=man, honors=honors)
     discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
 

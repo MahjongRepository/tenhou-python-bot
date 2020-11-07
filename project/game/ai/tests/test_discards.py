@@ -359,18 +359,18 @@ def test_choose_best_wait_with_melds():
     player = table.player
     table.has_aka_dora = False
 
-    tiles = string_to_136_array(sou="1222233455599")
+    tiles = string_to_136_array(sou="3499222555123")
     player.init_hand(tiles)
 
-    meld = make_meld(MeldPrint.CHI, sou="123")
-    player.add_called_meld(meld)
     meld = make_meld(MeldPrint.PON, sou="222")
-    player.add_called_meld(meld)
+    table.add_called_meld(0, meld)
+    # 123s, we can't automatically chose correct index for fourth 2s
+    meld = make_meld(MeldPrint.CHI, tiles=[72, 79, 80])
+    table.add_called_meld(0, meld)
     meld = make_meld(MeldPrint.PON, sou="555")
-    player.add_called_meld(meld)
+    table.add_called_meld(0, meld)
 
     player.draw_tile(string_to_136_tile(sou="4"))
-
     discarded_tile = player.discard_tile()
     # double-pairs wait becomes better, because it has 4 tiles to wait for
     # against just 1 in ryanmen
@@ -746,7 +746,7 @@ def test_calculate_second_level_ukeire():
     player.init_hand(tiles)
     player.draw_tile(tile)
 
-    discard_options, _ = player.ai.hand_builder.find_discard_options(player.tiles, player.closed_hand, player.melds)
+    discard_options, _ = player.ai.hand_builder.find_discard_options(player.tiles, player.closed_hand)
 
     tile = string_to_136_tile(man="4")
     discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]

@@ -418,16 +418,10 @@ def test_call_upgrade_pon_and_bad_ukeire_after_call_second_case():
 
     assert player.should_call_kan(tile, False) is None
 
-    player.draw_tile(tile)
-    discarded_tile = player.discard_tile()
-
-    assert tiles_to_string([discarded_tile]) == "2s"
-
 
 def test_call_upgrade_pon_and_bad_ukeire_after_call_third_case():
     table = Table()
     table.count_of_remaining_tiles = 10
-    player = table.player
 
     tiles = string_to_136_array(man="67", pin="6", sou="1344478999")
     table.player.init_hand(tiles)
@@ -437,11 +431,6 @@ def test_call_upgrade_pon_and_bad_ukeire_after_call_third_case():
 
     # we don't want to call shouminkan here
     assert table.player.should_call_kan(tile, False) is None
-
-    player.draw_tile(tile)
-    discarded_tile = player.discard_tile()
-
-    assert tiles_to_string([discarded_tile]) == "6p"
 
 
 def test_call_shouminkan():

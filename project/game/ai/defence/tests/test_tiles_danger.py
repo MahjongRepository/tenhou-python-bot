@@ -466,6 +466,35 @@ def test_tile_danger_against_honitsu_threat():
     _assert_discard(player, enemy_seat, TileDanger.SAFE_AGAINST_THREATENING_HAND, pin="5", positive=False)
 
 
+def test_tile_danger_against_toitoi_threat():
+    table = Table()
+    table.add_dora_indicator(string_to_136_tile(pin="1"))
+    player = table.player
+
+    enemy_seat = 1
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, pin="222"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, honors="444"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, sou="999"))
+
+    table.add_dora_indicator(string_to_136_tile(pin="1"))
+
+    threatening_players = table.player.ai.defence.get_threatening_players()
+    assert len(threatening_players) == 1
+    assert threatening_players[0].enemy.seat == enemy_seat
+
+    # let's make 2 man impossible to wait in toitoi
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="2"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="2"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="2"), False)
+
+    tiles = string_to_136_array(man="11134", pin="1569", honors="2555")
+    tile = string_to_136_tile(man="2")
+    player.init_hand(tiles)
+    player.draw_tile(tile)
+
+    _assert_discard(player, enemy_seat, TileDanger.SAFE_AGAINST_THREATENING_HAND, man="2")
+
+
 def _create_table(enemy_seat, discards, riichi_tile):
     table = Table()
     table.has_aka_dora = True

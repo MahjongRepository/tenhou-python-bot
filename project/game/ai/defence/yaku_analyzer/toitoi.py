@@ -2,6 +2,7 @@ from copy import copy
 
 from game.ai.defence.yaku_analyzer.yaku_analyzer import YakuAnalyzer
 from game.ai.helpers.defence import TileDanger
+from mahjong.tile import TilesConverter
 from mahjong.utils import plus_dora
 from utils.decisions_logger import MeldPrint
 
@@ -11,6 +12,10 @@ class ToitoiAnalyzer(YakuAnalyzer):
 
     def __init__(self, enemy):
         self.enemy = enemy
+        self.table = enemy.table
+
+        # is our bot
+        self.main_player = self.table.player
 
     def serialize(self):
         return {"id": self.id}
@@ -32,8 +37,14 @@ class ToitoiAnalyzer(YakuAnalyzer):
         return 2
 
     def get_safe_tiles_34(self):
-        # FIXME: tiles that player cannot wait in tanki/syanpon should be considered safe
-        return []
+        safe_tiles_34 = []
+        closed_hand_34 = TilesConverter.to_34_array(self.main_player.closed_hand)
+        for tile_34 in range(0, 34):
+            number_of_revealed_tiles = self.main_player.number_of_revealed_tiles(tile_34, closed_hand_34)
+            if number_of_revealed_tiles == 4:
+                safe_tiles_34.append(tile_34)
+
+        return safe_tiles_34
 
     def get_bonus_danger(self, tile_136, number_of_revealed_tiles):
         bonus_danger = []

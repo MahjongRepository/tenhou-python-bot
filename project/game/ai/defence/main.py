@@ -145,8 +145,8 @@ class TileDangerHandler:
 
             if enemy_analyzer.threat_reason.get("active_yaku"):
                 for yaku_analyzer in enemy_analyzer.threat_reason.get("active_yaku"):
-                    danger = yaku_analyzer.get_bonus_danger(tile_34, number_of_revealed_tiles)
-                    if danger:
+                    bonus_danger = yaku_analyzer.get_bonus_danger(tile_136, number_of_revealed_tiles)
+                    for danger in bonus_danger:
                         self._update_discard_candidate(
                             tile_34,
                             discard_candidates,

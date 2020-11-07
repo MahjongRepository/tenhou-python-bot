@@ -206,6 +206,7 @@ class TileDanger:
     }
 
     # bonus danger for different yaku
+    # they may add up
     HONITSU_THIRD_HONOR_BONUS_DANGER = {
         "value": 80,
         "description": "Additional danger for third honor against honitsu hands",
@@ -213,6 +214,23 @@ class TileDanger:
     HONITSU_FIRST_SECOND_HONOR_BONUS_DANGER = {
         "value": 160,
         "description": "Additional danger for shonpai or second honor against honitsu hands",
+    }
+
+    TOITOI_SECOND_YAKUHAI_HONOR_BONUS_DANGER = {
+        "value": 120,
+        "description": "Additional danger for second honor against honitsu hands",
+    }
+    TOITOI_SHONPAI_NON_YAKUHAI_BONUS_DANGER = {
+        "value": 160,
+        "description": "Additional danger for non-yakuhai shonpai tiles agains toitoi hands",
+    }
+    TOITOI_SHONPAI_YAKUHAI_BONUS_DANGER = {
+        "value": 240,
+        "description": "Additional danger for shonpai yakuhai against toitoi hands",
+    }
+    TOITOI_SHONPAI_DORA_BONUS_DANGER = {
+        "value": 240,
+        "description": "Additional danger for shonpai dora tiles agains toitoi hands",
     }
 
     ###############

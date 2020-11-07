@@ -50,16 +50,18 @@ class HonitsuAnalyzer(YakuAnalyzer):
 
         return safe_tiles
 
-    def get_bonus_danger(self, tile_34, number_of_revealed_tiles):
+    def get_bonus_danger(self, tile_136, number_of_revealed_tiles):
+        tile_34 = tile_136 // 4
+
         if is_honor(tile_34):
             if number_of_revealed_tiles == 4:
-                return None
+                return []
             elif number_of_revealed_tiles == 3:
-                return TileDanger.HONITSU_THIRD_HONOR_BONUS_DANGER
+                return [TileDanger.HONITSU_THIRD_HONOR_BONUS_DANGER]
             else:
-                return TileDanger.HONITSU_FIRST_SECOND_HONOR_BONUS_DANGER
+                return [TileDanger.HONITSU_FIRST_SECOND_HONOR_BONUS_DANGER]
 
-        return None
+        return []
 
     def _get_chosen_suit_from_discards(self):
         """

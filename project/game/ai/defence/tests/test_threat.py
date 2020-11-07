@@ -72,9 +72,9 @@ def test_is_threatening_and_two_open_yakuhai_melds():
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
     assert threatening_players[0].assumed_hand_cost == 3900
 
-    for tile_34 in range(0, 34):
-        bonus_danger = threatening_players[0].threat_reason.get("active_yaku")[0].get_bonus_danger(tile_34, 1)
-        assert bonus_danger is None
+    for tile_136 in range(0, 136):
+        bonus_danger = threatening_players[0].threat_reason.get("active_yaku")[0].get_bonus_danger(tile_136, 1)
+        assert not bonus_danger
 
 
 def test_is_threatening_and_two_open_tanyao_melds():
@@ -101,9 +101,9 @@ def test_is_threatening_and_two_open_tanyao_melds():
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
     assert threatening_players[0].assumed_hand_cost == 3900
 
-    for tile_34 in range(0, 34):
-        bonus_danger = threatening_players[0].threat_reason.get("active_yaku")[0].get_bonus_danger(tile_34, 1)
-        assert bonus_danger is None
+    for tile_136 in range(0, 136):
+        bonus_danger = threatening_players[0].threat_reason.get("active_yaku")[0].get_bonus_danger(tile_136, 1)
+        assert not bonus_danger
 
 
 def test_is_threatening_and_honitsu_hand():
@@ -132,12 +132,33 @@ def test_is_threatening_and_honitsu_hand():
     assert threatening_players[0].assumed_hand_cost == 3900
     assert threatening_players[0].threat_reason["active_yaku"][0].id == HonitsuAnalyzer.id
 
-    for tile_34 in range(0, 34):
-        bonus_danger = threatening_players[0].threat_reason.get("active_yaku")[0].get_bonus_danger(tile_34, 1)
-        if is_honor(tile_34):
-            assert bonus_danger is not None
+    for tile_136 in range(0, 136):
+        bonus_danger = threatening_players[0].threat_reason.get("active_yaku")[0].get_bonus_danger(tile_136, 1)
+        if is_honor(tile_136 // 4):
+            assert bonus_danger
         else:
-            assert bonus_danger is None
+            assert not bonus_danger
+
+
+def test_is_threatening_and_toitoi_melds():
+    table = Table()
+
+    threatening_players = table.player.ai.defence.get_threatening_players()
+    assert len(threatening_players) == 0
+
+    enemy_seat = 2
+    table.player.round_step = 2
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, pin="222"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, honors="444"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, sou="999"))
+
+    table.add_dora_indicator(string_to_136_tile(pin="1"))
+
+    threatening_players = table.player.ai.defence.get_threatening_players()
+    assert len(threatening_players) == 1
+    assert threatening_players[0].enemy.seat == enemy_seat
+    assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
+    assert threatening_players[0].assumed_hand_cost == 8000
 
 
 def test_threatening_riichi_player_and_default_hand_cost():

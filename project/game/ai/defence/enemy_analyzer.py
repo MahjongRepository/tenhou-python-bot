@@ -2,6 +2,7 @@ from copy import copy
 
 from game.ai.defence.yaku_analyzer.honitsu import HonitsuAnalyzer
 from game.ai.defence.yaku_analyzer.tanyao import TanyaoAnalyzer
+from game.ai.defence.yaku_analyzer.toitoi import ToitoiAnalyzer
 from game.ai.defence.yaku_analyzer.yakuhai import YakuhaiAnalyzer
 from game.ai.helpers.defence import EnemyDanger, TileDanger
 from game.ai.helpers.possible_forms import PossibleFormsAnalyzer
@@ -70,11 +71,20 @@ class EnemyAnalyzer:
 
         # let's not stack tanyao with other yaku for now
         # it is not compatible with yakuhai and it is probably will not compatible with honitsu
+        has_tanyao = False
         if not active_yaku:
             tanyao_analyzer = TanyaoAnalyzer(self.enemy)
             if tanyao_analyzer.is_yaku_active():
                 active_yaku.append(tanyao_analyzer)
                 melds_han += tanyao_analyzer.melds_han()
+                has_tanyao = True
+
+        # let's not stack toitoi with tanyao for now
+        if not has_tanyao:
+            toitoi_analyzer = ToitoiAnalyzer(self.enemy)
+            if toitoi_analyzer.is_yaku_active():
+                active_yaku.append(toitoi_analyzer)
+                melds_han += toitoi_analyzer.melds_han()
 
         meld_tiles = self.enemy.meld_tiles
         dora_count = sum([plus_dora(x, self.table.dora_indicators) for x in meld_tiles])

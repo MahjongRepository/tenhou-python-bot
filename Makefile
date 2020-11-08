@@ -23,4 +23,4 @@ run_battle:
 		mahjong_bot pypy3 bots_battle.py -g $(GAMES)
 
 archive_replays:
-	tar -czvf replays.tar.gz -C ./project/battle_results/replays/ .
+	tar -czvf "replays-$(shell date '+%Y-%m-%d-%H-%M').tar.gz" -C ./project/battle_results/replays/ .

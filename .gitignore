@@ -23,7 +23,7 @@ project/game/data/*
 project/analytics/data/*
 
 project/battle_results/**/*
-replays.tar.gz
+*.tar.gz
 
 # temporary files
 experiments

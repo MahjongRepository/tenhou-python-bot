@@ -120,9 +120,9 @@ class EnemyAnalyzer:
         # FIXME: we will currently sum up chinitsu and honitsu han, refactor that with yaku compatibility table
         for yaku_analyzer in self.threat_reason["active_yaku"]:
             if not (tile_34 in yaku_analyzer.get_safe_tiles_34()):
-                melds_han += yaku_analyzer.melds_han()
+                melds_han += yaku_analyzer.melds_han() * yaku_analyzer.get_tempai_probability_modifier()
 
-        return melds_han
+        return int(melds_han)
 
     def get_assumed_hand_cost(self, tile_136) -> int:
         """

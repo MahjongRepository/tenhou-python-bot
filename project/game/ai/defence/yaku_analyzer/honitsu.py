@@ -90,7 +90,9 @@ class HonitsuAnalyzer(YakuAnalyzer):
                 has_discarded_other_suit_from_hand = [
                     x
                     for x in discards_after
-                    if (not x.is_tsumogiri and not is_honor(x.value // 4) and not current_suit["function"](x.value // 4))
+                    if (
+                        not x.is_tsumogiri and not is_honor(x.value // 4) and not current_suit["function"](x.value // 4)
+                    )
                 ]
                 if has_discarded_other_suit_from_hand:
                     return False
@@ -129,3 +131,12 @@ class HonitsuAnalyzer(YakuAnalyzer):
                 return [TileDanger.HONITSU_FIRST_SECOND_HONOR_BONUS_DANGER]
 
         return []
+
+    def get_tempai_probability_modifier(self):
+        # if enemy has not yet discarded his suit and there are less than 3 melds, consider tempai less probable
+        suit_discards = [x for x in self.enemy.discards if self.chosen_suit(x.value // 4)]
+
+        if not suit_discards and len(self.enemy.melds):
+            return 0.5
+
+        return 1

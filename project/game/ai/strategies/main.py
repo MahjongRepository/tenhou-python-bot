@@ -233,15 +233,22 @@ class BaseStrategy:
         if not threats:
             return True
 
+        # don't open garbage hand against threats
+        if selected_tile.shanten >= 3:
+            return False
+
+        # FIXME: we should get tile_136 directly from discard_option as it may be important if it's an aka
+        tile_to_discard_136 = selected_tile.tile_to_discard * 4
+
         if len(threats) == 1:
-            threat_hand_cost = threats[0].threat_reason["assumed_hand_cost"]
+            threat_hand_cost = threats[0].get_assumed_hand_cost(tile_to_discard_136)
             # expensive threat
             # and our hand is not good
             # let's not open this
             if threat_hand_cost >= 7700:
                 return False
         else:
-            min_threat_hand_cost = min([x.threat_reason["assumed_hand_cost"] for x in threats])
+            min_threat_hand_cost = min([x.get_assumed_hand_cost(tile_to_discard_136) for x in threats])
             # 2+ threats
             # and they are not cheap
             # so, let's skip opening of bad hand

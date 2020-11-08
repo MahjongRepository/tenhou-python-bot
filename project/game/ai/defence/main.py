@@ -163,6 +163,8 @@ class TileDangerHandler:
             danger_border = DangerBorder.BETAORI
             hand_weighted_cost = 0
             shanten = discard_option.shanten
+            # FIXME: we should get tile_136 directly from discard_option as it may be important if it's an aka
+            tile_to_discard_136 = discard_option.tile_to_discard * 4
 
             # never push with zero chance to win
             # FIXME: we may actually want to push it for tempai in ryukoku, so reconsider
@@ -172,7 +174,13 @@ class TileDangerHandler:
                 )
                 continue
 
-            threatening_player_hand_cost = threatening_player.threat_reason["assumed_hand_cost"]
+            threatening_player_hand_cost = threatening_player.get_assumed_hand_cost(tile_to_discard_136)
+            # fast path: we don't need to calculate all the stuff if this tile is safe against this enemy
+            if threatening_player_hand_cost == 0:
+                discard_option.danger.set_danger_border(
+                    threatening_player.enemy.seat, DangerBorder.IGNORE, hand_weighted_cost
+                )
+                continue
 
             if discard_option.shanten == 0:
                 hand_weighted_cost = self.player.ai.estimate_weighted_mean_hand_value(discard_option)

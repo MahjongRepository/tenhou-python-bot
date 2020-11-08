@@ -8,7 +8,7 @@ from game.ai.helpers.defence import EnemyDanger, TileDanger
 from game.ai.helpers.possible_forms import PossibleFormsAnalyzer
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
-from mahjong.utils import plus_dora
+from mahjong.utils import is_honor, plus_dora
 from utils.general import separate_tiles_by_suits
 
 
@@ -63,6 +63,7 @@ class EnemyAnalyzer:
             ToitoiAnalyzer(self.enemy),
         ]
 
+        # FIXME: further refactoring is needed, only consider melds han when we know which tile we discard
         melds_han = 0
         active_yaku = []
         for x in yaku_analyzers:
@@ -87,26 +88,34 @@ class EnemyAnalyzer:
         # and there is 6+ round step
         if len(melds) == 1 and round_step > 6 and dora_count >= 3:
             self._create_danger_reason(
-                EnemyDanger.THREAT_OPEN_HAND_AND_MULTIPLE_DORA, melds, dora_count, melds_han, active_yaku, round_step
+                EnemyDanger.THREAT_OPEN_HAND_AND_MULTIPLE_DORA, melds, dora_count, active_yaku, round_step
             )
             return True
 
         if melds_han + dora_count >= 3 and len(melds) >= 2:
             self._create_danger_reason(
-                EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND, melds, dora_count, melds_han, active_yaku, round_step
+                EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND, melds, dora_count, active_yaku, round_step
             )
             return True
 
         return False
 
-    @property
-    def assumed_hand_cost(self) -> int:
+    def get_melds_han(self, tile_34) -> int:
+        melds_han = 0
+
+        for yaku_analyzer in self.threat_reason["active_yaku"]:
+            if not (tile_34 in yaku_analyzer.get_safe_tiles_34()):
+                melds_han += yaku_analyzer.melds_han()
+
+        return melds_han
+
+    def get_assumed_hand_cost(self, tile_136) -> int:
         """
         How much the hand could cost
         """
         if self.enemy.in_riichi:
-            return self._calculate_assumed_hand_cost_for_riichi()
-        return self._calculate_assumed_hand_cost()
+            return self._calculate_assumed_hand_cost_for_riichi(tile_136)
+        return self._calculate_assumed_hand_cost(tile_136)
 
     @property
     def number_of_unverified_suji(self) -> int:
@@ -137,12 +146,36 @@ class EnemyAnalyzer:
     def calculate_suji_count_coeff(unverified_suji_count: int) -> int:
         return (TileDanger.SUJI_COUNT_BOUNDARY - unverified_suji_count) * TileDanger.SUJI_COUNT_MODIFIER
 
-    def _calculate_assumed_hand_cost(self) -> int:
+    def _get_dora_scale_bonus(self, tile_136):
+        tile_34 = tile_136 // 4
+        scale_bonus = 0
+
+        dora_count = plus_dora(tile_136, self.table.dora_indicators, add_aka_dora=self.table.has_aka_dora)
+
+        if is_honor(tile_34):
+            # it can actually be +3 but let's count +2 as it may be either tanki or syanpon
+            scale_bonus += dora_count * 2
+        else:
+            scale_bonus += dora_count
+
+        return scale_bonus
+
+    def _calculate_assumed_hand_cost(self, tile_136) -> int:
+        tile_34 = tile_136 // 4
+
+        melds_han = self.get_melds_han(tile_34)
+        if melds_han == 0:
+            return 0
+
+        han = melds_han
+        han += self.threat_reason.get("dora_count", 0)
+        han += self._get_dora_scale_bonus(tile_136)
+
         if self.enemy.is_dealer:
             scale = [1000, 2900, 5800, 12000, 12000, 18000, 18000, 24000, 24000, 24000, 36000, 36000, 48000]
         else:
             scale = [1000, 2000, 3900, 8000, 8000, 12000, 12000, 16000, 16000, 16000, 24000, 24000, 32000]
-        han = self.threat_reason.get("dora_count", 0) + self.threat_reason.get("melds_han", 0)
+
         if han > len(scale) - 1:
             han = len(scale) - 1
         elif han == 0:
@@ -150,13 +183,13 @@ class EnemyAnalyzer:
 
         return scale[han - 1]
 
-    def _calculate_assumed_hand_cost_for_riichi(self) -> int:
-        scale_index = 1
+    def _calculate_assumed_hand_cost_for_riichi(self, tile_136) -> int:
+        scale_index = 0
 
         if self.enemy.is_dealer:
-            scale = [2900, 5800, 7700, 12000, 18000, 18000, 24000, 24000, 48000]
+            scale = [2900, 5800, 7700, 12000, 12000, 18000, 18000, 24000, 24000, 48000]
         else:
-            scale = [2000, 3900, 5200, 8000, 12000, 12000, 16000, 16000, 32000]
+            scale = [2000, 3900, 5200, 8000, 8000, 12000, 12000, 16000, 16000, 32000]
 
         # it wasn't early riichi, let's think that it could be more expensive
         if len(self.enemy.discards) > 6:
@@ -173,13 +206,16 @@ class EnemyAnalyzer:
         if live_dora_tiles >= 4:
             scale_index += 1
 
+        # if we are discarding dora we are obviously going to make enemy hand more expensive
+        scale_index += self._get_dora_scale_bonus(tile_136)
+
         # if enemy has closed kan, his hand is more expensive on average
         for meld in self.enemy.melds:
             # if he is in riichi he can only have closed kan
             assert meld.type == Meld.KAN and not meld.opened
 
-            # plus one just because of riichi with kan
-            scale_index += 1
+            # plus two just because of riichi with kan
+            scale_index += 2
 
             # higher danger for doras
             for tile in meld.tiles:
@@ -194,15 +230,11 @@ class EnemyAnalyzer:
 
         return scale[scale_index]
 
-    def _create_danger_reason(
-        self, danger_reason, melds=None, dora_count=0, melds_han=0, active_yaku=None, round_step=None
-    ):
+    def _create_danger_reason(self, danger_reason, melds=None, dora_count=0, active_yaku=None, round_step=None):
         new_danger_reason = copy(danger_reason)
         new_danger_reason["melds"] = melds
         new_danger_reason["dora_count"] = dora_count
-        new_danger_reason["melds_han"] = melds_han
         new_danger_reason["active_yaku"] = active_yaku
         new_danger_reason["round_step"] = round_step
 
         self.threat_reason = new_danger_reason
-        self.threat_reason["assumed_hand_cost"] = self.assumed_hand_cost

@@ -115,18 +115,24 @@ def test_dont_open_bad_hand_if_there_are_expensive_threat():
     table.add_called_riichi(enemy_seat)
     table.add_discarded_tile(enemy_seat, string_to_136_tile(honors="4"), True)
 
-    tiles = string_to_136_array(sou="22499", pin="27", man="3344", honors="4") + [FIVE_RED_MAN]
+    tiles = string_to_136_array(sou="226", pin="2469", man="3344", honors="4") + [FIVE_RED_MAN]
     player.init_hand(tiles)
-    tile = string_to_136_tile(man="4")
 
-    # cheap enemy tempai (5200), let's push this hand
-    meld, _ = player.try_to_call_meld(tile, False)
+    # cheap enemy tempai, but this meld is garbage, let's not push
+    tile = string_to_136_tile(man="4")
+    meld, _ = player.try_to_call_meld(tile, True)
+    assert meld is None
+
+    # cheap enemy tempai, and good chi, let's take this meld
+    tile = string_to_136_tile(man="2")
+    meld, _ = player.try_to_call_meld(tile, True)
     assert meld is not None
 
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.KAN, is_open=False, honors="1111"))
     # enemy hand is more expensive now (12000)
     # in this case let's not open this hand
-    meld, _ = player.try_to_call_meld(tile, False)
+    tile = string_to_136_tile(man="2")
+    meld, _ = player.try_to_call_meld(tile, True)
     assert meld is None
 
 
@@ -148,7 +154,7 @@ def test_dont_open_bad_hand_if_there_are_multiple_threats():
     player.init_hand(tiles)
     tile = string_to_136_tile(man="4")
 
-    # there are multiple threats with (5200+) hands
+    # there are multiple threats with (3900+) hands
     # let's not push in that case
     meld, _ = player.try_to_call_meld(tile, False)
     assert meld is None

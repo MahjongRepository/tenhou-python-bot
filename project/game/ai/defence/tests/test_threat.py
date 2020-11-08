@@ -41,7 +41,7 @@ def test_is_threatening_and_dora_pon():
     assert len(threatening_players) == 1
     assert threatening_players[0].enemy.seat == enemy_seat
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_OPEN_HAND_AND_MULTIPLE_DORA["id"]
-    assert threatening_players[0].assumed_hand_cost == 8000
+    assert threatening_players[0].get_assumed_hand_cost(string_to_136_tile(man="2")) == 8000
 
 
 def test_is_threatening_and_two_open_yakuhai_melds():
@@ -70,7 +70,7 @@ def test_is_threatening_and_two_open_yakuhai_melds():
     assert len(threatening_players) == 1
     assert threatening_players[0].enemy.seat == enemy_seat
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
-    assert threatening_players[0].assumed_hand_cost == 3900
+    assert threatening_players[0].get_assumed_hand_cost(string_to_136_tile(man="8")) == 3900
 
     for tile_136 in range(0, 136):
         bonus_danger = threatening_players[0].threat_reason.get("active_yaku")[0].get_bonus_danger(tile_136, 1)
@@ -99,7 +99,7 @@ def test_is_threatening_and_two_open_tanyao_melds():
     assert len(threatening_players) == 1
     assert threatening_players[0].enemy.seat == enemy_seat
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
-    assert threatening_players[0].assumed_hand_cost == 3900
+    assert threatening_players[0].get_assumed_hand_cost(string_to_136_tile(man="2")) == 3900
 
     for tile_136 in range(0, 136):
         bonus_danger = threatening_players[0].threat_reason.get("active_yaku")[0].get_bonus_danger(tile_136, 1)
@@ -129,7 +129,8 @@ def test_is_threatening_and_honitsu_hand():
     threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 1
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
-    assert threatening_players[0].assumed_hand_cost == 3900
+    assert threatening_players[0].get_assumed_hand_cost(string_to_136_tile(pin="1")) == 3900
+    assert threatening_players[0].get_assumed_hand_cost(string_to_136_tile(pin="2")) == 8000
     assert threatening_players[0].threat_reason["active_yaku"][0].id == HonitsuAnalyzer.id
 
     for tile_136 in range(0, 136):
@@ -158,7 +159,7 @@ def test_is_threatening_and_toitoi_melds():
     assert len(threatening_players) == 1
     assert threatening_players[0].enemy.seat == enemy_seat
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
-    assert threatening_players[0].assumed_hand_cost == 8000
+    assert threatening_players[0].get_assumed_hand_cost(string_to_136_tile(man="2")) == 8000
 
 
 def test_threatening_riichi_player_and_default_hand_cost():
@@ -169,11 +170,11 @@ def test_threatening_riichi_player_and_default_hand_cost():
     # non dealer
     threatening_player = table.player.ai.defence.get_threatening_players()[0]
     assert threatening_player.enemy.seat == enemy_seat
-    assert threatening_player.assumed_hand_cost == 3900
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(man="2")) == 2000
 
     # dealer
     threatening_player.enemy.dealer_seat = enemy_seat
-    assert threatening_player.assumed_hand_cost == 5800
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(man="2")) == 2900
 
 
 def test_threatening_riichi_player_and_not_early_hand_bonus():
@@ -187,7 +188,7 @@ def test_threatening_riichi_player_and_not_early_hand_bonus():
     # +1 scale for riichi on 6+ turn
     threatening_player = table.player.ai.defence.get_threatening_players()[0]
     assert threatening_player.enemy.seat == enemy_seat
-    assert threatening_player.assumed_hand_cost == 5200
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(man="2")) == 3900
 
 
 def test_threatening_riichi_player_and_not_visible_dora():
@@ -204,7 +205,9 @@ def test_threatening_riichi_player_and_not_visible_dora():
     # +1 scale for riichi on 6+ turn
     threatening_player = table.player.ai.defence.get_threatening_players()[0]
     assert threatening_player.enemy.seat == enemy_seat
-    assert threatening_player.assumed_hand_cost == 5200
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(man="2")) == 3900
+    # on dora discard, enemy hand will be on average more expensive
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(sou="3")) == 5200
 
 
 def test_threatening_riichi_player_with_kan():
@@ -217,11 +220,11 @@ def test_threatening_riichi_player_with_kan():
     # non dealer
     threatening_player = table.player.ai.defence.get_threatening_players()[0]
     assert threatening_player.enemy.seat == enemy_seat
-    assert threatening_player.assumed_hand_cost == 5200
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(man="2")) == 5200
 
     # dealer
     threatening_player.enemy.dealer_seat = enemy_seat
-    assert threatening_player.assumed_hand_cost == 7700
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(man="2")) == 7700
 
 
 def test_threatening_riichi_player_with_kan_aka():
@@ -235,11 +238,11 @@ def test_threatening_riichi_player_with_kan_aka():
     # non dealer
     threatening_player = table.player.ai.defence.get_threatening_players()[0]
     assert threatening_player.enemy.seat == enemy_seat
-    assert threatening_player.assumed_hand_cost == 8000
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(sou="2")) == 8000
 
     # dealer
     threatening_player.enemy.dealer_seat = enemy_seat
-    assert threatening_player.assumed_hand_cost == 12000
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(sou="2")) == 12000
 
 
 def test_threatening_riichi_player_with_dora_kan():
@@ -254,11 +257,11 @@ def test_threatening_riichi_player_with_dora_kan():
     # non dealer
     threatening_player = table.player.ai.defence.get_threatening_players()[0]
     assert threatening_player.enemy.seat == enemy_seat
-    assert threatening_player.assumed_hand_cost == 16000
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(man="2")) == 16000
 
     # dealer
     threatening_player.enemy.dealer_seat = enemy_seat
-    assert threatening_player.assumed_hand_cost == 24000
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(man="2")) == 24000
 
 
 def test_threatening_riichi_player_with_yakuhai_kan():
@@ -272,7 +275,7 @@ def test_threatening_riichi_player_with_yakuhai_kan():
     # non dealer
     threatening_player = table.player.ai.defence.get_threatening_players()[0]
     assert threatening_player.enemy.seat == enemy_seat
-    assert threatening_player.assumed_hand_cost == 8000
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(man="2")) == 8000
 
 
 def test_threatening_riichi_player_with_double_yakuhai_kan():
@@ -287,7 +290,7 @@ def test_threatening_riichi_player_with_double_yakuhai_kan():
     threatening_player = table.player.ai.defence.get_threatening_players()[0]
     threatening_player.enemy.dealer_seat = enemy_seat
     assert threatening_player.enemy.seat == enemy_seat
-    assert threatening_player.assumed_hand_cost == 18000
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(man="2")) == 12000
 
 
 def test_number_of_unverified_suji():

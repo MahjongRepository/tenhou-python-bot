@@ -237,7 +237,7 @@ class GameManager:
                         count_of_riichi_players += 1
 
                 if count_of_riichi_players == 4:
-                    self.abortive_retake(AbortiveDraw.FOUR_RIICHI)
+                    return [self.abortive_retake(AbortiveDraw.FOUR_RIICHI)]
 
             # abortive retake
             result = self._check_same_winds()

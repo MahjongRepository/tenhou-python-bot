@@ -70,7 +70,7 @@ class GameManager:
         Clients random placement and dealer selection.
         """
 
-        replay_name = "{}.log".format(int(time.time()))
+        replay_name = f"{int(time.time())}_{randint(0, 999):03}.txt"
         logger.info("Replay name: {}".format(replay_name))
         self.replay = TenhouReplay(replay_name, self.clients, self.replays_directory)
 

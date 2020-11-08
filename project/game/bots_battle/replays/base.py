@@ -1,21 +1,13 @@
-# -*- coding: utf-8 -*-
-import os
-
-replays_directory = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "data")
-if not os.path.exists(replays_directory):
-    os.mkdir(replays_directory)
-
-
-class Replay(object):
+class Replay:
     replays_directory = ""
     replay_name = ""
     tags = []
     clients = []
 
-    def __init__(self, replay_name, clients):
-        self.replays_directory = replays_directory
+    def __init__(self, replay_name, clients, replays_directory):
         self.replay_name = replay_name
         self.clients = clients
+        self.replays_directory = replays_directory
 
     def init_game(self, seed):
         raise NotImplementedError()

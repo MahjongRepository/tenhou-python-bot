@@ -1,3 +1,6 @@
+MAKE_FILE_PATH=$(abspath $(lastword $(MAKEFILE_LIST)))
+CURRENT_DIR=$(dir $(MAKE_FILE_PATH))
+
 format:
 	isort project/*
 	black project/*
@@ -9,3 +12,12 @@ lint:
 
 tests:
 	PYTHONPATH=./project pytest -n 4
+
+build_docker:
+	docker build -t mahjong_bot .
+
+GAMES=1
+run_battle:
+	docker run -u `id -u` -it --rm \
+		-v "$(CURRENT_DIR)project/:/app/" \
+		mahjong_bot pypy3 bots_battle.py -g $(GAMES)

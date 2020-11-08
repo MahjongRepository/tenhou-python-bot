@@ -52,7 +52,7 @@ class GameManager:
     _unique_dealers = 0
     _need_to_check_same_winds = None
 
-    def __init__(self, clients):
+    def __init__(self, clients, replays_directory):
         self._need_to_check_same_winds = True
         self.tiles = []
         self.dead_wall = []
@@ -62,7 +62,7 @@ class GameManager:
 
         self.agari = Agari()
         self.finished_hand = HandCalculator()
-        self.replay = TenhouReplay("", self.clients)
+        self.replays_directory = replays_directory
 
     def init_game(self):
         """
@@ -72,7 +72,7 @@ class GameManager:
 
         replay_name = "{}.log".format(int(time.time()))
         logger.info("Replay name: {}".format(replay_name))
-        self.replay = TenhouReplay(replay_name, self.clients)
+        self.replay = TenhouReplay(replay_name, self.clients, self.replays_directory)
 
         logger.info("Seed: {}".format(shuffle_seed()))
         logger.info("Aka dora: {}".format(settings.FIVE_REDS))

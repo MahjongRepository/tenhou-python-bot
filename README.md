@@ -1,6 +1,6 @@
 ![Mahjong bot](https://github.com/MahjongRepository/tenhou-python-bot/workflows/Mahjong%20bot/badge.svg)
 
-Bot was tested with Python 3.6+, we are not supporting Python 2.
+Bot was tested with Python 3.6+ and PyPy3, we are not supporting Python 2.
 
 # What do we have here?
 
@@ -20,14 +20,26 @@ Here you can read about bot played games statistic: [versions history](doc/versi
 
 ## How to run it?
 
-1. `pip install -r requirements/dev.txt`
-2. Run `cd project && python main.py` it will connect to the tenhou.net and will play a game.
+1. `pip install -r requirements/lint.txt`
+1. Run `cd project && python main.py` it will connect to the tenhou.net and will play a game.
+
+## How to run bot battle with pypy
+
+To make it easier run bot vs bot battles we prepared PyPy3 Docker container.
+
+It wasn't tested for regular game on tenhou.net, but theoretically should work here without any issues.
+
+How to run the game locally:
+
+1. [Install Docker](https://docs.docker.com/get-docker/) 
+1. Run `make build_docker`
+1. Run `make GAMES=1 run_battle` it will play one game locally. Logs and replays will be stored in `bots_battle` folder
 
 ## Configuration instructions
 
 1. Put your own settings to the `project/settings_local.py` file. 
 They will override settings from default `settings.py` file.
-2. Also, you can override some default settings with command arguments. 
+1. Also, you can override some default settings with command arguments. 
 Use `python main.py -h` to check all available commands.
 
 ## Game reproducer

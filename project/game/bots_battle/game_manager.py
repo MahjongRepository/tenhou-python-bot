@@ -3,8 +3,8 @@ import time
 from collections import deque
 from random import randint, random, seed, shuffle
 
+from game.bots_battle.local_client import LocalClient
 from game.bots_battle.replays.tenhou import TenhouReplay
-from game.client import Client
 from mahjong.agari import Agari
 from mahjong.constants import WINDS
 from mahjong.hand_calculating.hand import HandCalculator
@@ -236,7 +236,7 @@ class GameManager:
                         count_of_riichi_players += 1
 
                 if count_of_riichi_players == 4:
-                    self.abortive_retake(self.FOUR_RIICHI)
+                    self.abortive_retake(AbortiveDraw.FOUR_RIICHI)
 
             # abortive retake
             result = self._check_same_winds()
@@ -339,7 +339,7 @@ class GameManager:
                 possible_win_client.append(other_client)
 
         if len(possible_win_client) == 3:
-            return [self.abortive_retake(self.TRIPLE_RON)]
+            return [self.abortive_retake(AbortiveDraw.TRIPLE_RON)]
 
         # check multiple ron
         results = []
@@ -719,7 +719,7 @@ class GameManager:
 
         tile = unique_tiles[1]
         if tile in WINDS:
-            return self.abortive_retake(self.SAME_FIRST_WIND)
+            return self.abortive_retake(AbortiveDraw.SAME_FIRST_WIND)
         else:
             self._need_to_check_same_winds = False
             return None
@@ -739,7 +739,7 @@ class GameManager:
 
         return is_game_end
 
-    def _get_current_client(self) -> Client:
+    def _get_current_client(self) -> LocalClient:
         return self.clients[self.current_client_seat]
 
     def _cut_tiles(self, count_of_tiles) -> []:
@@ -791,3 +791,12 @@ class GameManager:
         shuffle_wall(rand_two)
 
         return wall
+
+
+# let's use tenhou constant values, to make things easier
+class AbortiveDraw:
+    NINE_DIFFERENT = "yao9"
+    FOUR_RIICHI = "reach4"
+    TRIPLE_RON = "ron3"
+    FOUR_KANS = "kan4"
+    SAME_FIRST_WIND = "kaze4"

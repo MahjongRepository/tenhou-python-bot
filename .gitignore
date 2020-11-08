@@ -21,7 +21,8 @@ seeds.txt
 project/game/data/*
 project/analytics/data/*
 
-battle_results/*
+project/battle_results/**/*
+replays.tar.gz
 
 # temporary files
 experiments

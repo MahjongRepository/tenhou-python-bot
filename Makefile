@@ -21,3 +21,6 @@ run_battle:
 	docker run -u `id -u` -it --rm \
 		-v "$(CURRENT_DIR)project/:/app/" \
 		mahjong_bot pypy3 bots_battle.py -g $(GAMES)
+
+archive_replays:
+	tar -czvf replays.tar.gz -C ./project/battle_results/replays/ .

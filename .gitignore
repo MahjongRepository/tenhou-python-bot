@@ -21,6 +21,8 @@ seeds.txt
 project/game/data/*
 project/analytics/data/*
 
+battle_results/*
+
 # temporary files
 experiments
 

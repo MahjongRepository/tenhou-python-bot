@@ -1,3 +1,4 @@
+from game.ai.defence.yaku_analyzer.chinitsu import ChinitsuAnalyzer
 from game.ai.defence.yaku_analyzer.honitsu import HonitsuAnalyzer
 from game.ai.helpers.defence import EnemyDanger
 from game.table import Table
@@ -135,7 +136,7 @@ def test_is_threatening_and_honitsu_hand():
     assert len(threatening_players) == 0
 
     enemy_seat = 1
-    table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, pin="567"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, honors="444"))
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.CHI, pin="123"))
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.CHI, pin="345"))
 
@@ -150,16 +151,55 @@ def test_is_threatening_and_honitsu_hand():
     threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 1
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
-    assert threatening_players[0].get_assumed_hand_cost(string_to_136_tile(pin="1")) == 3900
+    assert threatening_players[0].get_assumed_hand_cost(string_to_136_tile(pin="4")) == 3900
     assert threatening_players[0].get_assumed_hand_cost(string_to_136_tile(pin="2")) == 8000
-    assert threatening_players[0].threat_reason["active_yaku"][0].id == HonitsuAnalyzer.id
+    assert HonitsuAnalyzer.id in [x.id for x in threatening_players[0].threat_reason["active_yaku"]]
+
+    honitsu_analyzer = [x for x in threatening_players[0].threat_reason["active_yaku"] if x.id == HonitsuAnalyzer.id][0]
 
     for tile_136 in range(0, 136):
-        bonus_danger = threatening_players[0].threat_reason.get("active_yaku")[0].get_bonus_danger(tile_136, 1)
+        bonus_danger = honitsu_analyzer.get_bonus_danger(tile_136, 1)
         if is_honor(tile_136 // 4):
             assert bonus_danger
         else:
             assert not bonus_danger
+
+
+def test_is_threatening_and_chinitsu_hand():
+    table = Table()
+    table.add_dora_indicator(string_to_136_tile(pin="1"))
+
+    threatening_players = table.player.ai.defence.get_threatening_players()
+    assert len(threatening_players) == 0
+
+    enemy_seat = 1
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, pin="666"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.CHI, pin="123"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.CHI, pin="345"))
+
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="1"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="5"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="8"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="9"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="1"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="1"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="1"), False)
+
+    threatening_players = table.player.ai.defence.get_threatening_players()
+    assert len(threatening_players) == 1
+    assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
+    # FIXME: enable this check when yaku compatibility is fixed
+    # assert threatening_players[0].get_assumed_hand_cost(string_to_136_tile(pin="4")) == 12000
+    assert threatening_players[0].get_assumed_hand_cost(string_to_136_tile(pin="2")) == 16000
+    assert ChinitsuAnalyzer.id in [x.id for x in threatening_players[0].threat_reason["active_yaku"]]
+
+    chinitsu_analyzer = [x for x in threatening_players[0].threat_reason["active_yaku"] if x.id == ChinitsuAnalyzer.id][
+        0
+    ]
+
+    for tile_136 in range(0, 136):
+        bonus_danger = chinitsu_analyzer.get_bonus_danger(tile_136, 1)
+        assert not bonus_danger
 
 
 def test_is_threatening_and_toitoi_melds():

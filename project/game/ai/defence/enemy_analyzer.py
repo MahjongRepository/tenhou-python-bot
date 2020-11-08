@@ -1,5 +1,6 @@
 from copy import copy
 
+from game.ai.defence.yaku_analyzer.chinitsu import ChinitsuAnalyzer
 from game.ai.defence.yaku_analyzer.honitsu import HonitsuAnalyzer
 from game.ai.defence.yaku_analyzer.tanyao import TanyaoAnalyzer
 from game.ai.defence.yaku_analyzer.toitoi import ToitoiAnalyzer
@@ -66,6 +67,7 @@ class EnemyAnalyzer:
             sure_han = yakuhai_analyzer.melds_han()
 
         yaku_analyzers = [
+            ChinitsuAnalyzer(self.enemy),
             HonitsuAnalyzer(self.enemy),
             ToitoiAnalyzer(self.enemy),
         ]
@@ -81,8 +83,8 @@ class EnemyAnalyzer:
             if tanyao_analyzer.is_yaku_active():
                 active_yaku.append(tanyao_analyzer)
 
-        # we only have one possible yaku
-        if len(active_yaku) == 1:
+        if active_yaku:
+            # FIXME: use yaku compatibility table to handle this properly
             sure_han = active_yaku[0].melds_han()
 
         meld_tiles = self.enemy.meld_tiles
@@ -115,6 +117,7 @@ class EnemyAnalyzer:
     def get_melds_han(self, tile_34) -> int:
         melds_han = 0
 
+        # FIXME: we will currently sum up chinitsu and honitsu han, refactor that with yaku compatibility table
         for yaku_analyzer in self.threat_reason["active_yaku"]:
             if not (tile_34 in yaku_analyzer.get_safe_tiles_34()):
                 melds_han += yaku_analyzer.melds_han()

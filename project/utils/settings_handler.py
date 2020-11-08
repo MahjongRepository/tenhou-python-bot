@@ -23,7 +23,7 @@ class SettingsSingleton:
 
 class Settings:
     def __init__(self):
-        mod = importlib.import_module("settings")
+        mod = importlib.import_module("settings.base")
 
         for setting in dir(mod):
             setting_value = getattr(mod, setting)

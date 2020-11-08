@@ -1,6 +1,7 @@
 """
 Endpoint to run bot. It will play a game on tenhou.net
 """
+import importlib
 from optparse import OptionParser
 
 from tenhou.main import connect_and_play
@@ -63,7 +64,7 @@ def parse_args_and_set_up_settings():
     settings.WAITING_GAME_TIMEOUT_MINUTES = opts.timeout
 
     if opts.settings:
-        module = __import__(opts.settings)
+        module = importlib.import_module(f"settings.{opts.settings}")
         for key, value in vars(module).items():
             # let's use only upper case settings
             if key.isupper():

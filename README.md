@@ -37,8 +37,8 @@ How to run the game locally:
 
 ## Configuration instructions
 
-1. Put your own settings to the `project/settings_local.py` file. 
-They will override settings from default `settings.py` file.
+1. Put your own settings to the `project/settings/settings_local.py` file. 
+They will override settings from default `settings/base.py` file.
 1. Also, you can override some default settings with command arguments. 
 Use `python main.py -h` to check all available commands.
 

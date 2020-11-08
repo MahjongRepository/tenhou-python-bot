@@ -52,6 +52,6 @@ PRINT_LOGS = True
 GAME_TYPE = "1"
 
 try:
-    from settings_local import *
+    from .settings_local import *
 except ImportError:
     pass

@@ -81,9 +81,7 @@ class HonitsuAnalyzer(YakuAnalyzer):
         # if enemy had discarded tiles from that suit or honor and after that he had discarded a tile from a different
         # suit from his hand - let's believe it's not honitsu
         suit_discards_positions = [
-            self.enemy.discards.index(x)
-            for x in self.enemy.discards
-            if ChinitsuAnalyzer._is_tile_from_suit(current_suit, x.value)
+            self.enemy.discards.index(x) for x in self.enemy.discards if current_suit["function"](x.value // 4)
         ]
         if suit_discards_positions:
             last_honitsu_discard = suit_discards_positions[-1]
@@ -92,11 +90,7 @@ class HonitsuAnalyzer(YakuAnalyzer):
                 has_discarded_other_suit_from_hand = [
                     x
                     for x in discards_after
-                    if (
-                        not x.is_tsumogiri
-                        and not is_honor(x.value // 4)
-                        and not ChinitsuAnalyzer._is_tile_from_suit(current_suit, x.value)
-                    )
+                    if (not x.is_tsumogiri and not is_honor(x.value // 4) and not current_suit["function"](x.value // 4))
                 ]
                 if has_discarded_other_suit_from_hand:
                     return False

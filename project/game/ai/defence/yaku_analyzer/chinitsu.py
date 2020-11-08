@@ -53,7 +53,7 @@ class ChinitsuAnalyzer(YakuAnalyzer):
         # if enemy had discarded tiles from that suit and after that he had discarded a tile from a different
         # suit from his hand - let's believe it's not chinitsu
         suit_discards_positions = [
-            self.enemy.discards.index(x) for x in self.enemy.discards if self._is_tile_from_suit(current_suit, x.value)
+            self.enemy.discards.index(x) for x in self.enemy.discards if current_suit["function"](x.value // 34)
         ]
         if suit_discards_positions:
             last_suit_discard = suit_discards_positions[-1]
@@ -62,11 +62,7 @@ class ChinitsuAnalyzer(YakuAnalyzer):
                 has_discarded_other_suit_from_hand = [
                     x.value
                     for x in discards_after
-                    if (
-                        not x.is_tsumogiri
-                        and not is_honor(x.value // 4)
-                        and not self._is_tile_from_suit(current_suit, x.value)
-                    )
+                    if (not x.is_tsumogiri and not is_honor(x.value // 4) and not current_suit["function"](x.value // 4))
                 ]
                 if has_discarded_other_suit_from_hand:
                     return False
@@ -120,8 +116,3 @@ class ChinitsuAnalyzer(YakuAnalyzer):
         suit = suits[0]
         assert suit["count"] == 1
         return suit
-
-    @staticmethod
-    # FIXME: remove this method and use proper one from mahjong lib
-    def _is_tile_from_suit(suit, tile_136):
-        return ChinitsuAnalyzer._get_tile_suit(tile_136) == suit

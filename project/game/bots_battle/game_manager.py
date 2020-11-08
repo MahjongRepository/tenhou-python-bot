@@ -211,6 +211,7 @@ class GameManager:
                 tile = draw_tile
                 current_client.table.add_discarded_tile(0, tile, True)
 
+            who_called_riichi = None
             if in_tempai and current_client.player.can_call_riichi():
                 who_called_riichi = current_client.seat
                 for client in self.clients:
@@ -226,7 +227,7 @@ class GameManager:
                 return result
 
             # if there is no challenger to ron, let's check can we call riichi with tile discard or not
-            if in_tempai and current_client.player.can_call_riichi():
+            if who_called_riichi:
                 self.call_riichi(current_client)
                 self.replay.riichi(current_client.seat, 2)
 

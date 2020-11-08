@@ -420,6 +420,13 @@ def test_tile_danger_against_tanyao_threat():
     table.add_dora_indicator(string_to_136_tile(pin="1"))
     table.add_dora_indicator(string_to_136_tile(pin="2"))
 
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="1"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="5"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="8"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="9"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="4"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="3"), False)
+
     threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 1
     assert threatening_players[0].enemy.seat == enemy_seat
@@ -475,6 +482,13 @@ def test_tile_danger_against_toitoi_threat():
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, pin="222"))
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, honors="444"))
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, sou="999"))
+
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="1"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="5"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="8"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="9"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="4"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="3"), False)
 
     table.add_dora_indicator(string_to_136_tile(pin="1"))
 

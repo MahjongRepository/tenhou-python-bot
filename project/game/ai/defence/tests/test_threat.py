@@ -31,6 +31,13 @@ def test_is_threatening_and_dora_pon():
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, man="333"))
     table.player.round_step = 7
 
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="1"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="5"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="8"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="9"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="4"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="7"), False)
+
     # simple pon it is no threat
     threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 0
@@ -58,6 +65,13 @@ def test_is_threatening_and_two_open_yakuhai_melds():
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, honors="222"))
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.CHI, man="123"))
     table.player.round_step = 2
+
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="1"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="5"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="8"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="9"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="4"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="3"), False)
 
     # double wind is not enough
     threatening_players = table.player.ai.defence.get_threatening_players()
@@ -88,7 +102,14 @@ def test_is_threatening_and_two_open_tanyao_melds():
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.CHI, sou="333"))
     table.player.round_step = 2
 
-    # tanyao without dor is not threat
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="1"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="5"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="8"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="9"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="4"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="3"), False)
+
+    # tanyao without doras is not threat
     threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 0
 
@@ -152,6 +173,13 @@ def test_is_threatening_and_toitoi_melds():
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, pin="222"))
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, honors="444"))
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, sou="999"))
+
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="1"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="5"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="8"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="9"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="4"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="3"), False)
 
     table.add_dora_indicator(string_to_136_tile(pin="1"))
 

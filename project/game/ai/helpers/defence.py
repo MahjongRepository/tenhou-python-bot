@@ -378,6 +378,10 @@ class EnemyDanger:
         "id": "threatening_3_han_meld",
         "description": "Enemy opened hand has 3+ han",
     }
+    THREAT_OPEN_HAND_UNKNOWN_COST = {
+        "id": "threatening_melds",
+        "description": "Enemy opened hand and we are not sure if it's expensive",
+    }
 
 
 class TileDangerHandler:

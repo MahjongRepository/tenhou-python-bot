@@ -46,7 +46,7 @@ class EnemyAnalyzer:
         """
         We are trying to determine other players current threat
         """
-        round_step = self.main_player.round_step
+        round_step = len(self.enemy.discards)
 
         if self.enemy.in_riichi:
             self._create_danger_reason(EnemyDanger.THREAT_RIICHI, round_step=round_step)
@@ -57,19 +57,22 @@ class EnemyAnalyzer:
         if not melds:
             return False
 
+        active_yaku = []
+        sure_han = 0
+
+        yakuhai_analyzer = YakuhaiAnalyzer(self.enemy)
+        if yakuhai_analyzer.is_yaku_active():
+            active_yaku.append(yakuhai_analyzer)
+            sure_han = yakuhai_analyzer.melds_han()
+
         yaku_analyzers = [
             HonitsuAnalyzer(self.enemy),
-            YakuhaiAnalyzer(self.enemy),
             ToitoiAnalyzer(self.enemy),
         ]
 
-        # FIXME: further refactoring is needed, only consider melds han when we know which tile we discard
-        melds_han = 0
-        active_yaku = []
         for x in yaku_analyzers:
             if x.is_yaku_active():
                 active_yaku.append(x)
-                melds_han += x.melds_han()
 
         # let's not stack tanyao with other yaku for now
         # it is not compatible with yakuhai and it is probably will not compatible with honitsu, toitoi
@@ -77,24 +80,33 @@ class EnemyAnalyzer:
             tanyao_analyzer = TanyaoAnalyzer(self.enemy)
             if tanyao_analyzer.is_yaku_active():
                 active_yaku.append(tanyao_analyzer)
-                melds_han += tanyao_analyzer.melds_han()
+
+        # we only have one possible yaku
+        if len(active_yaku) == 1:
+            sure_han = active_yaku[0].melds_han()
 
         meld_tiles = self.enemy.meld_tiles
         dora_count = sum(
             [plus_dora(x, self.table.dora_indicators, add_aka_dora=self.table.has_aka_dora) for x in meld_tiles]
         )
+        sure_han += dora_count
 
-        # enemy has one dora pon/kan
-        # and there is 6+ round step
-        if len(melds) == 1 and round_step > 6 and dora_count >= 3:
+        if len(melds) == 1 and round_step > 5 and sure_han >= 4:
             self._create_danger_reason(
                 EnemyDanger.THREAT_OPEN_HAND_AND_MULTIPLE_DORA, melds, dora_count, active_yaku, round_step
             )
             return True
 
-        if melds_han + dora_count >= 3 and len(melds) >= 2:
+        if len(melds) >= 2 and round_step > 4 and sure_han >= 3:
             self._create_danger_reason(
                 EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND, melds, dora_count, active_yaku, round_step
+            )
+            return True
+
+        # we are not sure how expensive this is, but let's be a little bit careful
+        if (round_step > 14 and len(melds) >= 1) or (round_step > 9 and len(melds) >= 2) or len(melds) >= 3:
+            self._create_danger_reason(
+                EnemyDanger.THREAT_OPEN_HAND_UNKNOWN_COST, melds, dora_count, active_yaku, round_step
             )
             return True
 

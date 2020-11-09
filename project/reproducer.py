@@ -58,6 +58,9 @@ class TenhouLogReproducer:
         player_draw_regex = re.compile(r"^<[{}]+\d*".format("".join(player_draw)))
         discard_regex = re.compile(r"^<[{}]+\d*".format("".join(discard_tags)))
 
+        draw_regex = re.compile(r"^<[{}]+\d*".format("".join(draw_tags)))
+        last_draws = {0: None, 1: None, 2: None, 3: None}
+
         table = Table()
         # TODO get this info from log content
         table.has_aka_dora = True
@@ -117,6 +120,12 @@ class TenhouLogReproducer:
             if "DORA hai" in tag:
                 table.dora_indicators.append(int(self._get_attribute_content(tag, "hai")))
 
+            if draw_regex.match(tag) and "UN" not in tag:
+                tile = self.decoder.parse_tile(tag)
+                player_sign = tag.upper()[1]
+                player_seat = self._normalize_position(player_position, draw_tags.index(player_sign))
+                last_draws[player_seat] = tile
+
             if discard_regex.match(tag) and "DORA" not in tag:
                 tile = self.decoder.parse_tile(tag)
                 player_sign = tag.upper()[1]
@@ -140,8 +149,8 @@ class TenhouLogReproducer:
                             table.player.try_to_call_meld(tile, is_kamicha_discard)
                             return
 
-                    # TODO detect is_tsumogiri correctly
-                    table.add_discarded_tile(player_seat, tile, is_tsumogiri=False)
+                    is_tsumogiri = last_draws[player_seat] == tile
+                    table.add_discarded_tile(player_seat, tile, is_tsumogiri=is_tsumogiri)
 
             if "<N who=" in tag:
                 meld = self.decoder.parse_meld(tag)

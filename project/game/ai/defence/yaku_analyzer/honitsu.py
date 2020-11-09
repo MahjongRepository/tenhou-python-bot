@@ -50,28 +50,30 @@ class HonitsuAnalyzer(YakuAnalyzer):
             elif suit != current_suit:
                 return False
 
-        # it is possible that we have only melded honor tiles, let's check discards in that case
-        if not current_suit:
-            discards = [x.value for x in self.enemy.discards]
-            discards_34 = TilesConverter.to_34_array(discards)
-            result = count_tiles_by_suits(discards_34)
+        # let's check discards
+        discards = [x.value for x in self.enemy.discards]
+        discards_34 = TilesConverter.to_34_array(discards)
+        result = count_tiles_by_suits(discards_34)
 
-            honors = [x for x in result if x["name"] == "honor"][0]
-            suits = [x for x in result if x["name"] != "honor"]
-            suits = sorted(suits, key=lambda x: x["count"], reverse=False)
+        honors = [x for x in result if x["name"] == "honor"][0]
+        suits = [x for x in result if x["name"] != "honor"]
+        suits = sorted(suits, key=lambda x: x["count"], reverse=False)
 
-            less_suit = suits[0]
-            less_suit_tiles = less_suit["count"]
-            percentage_of_less_suit = (less_suit_tiles / total_discards) * 100
-            percentage_of_honor_tiles = (honors["count"] / total_discards) * 100
+        less_suit = suits[0]
+        less_suit_tiles = less_suit["count"]
+        percentage_of_less_suit = (less_suit_tiles / total_discards) * 100
+        percentage_of_honor_tiles = (honors["count"] / total_discards) * 100
 
-            # there is not too much one suit + honor tiles in the discard
-            # so we can tell that user trying to collect honitsu
-            if (
-                percentage_of_less_suit <= HonitsuAnalyzer.LESS_SUIT_PERCENTAGE_BORDER
-                and percentage_of_honor_tiles <= HonitsuAnalyzer.HONORS_PERCENTAGE_BORDER
-            ):
+        # there is not too much one suit + honor tiles in the discard
+        # so we can tell that user trying to collect honitsu
+        if (
+            percentage_of_less_suit <= HonitsuAnalyzer.LESS_SUIT_PERCENTAGE_BORDER
+            and percentage_of_honor_tiles <= HonitsuAnalyzer.HONORS_PERCENTAGE_BORDER
+        ):
+            if not current_suit:
                 current_suit = less_suit
+            elif current_suit != less_suit:
+                return False
 
         # still cannot determine the suit - this is probably not honitsu
         if not current_suit:

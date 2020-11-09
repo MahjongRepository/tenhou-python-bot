@@ -1,5 +1,6 @@
 from copy import copy
 
+from game.ai.defence.yaku_analyzer.tanyao import TanyaoAnalyzer
 from game.ai.defence.yaku_analyzer.yaku_analyzer import YakuAnalyzer
 from game.ai.helpers.defence import TileDanger
 from mahjong.tile import TilesConverter
@@ -74,3 +75,6 @@ class ToitoiAnalyzer(YakuAnalyzer):
             pass
 
         return bonus_danger
+
+    def is_absorbed(self, possible_yaku, tile_34=None):
+        return self._is_absorbed_by(possible_yaku, TanyaoAnalyzer.id, tile_34)

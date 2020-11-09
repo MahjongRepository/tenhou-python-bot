@@ -104,3 +104,6 @@ class HonitsuAnalyzer(HonitsuAnalyzerBase):
                 return [TileDanger.HONITSU_FIRST_SECOND_HONOR_BONUS_DANGER]
 
         return []
+
+    def is_absorbed(self, possible_yaku, tile_34=None):
+        return self._is_absorbed_by(possible_yaku, ChinitsuAnalyzer.id, tile_34)

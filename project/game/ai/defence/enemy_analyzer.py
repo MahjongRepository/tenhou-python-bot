@@ -70,22 +70,20 @@ class EnemyAnalyzer:
             ChinitsuAnalyzer(self.enemy),
             HonitsuAnalyzer(self.enemy),
             ToitoiAnalyzer(self.enemy),
+            TanyaoAnalyzer(self.enemy),
         ]
 
         for x in yaku_analyzers:
             if x.is_yaku_active():
                 active_yaku.append(x)
 
-        # let's not stack tanyao with other yaku for now
-        # it is not compatible with yakuhai and it is probably will not compatible with honitsu, toitoi
-        if not active_yaku:
-            tanyao_analyzer = TanyaoAnalyzer(self.enemy)
-            if tanyao_analyzer.is_yaku_active():
-                active_yaku.append(tanyao_analyzer)
-
-        if active_yaku:
-            # FIXME: use yaku compatibility table to handle this properly
-            sure_han = active_yaku[0].melds_han()
+        # FIXME: probably our approach here should be refactored and we should not care about cost
+        if not sure_han:
+            main_yaku = [x for x in active_yaku if not x.is_absorbed(active_yaku)]
+            if main_yaku:
+                sure_han = main_yaku[0].melds_han()
+            else:
+                sure_han = 1
 
         meld_tiles = self.enemy.meld_tiles
         dora_count = sum(
@@ -117,9 +115,10 @@ class EnemyAnalyzer:
     def get_melds_han(self, tile_34) -> int:
         melds_han = 0
 
-        # FIXME: we will currently sum up chinitsu and honitsu han, refactor that with yaku compatibility table
         for yaku_analyzer in self.threat_reason["active_yaku"]:
-            if not (tile_34 in yaku_analyzer.get_safe_tiles_34()):
+            if not (tile_34 in yaku_analyzer.get_safe_tiles_34()) and not yaku_analyzer.is_absorbed(
+                self.threat_reason["active_yaku"], tile_34
+            ):
                 melds_han += yaku_analyzer.melds_han() * yaku_analyzer.get_tempai_probability_modifier()
 
         return int(melds_han)

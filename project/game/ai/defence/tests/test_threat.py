@@ -175,7 +175,7 @@ def test_is_threatening_and_chinitsu_hand():
     enemy_seat = 1
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, pin="666"))
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.CHI, pin="123"))
-    table.add_called_meld(enemy_seat, make_meld(MeldPrint.CHI, pin="345"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.CHI, pin="234"))
 
     table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="1"), False)
     table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="5"), False)
@@ -188,8 +188,7 @@ def test_is_threatening_and_chinitsu_hand():
     threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 1
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_EXPENSIVE_OPEN_HAND["id"]
-    # FIXME: enable this check when yaku compatibility is fixed
-    # assert threatening_players[0].get_assumed_hand_cost(string_to_136_tile(pin="4")) == 12000
+    assert threatening_players[0].get_assumed_hand_cost(string_to_136_tile(pin="4")) == 12000
     assert threatening_players[0].get_assumed_hand_cost(string_to_136_tile(pin="2")) == 16000
     assert ChinitsuAnalyzer.id in [x.id for x in threatening_players[0].threat_reason["active_yaku"]]
 

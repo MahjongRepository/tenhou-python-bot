@@ -53,7 +53,7 @@ class ChinitsuAnalyzer(YakuAnalyzer):
         # if enemy had discarded tiles from that suit and after that he had discarded a tile from a different
         # suit from his hand - let's believe it's not chinitsu
         suit_discards_positions = [
-            self.enemy.discards.index(x) for x in self.enemy.discards if current_suit["function"](x.value // 34)
+            self.enemy.discards.index(x) for x in self.enemy.discards if current_suit["function"](x.value // 4)
         ]
         if suit_discards_positions:
             last_suit_discard = suit_discards_positions[-1]

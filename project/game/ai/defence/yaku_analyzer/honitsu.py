@@ -86,8 +86,11 @@ class HonitsuAnalyzer(YakuAnalyzer):
             self.enemy.discards.index(x) for x in self.enemy.discards if current_suit["function"](x.value // 4)
         ]
         if suit_discards_positions:
-            last_honitsu_discard = suit_discards_positions[-1]
-            discards_after = self.enemy.discards[last_honitsu_discard:]
+            # we consider second discard of chosen suit to be reference point
+            # first one could have happened when player was not yet sure if he is going to honitsu
+            # after the second one there should be no discars of other suit from hand
+            reference_discard = suit_discards_positions[min(1, len(suit_discards_positions) - 1)]
+            discards_after = self.enemy.discards[reference_discard:]
             if discards_after:
                 has_discarded_other_suit_from_hand = [
                     x

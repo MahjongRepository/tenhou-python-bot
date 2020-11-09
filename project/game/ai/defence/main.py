@@ -166,19 +166,26 @@ class TileDangerHandler:
             # FIXME: we should get tile_136 directly from discard_option as it may be important if it's an aka
             tile_to_discard_136 = discard_option.tile_to_discard * 4
 
+            if discard_option.danger.get_total_danger_for_player(threatening_player.enemy.seat) == 0:
+                threatening_player_hand_cost = 0
+            else:
+                threatening_player_hand_cost = threatening_player.get_assumed_hand_cost(tile_to_discard_136)
+
+            # fast path: we don't need to calculate all the stuff if this tile is safe against this enemy
+            if threatening_player_hand_cost == 0:
+                discard_option.danger.set_danger_border(
+                    threatening_player.enemy.seat, DangerBorder.IGNORE, hand_weighted_cost, threatening_player_hand_cost
+                )
+                continue
+
             # never push with zero chance to win
             # FIXME: we may actually want to push it for tempai in ryukoku, so reconsider
             if discard_option.ukeire == 0:
                 discard_option.danger.set_danger_border(
-                    threatening_player.enemy.seat, DangerBorder.BETAORI, hand_weighted_cost
-                )
-                continue
-
-            threatening_player_hand_cost = threatening_player.get_assumed_hand_cost(tile_to_discard_136)
-            # fast path: we don't need to calculate all the stuff if this tile is safe against this enemy
-            if threatening_player_hand_cost == 0:
-                discard_option.danger.set_danger_border(
-                    threatening_player.enemy.seat, DangerBorder.IGNORE, hand_weighted_cost
+                    threatening_player.enemy.seat,
+                    DangerBorder.BETAORI,
+                    hand_weighted_cost,
+                    threatening_player_hand_cost,
                 )
                 continue
 
@@ -255,7 +262,10 @@ class TileDangerHandler:
                 # FIXME: we may actually want to push it for tempai in ryukoku, so reconsider
                 if not hand_weighted_cost:
                     discard_option.danger.set_danger_border(
-                        threatening_player.enemy.seat, DangerBorder.BETAORI, hand_weighted_cost
+                        threatening_player.enemy.seat,
+                        DangerBorder.BETAORI,
+                        hand_weighted_cost,
+                        threatening_player_hand_cost,
                     )
                     continue
 
@@ -392,7 +402,9 @@ class TileDangerHandler:
 
             danger_border = DangerBorder.tune_for_round(self.player, danger_border, shanten)
 
-            discard_option.danger.set_danger_border(threatening_player.enemy.seat, danger_border, hand_weighted_cost)
+            discard_option.danger.set_danger_border(
+                threatening_player.enemy.seat, danger_border, hand_weighted_cost, threatening_player_hand_cost
+            )
         return discard_options
 
     def get_threatening_players(self):

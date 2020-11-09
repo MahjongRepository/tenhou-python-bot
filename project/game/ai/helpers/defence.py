@@ -393,6 +393,10 @@ class TileDangerHandler:
     weighted_cost: Optional[int]
     danger_border: dict
 
+    # if we estimate that one's threat cost is less than COST_PERCENT_THRESHOLD of other's
+    # we ignore it when choosing tile for fold
+    COST_PERCENT_THRESHOLD = 40
+
     def __init__(self):
         """
         1, 2, 3 is our opponents seats
@@ -404,8 +408,12 @@ class TileDangerHandler:
     def set_danger(self, player_seat, danger):
         self.values[player_seat].append(danger)
 
-    def set_danger_border(self, player_seat, danger_border: int, our_hand_cost: int):
-        self.danger_border[player_seat] = {"border": danger_border, "our_hand_cost": our_hand_cost}
+    def set_danger_border(self, player_seat, danger_border: int, our_hand_cost: int, enemy_hand_cost: int):
+        self.danger_border[player_seat] = {
+            "border": danger_border,
+            "our_hand_cost": our_hand_cost,
+            "enemy_hand_cost": enemy_hand_cost,
+        }
 
     def get_danger_reasons(self, player_seat):
         return self.values[player_seat]
@@ -435,6 +443,30 @@ class TileDangerHandler:
                 self.get_total_danger_for_player(3),
             ]
         )
+
+    def get_weighted_danger(self):
+        costs = [
+            self.get_danger_border(1).get("enemy_hand_cost") or 0,
+            self.get_danger_border(2).get("enemy_hand_cost") or 0,
+            self.get_danger_border(3).get("enemy_hand_cost") or 0,
+        ]
+        max_cost = max(costs)
+        if max_cost == 0:
+            return 0
+
+        dangers = [
+            self.get_total_danger_for_player(1),
+            self.get_total_danger_for_player(2),
+            self.get_total_danger_for_player(3),
+        ]
+
+        weighted = 0
+
+        for cost, danger in zip(costs, dangers):
+            if cost * 100 / max_cost >= self.COST_PERCENT_THRESHOLD:
+                weighted += cost * danger
+
+        return weighted
 
     def get_min_danger_border(self):
         borders = []

@@ -103,6 +103,12 @@ class EnemyAnalyzer:
             )
             return True
 
+        if len(melds) >= 1 and round_step > 10 and sure_han >= 2 and self.enemy.is_dealer:
+            self._create_danger_reason(
+                EnemyDanger.THREAT_OPEN_HAND_UNKNOWN_COST, melds, dora_count, active_yaku, round_step
+            )
+            return True
+
         # we are not sure how expensive this is, but let's be a little bit careful
         if (round_step > 14 and len(melds) >= 1) or (round_step > 9 and len(melds) >= 2) or len(melds) >= 3:
             self._create_danger_reason(

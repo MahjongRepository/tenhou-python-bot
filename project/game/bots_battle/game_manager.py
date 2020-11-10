@@ -298,7 +298,9 @@ class GameManager:
                 discarded_tile = current_client.player.discard_tile(discard_option)
 
                 self.replay.discard(current_client.seat, discarded_tile)
-                logger.info("Discard tile: {}".format(TilesConverter.to_one_line_string([discarded_tile])))
+                logger.info(
+                    "Discard tile: {}".format(TilesConverter.to_one_line_string([discarded_tile], print_aka_dora=True))
+                )
 
                 # the end of the round
                 result = self.check_clients_possible_ron(current_client, discarded_tile, False)
@@ -453,7 +455,9 @@ class GameManager:
         logger.info("Riichi: {0} -1,000".format(self.clients[who_called_riichi].player.name))
         logger.info(
             "With hand: {}".format(
-                TilesConverter.to_one_line_string(self.clients[who_called_riichi].player.closed_hand)
+                TilesConverter.to_one_line_string(
+                    self.clients[who_called_riichi].player.closed_hand, print_aka_dora=True
+                )
             )
         )
 
@@ -485,8 +489,8 @@ class GameManager:
             logger.info(
                 "{}: {} + {}".format(
                     is_tsumo and "Tsumo" or "Ron",
-                    TilesConverter.to_one_line_string(tiles),
-                    TilesConverter.to_one_line_string([win_tile]),
+                    TilesConverter.to_one_line_string(tiles, print_aka_dora=True),
+                    TilesConverter.to_one_line_string([win_tile], print_aka_dora=True),
                 ),
             )
         else:
@@ -552,12 +556,16 @@ class GameManager:
             if hand_value.error:
                 logger.error(
                     "Can't estimate a hand: {}. Error: {}".format(
-                        TilesConverter.to_one_line_string(tiles + [win_tile]), hand_value.error
+                        TilesConverter.to_one_line_string(tiles + [win_tile], print_aka_dora=True), hand_value.error
                     )
                 )
                 raise ValueError("Not correct hand")
 
-            logger.info("Dora indicators: {}".format(TilesConverter.to_one_line_string(self.dora_indicators)))
+            logger.info(
+                "Dora indicators: {}".format(
+                    TilesConverter.to_one_line_string(self.dora_indicators, print_aka_dora=True)
+                )
+            )
             logger.info("Hand yaku: {}".format(", ".join(str(x) for x in hand_value.yaku)))
 
             if loser is not None:

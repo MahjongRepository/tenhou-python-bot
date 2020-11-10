@@ -240,14 +240,20 @@ class Player(PlayerInterface):
         return revealed_tiles
 
     def format_hand_for_print(self, tile_136=None):
-        hand_string = "{}".format(TilesConverter.to_one_line_string(self.closed_hand))
+        hand_string = "{}".format(
+            TilesConverter.to_one_line_string(self.closed_hand, print_aka_dora=self.table.has_aka_dora)
+        )
 
         if tile_136 is not None:
-            hand_string += " + {}".format(TilesConverter.to_one_line_string([tile_136]))
+            hand_string += " + {}".format(
+                TilesConverter.to_one_line_string([tile_136], print_aka_dora=self.table.has_aka_dora)
+            )
 
         melds = []
         for item in self.melds:
-            melds.append("{}".format(TilesConverter.to_one_line_string(item.tiles)))
+            melds.append(
+                "{}".format(TilesConverter.to_one_line_string(item.tiles, print_aka_dora=self.table.has_aka_dora))
+            )
 
         if melds:
             hand_string += " [{}]".format(", ".join(melds))

@@ -70,7 +70,9 @@ class DiscardOption:
 
     def serialize(self):
         data = {
-            "tile": TilesConverter.to_one_line_string([self.tile_to_discard * 4]),
+            "tile": TilesConverter.to_one_line_string(
+                [self.tile_to_discard * 4], print_aka_dora=self.player.table.has_aka_dora
+            ),
             "shanten": self.shanten,
             "ukeire": self.ukeire,
             "valuation": self.valuation,

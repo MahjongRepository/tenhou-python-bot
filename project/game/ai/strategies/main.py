@@ -365,7 +365,9 @@ class BaseStrategy:
                     simplified_call = simplify(call_tile_136 // 4)
                     simplified_discard = simplify(selected_tile.tile_to_discard)
                     if simplified_discard in [simplified_call - 3, simplified_call, simplified_call + 3]:
-                        tile_str = TilesConverter.to_one_line_string([selected_tile.tile_to_discard * 4])
+                        tile_str = TilesConverter.to_one_line_string(
+                            [selected_tile.tile_to_discard * 4], print_aka_dora=self.player.table.has_aka_dora
+                        )
                         DecisionsLogger.debug(
                             log.MELD_DEBUG,
                             f"Kuikae discard {tile_str} candidate. Abort melding.",
@@ -397,6 +399,15 @@ class BaseStrategy:
         return final_results[0]
 
     def _format_hand_for_print(self, tiles, new_tile, melds):
-        hand_string = f"{TilesConverter.to_one_line_string(tiles)} + {TilesConverter.to_one_line_string([new_tile])}"
-        hand_string += " [{}]".format(", ".join([TilesConverter.to_one_line_string(x.tiles) for x in melds]))
+        tiles_string = TilesConverter.to_one_line_string(tiles, print_aka_dora=self.player.table.has_aka_dora)
+        tile_string = TilesConverter.to_one_line_string([new_tile], print_aka_dora=self.player.table.has_aka_dora)
+        hand_string = f"{tiles_string} + {tile_string}"
+        hand_string += " [{}]".format(
+            ", ".join(
+                [
+                    TilesConverter.to_one_line_string(x.tiles, print_aka_dora=self.player.table.has_aka_dora)
+                    for x in melds
+                ]
+            )
+        )
         return hand_string

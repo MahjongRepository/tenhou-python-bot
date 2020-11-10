@@ -35,7 +35,7 @@ def make_meld(meld_type, is_open=True, man="", pin="", sou="", honors="", tiles=
 
 
 def tiles_to_string(tiles_136):
-    return TilesConverter.to_one_line_string(tiles_136)
+    return TilesConverter.to_one_line_string(tiles_136, print_aka_dora=True)
 
 
 def find_discard_option(player, sou="", pin="", man="", honors=""):

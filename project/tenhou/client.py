@@ -281,7 +281,11 @@ class TenhouClient(Client):
                     drawn_tile = self.decoder.parse_tile(message)
                     self.table.count_of_remaining_tiles -= 1
 
-                    logger.info("Drawn tile: {}".format(TilesConverter.to_one_line_string([drawn_tile])))
+                    logger.info(
+                        "Drawn tile: {}".format(
+                            TilesConverter.to_one_line_string([drawn_tile], print_aka_dora=self.table.has_aka_dora)
+                        )
+                    )
 
                     kan_type = self.player.should_call_kan(drawn_tile, False, main_player.in_riichi)
                     if kan_type:
@@ -315,13 +319,21 @@ class TenhouClient(Client):
 
                     # tenhou format: <D p="133" />
                     self._send_message('<D p="{}"/>'.format(discarded_tile))
-                    logger.info("Discard: {}".format(TilesConverter.to_one_line_string([discarded_tile])))
+                    logger.info(
+                        "Discard: {}".format(
+                            TilesConverter.to_one_line_string([discarded_tile], print_aka_dora=self.table.has_aka_dora)
+                        )
+                    )
 
                 # new dora indicator after kan
                 if "<DORA" in message:
                     tile = self.decoder.parse_dora_indicator(message)
                     self.table.add_dora_indicator(tile)
-                    logger.info("New dora indicator: {}".format(TilesConverter.to_one_line_string([tile])))
+                    logger.info(
+                        "New dora indicator: {}".format(
+                            TilesConverter.to_one_line_string([tile], print_aka_dora=self.table.has_aka_dora)
+                        )
+                    )
 
                 if "<REACH" in message and 'step="1"' in message:
                     who_called_riichi = self.decoder.parse_who_called_riichi(message)

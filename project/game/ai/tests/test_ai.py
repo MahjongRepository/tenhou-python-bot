@@ -200,7 +200,7 @@ def test_chose_right_set_to_open_hand_dora():
     meld, _ = player.try_to_call_meld(tile, True)
     assert meld is not None
     assert meld.type == MeldPrint.CHI
-    assert tiles_to_string(meld.tiles) == "345s"
+    assert tiles_to_string(meld.tiles) == "340s"
 
     table = Table()
     table.has_open_tanyao = True

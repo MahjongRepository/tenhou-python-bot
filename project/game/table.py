@@ -41,7 +41,9 @@ class Table:
         self.revealed_tiles_136 = []
 
     def __str__(self):
-        dora_string = TilesConverter.to_one_line_string(self.dora_indicators)
+        dora_string = TilesConverter.to_one_line_string(
+            self.dora_indicators, print_aka_dora=self.player.table.has_aka_dora
+        )
 
         round_settings = {EAST: ["e", 0], SOUTH: ["s", 3], WEST: ["w", 7]}.get(self.round_wind_tile)
 

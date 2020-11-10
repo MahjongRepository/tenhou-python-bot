@@ -96,111 +96,7 @@ class HandBuilder:
         if first_option.shanten == 2 or first_option.shanten == 3:
             return self._choose_best_discard_with_2_3_shanten(tiles, melds, results_with_same_shanten, after_meld)
 
-        possible_options = [first_option]
-        ukeire_borders = self._choose_ukeire_borders(
-            first_option, DiscardOption.UKEIRE_FIRST_FILTER_PERCENTAGE, "ukeire"
-        )
-        for discard_option in results_with_same_shanten:
-            # there is no sense to check already chosen tile
-            if discard_option.tile_to_discard == first_option.tile_to_discard:
-                continue
-
-            # let's choose tiles that are close to the max ukeire tile
-            if discard_option.ukeire >= first_option.ukeire - ukeire_borders:
-                possible_options.append(discard_option)
-
-        ukeire_field = "ukeire"
-        possible_options = sorted(possible_options, key=lambda x: (-getattr(x, ukeire_field), x.valuation))
-
-        # only one option - so we choose it
-        if len(possible_options) == 1:
-            return possible_options[0]
-
-        tiles_without_dora = [x for x in possible_options if x.count_of_dora == 0]
-
-        # we have only dora candidates to discard
-        if not tiles_without_dora:
-            min_dora = min([x.count_of_dora for x in possible_options])
-            min_dora_list = [x for x in possible_options if x.count_of_dora == min_dora]
-
-            def sorting_lambda(x):
-                return (-getattr(x, ukeire_field), x.valuation)
-
-            return self._choose_first_option_or_safe_tiles(
-                sorted(min_dora_list, key=sorting_lambda),
-                discard_options,
-                after_meld,
-                sorting_lambda,
-            )
-
-        # only one option - so we choose it
-        if len(tiles_without_dora) == 1:
-            return tiles_without_dora[0]
-
-        if first_option.shanten == 2 or first_option.shanten == 3:
-            filtered_options = self._filter_list_by_percentage(
-                tiles_without_dora, ukeire_field, DiscardOption.UKEIRE_SECOND_FILTER_PERCENTAGE
-            )
-        # we should also consider borders for 3+ shanten hands
-        else:
-            best_option_without_dora = tiles_without_dora[0]
-            ukeire_borders = self._choose_ukeire_borders(
-                best_option_without_dora, DiscardOption.UKEIRE_SECOND_FILTER_PERCENTAGE, ukeire_field
-            )
-            filtered_options = []
-            for discard_option in tiles_without_dora:
-                val = getattr(best_option_without_dora, ukeire_field) - ukeire_borders
-                if getattr(discard_option, ukeire_field) >= val:
-                    filtered_options.append(discard_option)
-
-        DecisionsLogger.debug(log.DISCARD_OPTIONS, "Candidates after filtering by ukeire2", context=possible_options)
-
-        closed_hand_34 = TilesConverter.to_34_array(closed_hand)
-        isolated_tiles = [x for x in filtered_options if is_tile_strictly_isolated(closed_hand_34, x.tile_to_discard)]
-        # isolated tiles should be discarded first
-        if isolated_tiles:
-
-            def sorting_lambda(x):
-                return (x.valuation,)
-
-            # let's sort tiles by value and let's choose less valuable tile to discard
-            return self._choose_first_option_or_safe_tiles(
-                sorted(isolated_tiles, key=sorting_lambda),
-                discard_options,
-                after_meld,
-                sorting_lambda,
-            )
-
-        # there are no isolated tiles or we don't care about them
-        # let's discard tile with greater ukeire/ukeire2
-        def sorting_lambda(x):
-            return (-getattr(x, ukeire_field), x.valuation)
-
-        filtered_options = sorted(filtered_options, key=sorting_lambda)
-        first_option = self._choose_first_option_or_safe_tiles(
-            filtered_options, discard_options, after_meld, sorting_lambda
-        )
-
-        other_tiles_with_same_ukeire = [
-            x for x in filtered_options if getattr(x, ukeire_field) == getattr(first_option, ukeire_field)
-        ]
-
-        # it will happen with shanten=1, all tiles will have ukeire_second == 0
-        # or in tempai we can have several tiles with same ukeire
-        if other_tiles_with_same_ukeire:
-
-            def sorting_lambda(x):
-                return (x.valuation,)
-
-            return self._choose_first_option_or_safe_tiles(
-                sorted(other_tiles_with_same_ukeire, key=sorting_lambda),
-                discard_options,
-                after_meld,
-                sorting_lambda,
-            )
-
-        # we have only one candidate to discard with greater ukeire
-        return first_option
+        return self._choose_best_discard_with_4_or_more_shanten(closed_hand, results_with_same_shanten, after_meld)
 
     def process_discard_option(self, discard_option, closed_hand, force_discard=False):
         DecisionsLogger.debug(log.DISCARD, context=discard_option)
@@ -495,6 +391,13 @@ class HandBuilder:
     @staticmethod
     def _sorting_rule_for_2_3_shanten(x):
         return HandBuilder._sorting_rule_for_1_shanten_no_cost(x)
+
+    @staticmethod
+    def _sorting_rule_for_4_or_more_shanten(x):
+        return (
+            -x.ukeire,
+            x.valuation,
+        )
 
     @staticmethod
     def _sorting_rule_for_betaori(x):
@@ -798,26 +701,59 @@ class HandBuilder:
             possible_options, "ukeire_second", DiscardOption.UKEIRE_SECOND_FILTER_PERCENTAGE
         )
 
-        tiles_without_dora = [x for x in possible_options if x.count_of_dora == 0]
-        # we have only dora candidates to discard
-        if not tiles_without_dora:
-            min_dora = min([x.count_of_dora for x in possible_options])
-            min_dora_list = [x for x in possible_options if x.count_of_dora == min_dora]
-            possible_options = min_dora_list
-        else:
-            # filter by ukeire2 again - this time only tiles without dora
-            possible_options = self._filter_list_by_percentage(
-                tiles_without_dora, "ukeire_second", DiscardOption.UKEIRE_SECOND_FILTER_PERCENTAGE
-            )
+        possible_options = self._try_keep_doras(
+            possible_options, "ukeire_second", DiscardOption.UKEIRE_SECOND_FILTER_PERCENTAGE
+        )
+        assert possible_options
 
         DecisionsLogger.debug(log.DISCARD_OPTIONS, "Candidates after filtering by ukeire2", context=possible_options)
-
-        assert possible_options
 
         return self._choose_best_tile(
             sorted(possible_options, key=self._sorting_rule_for_2_3_shanten),
             self._sorting_rule_for_2_3_shanten,
         )
+
+    def _choose_best_discard_with_4_or_more_shanten(self, closed_hand, discard_options, after_meld):
+        discard_options = sorted(discard_options, key=lambda x: (x.shanten, -x.ukeire))
+        first_option = discard_options[0]
+
+        # we filter by ukeire
+        ukeire_borders = self._choose_ukeire_borders(
+            first_option, DiscardOption.UKEIRE_FIRST_FILTER_PERCENTAGE, "ukeire"
+        )
+        possible_options = self._filter_list_by_ukeire_borders(discard_options, first_option.ukeire, ukeire_borders)
+
+        possible_options = sorted(possible_options, key=self._sorting_rule_for_4_or_more_shanten)
+
+        possible_options = self._try_keep_doras(
+            possible_options, "ukeire", DiscardOption.UKEIRE_FIRST_FILTER_PERCENTAGE
+        )
+        assert possible_options
+
+        closed_hand_34 = TilesConverter.to_34_array(closed_hand)
+        isolated_tiles = [x for x in possible_options if is_tile_strictly_isolated(closed_hand_34, x.tile_to_discard)]
+        # isolated tiles should be discarded first
+        if isolated_tiles:
+            possible_options = isolated_tiles
+
+        # let's sort tiles by value and let's choose less valuable tile to discard
+        return self._choose_best_tile(
+            sorted(possible_options, key=self._sorting_rule_for_4_or_more_shanten),
+            self._sorting_rule_for_4_or_more_shanten,
+        )
+
+    def _try_keep_doras(self, discard_options, ukeire_field, filter_percentage):
+        tiles_without_dora = [x for x in discard_options if x.count_of_dora == 0]
+        # we have only dora candidates to discard
+        if not tiles_without_dora:
+            min_dora = min([x.count_of_dora for x in discard_options])
+            min_dora_list = [x for x in discard_options if x.count_of_dora == min_dora]
+            possible_options = min_dora_list
+        else:
+            # filter again - this time only tiles without dora
+            possible_options = self._filter_list_by_percentage(tiles_without_dora, ukeire_field, filter_percentage)
+
+        return possible_options
 
     @staticmethod
     def _filter_list_by_ukeire_borders(discard_options, ukeire, ukeire_borders):

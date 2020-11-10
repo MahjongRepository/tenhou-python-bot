@@ -27,6 +27,8 @@ class HandBuilder:
         Try to find best tile to discard, based on different evaluations
         """
         discard_options, min_shanten = self.find_discard_options(tiles, closed_hand)
+        if min_shanten == Shanten.AGARI_STATE:
+            min_shanten = min([x.shanten for x in discard_options])
 
         one_shanten_ukeire2_calculated_beforehand = False
         if self.player.config.FEATURE_DEFENCE_ENABLED:
@@ -47,6 +49,13 @@ class HandBuilder:
 
         tiles_we_can_discard = [x for x in discard_options if x.danger.is_danger_acceptable()]
         if not tiles_we_can_discard:
+            # no tiles with acceptable danger - we go betaori
+            return self._choose_safest_tile(discard_options, after_meld)
+
+        min_acceptable_shanten = min([x.shanten for x in tiles_we_can_discard])
+        assert min_acceptable_shanten >= min_shanten
+        if min_acceptable_shanten > min_shanten:
+            # all tiles with acceptable danger increase number of shanten - we just go betaori
             return self._choose_safest_tile(discard_options, after_meld)
 
         # our strategy can affect discard options
@@ -55,20 +64,19 @@ class HandBuilder:
                 tiles_we_can_discard, closed_hand, melds
             )
 
-        had_to_be_discarded_tiles = [x for x in tiles_we_can_discard if x.had_to_be_discarded]
-        if had_to_be_discarded_tiles:
+            had_to_be_discarded_tiles = [x for x in tiles_we_can_discard if x.had_to_be_discarded]
+            if had_to_be_discarded_tiles:
+                return self._choose_best_tile(had_to_be_discarded_tiles, self._default_sorting_rule)
 
-            def sorting_lambda(x):
-                return (x.shanten, -x.ukeire, x.valuation)
+            # remove needed tiles from discard options
+            tiles_we_can_discard = [x for x in tiles_we_can_discard if not x.had_to_be_saved]
+            if not tiles_we_can_discard:
+                # no acceptable tiles that allow us to keep our strategy - we go betaori
+                return self._choose_safest_tile(discard_options, after_meld)
 
-            tiles_we_can_discard = sorted(had_to_be_discarded_tiles, key=sorting_lambda)
-            return self._choose_first_option_or_safe_tiles(
-                tiles_we_can_discard, discard_options, after_meld, sorting_lambda
-            )
-
-        # remove needed tiles from discard options
-        tiles_we_can_discard = [x for x in tiles_we_can_discard if not x.had_to_be_saved]
-
+        # by now we have the following:
+        # - all discard candidates have acceptable danger
+        # - all discard candidates allow us to proceed with our strategy
         tiles_we_can_discard = sorted(tiles_we_can_discard, key=lambda x: (x.shanten, -x.ukeire))
         first_option = tiles_we_can_discard[0]
         results_with_same_shanten = [x for x in tiles_we_can_discard if x.shanten == first_option.shanten]
@@ -480,13 +488,16 @@ class HandBuilder:
         return shanten, use_chiitoitsu
 
     @staticmethod
-    def _sorting_rule_for_betaori(x):
+    def _default_sorting_rule(x):
         return (
-            x.danger.get_weighted_danger(),
             x.shanten,
             -x.ukeire,
             x.valuation,
         )
+
+    @staticmethod
+    def _sorting_rule_for_betaori(x):
+        return (x.danger.get_weighted_danger(),) + HandBuilder._default_sorting_rule(x)
 
     def _choose_safest_tile(self, discard_options, after_meld):
         if after_meld:
@@ -496,26 +507,30 @@ class HandBuilder:
         DecisionsLogger.debug(log.DISCARD_SAFE_TILE, "There are only dangerous tiles. Discard safest tile.")
         return sorted(discard_options, key=self._sorting_rule_for_betaori)[0]
 
+    def _choose_best_tile(self, discard_options, sorting_rule):
+        assert discard_options
+        # try to discard safest tile for calculated ukeire border
+        candidate = sorted(discard_options, key=sorting_rule)[0]
+        ukeire_border = max(
+            [
+                round((candidate.ukeire / 100) * DiscardOption.UKEIRE_DANGER_FILTER_PERCENTAGE),
+                DiscardOption.MIN_UKEIRE_DANGER_BORDER,
+            ]
+        )
+
+        discard_options_within_borders = sorted(
+            [x for x in discard_options if x.ukeire >= x.ukeire - ukeire_border],
+            key=lambda x: (x.danger.get_weighted_danger(),) + sorting_rule(x),
+        )
+
+        DecisionsLogger.debug(log.DISCARD_OPTIONS, "All discard candidates", discard_options_within_borders)
+
+        return discard_options_within_borders[0]
+
     def _choose_first_option_or_safe_tiles(self, chosen_candidates, all_discard_options, after_meld, sorting_lambda):
         # it looks like everything is fine
         if len(chosen_candidates):
-            # try to discard safest tile for calculated ukeire border
-            candidate = chosen_candidates[0]
-            ukeire_border = max(
-                [
-                    round((candidate.ukeire / 100) * DiscardOption.UKEIRE_DANGER_FILTER_PERCENTAGE),
-                    DiscardOption.MIN_UKEIRE_DANGER_BORDER,
-                ]
-            )
-
-            options_to_chose = sorted(
-                [x for x in chosen_candidates if x.ukeire >= x.ukeire - ukeire_border],
-                key=lambda x: (x.danger.get_weighted_danger(),) + sorting_lambda(x),
-            )
-
-            DecisionsLogger.debug(log.DISCARD_OPTIONS, "All discard candidates", options_to_chose)
-
-            return options_to_chose[0]
+            return self._choose_best_tile(chosen_candidates, sorting_lambda)
 
         return self._choose_safest_tile(all_discard_options, after_meld)
 

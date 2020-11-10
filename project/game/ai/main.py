@@ -5,6 +5,7 @@ from game.ai.defence.main import TileDangerHandler
 from game.ai.hand_builder import HandBuilder
 from game.ai.helpers.kabe import Kabe
 from game.ai.helpers.suji import Suji
+from game.ai.placement import PlacementHandler
 from game.ai.riichi import Riichi
 from game.ai.strategies.chiitoitsu import ChiitoitsuStrategy
 from game.ai.strategies.chinitsu import ChinitsuStrategy
@@ -57,6 +58,7 @@ class MahjongAI:
         self.hand_divider = HandDivider()
         self.finished_hand = HandCalculator()
         self.hand_builder = HandBuilder(player, self)
+        self.placement = PlacementHandler(player)
 
         self.suji = Suji(player)
         self.kabe = Kabe(player)

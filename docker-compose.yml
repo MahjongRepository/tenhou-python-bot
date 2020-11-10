@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  bot1:
+    image: mahjong_bot
+    volumes:
+      - ./project/:/app
+    command: pypy3 main.py -s bot_1_settings
+  bot2:
+    image: mahjong_bot
+    volumes:
+      - ./project/:/app
+    command: pypy3 main.py -s bot_2_settings
+  bot3:
+    image: mahjong_bot
+    volumes:
+      - ./project/:/app
+    command: pypy3 main.py -s bot_3_settings
+  bot4:
+    image: mahjong_bot
+    volumes:
+      - ./project/:/app
+    command: pypy3 main.py -s bot_4_settings
+  bot5:
+    image: mahjong_bot
+    volumes:
+      - ./project/:/app
+    command: pypy3 main.py -s bot_5_settings
+

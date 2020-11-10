@@ -27,13 +27,18 @@ Here you can read about bot played games statistic: [versions history](doc/versi
 
 To make it easier run bot vs bot battles we prepared PyPy3 Docker container.
 
-It wasn't tested for regular game on tenhou.net, but theoretically should work here without any issues.
-
-How to run the game locally:
+Run the game locally:
 
 1. [Install Docker](https://docs.docker.com/get-docker/) 
 1. Run `make build_docker`
-1. Run `make GAMES=1 run_battle` it will play one game locally. Logs and replays will be stored in `bots_battle` folder
+1. Run `make GAMES=1 run_battle` it will play one game locally. Logs and replays will be stored in `bots_battle` folder.
+
+## Run multiple bots to play one game
+
+1. [Install Docker](https://docs.docker.com/get-docker/) and [Install Docker Compose](https://docs.docker.com/compose/install/)
+1. Run `make build_docker`
+1. Put bot configs to `project/settings/`. By default we are looking for these configs: `bot_1_settings.py`, `bot_2_settings.py`, `bot_3_settings.py`, `bot_4_settings.py`, `bot_5_settings.py`. Why 5 settings? Because tenhou doesn't start 2+ game in the custom lobby if you are running only 4 bots.
+1. Run `make run_on_tenhou`
 
 ## Configuration instructions
 

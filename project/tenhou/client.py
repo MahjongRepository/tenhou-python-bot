@@ -136,6 +136,7 @@ class TenhouClient(Client):
             game_type = "{},{}".format(settings.LOBBY, selected_game_type)
 
             if not settings.IS_TOURNAMENT:
+                self._random_sleep(2, 5)
                 self._send_message('<JOIN t="{}" />'.format(game_type))
                 logger.info("Looking for the game...")
 

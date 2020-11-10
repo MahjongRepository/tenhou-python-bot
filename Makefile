@@ -22,5 +22,8 @@ run_battle:
 		-v "$(CURRENT_DIR)project/:/app/" \
 		mahjong_bot pypy3 bots_battle.py -g $(GAMES)
 
+run_on_tenhou:
+	docker-compose up
+
 archive_replays:
 	tar -czvf "replays-$(shell date '+%Y-%m-%d-%H-%M').tar.gz" -C ./project/battle_results/replays/ .

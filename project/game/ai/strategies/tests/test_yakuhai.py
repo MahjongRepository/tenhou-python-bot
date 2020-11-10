@@ -545,9 +545,10 @@ def test_atodzuke_choose_hidden_syanpon():
     for _ in range(0, 4):
         table.add_discarded_tile(1, string_to_136_tile(sou="9"), False)
 
-    player.draw_tile(string_to_136_tile(man="6"))
+    player.draw_tile(string_to_136_tile(sou="6"))
     discarded_tile = player.discard_tile()
-    assert tiles_to_string([discarded_tile]) != "6m"
+    assert tiles_to_string([discarded_tile]) != "6s"
+    assert tiles_to_string([discarded_tile]) == "5s" or tiles_to_string([discarded_tile]) == "8s"
 
 
 def test_tempai_with_open_yakuhai_meld_and_yakuhai_pair_in_the_hand():

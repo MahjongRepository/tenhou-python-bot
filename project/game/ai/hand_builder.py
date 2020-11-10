@@ -52,12 +52,6 @@ class HandBuilder:
             # no tiles with acceptable danger - we go betaori
             return self._choose_safest_tile_or_skip_meld(discard_options, after_meld)
 
-        min_acceptable_shanten = min([x.shanten for x in tiles_we_can_discard])
-        assert min_acceptable_shanten >= min_shanten
-        if min_acceptable_shanten > min_shanten:
-            # all tiles with acceptable danger increase number of shanten - we just go betaori
-            return self._choose_safest_tile_or_skip_meld(discard_options, after_meld)
-
         # our strategy can affect discard options
         if self.ai.current_strategy:
             tiles_we_can_discard = self.ai.current_strategy.determine_what_to_discard(
@@ -76,11 +70,19 @@ class HandBuilder:
                 # no acceptable tiles that allow us to keep our strategy - we go betaori
                 return self._choose_safest_tile_or_skip_meld(discard_options, after_meld)
 
+        # we check this after strategy checks to allow discarding safe 99 from tempai to get tanyao for example
+        min_acceptable_shanten = min([x.shanten for x in tiles_we_can_discard])
+        assert min_acceptable_shanten >= min_shanten
+        if min_acceptable_shanten > min_shanten:
+            # all tiles with acceptable danger increase number of shanten - we just go betaori
+            return self._choose_safest_tile_or_skip_meld(discard_options, after_meld)
+
         # by now we have the following:
         # - all discard candidates have acceptable danger
         # - all discard candidates allow us to proceed with our strategy
         tiles_we_can_discard = sorted(tiles_we_can_discard, key=lambda x: (x.shanten, -x.ukeire))
         first_option = tiles_we_can_discard[0]
+        assert first_option.shanten == min_shanten
         results_with_same_shanten = [x for x in tiles_we_can_discard if x.shanten == first_option.shanten]
 
         if first_option.shanten == 0:
@@ -90,6 +92,9 @@ class HandBuilder:
             return self._choose_best_discard_with_1_shanten(
                 tiles, melds, results_with_same_shanten, after_meld, one_shanten_ukeire2_calculated_beforehand
             )
+
+        if first_option.shanten == 2 or first_option.shanten == 3:
+            return self._choose_best_discard_with_2_3_shanten(tiles, melds, results_with_same_shanten, after_meld)
 
         possible_options = [first_option]
         ukeire_borders = self._choose_ukeire_borders(
@@ -104,20 +109,8 @@ class HandBuilder:
             if discard_option.ukeire >= first_option.ukeire - ukeire_borders:
                 possible_options.append(discard_option)
 
-        if first_option.shanten in [2, 3]:
-            ukeire_field = "ukeire_second"
-            # FIXME: see hack at the start of the function, sometimes we have already calculated it
-            if not (first_option.shanten == 1 and one_shanten_ukeire2_calculated_beforehand):
-                for x in possible_options:
-                    self.calculate_second_level_ukeire(x, tiles, melds, after_meld)
-
-            possible_options = sorted(possible_options, key=lambda x: (-getattr(x, ukeire_field), x.valuation))
-            possible_options = self._filter_list_by_percentage(
-                possible_options, ukeire_field, DiscardOption.UKEIRE_SECOND_FILTER_PERCENTAGE
-            )
-        else:
-            ukeire_field = "ukeire"
-            possible_options = sorted(possible_options, key=lambda x: (-getattr(x, ukeire_field), x.valuation))
+        ukeire_field = "ukeire"
+        possible_options = sorted(possible_options, key=lambda x: (-getattr(x, ukeire_field), x.valuation))
 
         # only one option - so we choose it
         if len(possible_options) == 1:
@@ -500,6 +493,10 @@ class HandBuilder:
         )
 
     @staticmethod
+    def _sorting_rule_for_2_3_shanten(x):
+        return HandBuilder._sorting_rule_for_1_shanten_no_cost(x)
+
+    @staticmethod
     def _sorting_rule_for_betaori(x):
         return (x.danger.get_weighted_danger(),) + HandBuilder._default_sorting_rule(x)
 
@@ -766,7 +763,7 @@ class HandBuilder:
         possible_options = self._filter_list_by_ukeire_borders(discard_options, first_option.ukeire, ukeire_borders)
 
         # FIXME: hack, sometimes we have already calculated it
-        if not (first_option.shanten == 1 and one_shanten_ukeire2_calculated_beforehand):
+        if not one_shanten_ukeire2_calculated_beforehand:
             for x in possible_options:
                 self.calculate_second_level_ukeire(x, tiles, melds, after_meld)
 
@@ -780,6 +777,46 @@ class HandBuilder:
         return self._choose_best_tile(
             sorted(possible_options, key=self._sorting_rule_for_1_shanten),
             self._sorting_rule_for_1_shanten,
+        )
+
+    def _choose_best_discard_with_2_3_shanten(self, tiles, melds, discard_options, after_meld):
+        discard_options = sorted(discard_options, key=lambda x: (x.shanten, -x.ukeire))
+        first_option = discard_options[0]
+
+        # first we filter by ukeire
+        ukeire_borders = self._choose_ukeire_borders(
+            first_option, DiscardOption.UKEIRE_FIRST_FILTER_PERCENTAGE, "ukeire"
+        )
+        possible_options = self._filter_list_by_ukeire_borders(discard_options, first_option.ukeire, ukeire_borders)
+
+        for x in possible_options:
+            self.calculate_second_level_ukeire(x, tiles, melds, after_meld)
+
+        # then we filter by ukeire 2
+        possible_options = sorted(possible_options, key=self._sorting_rule_for_2_3_shanten)
+        possible_options = self._filter_list_by_percentage(
+            possible_options, "ukeire_second", DiscardOption.UKEIRE_SECOND_FILTER_PERCENTAGE
+        )
+
+        tiles_without_dora = [x for x in possible_options if x.count_of_dora == 0]
+        # we have only dora candidates to discard
+        if not tiles_without_dora:
+            min_dora = min([x.count_of_dora for x in possible_options])
+            min_dora_list = [x for x in possible_options if x.count_of_dora == min_dora]
+            possible_options = min_dora_list
+        else:
+            # filter by ukeire2 again - this time only tiles without dora
+            possible_options = self._filter_list_by_percentage(
+                tiles_without_dora, "ukeire_second", DiscardOption.UKEIRE_SECOND_FILTER_PERCENTAGE
+            )
+
+        DecisionsLogger.debug(log.DISCARD_OPTIONS, "Candidates after filtering by ukeire2", context=possible_options)
+
+        assert possible_options
+
+        return self._choose_best_tile(
+            sorted(possible_options, key=self._sorting_rule_for_2_3_shanten),
+            self._sorting_rule_for_2_3_shanten,
         )
 
     @staticmethod

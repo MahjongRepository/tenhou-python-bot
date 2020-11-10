@@ -211,9 +211,13 @@ class TileDanger:
         "value": 80,
         "description": "Additional danger for third honor against honitsu hands",
     }
-    HONITSU_FIRST_SECOND_HONOR_BONUS_DANGER = {
+    HONITSU_SECOND_HONOR_BONUS_DANGER = {
         "value": 160,
-        "description": "Additional danger for shonpai or second honor against honitsu hands",
+        "description": "Additional danger for second honor against honitsu hands",
+    }
+    HONITSU_SHONPAI_HONOR_BONUS_DANGER = {
+        "value": 280,
+        "description": "Additional danger for shonpai honor against honitsu hands",
     }
 
     TOITOI_SECOND_YAKUHAI_HONOR_BONUS_DANGER = {

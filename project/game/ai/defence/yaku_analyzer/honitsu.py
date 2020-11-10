@@ -99,8 +99,10 @@ class HonitsuAnalyzer(HonitsuAnalyzerBase):
                 return []
             elif number_of_revealed_tiles == 3:
                 return [TileDanger.HONITSU_THIRD_HONOR_BONUS_DANGER]
+            elif number_of_revealed_tiles == 2:
+                return [TileDanger.HONITSU_SECOND_HONOR_BONUS_DANGER]
             else:
-                return [TileDanger.HONITSU_FIRST_SECOND_HONOR_BONUS_DANGER]
+                return [TileDanger.HONITSU_SHONPAI_HONOR_BONUS_DANGER]
 
         return []
 

@@ -26,6 +26,8 @@ class HandBuilder:
         """
         Try to find best tile to discard, based on different evaluations
         """
+        threatening_players = None
+
         discard_options, min_shanten = self.find_discard_options(tiles, closed_hand)
         if min_shanten == Shanten.AGARI_STATE:
             min_shanten = min([x.shanten for x in discard_options])
@@ -76,6 +78,11 @@ class HandBuilder:
         if min_acceptable_shanten > min_shanten:
             # all tiles with acceptable danger increase number of shanten - we just go betaori
             return self._choose_safest_tile_or_skip_meld(discard_options, after_meld)
+
+        # we should have some plan for push when we open our hand, otherwise - don't meld
+        if threatening_players and after_meld and min_shanten > 0:
+            if not self._find_acceptable_path_to_tempai(tiles_we_can_discard, min_shanten):
+                return None
 
         # by now we have the following:
         # - all discard candidates have acceptable danger
@@ -754,6 +761,18 @@ class HandBuilder:
             possible_options = self._filter_list_by_percentage(tiles_without_dora, ukeire_field, filter_percentage)
 
         return possible_options
+
+    def _find_acceptable_path_to_tempai(self, acceptable_discard_options, shanten):
+        # this might be a bit conservative, because in tempai danger borders will be higher, but since
+        # we expect that we need to discard a few more dangerous tiles before we get tempai, if we push
+        # we can use danger borders for our current shanten number and it all compensates
+        acceptable_discard_options_with_same_shanten = [x for x in acceptable_discard_options if x.shanten == shanten]
+        # +1 because we need to discard one more tile to get to lower shanten number one more time
+        # so if we want to meld and get 1-shanten we should have at least two tiles in hand we can discard
+        # that don't increase shanten number
+        if len(acceptable_discard_options_with_same_shanten) < shanten + 1:
+            # there is no acceptable way for tempai even in theory
+            return False
 
     @staticmethod
     def _filter_list_by_ukeire_borders(discard_options, ukeire, ukeire_borders):

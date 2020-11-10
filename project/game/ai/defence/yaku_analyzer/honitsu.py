@@ -1,7 +1,6 @@
 from game.ai.defence.yaku_analyzer.chinitsu import ChinitsuAnalyzer
 from game.ai.defence.yaku_analyzer.honitsu_analyzer_base import HonitsuAnalyzerBase
 from game.ai.helpers.defence import TileDanger
-from mahjong.constants import HONOR_INDICES
 from mahjong.tile import TilesConverter
 from mahjong.utils import count_tiles_by_suits, is_honor
 
@@ -85,9 +84,9 @@ class HonitsuAnalyzer(HonitsuAnalyzerBase):
         if not self.chosen_suit:
             return []
 
-        safe_tiles = HONOR_INDICES[:]
+        safe_tiles = []
         for x in range(0, 34):
-            if not self.chosen_suit(x):
+            if not self.chosen_suit(x) and not is_honor(x):
                 safe_tiles.append(x)
 
         return safe_tiles

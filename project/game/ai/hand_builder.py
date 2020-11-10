@@ -50,13 +50,13 @@ class HandBuilder:
         tiles_we_can_discard = [x for x in discard_options if x.danger.is_danger_acceptable()]
         if not tiles_we_can_discard:
             # no tiles with acceptable danger - we go betaori
-            return self._choose_safest_tile(discard_options, after_meld)
+            return self._choose_safest_tile_or_skip_meld(discard_options, after_meld)
 
         min_acceptable_shanten = min([x.shanten for x in tiles_we_can_discard])
         assert min_acceptable_shanten >= min_shanten
         if min_acceptable_shanten > min_shanten:
             # all tiles with acceptable danger increase number of shanten - we just go betaori
-            return self._choose_safest_tile(discard_options, after_meld)
+            return self._choose_safest_tile_or_skip_meld(discard_options, after_meld)
 
         # our strategy can affect discard options
         if self.ai.current_strategy:
@@ -66,13 +66,15 @@ class HandBuilder:
 
             had_to_be_discarded_tiles = [x for x in tiles_we_can_discard if x.had_to_be_discarded]
             if had_to_be_discarded_tiles:
-                return self._choose_best_tile(had_to_be_discarded_tiles, self._default_sorting_rule)
+                # we don't care about effectiveness of tiles that don't suit our strategy,
+                # so just choose the safest one
+                return self._choose_safest_tile(had_to_be_discarded_tiles)
 
             # remove needed tiles from discard options
             tiles_we_can_discard = [x for x in tiles_we_can_discard if not x.had_to_be_saved]
             if not tiles_we_can_discard:
                 # no acceptable tiles that allow us to keep our strategy - we go betaori
-                return self._choose_safest_tile(discard_options, after_meld)
+                return self._choose_safest_tile_or_skip_meld(discard_options, after_meld)
 
         # by now we have the following:
         # - all discard candidates have acceptable danger
@@ -499,13 +501,16 @@ class HandBuilder:
     def _sorting_rule_for_betaori(x):
         return (x.danger.get_weighted_danger(),) + HandBuilder._default_sorting_rule(x)
 
-    def _choose_safest_tile(self, discard_options, after_meld):
+    def _choose_safest_tile_or_skip_meld(self, discard_options, after_meld):
         if after_meld:
             return None
 
         # we can't discard effective tile from the hand, let's fold
         DecisionsLogger.debug(log.DISCARD_SAFE_TILE, "There are only dangerous tiles. Discard safest tile.")
         return sorted(discard_options, key=self._sorting_rule_for_betaori)[0]
+
+    def _choose_safest_tile(self, discard_options):
+        return self._choose_safest_tile_or_skip_meld(discard_options, after_meld=False)
 
     def _choose_best_tile(self, discard_options, sorting_rule):
         assert discard_options
@@ -532,7 +537,7 @@ class HandBuilder:
         if len(chosen_candidates):
             return self._choose_best_tile(chosen_candidates, sorting_lambda)
 
-        return self._choose_safest_tile(all_discard_options, after_meld)
+        return self._choose_safest_tile_or_skip_meld(all_discard_options, after_meld)
 
     def _choose_best_tanki_wait(self, discard_desc):
         discard_desc = sorted(discard_desc, key=lambda k: (k["hand_cost"], -k["weighted_danger"]), reverse=True)

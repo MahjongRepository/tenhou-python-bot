@@ -101,9 +101,11 @@ class HandBuilder:
             )
 
         if first_option.shanten == 2 or first_option.shanten == 3:
-            return self._choose_best_discard_with_2_3_shanten(tiles, melds, results_with_same_shanten, after_meld)
+            return self._choose_best_discard_with_2_3_shanten(
+                tiles, melds, closed_hand, results_with_same_shanten, after_meld
+            )
 
-        return self._choose_best_discard_with_4_or_more_shanten(closed_hand, results_with_same_shanten, after_meld)
+        return self._choose_best_discard_with_4_or_more_shanten(closed_hand, results_with_same_shanten)
 
     def process_discard_option(self, discard_option, closed_hand, force_discard=False):
         DecisionsLogger.debug(log.DISCARD, context=discard_option)
@@ -400,6 +402,15 @@ class HandBuilder:
         return HandBuilder._sorting_rule_for_1_shanten_no_cost(x)
 
     @staticmethod
+    def _sorting_rule_for_2_3_shanten_with_isolated(x, closed_hand_34):
+        return (
+            -x.ukeire_second,
+            -x.ukeire,
+            -is_tile_strictly_isolated(closed_hand_34, x.tile_to_discard),
+            x.valuation,
+        )
+
+    @staticmethod
     def _sorting_rule_for_4_or_more_shanten(x):
         return (
             -x.ukeire,
@@ -423,19 +434,24 @@ class HandBuilder:
 
     def _choose_best_tile(self, discard_options, sorting_rule):
         assert discard_options
-        # try to discard safest tile for calculated ukeire border
-        candidate = sorted(discard_options, key=sorting_rule)[0]
-        ukeire_border = max(
-            [
-                round((candidate.ukeire / 100) * DiscardOption.UKEIRE_DANGER_FILTER_PERCENTAGE),
-                DiscardOption.MIN_UKEIRE_DANGER_BORDER,
-            ]
-        )
 
-        discard_options_within_borders = sorted(
-            [x for x in discard_options if x.ukeire >= x.ukeire - ukeire_border],
-            key=lambda x: (x.danger.get_weighted_danger(),) + sorting_rule(x),
-        )
+        threats_present = [x for x in discard_options if x.danger.get_max_danger() != 0]
+        if threats_present:
+            # try to discard safest tile for calculated ukeire border
+            candidate = sorted(discard_options, key=sorting_rule)[0]
+            ukeire_border = max(
+                [
+                    round((candidate.ukeire / 100) * DiscardOption.UKEIRE_DANGER_FILTER_PERCENTAGE),
+                    DiscardOption.MIN_UKEIRE_DANGER_BORDER,
+                ]
+            )
+
+            discard_options_within_borders = sorted(
+                [x for x in discard_options if x.ukeire >= x.ukeire - ukeire_border],
+                key=lambda x: (x.danger.get_weighted_danger(),) + sorting_rule(x),
+            )
+        else:
+            discard_options_within_borders = discard_options
 
         DecisionsLogger.debug(log.DISCARD_OPTIONS, "All discard candidates", discard_options_within_borders)
 
@@ -689,9 +705,10 @@ class HandBuilder:
             self._sorting_rule_for_1_shanten,
         )
 
-    def _choose_best_discard_with_2_3_shanten(self, tiles, melds, discard_options, after_meld):
+    def _choose_best_discard_with_2_3_shanten(self, tiles, melds, closed_hand, discard_options, after_meld):
         discard_options = sorted(discard_options, key=lambda x: (x.shanten, -x.ukeire))
         first_option = discard_options[0]
+        closed_hand_34 = TilesConverter.to_34_array(closed_hand)
 
         # first we filter by ukeire
         ukeire_borders = self._choose_ukeire_borders(
@@ -703,7 +720,9 @@ class HandBuilder:
             self.calculate_second_level_ukeire(x, tiles, melds, after_meld)
 
         # then we filter by ukeire 2
-        possible_options = sorted(possible_options, key=self._sorting_rule_for_2_3_shanten)
+        possible_options = sorted(
+            possible_options, key=lambda x: self._sorting_rule_for_2_3_shanten_with_isolated(x, closed_hand_34)
+        )
         possible_options = self._filter_list_by_percentage(
             possible_options, "ukeire_second", DiscardOption.UKEIRE_SECOND_FILTER_PERCENTAGE
         )
@@ -716,11 +735,11 @@ class HandBuilder:
         DecisionsLogger.debug(log.DISCARD_OPTIONS, "Candidates after filtering by ukeire2", context=possible_options)
 
         return self._choose_best_tile(
-            sorted(possible_options, key=self._sorting_rule_for_2_3_shanten),
+            sorted(possible_options, key=lambda x: self._sorting_rule_for_2_3_shanten_with_isolated(x, closed_hand_34)),
             self._sorting_rule_for_2_3_shanten,
         )
 
-    def _choose_best_discard_with_4_or_more_shanten(self, closed_hand, discard_options, after_meld):
+    def _choose_best_discard_with_4_or_more_shanten(self, closed_hand, discard_options):
         discard_options = sorted(discard_options, key=lambda x: (x.shanten, -x.ukeire))
         first_option = discard_options[0]
 

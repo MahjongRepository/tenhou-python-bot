@@ -494,7 +494,7 @@ class HandBuilder:
 
         # we can't discard effective tile from the hand, let's fold
         DecisionsLogger.debug(log.DISCARD_SAFE_TILE, "There are only dangerous tiles. Discard safest tile.")
-        return sorted(discard_options, key=self._sorting_rule_for_betaori)
+        return sorted(discard_options, key=self._sorting_rule_for_betaori)[0]
 
     def _choose_first_option_or_safe_tiles(self, chosen_candidates, all_discard_options, after_meld, sorting_lambda):
         # it looks like everything is fine

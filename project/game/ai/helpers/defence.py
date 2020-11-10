@@ -427,22 +427,10 @@ class TileDangerHandler:
         return total
 
     def get_max_danger(self):
-        return max(
-            [
-                self.get_total_danger_for_player(1),
-                self.get_total_danger_for_player(2),
-                self.get_total_danger_for_player(3),
-            ]
-        )
+        return max(self._danger_array)
 
     def get_sum_danger(self):
-        return sum(
-            [
-                self.get_total_danger_for_player(1),
-                self.get_total_danger_for_player(2),
-                self.get_total_danger_for_player(3),
-            ]
-        )
+        return sum(self._danger_array)
 
     def get_weighted_danger(self):
         costs = [
@@ -454,11 +442,7 @@ class TileDangerHandler:
         if max_cost == 0:
             return 0
 
-        dangers = [
-            self.get_total_danger_for_player(1),
-            self.get_total_danger_for_player(2),
-            self.get_total_danger_for_player(3),
-        ]
+        dangers = self._danger_array
 
         weighted = 0
 
@@ -469,15 +453,31 @@ class TileDangerHandler:
         return weighted
 
     def get_min_danger_border(self):
-        borders = []
-        if self.get_danger_border(1).get("border"):
-            borders.append(self.get_danger_border(1).get("border"))
-        if self.get_danger_border(2).get("border"):
-            borders.append(self.get_danger_border(2).get("border"))
-        if self.get_danger_border(3).get("border"):
-            borders.append(self.get_danger_border(3).get("border"))
-        return borders and min(borders) or 0
+        return min(self._borders_array)
 
     def clear_danger(self, player_seat):
         self.values[player_seat] = []
         self.danger_border[player_seat] = {}
+
+    def is_danger_acceptable(self):
+        for border, danger in zip(self._borders_array, self._danger_array):
+            if border < danger:
+                return False
+
+        return True
+
+    @property
+    def _danger_array(self):
+        return [
+            self.get_total_danger_for_player(1),
+            self.get_total_danger_for_player(2),
+            self.get_total_danger_for_player(3),
+        ]
+
+    @property
+    def _borders_array(self):
+        return [
+            self.get_danger_border(1).get("border") or 0,
+            self.get_danger_border(2).get("border") or 0,
+            self.get_danger_border(3).get("border") or 0,
+        ]

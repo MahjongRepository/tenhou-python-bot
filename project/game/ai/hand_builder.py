@@ -26,9 +26,7 @@ class HandBuilder:
         """
         Try to find best tile to discard, based on different evaluations
         """
-        discard_options, _ = self.find_discard_options(tiles, closed_hand)
-
-        min_shanten = min([x.shanten for x in discard_options])
+        discard_options, min_shanten = self.find_discard_options(tiles, closed_hand)
 
         one_shanten_ukeire2_calculated_beforehand = False
         if self.player.config.FEATURE_DEFENCE_ENABLED:
@@ -47,9 +45,7 @@ class HandBuilder:
 
         DecisionsLogger.debug(log.DISCARD_OPTIONS, "All discard candidates", discard_options)
 
-        tiles_we_can_discard = [
-            x for x in discard_options if x.danger.get_max_danger() <= x.danger.get_min_danger_border()
-        ]
+        tiles_we_can_discard = [x for x in discard_options if x.danger.is_danger_acceptable()]
         if not tiles_we_can_discard:
             return self._chose_first_option_or_safe_tiles([], discard_options, after_meld, lambda x: ())
 

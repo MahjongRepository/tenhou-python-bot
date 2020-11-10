@@ -47,7 +47,7 @@ class HandBuilder:
 
         tiles_we_can_discard = [x for x in discard_options if x.danger.is_danger_acceptable()]
         if not tiles_we_can_discard:
-            return self._chose_first_option_or_safe_tiles([], discard_options, after_meld, lambda x: ())
+            return self._choose_first_option_or_safe_tiles([], discard_options, after_meld, lambda x: ())
 
         # our strategy can affect discard options
         if self.ai.current_strategy:
@@ -62,7 +62,7 @@ class HandBuilder:
                 return (x.shanten, -x.ukeire, x.valuation)
 
             tiles_we_can_discard = sorted(had_to_be_discarded_tiles, key=sorting_lambda)
-            return self._chose_first_option_or_safe_tiles(
+            return self._choose_first_option_or_safe_tiles(
                 tiles_we_can_discard, discard_options, after_meld, sorting_lambda
             )
 
@@ -120,7 +120,7 @@ class HandBuilder:
             def sorting_lambda(x):
                 return (-getattr(x, ukeire_field), x.valuation)
 
-            return self._chose_first_option_or_safe_tiles(
+            return self._choose_first_option_or_safe_tiles(
                 sorted(min_dora_list, key=sorting_lambda),
                 discard_options,
                 after_meld,
@@ -137,7 +137,7 @@ class HandBuilder:
             def sorting_lambda(x):
                 return (-x.second_level_cost, -x.ukeire_second, x.valuation)
 
-            return self._chose_first_option_or_safe_tiles(
+            return self._choose_first_option_or_safe_tiles(
                 sorted(tiles_without_dora, key=sorting_lambda),
                 discard_options,
                 after_meld,
@@ -171,7 +171,7 @@ class HandBuilder:
                 return (x.valuation,)
 
             # let's sort tiles by value and let's choose less valuable tile to discard
-            return self._chose_first_option_or_safe_tiles(
+            return self._choose_first_option_or_safe_tiles(
                 sorted(isolated_tiles, key=sorting_lambda),
                 discard_options,
                 after_meld,
@@ -184,7 +184,7 @@ class HandBuilder:
             return (-getattr(x, ukeire_field), x.valuation)
 
         filtered_options = sorted(filtered_options, key=sorting_lambda)
-        first_option = self._chose_first_option_or_safe_tiles(
+        first_option = self._choose_first_option_or_safe_tiles(
             filtered_options, discard_options, after_meld, sorting_lambda
         )
 
@@ -199,7 +199,7 @@ class HandBuilder:
             def sorting_lambda(x):
                 return (x.valuation,)
 
-            return self._chose_first_option_or_safe_tiles(
+            return self._choose_first_option_or_safe_tiles(
                 sorted(other_tiles_with_same_ukeire, key=sorting_lambda),
                 discard_options,
                 after_meld,
@@ -479,7 +479,7 @@ class HandBuilder:
 
         return shanten, use_chiitoitsu
 
-    def _chose_first_option_or_safe_tiles(self, chosen_candidates, all_discard_options, after_meld, sorting_lambda):
+    def _choose_first_option_or_safe_tiles(self, chosen_candidates, all_discard_options, after_meld, sorting_lambda):
         # it looks like everything is fine
         if len(chosen_candidates):
             # try to discard safest tile for calculated ukeire border

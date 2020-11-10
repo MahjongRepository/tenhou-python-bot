@@ -47,7 +47,7 @@ class HandBuilder:
 
         tiles_we_can_discard = [x for x in discard_options if x.danger.is_danger_acceptable()]
         if not tiles_we_can_discard:
-            return self._choose_first_option_or_safe_tiles([], discard_options, after_meld, lambda x: ())
+            return self._choose_safest_tile(discard_options, after_meld)
 
         # our strategy can affect discard options
         if self.ai.current_strategy:
@@ -479,6 +479,23 @@ class HandBuilder:
 
         return shanten, use_chiitoitsu
 
+    @staticmethod
+    def _sorting_rule_for_betaori(x):
+        return (
+            x.danger.get_weighted_danger(),
+            x.shanten,
+            -x.ukeire,
+            x.valuation,
+        )
+
+    def _choose_safest_tile(self, discard_options, after_meld):
+        if after_meld:
+            return None
+
+        # we can't discard effective tile from the hand, let's fold
+        DecisionsLogger.debug(log.DISCARD_SAFE_TILE, "There are only dangerous tiles. Discard safest tile.")
+        return sorted(discard_options, key=self._sorting_rule_for_betaori)
+
     def _choose_first_option_or_safe_tiles(self, chosen_candidates, all_discard_options, after_meld, sorting_lambda):
         # it looks like everything is fine
         if len(chosen_candidates):
@@ -499,13 +516,8 @@ class HandBuilder:
             DecisionsLogger.debug(log.DISCARD_OPTIONS, "All discard candidates", options_to_chose)
 
             return options_to_chose[0]
-        # we don't want to open hand in that case
-        elif after_meld:
-            return None
 
-        # we can't discard effective tile from the hand, let's fold
-        DecisionsLogger.debug(log.DISCARD_SAFE_TILE, "There are only dangerous tiles. Discard safest tile.")
-        return sorted(all_discard_options, key=lambda x: (x.danger.get_weighted_danger(),) + sorting_lambda(x))[0]
+        return self._choose_safest_tile(all_discard_options, after_meld)
 
     def _choose_best_tanki_wait(self, discard_desc):
         discard_desc = sorted(discard_desc, key=lambda k: (k["hand_cost"], -k["weighted_danger"]), reverse=True)

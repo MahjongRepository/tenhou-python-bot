@@ -109,7 +109,6 @@ def test_tempai_without_yaku():
 
     discard = table.player.discard_tile()
     assert tiles_to_string([discard]) != "7z"
-    assert tiles_to_string([discard]) != "5p"
 
 
 def test_wrong_shanten_improvements_detection():

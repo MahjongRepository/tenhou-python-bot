@@ -37,7 +37,7 @@ class HandBuilder:
             if self.player.ai.defence.get_threatening_players() and min_shanten != 0:
                 for discard_option in discard_options:
                     if discard_option.shanten == 1:
-                        self.calculate_second_level_ukeire(discard_option, tiles, melds)
+                        self.calculate_second_level_ukeire(discard_option, tiles, melds, after_meld)
                         one_shanten_ukeire2_calculated_beforehand = True
 
             discard_options, threatening_players = self.player.ai.defence.mark_tiles_danger_for_threats(discard_options)
@@ -83,6 +83,14 @@ class HandBuilder:
         first_option = tiles_we_can_discard[0]
         results_with_same_shanten = [x for x in tiles_we_can_discard if x.shanten == first_option.shanten]
 
+        if first_option.shanten == 0:
+            return self._choose_best_discard_in_tempai(tiles, melds, results_with_same_shanten, after_meld)
+
+        if first_option.shanten == 1:
+            return self._choose_best_discard_with_1_shanten(
+                tiles, melds, results_with_same_shanten, after_meld, one_shanten_ukeire2_calculated_beforehand
+            )
+
         possible_options = [first_option]
         ukeire_borders = self._choose_ukeire_borders(
             first_option, DiscardOption.UKEIRE_FIRST_FILTER_PERCENTAGE, "ukeire"
@@ -96,16 +104,16 @@ class HandBuilder:
             if discard_option.ukeire >= first_option.ukeire - ukeire_borders:
                 possible_options.append(discard_option)
 
-        if first_option.shanten in [1, 2, 3]:
+        if first_option.shanten in [2, 3]:
             ukeire_field = "ukeire_second"
             # FIXME: see hack at the start of the function, sometimes we have already calculated it
             if not (first_option.shanten == 1 and one_shanten_ukeire2_calculated_beforehand):
                 for x in possible_options:
-                    self.calculate_second_level_ukeire(x, tiles, melds)
+                    self.calculate_second_level_ukeire(x, tiles, melds, after_meld)
 
             possible_options = sorted(possible_options, key=lambda x: (-getattr(x, ukeire_field), x.valuation))
             possible_options = self._filter_list_by_percentage(
-                possible_options, ukeire_field, DiscardOption.UKEIRE_FIRST_FILTER_PERCENTAGE
+                possible_options, ukeire_field, DiscardOption.UKEIRE_SECOND_FILTER_PERCENTAGE
             )
         else:
             ukeire_field = "ukeire"
@@ -114,11 +122,6 @@ class HandBuilder:
         # only one option - so we choose it
         if len(possible_options) == 1:
             return possible_options[0]
-
-        # tempai state has a special handling
-        if first_option.shanten == 0:
-            other_tiles_with_same_shanten = [x for x in possible_options if x.shanten == 0]
-            return self._choose_best_discard_in_tempai(tiles, melds, other_tiles_with_same_shanten)
 
         tiles_without_dora = [x for x in possible_options if x.count_of_dora == 0]
 
@@ -140,19 +143,6 @@ class HandBuilder:
         # only one option - so we choose it
         if len(tiles_without_dora) == 1:
             return tiles_without_dora[0]
-
-        # 1-shanten hands have special handling - we can consider future hand cost here
-        if first_option.shanten == 1:
-
-            def sorting_lambda(x):
-                return (-x.second_level_cost, -x.ukeire_second, x.valuation)
-
-            return self._choose_first_option_or_safe_tiles(
-                sorted(tiles_without_dora, key=sorting_lambda),
-                discard_options,
-                after_meld,
-                sorting_lambda,
-            )
 
         if first_option.shanten == 2 or first_option.shanten == 3:
             filtered_options = self._filter_list_by_percentage(
@@ -366,9 +356,9 @@ class HandBuilder:
 
         return have_suji, have_kabe
 
-    def calculate_second_level_ukeire(self, discard_option, tiles, melds):
+    def calculate_second_level_ukeire(self, discard_option, tiles, melds, after_meld=False):
         not_suitable_tiles = self.ai.current_strategy and self.ai.current_strategy.not_suitable_tiles or []
-        call_riichi = not self.player.is_open_hand
+        call_riichi = not (self.player.is_open_hand or after_meld)
 
         # we are going to do manipulations that require player hand and discards to be updated
         # so we save original tiles and discards here and restore it at the end of the function
@@ -498,6 +488,18 @@ class HandBuilder:
         )
 
     @staticmethod
+    def _sorting_rule_for_1_shanten(x):
+        return (-x.second_level_cost,) + HandBuilder._sorting_rule_for_1_shanten_no_cost(x)
+
+    @staticmethod
+    def _sorting_rule_for_1_shanten_no_cost(x):
+        return (
+            -x.ukeire_second,
+            -x.ukeire,
+            x.valuation,
+        )
+
+    @staticmethod
     def _sorting_rule_for_betaori(x):
         return (x.danger.get_weighted_danger(),) + HandBuilder._default_sorting_rule(x)
 
@@ -542,8 +544,8 @@ class HandBuilder:
     def _choose_best_tanki_wait(self, discard_desc):
         discard_desc = sorted(discard_desc, key=lambda k: (k["hand_cost"], -k["weighted_danger"]), reverse=True)
 
-        # we are always choosing between exactly two tanki waits
-        assert len(discard_desc) == 2
+        # we are choosing between no more than two tanki waits
+        assert len(discard_desc) <= 2
 
         discard_desc = [x for x in discard_desc if x["hand_cost"] != 0]
 
@@ -620,9 +622,9 @@ class HandBuilder:
 
         return is_furiten
 
-    def _choose_best_discard_in_tempai(self, tiles, melds, discard_options):
+    def _choose_best_discard_in_tempai(self, tiles, melds, discard_options, after_meld):
         # first of all we find tiles that have the best hand cost * ukeire value
-        call_riichi = not self.player.is_open_hand
+        call_riichi = not (self.player.is_open_hand or after_meld)
 
         discard_desc = []
         player_tiles_copy = self.player.tiles[:]
@@ -731,13 +733,13 @@ class HandBuilder:
             self.player.melds = player_melds_copy
             self.player.discards.remove(discarded_tile)
 
-        discard_desc = sorted(
-            discard_desc, key=lambda k: (k["cost_x_ukeire"], not k["is_furiten"], -k["weighted_danger"]), reverse=True
-        )
+        discard_desc = sorted(discard_desc, key=lambda k: (-k["cost_x_ukeire"], k["is_furiten"], k["weighted_danger"]))
 
-        # if we don't have any good options, e.g. all our possible waits ara karaten
+        # if we don't have any good options, e.g. all our possible waits are karaten
         if discard_desc[0]["cost_x_ukeire"] == 0:
-            return sorted(discard_options, key=lambda x: (-x.danger.get_weighted_danger(), x.valuation))[0]
+            # we still choose between options that give us tempai, because we may be going to formal tempai
+            # with no hand cost
+            return self._choose_safest_tile(discard_options)
 
         num_tanki_waits = len([x for x in discard_desc if x["is_tanki"]])
 
@@ -746,14 +748,50 @@ class HandBuilder:
             return self._choose_best_tanki_wait(discard_desc)
 
         best_discard_desc = [x for x in discard_desc if x["cost_x_ukeire"] == discard_desc[0]["cost_x_ukeire"]]
-        best_discard_desc = sorted(best_discard_desc, key=lambda k: (k["weighted_danger"]))
-
-        # we only have one best option based on ukeire and cost, nothing more to do here
-        if len(best_discard_desc) == 1:
-            return best_discard_desc[0]["discard_option"]
+        best_discard_desc = sorted(best_discard_desc, key=lambda k: (k["is_furiten"], k["weighted_danger"]))
 
         # if we have several options that give us similar wait
         return best_discard_desc[0]["discard_option"]
+
+    def _choose_best_discard_with_1_shanten(
+        self, tiles, melds, discard_options, after_meld, one_shanten_ukeire2_calculated_beforehand
+    ):
+        discard_options = sorted(discard_options, key=lambda x: (x.shanten, -x.ukeire))
+        first_option = discard_options[0]
+
+        # first we filter by ukeire
+        ukeire_borders = self._choose_ukeire_borders(
+            first_option, DiscardOption.UKEIRE_FIRST_FILTER_PERCENTAGE, "ukeire"
+        )
+        possible_options = self._filter_list_by_ukeire_borders(discard_options, first_option.ukeire, ukeire_borders)
+
+        # FIXME: hack, sometimes we have already calculated it
+        if not (first_option.shanten == 1 and one_shanten_ukeire2_calculated_beforehand):
+            for x in possible_options:
+                self.calculate_second_level_ukeire(x, tiles, melds, after_meld)
+
+        # then we filter by ukeire2
+        possible_options = sorted(possible_options, key=self._sorting_rule_for_1_shanten_no_cost)
+        possible_options = self._filter_list_by_percentage(
+            possible_options, "ukeire_second", DiscardOption.UKEIRE_FIRST_FILTER_PERCENTAGE
+        )
+
+        # and finally we sort by main 1-shanten rule
+        return self._choose_best_tile(
+            sorted(possible_options, key=self._sorting_rule_for_1_shanten),
+            self._sorting_rule_for_1_shanten,
+        )
+
+    @staticmethod
+    def _filter_list_by_ukeire_borders(discard_options, ukeire, ukeire_borders):
+        filteted = []
+
+        for discard_option in discard_options:
+            # let's choose tiles that are close to the max ukeire tile
+            if discard_option.ukeire >= ukeire - ukeire_borders:
+                filteted.append(discard_option)
+
+        return filteted
 
     @staticmethod
     def _filter_list_by_percentage(items, attribute, percentage):

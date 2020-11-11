@@ -1,3 +1,4 @@
+from game.ai.placement import Placement
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_chi, is_honor, is_pair, simplify
 
@@ -34,6 +35,18 @@ class Riichi:
         )
         waiting = self.player.ai.waiting[0]
         hand_value = self.player.ai.estimate_hand_value_or_get_from_cache(waiting, call_riichi=False)
+        hand_value_with_riichi = self.player.ai.estimate_hand_value_or_get_from_cache(waiting, call_riichi=True)
+
+        must_riichi = self.player.ai.placement.must_riichi(
+            hand_value.yaku is not None and hand_value.cost is not None,
+            count_tiles,
+            hand_value.cost and hand_value.cost["main"] or 0,
+            hand_value_with_riichi.cost["main"],
+        )
+        if must_riichi == Placement.MUST_RIICHI:
+            return True
+        elif must_riichi == Placement.MUST_DAMATEN:
+            return False
 
         tiles = self.player.closed_hand[:]
         closed_melds = [x for x in self.player.melds if not x.opened]
@@ -232,6 +245,7 @@ class Riichi:
             self.player.ai.waiting, TilesConverter.to_34_array(self.player.closed_hand)
         )
         hand_costs = []
+        hand_costs_with_riichi = []
         waits_with_yaku = 0
         for waiting in self.player.ai.waiting:
             hand_value = self.player.ai.estimate_hand_value_or_get_from_cache(waiting, call_riichi=False)
@@ -240,10 +254,26 @@ class Riichi:
                 if hand_value.yaku is not None and hand_value.cost is not None:
                     waits_with_yaku += 1
 
+            hand_value_with_riichi = self.player.ai.estimate_hand_value_or_get_from_cache(waiting, call_riichi=True)
+            if hand_value_with_riichi.error is None:
+                hand_costs_with_riichi.append(hand_value_with_riichi.cost["main"])
+
+        min_cost = hand_costs and min(hand_costs) or 0
+        min_cost_with_riichi = hand_costs_with_riichi and min(hand_costs_with_riichi) or 0
+
+        must_riichi = self.player.ai.placement.must_riichi(
+            waits_with_yaku == len(self.player.ai.waiting),
+            count_tiles,
+            min_cost,
+            min_cost_with_riichi,
+        )
+        if must_riichi == Placement.MUST_RIICHI:
+            return True
+        elif must_riichi == Placement.MUST_DAMATEN:
+            return False
+
         # if we have yaku on every wait
         if waits_with_yaku == len(self.player.ai.waiting):
-            min_cost = min(hand_costs)
-
             # let's not riichi this bad wait
             if count_tiles <= 2:
                 return False

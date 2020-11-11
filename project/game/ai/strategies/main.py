@@ -326,7 +326,7 @@ class BaseStrategy:
             melds = self.player.melds + [meld]
 
             DecisionsLogger.debug(
-                log.MELD_HAND, f"Hand: {self._format_hand_for_print(new_tiles, discarded_tile, melds)}"
+                log.MELD_HAND, f"Hand: {self._format_hand_for_print(closed_hand, discarded_tile, self.player.melds)}"
             )
 
             selected_tile = self.player.ai.hand_builder.choose_tile_to_discard(

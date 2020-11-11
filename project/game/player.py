@@ -148,8 +148,8 @@ class Player(PlayerInterface):
 
     def __init__(self, table, seat, dealer_seat, bot_config: Optional[BotDefaultConfig]):
         super().__init__(table, seat, dealer_seat)
-        self.ai = MahjongAI(self)
         self.config = bot_config or BotDefaultConfig()
+        self.ai = MahjongAI(self)
 
     def erase_state(self):
         super().erase_state()

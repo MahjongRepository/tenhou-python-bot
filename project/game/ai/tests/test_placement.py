@@ -12,7 +12,7 @@ def test_placement_evaluation():
         if enemy != player:
             enemy.scores = 6000
 
-    placement = player.ai.placement.get_placement_evaluation(player.ai.placement.get_current_placement())
+    placement = player.ai.placement.get_placement_evaluation(player.ai.placement._get_current_placement())
     assert placement == Placement.VERY_COMFORTABLE_FIRST
 
 
@@ -25,7 +25,7 @@ def test_placement():
         if enemy != player:
             enemy.scores = 6000
 
-    placement = player.ai.placement.get_current_placement()
+    placement = player.ai.placement._get_current_placement()
     assert placement["place"] == 1
     assert placement["diff_with_1st"] == 0
     assert placement["diff_with_2nd"] == 76000
@@ -41,7 +41,7 @@ def test_placement():
             enemy.scores = 24000 + i * 6000
             i += 1
 
-    placement = player.ai.placement.get_current_placement()
+    placement = player.ai.placement._get_current_placement()
     assert placement["place"] == 3
     assert placement["diff_with_1st"] == 8000
     assert placement["diff_with_2nd"] == 2000
@@ -55,7 +55,7 @@ def test_placement():
         if enemy != player:
             enemy.scores = 33000
 
-    placement = player.ai.placement.get_current_placement()
+    placement = player.ai.placement._get_current_placement()
     assert placement["place"] == 4
     assert placement["diff_with_1st"] == 32000
     assert placement["diff_with_2nd"] == 32000

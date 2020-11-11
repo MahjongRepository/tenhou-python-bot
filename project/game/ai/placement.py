@@ -4,27 +4,27 @@ class PlacementHandler:
         self.table = player.table
 
     def get_allowed_danger_modifier(self) -> int:
-        placement_evaluation = self.get_placement_evaluation(self.get_current_placement())
+        placement_evaluation = self.get_placement_evaluation(self._get_current_placement())
 
         if placement_evaluation == Placement.VERY_COMFORTABLE_FIRST:
             if self.is_late_round:
-                return -3
+                return Placement.NO_RISK_DANGER_MODIFIER
 
-            return -2
+            return Placement.MODERATE_DANGER_MODIFIER
 
-        if placement_evaluation == Placement.VERY_COMFORTABLE_FIRST:
+        if placement_evaluation == Placement.COMFORTABLE_FIRST:
             if self.is_late_round:
-                return -2
+                return Placement.MODERATE_DANGER_MODIFIER
 
-        return 0
+        return Placement.DEFAULT_DANGER_MODIFIER
 
     # TODO: different logic for tournament games
-    def must_riichi(self, has_yaku, num_waits, cost_with_riichi, cost_with_damaten):
+    def must_riichi(self, has_yaku, num_waits, cost_with_riichi, cost_with_damaten) -> int:
         # now we only change our decisions for oorasu
         if not self.is_oorasu:
             return Placement.DEFAULT_RIICHI_DECISION
 
-        placement = self.get_current_placement()
+        placement = self._get_current_placement()
         if not placement:
             return Placement.DEFAULT_RIICHI_DECISION
 
@@ -61,7 +61,7 @@ class PlacementHandler:
 
         return Placement.DEFAULT_RIICHI_DECISION
 
-    def get_placement_evaluation(self, placement):
+    def get_placement_evaluation(self, placement) -> int:
         if not placement:
             return Placement.NEUTRAL
 
@@ -75,7 +75,7 @@ class PlacementHandler:
 
         return Placement.NEUTRAL
 
-    def get_current_placement(self):
+    def _get_current_placement(self):
         if not self.points_initialized:
             return None
 
@@ -109,6 +109,21 @@ class PlacementHandler:
         return self.table.round_wind_number >= 6
 
 
+class DummyPlacementHandler(PlacementHandler):
+    """
+    Use this class in config if you want to disable placement logic for bot
+    """
+
+    def get_allowed_danger_modifier(self) -> int:
+        return Placement.NO_RISK_DANGER_MODIFIER
+
+    def must_riichi(self, has_yaku, num_waits, cost_with_riichi, cost_with_damaten) -> int:
+        return Placement.DEFAULT_RIICHI_DECISION
+
+    def get_placement_evaluation(self, placement) -> int:
+        return Placement.NEUTRAL
+
+
 class Placement:
     # TODO: account for honbas and riichi sticks on the table
     VERY_COMFORTABLE_DIFF = 24100
@@ -125,3 +140,8 @@ class Placement:
     DEFAULT_RIICHI_DECISION = 0
     MUST_RIICHI = 1
     MUST_DAMATEN = 2
+
+    # danger modifier
+    NO_RISK_DANGER_MODIFIER = -3
+    MODERATE_DANGER_MODIFIER = -2
+    DEFAULT_DANGER_MODIFIER = 0

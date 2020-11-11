@@ -26,4 +26,5 @@ run_on_tenhou:
 	docker-compose up
 
 archive_replays:
+	tar -czvf "logs-$(shell date '+%Y-%m-%d-%H-%M').tar.gz" -C ./project/battle_results/logs/ .
 	tar -czvf "replays-$(shell date '+%Y-%m-%d-%H-%M').tar.gz" -C ./project/battle_results/replays/ .

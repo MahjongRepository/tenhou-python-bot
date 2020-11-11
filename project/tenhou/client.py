@@ -310,7 +310,7 @@ class TenhouClient(Client):
 
                         # let's call riichi
                         if can_call_riichi:
-                            self._random_sleep(1, 2)
+                            self._random_sleep(0.5, 1)
                             self._send_message('<REACH hai="{}" />'.format(discarded_tile))
                             main_player.in_riichi = True
                     else:
@@ -343,7 +343,7 @@ class TenhouClient(Client):
 
                 # the end of round
                 if "<AGARI" in message or "<RYUUKYOKU" in message:
-                    self._random_sleep(1, 2)
+                    self._random_sleep(4, 6)
                     self._send_message("<NEXTREADY />")
 
                 # set was called
@@ -373,7 +373,7 @@ class TenhouClient(Client):
                         tile = self.decoder.parse_tile(message)
                         enemy_seat = self.decoder.get_enemy_seat(message)
 
-                    self._random_sleep(1, 2)
+                    self._random_sleep(0.4, 0.6)
 
                     if main_player.should_call_win(tile, enemy_seat):
                         self._send_message('<N type="6" />')
@@ -599,4 +599,4 @@ class TenhouClient(Client):
         return True
 
     def _random_sleep(self, min_sleep, max_sleep):
-        sleep(random.randint(min_sleep, max_sleep + 1))
+        sleep(random.uniform(min_sleep, max_sleep))

@@ -466,10 +466,6 @@ class HandBuilder:
 
     def _choose_best_tanki_wait(self, discard_desc):
         discard_desc = sorted(discard_desc, key=lambda k: (k["hand_cost"], -k["weighted_danger"]), reverse=True)
-
-        # we are choosing between no more than two tanki waits
-        assert len(discard_desc) <= 2
-
         discard_desc = [x for x in discard_desc if x["hand_cost"] != 0]
 
         # we are guaranteed to have at least one wait with cost by caller logic
@@ -478,13 +474,12 @@ class HandBuilder:
         if len(discard_desc) == 1:
             return discard_desc[0]["discard_option"]
 
-        # if not 1 then 2
-        assert len(discard_desc) == 2
-
-        num_furiten_waits = len([x for x in discard_desc if x["is_furiten"]])
-        # if we choose tanki, we always prefer non-furiten wait over furiten one, no matter what the cost is
-        if num_furiten_waits == 1:
-            return [x for x in discard_desc if not x["is_furiten"]][0]["discard_option"]
+        non_furiten_waits = [x for x in discard_desc if not x["is_furiten"]]
+        num_non_furiten_waits = len(non_furiten_waits)
+        if num_non_furiten_waits == 1:
+            return non_furiten_waits[0]["discard_option"]
+        elif num_non_furiten_waits > 1:
+            discard_desc = non_furiten_waits
 
         best_discard_desc = [x for x in discard_desc if x["hand_cost"] == discard_desc[0]["hand_cost"]]
 

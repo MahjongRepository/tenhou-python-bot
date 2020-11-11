@@ -31,8 +31,19 @@ class TenhouReplay(Replay):
 
         self.tags.append("</mjloggm>")
 
-        with open(os.path.join(self.replays_directory, self.replay_name), "w") as f:
+        self.save_log_file()
+
+    def save_log_file(self, prefix=""):
+        with open(os.path.join(self.replays_directory, prefix + self.replay_name), "w") as f:
             f.write("".join(self.tags))
+
+    def save_failed_log(self):
+        """
+        When bot crashed we want to finish replay to be able reproduce crash
+        """
+        self.tags.append('<RYUUKYOKU owari="" />')
+        self.tags.append("</mjloggm>")
+        self.save_log_file(prefix="failed_")
 
     def init_round(self, dealer, round_number, honba_sticks, riichi_sticks, dora):
         self.tags.append(

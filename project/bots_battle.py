@@ -70,6 +70,7 @@ def main(number_of_games):
                 total_result_client["positions"].append(player.position)
                 total_result_client["played_rounds"] += result["played_rounds"]
         except Exception as e:
+            manager.replay.save_failed_log()
             logger.error(f"Hanchan seed={seed_value} crashed", exc_info=e)
 
     # recalculate stat values

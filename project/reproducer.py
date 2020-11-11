@@ -19,10 +19,17 @@ class TenhouLogReproducer:
     The way to debug bot decisions that it made in real tenhou.net games
     """
 
-    def __init__(self, log_id):
+    def __init__(self, log_id, file_path):
         self.decoder = TenhouDecoder()
 
-        log_content = self._download_log_content(log_id)
+        if log_id:
+            log_content = self._download_log_content(log_id)
+        elif file_path:
+            with open(file_path, "r") as f:
+                log_content = f.read()
+        else:
+            raise AssertionError("log id or file path should be specified")
+
         self.rounds = self._parse_rounds(log_content)
 
     def print_meta_info(self):
@@ -309,6 +316,11 @@ def parse_args_and_start_reproducer():
         help="Tenhou.net log link. Example: 2020102008gm-0001-7994-9438a8f4",
     )
     parser.add_option(
+        "--file",
+        type="string",
+        help="Path to local game log file",
+    )
+    parser.add_option(
         "--meta",
         action="store_true",
         help="Print meta information about the game",
@@ -348,7 +360,7 @@ def parse_args_and_start_reproducer():
 
     opts, _ = parser.parse_args()
 
-    reproducer = TenhouLogReproducer(opts.log)
+    reproducer = TenhouLogReproducer(opts.log, opts.file)
     if opts.meta:
         meta_information = reproducer.print_meta_info()
         logger.debug(json.dumps(meta_information, indent=2, ensure_ascii=False))

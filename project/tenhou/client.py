@@ -452,6 +452,7 @@ class TenhouClient(Client):
                 self.end_game(False)
                 return
 
+        logger.info("Log: {}".format(log_link))
         logger.info("Final results: {}".format(self.table.get_players_sorted_by_scores()))
 
         # we need to finish the game, and only after this try to send statistics

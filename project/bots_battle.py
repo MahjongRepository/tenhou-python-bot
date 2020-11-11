@@ -9,7 +9,8 @@ from game.bots_battle.battle_config import BattleConfig
 from game.bots_battle.game_manager import GameManager
 from game.bots_battle.local_client import LocalClient
 from tqdm import trange
-from utils.logger import DATE_FORMAT, LOG_FORMAT
+from utils.logger import DATE_FORMAT, LOG_FORMAT, set_up_logging
+from utils.settings_handler import settings
 
 logger = logging.getLogger("game")
 
@@ -134,6 +135,19 @@ if __name__ == "__main__":
         default=1,
         help="Number of games to play",
     )
+    parser.add_option(
+        "--logs",
+        action="store_true",
+        help="Enable logs for bots, use it only for debug, not for live games",
+    )
     opts, _ = parser.parse_args()
+
+    settings.FIVE_REDS = True
+    settings.OPEN_TANYAO = True
+    settings.PRINT_LOGS = False
+
+    if opts.logs:
+        settings.PRINT_LOGS = True
+        set_up_logging(save_to_file=True, print_to_console=False)
 
     main(opts.games)

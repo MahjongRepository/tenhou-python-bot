@@ -18,4 +18,7 @@ MELD_DEBUG = "meld_debug"
 
 RIICHI = "riichi"
 
+PLACEMENT_DANGER_MODIFIER = "placement_danger_modifier"
+PLACEMENT_RIICHI_OR_DAMATEN = "placement_riichi_or_damaten"
+
 DEFENCE_THREATENING_ENEMY = "defence_threatening_enemy"

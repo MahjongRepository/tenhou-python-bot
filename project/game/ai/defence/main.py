@@ -159,6 +159,7 @@ class TileDangerHandler:
     def calculate_danger_borders(self, discard_options, threatening_player):
         min_shanten = min([x.shanten for x in discard_options])
 
+        placement_adjustment = self.player.ai.placement.get_allowed_danger_modifier()
         for discard_option in discard_options:
             danger_border = DangerBorder.BETAORI
             hand_weighted_cost = 0
@@ -404,7 +405,6 @@ class TileDangerHandler:
             danger_border = DangerBorder.tune_for_round(self.player, danger_border, shanten)
 
             # depending on our placement we may want to be more defensive
-            placement_adjustment = self.player.ai.placement.get_allowed_danger_modifier()
             if placement_adjustment < 0:
                 danger_border = DangerBorder.tune_down(danger_border, -placement_adjustment)
 

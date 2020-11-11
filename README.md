@@ -33,6 +33,9 @@ Run the game locally:
 1. Run `make build_docker`
 1. Run `make GAMES=1 run_battle` it will play one game locally. Logs and replays will be stored in `bots_battle` folder.
 
+Run bots with enabled decision logger (use it only for debug, since it harms performance):
+1. Run `make GAMES=1 ARGS=--logs run_battle`
+
 ## Run multiple bots to play one game
 
 1. [Install Docker](https://docs.docker.com/get-docker/) and [Install Docker Compose](https://docs.docker.com/compose/install/)

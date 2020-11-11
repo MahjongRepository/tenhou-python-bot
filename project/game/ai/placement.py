@@ -1,19 +1,39 @@
+import utils.decisions_constants as log
+from utils.decisions_logger import DecisionsLogger
+
+
 class PlacementHandler:
     def __init__(self, player):
         self.player = player
         self.table = player.table
 
     def get_allowed_danger_modifier(self) -> int:
-        placement_evaluation = self.get_placement_evaluation(self._get_current_placement())
+        placement = self._get_current_placement()
+        placement_evaluation = self._get_placement_evaluation(placement)
 
         if placement_evaluation == Placement.VERY_COMFORTABLE_FIRST:
             if self.is_late_round:
+                DecisionsLogger.debug(
+                    log.PLACEMENT_DANGER_MODIFIER,
+                    "Very comfortable first and late round",
+                    {"placement": placement, "placement_evaluation": placement_evaluation},
+                )
                 return Placement.NO_RISK_DANGER_MODIFIER
 
+            DecisionsLogger.debug(
+                log.PLACEMENT_DANGER_MODIFIER,
+                "Very comfortable first and NOT late round",
+                {"placement": placement, "placement_evaluation": placement_evaluation},
+            )
             return Placement.MODERATE_DANGER_MODIFIER
 
         if placement_evaluation == Placement.COMFORTABLE_FIRST:
             if self.is_late_round:
+                DecisionsLogger.debug(
+                    log.PLACEMENT_DANGER_MODIFIER,
+                    "Comfortable first and late round",
+                    {"placement": placement, "placement_evaluation": placement_evaluation},
+                )
                 return Placement.MODERATE_DANGER_MODIFIER
 
         return Placement.DEFAULT_DANGER_MODIFIER
@@ -28,40 +48,64 @@ class PlacementHandler:
         if not placement:
             return Placement.DEFAULT_RIICHI_DECISION
 
-        placement_evaluation = self.get_placement_evaluation(placement)
+        placement_evaluation = self._get_placement_evaluation(placement)
+
+        logger_context = {
+            "placement": placement,
+            "placement_evaluation": placement_evaluation,
+            "has_yaku": has_yaku,
+            "num_waits": num_waits,
+            "cost_with_riichi": cost_with_riichi,
+            "cost_with_damaten": cost_with_damaten,
+            "round_step": self.player.round_step,
+        }
 
         if placement["place"] == 1:
             if has_yaku:
+                DecisionsLogger.debug(log.PLACEMENT_RIICHI_OR_DAMATEN, "1st place, has yaku", logger_context)
                 return Placement.MUST_DAMATEN
 
             # no yaku but we can just sit here and chill
             if placement_evaluation >= Placement.VERY_COMFORTABLE_FIRST:
+                DecisionsLogger.debug(
+                    log.PLACEMENT_RIICHI_OR_DAMATEN, "1st place, very comfortable first", logger_context
+                )
                 return Placement.MUST_DAMATEN
 
             if placement_evaluation >= Placement.COMFORTABLE_FIRST:
                 # just chill
                 if num_waits < 6 or self.player.round_step > 11:
+                    DecisionsLogger.debug(
+                        log.PLACEMENT_RIICHI_OR_DAMATEN,
+                        "1st place, comfortable first, late round, < 6 waits",
+                        logger_context,
+                    )
                     return Placement.MUST_DAMATEN
 
         if placement["place"] == 2:
             if cost_with_damaten < placement["diff_with_1st"] <= cost_with_riichi:
                 if placement["diff_with_4th"] >= Placement.COMFORTABLE_DIFF_FOR_RISK:
+                    DecisionsLogger.debug(
+                        log.PLACEMENT_RIICHI_OR_DAMATEN, "2st place, we are good to risk", logger_context
+                    )
                     return Placement.MUST_RIICHI
 
         # TODO: special rules for 3rd place
         if placement["place"] == 4:
             # TODO: consider going for better hand
             if cost_with_damaten < placement["diff_with_3rd"]:
+                DecisionsLogger.debug(log.PLACEMENT_RIICHI_OR_DAMATEN, "4st place, let's riichi", logger_context)
                 return Placement.MUST_RIICHI
 
         # general rule:
         if placement["place"] != 4 and has_yaku:
             if placement["diff_with_next_up"] > cost_with_riichi * 2 and placement["diff_with_next_down"] <= 1000:
+                DecisionsLogger.debug(log.PLACEMENT_RIICHI_OR_DAMATEN, "not 4st place and has yaku", logger_context)
                 return Placement.MUST_DAMATEN
 
         return Placement.DEFAULT_RIICHI_DECISION
 
-    def get_placement_evaluation(self, placement) -> int:
+    def _get_placement_evaluation(self, placement) -> int:
         if not placement:
             return Placement.NEUTRAL
 
@@ -120,7 +164,7 @@ class DummyPlacementHandler(PlacementHandler):
     def must_riichi(self, has_yaku, num_waits, cost_with_riichi, cost_with_damaten) -> int:
         return Placement.DEFAULT_RIICHI_DECISION
 
-    def get_placement_evaluation(self, placement) -> int:
+    def _get_placement_evaluation(self, placement) -> int:
         return Placement.NEUTRAL
 
 

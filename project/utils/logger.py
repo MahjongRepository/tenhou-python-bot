@@ -31,18 +31,20 @@ class ColoredFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-def set_up_logging(save_to_file=True):
+def set_up_logging(save_to_file=True, print_to_console=True):
     """
     Logger for tenhou communication and AI output
     """
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.DEBUG)
-    formatter = ColoredFormatter(LOG_FORMAT, datefmt=DATE_FORMAT)
-    ch.setFormatter(formatter)
-
     logger = logging.getLogger("bot")
     logger.setLevel(logging.DEBUG)
-    logger.addHandler(ch)
+
+    if print_to_console:
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.DEBUG)
+        formatter = ColoredFormatter(LOG_FORMAT, datefmt=DATE_FORMAT)
+        ch.setFormatter(formatter)
+
+        logger.addHandler(ch)
 
     log_prefix = settings.LOG_PREFIX
     if not log_prefix:

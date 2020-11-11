@@ -12,7 +12,7 @@ def test_placement_evaluation():
         if enemy != player:
             enemy.scores = 6000
 
-    placement = player.ai.placement.get_placement_evaluation(player.ai.placement._get_current_placement())
+    placement = player.ai.placement._get_placement_evaluation(player.ai.placement._get_current_placement())
     assert placement == Placement.VERY_COMFORTABLE_FIRST
 
 

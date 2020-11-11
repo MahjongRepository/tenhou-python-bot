@@ -13,10 +13,6 @@ from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
 from utils.settings_handler import settings
 
-settings.PRINT_LOGS = False
-settings.FIVE_REDS = True
-settings.OPEN_TANYAO = True
-
 # we need to have it
 # to be able repeat our tests with needed random
 seed_value = random()

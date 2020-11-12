@@ -1,3 +1,4 @@
+import pytest
 from game.ai.strategies.honitsu import HonitsuStrategy
 from game.ai.strategies.main import BaseStrategy
 from game.table import Table
@@ -213,6 +214,22 @@ def test_open_hand_and_not_go_for_chiitoitsu():
     meld, _ = player.try_to_call_meld(tile, False)
     assert meld is not None
     assert tiles_to_string(meld.tiles) == "555z"
+
+
+@pytest.mark.skip("Skipped, needs strategies refactoring, ref #153")
+def test_open_hand_and_not_go_for_atodzuke_yakuhai():
+    table = Table()
+    # dora here to activate honitsu strategy
+    table.add_dora_indicator(string_to_136_tile(sou="9"))
+    player = table.player
+    player.seat = 1
+
+    tiles = string_to_136_array(sou="1112345678", honors="557")
+    player.init_hand(tiles)
+    tile = string_to_136_array(sou="1111")[3]
+    meld, _ = player.try_to_call_meld(tile, False)
+    assert meld is not None
+    assert tiles_to_string(meld.tiles) == "111s"
 
 
 def test_open_suit_same_shanten():

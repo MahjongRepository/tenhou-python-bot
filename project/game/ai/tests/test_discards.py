@@ -746,7 +746,7 @@ def test_calculate_second_level_ukeire():
     player.init_hand(tiles)
     player.draw_tile(tile)
 
-    discard_options, _ = player.ai.hand_builder.find_discard_options(player.tiles, player.closed_hand)
+    discard_options, _ = player.ai.hand_builder.find_discard_options()
 
     tile = string_to_136_tile(man="4")
     discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]

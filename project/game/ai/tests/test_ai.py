@@ -384,20 +384,20 @@ def test_remaining_tiles_and_enemy_discard():
     tiles = string_to_136_array(man="123456789", sou="167", honors="77")
     player.init_hand(tiles)
 
-    results, shanten = player.ai.hand_builder.find_discard_options(tiles, tiles)
+    results, shanten = player.ai.hand_builder.find_discard_options()
     result = [x for x in results if x.tile_to_discard == string_to_34_tile(sou="1")][0]
     assert result.ukeire == 8
 
     player.table.add_discarded_tile(1, string_to_136_tile(sou="5"), False)
 
-    results, shanten = player.ai.hand_builder.find_discard_options(tiles, tiles)
+    results, shanten = player.ai.hand_builder.find_discard_options()
     result = [x for x in results if x.tile_to_discard == string_to_34_tile(sou="1")][0]
     assert result.ukeire == 7
 
     player.table.add_discarded_tile(2, string_to_136_tile(sou="5"), False)
     player.table.add_discarded_tile(3, string_to_136_tile(sou="8"), False)
 
-    results, shanten = player.ai.hand_builder.find_discard_options(tiles, tiles)
+    results, shanten = player.ai.hand_builder.find_discard_options()
     result = [x for x in results if x.tile_to_discard == string_to_34_tile(sou="1")][0]
     assert result.ukeire == 5
 
@@ -409,7 +409,7 @@ def test_remaining_tiles_and_opened_meld():
     tiles = string_to_136_array(man="123456789", sou="167", honors="77")
     player.init_hand(tiles)
 
-    results, shanten = player.ai.hand_builder.find_discard_options(tiles, tiles)
+    results, shanten = player.ai.hand_builder.find_discard_options()
     result = [x for x in results if x.tile_to_discard == string_to_34_tile(sou="1")][0]
     assert result.ukeire == 8
 
@@ -420,7 +420,7 @@ def test_remaining_tiles_and_opened_meld():
     meld.called_tile = tile
     player.table.add_called_meld(3, meld)
 
-    results, shanten = player.ai.hand_builder.find_discard_options(tiles, tiles)
+    results, shanten = player.ai.hand_builder.find_discard_options()
     result = [x for x in results if x.tile_to_discard == string_to_34_tile(sou="1")][0]
     assert result.ukeire == 5
 
@@ -431,7 +431,7 @@ def test_remaining_tiles_and_opened_meld():
     meld.called_tile = tile
     player.table.add_called_meld(2, meld)
 
-    results, shanten = player.ai.hand_builder.find_discard_options(tiles, tiles)
+    results, shanten = player.ai.hand_builder.find_discard_options()
     result = [x for x in results if x.tile_to_discard == string_to_34_tile(sou="1")][0]
     assert result.ukeire == 4
 
@@ -443,13 +443,13 @@ def test_remaining_tiles_and_dora_indicators():
     tiles = string_to_136_array(man="123456789", sou="167", honors="77")
     player.init_hand(tiles)
 
-    results, shanten = player.ai.hand_builder.find_discard_options(tiles, tiles)
+    results, shanten = player.ai.hand_builder.find_discard_options()
     result = [x for x in results if x.tile_to_discard == string_to_34_tile(sou="1")][0]
     assert result.ukeire == 8
 
     table.add_dora_indicator(string_to_136_tile(sou="8"))
 
-    results, shanten = player.ai.hand_builder.find_discard_options(tiles, tiles)
+    results, shanten = player.ai.hand_builder.find_discard_options()
     result = [x for x in results if x.tile_to_discard == string_to_34_tile(sou="1")][0]
     assert result.ukeire == 7
 
@@ -478,7 +478,7 @@ def test_call_upgrade_pon_and_bad_ukeire_after_call():
 
     tiles = string_to_136_array(man="34445", sou="123456", pin="89")
     table.player.init_hand(tiles)
-    tile = string_to_136_tile(man="4")
+    tile = string_to_136_array(man="4444")[3]
 
     assert table.player.should_call_kan(tile, False) is None
 
@@ -500,7 +500,7 @@ def test_call_upgrade_pon_and_bad_ukeire_after_call_second_case():
     player.add_called_meld(make_meld(MeldPrint.PON, man="555"))
     player.add_called_meld(make_meld(MeldPrint.PON, honors="666"))
 
-    tile = string_to_136_tile(man="5")
+    tile = string_to_136_array(man="5555")[3]
 
     assert player.should_call_kan(tile, False) is None
 
@@ -513,7 +513,7 @@ def test_call_upgrade_pon_and_bad_ukeire_after_call_third_case():
     table.player.init_hand(tiles)
     table.player.add_called_meld(make_meld(MeldPrint.PON, sou="444"))
 
-    tile = string_to_136_tile(sou="4")
+    tile = string_to_136_array(sou="4444")[3]
 
     # we don't want to call shouminkan here
     assert table.player.should_call_kan(tile, False) is None
@@ -527,7 +527,7 @@ def test_call_shouminkan():
     table.player.init_hand(tiles)
     table.player.add_called_meld(make_meld(MeldPrint.PON, honors="666"))
 
-    tile = string_to_136_tile(honors="6")
+    tile = string_to_136_array(honors="6666")[3]
 
     assert table.player.should_call_kan(tile, False) == MeldPrint.SHOUMINKAN
 

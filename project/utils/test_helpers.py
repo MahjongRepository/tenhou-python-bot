@@ -39,7 +39,7 @@ def tiles_to_string(tiles_136):
 
 
 def find_discard_option(player, sou="", pin="", man="", honors=""):
-    discard_options, _ = player.ai.hand_builder.find_discard_options(player.tiles, player.closed_hand)
+    discard_options, _ = player.ai.hand_builder.find_discard_options()
     tile = string_to_136_tile(sou=sou, pin=pin, man=man, honors=honors)
     discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
 

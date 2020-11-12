@@ -30,7 +30,7 @@ class HandBuilder:
 
         threatening_players = None
 
-        discard_options, min_shanten = self.find_discard_options(self.player.tiles, self.player.closed_hand)
+        discard_options, min_shanten = self.find_discard_options()
         if min_shanten == Shanten.AGARI_STATE:
             min_shanten = min([x.shanten for x in discard_options])
 
@@ -165,13 +165,16 @@ class HandBuilder:
 
         return waiting, previous_shanten
 
-    def find_discard_options(self, tiles: List[int], closed_hand: List[int]):
+    def find_discard_options(self):
         """
         :param tiles: array of tiles in 136 format
         :param closed_hand: array of tiles in 136 format
         :return:
         """
-        self._assert_hand_correctness(tiles, closed_hand)
+        self._assert_hand_correctness(self.player.tiles, self.player.closed_hand)
+
+        tiles = self.player.tiles
+        closed_hand = self.player.closed_hand
 
         tiles_34 = TilesConverter.to_34_array(tiles)
         closed_tiles_34 = TilesConverter.to_34_array(closed_hand)
@@ -277,7 +280,7 @@ class HandBuilder:
             assert wait_136 is not None
             self.player.tiles.append(wait_136)
 
-            results, shanten = self.find_discard_options(self.player.tiles, self.player.closed_hand)
+            results, shanten = self.find_discard_options()
             results = [x for x in results if x.shanten == discard_option.shanten - 1]
 
             # let's take best ukeire here

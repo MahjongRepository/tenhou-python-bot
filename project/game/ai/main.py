@@ -277,8 +277,8 @@ class MahjongAI:
         tile_34 = tile // 4
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
 
-        tiles = self.player.tiles[:]
-        closed_hand_tiles = self.player.closed_hand[:]
+        # save original hand state
+        original_tiles = self.player.tiles[:]
 
         new_shanten = 0
         previous_shanten = 0
@@ -293,14 +293,12 @@ class MahjongAI:
             if tile_34 in meld:
                 has_shouminkan_candidate = True
 
-                tiles.append(tile)
-                closed_hand_tiles.append(tile)
+                self.player.tiles.append(tile)
+                closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
+                previous_shanten, previous_waits_count = self._calculate_shanten_for_kan()
+                self.player.tiles = original_tiles[:]
 
-                previous_shanten, previous_waits_count = self._calculate_shanten_for_kan(tiles, closed_hand_tiles)
-
-                closed_hand_34 = TilesConverter.to_34_array(closed_hand_tiles)
                 closed_hand_34[tile_34] -= 1
-
                 new_waiting, new_shanten = self.hand_builder.calculate_waits(closed_hand_34, use_chiitoitsu=False)
                 new_waits_count = self.hand_builder.count_tiles(new_waiting, closed_hand_34)
 
@@ -316,10 +314,9 @@ class MahjongAI:
                 previous_waiting, previous_shanten = self.hand_builder.calculate_waits(tiles_34, use_chiitoitsu=False)
                 previous_waits_count = self.hand_builder.count_tiles(previous_waiting, closed_hand_34)
             else:
-                tiles.append(tile)
-                closed_hand_tiles.append(tile)
-
-                previous_shanten, previous_waits_count = self._calculate_shanten_for_kan(tiles, closed_hand_tiles)
+                self.player.tiles.append(tile)
+                previous_shanten, previous_waits_count = self._calculate_shanten_for_kan()
+                self.player.tiles = original_tiles[:]
 
             tiles_34[tile_34] = 0
             new_waiting, new_shanten = self.hand_builder.calculate_waits(tiles_34, use_chiitoitsu=False)
@@ -380,8 +377,8 @@ class MahjongAI:
         """
         return self.player.table.players[1:]
 
-    def _calculate_shanten_for_kan(self, tiles, closed_hand_tiles):
-        previous_results, previous_shanten = self.hand_builder.find_discard_options(tiles, closed_hand_tiles)
+    def _calculate_shanten_for_kan(self):
+        previous_results, previous_shanten = self.hand_builder.find_discard_options()
 
         previous_results = [x for x in previous_results if x.shanten == previous_shanten]
 

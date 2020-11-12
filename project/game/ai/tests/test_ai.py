@@ -1,3 +1,4 @@
+import pytest
 from game.ai.strategies.main import BaseStrategy
 from game.table import Table
 from utils.decisions_logger import MeldPrint
@@ -36,6 +37,34 @@ def test_not_open_hand_in_riichi():
     player.init_hand(tiles)
     meld, _ = player.try_to_call_meld(tile, False)
     assert meld is None
+
+
+@pytest.mark.skip("Skipped while debugging it further, ref #147")
+def test_crash_when_tyring_to_open_meld():
+    """
+    Bot crashed when tried to calculate meld possibility with hand 7m333789s + 3s [222z, 123p]
+    This test is checking that there are no crashes in such situations anymore
+    """
+    table = Table()
+    # dora here to activate yakuhai strategy
+    table.add_dora_indicator(string_to_136_tile(sou="2"))
+    player = table.player
+    # this one to activate yakuhai strategy as well
+    player.seat = 1
+
+    tiles = string_to_136_array(man="7", pin="123", sou="333789", honors="222")
+    player.init_hand(tiles)
+    player.add_called_meld(make_meld(MeldPrint.PON, honors="222"))
+    player.add_called_meld(make_meld(MeldPrint.CHI, pin="123"))
+    # it is important for crash to take fourth 3s (with index 83)
+    tile = string_to_136_array(sou="3333")[3]
+    meld, _ = player.try_to_call_meld(tile, False)
+    assert meld is None
+
+    # additional hands to check
+    # 1112345678s557z + 1s
+    # 11123456789s57z + 1s
+    # 111234567s5z [555z] + 1s
 
 
 def test_chose_right_set_to_open_hand():

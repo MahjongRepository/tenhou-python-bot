@@ -157,6 +157,9 @@ def test_open_hand_and_discard_tiles_logic():
     assert meld is not None
     assert tiles_to_string([(discard_option.tile_to_discard * 4)]) == "4z"
 
+    tiles = string_to_136_array(man="22234", sou="2348", pin="256", honors="44")
+    table.player.init_hand(tiles)
+    table.player.add_called_meld(meld)
     table.player.discard_tile(discard_option)
 
     tile = string_to_136_tile(pin="5")

@@ -44,6 +44,11 @@ def test_get_tempai():
     assert meld is not None
     assert tiles_to_string(meld.tiles) == "789m"
 
+    # reinit hand with meld
+    tiles = string_to_136_array(man="23789", sou="4568", pin="22299")
+    table.player.init_hand(tiles)
+    table.player.add_called_meld(meld)
+
     tile_to_discard = table.player.discard_tile()
     assert tiles_to_string([tile_to_discard]) == "8s"
 

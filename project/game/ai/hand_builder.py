@@ -126,38 +126,42 @@ class HandBuilder:
         else:
             return discard_option.find_tile_in_hand(closed_hand)
 
-    def calculate_shanten_and_decide_hand_structure(self, tiles_34, open_sets_34=None):
-        shanten_with_chiitoitsu = self.ai.calculate_shanten_or_get_from_cache(tiles_34, use_chiitoitsu=True)
-        shanten_without_chiitoitsu = self.ai.calculate_shanten_or_get_from_cache(tiles_34, use_chiitoitsu=False)
-        return self._decide_if_use_chiitoitsu(shanten_with_chiitoitsu, shanten_without_chiitoitsu)
+    def calculate_shanten_and_decide_hand_structure(self, closed_hand_34):
+        shanten_without_chiitoitsu = self.ai.calculate_shanten_or_get_from_cache(closed_hand_34, use_chiitoitsu=False)
 
-    def calculate_waits(self, tiles_34: List[int], use_chiitoitsu: bool = False):
-        previous_shanten = self.ai.calculate_shanten_or_get_from_cache(tiles_34, use_chiitoitsu=use_chiitoitsu)
+        if not self.player.is_open_hand:
+            shanten_with_chiitoitsu = self.ai.calculate_shanten_or_get_from_cache(closed_hand_34, use_chiitoitsu=True)
+            return self._decide_if_use_chiitoitsu(shanten_with_chiitoitsu, shanten_without_chiitoitsu)
+        else:
+            return shanten_without_chiitoitsu, False
+
+    def calculate_waits(self, closed_hand_34: List[int], use_chiitoitsu: bool = False):
+        previous_shanten = self.ai.calculate_shanten_or_get_from_cache(closed_hand_34, use_chiitoitsu=use_chiitoitsu)
 
         waiting = []
         for tile_index in range(0, 34):
-            if tiles_34[tile_index] == 4:
+            if closed_hand_34[tile_index] == 4:
                 continue
 
-            tiles_34[tile_index] += 1
+            closed_hand_34[tile_index] += 1
 
             skip_isolated_tile = True
-            if tiles_34[tile_index] == 4:
+            if closed_hand_34[tile_index] == 4:
                 skip_isolated_tile = False
-            if use_chiitoitsu and tiles_34[tile_index] == 3:
+            if use_chiitoitsu and closed_hand_34[tile_index] == 3:
                 skip_isolated_tile = False
 
             # there is no need to check single isolated tile
-            if skip_isolated_tile and is_tile_strictly_isolated(tiles_34, tile_index):
-                tiles_34[tile_index] -= 1
+            if skip_isolated_tile and is_tile_strictly_isolated(closed_hand_34, tile_index):
+                closed_hand_34[tile_index] -= 1
                 continue
 
-            new_shanten = self.ai.calculate_shanten_or_get_from_cache(tiles_34, use_chiitoitsu=use_chiitoitsu)
+            new_shanten = self.ai.calculate_shanten_or_get_from_cache(closed_hand_34, use_chiitoitsu=use_chiitoitsu)
 
             if new_shanten == previous_shanten - 1:
                 waiting.append(tile_index)
 
-            tiles_34[tile_index] -= 1
+            closed_hand_34[tile_index] -= 1
 
         return waiting, previous_shanten
 
@@ -167,27 +171,15 @@ class HandBuilder:
         :param closed_hand: array of tiles in 136 format
         :return:
         """
+        # we must always have correct hand to discard from, e.g. we cannot discard when we have 13 tiles
+        assert len(tiles) == 14
+
         tiles_34 = TilesConverter.to_34_array(tiles)
         closed_tiles_34 = TilesConverter.to_34_array(closed_hand)
         is_agari = self.ai.agari.is_agari(tiles_34, self.player.meld_34_tiles)
 
         # we decide beforehand if we need to consider chiitoitsu for all of our possible discards
-        min_shanten_with_chiitoitsu = 7
-        min_shanten_without_chiitoitsu = 7
-
-        for hand_tile in range(0, 34):
-            if not closed_tiles_34[hand_tile]:
-                continue
-
-            shanten, use_chiitoitsu = self.calculate_shanten_and_decide_hand_structure(tiles_34)
-            if use_chiitoitsu and shanten < min_shanten_with_chiitoitsu:
-                min_shanten_with_chiitoitsu = shanten
-            elif not use_chiitoitsu and shanten < min_shanten_without_chiitoitsu:
-                min_shanten_without_chiitoitsu = shanten
-
-        min_shanten, use_chiitoitsu = self._decide_if_use_chiitoitsu(
-            min_shanten_with_chiitoitsu, min_shanten_without_chiitoitsu
-        )
+        min_shanten, use_chiitoitsu = self.calculate_shanten_and_decide_hand_structure(closed_tiles_34)
 
         results = []
         for hand_tile in range(0, 34):
@@ -215,8 +207,7 @@ class HandBuilder:
         if is_agari:
             shanten = Shanten.AGARI_STATE
         else:
-            shanten = self.ai.calculate_shanten_or_get_from_cache(tiles_34, use_chiitoitsu=use_chiitoitsu)
-            assert shanten >= min_shanten
+            shanten = min_shanten
 
         return results, shanten
 

@@ -274,7 +274,7 @@ def test_chose_right_set_to_open_hand_dora():
 def test_not_open_hand_for_not_needed_set():
     """
     We don't need to open hand if it is not improve the hand.
-    It was a bug related to it
+    There was a bug related to it.
     """
     table = Table()
     player = table.player
@@ -287,6 +287,10 @@ def test_not_open_hand_for_not_needed_set():
     meld, discard_option = player.try_to_call_meld(tile, True)
     assert meld is not None
     assert tiles_to_string(meld.tiles) == "123s"
+
+    # fully update hand
+    tiles = string_to_136_array(man="22457", sou="122334", pin="9", honors="55")
+    player.init_hand(tiles)
     player.add_called_meld(meld)
     player.discard_tile(discard_option)
 
@@ -663,7 +667,6 @@ def test_kan_crash():
     assert table.player.should_call_kan(tile, False) is None
 
 
-@pytest.mark.skip("Skipped while debugging it further, ref #154")
 def test_shanten_and_hand_structure():
     table = Table()
     player = table.player
@@ -675,8 +678,7 @@ def test_shanten_and_hand_structure():
     player.melds.append(make_meld(MeldPrint.CHI, man="345"))
     player.melds.append(make_meld(MeldPrint.CHI, man="345"))
 
-    tiles_136 = player.tiles[:]
-    tiles_34 = TilesConverter.to_34_array(tiles_136)
+    closed_hand_34 = TilesConverter.to_34_array(player.closed_hand)
 
-    shanten, _ = player.ai.hand_builder.calculate_shanten_and_decide_hand_structure(tiles_34, open_sets_34=player.melds)
+    shanten, _ = player.ai.hand_builder.calculate_shanten_and_decide_hand_structure(closed_hand_34)
     assert shanten == 1

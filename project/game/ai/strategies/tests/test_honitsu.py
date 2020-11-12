@@ -102,8 +102,6 @@ def test_open_hand_and_discard_tiles_logic():
     assert meld is not None
     assert tiles_to_string([(discard_option.tile_to_discard * 4)]) == "2m"
 
-    player.discard_tile(discard_option)
-
     tile = string_to_136_tile(man="1")
     player.draw_tile(tile)
     tile_to_discard = player.discard_tile()

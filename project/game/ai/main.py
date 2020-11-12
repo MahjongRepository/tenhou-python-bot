@@ -108,6 +108,7 @@ class MahjongAI:
 
     def try_to_call_meld(self, tile_136, is_kamicha_discard):
         tiles_136_previous = self.player.tiles[:]
+        closed_hand_136_previous = self.player.closed_hand[:]
         tiles_136 = tiles_136_previous + [tile_136]
         self.determine_strategy(tiles_136)
 
@@ -115,8 +116,8 @@ class MahjongAI:
             DecisionsLogger.debug(log.MELD_DEBUG, "We don't have active strategy. Abort melding.")
             return None, None
 
-        tiles_34_previous = TilesConverter.to_34_array(tiles_136_previous)
-        previous_shanten, _ = self.hand_builder.calculate_shanten_and_decide_hand_structure(tiles_34_previous)
+        closed_hand_34_previous = TilesConverter.to_34_array(closed_hand_136_previous)
+        previous_shanten, _ = self.hand_builder.calculate_shanten_and_decide_hand_structure(closed_hand_34_previous)
 
         if previous_shanten == Shanten.AGARI_STATE and not self.current_strategy.can_meld_into_agari():
             return None, None
@@ -357,18 +358,18 @@ class MahjongAI:
         """
         pass
 
-    def calculate_shanten_or_get_from_cache(self, tiles_34: List[int], use_chiitoitsu: bool):
+    def calculate_shanten_or_get_from_cache(self, closed_hand_34: List[int], use_chiitoitsu: bool):
         """
         Sometimes we are calculating shanten for the same hand multiple times
         to save some resources let's cache previous calculations
         """
-        key = build_shanten_cache_key(tiles_34, use_chiitoitsu)
+        key = build_shanten_cache_key(closed_hand_34, use_chiitoitsu)
         if key in self.hand_cache_shanten:
             return self.hand_cache_shanten[key]
         if use_chiitoitsu and not self.player.is_open_hand:
-            result = self.shanten_calculator.calculate_shanten_for_chiitoitsu_hand(tiles_34)
+            result = self.shanten_calculator.calculate_shanten_for_chiitoitsu_hand(closed_hand_34)
         else:
-            result = self.shanten_calculator.calculate_shanten_for_regular_hand(tiles_34)
+            result = self.shanten_calculator.calculate_shanten_for_regular_hand(closed_hand_34)
         self.hand_cache_shanten[key] = result
         return result
 

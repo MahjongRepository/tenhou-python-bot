@@ -45,7 +45,7 @@ def find_discard_option(player, sou="", pin="", man="", honors=""):
 
     for x in discard_options:
         if x.shanten in [1]:
-            player.ai.hand_builder.calculate_second_level_ukeire(x, player.tiles, player.melds)
+            player.ai.hand_builder.calculate_second_level_ukeire(x)
 
     discard_options, _ = player.ai.defence.mark_tiles_danger_for_threats(discard_options)
 

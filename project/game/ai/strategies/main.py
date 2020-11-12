@@ -298,7 +298,7 @@ class BaseStrategy:
         self.dora_count_total = self.dora_count_central + self.dora_count_not_central
 
     def _find_best_meld_to_open(self, call_tile_136, possible_melds, new_tiles, closed_hand, discarded_tile):
-        discarded_tile_34 = discarded_tile // 4
+        assert len(new_tiles) == 14
 
         all_tiles_are_suitable = True
         for tile_136 in closed_hand:
@@ -306,32 +306,29 @@ class BaseStrategy:
 
         final_results = []
         for meld_34 in possible_melds:
-            meld_34_copy = meld_34[:]
-            closed_hand_copy = closed_hand[:]
+            # in order to fully emulate the possible hand with meld, we save original melds state,
+            # modify player's melds and then restore original melds state after everything is done
+            melds_original = self.player.melds[:]
+            tiles_original = self.player.tiles[:]
 
-            meld_type = is_chi(meld_34_copy) and MeldPrint.CHI or MeldPrint.PON
-            meld_34_copy.remove(discarded_tile_34)
-
-            first_tile = TilesConverter.find_34_tile_in_136_array(meld_34_copy[0], closed_hand_copy)
-            closed_hand_copy.remove(first_tile)
-
-            second_tile = TilesConverter.find_34_tile_in_136_array(meld_34_copy[1], closed_hand_copy)
-            closed_hand_copy.remove(second_tile)
-
-            tiles = [first_tile, second_tile, discarded_tile]
-
+            tiles = self._find_meld_tiles(closed_hand, meld_34, discarded_tile)
             meld = MeldPrint()
-            meld.type = meld_type
+            meld.type = is_chi(meld_34) and MeldPrint.CHI or MeldPrint.PON
             meld.tiles = sorted(tiles)
-            melds = self.player.melds + [meld]
 
             DecisionsLogger.debug(
                 log.MELD_HAND, f"Hand: {self._format_hand_for_print(closed_hand, discarded_tile, self.player.melds)}"
             )
 
-            selected_tile = self.player.ai.hand_builder.choose_tile_to_discard(
-                new_tiles, closed_hand_copy, melds, after_meld=True
-            )
+            # update player hand state to emulate new situation and choose what to discard
+            self.player.tiles = new_tiles[:]
+            self.player.add_called_meld(meld)
+
+            selected_tile = self.player.ai.hand_builder.choose_tile_to_discard(after_meld=True)
+
+            # restore original tiles and melds state
+            self.player.tiles = tiles_original
+            self.player.melds = melds_original
 
             # we can't find a good discard candidate, so let's skip this
             if not selected_tile:
@@ -397,6 +394,24 @@ class BaseStrategy:
             context=final_results,
         )
         return final_results[0]
+
+    @staticmethod
+    def _find_meld_tiles(closed_hand, meld_34, discarded_tile):
+        discarded_tile_34 = discarded_tile // 4
+        meld_34_copy = meld_34[:]
+        closed_hand_copy = closed_hand[:]
+
+        meld_34_copy.remove(discarded_tile_34)
+
+        first_tile = TilesConverter.find_34_tile_in_136_array(meld_34_copy[0], closed_hand_copy)
+        closed_hand_copy.remove(first_tile)
+
+        second_tile = TilesConverter.find_34_tile_in_136_array(meld_34_copy[1], closed_hand_copy)
+        closed_hand_copy.remove(second_tile)
+
+        tiles = [first_tile, second_tile, discarded_tile]
+
+        return tiles
 
     def _format_hand_for_print(self, tiles, new_tile, melds):
         tiles_string = TilesConverter.to_one_line_string(tiles, print_aka_dora=self.player.table.has_aka_dora)

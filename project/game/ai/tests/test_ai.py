@@ -46,26 +46,58 @@ def test_crash_when_tyring_to_open_meld():
     Bot crashed when tried to calculate meld possibility with hand 7m333789s + 3s [222z, 123p]
     This test is checking that there are no crashes in such situations anymore
     """
+    # checking a few similar hands here
+    # #1
+    table = Table()
+    # dora here to activate honitsu strategy
+    table.add_dora_indicator(string_to_136_tile(sou="9"))
+    player = table.player
+
+    tiles = string_to_136_array(sou="1112345678", honors="447")
+    player.init_hand(tiles)
+    tile = string_to_136_array(sou="1111")[3]
+    meld, _ = player.try_to_call_meld(tile, False)
+    assert meld is not None
+
+    # #2
+    table = Table()
+    # dora here to activate honitsu strategy
+    table.add_dora_indicator(string_to_136_tile(sou="9"))
+    player = table.player
+
+    tiles = string_to_136_array(sou="11123456789", honors="47")
+    player.init_hand(tiles)
+    tile = string_to_136_array(sou="1111")[3]
+    meld, _ = player.try_to_call_meld(tile, False)
+    assert meld is not None
+
+    # #3
+    table = Table()
+    # dora here to activate honitsu strategy
+    table.add_dora_indicator(string_to_136_tile(sou="9"))
+    player = table.player
+
+    tiles = string_to_136_array(sou="111234567", honors="4444")
+    player.init_hand(tiles)
+    table.add_called_meld(player.seat, make_meld(MeldPrint.PON, honors="444"))
+    tile = string_to_136_array(sou="1111")[3]
+    meld, _ = player.try_to_call_meld(tile, False)
+    assert meld is not None
+
+    # #4 - the original one
     table = Table()
     # dora here to activate yakuhai strategy
     table.add_dora_indicator(string_to_136_tile(sou="2"))
     player = table.player
-    # this one to activate yakuhai strategy as well
-    player.seat = 1
 
-    tiles = string_to_136_array(man="7", pin="123", sou="333789", honors="222")
+    tiles = string_to_136_array(man="7", pin="123", sou="333789", honors="111")
     player.init_hand(tiles)
-    player.add_called_meld(make_meld(MeldPrint.PON, honors="222"))
-    player.add_called_meld(make_meld(MeldPrint.CHI, pin="123"))
+    table.add_called_meld(player.seat, make_meld(MeldPrint.PON, honors="111"))
+    table.add_called_meld(player.seat, make_meld(MeldPrint.CHI, pin="123"))
     # it is important for crash to take fourth 3s (with index 83)
     tile = string_to_136_array(sou="3333")[3]
     meld, _ = player.try_to_call_meld(tile, False)
     assert meld is None
-
-    # additional hands to check
-    # 1112345678s557z + 1s
-    # 11123456789s57z + 1s
-    # 111234567s5z [555z] + 1s
 
 
 @pytest.mark.skip("Skipped while debugging it further, ref #148")
@@ -102,7 +134,7 @@ def test_chose_right_set_to_open_hand():
     table.add_dora_indicator(string_to_136_tile(pin="3"))
 
     tiles = string_to_136_array(man="23455", pin="3445678", honors="1")
-    tile = string_to_136_tile(man="5")
+    tile = string_to_136_array(man="5555")[2]
     player.init_hand(tiles)
 
     meld, _ = player.try_to_call_meld(tile, True)
@@ -132,7 +164,7 @@ def test_chose_right_set_to_open_hand():
     tiles = string_to_136_array(man="23557", pin="556788", honors="22")
     player.init_hand(tiles)
 
-    tile = string_to_136_tile(pin="5")
+    tile = string_to_136_array(pin="5555")[2]
     meld, _ = player.try_to_call_meld(tile, True)
     assert meld is not None
     assert meld.type == MeldPrint.PON
@@ -162,7 +194,7 @@ def test_chose_right_set_to_open_hand():
     tiles = string_to_136_array(man="34458", pin="234668", sou="28")
     player.init_hand(tiles)
 
-    tile = string_to_136_tile(man="4")
+    tile = string_to_136_array(man="4444")[2]
     meld, _ = player.try_to_call_meld(tile, True)
     assert meld is not None
     assert meld.type == MeldPrint.CHI
@@ -176,13 +208,13 @@ def test_chose_right_set_to_open_hand():
     tiles = string_to_136_array(man="567888", pin="788", sou="3456")
     player.init_hand(tiles)
 
-    tile = string_to_136_tile(sou="4")
+    tile = string_to_136_array(sou="4444")[1]
     meld, _ = player.try_to_call_meld(tile, True)
     assert meld is not None
     assert meld.type == MeldPrint.CHI
     assert tiles_to_string(meld.tiles) == "456s"
 
-    tile = string_to_136_tile(sou="5")
+    tile = string_to_136_array(sou="5555")[1]
     meld, _ = player.try_to_call_meld(tile, True)
     assert meld is not None
     assert meld.type == MeldPrint.CHI
@@ -196,7 +228,7 @@ def test_chose_right_set_to_open_hand():
     tiles = string_to_136_array(man="567888", pin="788", sou="2345")
     player.init_hand(tiles)
 
-    tile = string_to_136_tile(sou="4")
+    tile = string_to_136_array(sou="4444")[1]
     meld, _ = player.try_to_call_meld(tile, True)
     assert meld is not None
     assert meld.type == MeldPrint.CHI
@@ -283,7 +315,7 @@ def test_not_open_hand_for_not_needed_set():
     tiles = string_to_136_array(man="22457", sou="12234", pin="9", honors="55")
     player.init_hand(tiles)
 
-    tile = string_to_136_tile(sou="3")
+    tile = string_to_136_array(sou="3333")[1]
     meld, discard_option = player.try_to_call_meld(tile, True)
     assert meld is not None
     assert tiles_to_string(meld.tiles) == "123s"
@@ -294,7 +326,7 @@ def test_not_open_hand_for_not_needed_set():
     player.add_called_meld(meld)
     player.discard_tile(discard_option)
 
-    tile = string_to_136_tile(sou="3")
+    tile = string_to_136_array(sou="3333")[2]
     meld, _ = player.try_to_call_meld(tile, True)
     assert meld is None
 
@@ -574,7 +606,7 @@ def test_opened_kan_third_case():
     table.player.draw_tile(string_to_136_tile(pin="9"))
     table.player.discard_tile()
 
-    tile = string_to_136_tile(sou="5")
+    tile = string_to_136_array(sou="5555")[3]
     assert table.player.should_call_kan(tile, True) is None
     assert table.player.try_to_call_meld(tile, True) == (None, None)
 
@@ -589,7 +621,7 @@ def test_closed_kan_and_wrong_shanten_number_calculation():
     tiles = string_to_136_array(man="56", sou="14578999", pin="666")
     player.init_hand(tiles)
     tile = string_to_136_tile(man="7")
-    player.melds.append(make_meld(MeldPrint.KAN, False, sou="9999"))
+    player.table.add_called_meld(player.seat, make_meld(MeldPrint.KAN, False, sou="9999"))
     player.draw_tile(tile)
     player.discard_tile()
 

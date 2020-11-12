@@ -18,17 +18,19 @@ class HandBuilder:
         self.player = player
         self.ai = ai
 
-    def discard_tile(self, tiles, closed_hand, melds):
-        selected_tile = self.choose_tile_to_discard(tiles, closed_hand, melds)
-        return self.process_discard_option(selected_tile, closed_hand)
+    def discard_tile(self):
+        selected_tile = self.choose_tile_to_discard()
+        return self.process_discard_option(selected_tile, self.player.closed_hand)
 
-    def choose_tile_to_discard(self, tiles, closed_hand, melds, after_meld=False):
+    def choose_tile_to_discard(self, after_meld=False):
         """
         Try to find best tile to discard, based on different evaluations
         """
+        self._assert_hand_correctness(self.player.tiles, self.player.closed_hand)
+
         threatening_players = None
 
-        discard_options, min_shanten = self.find_discard_options(tiles, closed_hand)
+        discard_options, min_shanten = self.find_discard_options(self.player.tiles, self.player.closed_hand)
         if min_shanten == Shanten.AGARI_STATE:
             min_shanten = min([x.shanten for x in discard_options])
 
@@ -39,7 +41,7 @@ class HandBuilder:
             if self.player.ai.defence.get_threatening_players() and min_shanten != 0:
                 for discard_option in discard_options:
                     if discard_option.shanten == 1:
-                        self.calculate_second_level_ukeire(discard_option, tiles, melds, after_meld)
+                        self.calculate_second_level_ukeire(discard_option, after_meld)
                         one_shanten_ukeire2_calculated_beforehand = True
 
             discard_options, threatening_players = self.player.ai.defence.mark_tiles_danger_for_threats(discard_options)
@@ -57,7 +59,7 @@ class HandBuilder:
         # our strategy can affect discard options
         if self.ai.current_strategy:
             tiles_we_can_discard = self.ai.current_strategy.determine_what_to_discard(
-                tiles_we_can_discard, closed_hand, melds
+                tiles_we_can_discard, self.player.closed_hand, self.player.melds
             )
 
             had_to_be_discarded_tiles = [x for x in tiles_we_can_discard if x.had_to_be_discarded]
@@ -93,19 +95,17 @@ class HandBuilder:
         results_with_same_shanten = [x for x in tiles_we_can_discard if x.shanten == first_option.shanten]
 
         if first_option.shanten == 0:
-            return self._choose_best_discard_in_tempai(tiles, melds, results_with_same_shanten, after_meld)
+            return self._choose_best_discard_in_tempai(results_with_same_shanten, after_meld)
 
         if first_option.shanten == 1:
             return self._choose_best_discard_with_1_shanten(
-                tiles, melds, results_with_same_shanten, after_meld, one_shanten_ukeire2_calculated_beforehand
+                results_with_same_shanten, after_meld, one_shanten_ukeire2_calculated_beforehand
             )
 
         if first_option.shanten == 2 or first_option.shanten == 3:
-            return self._choose_best_discard_with_2_3_shanten(
-                tiles, melds, closed_hand, results_with_same_shanten, after_meld
-            )
+            return self._choose_best_discard_with_2_3_shanten(results_with_same_shanten, after_meld)
 
-        return self._choose_best_discard_with_4_or_more_shanten(closed_hand, results_with_same_shanten)
+        return self._choose_best_discard_with_4_or_more_shanten(results_with_same_shanten)
 
     def process_discard_option(self, discard_option, closed_hand, force_discard=False):
         DecisionsLogger.debug(log.DISCARD, context=discard_option)
@@ -171,8 +171,7 @@ class HandBuilder:
         :param closed_hand: array of tiles in 136 format
         :return:
         """
-        # we must always have correct hand to discard from, e.g. we cannot discard when we have 13 tiles
-        assert len(tiles) == 14
+        self._assert_hand_correctness(tiles, closed_hand)
 
         tiles_34 = TilesConverter.to_34_array(tiles)
         closed_tiles_34 = TilesConverter.to_34_array(closed_hand)
@@ -245,7 +244,9 @@ class HandBuilder:
 
         return have_suji, have_kabe
 
-    def calculate_second_level_ukeire(self, discard_option, tiles, melds, after_meld=False):
+    def calculate_second_level_ukeire(self, discard_option, after_meld=False):
+        self._assert_hand_correctness(self.player.tiles, self.player.closed_hand)
+
         not_suitable_tiles = self.ai.current_strategy and self.ai.current_strategy.not_suitable_tiles or []
         call_riichi = not (self.player.is_open_hand or after_meld)
 
@@ -256,7 +257,6 @@ class HandBuilder:
 
         tile_in_hand = discard_option.find_tile_in_hand(self.player.closed_hand)
 
-        self.player.tiles = tiles[:]
         self.player.discards.append(Tile(tile_in_hand, False))
         self.player.tiles.remove(tile_in_hand)
 
@@ -273,7 +273,8 @@ class HandBuilder:
             if live_tiles == 0:
                 continue
 
-            wait_136 = wait_34 * 4
+            wait_136 = self._find_live_tile(wait_34)
+            assert wait_136 is not None
             self.player.tiles.append(wait_136)
 
             results, shanten = self.find_discard_options(self.player.tiles, self.player.closed_hand)
@@ -531,23 +532,20 @@ class HandBuilder:
 
         return is_furiten
 
-    def _choose_best_discard_in_tempai(self, tiles, melds, discard_options, after_meld):
+    def _choose_best_discard_in_tempai(self, discard_options, after_meld):
         # first of all we find tiles that have the best hand cost * ukeire value
         call_riichi = not (self.player.is_open_hand or after_meld)
 
         discard_desc = []
         player_tiles_copy = self.player.tiles[:]
-        player_melds_copy = self.player.melds[:]
 
         closed_tiles_34 = TilesConverter.to_34_array(self.player.closed_hand)
 
         for discard_option in discard_options:
             tile = discard_option.find_tile_in_hand(self.player.closed_hand)
             # temporary remove discard option to estimate hand value
-            self.player.tiles = tiles[:]
+            self.player.tiles = player_tiles_copy[:]
             self.player.tiles.remove(tile)
-            # temporary replace melds
-            self.player.melds = melds[:]
             # for kabe/suji handling
             discarded_tile = Tile(tile, False)
             self.player.discards.append(discarded_tile)
@@ -639,7 +637,6 @@ class HandBuilder:
 
             # reverse all temporary tile tweaks
             self.player.tiles = player_tiles_copy
-            self.player.melds = player_melds_copy
             self.player.discards.remove(discarded_tile)
 
         discard_desc = sorted(discard_desc, key=lambda k: (-k["cost_x_ukeire"], k["is_furiten"], k["weighted_danger"]))
@@ -663,7 +660,7 @@ class HandBuilder:
         return best_discard_desc[0]["discard_option"]
 
     def _choose_best_discard_with_1_shanten(
-        self, tiles, melds, discard_options, after_meld, one_shanten_ukeire2_calculated_beforehand
+        self, discard_options, after_meld, one_shanten_ukeire2_calculated_beforehand
     ):
         discard_options = sorted(discard_options, key=lambda x: (x.shanten, -x.ukeire))
         first_option = discard_options[0]
@@ -677,7 +674,7 @@ class HandBuilder:
         # FIXME: hack, sometimes we have already calculated it
         if not one_shanten_ukeire2_calculated_beforehand:
             for x in possible_options:
-                self.calculate_second_level_ukeire(x, tiles, melds, after_meld)
+                self.calculate_second_level_ukeire(x, after_meld)
 
         # then we filter by ukeire2
         possible_options = sorted(possible_options, key=self._sorting_rule_for_1_shanten_no_cost)
@@ -691,10 +688,10 @@ class HandBuilder:
             self._sorting_rule_for_1_shanten,
         )
 
-    def _choose_best_discard_with_2_3_shanten(self, tiles, melds, closed_hand, discard_options, after_meld):
+    def _choose_best_discard_with_2_3_shanten(self, discard_options, after_meld):
         discard_options = sorted(discard_options, key=lambda x: (x.shanten, -x.ukeire))
         first_option = discard_options[0]
-        closed_hand_34 = TilesConverter.to_34_array(closed_hand)
+        closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
 
         # first we filter by ukeire
         ukeire_borders = self._choose_ukeire_borders(
@@ -703,7 +700,7 @@ class HandBuilder:
         possible_options = self._filter_list_by_ukeire_borders(discard_options, first_option.ukeire, ukeire_borders)
 
         for x in possible_options:
-            self.calculate_second_level_ukeire(x, tiles, melds, after_meld)
+            self.calculate_second_level_ukeire(x, after_meld)
 
         # then we filter by ukeire 2
         possible_options = sorted(
@@ -725,7 +722,7 @@ class HandBuilder:
             self._sorting_rule_for_2_3_shanten,
         )
 
-    def _choose_best_discard_with_4_or_more_shanten(self, closed_hand, discard_options):
+    def _choose_best_discard_with_4_or_more_shanten(self, discard_options):
         discard_options = sorted(discard_options, key=lambda x: (x.shanten, -x.ukeire))
         first_option = discard_options[0]
 
@@ -742,7 +739,7 @@ class HandBuilder:
         )
         assert possible_options
 
-        closed_hand_34 = TilesConverter.to_34_array(closed_hand)
+        closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
         isolated_tiles = [x for x in possible_options if is_tile_strictly_isolated(closed_hand_34, x.tile_to_discard)]
         # isolated tiles should be discarded first
         if isolated_tiles:
@@ -850,6 +847,26 @@ class HandBuilder:
             hand_cost = None
 
         return cost_x_ukeire, hand_cost
+
+    def _find_live_tile(self, tile_34):
+        for i in range(0, 4):
+            tile = tile_34 * 4 + i
+            if not (tile in self.player.closed_hand) and not (tile in self.player.meld_tiles):
+                return tile
+
+        return None
+
+    @staticmethod
+    def _assert_hand_correctness(tiles: List[int], closed_hand: List[int]):
+        # we must always have correct hand to discard from, e.g. we cannot discard when we have 13 tiles
+        assert len(tiles) == 14
+        assert (
+            len(closed_hand) == 2
+            or len(closed_hand) == 5
+            or len(closed_hand) == 8
+            or len(closed_hand) == 11
+            or len(closed_hand) == 14
+        )
 
 
 class TankiWait:

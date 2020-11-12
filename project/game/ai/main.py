@@ -104,7 +104,7 @@ class MahjongAI:
 
             return self.hand_builder.process_discard_option(self.last_discard_option, self.player.closed_hand, True)
 
-        return self.hand_builder.discard_tile(self.player.tiles, self.player.closed_hand, self.player.melds)
+        return self.hand_builder.discard_tile()
 
     def try_to_call_meld(self, tile_136, is_kamicha_discard):
         tiles_136_previous = self.player.tiles[:]

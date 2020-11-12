@@ -324,11 +324,11 @@ def test_threatening_riichi_player_with_dora_kan():
     # non dealer
     threatening_player = table.player.ai.defence.get_threatening_players()[0]
     assert threatening_player.enemy.seat == enemy_seat
-    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(man="2")) == 16000
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(man="2")) == 12000
 
     # dealer
     threatening_player.enemy.dealer_seat = enemy_seat
-    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(man="2")) == 24000
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(man="2")) == 18000
 
 
 def test_threatening_riichi_player_with_yakuhai_kan():

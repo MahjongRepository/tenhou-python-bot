@@ -128,7 +128,7 @@ def test_wrong_shanten_improvements_detection():
     meld = make_meld(MeldPrint.PON, honors="444")
     table.player.add_called_meld(meld)
 
-    tile = string_to_136_tile(sou="2")
+    tile = string_to_136_array(sou="2222")[1]
     meld, _ = table.player.try_to_call_meld(tile, True)
     assert meld is None
 

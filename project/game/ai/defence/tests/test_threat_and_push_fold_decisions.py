@@ -119,7 +119,7 @@ def test_dont_open_bad_hand_if_there_are_expensive_threat():
     player.init_hand(tiles)
 
     # cheap enemy tempai, but this meld is garbage, let's not push
-    tile = string_to_136_tile(man="4")
+    tile = string_to_136_array(man="4444")[2]
     meld, _ = player.try_to_call_meld(tile, True)
     assert meld is None
 

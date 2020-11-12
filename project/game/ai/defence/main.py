@@ -163,6 +163,7 @@ class TileDangerHandler:
         for discard_option in discard_options:
             danger_border = DangerBorder.BETAORI
             hand_weighted_cost = 0
+            tune = 0
             shanten = discard_option.shanten
             # FIXME: we should get tile_136 directly from discard_option as it may be important if it's an aka
             tile_to_discard_136 = discard_option.tile_to_discard * 4
@@ -194,6 +195,7 @@ class TileDangerHandler:
                 hand_weighted_cost = self.player.ai.estimate_weighted_mean_hand_value(discard_option)
                 discard_option.danger.weighted_cost = hand_weighted_cost
                 cost_ratio = (hand_weighted_cost / threatening_player_hand_cost) * 100
+                tune = self.player.config.TUNE_DANGER_BORDER_TEMPAI_VALUE
 
                 # good wait
                 if discard_option.ukeire >= 6:
@@ -253,6 +255,8 @@ class TileDangerHandler:
                         danger_border = DangerBorder.EXTREMELY_LOW
 
             if discard_option.shanten == 1:
+                tune = self.player.config.TUNE_DANGER_BORDER_1_SHANTEN_VALUE
+
                 # FIXME: temporary solution to avoid too much ukeire2 calculation
                 if min_shanten == 0:
                     hand_weighted_cost = 2000
@@ -346,6 +350,8 @@ class TileDangerHandler:
                     danger_border = DangerBorder.BETAORI
 
             if discard_option.shanten == 2:
+                tune = self.player.config.TUNE_DANGER_BORDER_2_SHANTEN_VALUE
+
                 if self.player.is_dealer:
                     scale = [0, 1000, 2900, 5800, 7700, 12000, 18000, 18000, 24000, 24000, 48000]
                 else:
@@ -401,12 +407,12 @@ class TileDangerHandler:
             if discard_option.shanten != 0 and min_shanten == 0:
                 danger_border = DangerBorder.tune_down(danger_border, 2)
 
+            # depending on our placement we may want to be more defensive or more offensive
+            tune += placement_adjustment
+            danger_border = DangerBorder.tune(danger_border, tune)
+
             # if it's late there are generally less reasons to be aggressive
             danger_border = DangerBorder.tune_for_round(self.player, danger_border, shanten)
-
-            # depending on our placement we may want to be more defensive
-            if placement_adjustment < 0:
-                danger_border = DangerBorder.tune_down(danger_border, -placement_adjustment)
 
             discard_option.danger.set_danger_border(
                 threatening_player.enemy.seat, danger_border, hand_weighted_cost, threatening_player_hand_cost

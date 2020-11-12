@@ -305,6 +305,25 @@ class DangerBorder:
         }
     )
 
+    one_step_up_dict = dict(
+        {
+            IGNORE: IGNORE,
+            EXTREME: IGNORE,
+            VERY_HIGH: EXTREME,
+            HIGH: VERY_HIGH,
+            UPPER_MEDIUM: HIGH,
+            MEDIUM: UPPER_MEDIUM,
+            LOWER_MEDIUM: MEDIUM,
+            UPPER_LOW: LOWER_MEDIUM,
+            LOW: UPPER_LOW,
+            VERY_LOW: LOW,
+            EXTREMELY_LOW: VERY_LOW,
+            LOWEST: EXTREMELY_LOW,
+            # betaori means betaori, don't tune it up
+            BETAORI: BETAORI,
+        }
+    )
+
     late_danger_dict = dict(
         {
             IGNORE: IGNORE,
@@ -343,8 +362,26 @@ class DangerBorder:
 
     @staticmethod
     def tune_down(danger_border, steps):
+        assert steps >= 0
         for _ in range(steps):
             danger_border = DangerBorder.one_step_down_dict[danger_border]
+
+        return danger_border
+
+    @staticmethod
+    def tune_up(danger_border, steps):
+        assert steps >= 0
+        for _ in range(steps):
+            danger_border = DangerBorder.one_step_up_dict[danger_border]
+
+        return danger_border
+
+    @staticmethod
+    def tune(danger_border, value):
+        if value > 0:
+            return DangerBorder.tune_up(danger_border, value)
+        elif value < 0:
+            return DangerBorder.tune_down(danger_border, abs(value))
 
         return danger_border
 

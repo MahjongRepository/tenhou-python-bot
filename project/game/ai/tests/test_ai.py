@@ -67,6 +67,26 @@ def test_crash_when_tyring_to_open_meld():
     # 111234567s5z [555z] + 1s
 
 
+@pytest.mark.skip("Skipped while debugging it further, ref #148")
+def test_crash_when_tyring_to_discard_with_open_hand():
+    """
+    Bot crashed when tried to discard tile from hand 266m4444z + 1z [111z, 789m]
+    This test is checking that there are no crashes in such situations anymore
+    """
+    table = Table()
+    player = table.player
+
+    tiles = string_to_136_array(man="266789", honors="1114444")
+    player.init_hand(tiles)
+    player.add_called_meld(make_meld(MeldPrint.PON, honors="111"))
+    player.add_called_meld(make_meld(MeldPrint.CHI, man="789"))
+    # it is important for crash to take fourth 4z
+    tile = string_to_136_array(honors="1111")[3]
+    player.draw_tile(tile)
+    discard = player.discard_tile()
+    assert discard is not None
+
+
 def test_chose_right_set_to_open_hand():
     """
     Different test cases to open hand and chose correct set to open hand.

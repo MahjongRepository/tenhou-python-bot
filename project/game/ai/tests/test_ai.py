@@ -1,6 +1,7 @@
 import pytest
 from game.ai.strategies.main import BaseStrategy
 from game.table import Table
+from mahjong.tile import TilesConverter
 from utils.decisions_logger import MeldPrint
 from utils.test_helpers import make_meld, string_to_34_tile, string_to_136_array, string_to_136_tile, tiles_to_string
 
@@ -660,3 +661,22 @@ def test_kan_crash():
     tile = string_to_136_tile(pin="9")
 
     assert table.player.should_call_kan(tile, False) is None
+
+
+@pytest.mark.skip("Skipped while debugging it further, ref #154")
+def test_shanten_and_hand_structure():
+    table = Table()
+    player = table.player
+
+    table.add_dora_indicator(string_to_136_tile(man="2"))
+
+    tiles = string_to_136_array(man="33344455", pin="34567")
+    player.init_hand(tiles)
+    player.melds.append(make_meld(MeldPrint.CHI, man="345"))
+    player.melds.append(make_meld(MeldPrint.CHI, man="345"))
+
+    tiles_136 = player.tiles[:]
+    tiles_34 = TilesConverter.to_34_array(tiles_136)
+
+    shanten, _ = player.ai.hand_builder.calculate_shanten_and_decide_hand_structure(tiles_34, open_sets_34=player.melds)
+    assert shanten == 1

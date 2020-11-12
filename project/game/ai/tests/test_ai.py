@@ -100,7 +100,6 @@ def test_crash_when_tyring_to_open_meld():
     assert meld is None
 
 
-@pytest.mark.skip("Skipped while debugging it further, ref #148")
 def test_crash_when_tyring_to_discard_with_open_hand():
     """
     Bot crashed when tried to discard tile from hand 266m4444z + 1z [111z, 789m]
@@ -111,8 +110,10 @@ def test_crash_when_tyring_to_discard_with_open_hand():
 
     tiles = string_to_136_array(man="266789", honors="1114444")
     player.init_hand(tiles)
-    player.add_called_meld(make_meld(MeldPrint.PON, honors="111"))
-    player.add_called_meld(make_meld(MeldPrint.CHI, man="789"))
+    # we manually reveal one tile to emulate the fact that we saw it when it was discarded
+    table._add_revealed_tile(string_to_136_tile(honors="1"))
+    table.add_called_meld(player.seat, make_meld(MeldPrint.PON, honors="111"))
+    table.add_called_meld(player.seat, make_meld(MeldPrint.CHI, man="789"))
     # it is important for crash to take fourth 4z
     tile = string_to_136_array(honors="1111")[3]
     player.draw_tile(tile)

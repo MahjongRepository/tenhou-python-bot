@@ -320,6 +320,9 @@ def test_threatening_riichi_player_with_dora_kan():
     table.add_dora_indicator(string_to_136_tile(man="2"))
 
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.KAN, is_open=False, man="3333"))
+    # we have to do it manually in test
+    # normally tenhou client would do that
+    table._add_revealed_tile(string_to_136_tile(man="3"))
 
     # non dealer
     threatening_player = table.player.ai.defence.get_threatening_players()[0]

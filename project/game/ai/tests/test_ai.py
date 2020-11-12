@@ -622,6 +622,9 @@ def test_closed_kan_and_wrong_shanten_number_calculation():
     player.init_hand(tiles)
     tile = string_to_136_tile(man="7")
     player.table.add_called_meld(player.seat, make_meld(MeldPrint.KAN, False, sou="9999"))
+    # we have to do it manually in test
+    # normally tenhou client would do that
+    player.table._add_revealed_tile(string_to_136_tile(sou="9"))
     player.draw_tile(tile)
     player.discard_tile()
 

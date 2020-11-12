@@ -1,6 +1,8 @@
 .idea
 env
 
+failed_*.txt
+
 *.py[cod]
 __pycache__
 .DS_Store

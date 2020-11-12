@@ -87,7 +87,7 @@ class TenhouLogReproducer:
                         logger.info("Stop on player draw")
 
                         # TODO suggest it only when it possible to open kan
-                        table.player.should_call_kan(tile, False, table.player.in_riichi)
+                        table.player.should_call_kan(tile, open_kan=False, from_riichi=table.player.in_riichi)
 
                         table.player.draw_tile(tile)
 
@@ -153,6 +153,7 @@ class TenhouLogReproducer:
                         enemy_discard_seen_number += 1
                         if enemy_discard_seen_number == tile_number_to_stop:
                             logger.info("Stop on enemy discard")
+                            table.player.should_call_kan(tile, open_kan=True, from_riichi=False)
                             table.player.try_to_call_meld(tile, is_kamicha_discard)
                             return
 

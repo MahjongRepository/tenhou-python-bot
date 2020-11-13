@@ -367,12 +367,36 @@ class GameManager:
         while not is_game_end:
             self.init_round()
 
-            result = self.play_round()
+            results = self.play_round()
+            logger.info("")
+
+            dealer_won = False
+            for result in results:
+                # we want to increase honba in that case and don't move dealer seat
+                if result["is_abortive_retake"]:
+                    dealer_won = True
+
+                if not result["winner"]:
+                    continue
+
+                if result["winner"].player.is_dealer:
+                    dealer_won = True
+
+            # if dealer won we need to increment honba sticks
+            if dealer_won:
+                self.honba_sticks += 1
+            # otherwise let's move dealer seat
+            else:
+                self.honba_sticks = 0
+                new_dealer = self._move_position(self.dealer)
+                self.set_dealer(new_dealer)
+
             # important increment, we are building wall seed based on the round number
             self.round_number += 1
 
-            for item in result:
-                is_game_end = item["is_game_end"]
+            is_game_end = self._check_the_end_of_game()
+
+            for item in results:
                 loser = item["loser"]
                 winner = item["winner"]
                 if loser:
@@ -489,211 +513,185 @@ class GameManager:
             raise ValueError("Wrong tiles count: {}".format(len(tiles)))
 
         if winner:
-            logger.info(
-                "{}: {} + {}".format(
-                    is_tsumo and "Tsumo" or "Ron",
-                    TilesConverter.to_one_line_string(tiles, print_aka_dora=True),
-                    TilesConverter.to_one_line_string([win_tile], print_aka_dora=True),
-                ),
-            )
+            return self.agari_result(winner, loser, is_tsumo, tiles, win_tile)
         else:
-            logger.info("Retake")
+            return self.retake()
 
-        if winner:
-            ura_dora = []
-            # add one more dora for riichi win
-            if winner.player.in_riichi:
-                ura_dora.append(self.dead_wall[9])
+    def agari_result(self, winner, loser, is_tsumo, tiles, win_tile):
+        logger.info(
+            "{}: {} + {}".format(
+                is_tsumo and "Tsumo" or "Ron",
+                TilesConverter.to_one_line_string(tiles, print_aka_dora=True),
+                TilesConverter.to_one_line_string([win_tile], print_aka_dora=True),
+            ),
+        )
 
-            is_tenhou = False
-            # tenhou.net doesn't have renhou
-            is_renhou = False
-            is_chiihou = False
+        ura_dora = []
+        # add one more dora for riichi win
+        if winner.player.in_riichi:
+            ura_dora.append(self.dead_wall[9])
 
-            if not self.players_with_open_hands and len(winner.player.discards) == 0 and is_tsumo:
-                if winner.player.is_dealer:
-                    is_tenhou = True
-                else:
-                    is_chiihou = True
+        is_tenhou = False
+        # tenhou.net doesn't have renhou
+        is_renhou = False
+        is_chiihou = False
 
-            is_haitei = False
-            is_houtei = False
-            if not self.tiles:
-                if is_tsumo:
-                    is_haitei = True
-                else:
-                    is_houtei = True
-
-            config = HandConfig(
-                is_riichi=winner.player.in_riichi,
-                player_wind=winner.player.player_wind,
-                round_wind=winner.player.table.round_wind_tile,
-                is_tsumo=is_tsumo,
-                is_tenhou=is_tenhou,
-                is_renhou=is_renhou,
-                is_chiihou=is_chiihou,
-                is_daburu_riichi=winner.is_daburi,
-                is_ippatsu=winner.is_ippatsu,
-                is_haitei=is_haitei,
-                is_houtei=is_houtei,
-                options=OptionalRules(
-                    has_aka_dora=settings.FIVE_REDS,
-                    has_open_tanyao=settings.OPEN_TANYAO,
-                    has_double_yakuman=False,
-                ),
-            )
-
-            hand_value = self.finished_hand.estimate_hand_value(
-                tiles=tiles + [win_tile],
-                win_tile=win_tile,
-                melds=winner.player.melds,
-                dora_indicators=self.dora_indicators + ura_dora,
-                config=config,
-            )
-
-            if hand_value.error:
-                logger.error(
-                    "Can't estimate a hand: {}. Error: {}".format(
-                        TilesConverter.to_one_line_string(tiles + [win_tile], print_aka_dora=True), hand_value.error
-                    )
-                )
-                raise ValueError("Not correct hand")
-
-            logger.info(
-                "Dora indicators: {}".format(
-                    TilesConverter.to_one_line_string(self.dora_indicators, print_aka_dora=True)
-                )
-            )
-            logger.info("Hand yaku: {}".format(", ".join(str(x) for x in hand_value.yaku)))
-
-            if loser is not None:
-                loser_seat = loser.seat
-            else:
-                # tsumo
-                loser_seat = winner.seat
-
-            self.replay.win(
-                winner.seat,
-                loser_seat,
-                win_tile,
-                self.honba_sticks,
-                self.riichi_sticks,
-                hand_value.han,
-                hand_value.fu,
-                hand_value.cost,
-                hand_value.yaku,
-                self.dora_indicators,
-                ura_dora,
-            )
-
-            riichi_bonus = self.riichi_sticks * 1000
-            self.riichi_sticks = 0
-            honba_bonus = self.honba_sticks * 300
-
-            # if dealer won we need to increment honba sticks
+        if not self.players_with_open_hands and len(winner.player.discards) == 0 and is_tsumo:
             if winner.player.is_dealer:
-                self.honba_sticks += 1
+                is_tenhou = True
             else:
-                self.honba_sticks = 0
-                new_dealer = self._move_position(self.dealer)
-                self.set_dealer(new_dealer)
+                is_chiihou = True
 
-            # win by ron
-            if loser:
-                scores_to_pay = hand_value.cost["main"] + honba_bonus
-                win_amount = scores_to_pay + riichi_bonus
-                winner.player.scores += win_amount
-                loser.player.scores -= scores_to_pay
-
-                logger.info("Win:  {0} +{1:,d} +{2:,d}".format(winner.player.name, scores_to_pay, riichi_bonus))
-                logger.info("Lose: {0} -{1:,d}".format(loser.player.name, scores_to_pay))
-            # win by tsumo
+        is_haitei = False
+        is_houtei = False
+        if not self.tiles:
+            if is_tsumo:
+                is_haitei = True
             else:
-                calculated_cost = hand_value.cost["main"] + hand_value.cost["additional"] * 2
-                win_amount = calculated_cost + riichi_bonus + honba_bonus
-                winner.player.scores += win_amount
+                is_houtei = True
 
-                logger.info(
-                    "Win:  {0} +{1:,d} +{2:,d}".format(winner.player.name, calculated_cost, riichi_bonus + honba_bonus)
+        config = HandConfig(
+            is_riichi=winner.player.in_riichi,
+            player_wind=winner.player.player_wind,
+            round_wind=winner.player.table.round_wind_tile,
+            is_tsumo=is_tsumo,
+            is_tenhou=is_tenhou,
+            is_renhou=is_renhou,
+            is_chiihou=is_chiihou,
+            is_daburu_riichi=winner.is_daburi,
+            is_ippatsu=winner.is_ippatsu,
+            is_haitei=is_haitei,
+            is_houtei=is_houtei,
+            options=OptionalRules(
+                has_aka_dora=settings.FIVE_REDS,
+                has_open_tanyao=settings.OPEN_TANYAO,
+                has_double_yakuman=False,
+            ),
+        )
+
+        hand_value = self.finished_hand.estimate_hand_value(
+            tiles=tiles + [win_tile],
+            win_tile=win_tile,
+            melds=winner.player.melds,
+            dora_indicators=self.dora_indicators + ura_dora,
+            config=config,
+        )
+
+        if hand_value.error:
+            logger.error(
+                "Can't estimate a hand: {}. Error: {}".format(
+                    TilesConverter.to_one_line_string(tiles + [win_tile], print_aka_dora=True), hand_value.error
                 )
+            )
+            raise ValueError("Not correct hand")
 
-                for client in self.clients:
-                    if client != winner:
-                        if client.player.is_dealer:
-                            scores_to_pay = hand_value.cost["main"]
-                        else:
-                            scores_to_pay = hand_value.cost["additional"]
-                        scores_to_pay += honba_bonus / 3
+        logger.info(
+            "Dora indicators: {}".format(TilesConverter.to_one_line_string(self.dora_indicators, print_aka_dora=True))
+        )
+        logger.info("Hand yaku: {}".format(", ".join(str(x) for x in hand_value.yaku)))
 
-                        client.player.scores -= scores_to_pay
-                        logger.info("Lose: {0} -{1:,d}".format(client.player.name, int(scores_to_pay)))
-
-        # retake
+        if loser is not None:
+            loser_seat = loser.seat
         else:
-            tempai_users = []
+            # tsumo
+            loser_seat = winner.seat
 
-            dealer_was_tempai = False
+        self.replay.win(
+            winner.seat,
+            loser_seat,
+            win_tile,
+            self.honba_sticks,
+            self.riichi_sticks,
+            hand_value.han,
+            hand_value.fu,
+            hand_value.cost,
+            hand_value.yaku,
+            self.dora_indicators,
+            ura_dora,
+        )
+
+        riichi_bonus = self.riichi_sticks * 1000
+        self.riichi_sticks = 0
+        honba_bonus = self.honba_sticks * 300
+
+        # win by ron
+        if loser:
+            scores_to_pay = hand_value.cost["main"] + honba_bonus
+            win_amount = scores_to_pay + riichi_bonus
+            winner.player.scores += win_amount
+            loser.player.scores -= scores_to_pay
+
+            logger.info("Win:  {0} +{1:,d} +{2:,d}".format(winner.player.name, scores_to_pay, riichi_bonus))
+            logger.info("Lose: {0} -{1:,d}".format(loser.player.name, scores_to_pay))
+        # win by tsumo
+        else:
+            calculated_cost = hand_value.cost["main"] + hand_value.cost["additional"] * 2
+            win_amount = calculated_cost + riichi_bonus + honba_bonus
+            winner.player.scores += win_amount
+
+            logger.info(
+                "Win:  {0} +{1:,d} +{2:,d}".format(winner.player.name, calculated_cost, riichi_bonus + honba_bonus)
+            )
+
+            for client in self.clients:
+                if client != winner:
+                    if client.player.is_dealer:
+                        scores_to_pay = hand_value.cost["main"]
+                    else:
+                        scores_to_pay = hand_value.cost["additional"]
+                    scores_to_pay += honba_bonus / 3
+
+                    client.player.scores -= scores_to_pay
+                    logger.info("Lose: {0} -{1:,d}".format(client.player.name, int(scores_to_pay)))
+
+        return {"winner": winner, "loser": loser, "is_tsumo": is_tsumo, "is_abortive_retake": False}
+
+    def retake(self):
+        logger.info("Retake")
+        tempai_users = []
+        dealer_was_tempai = False
+        for client in self.clients:
+            if client.player.in_tempai:
+                tempai_users.append(client.seat)
+
+                if client.player.is_dealer:
+                    dealer_was_tempai = True
+
+        tempai_users_count = len(tempai_users)
+        if tempai_users_count == 0 or tempai_users_count == 4:
+            self.honba_sticks += 1
+        else:
+            # 1 tempai user  will get 3000
+            # 2 tempai users will get 1500 each
+            # 3 tempai users will get 1000 each
+            scores_to_pay = 3000 / tempai_users_count
             for client in self.clients:
                 if client.player.in_tempai:
-                    tempai_users.append(client.seat)
+                    client.player.scores += scores_to_pay
+                    logger.info("{0} +{1:,d}".format(client.player.name, int(scores_to_pay)))
 
+                    # dealer was tempai, we need to add honba stick
                     if client.player.is_dealer:
-                        dealer_was_tempai = True
+                        self.honba_sticks += 1
+                else:
+                    client.player.scores -= 3000 / (4 - tempai_users_count)
 
-            tempai_users_count = len(tempai_users)
-            if tempai_users_count == 0 or tempai_users_count == 4:
+        # dealer not in tempai, so round should move
+        if not dealer_was_tempai:
+            new_dealer = self._move_position(self.dealer)
+            self.set_dealer(new_dealer)
+
+            # someone was in tempai, we need to add honba here
+            if tempai_users_count != 0 and tempai_users_count != 4:
                 self.honba_sticks += 1
-            else:
-                # 1 tempai user  will get 3000
-                # 2 tempai users will get 1500 each
-                # 3 tempai users will get 1000 each
-                scores_to_pay = 3000 / tempai_users_count
-                for client in self.clients:
-                    if client.player.in_tempai:
-                        client.player.scores += scores_to_pay
-                        logger.info("{0} +{1:,d}".format(client.player.name, int(scores_to_pay)))
 
-                        # dealer was tempai, we need to add honba stick
-                        if client.player.is_dealer:
-                            self.honba_sticks += 1
-                    else:
-                        client.player.scores -= 3000 / (4 - tempai_users_count)
-
-            # dealer not in tempai, so round should move
-            if not dealer_was_tempai:
-                new_dealer = self._move_position(self.dealer)
-                self.set_dealer(new_dealer)
-
-                # someone was in tempai, we need to add honba here
-                if tempai_users_count != 0 and tempai_users_count != 4:
-                    self.honba_sticks += 1
-
-            self.replay.retake(tempai_users, self.honba_sticks, self.riichi_sticks)
-
-        is_game_end = self._check_the_end_of_game()
-        logger.info("")
-
-        return {
-            "winner": winner,
-            "loser": loser,
-            "is_tsumo": is_tsumo,
-            "is_game_end": is_game_end,
-        }
+        self.replay.retake(tempai_users, self.honba_sticks, self.riichi_sticks)
+        return {"winner": None, "loser": None, "is_tsumo": False, "is_abortive_retake": False}
 
     def abortive_retake(self, reason):
         logger.info("Abortive retake. Reason: {}".format(reason))
-
-        self.honba_sticks += 1
-        is_game_end = self._check_the_end_of_game()
-
         self.replay.abortive_retake(reason, self.honba_sticks, self.riichi_sticks)
-
-        return {
-            "winner": None,
-            "loser": None,
-            "is_tsumo": False,
-            "is_game_end": is_game_end,
-        }
+        return {"winner": None, "loser": None, "is_tsumo": False, "is_abortive_retake": True}
 
     def players_sorted_by_scores(self):
         return sorted([i.player for i in self.clients], key=lambda x: x.scores, reverse=True)

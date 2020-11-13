@@ -187,11 +187,43 @@ class MahjongAI:
 
         tiles += [win_tile_136]
 
-        cache_key = build_estimate_hand_value_cache_key(
-            tiles, call_riichi, is_tsumo, self.player.melds, self.player.table.dora_indicators
+        config = HandConfig(
+            is_riichi=call_riichi,
+            player_wind=self.player.player_wind,
+            round_wind=self.player.table.round_wind_tile,
+            is_tsumo=is_tsumo,
+            options=OptionalRules(
+                has_aka_dora=self.player.table.has_aka_dora,
+                has_open_tanyao=self.player.table.has_open_tanyao,
+            ),
+            tsumi_number=self.player.table.count_of_honba_sticks,
+            kyoutaku_number=self.player.table.count_of_riichi_sticks,
         )
-        if self.hand_cache_estimation.get(cache_key):
-            return self.hand_cache_estimation.get(cache_key)
+
+        return self._estimate_hand_value_or_get_from_cache(win_tile_136, tiles, call_riichi, is_tsumo, 0, config)
+
+    def calculate_exact_hand_value_or_get_from_cache(
+        self,
+        win_tile_136,
+        tiles=None,
+        call_riichi=False,
+        is_tsumo=False,
+        is_chankan=False,
+        is_haitei=False,
+        is_ippatsu=False,
+    ):
+        if not tiles:
+            tiles = self.player.tiles[:]
+
+        tiles += [win_tile_136]
+
+        additional_han = 0
+        if is_chankan:
+            additional_han += 1
+        if is_haitei:
+            additional_han += 1
+        if is_ippatsu:
+            additional_han += 1
 
         config = HandConfig(
             is_riichi=call_riichi,
@@ -202,7 +234,33 @@ class MahjongAI:
                 has_aka_dora=self.player.table.has_aka_dora,
                 has_open_tanyao=self.player.table.has_open_tanyao,
             ),
+            is_chankan=is_chankan,
+            is_ippatsu=is_ippatsu,
+            is_haitei=is_tsumo and is_haitei or False,
+            is_hotei=(not is_tsumo) and is_haitei or False,
+            tsumi_number=self.player.table.count_of_honba_sticks,
+            kyoutaku_number=self.player.table.count_of_riichi_sticks,
         )
+
+        return self._estimate_hand_value_or_get_from_cache(
+            win_tile_136, tiles, call_riichi, is_tsumo, additional_han, config
+        )
+
+    def _estimate_hand_value_or_get_from_cache(
+        self, win_tile_136, tiles, call_riichi, is_tsumo, additional_han, config
+    ):
+        cache_key = build_estimate_hand_value_cache_key(
+            tiles,
+            call_riichi,
+            is_tsumo,
+            self.player.melds,
+            self.player.table.dora_indicators,
+            self.player.table.count_of_riichi_sticks,
+            self.player.table.count_of_honba_sticks,
+            additional_han,
+        )
+        if self.hand_cache_estimation.get(cache_key):
+            return self.hand_cache_estimation.get(cache_key)
 
         result = self.finished_hand.estimate_hand_value(
             tiles,

@@ -11,7 +11,14 @@ def build_shanten_cache_key(tiles_34: List[int], use_chiitoitsu: bool):
 
 
 def build_estimate_hand_value_cache_key(
-    tiles_136: List[int], is_riichi: bool, is_tsumo: bool, melds: List[MeldPrint], dora_indicators: List[int]
+    tiles_136: List[int],
+    is_riichi: bool,
+    is_tsumo: bool,
+    melds: List[MeldPrint],
+    dora_indicators: List[int],
+    count_of_riichi_sticks: int,
+    count_of_honba_sticks: int,
+    additional_han: int,
 ):
     prepared_array = (
         tiles_136
@@ -21,5 +28,8 @@ def build_estimate_hand_value_cache_key(
         + (melds and [x.tiles for x in melds] or [])
         + [200]
         + dora_indicators
+        + [count_of_riichi_sticks]
+        + [count_of_honba_sticks]
+        + [additional_han]
     )
     return hashlib.md5(marshal.dumps(prepared_array)).hexdigest()

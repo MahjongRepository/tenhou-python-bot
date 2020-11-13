@@ -125,7 +125,12 @@ class Table:
             self._add_revealed_tile(tile)
 
     def add_called_riichi(self, player_seat):
-        self.get_player(player_seat).in_riichi = True
+        player = self.get_player(player_seat)
+
+        player.in_riichi = True
+        if player.scores is not None:
+            player.scores -= 1000
+        self.count_of_riichi_sticks += 1
 
         # we had to check will we go for defence or not
         if player_seat != 0:

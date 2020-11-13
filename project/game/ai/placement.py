@@ -110,6 +110,10 @@ class PlacementHandler:
         if is_tsumo:
             return True
 
+        # never skip win if we are the dealer
+        if self.player.is_dealer:
+            return True
+
         placement = self._get_current_placement()
         if not placement:
             return True
@@ -140,20 +144,20 @@ class PlacementHandler:
             "num_players_over_30000": num_players_over_30000,
         }
 
-        # check if we can make it to the west round
-        if num_players_over_30000 == 0:
-            DecisionsLogger.debug(log.AGARI, "Decided to take ron for west round", logger_context)
-            return True
+        if not self.is_west_4:
+            # check if we can make it to the west round
+            if num_players_over_30000 == 0:
+                DecisionsLogger.debug(log.AGARI, "Decided to take ron for west round", logger_context)
+                return True
 
-        if num_players_over_30000 == 1:
-            if enemy_seat == first_place.seat:
-                if first_place.scores < 30000 + direct_hit_cost:
-                    DecisionsLogger.debug(
-                        log.AGARI, "Decided to take ron from first place for west round", logger_context
-                    )
-                    return True
+            if num_players_over_30000 == 1:
+                if enemy_seat == first_place.seat:
+                    if first_place.scores < 30000 + direct_hit_cost:
+                        DecisionsLogger.debug(
+                            log.AGARI, "Decided to take ron from first place for west round", logger_context
+                        )
+                        return True
 
-        # TODO: account for winds placement
         if covered_cost < needed_cost:
             DecisionsLogger.debug(log.AGARI, "Decided to skip ron", logger_context)
             return False
@@ -171,7 +175,13 @@ class PlacementHandler:
                 return 0
 
         if placement["place"] == 4:
-            return placement["diff_with_next_up"]
+            third_place = self.table.get_players_sorted_by_scores()[2]
+
+            extra = 0
+            if self.player.first_seat > third_place.first_seat:
+                extra = 100
+
+            return placement["diff_with_next_up"] + extra
 
         return 0
 
@@ -216,6 +226,11 @@ class PlacementHandler:
     def is_oorasu(self):
         # TODO: consider tonpu
         return self.table.round_wind_number >= 7
+
+    @property
+    def is_west_4(self):
+        # TODO: consider tonpu
+        return self.table.round_wind_number == 11
 
     @property
     def is_late_round(self):

@@ -73,6 +73,8 @@ def test_minimal_cost():
 
     # orasu
     table.round_wind_number = 7
+    table.dealer_seat = 1
+    player.dealer_seat = 1
 
     player.scores = 22000
     i = -1
@@ -100,6 +102,8 @@ def test_skip_ron():
     table.has_open_tanyao = True
     # orasu
     table.round_wind_number = 7
+    table.dealer_seat = 1
+    player.dealer_seat = 1
 
     table.add_dora_indicator(string_to_136_tile(sou="1"))
 
@@ -134,6 +138,34 @@ def test_skip_ron():
     assert player.should_call_win(string_to_136_tile(sou="2"), False, 3)
 
 
+def test_dont_skip_ron_if_dealer():
+    table = Table()
+    player = table.player
+    table.has_aka_dora = True
+    table.has_open_tanyao = True
+    # orasu
+    table.round_wind_number = 7
+    table.dealer_seat = 0
+    player.dealer_seat = 0
+
+    table.add_dora_indicator(string_to_136_tile(sou="1"))
+
+    player.scores = 16100
+    assert table.players[0] == player
+    table.players[1].scores = 24000
+    table.players[2].scores = 26000
+    table.players[3].scores = 35900
+
+    tiles = string_to_136_array(man="23488", sou="34678", pin="567")
+    table.player.init_hand(tiles)
+    table.player.add_called_meld(make_meld(MeldPrint.CHI, pin="567"))
+    table.player.round_step = 14
+
+    assert player.should_call_win(string_to_136_tile(sou="5"), False, 1)
+    assert player.should_call_win(string_to_136_tile(sou="5"), False, 2)
+    assert player.should_call_win(string_to_136_tile(sou="5"), False, 3)
+
+
 def test_take_ron_for_west():
     table = Table()
     player = table.player
@@ -141,6 +173,8 @@ def test_take_ron_for_west():
     table.has_open_tanyao = True
     # orasu
     table.round_wind_number = 7
+    table.dealer_seat = 1
+    player.dealer_seat = 1
 
     table.add_dora_indicator(string_to_136_tile(sou="1"))
 
@@ -164,6 +198,76 @@ def test_take_ron_for_west():
     table.players[1].scores = 22000
     table.players[2].scores = 30100
     table.players[3].scores = 31000
+
+    assert player.should_call_win(string_to_136_tile(sou="5"), False, 1)
+    assert not player.should_call_win(string_to_136_tile(sou="5"), False, 2)
+    assert not player.should_call_win(string_to_136_tile(sou="5"), False, 3)
+
+
+def test_skip_ron_in_west_4():
+    table = Table()
+    player = table.player
+    table.has_aka_dora = True
+    table.has_open_tanyao = True
+    # orasu
+    table.round_wind_number = 11
+    table.dealer_seat = 1
+    player.dealer_seat = 1
+
+    table.add_dora_indicator(string_to_136_tile(sou="1"))
+
+    tiles = string_to_136_array(man="23488", sou="34678", pin="567")
+    table.player.init_hand(tiles)
+    table.player.add_called_meld(make_meld(MeldPrint.CHI, pin="567"))
+    table.player.round_step = 14
+
+    player.scores = 20100
+    assert table.players[0] == player
+    table.players[1].scores = 22000
+    table.players[2].scores = 26000
+    table.players[3].scores = 29900
+
+    assert player.should_call_win(string_to_136_tile(sou="5"), False, 1)
+    assert not player.should_call_win(string_to_136_tile(sou="5"), False, 2)
+    assert not player.should_call_win(string_to_136_tile(sou="5"), False, 3)
+
+
+def test_skip_ron_wind_placement():
+    table = Table()
+    player = table.player
+    table.has_aka_dora = True
+    table.has_open_tanyao = True
+    # orasu
+    table.round_wind_number = 7
+    table.dealer_seat = 1
+    player.dealer_seat = 1
+
+    table.add_dora_indicator(string_to_136_tile(sou="1"))
+
+    tiles = string_to_136_array(man="23488", sou="34678", pin="567")
+    table.player.init_hand(tiles)
+    table.player.add_called_meld(make_meld(MeldPrint.CHI, pin="567"))
+    table.player.round_step = 14
+
+    player.scores = 21000
+    assert table.players[0] == player
+    table.players[1].scores = 22000
+    table.players[2].scores = 30100
+    table.players[3].scores = 31000
+
+    player.first_seat = 0
+    table.players[1].first_seat = 1
+
+    assert player.ai.placement.get_minimal_cost_needed() == 1000
+
+    assert player.should_call_win(string_to_136_tile(sou="5"), False, 1)
+    assert player.should_call_win(string_to_136_tile(sou="5"), False, 2)
+    assert player.should_call_win(string_to_136_tile(sou="5"), False, 3)
+
+    player.first_seat = 1
+    table.players[1].first_seat = 0
+
+    assert player.ai.placement.get_minimal_cost_needed() == 1100
 
     assert player.should_call_win(string_to_136_tile(sou="5"), False, 1)
     assert not player.should_call_win(string_to_136_tile(sou="5"), False, 2)

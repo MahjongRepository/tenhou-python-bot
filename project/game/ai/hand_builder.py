@@ -135,12 +135,15 @@ class HandBuilder:
         else:
             return shanten_without_chiitoitsu, False
 
-    def calculate_waits(self, closed_hand_34: List[int], use_chiitoitsu: bool = False):
+    def calculate_waits(self, closed_hand_34: List[int], all_tiles_34: List[int], use_chiitoitsu: bool = False):
         previous_shanten = self.ai.calculate_shanten_or_get_from_cache(closed_hand_34, use_chiitoitsu=use_chiitoitsu)
 
         waiting = []
         for tile_index in range(0, 34):
-            if closed_hand_34[tile_index] == 4:
+            # it is important to check that we don't have all 4 tiles in the all tiles
+            # not in the closed hand
+            # so, we will not count 1z as waiting when we have 111z meld
+            if all_tiles_34[tile_index] == 4:
                 continue
 
             closed_hand_34[tile_index] += 1
@@ -189,7 +192,7 @@ class HandBuilder:
                 continue
 
             closed_tiles_34[hand_tile] -= 1
-            waiting, shanten = self.calculate_waits(closed_tiles_34, use_chiitoitsu=use_chiitoitsu)
+            waiting, shanten = self.calculate_waits(closed_tiles_34, tiles_34, use_chiitoitsu=use_chiitoitsu)
             assert shanten >= min_shanten
             closed_tiles_34[hand_tile] += 1
 

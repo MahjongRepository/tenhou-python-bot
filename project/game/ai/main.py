@@ -357,10 +357,14 @@ class MahjongAI:
                 self.player.tiles = original_tiles[:]
 
                 closed_hand_34[tile_34] -= 1
-                new_waiting, new_shanten = self.hand_builder.calculate_waits(closed_hand_34, use_chiitoitsu=False)
+                tiles_34[tile_34] -= 1
+                new_waiting, new_shanten = self.hand_builder.calculate_waits(
+                    closed_hand_34, tiles_34, use_chiitoitsu=False
+                )
                 new_waits_count = self.hand_builder.count_tiles(new_waiting, closed_hand_34)
 
         closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
+        tiles_34 = TilesConverter.to_34_array(self.player.tiles)
 
         if not has_shouminkan_candidate:
             # we don't have enough tiles in the hand
@@ -369,15 +373,17 @@ class MahjongAI:
 
             if open_kan or from_riichi:
                 # this 4 tiles can only be used in kan, no other options
-                previous_waiting, previous_shanten = self.hand_builder.calculate_waits(tiles_34, use_chiitoitsu=False)
+                previous_waiting, previous_shanten = self.hand_builder.calculate_waits(
+                    closed_hand_34, tiles_34, use_chiitoitsu=False
+                )
                 previous_waits_count = self.hand_builder.count_tiles(previous_waiting, closed_hand_34)
             else:
                 self.player.tiles.append(tile)
                 previous_shanten, previous_waits_count = self._calculate_shanten_for_kan()
                 self.player.tiles = original_tiles[:]
 
-            tiles_34[tile_34] = 0
-            new_waiting, new_shanten = self.hand_builder.calculate_waits(tiles_34, use_chiitoitsu=False)
+            closed_hand_34[tile_34] = 0
+            new_waiting, new_shanten = self.hand_builder.calculate_waits(closed_hand_34, tiles_34, use_chiitoitsu=False)
 
             closed_hand_34[tile_34] = 4
             new_waits_count = self.hand_builder.count_tiles(new_waiting, closed_hand_34)

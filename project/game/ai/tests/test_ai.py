@@ -1,4 +1,3 @@
-import pytest
 from game.ai.strategies.main import BaseStrategy
 from game.table import Table
 from mahjong.tile import TilesConverter
@@ -40,7 +39,6 @@ def test_not_open_hand_in_riichi():
     assert meld is None
 
 
-@pytest.mark.skip("Skipped while debugging it further, ref #147")
 def test_crash_when_tyring_to_open_meld():
     """
     Bot crashed when tried to calculate meld possibility with hand 7m333789s + 3s [222z, 123p]

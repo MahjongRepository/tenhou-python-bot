@@ -505,6 +505,18 @@ def test_kuikae_advanced():
     meld, _ = table.player.try_to_call_meld(tile, True)
     assert meld is not None
 
+    # case 3: another allowed chi
+    table = _make_table()
+    table.add_dora_indicator(string_to_136_tile(pin="2"))
+    # but with opened hand we don't need to count not suitable tiles as ukeire
+    tiles = string_to_136_array(man="234", sou="12345", pin="33355")
+    table.player.init_hand(tiles)
+    table.player.add_called_meld(make_meld(MeldPrint.CHI, man="234"))
+
+    tile = string_to_136_tile(sou="4")
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is not None
+
 
 def _make_table():
     table = Table()

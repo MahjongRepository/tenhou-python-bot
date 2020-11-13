@@ -366,7 +366,10 @@ class GameManager:
 
         while not is_game_end:
             self.init_round()
+
             result = self.play_round()
+            # important increment, we are building wall seed based on the round number
+            self.round_number += 1
 
             for item in result:
                 is_game_end = item["is_game_end"]
@@ -491,8 +494,6 @@ class GameManager:
             )
         else:
             logger.info("Retake")
-
-        self.round_number += 1
 
         if winner:
             ura_dora = []
@@ -772,7 +773,9 @@ class GameManager:
         return positions[who - from_who]
 
     def _generate_wall(self):
+        # round of played numbers here to be sure that each wall will be unique
         wall_seed = shuffle_seed() + self.round_number
+
         # init seed for random generator
         seed(wall_seed)
 

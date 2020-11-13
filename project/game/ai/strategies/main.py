@@ -298,8 +298,6 @@ class BaseStrategy:
         self.dora_count_total = self.dora_count_central + self.dora_count_not_central
 
     def _find_best_meld_to_open(self, call_tile_136, possible_melds, new_tiles, closed_hand, discarded_tile):
-        assert len(new_tiles) == 14
-
         all_tiles_are_suitable = True
         for tile_136 in closed_hand:
             all_tiles_are_suitable &= self.is_tile_suitable(tile_136)

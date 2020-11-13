@@ -20,6 +20,7 @@ GAMES=1
 run_battle:
 	docker run -u `id -u` -it --rm \
 		-v "$(CURRENT_DIR)project/:/app/" \
+		-v /dev/urandom:/dev/random \
 		mahjong_bot pypy3 bots_battle.py -g $(GAMES) $(ARGS)
 
 run_on_tenhou:

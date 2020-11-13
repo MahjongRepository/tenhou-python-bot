@@ -1,5 +1,6 @@
 from copy import copy
 
+from game.ai.defence.yaku_analyzer.atodzuke import AtodzukeAnalyzer
 from game.ai.defence.yaku_analyzer.chinitsu import ChinitsuAnalyzer
 from game.ai.defence.yaku_analyzer.honitsu import HonitsuAnalyzer
 from game.ai.defence.yaku_analyzer.tanyao import TanyaoAnalyzer
@@ -76,6 +77,10 @@ class EnemyAnalyzer:
         for x in yaku_analyzers:
             if x.is_yaku_active():
                 active_yaku.append(x)
+
+        if not active_yaku:
+            active_yaku.append(AtodzukeAnalyzer(self.enemy))
+            sure_han = 1
 
         # FIXME: probably our approach here should be refactored and we should not care about cost
         if not sure_han:
@@ -173,8 +178,12 @@ class EnemyAnalyzer:
         dora_count = plus_dora(tile_136, self.table.dora_indicators, add_aka_dora=self.table.has_aka_dora)
 
         if is_honor(tile_34):
-            # it can actually be +3 but let's count +2 as it may be either tanki or syanpon
-            scale_bonus += dora_count * 2
+            closed_hand_34 = TilesConverter.to_34_array(self.main_player.closed_hand)
+            revealed_tiles = self.main_player.number_of_revealed_tiles(tile_34, closed_hand_34)
+            if revealed_tiles < 2:
+                scale_bonus += dora_count * 3
+            else:
+                scale_bonus += dora_count * 2
         else:
             scale_bonus += dora_count
 

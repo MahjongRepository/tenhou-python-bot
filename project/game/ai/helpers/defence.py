@@ -237,6 +237,11 @@ class TileDanger:
         "description": "Additional danger for shonpai dora tiles agains toitoi hands",
     }
 
+    ATODZUKE_YAKUHAI_HONOR_BONUS_DANGER = {
+        "value": 400,
+        "description": "Bonus danger yakuhai tiles for atodzuke yakuhai hands",
+    }
+
     ###############
     # The following constants don't follow the logic of other constants, so they are not dictionaries
     ##############

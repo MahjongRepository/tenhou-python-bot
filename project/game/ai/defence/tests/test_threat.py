@@ -398,3 +398,48 @@ def test_number_of_unverified_suji():
     assert threatening_player.number_of_unverified_suji == 2
     table.add_discarded_tile(0, string_to_136_tile(pin="6"), True)
     assert threatening_player.number_of_unverified_suji == 0
+
+
+def test_is_threatening_and_atodzuke():
+    table = Table()
+
+    threatening_players = table.player.ai.defence.get_threatening_players()
+    assert len(threatening_players) == 0
+
+    table.add_dora_indicator(string_to_136_tile(honors="5"))
+
+    enemy_seat = 2
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.CHI, man="234"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.PON, sou="333"))
+    table.add_called_meld(enemy_seat, make_meld(MeldPrint.KAN, pin="9999"))
+    table.player.round_step = 5
+
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(honors="1"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(honors="4"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="8"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="9"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="1"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="6"), False)
+
+    # atodzuke with 3 melds is a threat
+    threatening_players = table.player.ai.defence.get_threatening_players()
+    assert len(threatening_players) == 1
+    assert threatening_players[0].enemy.seat == enemy_seat
+    assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_OPEN_HAND_UNKNOWN_COST["id"]
+    assert threatening_players[0].get_assumed_hand_cost(string_to_136_tile(honors="5")) == 1000
+    assert threatening_players[0].get_assumed_hand_cost(string_to_136_tile(honors="6")) == 8000
+
+    for tile_136 in range(0, 136):
+        bonus_danger = threatening_players[0].threat_reason.get("active_yaku")[0].get_bonus_danger(tile_136, 1)
+        if not is_honor(tile_136 // 4):
+            assert not bonus_danger
+        elif (
+            (tile_136 // 4 == string_to_136_tile(honors="1") // 4)
+            or (tile_136 // 4 == string_to_136_tile(honors="3") // 4)
+            or (tile_136 // 4 == string_to_136_tile(honors="5") // 4)
+            or (tile_136 // 4 == string_to_136_tile(honors="6") // 4)
+            or (tile_136 // 4 == string_to_136_tile(honors="7") // 4)
+        ):
+            assert bonus_danger
+        else:
+            assert not bonus_danger

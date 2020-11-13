@@ -233,11 +233,12 @@ class MahjongAI:
             options=OptionalRules(
                 has_aka_dora=self.player.table.has_aka_dora,
                 has_open_tanyao=self.player.table.has_open_tanyao,
+                has_double_yakuman=False,
             ),
             is_chankan=is_chankan,
             is_ippatsu=is_ippatsu,
             is_haitei=is_tsumo and is_haitei or False,
-            is_hotei=(not is_tsumo) and is_haitei or False,
+            is_houtei=(not is_tsumo) and is_haitei or False,
             tsumi_number=self.player.table.count_of_honba_sticks,
             kyoutaku_number=self.player.table.count_of_riichi_sticks,
         )

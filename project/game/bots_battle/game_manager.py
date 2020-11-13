@@ -502,19 +502,17 @@ class GameManager:
                 ura_dora.append(self.dead_wall[9])
 
             is_tenhou = False
+            # tenhou.net doesn't have renhou
             is_renhou = False
             is_chiihou = False
             # win on the first draw\discard
             # we can win after daburi riichi in that case we will have one tile in discard
             # that's why we have < 2 condition (not == 0)
-            if not self.players_with_open_hands and len(winner.player.discards) < 2:
-                if is_tsumo:
-                    if winner.player.is_dealer:
-                        is_tenhou = True
-                    else:
-                        is_chiihou = True
+            if not self.players_with_open_hands and len(winner.player.discards) < 2 and is_tsumo:
+                if winner.player.is_dealer:
+                    is_tenhou = True
                 else:
-                    is_renhou = True
+                    is_chiihou = True
 
             is_haitei = False
             is_houtei = False
@@ -537,8 +535,9 @@ class GameManager:
                 is_haitei=is_haitei,
                 is_houtei=is_houtei,
                 options=OptionalRules(
-                    has_aka_dora=True,
-                    has_open_tanyao=True,
+                    has_aka_dora=settings.FIVE_REDS,
+                    has_open_tanyao=settings.OPEN_TANYAO,
+                    has_double_yakuman=False,
                 ),
             )
 

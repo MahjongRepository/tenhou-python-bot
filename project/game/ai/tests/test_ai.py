@@ -617,7 +617,7 @@ def test_closed_kan_and_wrong_shanten_number_calculation():
     table = Table()
     player = table.player
 
-    tiles = string_to_136_array(man="56", sou="14578999", pin="666")
+    tiles = string_to_136_array(man="56", sou="145789999", pin="666")
     player.init_hand(tiles)
     tile = string_to_136_tile(man="7")
     player.table.add_called_meld(player.seat, make_meld(MeldPrint.KAN, False, sou="9999"))

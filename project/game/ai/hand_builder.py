@@ -7,7 +7,7 @@ from mahjong.constants import AKA_DORA_LIST
 from mahjong.shanten import Shanten
 from mahjong.tile import Tile, TilesConverter
 from mahjong.utils import is_honor, is_pair, is_tile_strictly_isolated, simplify
-from utils.decisions_logger import DecisionsLogger
+from utils.decisions_logger import DecisionsLogger, MeldPrint
 
 
 class HandBuilder:
@@ -26,7 +26,7 @@ class HandBuilder:
         """
         Try to find best tile to discard, based on different evaluations
         """
-        self._assert_hand_correctness(self.player.tiles, self.player.closed_hand)
+        self._assert_hand_correctness()
 
         threatening_players = None
 
@@ -174,7 +174,7 @@ class HandBuilder:
         :param closed_hand: array of tiles in 136 format
         :return:
         """
-        self._assert_hand_correctness(self.player.tiles, self.player.closed_hand)
+        self._assert_hand_correctness()
 
         tiles = self.player.tiles
         closed_hand = self.player.closed_hand
@@ -251,7 +251,7 @@ class HandBuilder:
         return have_suji, have_kabe
 
     def calculate_second_level_ukeire(self, discard_option, after_meld=False):
-        self._assert_hand_correctness(self.player.tiles, self.player.closed_hand)
+        self._assert_hand_correctness()
 
         not_suitable_tiles = self.ai.current_strategy and self.ai.current_strategy.not_suitable_tiles or []
         call_riichi = not (self.player.is_open_hand or after_meld)
@@ -862,16 +862,16 @@ class HandBuilder:
 
         return None
 
-    @staticmethod
-    def _assert_hand_correctness(tiles: List[int], closed_hand: List[int]):
+    def _assert_hand_correctness(self):
         # we must always have correct hand to discard from, e.g. we cannot discard when we have 13 tiles
-        assert len(tiles) == 14
+        num_kans = len([x for x in self.player.melds if x.type == MeldPrint.KAN or x.type == MeldPrint.SHOUMINKAN])
+        assert len(self.player.tiles) == 14 + num_kans
         assert (
-            len(closed_hand) == 2
-            or len(closed_hand) == 5
-            or len(closed_hand) == 8
-            or len(closed_hand) == 11
-            or len(closed_hand) == 14
+            len(self.player.closed_hand) == 2
+            or len(self.player.closed_hand) == 5
+            or len(self.player.closed_hand) == 8
+            or len(self.player.closed_hand) == 11
+            or len(self.player.closed_hand) == 14
         )
 
 

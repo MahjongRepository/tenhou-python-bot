@@ -267,7 +267,8 @@ class TenhouClient(Client):
                     win_suggestions = ['t="16"', 't="48"']
                     # we won by self draw (tsumo)
                     if any(i in message for i in win_suggestions):
-                        self._random_sleep(1, 2)
+                        # TODO: add should_call_win check
+                        self._random_sleep(0.4, 0.6)
                         self._send_message('<N type="7" />')
                         continue
 
@@ -364,18 +365,20 @@ class TenhouClient(Client):
                 win_suggestions = ['t="8"', 't="9"', 't="10"', 't="11"', 't="12"', 't="13"', 't="15"']
                 # we win by other player's discard
                 if any(i in message for i in win_suggestions):
+                    is_chankan = False
                     # enemy called shouminkan and we can win there
                     if self.decoder.is_opened_set_message(message):
                         meld = self.decoder.parse_meld(message)
                         tile = meld.called_tile
                         enemy_seat = meld.who
+                        is_chankan = True
                     else:
                         tile = self.decoder.parse_tile(message)
                         enemy_seat = self.decoder.get_enemy_seat(message)
 
                     self._random_sleep(0.4, 0.6)
 
-                    if main_player.should_call_win(tile, enemy_seat):
+                    if main_player.should_call_win(tile, False, enemy_seat, is_chankan):
                         self._send_message('<N type="6" />')
                     else:
                         self._send_message("<N />")

@@ -184,6 +184,8 @@ class MahjongAI:
 
         if not tiles:
             tiles = self.player.tiles[:]
+        else:
+            tiles = tiles[:]
 
         tiles += [win_tile_136]
 
@@ -215,6 +217,8 @@ class MahjongAI:
     ):
         if not tiles:
             tiles = self.player.tiles[:]
+        else:
+            tiles = tiles[:]
 
         tiles += [win_tile_136]
 
@@ -410,8 +414,36 @@ class MahjongAI:
 
         return None
 
-    def should_call_win(self, tile, enemy_seat):
-        return True
+    def should_call_win(self, tile, is_tsumo, enemy_seat, is_chankan=False):
+        # don't skip win in riichi
+        if self.player.in_riichi:
+            return True
+
+        # currently we don't support win skipping for tsumo
+        if is_tsumo:
+            return True
+
+        # fast path - check it first to not calculate hand cost
+        cost_needed = self.placement.get_minimal_cost_needed()
+        if cost_needed == 0:
+            return True
+
+        # 1 and not 0 because we call check for win this before updating remaining tiles
+        is_hotei = self.player.table.count_of_remaining_tiles == 1
+
+        hand_responce = self.calculate_exact_hand_value_or_get_from_cache(
+            tile,
+            tiles=self.player.tiles,
+            call_riichi=self.player.in_riichi,
+            is_tsumo=is_tsumo,
+            is_chankan=is_chankan,
+            is_haitei=is_hotei,
+        )
+        assert hand_responce is not None
+        assert not hand_responce.error
+        cost = hand_responce.cost
+
+        return self.placement.should_call_win(cost, is_tsumo, enemy_seat)
 
     def enemy_called_riichi(self, enemy_seat):
         """

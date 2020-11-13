@@ -18,6 +18,8 @@ MELD_DEBUG = "meld_debug"
 
 RIICHI = "riichi"
 
+AGARI = "agari"
+
 PLACEMENT_DANGER_MODIFIER = "placement_danger_modifier"
 PLACEMENT_RIICHI_OR_DAMATEN = "placement_riichi_or_damaten"
 

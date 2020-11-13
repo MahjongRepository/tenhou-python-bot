@@ -105,6 +105,76 @@ class PlacementHandler:
 
         return Placement.DEFAULT_RIICHI_DECISION
 
+    def should_call_win(self, cost, is_tsumo, enemy_seat):
+        # we currently don't support win skipping for tsumo
+        if is_tsumo:
+            return True
+
+        placement = self._get_current_placement()
+        if not placement:
+            return True
+
+        needed_cost = self.get_minimal_cost_needed(placement=placement)
+        if needed_cost == 0:
+            return True
+
+        # currently we don't support logic other than for 4th place
+        assert self.player == self.table.get_players_sorted_by_scores()[3]
+        first_place = self.table.get_players_sorted_by_scores()[0]
+        third_place = self.table.get_players_sorted_by_scores()[2]
+
+        num_players_over_30000 = len([x for x in self.table.players if x.scores >= 30000])
+        direct_hit_cost = cost["main"] + cost["main_bonus"]
+        if enemy_seat == third_place.seat:
+            covered_cost = direct_hit_cost * 2 + cost["kyoutaku_bonus"]
+        else:
+            covered_cost = cost["total"]
+
+        logger_context = {
+            "placement": placement,
+            "needed_cost": needed_cost,
+            "covered_cost": covered_cost,
+            "is_tsumo": is_tsumo,
+            "closest_enemy_seat": third_place.seat,
+            "enemy_seat_ron": enemy_seat,
+            "num_players_over_30000": num_players_over_30000,
+        }
+
+        # check if we can make it to the west round
+        if num_players_over_30000 == 0:
+            DecisionsLogger.debug(log.AGARI, "Decided to take ron for west round", logger_context)
+            return True
+
+        if num_players_over_30000 == 1:
+            if enemy_seat == first_place.seat:
+                if first_place.scores < 30000 + direct_hit_cost:
+                    DecisionsLogger.debug(
+                        log.AGARI, "Decided to take ron from first place for west round", logger_context
+                    )
+                    return True
+
+        # TODO: account for winds placement
+        if covered_cost < needed_cost:
+            DecisionsLogger.debug(log.AGARI, "Decided to skip ron", logger_context)
+            return False
+
+        DecisionsLogger.debug(log.AGARI, "Decided to take ron for better placement", logger_context)
+        return True
+
+    def get_minimal_cost_needed(self, placement=None):
+        if not self.is_oorasu:
+            return 0
+
+        if not placement:
+            placement = self._get_current_placement()
+            if not placement:
+                return 0
+
+        if placement["place"] == 4:
+            return placement["diff_with_next_up"]
+
+        return 0
+
     def _get_placement_evaluation(self, placement) -> int:
         if not placement:
             return Placement.NEUTRAL
@@ -166,6 +236,12 @@ class DummyPlacementHandler(PlacementHandler):
 
     def _get_placement_evaluation(self, placement) -> int:
         return Placement.NEUTRAL
+
+    def should_call_win(self, cost, is_tsumo, enemy_seat):
+        return True
+
+    def get_minimal_cost_needed(self) -> int:
+        return 0
 
 
 class Placement:

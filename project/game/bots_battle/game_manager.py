@@ -440,7 +440,7 @@ class GameManager:
             return False
 
         # bot decided to not call ron
-        if not client.player.should_call_win(win_tile, shifted_enemy_seat):
+        if not client.player.should_call_win(win_tile, False, shifted_enemy_seat):
             return False
 
         # check for furiten

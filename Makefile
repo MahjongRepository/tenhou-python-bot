@@ -1,6 +1,8 @@
 MAKE_FILE_PATH=$(abspath $(lastword $(MAKEFILE_LIST)))
 CURRENT_DIR=$(dir $(MAKE_FILE_PATH))
 
+check: format lint tests
+
 format:
 	isort project/*
 	black project/*

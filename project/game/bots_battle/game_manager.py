@@ -505,10 +505,8 @@ class GameManager:
             # tenhou.net doesn't have renhou
             is_renhou = False
             is_chiihou = False
-            # win on the first draw\discard
-            # we can win after daburi riichi in that case we will have one tile in discard
-            # that's why we have < 2 condition (not == 0)
-            if not self.players_with_open_hands and len(winner.player.discards) < 2 and is_tsumo:
+
+            if not self.players_with_open_hands and len(winner.player.discards) == 0 and is_tsumo:
                 if winner.player.is_dealer:
                     is_tenhou = True
                 else:

@@ -334,7 +334,7 @@ class GameManager:
                 self._enemy_position(current_client.seat, other_client.seat), tile, is_tsumogiri
             )
 
-            if self.can_call_ron(other_client, tile):
+            if self.can_call_ron(other_client, tile, self._enemy_position(current_client.seat, other_client.seat)):
                 possible_win_client.append(other_client)
 
         if len(possible_win_client) == 3:
@@ -411,8 +411,12 @@ class GameManager:
                 if client.id == temp_client.id:
                     client.player.position = i + 1
 
-    def can_call_ron(self, client, win_tile):
+    def can_call_ron(self, client, win_tile, shifted_enemy_seat):
         if not client.player.in_tempai:
+            return False
+
+        # bot decided to not call ron
+        if not client.player.should_call_win(win_tile, shifted_enemy_seat):
             return False
 
         # check for furiten

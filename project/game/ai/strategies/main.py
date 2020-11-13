@@ -344,7 +344,7 @@ class BaseStrategy:
             # kuikae
             # we can't discard the same tile
             # or tile from the same suji
-            if not is_honor(selected_tile.tile_to_discard):
+            if not is_honor(selected_tile.tile_to_discard) and meld.type == MeldPrint.CHI:
                 call_tile_34 = call_tile_136 // 4
 
                 if is_sou(selected_tile.tile_to_discard) and is_sou(call_tile_34):
@@ -357,9 +357,23 @@ class BaseStrategy:
                     same_suit = False
 
                 if same_suit:
+                    simplified_meld_0 = simplify(meld.tiles[0] // 4)
+                    simplified_meld_1 = simplify(meld.tiles[1] // 4)
                     simplified_call = simplify(call_tile_136 // 4)
                     simplified_discard = simplify(selected_tile.tile_to_discard)
-                    if simplified_discard in [simplified_call - 3, simplified_call, simplified_call + 3]:
+                    kuikae = False
+                    if simplified_discard == simplified_call - 3:
+                        kuikae_set = [simplified_call - 1, simplified_call - 2]
+                        if simplified_meld_0 in kuikae_set and simplified_meld_1 in kuikae_set:
+                            kuikae = True
+                    elif simplified_discard == simplified_call:
+                        kuikae = True
+                    elif simplified_discard == simplified_call + 3:
+                        kuikae_set = [simplified_call + 1, simplified_call + 2]
+                        if simplified_meld_0 in kuikae_set and simplified_meld_1 in kuikae_set:
+                            kuikae = True
+
+                    if kuikae:
                         tile_str = TilesConverter.to_one_line_string(
                             [selected_tile.tile_to_discard * 4], print_aka_dora=self.player.table.has_aka_dora
                         )

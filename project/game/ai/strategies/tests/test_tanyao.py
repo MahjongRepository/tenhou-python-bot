@@ -1,3 +1,4 @@
+import pytest
 from game.ai.strategies.main import BaseStrategy
 from game.ai.strategies.tanyao import TanyaoStrategy
 from game.table import Table
@@ -426,6 +427,83 @@ def test_dont_open_tanyao_with_good_one_shanten_hand_and_without_tempai():
     tile = FIVE_RED_SOU + 1  # not aka dora
     meld, _ = table.player.try_to_call_meld(tile, True)
     assert meld is None
+
+
+def test_kuikae_simple():
+    # case 1: simple chi
+    table = _make_table()
+    table.add_dora_indicator(string_to_136_tile(pin="2"))
+    # but with opened hand we don't need to count not suitable tiles as ukeire
+    tiles = string_to_136_array(man="234678", sou="135", pin="3335")
+    table.player.init_hand(tiles)
+    table.player.add_called_meld(make_meld(MeldPrint.CHI, man="234"))
+
+    tile = string_to_136_tile(sou="4")
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is not None
+
+    # case 2: kuikae
+    table = _make_table()
+    table.add_dora_indicator(string_to_136_tile(pin="2"))
+    # but with opened hand we don't need to count not suitable tiles as ukeire
+    tiles = string_to_136_array(man="234678", sou="123", pin="3335")
+    table.player.init_hand(tiles)
+    table.player.add_called_meld(make_meld(MeldPrint.CHI, man="234"))
+
+    tile = string_to_136_tile(sou="4")
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is None
+
+    # case 3: no kuikae can be applie to pon
+    table = _make_table()
+    table.add_dora_indicator(string_to_136_tile(pin="2"))
+    # but with opened hand we don't need to count not suitable tiles as ukeire
+    tiles = string_to_136_array(man="234678", sou="144", pin="3335")
+    table.player.init_hand(tiles)
+    table.player.add_called_meld(make_meld(MeldPrint.CHI, man="234"))
+
+    tile = string_to_136_tile(sou="4")
+    meld, _ = table.player.try_to_call_meld(tile, False)
+    assert meld is not None
+
+    # case 4: no false kuikae
+    table = _make_table()
+    table.add_dora_indicator(string_to_136_tile(pin="2"))
+    # but with opened hand we don't need to count not suitable tiles as ukeire
+    tiles = string_to_136_array(man="234678", sou="237", pin="3335")
+    table.player.init_hand(tiles)
+    table.player.add_called_meld(make_meld(MeldPrint.CHI, man="234"))
+
+    tile = string_to_136_tile(sou="4")
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is not None
+
+
+@pytest.mark.skip("Need to implement logic for these tests. Github issue #156")
+def test_kuikae_advanced():
+    # case 1: allowed chi
+    table = _make_table()
+    table.add_dora_indicator(string_to_136_tile(pin="2"))
+    # but with opened hand we don't need to count not suitable tiles as ukeire
+    tiles = string_to_136_array(man="234", sou="123456", pin="3335")
+    table.player.init_hand(tiles)
+    table.player.add_called_meld(make_meld(MeldPrint.CHI, man="234"))
+
+    tile = string_to_136_tile(sou="4")
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is not None
+
+    # case 2: another allowed chi
+    table = _make_table()
+    table.add_dora_indicator(string_to_136_tile(pin="2"))
+    # but with opened hand we don't need to count not suitable tiles as ukeire
+    tiles = string_to_136_array(man="234", sou="123345", pin="3335")
+    table.player.init_hand(tiles)
+    table.player.add_called_meld(make_meld(MeldPrint.CHI, man="234"))
+
+    tile = string_to_136_tile(sou="4")
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is not None
 
 
 def _make_table():

@@ -4,7 +4,7 @@ from game.ai.helpers.defence import EnemyDanger
 from game.table import Table
 from mahjong.utils import is_honor
 from utils.decisions_logger import MeldPrint
-from utils.test_helpers import make_meld, string_to_136_array, string_to_136_tile
+from utils.test_helpers import make_meld, string_to_34_tile, string_to_136_array, string_to_136_tile
 
 
 def test_is_threatening_and_riichi():
@@ -434,11 +434,11 @@ def test_is_threatening_and_atodzuke():
         if not is_honor(tile_136 // 4):
             assert not bonus_danger
         elif (
-            (tile_136 // 4 == string_to_136_tile(honors="1") // 4)
-            or (tile_136 // 4 == string_to_136_tile(honors="3") // 4)
-            or (tile_136 // 4 == string_to_136_tile(honors="5") // 4)
-            or (tile_136 // 4 == string_to_136_tile(honors="6") // 4)
-            or (tile_136 // 4 == string_to_136_tile(honors="7") // 4)
+            (tile_136 // 4 == string_to_34_tile(honors="1"))
+            or (tile_136 // 4 == string_to_34_tile(honors="3"))
+            or (tile_136 // 4 == string_to_34_tile(honors="5"))
+            or (tile_136 // 4 == string_to_34_tile(honors="6"))
+            or (tile_136 // 4 == string_to_34_tile(honors="7"))
         ):
             assert bonus_danger
         else:

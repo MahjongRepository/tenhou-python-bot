@@ -414,7 +414,7 @@ class MahjongAI:
 
         return None
 
-    def should_call_win(self, tile, is_tsumo, enemy_seat, is_chankan=False):
+    def should_call_win(self, tile, is_tsumo, enemy_seat=None, is_chankan=False):
         # don't skip win in riichi
         if self.player.in_riichi:
             return True

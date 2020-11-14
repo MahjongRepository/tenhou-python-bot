@@ -212,6 +212,8 @@ class TenhouClient(Client):
         meld_tile = None
         tile_to_discard = None
 
+        tsumo_win_suggestions = ['t="16"', 't="48"']
+        ron_win_suggestions = ['t="8"', 't="9"', 't="10"', 't="11"', 't="12"', 't="13"', 't="15"']
         while self.game_is_continue:
             self._random_sleep(1, 2)
 
@@ -264,10 +266,19 @@ class TenhouClient(Client):
 
                 # draw and discard
                 if "<T" in message:
-                    win_suggestions = ['t="16"', 't="48"']
+                    drawn_tile = self.decoder.parse_tile(message)
+                    self.table.count_of_remaining_tiles -= 1
+
+                    logger.info(
+                        "Drawn tile: {}".format(
+                            TilesConverter.to_one_line_string([drawn_tile], print_aka_dora=self.table.has_aka_dora)
+                        )
+                    )
+
                     # we won by self draw (tsumo)
-                    if any(i in message for i in win_suggestions):
-                        # TODO: add should_call_win check
+                    if any(i in message for i in tsumo_win_suggestions) and self.player.should_call_win(
+                        drawn_tile, is_tsumo=True
+                    ):
                         self._random_sleep(0.4, 0.6)
                         self._send_message('<N type="7" />')
                         continue
@@ -279,15 +290,6 @@ class TenhouClient(Client):
                         # TODO aim for kokushi
                         self._send_message('<N type="9" />')
                         continue
-
-                    drawn_tile = self.decoder.parse_tile(message)
-                    self.table.count_of_remaining_tiles -= 1
-
-                    logger.info(
-                        "Drawn tile: {}".format(
-                            TilesConverter.to_one_line_string([drawn_tile], print_aka_dora=self.table.has_aka_dora)
-                        )
-                    )
 
                     kan_type = self.player.should_call_kan(drawn_tile, False, main_player.in_riichi)
                     if kan_type:
@@ -304,22 +306,22 @@ class TenhouClient(Client):
 
                         continue
 
-                    if not main_player.in_riichi:
-                        self.player.draw_tile(drawn_tile)
-                        discarded_tile = self.player.discard_tile()
-                        can_call_riichi = main_player.can_call_riichi()
-
-                        # let's call riichi
-                        if can_call_riichi:
-                            self._random_sleep(0.5, 1)
-                            self._send_message('<REACH hai="{}" />'.format(discarded_tile))
-                            main_player.in_riichi = True
-                    else:
+                    if main_player.in_riichi:
                         # we had to add it to discards, to calculate remaining tiles correctly
                         discarded_tile = drawn_tile
                         self.table.add_discarded_tile(0, discarded_tile, True)
+                        continue
 
-                    # tenhou format: <D p="133" />
+                    self.player.draw_tile(drawn_tile)
+                    discarded_tile = self.player.discard_tile()
+                    can_call_riichi = main_player.can_call_riichi()
+
+                    # let's call riichi
+                    if can_call_riichi:
+                        self._random_sleep(0.5, 1)
+                        self._send_message('<REACH hai="{}" />'.format(discarded_tile))
+                        main_player.in_riichi = True
+
                     self._send_message('<D p="{}"/>'.format(discarded_tile))
                     logger.info(
                         "Discard: {}".format(
@@ -362,9 +364,8 @@ class TenhouClient(Client):
                             self.player.tiles.append(meld_tile)
                             self._send_message('<D p="{}"/>'.format(discarded_tile))
 
-                win_suggestions = ['t="8"', 't="9"', 't="10"', 't="11"', 't="12"', 't="13"', 't="15"']
                 # we win by other player's discard
-                if any(i in message for i in win_suggestions):
+                if any(i in message for i in ron_win_suggestions):
                     is_chankan = False
                     # enemy called shouminkan and we can win there
                     if self.decoder.is_opened_set_message(message):

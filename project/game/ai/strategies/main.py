@@ -333,12 +333,6 @@ class BaseStrategy:
                 DecisionsLogger.debug(log.MELD_DEBUG, "Can't find discard candidate after meld. Abort melding.")
                 continue
 
-            if selected_tile.tile_to_discard == call_tile_136 // 4:
-                DecisionsLogger.debug(
-                    log.MELD_DEBUG, "We can't discard same tile that we used for meld. Abort melding."
-                )
-                continue
-
             if not all_tiles_are_suitable and self.is_tile_suitable(selected_tile.tile_to_discard * 4):
                 DecisionsLogger.debug(
                     log.MELD_DEBUG,
@@ -347,12 +341,16 @@ class BaseStrategy:
                 )
                 continue
 
-            # kuikae
-            # we can't discard the same tile
-            # or tile from the same suji
-            if not is_honor(selected_tile.tile_to_discard) and meld.type == MeldPrint.CHI:
-                call_tile_34 = call_tile_136 // 4
+            call_tile_34 = call_tile_136 // 4
+            # we can't discard the same tile that we called
+            if selected_tile.tile_to_discard == call_tile_34:
+                DecisionsLogger.debug(
+                    log.MELD_DEBUG, "We can't discard same tile that we used for meld. Abort melding."
+                )
+                continue
 
+            # we can't discard tile from the other end of the same ryanmen that we called
+            if not is_honor(selected_tile.tile_to_discard) and meld.type == MeldPrint.CHI:
                 if is_sou(selected_tile.tile_to_discard) and is_sou(call_tile_34):
                     same_suit = True
                 elif is_man(selected_tile.tile_to_discard) and is_man(call_tile_34):
@@ -365,15 +363,13 @@ class BaseStrategy:
                 if same_suit:
                     simplified_meld_0 = simplify(meld.tiles[0] // 4)
                     simplified_meld_1 = simplify(meld.tiles[1] // 4)
-                    simplified_call = simplify(call_tile_136 // 4)
+                    simplified_call = simplify(call_tile_34)
                     simplified_discard = simplify(selected_tile.tile_to_discard)
                     kuikae = False
                     if simplified_discard == simplified_call - 3:
                         kuikae_set = [simplified_call - 1, simplified_call - 2]
                         if simplified_meld_0 in kuikae_set and simplified_meld_1 in kuikae_set:
                             kuikae = True
-                    elif simplified_discard == simplified_call:
-                        kuikae = True
                     elif simplified_discard == simplified_call + 3:
                         kuikae_set = [simplified_call + 1, simplified_call + 2]
                         if simplified_meld_0 in kuikae_set and simplified_meld_1 in kuikae_set:

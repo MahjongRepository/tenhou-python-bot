@@ -166,13 +166,8 @@ class TenhouLogReproducer:
                 table.add_called_meld(player_seat, meld)
 
                 if player_seat == 0:
-                    # we had to delete called tile from hand
-                    # to have correct tiles count in the hand
                     if meld.type != MeldPrint.KAN and meld.type != MeldPrint.SHOUMINKAN:
                         table.player.draw_tile(meld.called_tile)
-
-                    if meld.type == MeldPrint.SHOUMINKAN:
-                        table.player.tiles.remove(meld.called_tile)
 
             if "<REACH" in tag and 'step="1"' in tag:
                 who_called_riichi = self._normalize_position(player_position, self.decoder.parse_who_called_riichi(tag))

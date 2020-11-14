@@ -865,7 +865,9 @@ class HandBuilder:
     def _assert_hand_correctness(self):
         # we must always have correct hand to discard from, e.g. we cannot discard when we have 13 tiles
         num_kans = len([x for x in self.player.melds if x.type == MeldPrint.KAN or x.type == MeldPrint.SHOUMINKAN])
-        assert len(self.player.tiles) == 14 + num_kans
+        total_tiles = len(self.player.tiles)
+        allowed_tiles = 14 + num_kans
+        assert total_tiles == allowed_tiles, f"{total_tiles} != {allowed_tiles}"
         assert (
             len(self.player.closed_hand) == 2
             or len(self.player.closed_hand) == 5

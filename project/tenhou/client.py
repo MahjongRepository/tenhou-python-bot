@@ -286,14 +286,16 @@ class TenhouClient(Client):
                     # Kyuushuu kyuuhai 「九種九牌」
                     # (9 kinds of honor or terminal tiles)
                     if 't="64"' in message:
-                        self._random_sleep(1, 2)
+                        self._random_sleep(0.3, 0.5)
                         # TODO aim for kokushi
                         self._send_message('<N type="9" />')
                         continue
 
+                    self.player.draw_tile(drawn_tile)
+
                     kan_type = self.player.should_call_kan(drawn_tile, False, main_player.in_riichi)
                     if kan_type:
-                        self._random_sleep(1, 2)
+                        self._random_sleep(0.5, 1)
 
                         if kan_type == MeldPrint.SHOUMINKAN:
                             meld_type = 5
@@ -312,7 +314,6 @@ class TenhouClient(Client):
                         self.table.add_discarded_tile(0, discarded_tile, True)
                         continue
 
-                    self.player.draw_tile(drawn_tile)
                     discarded_tile = self.player.discard_tile()
                     can_call_riichi = main_player.can_call_riichi()
 

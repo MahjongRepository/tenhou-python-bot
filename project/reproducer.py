@@ -130,13 +130,13 @@ class TenhouLogReproducer:
             if draw_regex.match(tag) and "UN" not in tag:
                 tile = self.decoder.parse_tile(tag)
                 player_sign = tag.upper()[1]
-                player_seat = self._normalize_position(player_position, draw_tags.index(player_sign))
+                player_seat = self._normalize_position(draw_tags.index(player_sign), player_position)
                 last_draws[player_seat] = tile
 
             if discard_regex.match(tag) and "DORA" not in tag:
                 tile = self.decoder.parse_tile(tag)
                 player_sign = tag.upper()[1]
-                player_seat = self._normalize_position(player_position, discard_tags.index(player_sign))
+                player_seat = self._normalize_position(discard_tags.index(player_sign), player_position)
 
                 if player_seat == 0:
                     table.player.discard_tile(tile)
@@ -162,7 +162,7 @@ class TenhouLogReproducer:
 
             if "<N who=" in tag:
                 meld = self.decoder.parse_meld(tag)
-                player_seat = self._normalize_position(player_position, meld.who)
+                player_seat = self._normalize_position(meld.who, player_position)
                 table.add_called_meld(player_seat, meld)
 
                 if player_seat == 0:
@@ -170,7 +170,7 @@ class TenhouLogReproducer:
                         table.player.draw_tile(meld.called_tile)
 
             if "<REACH" in tag and 'step="1"' in tag:
-                who_called_riichi = self._normalize_position(player_position, self.decoder.parse_who_called_riichi(tag))
+                who_called_riichi = self._normalize_position(self.decoder.parse_who_called_riichi(tag), player_position)
                 table.add_called_riichi(who_called_riichi)
 
     def _find_needed_round(self, wind, honba):

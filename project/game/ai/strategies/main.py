@@ -333,6 +333,12 @@ class BaseStrategy:
                 DecisionsLogger.debug(log.MELD_DEBUG, "Can't find discard candidate after meld. Abort melding.")
                 continue
 
+            if selected_tile.tile_to_discard == call_tile_136 // 4:
+                DecisionsLogger.debug(
+                    log.MELD_DEBUG, "We can't discard same tile that we used for meld. Abort melding."
+                )
+                continue
+
             if not all_tiles_are_suitable and self.is_tile_suitable(selected_tile.tile_to_discard * 4):
                 DecisionsLogger.debug(
                     log.MELD_DEBUG,

@@ -21,6 +21,7 @@ build_docker:
 GAMES=1
 run_battle:
 	docker run -u `id -u` -it --rm \
+		--cpus=".9" \
 		-v "$(CURRENT_DIR)project/:/app/" \
 		-v /dev/urandom:/dev/urandom \
 		mahjong_bot pypy3 bots_battle.py -g $(GAMES) $(ARGS)

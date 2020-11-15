@@ -5,6 +5,10 @@ from mahjong.constants import EAST
 from mahjong.utils import is_man, is_pin, is_sou, simplify
 
 
+def is_sangenpai(tile_34):
+    return tile_34 >= 31
+
+
 def make_random_letters_and_digit_string(length=15):
     random_chars = string.ascii_lowercase + string.digits
     return "".join(random.choice(random_chars) for _ in range(length))

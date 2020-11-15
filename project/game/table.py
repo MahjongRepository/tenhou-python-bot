@@ -3,6 +3,7 @@ from mahjong.constants import EAST, NORTH, SOUTH, WEST
 from mahjong.tile import Tile, TilesConverter
 from mahjong.utils import plus_dora
 from utils.decisions_logger import MeldPrint
+from utils.general import is_sangenpai
 
 
 class Table:
@@ -201,7 +202,7 @@ class Table:
             return NORTH
 
     def is_common_yakuhai(self, tile_34):
-        return tile_34 >= 31 or tile_34 == self.round_wind_tile
+        return is_sangenpai(tile_34) or tile_34 == self.round_wind_tile
 
     def _add_revealed_tile(self, tile):
         self.revealed_tiles_136.append(tile)

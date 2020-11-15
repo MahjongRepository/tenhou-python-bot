@@ -1,7 +1,7 @@
 import datetime
 import logging
 from collections import deque
-from random import randint, random, seed, shuffle
+from random import randint, random, seed
 
 from game.bots_battle.local_client import LocalClient
 from game.bots_battle.replays.tenhou import TenhouReplay
@@ -75,7 +75,8 @@ class GameManager:
         logger.info("Aka dora: {}".format(settings.FIVE_REDS))
         logger.info("Open tanyao: {}".format(settings.FIVE_REDS))
 
-        shuffle(self.clients, shuffle_seed)
+        seed(shuffle_seed())
+        self.clients = self._randomly_shuffle_array(self.clients)
         for i in range(0, len(self.clients)):
             self.clients[i].seat = i
 
@@ -853,26 +854,25 @@ class GameManager:
         # init seed for random generator
         seed(wall_seed)
 
-        def shuffle_wall(rand_seeds):
-            # for better wall shuffling we had to do it manually
-            # shuffle() didn't make wall to be really random
-            for x in range(0, 136):
-                src = x
-                dst = rand_seeds[x]
-
-                swap = wall[x]
-                wall[src] = wall[dst]
-                wall[dst] = swap
-
         wall = [i for i in range(0, 136)]
-        rand_one = [randint(0, 135) for _ in range(0, 136)]
-        rand_two = [randint(0, 135) for _ in range(0, 136)]
-
         # let's shuffle wall two times just in case
-        shuffle_wall(rand_one)
-        shuffle_wall(rand_two)
+        wall = self._randomly_shuffle_array(wall)
+        wall = self._randomly_shuffle_array(wall)
 
         return wall
+
+    def _randomly_shuffle_array(self, array):
+        rand_seeds = [randint(0, len(array) - 1) for _ in range(0, len(array))]
+        # for better wall shuffling we had to do it manually
+        # shuffle() didn't make wall to be really random
+        for x in range(0, len(array)):
+            src = x
+            dst = rand_seeds[x]
+
+            swap = array[x]
+            array[src] = array[dst]
+            array[dst] = swap
+        return array
 
     def add_new_dora_indicator(self):
         number_of_dora_indicators = len(self.dora_indicators)

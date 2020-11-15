@@ -1,8 +1,8 @@
 import datetime
 import logging
 import os
+import random
 from optparse import OptionParser
-from random import random
 
 import game.bots_battle
 from game.bots_battle.battle_config import BattleConfig
@@ -25,7 +25,7 @@ def main(number_of_games):
     if os.path.exists(seed_file):
         with open(seed_file, "r") as f:
             seeds = f.read().split("\n")
-            seeds = [float(x.strip()) for x in seeds if x.strip()]
+            seeds = [int(x.strip()) for x in seeds if x.strip()]
 
     replays_directory = os.path.join(battle_results_folder, "replays")
     if not os.path.exists(replays_directory):
@@ -55,7 +55,7 @@ def main(number_of_games):
         if i < len(seeds):
             seed_value = seeds[i]
         else:
-            seed_value = random()
+            seed_value = random.getrandbits(64)
 
         try:
             game.bots_battle.game_manager.shuffle_seed = lambda: seed_value

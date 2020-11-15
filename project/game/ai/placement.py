@@ -189,7 +189,7 @@ class PlacementHandler:
         if not placement:
             return Placement.NEUTRAL
 
-        if placement["place"] == 1:
+        if placement["place"] == 1 and placement["points"] >= Placement.COMFORTABLE_POINTS:
             assert placement["diff_with_2nd"] >= 0
             if placement["diff_with_2nd"] >= Placement.VERY_COMFORTABLE_DIFF:
                 return Placement.VERY_COMFORTABLE_FIRST
@@ -265,6 +265,7 @@ class Placement:
     VERY_COMFORTABLE_DIFF = 24100
     COMFORTABLE_DIFF_FOR_RISK = 18100
     COMFORTABLE_DIFF = 12100
+    COMFORTABLE_POINTS = 38000
 
     # player position in the game
     # must go in ascending order from bad to good, so we can use <, > operators with them

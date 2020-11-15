@@ -68,9 +68,7 @@ class DiscardOption:
     def serialize(self):
         data = {
             "tile": TilesConverter.to_one_line_string(
-                [self.tile_to_discard_34 * 4],
-                # FIXME return aka dora flag when we will know real tile 136 index
-                # print_aka_dora=self.player.table.has_aka_dora
+                [self.tile_to_discard_136],
             ),
             "shanten": self.shanten,
             "ukeire": self.ukeire,

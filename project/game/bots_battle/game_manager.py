@@ -287,10 +287,13 @@ class GameManager:
                         (drawn_tile_34 * 4) + 2,
                         (drawn_tile_34 * 4) + 3,
                     ]
+                    opened = False
+                    if kan_type == MeldPrint.SHOUMINKAN:
+                        opened = True
                     meld = MeldPrint(
                         kan_type,
                         tiles,
-                        opened=False,
+                        opened=opened,
                         called_tile=drawn_tile,
                         who=current_client.seat,
                         from_who=current_client.seat,
@@ -320,7 +323,7 @@ class GameManager:
                 current_client.table.add_discarded_tile(0, tile, True)
 
             who_called_riichi = None
-            if in_tempai and current_client.player.can_call_riichi():
+            if in_tempai and not current_client.player.is_open_hand and current_client.player.can_call_riichi():
                 who_called_riichi = current_client.seat
                 for client in self.clients:
                     client.table.add_called_riichi(self._enemy_position(who_called_riichi, client.seat))

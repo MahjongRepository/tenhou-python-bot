@@ -163,11 +163,64 @@ class TanyaoStrategy(BaseStrategy):
         return tile not in self.not_suitable_tiles
 
     def validate_meld(self, chosen_meld_dict):
+        # if we have already opened our hand, let's go by default riles
+        if self.player.is_open_hand:
+            return True
+
+        # otherwise let's not open hand if that does not improve our ukeire
+        closed_tiles_34 = TilesConverter.to_34_array(self.player.closed_hand)
+        waiting, shanten = self.player.ai.hand_builder.calculate_waits(
+            closed_tiles_34, closed_tiles_34, use_chiitoitsu=False
+        )
+        wait_to_ukeire = dict(
+            zip(waiting, [self.player.ai.hand_builder.count_tiles([x], closed_tiles_34) for x in waiting])
+        )
+        old_ukeire = sum(wait_to_ukeire.values())
         selected_tile = chosen_meld_dict["discard_tile"]
-        if selected_tile.shanten == 1 and selected_tile.ukeire >= 8:
+
+        logger_context = {
+            "old_shanten": shanten,
+            "old_ukeire": old_ukeire,
+            "new_shanten": selected_tile.shanten,
+            "new_ukeire": selected_tile.ukeire,
+        }
+
+        if selected_tile.shanten > shanten:
             DecisionsLogger.debug(
-                log.MELD_DEBUG, "We have a good 1 shanten tanyao hand, let's not open it without tempai."
+                log.MELD_DEBUG, "Opening into tanyao increases number of shanten, let's not do that", logger_context
             )
             return False
 
+        if selected_tile.shanten == shanten:
+            if old_ukeire >= selected_tile.ukeire:
+                DecisionsLogger.debug(
+                    log.MELD_DEBUG,
+                    "Opening into tanyao keeps same number of shanten and does not improve ukeire, let's not do that",
+                    logger_context,
+                )
+                return False
+
+            if old_ukeire != 0:
+                improvement_percent = ((selected_tile.ukeire - old_ukeire) / old_ukeire) * 100
+            else:
+                improvement_percent = selected_tile.ukeire * 100
+
+            if improvement_percent < 30:
+                DecisionsLogger.debug(
+                    log.MELD_DEBUG,
+                    "Opening into tanyao keeps same number of shanten and ukeire improvement is low, don't open",
+                    logger_context,
+                )
+                return False
+
+            DecisionsLogger.debug(
+                log.MELD_DEBUG,
+                "Opening into tanyao keeps same number of shanten and ukeire improvement is good, let's call meld",
+                logger_context,
+            )
+            return True
+
+        DecisionsLogger.debug(
+            log.MELD_DEBUG, "Opening into improves number of shanten, let's call meld", logger_context
+        )
         return True

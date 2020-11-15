@@ -1,4 +1,3 @@
-import pytest
 from game.ai.strategies.main import BaseStrategy
 from game.ai.strategies.tanyao import TanyaoStrategy
 from game.table import Table
@@ -168,6 +167,70 @@ def test_open_hand_and_discard_tiles_logic():
     tile_to_discard = table.player.discard_tile()
 
     assert tiles_to_string([tile_to_discard]) == "4z"
+
+
+def test_open_hand_and_discard_tiles_logic_advanced():
+    # we should choose between one of the ryanmens to discard
+    # in this case - discard the one that leads us to atodzuke and has less tanyao ukeire
+    # despite the fact that general ukeire is higher
+    table = _make_table()
+    table.add_discarded_tile(2, string_to_136_tile(pin="4"), False)
+    table.add_discarded_tile(2, string_to_136_tile(pin="7"), False)
+    table.add_discarded_tile(2, string_to_136_tile(sou="4"), False)
+    table.add_discarded_tile(2, string_to_136_tile(sou="7"), False)
+
+    tiles = string_to_136_array(man="236777", sou="56", pin="22256")
+    table.player.init_hand(tiles)
+    meld = make_meld(MeldPrint.PON, pin="222")
+    table.player.add_called_meld(meld)
+    tile = string_to_136_tile(man="6")
+    table.player.draw_tile(tile)
+    tile_to_discard = table.player.discard_tile()
+    assert tiles_to_string([tile_to_discard]) == "2m" or tiles_to_string([tile_to_discard]) == "3m"
+
+    # now same situation, but better ryanmen is no atodzuke
+    table = _make_table()
+    table.add_discarded_tile(2, string_to_136_tile(pin="4"), False)
+    table.add_discarded_tile(2, string_to_136_tile(pin="7"), False)
+    table.add_discarded_tile(2, string_to_136_tile(sou="4"), False)
+    table.add_discarded_tile(2, string_to_136_tile(sou="7"), False)
+
+    tiles = string_to_136_array(man="346777", sou="56", pin="22256")
+    table.player.init_hand(tiles)
+    meld = make_meld(MeldPrint.PON, pin="222")
+    table.player.add_called_meld(meld)
+    tile = string_to_136_tile(man="6")
+    table.player.draw_tile(tile)
+    tile_to_discard = table.player.discard_tile()
+    assert (
+        tiles_to_string([tile_to_discard]) == "5s"
+        or tiles_to_string([tile_to_discard]) == "6s"
+        or tiles_to_string([tile_to_discard]) == "5p"
+        or tiles_to_string([tile_to_discard]) == "6p"
+    )
+
+    # now same situation as the first one, but ryanshanten
+    table = _make_table()
+    table.add_discarded_tile(2, string_to_136_tile(pin="4"), False)
+    table.add_discarded_tile(2, string_to_136_tile(pin="7"), False)
+    table.add_discarded_tile(2, string_to_136_tile(sou="4"), False)
+    table.add_discarded_tile(2, string_to_136_tile(sou="7"), False)
+    table.add_discarded_tile(2, string_to_136_tile(man="5"), False)
+    table.add_discarded_tile(2, string_to_136_tile(man="8"), False)
+
+    tiles = string_to_136_array(man="2367", sou="2356", pin="22256")
+    table.player.init_hand(tiles)
+    meld = make_meld(MeldPrint.PON, pin="222")
+    table.player.add_called_meld(meld)
+    tile = string_to_136_tile(man="8")
+    table.player.draw_tile(tile)
+    tile_to_discard = table.player.discard_tile()
+    assert (
+        tiles_to_string([tile_to_discard]) == "2m"
+        or tiles_to_string([tile_to_discard]) == "3m"
+        or tiles_to_string([tile_to_discard]) == "2s"
+        or tiles_to_string([tile_to_discard]) == "3s"
+    )
 
 
 def test_dont_count_pairs_in_already_opened_hand():
@@ -406,7 +469,7 @@ def test_dont_meld_agari():
     assert meld is None
 
 
-def test_dont_open_tanyao_with_good_one_shanten_hand_and_without_tempai():
+def test_dont_open_tanyao_with_good_one_shanten_hand_into_one_shanten():
     table = _make_table()
     table.has_aka_dora = True
     table.add_dora_indicator(string_to_136_tile(pin="2"))
@@ -429,6 +492,26 @@ def test_dont_open_tanyao_with_good_one_shanten_hand_and_without_tempai():
     tile = FIVE_RED_SOU + 1  # not aka dora
     meld, _ = table.player.try_to_call_meld(tile, True)
     assert meld is None
+
+    # we must still take chi when improving from 2-shanten to 1-shanten though
+    tiles = string_to_136_array(man="34788", sou="3478", pin="135") + [FIVE_RED_SOU]  # aka dora
+    table.player.init_hand(tiles)
+    tile = string_to_136_tile(sou="6")
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is not None
+    assert tiles_to_string(meld.tiles) == "678s"
+
+    tile = FIVE_RED_SOU + 1  # not aka dora
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is None
+
+    # from 2-shanten to 2-shanten, but with clear improvement and dora pon
+    tiles = string_to_136_array(man="2257", sou="3456899", pin="68")
+    table.player.init_hand(tiles)
+    tile = string_to_136_tile(man="2")
+    meld, _ = table.player.try_to_call_meld(tile, False)
+    assert meld is not None
+    assert tiles_to_string(meld.tiles) == "222m"
 
 
 def test_kuikae_simple():
@@ -481,43 +564,84 @@ def test_kuikae_simple():
     assert meld is not None
 
 
-@pytest.mark.skip("Need to implement logic for these tests. Github issue #156")
 def test_kuikae_advanced():
+    # case 0: sanity check
+    table = _make_table()
+    table.add_dora_indicator(string_to_136_tile(pin="2"))
+    tiles = string_to_136_array(man="234", sou="23456", pin="33359")
+    table.player.init_hand(tiles)
+    table.player.add_called_meld(make_meld(MeldPrint.CHI, man="234"))
+    # just force tanyao for the test
+    table.player.ai.current_strategy = TanyaoStrategy(BaseStrategy.TANYAO, table.player)
+    _assert_tanyao(table.player)
+
+    tile = string_to_136_array(sou="4444")[1]
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is not None
+
     # case 1: allowed chi
     table = _make_table()
     table.add_dora_indicator(string_to_136_tile(pin="2"))
-    # but with opened hand we don't need to count not suitable tiles as ukeire
     tiles = string_to_136_array(man="234", sou="123456", pin="3335")
     table.player.init_hand(tiles)
     table.player.add_called_meld(make_meld(MeldPrint.CHI, man="234"))
+    # just force tanyao for the test
+    table.player.ai.current_strategy = TanyaoStrategy(BaseStrategy.TANYAO, table.player)
+    _assert_tanyao(table.player)
 
-    tile = string_to_136_tile(sou="4")
+    tile = string_to_136_array(sou="4444")[1]
     meld, _ = table.player.try_to_call_meld(tile, True)
     assert meld is not None
 
     # case 2: another allowed chi
     table = _make_table()
     table.add_dora_indicator(string_to_136_tile(pin="2"))
-    # but with opened hand we don't need to count not suitable tiles as ukeire
     tiles = string_to_136_array(man="234", sou="123345", pin="3335")
     table.player.init_hand(tiles)
     table.player.add_called_meld(make_meld(MeldPrint.CHI, man="234"))
+    # just force tanyao for the test
+    table.player.ai.current_strategy = TanyaoStrategy(BaseStrategy.TANYAO, table.player)
+    _assert_tanyao(table.player)
 
-    tile = string_to_136_tile(sou="4")
+    tile = string_to_136_array(sou="4444")[1]
     meld, _ = table.player.try_to_call_meld(tile, True)
     assert meld is not None
 
     # case 3: another allowed chi
     table = _make_table()
     table.add_dora_indicator(string_to_136_tile(pin="2"))
-    # but with opened hand we don't need to count not suitable tiles as ukeire
     tiles = string_to_136_array(man="234", sou="12345", pin="33355")
     table.player.init_hand(tiles)
     table.player.add_called_meld(make_meld(MeldPrint.CHI, man="234"))
+    # just force tanyao for the test
+    table.player.ai.current_strategy = TanyaoStrategy(BaseStrategy.TANYAO, table.player)
+    _assert_tanyao(table.player)
 
-    tile = string_to_136_tile(sou="4")
+    tile = string_to_136_array(sou="4444")[1]
     meld, _ = table.player.try_to_call_meld(tile, True)
     assert meld is not None
+
+    # case 4: useless chi, don't do that
+    table = _make_table()
+    table.add_dora_indicator(string_to_136_tile(pin="2"))
+    tiles = string_to_136_array(man="234", sou="234567", pin="3335")
+    table.player.init_hand(tiles)
+    table.player.add_called_meld(make_meld(MeldPrint.CHI, man="234"))
+    # just force tanyao for the test
+    table.player.ai.current_strategy = TanyaoStrategy(BaseStrategy.TANYAO, table.player)
+    _assert_tanyao(table.player)
+
+    tile = string_to_136_array(sou="2222")[2]
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is None
+
+    tile = string_to_136_array(sou="5555")[2]
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is None
+
+    tile = string_to_136_array(sou="8888")[2]
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is None
 
 
 def _make_table():

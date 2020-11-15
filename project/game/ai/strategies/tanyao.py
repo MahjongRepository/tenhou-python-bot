@@ -4,6 +4,7 @@ from mahjong.constants import HONOR_INDICES, TERMINAL_INDICES
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_honor, is_tile_strictly_isolated
 from utils.decisions_logger import DecisionsLogger
+from utils.test_helpers import tiles_to_string
 
 
 class TanyaoStrategy(BaseStrategy):
@@ -179,6 +180,8 @@ class TanyaoStrategy(BaseStrategy):
         selected_tile = chosen_meld_dict["discard_tile"]
 
         logger_context = {
+            "hand": tiles_to_string(self.player.closed_hand),
+            "meld": chosen_meld_dict,
             "old_shanten": shanten,
             "old_ukeire": old_ukeire,
             "new_shanten": selected_tile.shanten,
@@ -221,6 +224,6 @@ class TanyaoStrategy(BaseStrategy):
             return True
 
         DecisionsLogger.debug(
-            log.MELD_DEBUG, "Opening into improves number of shanten, let's call meld", logger_context
+            log.MELD_DEBUG, "Opening into tanyao improves number of shanten, let's call meld", logger_context
         )
         return True

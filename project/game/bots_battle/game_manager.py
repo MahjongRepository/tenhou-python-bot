@@ -516,20 +516,16 @@ class GameManager:
         if not client.player.in_tempai:
             return False
 
-        # check for furiten
-        for item in client.player.discards:
-            discarded_tile = item.value // 4
-            if discarded_tile in client.player.ai.waiting:
-                return False
-
         tiles = client.player.tiles
         is_agari = self.agari.is_agari(TilesConverter.to_34_array(tiles + [win_tile]), client.player.meld_34_tiles)
         if not is_agari:
             return False
 
-        # bot decided to not call ron
-        if not client.player.should_call_win(win_tile, False, shifted_enemy_seat):
-            return False
+        # check for furiten
+        for item in client.player.discards:
+            discarded_tile = item.value // 4
+            if discarded_tile in client.player.ai.waiting:
+                return False
 
         # it can be situation when we are in agari state
         # but our hand doesn't contain any yaku
@@ -539,7 +535,12 @@ class GameManager:
                 win_tile // 4,
                 is_tsumo=False,
             )
-            return result.error is None
+            if result.error:
+                return False
+
+        # bot decided to not call ron
+        if not client.player.should_call_win(win_tile, False, shifted_enemy_seat):
+            return False
 
         return True
 

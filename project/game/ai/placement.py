@@ -147,14 +147,14 @@ class PlacementHandler:
         if not self.is_west_4:
             # check if we can make it to the west round
             if num_players_over_30000 == 0:
-                DecisionsLogger.debug(log.AGARI, "Decided to take ron for west round", logger_context)
+                DecisionsLogger.debug(log.AGARI, "Decided to take ron when no enemies have 30k", logger_context)
                 return True
 
             if num_players_over_30000 == 1:
                 if enemy_seat == first_place.seat:
                     if first_place.scores < 30000 + direct_hit_cost:
                         DecisionsLogger.debug(
-                            log.AGARI, "Decided to take ron from first place for west round", logger_context
+                            log.AGARI, "Decided to take ron from first place, so no enemies have 30k", logger_context
                         )
                         return True
 

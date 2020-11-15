@@ -117,11 +117,11 @@ class YakuhaiStrategy(BaseStrategy):
             if is_open_hand:
                 if len(valued_pons) == 0:
                     # don't destroy our only yakuhai pair
-                    if len(valued_pairs) == 1 and item.tile_to_discard in valued_pairs:
+                    if len(valued_pairs) == 1 and item.tile_to_discard_34 in valued_pairs:
                         continue
                 elif len(valued_pons) == 1:
                     # don't destroy our only yakuhai pon
-                    if item.tile_to_discard in valued_pons:
+                    if item.tile_to_discard_34 in valued_pons:
                         continue
 
                 acceptable_options.append(item)

@@ -751,32 +751,32 @@ def test_calculate_second_level_ukeire():
     discard_options, _ = player.ai.hand_builder.find_discard_options()
 
     tile = string_to_136_tile(man="4")
-    discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
+    discard_option = [x for x in discard_options if x.tile_to_discard_34 == tile // 4][0]
     player.ai.hand_builder.calculate_second_level_ukeire(discard_option)
     assert discard_option.ukeire_second == 108
 
     tile = string_to_136_tile(man="3")
-    discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
+    discard_option = [x for x in discard_options if x.tile_to_discard_34 == tile // 4][0]
     player.ai.hand_builder.calculate_second_level_ukeire(discard_option)
     assert discard_option.ukeire_second == 108
 
     tile = string_to_136_tile(pin="2")
-    discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
+    discard_option = [x for x in discard_options if x.tile_to_discard_34 == tile // 4][0]
     player.ai.hand_builder.calculate_second_level_ukeire(discard_option)
     assert discard_option.ukeire_second == 96
 
     tile = string_to_136_tile(pin="3")
-    discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
+    discard_option = [x for x in discard_options if x.tile_to_discard_34 == tile // 4][0]
     player.ai.hand_builder.calculate_second_level_ukeire(discard_option)
     assert discard_option.ukeire_second == 96
 
     tile = string_to_136_tile(pin="5")
-    discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
+    discard_option = [x for x in discard_options if x.tile_to_discard_34 == tile // 4][0]
     player.ai.hand_builder.calculate_second_level_ukeire(discard_option)
     assert discard_option.ukeire_second == 96
 
     tile = string_to_136_tile(pin="6")
-    discard_option = [x for x in discard_options if x.tile_to_discard == tile // 4][0]
+    discard_option = [x for x in discard_options if x.tile_to_discard_34 == tile // 4][0]
     player.ai.hand_builder.calculate_second_level_ukeire(discard_option)
     assert discard_option.ukeire_second == 96
 

@@ -121,7 +121,7 @@ class HandBuilder:
             return discard_option.find_tile_in_hand(closed_hand)
 
         last_draw_34 = self.player.last_draw and self.player.last_draw // 4 or None
-        if self.player.last_draw not in AKA_DORA_LIST and last_draw_34 == discard_option.tile_to_discard:
+        if self.player.last_draw not in AKA_DORA_LIST and last_draw_34 == discard_option.tile_to_discard_34:
             return self.player.last_draw
         else:
             return discard_option.find_tile_in_hand(closed_hand)
@@ -410,7 +410,7 @@ class HandBuilder:
         return (
             -x.ukeire_second,
             -x.ukeire,
-            -is_tile_strictly_isolated(closed_hand_34, x.tile_to_discard),
+            -is_tile_strictly_isolated(closed_hand_34, x.tile_to_discard_34),
             x.valuation,
         )
 
@@ -752,7 +752,9 @@ class HandBuilder:
         assert possible_options
 
         closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
-        isolated_tiles = [x for x in possible_options if is_tile_strictly_isolated(closed_hand_34, x.tile_to_discard)]
+        isolated_tiles = [
+            x for x in possible_options if is_tile_strictly_isolated(closed_hand_34, x.tile_to_discard_34)
+        ]
         # isolated tiles should be discarded first
         if isolated_tiles:
             possible_options = isolated_tiles

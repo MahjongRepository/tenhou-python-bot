@@ -87,7 +87,7 @@ class BaseStrategy:
         # mark all not suitable tiles as ready to discard
         # even if they not should be discarded by uke-ire
         for x in discard_options:
-            if not self.is_tile_suitable(x.tile_to_discard * 4):
+            if not self.is_tile_suitable(x.tile_to_discard_34 * 4):
                 x.had_to_be_discarded = True
 
         return discard_options
@@ -331,7 +331,7 @@ class BaseStrategy:
                 DecisionsLogger.debug(log.MELD_DEBUG, "Can't find discard candidate after meld. Abort melding.")
                 continue
 
-            if not all_tiles_are_suitable and self.is_tile_suitable(selected_tile.tile_to_discard * 4):
+            if not all_tiles_are_suitable and self.is_tile_suitable(selected_tile.tile_to_discard_34 * 4):
                 DecisionsLogger.debug(
                     log.MELD_DEBUG,
                     "We have tiles in our hand that are not suitable to current strategy, "
@@ -341,19 +341,19 @@ class BaseStrategy:
 
             call_tile_34 = call_tile_136 // 4
             # we can't discard the same tile that we called
-            if selected_tile.tile_to_discard == call_tile_34:
+            if selected_tile.tile_to_discard_34 == call_tile_34:
                 DecisionsLogger.debug(
                     log.MELD_DEBUG, "We can't discard same tile that we used for meld. Abort melding."
                 )
                 continue
 
             # we can't discard tile from the other end of the same ryanmen that we called
-            if not is_honor(selected_tile.tile_to_discard) and meld.type == MeldPrint.CHI:
-                if is_sou(selected_tile.tile_to_discard) and is_sou(call_tile_34):
+            if not is_honor(selected_tile.tile_to_discard_34) and meld.type == MeldPrint.CHI:
+                if is_sou(selected_tile.tile_to_discard_34) and is_sou(call_tile_34):
                     same_suit = True
-                elif is_man(selected_tile.tile_to_discard) and is_man(call_tile_34):
+                elif is_man(selected_tile.tile_to_discard_34) and is_man(call_tile_34):
                     same_suit = True
-                elif is_pin(selected_tile.tile_to_discard) and is_pin(call_tile_34):
+                elif is_pin(selected_tile.tile_to_discard_34) and is_pin(call_tile_34):
                     same_suit = True
                 else:
                     same_suit = False
@@ -362,7 +362,7 @@ class BaseStrategy:
                     simplified_meld_0 = simplify(meld.tiles[0] // 4)
                     simplified_meld_1 = simplify(meld.tiles[1] // 4)
                     simplified_call = simplify(call_tile_34)
-                    simplified_discard = simplify(selected_tile.tile_to_discard)
+                    simplified_discard = simplify(selected_tile.tile_to_discard_34)
                     kuikae = False
                     if simplified_discard == simplified_call - 3:
                         kuikae_set = [simplified_call - 1, simplified_call - 2]

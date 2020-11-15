@@ -42,7 +42,7 @@ class TileDangerHandler:
         kabe_tiles = self.player.ai.kabe.find_all_kabe(closed_hand_34)
         suji_tiles = self.player.ai.suji.find_suji([x.value for x in enemy_analyzer.enemy.discards])
         for discard_option in discard_candidates:
-            tile_34 = discard_option.tile_to_discard
+            tile_34 = discard_option.tile_to_discard_34
             tile_136 = discard_option.find_tile_in_hand(self.player.closed_hand)
             number_of_revealed_tiles = self.player.number_of_revealed_tiles(tile_34, closed_hand_34)
 
@@ -581,7 +581,7 @@ class TileDangerHandler:
 
     def _update_discard_candidate(self, tile_34, discard_candidates, player_seat, danger):
         for discard_candidate in discard_candidates:
-            if discard_candidate.tile_to_discard == tile_34:
+            if discard_candidate.tile_to_discard_34 == tile_34:
                 # we found safe tile, in that case we can ignore all other metrics
                 if TileDanger.is_safe(danger):
                     discard_candidate.danger.clear_danger(player_seat)

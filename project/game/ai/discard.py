@@ -62,13 +62,13 @@ class DiscardOption:
         self.calculate_value()
 
     @property
-    def tile_to_discard(self):
+    def tile_to_discard_34(self):
         return self.tile_to_discard_136 // 4
 
     def serialize(self):
         data = {
             "tile": TilesConverter.to_one_line_string(
-                [self.tile_to_discard * 4],
+                [self.tile_to_discard_34 * 4],
                 # FIXME return aka dora flag when we will know real tile 136 index
                 # print_aka_dora=self.player.table.has_aka_dora
             ),
@@ -104,9 +104,9 @@ class DiscardOption:
         value = 100
         honored_value = 20
 
-        if is_honor(self.tile_to_discard):
-            if self.tile_to_discard in self.player.valued_honors:
-                count_of_winds = [x for x in self.player.valued_honors if x == self.tile_to_discard]
+        if is_honor(self.tile_to_discard_34):
+            if self.tile_to_discard_34 in self.player.valued_honors:
+                count_of_winds = [x for x in self.player.valued_honors if x == self.tile_to_discard_34]
                 # for west-west, east-east we had to double tile value
                 value += honored_value * len(count_of_winds)
         else:
@@ -117,7 +117,7 @@ class DiscardOption:
             else:
                 suit_tile_grades = [10, 20, 40, 50, 30, 50, 40, 20, 10]
 
-            simplified_tile = simplify(self.tile_to_discard)
+            simplified_tile = simplify(self.tile_to_discard_34)
             value += suit_tile_grades[simplified_tile]
 
             for indicator in self.player.table.dora_indicators:
@@ -126,15 +126,15 @@ class DiscardOption:
                     continue
 
                 # indicator and tile not from the same suit
-                if is_sou(indicator_34) and not is_sou(self.tile_to_discard):
+                if is_sou(indicator_34) and not is_sou(self.tile_to_discard_34):
                     continue
 
                 # indicator and tile not from the same suit
-                if is_man(indicator_34) and not is_man(self.tile_to_discard):
+                if is_man(indicator_34) and not is_man(self.tile_to_discard_34):
                     continue
 
                 # indicator and tile not from the same suit
-                if is_pin(indicator_34) and not is_pin(self.tile_to_discard):
+                if is_pin(indicator_34) and not is_pin(self.tile_to_discard_34):
                     continue
 
                 simplified_indicator = simplify(indicator_34)
@@ -158,11 +158,11 @@ class DiscardOption:
         self.count_of_dora = count_of_dora
         value += count_of_dora * DiscardOption.DORA_VALUE
 
-        if is_honor(self.tile_to_discard):
+        if is_honor(self.tile_to_discard_34):
             # depends on how much honor tiles were discarded
             # we will decrease tile value
             discard_percentage = [100, 75, 20, 0, 0]
-            discarded_tiles = self.player.table.revealed_tiles[self.tile_to_discard]
+            discarded_tiles = self.player.table.revealed_tiles[self.tile_to_discard_34]
 
             value = (value * discard_percentage[discarded_tiles]) / 100
 

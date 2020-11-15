@@ -384,20 +384,20 @@ def test_remaining_tiles_and_enemy_discard():
     player.init_hand(tiles)
 
     results, shanten = player.ai.hand_builder.find_discard_options()
-    result = [x for x in results if x.tile_to_discard == string_to_34_tile(sou="1")][0]
+    result = [x for x in results if x.tile_to_discard_34 == string_to_34_tile(sou="1")][0]
     assert result.ukeire == 8
 
     player.table.add_discarded_tile(1, string_to_136_tile(sou="5"), False)
 
     results, shanten = player.ai.hand_builder.find_discard_options()
-    result = [x for x in results if x.tile_to_discard == string_to_34_tile(sou="1")][0]
+    result = [x for x in results if x.tile_to_discard_34 == string_to_34_tile(sou="1")][0]
     assert result.ukeire == 7
 
     player.table.add_discarded_tile(2, string_to_136_tile(sou="5"), False)
     player.table.add_discarded_tile(3, string_to_136_tile(sou="8"), False)
 
     results, shanten = player.ai.hand_builder.find_discard_options()
-    result = [x for x in results if x.tile_to_discard == string_to_34_tile(sou="1")][0]
+    result = [x for x in results if x.tile_to_discard_34 == string_to_34_tile(sou="1")][0]
     assert result.ukeire == 5
 
 
@@ -409,7 +409,7 @@ def test_remaining_tiles_and_opened_meld():
     player.init_hand(tiles)
 
     results, shanten = player.ai.hand_builder.find_discard_options()
-    result = [x for x in results if x.tile_to_discard == string_to_34_tile(sou="1")][0]
+    result = [x for x in results if x.tile_to_discard_34 == string_to_34_tile(sou="1")][0]
     assert result.ukeire == 8
 
     # was discard and set was opened
@@ -420,7 +420,7 @@ def test_remaining_tiles_and_opened_meld():
     player.table.add_called_meld(3, meld)
 
     results, shanten = player.ai.hand_builder.find_discard_options()
-    result = [x for x in results if x.tile_to_discard == string_to_34_tile(sou="1")][0]
+    result = [x for x in results if x.tile_to_discard_34 == string_to_34_tile(sou="1")][0]
     assert result.ukeire == 5
 
     # was discard and set was opened
@@ -431,7 +431,7 @@ def test_remaining_tiles_and_opened_meld():
     player.table.add_called_meld(2, meld)
 
     results, shanten = player.ai.hand_builder.find_discard_options()
-    result = [x for x in results if x.tile_to_discard == string_to_34_tile(sou="1")][0]
+    result = [x for x in results if x.tile_to_discard_34 == string_to_34_tile(sou="1")][0]
     assert result.ukeire == 4
 
 
@@ -443,13 +443,13 @@ def test_remaining_tiles_and_dora_indicators():
     player.init_hand(tiles)
 
     results, shanten = player.ai.hand_builder.find_discard_options()
-    result = [x for x in results if x.tile_to_discard == string_to_34_tile(sou="1")][0]
+    result = [x for x in results if x.tile_to_discard_34 == string_to_34_tile(sou="1")][0]
     assert result.ukeire == 8
 
     table.add_dora_indicator(string_to_136_tile(sou="8"))
 
     results, shanten = player.ai.hand_builder.find_discard_options()
-    result = [x for x in results if x.tile_to_discard == string_to_34_tile(sou="1")][0]
+    result = [x for x in results if x.tile_to_discard_34 == string_to_34_tile(sou="1")][0]
     assert result.ukeire == 7
 
 

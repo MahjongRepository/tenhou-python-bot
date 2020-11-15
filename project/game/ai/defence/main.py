@@ -165,13 +165,12 @@ class TileDangerHandler:
             hand_weighted_cost = 0
             tune = 0
             shanten = discard_option.shanten
-            # FIXME: we should get tile_136 directly from discard_option as it may be important if it's an aka
-            tile_to_discard_136 = discard_option.tile_to_discard * 4
+            tile_136 = discard_option.tile_to_discard_136
 
             if discard_option.danger.get_total_danger_for_player(threatening_player.enemy.seat) == 0:
                 threatening_player_hand_cost = 0
             else:
-                threatening_player_hand_cost = threatening_player.get_assumed_hand_cost(tile_to_discard_136)
+                threatening_player_hand_cost = threatening_player.get_assumed_hand_cost(tile_136)
 
             # fast path: we don't need to calculate all the stuff if this tile is safe against this enemy
             if threatening_player_hand_cost == 0:

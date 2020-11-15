@@ -87,7 +87,7 @@ class BaseStrategy:
         # mark all not suitable tiles as ready to discard
         # even if they not should be discarded by uke-ire
         for x in discard_options:
-            if not self.is_tile_suitable(x.tile_to_discard_34 * 4):
+            if not self.is_tile_suitable(x.tile_to_discard_136):
                 x.had_to_be_discarded = True
 
         return discard_options
@@ -331,7 +331,7 @@ class BaseStrategy:
                 DecisionsLogger.debug(log.MELD_DEBUG, "Can't find discard candidate after meld. Abort melding.")
                 continue
 
-            if not all_tiles_are_suitable and self.is_tile_suitable(selected_tile.tile_to_discard_34 * 4):
+            if not all_tiles_are_suitable and self.is_tile_suitable(selected_tile.tile_to_discard_136):
                 DecisionsLogger.debug(
                     log.MELD_DEBUG,
                     "We have tiles in our hand that are not suitable to current strategy, "

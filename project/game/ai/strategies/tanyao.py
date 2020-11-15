@@ -128,7 +128,7 @@ class TanyaoStrategy(BaseStrategy):
         results = []
         not_suitable_tiles = []
         for item in discard_options:
-            if not self.is_tile_suitable(item.tile_to_discard_34 * 4):
+            if not self.is_tile_suitable(item.tile_to_discard_136):
                 item.had_to_be_discarded = True
                 not_suitable_tiles.append(item)
                 continue

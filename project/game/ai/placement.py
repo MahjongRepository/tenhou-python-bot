@@ -194,7 +194,7 @@ class PlacementHandler:
             if placement["diff_with_2nd"] >= Placement.VERY_COMFORTABLE_DIFF:
                 return Placement.VERY_COMFORTABLE_FIRST
 
-            if placement["diff_with_2nd"] >= Placement.COMFORTABLE_FIRST:
+            if placement["diff_with_2nd"] >= Placement.COMFORTABLE_DIFF:
                 return Placement.COMFORTABLE_FIRST
 
         return Placement.NEUTRAL

@@ -438,9 +438,12 @@ class MahjongAI:
             is_haitei=is_hotei,
         )
         assert hand_response is not None
-        assert not hand_response.error, hand_response.error
-        cost = hand_response.cost
 
+        # we has agari, but we don't have yaku
+        if hand_response.error:
+            return False
+
+        cost = hand_response.cost
         return self.placement.should_call_win(cost, is_tsumo, enemy_seat)
 
     def enemy_called_riichi(self, enemy_seat):

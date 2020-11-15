@@ -208,6 +208,7 @@ class PlacementHandler:
 
         return {
             "place": current_place + 1,
+            "points": self.player.scores,
             "diff_with_1st": abs(self.player.scores - players_by_points[0].scores),
             "diff_with_2nd": abs(self.player.scores - players_by_points[1].scores),
             "diff_with_3rd": abs(self.player.scores - players_by_points[2].scores),

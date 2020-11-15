@@ -38,10 +38,10 @@ class Riichi:
         hand_value_with_riichi = self.player.ai.estimate_hand_value_or_get_from_cache(waiting, call_riichi=True)
 
         must_riichi = self.player.ai.placement.must_riichi(
-            hand_value.yaku is not None and hand_value.cost is not None,
-            count_tiles,
-            hand_value.cost and hand_value.cost["main"] or 0,
-            hand_value_with_riichi.cost["main"],
+            has_yaku=(hand_value.yaku is not None and hand_value.cost is not None),
+            num_waits=count_tiles,
+            cost_with_riichi=hand_value_with_riichi.cost["main"],
+            cost_with_damaten=(hand_value.cost and hand_value.cost["main"] or 0),
         )
         if must_riichi == Placement.MUST_RIICHI:
             return True
@@ -262,10 +262,10 @@ class Riichi:
         min_cost_with_riichi = hand_costs_with_riichi and min(hand_costs_with_riichi) or 0
 
         must_riichi = self.player.ai.placement.must_riichi(
-            waits_with_yaku == len(self.player.ai.waiting),
-            count_tiles,
-            min_cost,
-            min_cost_with_riichi,
+            has_yaku=waits_with_yaku == len(self.player.ai.waiting),
+            num_waits=count_tiles,
+            cost_with_riichi=min_cost_with_riichi,
+            cost_with_damaten=min_cost,
         )
         if must_riichi == Placement.MUST_RIICHI:
             return True

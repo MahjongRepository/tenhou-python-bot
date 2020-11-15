@@ -5,7 +5,7 @@ from game.table import Table
 from mahjong.constants import CHUN, EAST, FIVE_RED_PIN, FIVE_RED_SOU, HAKU, HATSU, NORTH, SOUTH, WEST
 from mahjong.tile import Tile
 from utils.decisions_logger import MeldPrint
-from utils.test_helpers import make_meld, string_to_34_tile, string_to_136_array, string_to_136_tile, tiles_to_string
+from utils.test_helpers import make_meld, string_to_136_array, string_to_136_tile, tiles_to_string
 
 
 def test_discard_tile():
@@ -18,7 +18,7 @@ def test_discard_tile():
     player.draw_tile(tile)
 
     discarded_tile = player.discard_tile()
-    assert tiles_to_string([discarded_tile]) == "9m"
+    assert tiles_to_string([discarded_tile]) == "9m" or tiles_to_string([discarded_tile]) == "9p"
     assert player.ai.shanten == 2
 
     player.draw_tile(string_to_136_tile(pin="4"))
@@ -28,7 +28,7 @@ def test_discard_tile():
 
     player.draw_tile(string_to_136_tile(pin="3"))
     discarded_tile = player.discard_tile()
-    assert tiles_to_string([discarded_tile]) == "9p"
+    assert tiles_to_string([discarded_tile]) == "9p" or tiles_to_string([discarded_tile]) == "9m"
     assert player.ai.shanten == 1
 
     player.draw_tile(string_to_136_tile(man="4"))
@@ -67,6 +67,7 @@ def test_discard_tile_force_tsumogiri():
 def test_calculate_suit_tiles_value():
     table = Table()
     player = table.player
+    table.has_aka_dora = False
 
     # 0 - 8   man
     # 9 - 17  pin
@@ -104,13 +105,16 @@ def test_calculate_suit_tiles_value():
     for item in results:
         tile = item[0]
         value = item[1]
-        option = DiscardOption(player, tile, 0, [], 0)
-        assert option.valuation == value
+        assert DiscardOption(player, tile * 4, 0, [], 0).valuation == value
+        assert DiscardOption(player, tile * 4 + 1, 0, [], 0).valuation == value
+        assert DiscardOption(player, tile * 4 + 2, 0, [], 0).valuation == value
+        assert DiscardOption(player, tile * 4 + 3, 0, [], 0).valuation == value
 
 
 def test_calculate_suit_tiles_value_and_tanyao_hand():
     table = Table()
     player = table.player
+    table.has_aka_dora = False
     player.ai.current_strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
 
     # 0 - 8   man
@@ -149,47 +153,50 @@ def test_calculate_suit_tiles_value_and_tanyao_hand():
     for item in results:
         tile = item[0]
         value = item[1]
-        option = DiscardOption(player, tile, 0, [], 0)
-        assert option.valuation == value
+        assert DiscardOption(player, tile * 4, 0, [], 0).valuation == value
+        assert DiscardOption(player, tile * 4 + 1, 0, [], 0).valuation == value
+        assert DiscardOption(player, tile * 4 + 2, 0, [], 0).valuation == value
+        assert DiscardOption(player, tile * 4 + 3, 0, [], 0).valuation == value
 
 
 def test_calculate_honor_tiles_value():
     table = Table()
     player = table.player
     player.dealer_seat = 3
+    table.has_aka_dora = False
 
     # valuable honor, wind of the round
-    option = DiscardOption(player, EAST, 0, [], 0)
+    option = DiscardOption(player, EAST * 4, 0, [], 0)
     assert option.valuation == 120
 
     # valuable honor, wind of the player
-    option = DiscardOption(player, SOUTH, 0, [], 0)
+    option = DiscardOption(player, SOUTH * 4, 0, [], 0)
     assert option.valuation == 120
 
     # not valuable wind
-    option = DiscardOption(player, WEST, 0, [], 0)
+    option = DiscardOption(player, WEST * 4, 0, [], 0)
     assert option.valuation == 100
 
     # not valuable wind
-    option = DiscardOption(player, NORTH, 0, [], 0)
+    option = DiscardOption(player, NORTH * 4, 0, [], 0)
     assert option.valuation == 100
 
     # valuable dragon
-    option = DiscardOption(player, HAKU, 0, [], 0)
+    option = DiscardOption(player, HAKU * 4, 0, [], 0)
     assert option.valuation == 120
 
     # valuable dragon
-    option = DiscardOption(player, HATSU, 0, [], 0)
+    option = DiscardOption(player, HATSU * 4, 0, [], 0)
     assert option.valuation == 120
 
     # valuable dragon
-    option = DiscardOption(player, CHUN, 0, [], 0)
+    option = DiscardOption(player, CHUN * 4, 0, [], 0)
     assert option.valuation == 120
 
     player.dealer_seat = 0
 
     # double wind
-    option = DiscardOption(player, EAST, 0, [], 0)
+    option = DiscardOption(player, EAST * 4, 0, [], 0)
     assert option.valuation == 140
 
 
@@ -197,32 +204,33 @@ def test_calculate_suit_tiles_value_and_dora():
     table = Table()
     table.dora_indicators = [string_to_136_tile(sou="9")]
     player = table.player
+    table.has_aka_dora = False
 
-    tile = string_to_34_tile(sou="1")
+    tile = string_to_136_tile(sou="1")
     option = DiscardOption(player, tile, 0, [], 0)
     assert option.valuation == (DiscardOption.DORA_VALUE + 110)
 
     # double dora
     table.dora_indicators = [string_to_136_tile(sou="9"), string_to_136_tile(sou="9")]
-    tile = string_to_34_tile(sou="1")
+    tile = string_to_136_tile(sou="1")
     option = DiscardOption(player, tile, 0, [], 0)
     assert option.valuation == ((DiscardOption.DORA_VALUE * 2) + 110)
 
     # tile close to dora
     table.dora_indicators = [string_to_136_tile(sou="9")]
-    tile = string_to_34_tile(sou="2")
+    tile = string_to_136_tile(sou="2")
     option = DiscardOption(player, tile, 0, [], 0)
     assert option.valuation == (DiscardOption.DORA_FIRST_NEIGHBOUR + 120)
 
     # tile not far away from dora
     table.dora_indicators = [string_to_136_tile(sou="9")]
-    tile = string_to_34_tile(sou="3")
+    tile = string_to_136_tile(sou="3")
     option = DiscardOption(player, tile, 0, [], 0)
     assert option.valuation == (DiscardOption.DORA_SECOND_NEIGHBOUR + 140)
 
     # tile from other suit
     table.dora_indicators = [string_to_136_tile(sou="9")]
-    tile = string_to_34_tile(man="3")
+    tile = string_to_136_tile(man="3")
     option = DiscardOption(player, tile, 0, [], 0)
     assert option.valuation == 140
 
@@ -400,7 +408,7 @@ def test_discard_tile_and_wrong_tiles_valuation():
     player = table.player
     table.add_dora_indicator(string_to_136_tile(honors="2"))
 
-    tiles = string_to_136_array(man="445567", pin="245678", sou="67")
+    tiles = string_to_136_array(man="5", pin="256678", sou="2333467")
     player.init_hand(tiles)
 
     discarded_tile = player.discard_tile()
@@ -522,12 +530,6 @@ def test_choose_better_tanki_honor():
     player.draw_tile(string_to_136_tile(sou="6"))
     discarded_tile = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "5z"
-
-    tiles = string_to_136_array(man="11447799", sou="556", honors="34")
-    player.init_hand(tiles)
-    player.draw_tile(string_to_136_tile(sou="6"))
-    discarded_tile = player.discard_tile()
-    assert tiles_to_string([discarded_tile]) == "3z"
 
 
 def test_choose_tanki_with_kabe():

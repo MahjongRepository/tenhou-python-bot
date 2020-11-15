@@ -1,6 +1,5 @@
 from game.ai.helpers.defence import TileDangerHandler
 from game.ai.strategies.main import BaseStrategy
-from mahjong.constants import AKA_DORA_LIST
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_honor, is_man, is_pin, is_sou, plus_dora, simplify
 
@@ -21,8 +20,8 @@ class DiscardOption:
 
     player = None
 
-    # in 34 tile format
-    tile_to_discard = None
+    # in 136 tile format
+    tile_to_discard_136 = None
     # array of tiles that will improve our hand
     waiting = None
     # how much tiles will improve our hand
@@ -45,15 +44,9 @@ class DiscardOption:
     # second level average cost approximation for 1-shanten hands
     average_second_level_cost = None
 
-    def __init__(self, player, tile_to_discard, shanten, waiting, ukeire, wait_to_ukeire=None):
-        """
-        :param player:
-        :param tile_to_discard: tile in 34 format
-        :param waiting: list of tiles in 34 format
-        :param ukeire: count of tiles to wait after discard
-        """
+    def __init__(self, player, tile_to_discard_136, shanten, waiting, ukeire, wait_to_ukeire=None):
         self.player = player
-        self.tile_to_discard = tile_to_discard
+        self.tile_to_discard_136 = tile_to_discard_136
         self.shanten = shanten
         self.waiting = waiting
         self.ukeire = ukeire
@@ -67,6 +60,10 @@ class DiscardOption:
         self.average_second_level_cost = 0
 
         self.calculate_value()
+
+    @property
+    def tile_to_discard(self):
+        return self.tile_to_discard_136 // 4
 
     def serialize(self):
         data = {
@@ -97,30 +94,10 @@ class DiscardOption:
 
     def find_tile_in_hand(self, closed_hand):
         """
-        Find and return 136 tile in closed player hand
+        Wrapper to return 136 tile with assertion that it is present in closed player hand
         """
-
-        if self.player.table.has_aka_dora:
-            tiles_five_of_suits = [4, 13, 22]
-            # special case, to keep aka dora in hand
-            if self.tile_to_discard in tiles_five_of_suits:
-                aka_closed_hand = closed_hand[:]
-                while True:
-                    tile = TilesConverter.find_34_tile_in_136_array(self.tile_to_discard, aka_closed_hand)
-
-                    # we have only aka dora in the hand, without simple five
-                    if not tile:
-                        break
-
-                    # we found aka in the hand,
-                    # let's try to search another five tile
-                    # to keep aka dora
-                    if tile in AKA_DORA_LIST:
-                        aka_closed_hand.remove(tile)
-                    else:
-                        return tile
-
-        return TilesConverter.find_34_tile_in_136_array(self.tile_to_discard, closed_hand)
+        assert self.tile_to_discard_136 in closed_hand
+        return self.tile_to_discard_136
 
     def calculate_value(self):
         # base is 100 for ability to mark tiles as not needed (like set value to 50)
@@ -174,15 +151,9 @@ class DiscardOption:
                 if simplified_tile + 2 == simplified_dora or simplified_tile - 2 == simplified_dora:
                     value += DiscardOption.DORA_SECOND_NEIGHBOUR
 
-        tile_136 = self.find_tile_in_hand(self.player.closed_hand)
-        # it possible when we are calculating discard options for kan
-        # because we are not adding this tile to the hand
-        if tile_136:
-            count_of_dora = plus_dora(
-                tile_136, self.player.table.dora_indicators, add_aka_dora=self.player.table.has_aka_dora
-            )
-        else:
-            count_of_dora = plus_dora(self.tile_to_discard * 4, self.player.table.dora_indicators, add_aka_dora=False)
+        count_of_dora = plus_dora(
+            self.tile_to_discard_136, self.player.table.dora_indicators, add_aka_dora=self.player.table.has_aka_dora
+        )
 
         self.count_of_dora = count_of_dora
         value += count_of_dora * DiscardOption.DORA_VALUE

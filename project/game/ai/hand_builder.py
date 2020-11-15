@@ -187,14 +187,20 @@ class HandBuilder:
         min_shanten, use_chiitoitsu = self.calculate_shanten_and_decide_hand_structure(closed_tiles_34)
 
         results = []
-        for hand_tile in range(0, 34):
-            if not closed_tiles_34[hand_tile]:
+        tile_34_prev = None
+        # we iterate in reverse order to naturally handle aka-doras, i.e. discard regular 5 if we have it
+        for tile_136 in reversed(self.player.closed_hand):
+            tile_34 = tile_136 // 4
+            # already added
+            if tile_34 == tile_34_prev:
                 continue
+            else:
+                tile_34_prev = tile_34
 
-            closed_tiles_34[hand_tile] -= 1
+            closed_tiles_34[tile_34] -= 1
             waiting, shanten = self.calculate_waits(closed_tiles_34, tiles_34, use_chiitoitsu=use_chiitoitsu)
             assert shanten >= min_shanten
-            closed_tiles_34[hand_tile] += 1
+            closed_tiles_34[tile_34] += 1
 
             if waiting:
                 wait_to_ukeire = dict(zip(waiting, [self.count_tiles([x], closed_tiles_34) for x in waiting]))
@@ -202,7 +208,7 @@ class HandBuilder:
                     DiscardOption(
                         player=self.player,
                         shanten=shanten,
-                        tile_to_discard=hand_tile,
+                        tile_to_discard_136=tile_136,
                         waiting=waiting,
                         ukeire=sum(wait_to_ukeire.values()),
                         wait_to_ukeire=wait_to_ukeire,

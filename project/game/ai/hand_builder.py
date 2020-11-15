@@ -6,7 +6,7 @@ from game.ai.helpers.kabe import Kabe
 from mahjong.constants import AKA_DORA_LIST
 from mahjong.shanten import Shanten
 from mahjong.tile import Tile, TilesConverter
-from mahjong.utils import is_honor, is_pair, is_tile_strictly_isolated, simplify
+from mahjong.utils import is_honor, is_pair, is_terminal, is_tile_strictly_isolated, plus_dora, simplify
 from utils.decisions_logger import DecisionsLogger, MeldPrint
 
 
@@ -391,19 +391,15 @@ class HandBuilder:
 
     @staticmethod
     def _sorting_rule_for_1_shanten(x):
-        return (-x.second_level_cost,) + HandBuilder._sorting_rule_for_1_shanten_no_cost(x)
+        return (-x.second_level_cost,) + HandBuilder._sorting_rule_for_1_2_3_shanten_simple(x)
 
     @staticmethod
-    def _sorting_rule_for_1_shanten_no_cost(x):
+    def _sorting_rule_for_1_2_3_shanten_simple(x):
         return (
             -x.ukeire_second,
             -x.ukeire,
             x.valuation,
         )
-
-    @staticmethod
-    def _sorting_rule_for_2_3_shanten(x):
-        return HandBuilder._sorting_rule_for_1_shanten_no_cost(x)
 
     @staticmethod
     def _sorting_rule_for_2_3_shanten_with_isolated(x, closed_hand_34):
@@ -436,7 +432,12 @@ class HandBuilder:
     def _choose_safest_tile(self, discard_options):
         return self._choose_safest_tile_or_skip_meld(discard_options, after_meld=False)
 
-    def _choose_best_tile(self, discard_options, sorting_rule):
+    def _choose_best_tile(self, discard_options):
+        DecisionsLogger.debug(log.DISCARD_OPTIONS, "All discard candidates", discard_options)
+
+        return discard_options[0]
+
+    def _choose_best_tile_considering_threats(self, discard_options, sorting_rule):
         assert discard_options
 
         threats_present = [x for x in discard_options if x.danger.get_max_danger() != 0]
@@ -457,14 +458,12 @@ class HandBuilder:
         else:
             discard_options_within_borders = discard_options
 
-        DecisionsLogger.debug(log.DISCARD_OPTIONS, "All discard candidates", discard_options_within_borders)
-
-        return discard_options_within_borders[0]
+        return self._choose_best_tile(discard_options_within_borders)
 
     def _choose_first_option_or_safe_tiles(self, chosen_candidates, all_discard_options, after_meld, sorting_lambda):
         # it looks like everything is fine
         if len(chosen_candidates):
-            return self._choose_best_tile(chosen_candidates, sorting_lambda)
+            return self._choose_best_tile_considering_threats(chosen_candidates, sorting_lambda)
 
         return self._choose_safest_tile_or_skip_meld(all_discard_options, after_meld)
 
@@ -671,6 +670,80 @@ class HandBuilder:
         # if we have several options that give us similar wait
         return best_discard_desc[0]["discard_option"]
 
+    # this method is used when there are no threats but we are deciding if we should keep safe tile or useful tile
+    def _simplified_danger_valuation(self, discard_option):
+        tile_34 = discard_option.tile_to_discard_34
+        tile_136 = discard_option.tile_to_discard_136
+        number_of_revealed_tiles = self.player.number_of_revealed_tiles(
+            tile_34, TilesConverter.to_34_array(self.player.closed_hand)
+        )
+        if is_honor(tile_34):
+            if not self.player.table.is_common_yakuhai(tile_34):
+                if number_of_revealed_tiles == 4:
+                    simple_danger = 0
+                elif number_of_revealed_tiles == 3:
+                    simple_danger = 10
+                elif number_of_revealed_tiles == 2:
+                    simple_danger = 20
+                else:
+                    simple_danger = 30
+            else:
+                if number_of_revealed_tiles == 4:
+                    simple_danger = 0
+                elif number_of_revealed_tiles == 3:
+                    simple_danger = 11
+                elif number_of_revealed_tiles == 2:
+                    simple_danger = 21
+                else:
+                    simple_danger = 32
+        elif is_terminal(tile_34):
+            simple_danger = 100
+        elif simplify(tile_34) < 2 or simplify(tile_34) > 6:
+            # 2, 3 or 7, 8
+            simple_danger = 200
+        else:
+            # 4, 5, 6
+            simple_danger = 300
+
+        if simple_danger != 0:
+            simple_danger += plus_dora(
+                tile_136, self.player.table.dora_indicators, add_aka_dora=self.player.table.has_aka_dora
+            )
+
+        return simple_danger
+
+    def _sort_1_shanten_discard_options_no_threats(self, discard_options):
+        if self.player.round_step < 5:
+            return self._choose_best_tile(sorted(discard_options, key=self._sorting_rule_for_1_shanten))
+        elif self.player.round_step < 13:
+            # discard more dangerous tiles beforehand
+            DecisionsLogger.debug(
+                log.DISCARD_OPTIONS,
+                "There are no threats yet, better discard useless dangerous tile beforehand",
+                discard_options,
+            )
+            danger_sign = -1
+        else:
+            # late round - discard safer tiles first
+            DecisionsLogger.debug(
+                log.DISCARD_OPTIONS,
+                "There are no visible threats, but it's late, better keep useless dangerous tiles",
+                discard_options,
+            )
+            danger_sign = 1
+
+        return self._choose_best_tile(
+            sorted(
+                discard_options,
+                key=lambda x: (
+                    -x.second_level_cost,
+                    -x.ukeire_second,
+                    -x.ukeire,
+                    danger_sign * self._simplified_danger_valuation(x),
+                ),
+            ),
+        )
+
     def _choose_best_discard_with_1_shanten(
         self, discard_options, after_meld, one_shanten_ukeire2_calculated_beforehand
     ):
@@ -689,16 +762,20 @@ class HandBuilder:
                 self.calculate_second_level_ukeire(x, after_meld)
 
         # then we filter by ukeire2
-        possible_options = sorted(possible_options, key=self._sorting_rule_for_1_shanten_no_cost)
+        possible_options = sorted(possible_options, key=self._sorting_rule_for_1_2_3_shanten_simple)
         possible_options = self._filter_list_by_percentage(
             possible_options, "ukeire_second", DiscardOption.UKEIRE_FIRST_FILTER_PERCENTAGE
         )
 
-        # and finally we sort by main 1-shanten rule
-        return self._choose_best_tile(
-            sorted(possible_options, key=self._sorting_rule_for_1_shanten),
-            self._sorting_rule_for_1_shanten,
-        )
+        threats_present = [x for x in discard_options if x.danger.get_max_danger() != 0]
+        if threats_present:
+            return self._choose_best_tile_considering_threats(
+                sorted(possible_options, key=self._sorting_rule_for_1_shanten),
+                self._sorting_rule_for_1_shanten,
+            )
+        else:
+            # if there are no theats we try to either keep or discard potentially dangerous tiles depending on the round
+            return self._sort_1_shanten_discard_options_no_threats(possible_options)
 
     def _choose_best_discard_with_2_3_shanten(self, discard_options, after_meld):
         discard_options = sorted(discard_options, key=lambda x: (x.shanten, -x.ukeire))
@@ -729,9 +806,9 @@ class HandBuilder:
 
         DecisionsLogger.debug(log.DISCARD_OPTIONS, "Candidates after filtering by ukeire2", context=possible_options)
 
-        return self._choose_best_tile(
+        return self._choose_best_tile_considering_threats(
             sorted(possible_options, key=lambda x: self._sorting_rule_for_2_3_shanten_with_isolated(x, closed_hand_34)),
-            self._sorting_rule_for_2_3_shanten,
+            self._sorting_rule_for_1_2_3_shanten_simple,
         )
 
     def _choose_best_discard_with_4_or_more_shanten(self, discard_options):
@@ -760,7 +837,7 @@ class HandBuilder:
             possible_options = isolated_tiles
 
         # let's sort tiles by value and let's choose less valuable tile to discard
-        return self._choose_best_tile(
+        return self._choose_best_tile_considering_threats(
             sorted(possible_options, key=self._sorting_rule_for_4_or_more_shanten),
             self._sorting_rule_for_4_or_more_shanten,
         )

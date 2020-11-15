@@ -200,6 +200,9 @@ class Table:
         else:
             return NORTH
 
+    def is_common_yakuhai(self, tile_34):
+        return tile_34 >= 31 or tile_34 == self.round_wind_tile
+
     def _add_revealed_tile(self, tile):
         self.revealed_tiles_136.append(tile)
 

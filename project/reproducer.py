@@ -86,10 +86,10 @@ class TenhouLogReproducer:
                     if draw_tile_seen_number == tile_number_to_stop:
                         logger.info("Stop on player draw")
 
+                        table.player.draw_tile(tile)
+
                         # TODO suggest it only when it possible to open kan
                         table.player.should_call_kan(tile, open_kan=False, from_riichi=table.player.in_riichi)
-
-                        table.player.draw_tile(tile)
 
                         if not table.player.in_riichi:
                             table.player.discard_tile()

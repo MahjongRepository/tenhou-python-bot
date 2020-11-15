@@ -131,7 +131,11 @@ class PlayerInterface:
         melds = [x.tiles[:] for x in self.melds]
         results = []
         for meld in melds:
-            results.append([meld[0] // 4, meld[1] // 4, meld[2] // 4])
+            meld_34 = [meld[0] // 4, meld[1] // 4, meld[2] // 4]
+            # kan
+            if len(meld) > 3:
+                meld_34.append(meld[3] // 4)
+            results.append(meld_34)
         return results
 
     @property

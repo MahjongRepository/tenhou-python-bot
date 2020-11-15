@@ -238,7 +238,7 @@ class HandBuilder:
 
         tiles_34 = TilesConverter.to_34_array(tiles_copy)
 
-        results = self.player.ai.hand_divider.divide_hand(tiles_34)
+        results = self.player.ai.hand_divider.divide_hand(tiles_34, self.player.melds)
         return results, tiles_34
 
     def check_suji_and_kabe(self, tiles_34, waiting):

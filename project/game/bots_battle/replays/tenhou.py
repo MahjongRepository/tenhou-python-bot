@@ -184,6 +184,9 @@ class TenhouReplay(Replay):
             )
         )
 
+    def add_new_dora(self, dora_indicator):
+        self.tags.append(f'<DORA hai="{dora_indicator}" />')
+
     def _players_scores(self):
         return "{},{},{},{}".format(
             int(self.clients[0].player.scores // 100),
@@ -197,7 +200,30 @@ class TenhouReplay(Replay):
             return self._encode_chi(meld)
         if meld.type == Meld.PON:
             return self._encode_pon(meld)
+        if meld.type == Meld.SHOUMINKAN:
+            return self._encode_pon(meld, is_shouminkan=True)
+        if meld.type == Meld.KAN:
+            return self._encode_kan(meld)
         return ""
+
+    def _encode_kan(self, meld):
+        result = []
+
+        tiles = sorted(meld.tiles[:])
+        base = int(tiles[0] / 4)
+
+        called = tiles.index(meld.called_tile)
+        base_and_called = int(base * 4) + called
+        result.append(self._to_binary_string(base_and_called))
+
+        result.extend(["0", "0", "0", "0", "0", "0"])
+
+        offset = self._from_who_offset(meld.who, meld.from_who)
+        result.append(self._to_binary_string(offset, 2))
+
+        # convert bites to int
+        result = int("".join(result), 2)
+        return str(result)
 
     def _encode_chi(self, meld):
         result = []
@@ -226,12 +252,12 @@ class TenhouReplay(Replay):
         offset = self._from_who_offset(meld.who, meld.from_who)
         result.append(self._to_binary_string(offset, 2))
 
-        # convert bytes to int
+        # convert bites to int
         result = int("".join(result), 2)
 
         return str(result)
 
-    def _encode_pon(self, meld):
+    def _encode_pon(self, meld, is_shouminkan=False):
         result = []
 
         tiles = sorted(meld.tiles[:])
@@ -249,13 +275,25 @@ class TenhouReplay(Replay):
         for x in range(0, 3):
             delta.append(tiles[x] - base * 4)
         delta_index = delta_array.index(delta)
-        result.append(self._to_binary_string(delta_index, 2))
 
-        # not a chankan
-        result.append("0")
+        # not 100% sure that it is correct
+        if is_shouminkan:
+            delta_index = 2
 
-        # pon
-        result.append("1")
+        delta_bits = self._to_binary_string(delta_index, 2)
+        result.append(delta_bits)
+
+        # kan flag
+        if is_shouminkan:
+            result.append("1")
+        else:
+            result.append("0")
+
+        # pon flag
+        if is_shouminkan:
+            result.append("0")
+        else:
+            result.append("1")
 
         # not a chi
         result.append("0")
@@ -263,13 +301,13 @@ class TenhouReplay(Replay):
         offset = self._from_who_offset(meld.who, meld.from_who)
         result.append(self._to_binary_string(offset, 2))
 
-        # convert bytes to int
+        # convert bites to int
         result = int("".join(result), 2)
         return str(result)
 
     def _to_binary_string(self, number, size=None):
         result = bin(number).replace("0b", "")
-        # some bytes had to be with a fixed size
+        # some bites had to be with a fixed size
         if size and len(result) < size:
             while len(result) < size:
                 result = "0" + result

@@ -357,7 +357,6 @@ class MahjongAI:
             if tile_34 in meld:
                 has_shouminkan_candidate = True
 
-                self.player.tiles.append(tile)
                 closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
                 previous_shanten, previous_waits_count = self._calculate_shanten_for_kan()
                 self.player.tiles = original_tiles[:]
@@ -374,7 +373,7 @@ class MahjongAI:
 
         if not has_shouminkan_candidate:
             # we don't have enough tiles in the hand
-            if closed_hand_34[tile_34] != 3:
+            if closed_hand_34[tile_34] != 3 and closed_hand_34[tile_34] != 4:
                 return None
 
             if open_kan or from_riichi:
@@ -384,7 +383,6 @@ class MahjongAI:
                 )
                 previous_waits_count = self.hand_builder.count_tiles(previous_waiting, closed_hand_34)
             else:
-                self.player.tiles.append(tile)
                 previous_shanten, previous_waits_count = self._calculate_shanten_for_kan()
                 self.player.tiles = original_tiles[:]
 
@@ -431,7 +429,7 @@ class MahjongAI:
         # 1 and not 0 because we call check for win this before updating remaining tiles
         is_hotei = self.player.table.count_of_remaining_tiles == 1
 
-        hand_responce = self.calculate_exact_hand_value_or_get_from_cache(
+        hand_response = self.calculate_exact_hand_value_or_get_from_cache(
             tile,
             tiles=self.player.tiles,
             call_riichi=self.player.in_riichi,
@@ -439,9 +437,9 @@ class MahjongAI:
             is_chankan=is_chankan,
             is_haitei=is_hotei,
         )
-        assert hand_responce is not None
-        assert not hand_responce.error
-        cost = hand_responce.cost
+        assert hand_response is not None
+        assert not hand_response.error, hand_response.error
+        cost = hand_response.cost
 
         return self.placement.should_call_win(cost, is_tsumo, enemy_seat)
 

@@ -59,6 +59,12 @@ class MeldPrint(Meld):
     Wrapper to be able use mahjong package MeldPrint object in our loggers.
     """
 
+    def __str__(self):
+        meld_type_str = self.type
+        if meld_type_str == self.KAN:
+            meld_type_str += f" open={self.opened}"
+        return f"Type: {meld_type_str}, Tiles: {TilesConverter.to_one_line_string(self.tiles)} {self.tiles}"
+
     def serialize(self):
         return {
             "type": self.type,

@@ -11,6 +11,7 @@ from mahjong.hand_calculating.hand import HandCalculator
 from mahjong.hand_calculating.hand_config import HandConfig, OptionalRules
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
+from utils.decisions_logger import MeldPrint
 from utils.settings_handler import settings
 
 # we need to have it
@@ -88,268 +89,6 @@ class GameManager:
         self._unique_dealers = 1
         self.round_number = 0
 
-    def init_round(self):
-        """
-        Generate players hands, dead wall and dora indicators
-        """
-
-        self.players_with_open_hands = []
-        self.dora_indicators = []
-
-        self.tiles = self._generate_wall()
-
-        self.dead_wall = self._cut_tiles(14)
-        self.dora_indicators.append(self.dead_wall[8])
-
-        for x in range(0, len(self.clients)):
-            client = self.clients[x]
-
-            # each client think that he is a player with position = 0
-            # so, we need to move dealer position for each client
-            # and shift scores array
-            client_dealer = self._enemy_position(self.dealer, x)
-
-            player_scores = deque([i.player.scores / 100 for i in self.clients])
-            player_scores.rotate(x * -1)
-            player_scores = list(player_scores)
-
-            client.table.init_round(
-                self._unique_dealers,
-                self.honba_sticks,
-                self.riichi_sticks,
-                self.dora_indicators[0],
-                client_dealer,
-                player_scores,
-            )
-            client.erase_state()
-
-        # each player by rotation draw 4 tiles until they have 12
-        # after this each player draw one more tile
-        # and this is will be their initial hand
-        # we do it to make the tiles allocation in hands
-        # more random
-        for _ in range(0, 3):
-            for client in self.clients:
-                client.player.tiles += self._cut_tiles(4)
-
-        for client in self.clients:
-            client.player.tiles += self._cut_tiles(1)
-            client.player.tiles = sorted(client.player.tiles)
-            client.player.init_hand(client.player.tiles)
-
-        logger.info("Seed: {}".format(shuffle_seed()))
-        logger.info("Dealer: {}, {}".format(self.dealer, self.clients[self.dealer].player.name))
-        logger.info(
-            "Wind: {}. Riichi sticks: {}. Honba sticks: {}".format(
-                self._unique_dealers, self.riichi_sticks, self.honba_sticks
-            )
-        )
-        logger.info("Round number: {}".format(self.round_number))
-        logger.info("Players: {0}".format(self.players_sorted_by_scores()))
-
-        self.replay.init_round(
-            self.dealer, self._unique_dealers - 1, self.honba_sticks, self.riichi_sticks, self.dora_indicators[0]
-        )
-
-    def play_round(self) -> []:
-        continue_to_play = True
-
-        while continue_to_play:
-            current_client = self._get_current_client()
-            in_tempai = current_client.player.in_tempai
-
-            draw_tile = self._cut_tiles(1)[0]
-            self.replay.draw(current_client.seat, draw_tile)
-
-            # we don't need to add tile to the hand when we are in riichi
-            if current_client.player.in_riichi:
-                tiles = current_client.player.tiles + [draw_tile]
-            else:
-                current_client.player.draw_tile(draw_tile)
-                tiles = current_client.player.tiles
-
-            is_win = self.agari.is_agari(TilesConverter.to_34_array(tiles), current_client.player.meld_34_tiles)
-
-            # win by tsumo after tile draw
-            if is_win:
-                tiles.remove(draw_tile)
-                can_win = True
-
-                # with open hand it can be situation when we in the tempai
-                # but our hand doesn't contain any yaku
-                # in that case we can't call ron
-                if not current_client.player.in_riichi:
-                    result = current_client.player.ai.estimate_hand_value_or_get_from_cache(
-                        draw_tile // 4,
-                        is_tsumo=True,
-                    )
-                    can_win = result.error is None
-
-                if can_win:
-                    result = self.process_the_end_of_the_round(
-                        tiles=tiles, win_tile=draw_tile, winner=current_client, loser=None, is_tsumo=True
-                    )
-                    return [result]
-                else:
-                    # we can't win
-                    # so let's add tile back to hand
-                    # and discard it later
-                    tiles.append(draw_tile)
-
-            # we had to clear ippatsu, after tile draw
-            current_client.is_ippatsu = False
-
-            # if not in riichi, let's decide what tile to discard
-            if not current_client.player.in_riichi:
-                tile = current_client.player.discard_tile()
-                in_tempai = current_client.player.in_tempai
-            else:
-                tile = draw_tile
-                current_client.table.add_discarded_tile(0, tile, True)
-
-            who_called_riichi = None
-            if in_tempai and current_client.player.can_call_riichi():
-                who_called_riichi = current_client.seat
-                for client in self.clients:
-                    client.table.add_called_riichi(self._enemy_position(who_called_riichi, client.seat))
-                self.replay.riichi(current_client.seat, 1)
-
-            self.replay.discard(current_client.seat, tile)
-            is_tsumogiri = draw_tile == tile
-            result = self.check_clients_possible_ron(current_client, tile, is_tsumogiri)
-            # the end of the round
-            if result:
-                # check_clients_possible_ron already returns array
-                return result
-
-            # if there is no challenger to ron, let's check can we call riichi with tile discard or not
-            if who_called_riichi:
-                self.call_riichi(current_client)
-                self.replay.riichi(current_client.seat, 2)
-
-                count_of_riichi_players = 0
-                for client in self.clients:
-                    if client.player.in_riichi:
-                        count_of_riichi_players += 1
-
-                if count_of_riichi_players == 4:
-                    return [self.abortive_retake(AbortiveDraw.FOUR_RIICHI)]
-
-            # abortive retake
-            result = self._check_same_winds()
-            if result:
-                return [result]
-
-            # let's check other players hand to possibility open sets
-            possible_melds = []
-
-            for other_client in self.clients:
-                # there is no need to check the current client
-                # or check client in riichi
-                if other_client == current_client or other_client.player.in_riichi:
-                    continue
-
-                # was a tile discarded by the left player or not
-                if other_client.seat == 0:
-                    is_kamicha_discard = current_client.seat == 3
-                else:
-                    is_kamicha_discard = other_client.seat - current_client.seat == 1
-
-                other_client.table.revealed_tiles[tile // 4] -= 1
-
-                meld, discard_option = other_client.player.try_to_call_meld(tile, is_kamicha_discard)
-
-                other_client.table.revealed_tiles[tile // 4] += 1
-
-                if meld:
-                    meld.from_who = current_client.seat
-                    meld.who = other_client.seat
-                    meld.called_tile = tile
-                    possible_melds.append({"meld": meld, "discard_option": discard_option})
-
-            if possible_melds:
-                # pon is more important than chi
-                possible_melds = sorted(possible_melds, key=lambda x: x["meld"].type == Meld.PON)
-                meld = possible_melds[0]["meld"]
-                discard_option = possible_melds[0]["discard_option"]
-
-                # clear ippatsu after called meld
-                for client_item in self.clients:
-                    client_item.is_ippatsu = False
-
-                # we changed current client with called open set
-                self.current_client_seat = meld.who
-                current_client = self._get_current_client()
-                self.players_with_open_hands.append(self.current_client_seat)
-
-                logger.info("Called meld: {} by {}".format(meld, current_client.player.name))
-                logger.info("With hand: {}".format(current_client.player.format_hand_for_print(tile)))
-
-                # we need to notify each client about called meld
-                for _client in self.clients:
-                    _client.table.add_called_meld(self._enemy_position(current_client.seat, _client.seat), meld)
-
-                self.replay.open_meld(meld)
-                current_client.player.tiles.append(tile)
-                discarded_tile = current_client.player.discard_tile(discard_option)
-
-                self.replay.discard(current_client.seat, discarded_tile)
-                logger.info(
-                    "Discard tile: {}".format(TilesConverter.to_one_line_string([discarded_tile], print_aka_dora=True))
-                )
-
-                # the end of the round
-                result = self.check_clients_possible_ron(current_client, discarded_tile, False)
-                if result:
-                    # check_clients_possible_ron already returns array
-                    return result
-
-            self.current_client_seat = self._move_position(self.current_client_seat)
-
-            # retake
-            if not len(self.tiles):
-                continue_to_play = False
-
-        result = self.process_the_end_of_the_round([], 0, None, None, False)
-        return [result]
-
-    def check_clients_possible_ron(self, current_client, tile, is_tsumogiri) -> []:
-        """
-        After tile discard let's check all other players can they win or not
-        at this tile
-
-        :param current_client:
-        :param tile:
-        :param is_tsumogiri:
-        :return: None or ron result
-        """
-        possible_win_client = []
-        for other_client in self.clients:
-            # there is no need to check the current client
-            if other_client == current_client:
-                continue
-
-            # let's store other players discards
-            other_client.table.add_discarded_tile(
-                self._enemy_position(current_client.seat, other_client.seat), tile, is_tsumogiri
-            )
-
-            if self.can_call_ron(other_client, tile, self._enemy_position(current_client.seat, other_client.seat)):
-                possible_win_client.append(other_client)
-
-        if len(possible_win_client) == 3:
-            return [self.abortive_retake(AbortiveDraw.TRIPLE_RON)]
-
-        # check multiple ron
-        results = []
-        for client in possible_win_client:
-            result = self.process_the_end_of_the_round(
-                tiles=client.player.tiles, win_tile=tile, winner=client, loser=current_client, is_tsumo=False
-            )
-            results.append(result)
-
-        return results
-
     def play_game(self, total_results):
         """
         :param total_results: a dictionary with keys as client ids
@@ -422,6 +161,340 @@ class GameManager:
 
         return {"played_rounds": played_rounds}
 
+    def init_round(self):
+        """
+        Generate players hands, dead wall and dora indicators
+        """
+
+        self.players_with_open_hands = []
+        self.dora_indicators = []
+
+        self.tiles = self._generate_wall()
+
+        self.dead_wall = self._cut_tiles(14)
+        self.add_new_dora_indicator()
+
+        for x in range(0, len(self.clients)):
+            client = self.clients[x]
+
+            # each client think that he is a player with position = 0
+            # so, we need to move dealer position for each client
+            # and shift scores array
+            client_dealer = self._enemy_position(self.dealer, x)
+
+            player_scores = deque([i.player.scores / 100 for i in self.clients])
+            player_scores.rotate(x * -1)
+            player_scores = list(player_scores)
+
+            client.table.init_round(
+                self._unique_dealers,
+                self.honba_sticks,
+                self.riichi_sticks,
+                self.dora_indicators[0],
+                client_dealer,
+                player_scores,
+            )
+            client.erase_state()
+
+        # each player by rotation draw 4 tiles until they have 12
+        # after this each player draw one more tile
+        # and this is will be their initial hand
+        # we do it to make the tiles allocation in hands
+        # more random
+        for _ in range(0, 3):
+            for client in self.clients:
+                client.player.tiles += self._cut_tiles(4)
+
+        for client in self.clients:
+            client.player.tiles += self._cut_tiles(1)
+            client.player.tiles = sorted(client.player.tiles)
+            client.player.init_hand(client.player.tiles)
+
+        logger.info("Seed: {}".format(shuffle_seed()))
+        logger.info("Dealer: {}, {}".format(self.dealer, self.clients[self.dealer].player.name))
+        logger.info(
+            "Wind: {}. Riichi sticks: {}. Honba sticks: {}".format(
+                self._unique_dealers, self.riichi_sticks, self.honba_sticks
+            )
+        )
+        logger.info("Round number: {}".format(self.round_number))
+        logger.info("Players: {0}".format(self.players_sorted_by_scores()))
+
+        self.replay.init_round(
+            self.dealer, self._unique_dealers - 1, self.honba_sticks, self.riichi_sticks, self.dora_indicators[0]
+        )
+
+    def play_round(self) -> []:
+        continue_to_play = True
+
+        while continue_to_play:
+            current_client = self._get_current_client()
+
+            in_tempai = current_client.player.in_tempai
+
+            drawn_tile = self._cut_tiles(1)[0]
+
+            drawn_tile_34 = drawn_tile // 4
+            current_client.table.count_of_remaining_tiles -= 1
+            self.replay.draw(current_client.seat, drawn_tile)
+
+            # we don't need to add tile to the hand when we are in riichi
+            if current_client.player.in_riichi:
+                tiles = current_client.player.tiles + [drawn_tile]
+            else:
+                current_client.player.draw_tile(drawn_tile)
+                tiles = current_client.player.tiles
+
+            is_win = self.agari.is_agari(TilesConverter.to_34_array(tiles), current_client.player.meld_34_tiles)
+
+            # win by tsumo after tile draw
+            if is_win:
+                tiles.remove(drawn_tile)
+                can_win = True
+
+                # with open hand it can be situation when we in the tempai
+                # but our hand doesn't contain any yaku
+                # in that case we can't call ron
+                if not current_client.player.in_riichi:
+                    result = current_client.player.ai.estimate_hand_value_or_get_from_cache(
+                        drawn_tile_34,
+                        is_tsumo=True,
+                    )
+                    can_win = result.error is None
+
+                if can_win:
+                    result = self.process_the_end_of_the_round(
+                        tiles=tiles, win_tile=drawn_tile, winner=current_client, loser=None, is_tsumo=True
+                    )
+                    return [result]
+                else:
+                    # we can't win
+                    # so let's add tile back to hand
+                    # and discard it later
+                    tiles.append(drawn_tile)
+
+            # checks if we can call closed kan or shouminkan
+            current_client_tiles_34 = TilesConverter.to_34_array(current_client.player.tiles)
+            if current_client_tiles_34[drawn_tile_34] == 4:
+                kan_type = current_client.player.should_call_kan(
+                    drawn_tile, open_kan=False, from_riichi=current_client.player.in_riichi
+                )
+                if kan_type:
+                    tiles = [
+                        (drawn_tile_34 * 4),
+                        (drawn_tile_34 * 4) + 1,
+                        (drawn_tile_34 * 4) + 2,
+                        (drawn_tile_34 * 4) + 3,
+                    ]
+                    meld = MeldPrint(
+                        kan_type,
+                        tiles,
+                        opened=False,
+                        called_tile=drawn_tile,
+                        who=current_client.seat,
+                        from_who=current_client.seat,
+                    )
+                    logger.info("Called meld: {} by {}".format(meld, current_client.player.name))
+
+                    self.replay.open_meld(meld)
+
+                    # we need to notify each client about called meld
+                    for _client in self.clients:
+                        _client.table.add_called_meld(self._enemy_position(current_client.seat, _client.seat), meld)
+
+                    self.add_new_dora_indicator()
+
+                    # after that we will return to the current client next draw
+                    continue
+
+            # we had to clear ippatsu, after tile draw
+            current_client.is_ippatsu = False
+
+            # if not in riichi, let's decide what tile to discard
+            if not current_client.player.in_riichi:
+                tile = current_client.player.discard_tile()
+                in_tempai = current_client.player.in_tempai
+            else:
+                tile = drawn_tile
+                current_client.table.add_discarded_tile(0, tile, True)
+
+            who_called_riichi = None
+            if in_tempai and current_client.player.can_call_riichi():
+                who_called_riichi = current_client.seat
+                for client in self.clients:
+                    client.table.add_called_riichi(self._enemy_position(who_called_riichi, client.seat))
+                self.replay.riichi(current_client.seat, 1)
+
+            self.replay.discard(current_client.seat, tile)
+            is_tsumogiri = drawn_tile == tile
+            result = self.check_clients_possible_ron(current_client, tile, is_tsumogiri)
+            # the end of the round
+            if result:
+                # check_clients_possible_ron already returns array
+                return result
+
+            # if there is no challenger to ron, let's check can we call riichi with tile discard or not
+            if who_called_riichi:
+                self.call_riichi(current_client)
+                self.replay.riichi(current_client.seat, 2)
+
+                count_of_riichi_players = 0
+                for client in self.clients:
+                    if client.player.in_riichi:
+                        count_of_riichi_players += 1
+
+                if count_of_riichi_players == 4:
+                    return [self.abortive_retake(AbortiveDraw.FOUR_RIICHI)]
+
+            # abortive retake
+            result = self._check_same_winds()
+            if result:
+                return [result]
+
+            # let's check other players hand to possibility open sets
+            possible_melds = []
+
+            tile_34 = tile // 4
+            for other_client in self.clients:
+                # there is no need to check the current client
+                # or check client in riichi
+                if other_client == current_client or other_client.player.in_riichi:
+                    continue
+
+                # was a tile discarded by the left player or not
+                if other_client.seat == 0:
+                    is_kamicha_discard = current_client.seat == 3
+                else:
+                    is_kamicha_discard = other_client.seat - current_client.seat == 1
+
+                other_client.table.revealed_tiles[tile // 4] -= 1
+
+                # opened kan
+                other_client_closed_hand_34 = TilesConverter.to_34_array(other_client.player.closed_hand)
+                if other_client_closed_hand_34[tile_34] == 3 and other_client.player.should_call_kan(
+                    tile, open_kan=True
+                ):
+                    tiles = [
+                        (tile_34 * 4),
+                        (tile_34 * 4) + 1,
+                        (tile_34 * 4) + 2,
+                        (tile_34 * 4) + 3,
+                    ]
+                    meld = MeldPrint(
+                        MeldPrint.KAN,
+                        tiles,
+                        opened=True,
+                        called_tile=tile,
+                        who=other_client.seat,
+                        from_who=current_client.seat,
+                    )
+                    logger.info("Called meld: {} by {}".format(meld, other_client.player.name))
+
+                    self.replay.open_meld(meld)
+
+                    # we changed current client seat
+                    self.players_with_open_hands.append(other_client.seat)
+                    other_client.player.tiles.append(tile)
+
+                    # we need to notify each client about called meld
+                    for _client in self.clients:
+                        _client.table.add_called_meld(self._enemy_position(other_client.seat, _client.seat), meld)
+
+                    self.add_new_dora_indicator()
+
+                    # move to draw tile action
+                    self.current_client_seat = self._move_position(other_client.seat, shift=-1)
+                    continue
+
+                meld, discard_option = other_client.player.try_to_call_meld(tile, is_kamicha_discard)
+
+                other_client.table.revealed_tiles[tile // 4] += 1
+
+                if meld:
+                    meld.from_who = current_client.seat
+                    meld.who = other_client.seat
+                    meld.called_tile = tile
+                    possible_melds.append({"meld": meld, "discard_option": discard_option})
+
+            if possible_melds:
+                # pon is more important than chi
+                possible_melds = sorted(possible_melds, key=lambda x: x["meld"].type == Meld.PON)
+                meld = possible_melds[0]["meld"]
+                discard_option = possible_melds[0]["discard_option"]
+
+                # clear ippatsu after called meld
+                for client_item in self.clients:
+                    client_item.is_ippatsu = False
+
+                # we changed current client with called open set
+                self.current_client_seat = meld.who
+                current_client = self._get_current_client()
+                self.players_with_open_hands.append(self.current_client_seat)
+
+                logger.info("Called meld: {} by {}".format(meld, current_client.player.name))
+
+                # we need to notify each client about called meld
+                for _client in self.clients:
+                    _client.table.add_called_meld(self._enemy_position(current_client.seat, _client.seat), meld)
+
+                self.replay.open_meld(meld)
+                current_client.player.tiles.append(tile)
+                discarded_tile = current_client.player.discard_tile(discard_option)
+
+                self.replay.discard(current_client.seat, discarded_tile)
+
+                # the end of the round
+                result = self.check_clients_possible_ron(current_client, discarded_tile, False)
+                if result:
+                    # check_clients_possible_ron already returns array
+                    return result
+
+            self.current_client_seat = self._move_position(self.current_client_seat)
+
+            # retake
+            if not len(self.tiles):
+                continue_to_play = False
+
+        result = self.process_the_end_of_the_round([], 0, None, None, False)
+        return [result]
+
+    def check_clients_possible_ron(self, current_client, tile, is_tsumogiri) -> []:
+        """
+        After tile discard let's check all other players can they win or not
+        at this tile
+
+        :param current_client:
+        :param tile:
+        :param is_tsumogiri:
+        :return: None or ron result
+        """
+        possible_win_client = []
+        for other_client in self.clients:
+            # there is no need to check the current client
+            if other_client == current_client:
+                continue
+
+            # let's store other players discards
+            other_client.table.add_discarded_tile(
+                self._enemy_position(current_client.seat, other_client.seat), tile, is_tsumogiri
+            )
+
+            if self.can_call_ron(other_client, tile, self._enemy_position(current_client.seat, other_client.seat)):
+                possible_win_client.append(other_client)
+
+        if len(possible_win_client) == 3:
+            return [self.abortive_retake(AbortiveDraw.TRIPLE_RON)]
+
+        # check multiple ron
+        results = []
+        for client in possible_win_client:
+            result = self.process_the_end_of_the_round(
+                tiles=client.player.tiles, win_tile=tile, winner=client, loser=current_client, is_tsumo=False
+            )
+            results.append(result)
+
+        return results
+
     def recalculate_players_position(self):
         """
         For players with same count of scores we need
@@ -439,10 +512,6 @@ class GameManager:
         if not client.player.in_tempai:
             return False
 
-        # bot decided to not call ron
-        if not client.player.should_call_win(win_tile, False, shifted_enemy_seat):
-            return False
-
         # check for furiten
         for item in client.player.discards:
             discarded_tile = item.value // 4
@@ -452,6 +521,10 @@ class GameManager:
         tiles = client.player.tiles
         is_agari = self.agari.is_agari(TilesConverter.to_34_array(tiles + [win_tile]), client.player.meld_34_tiles)
         if not is_agari:
+            return False
+
+        # bot decided to not call ron
+        if not client.player.should_call_win(win_tile, False, shifted_enemy_seat):
             return False
 
         # it can be situation when we are in agari state
@@ -507,10 +580,6 @@ class GameManager:
         """
         Increment a round number and do a scores calculations
         """
-        count_of_tiles = len(tiles)
-        # retake or win
-        if count_of_tiles and count_of_tiles != 13:
-            raise ValueError("Wrong tiles count: {}".format(len(tiles)))
 
         if winner:
             return self.agari_result(winner, loser, is_tsumo, tiles, win_tile)
@@ -527,9 +596,13 @@ class GameManager:
         )
 
         ura_dora = []
+        number_of_dora_indicators = len(self.dora_indicators)
         # add one more dora for riichi win
         if winner.player.in_riichi:
-            ura_dora.append(self.dead_wall[9])
+            # 9 10 11 12 indices
+            for x in range(number_of_dora_indicators):
+                next_indicator_index = 9 + x
+                ura_dora.append(self.dead_wall[next_indicator_index])
 
         is_tenhou = False
         # tenhou.net doesn't have renhou
@@ -758,13 +831,15 @@ class GameManager:
         self.tiles = self.tiles[count_of_tiles : len(self.tiles)]
         return result
 
-    def _move_position(self, current_position):
+    def _move_position(self, current_position, shift=1):
         """
         Loop 0 -> 1 -> 2 -> 3 -> 0
         """
-        current_position += 1
+        current_position += shift
         if current_position > 3:
             current_position = 0
+        if current_position < 0:
+            current_position = 3
         return current_position
 
     def _enemy_position(self, who, from_who):
@@ -798,6 +873,18 @@ class GameManager:
         shuffle_wall(rand_two)
 
         return wall
+
+    def add_new_dora_indicator(self):
+        number_of_dora_indicators = len(self.dora_indicators)
+        # 2 3 4 5 indices
+        next_indicator_index = 2 + number_of_dora_indicators
+        self.dora_indicators.append(self.dead_wall[next_indicator_index])
+
+        if number_of_dora_indicators > 0:
+            self.replay.add_new_dora(self.dora_indicators[-1])
+
+        for _client in self.clients:
+            _client.table.add_dora_indicator(self.dora_indicators[-1])
 
 
 # let's use tenhou constant values, to make things easier

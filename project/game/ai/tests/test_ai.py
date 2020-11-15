@@ -478,13 +478,13 @@ def test_call_upgrade_pon_and_bad_ukeire_after_call():
     tiles = string_to_136_array(man="34445", sou="123456", pin="89")
     table.player.init_hand(tiles)
     tile = string_to_136_array(man="4444")[3]
+    table.player.draw_tile(tile)
 
     assert table.player.should_call_kan(tile, False) is None
 
     table.player.add_called_meld(make_meld(MeldPrint.PON, man="444"))
 
     assert len(table.player.melds) == 1
-    assert len(table.player.tiles) == 13
     assert table.player.should_call_kan(tile, False) is None
 
 
@@ -513,6 +513,7 @@ def test_call_upgrade_pon_and_bad_ukeire_after_call_third_case():
     table.player.add_called_meld(make_meld(MeldPrint.PON, sou="444"))
 
     tile = string_to_136_array(sou="4444")[3]
+    table.player.draw_tile(tile)
 
     # we don't want to call shouminkan here
     assert table.player.should_call_kan(tile, False) is None
@@ -527,6 +528,7 @@ def test_call_shouminkan():
     table.player.add_called_meld(make_meld(MeldPrint.PON, honors="666"))
 
     tile = string_to_136_array(honors="6666")[3]
+    table.player.draw_tile(tile)
 
     assert table.player.should_call_kan(tile, False) == MeldPrint.SHOUMINKAN
 
@@ -538,6 +540,7 @@ def test_call_closed_kan():
     tiles = string_to_136_array(man="12223", sou="111456", pin="12")
     table.player.init_hand(tiles)
     tile = string_to_136_tile(man="2")
+    table.player.draw_tile(tile)
 
     # it is pretty stupid to call closed kan with 2m
     assert table.player.should_call_kan(tile, False) is None
@@ -545,6 +548,7 @@ def test_call_closed_kan():
     tiles = string_to_136_array(man="12223", sou="111456", pin="12")
     table.player.init_hand(tiles)
     tile = string_to_136_tile(sou="1")
+    table.player.draw_tile(tile)
 
     # call closed kan with 1s is fine
     assert table.player.should_call_kan(tile, False) == MeldPrint.KAN
@@ -663,6 +667,7 @@ def test_closed_kan_same_shanten_bad_ukeire():
     player.melds.append(make_meld(MeldPrint.PON, man="333"))
 
     tile = string_to_136_tile(man="8")
+    player.draw_tile(tile)
 
     assert player.should_call_kan(tile, False) is None
 
@@ -681,6 +686,7 @@ def test_closed_kan_same_shanten_same_ukeire():
     player.melds.append(make_meld(MeldPrint.PON, man="333"))
 
     tile = string_to_136_tile(honors="3")
+    player.draw_tile(tile)
 
     assert player.should_call_kan(tile, False) == MeldPrint.KAN
 
@@ -697,6 +703,7 @@ def test_kan_crash():
     table.player.init_hand(tiles)
     table.player.add_called_meld(make_meld(MeldPrint.PON, sou="666"))
     tile = string_to_136_tile(pin="9")
+    table.player.draw_tile(tile)
 
     assert table.player.should_call_kan(tile, False) is None
 

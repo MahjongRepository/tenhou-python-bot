@@ -78,8 +78,6 @@ class GameManager:
         self.replay = TenhouReplay(self.replay_name, self.clients, self.replays_directory)
 
         logger.info("Seed: {}".format(shuffle_seed()))
-        logger.info("Aka dora: {}".format(settings.FIVE_REDS))
-        logger.info("Open tanyao: {}".format(settings.FIVE_REDS))
 
         seed(shuffle_seed())
         self.clients = self._randomly_shuffle_array(self.clients)
@@ -93,7 +91,7 @@ class GameManager:
         for client in self.clients:
             client.player.scores = 25000
 
-        self._unique_dealers = 1
+        self._unique_dealers = 0
         self.round_number = 0
 
     def play_game(self):
@@ -102,7 +100,6 @@ class GameManager:
         :return: game results
         """
         logger.info("The start of the game")
-        logger.info("")
 
         is_game_end = False
         self.init_game()
@@ -114,7 +111,6 @@ class GameManager:
             self.init_round()
 
             results = self.play_round()
-            logger.info("")
 
             dealer_won = False
             for result in results:
@@ -211,7 +207,7 @@ class GameManager:
         logger.info("Players: {0}".format(self.players_sorted_by_scores()))
 
         self.replay.init_round(
-            self.dealer, self._unique_dealers - 1, self.honba_sticks, self.riichi_sticks, self.dora_indicators[0]
+            self.dealer, self._unique_dealers, self.honba_sticks, self.riichi_sticks, self.dora_indicators[0]
         )
 
     def play_round(self) -> []:
@@ -562,16 +558,6 @@ class GameManager:
         # or called meld
         client.is_ippatsu = True
 
-        who_called_riichi = client.seat
-        logger.info("Riichi: {0} -1,000".format(self.clients[who_called_riichi].player.name))
-        logger.info(
-            "With hand: {}".format(
-                TilesConverter.to_one_line_string(
-                    self.clients[who_called_riichi].player.closed_hand, print_aka_dora=True
-                )
-            )
-        )
-
     def set_dealer(self, dealer):
         self.dealer = dealer
         self._unique_dealers += 1
@@ -823,7 +809,7 @@ class GameManager:
                 is_game_end = True
 
         # we have played all 8 winds, let's finish the game
-        if self._unique_dealers > 8:
+        if self._unique_dealers > 7:
             is_game_end = True
 
         return is_game_end

@@ -9,14 +9,16 @@ class LocalClient(Client):
     is_daburi = False
     is_ippatsu = False
 
-    def __init__(self, bot_config, print_logs, replay_name):
+    def __init__(self, bot_config, print_logs, replay_name, game_count):
         super().__init__(bot_config)
         self.id = make_random_letters_and_digit_string()
         self.player.name = bot_config.name
 
         if print_logs:
             settings.LOG_PREFIX = self.player.name
-            logger = set_up_logging(save_to_file=True, print_to_console=False, logger_name=self.player.name)
+            logger = set_up_logging(
+                save_to_file=True, print_to_console=False, logger_name=self.player.name + str(game_count)
+            )
             logger.info(f"Replay name: {replay_name}")
             self.player.init_logger(logger)
 

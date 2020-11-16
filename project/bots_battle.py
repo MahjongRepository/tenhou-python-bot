@@ -39,7 +39,7 @@ def main(number_of_games, print_logs):
 
         replay_name = GameManager.generate_replay_name()
 
-        clients = [LocalClient(BattleConfig.CLIENTS_CONFIGS[x](), print_logs, replay_name) for x in range(0, 4)]
+        clients = [LocalClient(BattleConfig.CLIENTS_CONFIGS[x](), print_logs, replay_name, i) for x in range(0, 4)]
         manager = GameManager(clients, replays_directory, replay_name)
 
         try:

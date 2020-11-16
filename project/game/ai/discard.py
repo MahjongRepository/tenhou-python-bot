@@ -43,6 +43,8 @@ class DiscardOption:
     second_level_cost = None
     # second level average cost approximation for 1-shanten hands
     average_second_level_cost = None
+    # special descriptor for tempai with additional info
+    tempai_descriptor = None
 
     def __init__(self, player, tile_to_discard_136, shanten, waiting, ukeire, wait_to_ukeire=None):
         self.player = player
@@ -58,8 +60,9 @@ class DiscardOption:
         self.wait_to_ukeire = wait_to_ukeire
         self.second_level_cost = 0
         self.average_second_level_cost = 0
+        self.tempai_descriptor = None
 
-        self.calculate_value()
+        self.calculate_valuation()
 
     @property
     def tile_to_discard_34(self):
@@ -84,6 +87,8 @@ class DiscardOption:
         }
         if self.ukeire_second:
             data["ukeire2"] = self.ukeire_second
+        if self.average_second_level_cost:
+            data["average_second_level_cost"] = self.average_second_level_cost
         if self.had_to_be_saved:
             data["had_to_be_saved"] = self.had_to_be_saved
         if self.had_to_be_discarded:
@@ -97,7 +102,7 @@ class DiscardOption:
         assert self.tile_to_discard_136 in closed_hand
         return self.tile_to_discard_136
 
-    def calculate_value(self):
+    def calculate_valuation(self):
         # base is 100 for ability to mark tiles as not needed (like set value to 50)
         value = 100
         honored_value = 20

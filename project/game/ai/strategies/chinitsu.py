@@ -12,6 +12,9 @@ class ChinitsuStrategy(BaseStrategy):
     dora_count_suitable = 0
     dora_count_not_suitable = 0
 
+    def get_open_hand_han(self):
+        return 5
+
     def should_activate_strategy(self, tiles_136):
         """
         We can go for chinitsu strategy if we have prevalence of one suit

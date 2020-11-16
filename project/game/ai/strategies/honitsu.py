@@ -23,6 +23,9 @@ class HonitsuStrategy(BaseStrategy):
     tiles_count_other_suits = 0
     tiles_count_other_suits_not_isolated = 0
 
+    def get_open_hand_han(self):
+        return 2
+
     def should_activate_strategy(self, tiles_136):
         """
         We can go for honitsu strategy if we have prevalence of one suit and honor tiles

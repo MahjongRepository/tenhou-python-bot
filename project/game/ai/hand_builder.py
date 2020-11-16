@@ -339,7 +339,7 @@ class HandBuilder:
 
                     cost_x_ukeire, _ = self._estimate_cost_x_ukeire(best_one, call_riichi=call_riichi)
                     if best_ukeire != 0:
-                        average_costs.append((cost_x_ukeire / (best_ukeire * 4)))
+                        average_costs.append(cost_x_ukeire / best_ukeire)
                     # we reduce tile valuation for atodzuke
                     if result_has_atodzuke:
                         cost_x_ukeire /= 2
@@ -616,35 +616,36 @@ class HandBuilder:
                                 tanki_type = TankiWait.TANKI_WAIT_69_RAW
                         break
 
-                discard_desc.append(
-                    {
-                        "discard_option": discard_option,
-                        "hand_cost": hand_cost,
-                        "cost_x_ukeire": cost_x_ukeire,
-                        "is_furiten": is_furiten,
-                        "is_tanki": is_tanki,
-                        "tanki_type": tanki_type,
-                        "max_danger": discard_option.danger.get_max_danger(),
-                        "sum_danger": discard_option.danger.get_sum_danger(),
-                        "weighted_danger": discard_option.danger.get_weighted_danger(),
-                    }
-                )
+                tempai_descriptor = {
+                    "discard_option": discard_option,
+                    "hand_cost": hand_cost,
+                    "cost_x_ukeire": cost_x_ukeire,
+                    "is_furiten": is_furiten,
+                    "is_tanki": is_tanki,
+                    "tanki_type": tanki_type,
+                    "max_danger": discard_option.danger.get_max_danger(),
+                    "sum_danger": discard_option.danger.get_sum_danger(),
+                    "weighted_danger": discard_option.danger.get_weighted_danger(),
+                }
+                discard_desc.append(tempai_descriptor)
             else:
                 cost_x_ukeire, _ = self._estimate_cost_x_ukeire(discard_option, call_riichi)
 
-                discard_desc.append(
-                    {
-                        "discard_option": discard_option,
-                        "hand_cost": None,
-                        "cost_x_ukeire": cost_x_ukeire,
-                        "is_furiten": is_furiten,
-                        "is_tanki": False,
-                        "tanki_type": None,
-                        "max_danger": discard_option.danger.get_max_danger(),
-                        "sum_danger": discard_option.danger.get_sum_danger(),
-                        "weighted_danger": discard_option.danger.get_weighted_danger(),
-                    }
-                )
+                tempai_descriptor = {
+                    "discard_option": discard_option,
+                    "hand_cost": None,
+                    "cost_x_ukeire": cost_x_ukeire,
+                    "is_furiten": is_furiten,
+                    "is_tanki": False,
+                    "tanki_type": None,
+                    "max_danger": discard_option.danger.get_max_danger(),
+                    "sum_danger": discard_option.danger.get_sum_danger(),
+                    "weighted_danger": discard_option.danger.get_weighted_danger(),
+                }
+                discard_desc.append(tempai_descriptor)
+
+            # save descriptor to discard option for future users
+            discard_option.tempai_descriptor = tempai_descriptor
 
             # reverse all temporary tile tweaks
             self.player.tiles = player_tiles_copy
@@ -930,10 +931,10 @@ class HandBuilder:
         # these are abstract numbers used to compare different waits
         # some don't have yaku, some furiten, etc.
         # so we use an abstract formula of 1 tsumo cost + 3 ron costs
-        cost_x_ukeire = cost_x_ukeire_tsumo + 3 * cost_x_ukeire_ron
+        cost_x_ukeire = (cost_x_ukeire_tsumo + 3 * cost_x_ukeire_ron) // 4
 
         if len(discard_option.waiting) == 1:
-            hand_cost = hand_cost_tsumo + 3 * hand_cost_ron
+            hand_cost = (hand_cost_tsumo + 3 * hand_cost_ron) // 4
         else:
             hand_cost = None
 

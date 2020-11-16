@@ -7,7 +7,7 @@ class PlacementHandler:
         self.table = player.table
 
     def get_allowed_danger_modifier(self) -> int:
-        placement = self._get_current_placement()
+        placement = self.get_current_placement()
         placement_evaluation = self._get_placement_evaluation(placement)
 
         if placement_evaluation == Placement.VERY_COMFORTABLE_FIRST:
@@ -43,7 +43,7 @@ class PlacementHandler:
         if not self.is_oorasu:
             return Placement.DEFAULT_RIICHI_DECISION
 
-        placement = self._get_current_placement()
+        placement = self.get_current_placement()
         if not placement:
             return Placement.DEFAULT_RIICHI_DECISION
 
@@ -113,7 +113,7 @@ class PlacementHandler:
         if self.player.is_dealer:
             return True
 
-        placement = self._get_current_placement()
+        placement = self.get_current_placement()
         if not placement:
             return True
 
@@ -169,7 +169,7 @@ class PlacementHandler:
             return 0
 
         if not placement:
-            placement = self._get_current_placement()
+            placement = self.get_current_placement()
             if not placement:
                 return 0
 
@@ -198,7 +198,7 @@ class PlacementHandler:
 
         return Placement.NEUTRAL
 
-    def _get_current_placement(self):
+    def get_current_placement(self):
         if not self.points_initialized:
             return None
 

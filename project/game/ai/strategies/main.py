@@ -42,6 +42,9 @@ class BaseStrategy:
     def __str__(self):
         return self.TYPES[self.type]
 
+    def get_open_hand_han(self):
+        return 0
+
     def should_activate_strategy(self, tiles_136):
         """
         Based on player hand and table situation
@@ -259,6 +262,94 @@ class BaseStrategy:
         """
         In some cased we want additionally check that meld is suitable to the strategy
         """
+        if self.player.is_open_hand:
+            return True
+
+        if not self.player.ai.placement.is_oorasu:
+            return True
+
+        # don't care about not enough cost if we are the dealer
+        if self.player.is_dealer:
+            return True
+
+        placement = self.player.ai.placement.get_current_placement()
+        if not placement:
+            return True
+
+        if placement["place"] != 4:
+            return True
+
+        num_players_over_30000 = len([x for x in self.player.table.players if x.scores >= 30000])
+        if num_players_over_30000 == 0:
+            return True
+
+        needed_cost = self.player.ai.placement.get_minimal_cost_needed(placement=placement)
+        if num_players_over_30000 == 1:
+            needed_cost = min(needed_cost, self.player.table.get_players_sorted_by_scores()[0] - 30000)
+        if needed_cost <= 1000:
+            return True
+
+        selected_tile = chosen_meld_dict["discard_tile"]
+        if selected_tile.ukeire == 0:
+            self.player.logger.debug(
+                log.MELD_DEBUG, "We need to get out of 4th place, but this meld leaves us with zero ukeire"
+            )
+            return False
+
+        logger_context = {
+            "placement": placement,
+            "meld": chosen_meld_dict,
+            "needed_cost": needed_cost,
+        }
+
+        if selected_tile.shanten == 0:
+            if not selected_tile.tempai_descriptor:
+                return True
+
+            # tempai has special logger context
+            logger_context = {
+                "placement": placement,
+                "meld": chosen_meld_dict,
+                "needed_cost": needed_cost,
+                "tempai_descriptor": selected_tile.tempai_descriptor,
+            }
+
+            if selected_tile.tempai_descriptor["hand_cost"]:
+                hand_cost = selected_tile.tempai_descriptor["hand_cost"]
+            else:
+                hand_cost = selected_tile.tempai_descriptor["cost_x_ukeire"] / selected_tile.ukeire
+
+            # optimistic condition - direct ron
+            if hand_cost * 2 < needed_cost:
+                self.player.logger.debug(
+                    log.MELD_DEBUG, "No chance to comeback from 4th with this meld, so keep hand closed", logger_context
+                )
+                return False
+        elif selected_tile.shanten == 1:
+            if selected_tile.average_second_level_cost is None:
+                return True
+
+            # optimistic condition - direct ron
+            if selected_tile.average_second_level_cost * 2 < needed_cost:
+                self.player.logger.debug(
+                    log.MELD_DEBUG, "No chance to comeback from 4th with this meld, so keep hand closed", logger_context
+                )
+                return False
+        else:
+            simple_han_scale = [0, 1000, 2000, 3900, 7700, 8000, 12000, 12000]
+            num_han = self.get_open_hand_han() + self.dora_count_total
+            if num_han < len(simple_han_scale):
+                hand_cost = simple_han_scale[num_han]
+                # optimistic condition - direct ron
+                if hand_cost * 2 < needed_cost:
+                    self.player.logger.debug(
+                        log.MELD_DEBUG,
+                        "No chance to comeback from 4th with this meld, so keep hand closed",
+                        logger_context,
+                    )
+                    return False
+
+        self.player.logger.debug(log.MELD_DEBUG, "This meld should allow us to comeback from 4th", logger_context)
         return True
 
     def meld_had_to_be_called(self, tile):

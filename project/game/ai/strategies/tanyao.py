@@ -10,6 +10,9 @@ class TanyaoStrategy(BaseStrategy):
     min_shanten = 3
     not_suitable_tiles = TERMINAL_INDICES + HONOR_INDICES
 
+    def get_open_hand_han(self):
+        return 1
+
     def should_activate_strategy(self, tiles_136):
         """
         Tanyao hand is a hand without terminal and honor tiles, to achieve this
@@ -166,6 +169,10 @@ class TanyaoStrategy(BaseStrategy):
         # if we have already opened our hand, let's go by default riles
         if self.player.is_open_hand:
             return True
+
+        # choose if base method requires us to keep hand closed
+        if not super(TanyaoStrategy, self).validate_meld(chosen_meld_dict):
+            return False
 
         # otherwise let's not open hand if that does not improve our ukeire
         closed_tiles_34 = TilesConverter.to_34_array(self.player.closed_hand)

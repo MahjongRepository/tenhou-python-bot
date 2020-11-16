@@ -6,14 +6,19 @@ from utils.decisions_logger import MeldPrint
 
 class YakuhaiStrategy(BaseStrategy):
     valued_pairs = None
-    has_valued_pon = None
+    has_valued_anko = None
 
     def __init__(self, strategy_type, player):
         super().__init__(strategy_type, player)
 
         self.valued_pairs = []
-        self.has_valued_pon = False
+        self.valued_anko = []
+        self.has_valued_anko = False
         self.last_chance_calls = []
+
+    def get_open_hand_han(self):
+        # kinda rough estimation
+        return len(self.valued_anko) + len(self.valued_pairs)
 
     def should_activate_strategy(self, tiles_136):
         """
@@ -33,7 +38,8 @@ class YakuhaiStrategy(BaseStrategy):
         is_double_south_wind = len([x for x in self.valued_pairs if x == SOUTH]) == 2
 
         self.valued_pairs = list(set(self.valued_pairs))
-        self.has_valued_pon = len([x for x in self.player.valued_honors if player_hand_tiles_34[x] >= 3]) >= 1
+        self.valued_anko = [x for x in self.player.valued_honors if player_hand_tiles_34[x] >= 3]
+        self.has_valued_anko = len(self.valued_anko) >= 1
 
         opportunity_to_meld_yakuhai = False
 
@@ -54,7 +60,7 @@ class YakuhaiStrategy(BaseStrategy):
                 break
 
         # we don't have valuable pair or pon to open our hand
-        if not has_valued_pair and not self.has_valued_pon:
+        if not has_valued_pair and not self.has_valued_anko:
             return False
 
         # let's always open double east
@@ -183,7 +189,7 @@ class YakuhaiStrategy(BaseStrategy):
         return False
 
     def try_to_call_meld(self, tile, is_kamicha_discard, tiles_136):
-        if self.has_valued_pon:
+        if self.has_valued_anko:
             return super(YakuhaiStrategy, self).try_to_call_meld(tile, is_kamicha_discard, tiles_136)
 
         tile_34 = tile // 4

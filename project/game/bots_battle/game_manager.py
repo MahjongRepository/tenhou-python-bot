@@ -276,7 +276,7 @@ class GameManager:
 
             # checks if we can call closed kan or shouminkan
             current_client_tiles_34 = TilesConverter.to_34_array(current_client.player.tiles)
-            if current_client_tiles_34[drawn_tile_34] == 4:
+            if current_client_tiles_34[drawn_tile_34] == 4 and len(self.tiles) > 1:
                 kan_type = current_client.player.should_call_kan(
                     drawn_tile, open_kan=False, from_riichi=current_client.player.in_riichi
                 )
@@ -375,7 +375,7 @@ class GameManager:
 
                 # opened kan
                 other_client_closed_hand_34 = TilesConverter.to_34_array(other_client.player.closed_hand)
-                if other_client_closed_hand_34[tile_34] == 3 and other_client.player.should_call_kan(
+                if other_client_closed_hand_34[tile_34] == 3 and len(self.tiles) > 1 and other_client.player.should_call_kan(
                     tile, open_kan=True
                 ):
                     tiles = [

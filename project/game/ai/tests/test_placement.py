@@ -274,7 +274,7 @@ def test_skip_ron_wind_placement():
     assert not player.should_call_win(string_to_136_tile(sou="5"), False, 3)
 
 
-def test_skip_cheap_meld():
+def test_skip_cheap_meld_tempai():
     table = Table()
     player = table.player
     table.has_aka_dora = True
@@ -287,6 +287,72 @@ def test_skip_cheap_meld():
     table.add_dora_indicator(string_to_136_tile(sou="2"))
 
     tiles = string_to_136_array(man="3488", sou="334678", pin="678")
+    table.player.init_hand(tiles)
+    table.player.round_step = 12
+
+    player.scores = 18000
+    assert table.players[0] == player
+    table.players[1].scores = 28000
+    table.players[2].scores = 35000
+    table.players[3].scores = 40000
+
+    # it's too cheap, let's not open
+    tile = string_to_136_tile(sou="2")
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is None
+
+    # now this is the cost we might win with
+    tile = string_to_136_tile(sou="3")
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is not None
+
+
+def test_skip_cheap_meld_1_shanten():
+    table = Table()
+    player = table.player
+    table.has_aka_dora = True
+    table.has_open_tanyao = True
+    # orasu
+    table.round_wind_number = 7
+    table.dealer_seat = 1
+    player.dealer_seat = 1
+
+    table.add_dora_indicator(string_to_136_tile(sou="2"))
+
+    tiles = string_to_136_array(man="3488", sou="334678", pin="268")
+    table.player.init_hand(tiles)
+    table.player.round_step = 12
+
+    player.scores = 18000
+    assert table.players[0] == player
+    table.players[1].scores = 28000
+    table.players[2].scores = 35000
+    table.players[3].scores = 40000
+
+    # it's too cheap, let's not open
+    tile = string_to_136_tile(sou="2")
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is None
+
+    # now this is the cost we might win with
+    tile = string_to_136_tile(sou="3")
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is not None
+
+
+def test_skip_cheap_meld_2_shanten():
+    table = Table()
+    player = table.player
+    table.has_aka_dora = True
+    table.has_open_tanyao = True
+    # orasu
+    table.round_wind_number = 7
+    table.dealer_seat = 1
+    player.dealer_seat = 1
+
+    table.add_dora_indicator(string_to_136_tile(sou="2"))
+
+    tiles = string_to_136_array(man="34889", sou="33468", pin="268")
     table.player.init_hand(tiles)
     table.player.round_step = 12
 

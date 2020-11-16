@@ -77,8 +77,6 @@ class GameManager:
         logger.info("Replay name: {}".format(self.replay_name))
         self.replay = TenhouReplay(self.replay_name, self.clients, self.replays_directory)
 
-        logger.info("Seed: {}".format(shuffle_seed()))
-
         seed(shuffle_seed())
         self.clients = self._randomly_shuffle_array(self.clients)
         for i in range(0, len(self.clients)):
@@ -95,17 +93,11 @@ class GameManager:
         self.round_number = 0
 
     def play_game(self):
-        """
-        :param total_results: a dictionary with keys as client ids
-        :return: game results
-        """
         logger.info("The start of the game")
 
         is_game_end = False
         self.init_game()
         self.replay.init_game(shuffle_seed())
-
-        played_rounds = 0
 
         while not is_game_end:
             self.init_round()
@@ -113,12 +105,14 @@ class GameManager:
             results = self.play_round()
 
             dealer_won = False
+            was_retake = False
             for result in results:
                 # we want to increase honba in that case and don't move dealer seat
                 if result["is_abortive_retake"]:
                     dealer_won = True
 
                 if not result["winner"]:
+                    was_retake = True
                     continue
 
                 if result["winner"].player.is_dealer:
@@ -129,22 +123,24 @@ class GameManager:
                 self.honba_sticks += 1
             # otherwise let's move dealer seat
             else:
-                self.honba_sticks = 0
+                # retake and dealer is noten
+                if was_retake:
+                    self.honba_sticks += 1
+                else:
+                    self.honba_sticks = 0
+
                 new_dealer = self._move_position(self.dealer)
                 self.set_dealer(new_dealer)
 
             # important increment, we are building wall seed based on the round number
             self.round_number += 1
 
-            played_rounds += 1
             is_game_end = self._check_the_end_of_game()
 
         self.recalculate_players_position()
         self.replay.end_game()
 
         logger.info("Final Scores: {0}".format(self.players_sorted_by_scores()))
-
-        return {"played_rounds": played_rounds}
 
     def init_round(self):
         """
@@ -718,13 +714,9 @@ class GameManager:
     def retake(self):
         logger.info("Retake")
         tempai_users = []
-        dealer_was_tempai = False
         for client in self.clients:
             if client.player.in_tempai:
                 tempai_users.append(client.seat)
-
-                if client.player.is_dealer:
-                    dealer_was_tempai = True
 
         tempai_users_count = len(tempai_users)
         if tempai_users_count == 0 or tempai_users_count == 4:
@@ -744,15 +736,6 @@ class GameManager:
                         self.honba_sticks += 1
                 else:
                     client.player.scores -= 3000 / (4 - tempai_users_count)
-
-        # dealer not in tempai, so round should move
-        if not dealer_was_tempai:
-            new_dealer = self._move_position(self.dealer)
-            self.set_dealer(new_dealer)
-
-            # someone was in tempai, we need to add honba here
-            if tempai_users_count != 0 and tempai_users_count != 4:
-                self.honba_sticks += 1
 
         self.replay.retake(tempai_users, self.honba_sticks, self.riichi_sticks)
         return {"winner": None, "loser": None, "is_tsumo": False, "is_abortive_retake": False}

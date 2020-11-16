@@ -285,7 +285,7 @@ class BaseStrategy:
 
         needed_cost = self.player.ai.placement.get_minimal_cost_needed(placement=placement)
         if num_players_over_30000 == 1:
-            needed_cost = min(needed_cost, self.player.table.get_players_sorted_by_scores()[0] - 30000)
+            needed_cost = min(needed_cost, self.player.table.get_players_sorted_by_scores()[0].scores - 30000)
         if needed_cost <= 1000:
             return True
 

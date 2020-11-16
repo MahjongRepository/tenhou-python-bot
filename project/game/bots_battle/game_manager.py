@@ -228,6 +228,7 @@ class GameManager:
     def play_round(self) -> []:
         continue_to_play = True
 
+        number_of_kan_sets_per_player = {0: 0, 1: 0, 2: 0, 3: 0}
         while continue_to_play:
             current_client = self._get_current_client()
 
@@ -302,6 +303,13 @@ class GameManager:
 
                     self.replay.open_meld(meld)
 
+                    number_of_kan_sets_per_player[current_client.seat] += 1
+                    if (
+                        sum(number_of_kan_sets_per_player.values()) == 4
+                        and len(number_of_kan_sets_per_player.values()) != 1
+                    ):
+                        return [self.abortive_retake(AbortiveDraw.FOUR_KANS)]
+
                     # we need to notify each client about called meld
                     for _client in self.clients:
                         _client.table.add_called_meld(self._enemy_position(current_client.seat, _client.seat), meld)
@@ -375,8 +383,10 @@ class GameManager:
 
                 # opened kan
                 other_client_closed_hand_34 = TilesConverter.to_34_array(other_client.player.closed_hand)
-                if other_client_closed_hand_34[tile_34] == 3 and len(self.tiles) > 1 and other_client.player.should_call_kan(
-                    tile, open_kan=True
+                if (
+                    other_client_closed_hand_34[tile_34] == 3
+                    and len(self.tiles) > 1
+                    and other_client.player.should_call_kan(tile, open_kan=True)
                 ):
                     tiles = [
                         (tile_34 * 4),
@@ -399,6 +409,13 @@ class GameManager:
                     # we changed current client seat
                     self.players_with_open_hands.append(other_client.seat)
                     other_client.player.tiles.append(tile)
+
+                    number_of_kan_sets_per_player[other_client.seat] += 1
+                    if (
+                        sum(number_of_kan_sets_per_player.values()) == 4
+                        and len(number_of_kan_sets_per_player.values()) != 1
+                    ):
+                        return [self.abortive_retake(AbortiveDraw.FOUR_KANS)]
 
                     # we need to notify each client about called meld
                     for _client in self.clients:

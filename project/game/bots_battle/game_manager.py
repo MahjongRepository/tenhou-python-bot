@@ -800,19 +800,25 @@ class GameManager:
             return None
 
     def _check_the_end_of_game(self):
-        is_game_end = False
-
-        # if someone has negative scores,
-        # we need to end the game
+        has_player_with_30000_plus_scores = False
         for client in self.clients:
+            # if someone has negative scores at the end of round, we need to end the game
             if client.player.scores < 0:
-                is_game_end = True
+                return True
 
-        # we have played all 8 winds, let's finish the game
-        if self._unique_dealers > 7:
-            is_game_end = True
+            if client.player.scores >= 30000:
+                has_player_with_30000_plus_scores = True
 
-        return is_game_end
+        # we have played all 8 winds (starting from wind 0)
+        # and there is player with 30000+ scores
+        if self._unique_dealers > 7 and has_player_with_30000_plus_scores:
+            return True
+
+        # west round was finished, we don't want to play north round
+        if self._unique_dealers > 11:
+            return True
+
+        return False
 
     def _get_current_client(self) -> LocalClient:
         return self.clients[self.current_client_seat]

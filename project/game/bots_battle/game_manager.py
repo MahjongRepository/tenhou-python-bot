@@ -118,6 +118,8 @@ class GameManager:
                 if result["winner"].player.is_dealer:
                     dealer_won = True
 
+            is_game_end = self._check_the_end_of_game()
+
             # if dealer won we need to increment honba sticks
             if dealer_won:
                 self.honba_sticks += 1
@@ -134,8 +136,6 @@ class GameManager:
 
             # important increment, we are building wall seed based on the round number
             self.round_number += 1
-
-            is_game_end = self._check_the_end_of_game()
 
         self.recalculate_players_position()
         self.replay.end_game()

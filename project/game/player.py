@@ -1,4 +1,3 @@
-import logging
 from typing import Optional
 
 import utils.decisions_constants as log
@@ -7,8 +6,6 @@ from game.ai.main import MahjongAI
 from mahjong.constants import CHUN, EAST, HAKU, HATSU, NORTH, SOUTH, WEST
 from mahjong.tile import Tile, TilesConverter
 from utils.decisions_logger import DecisionsLogger, MeldPrint
-
-logger = logging.getLogger("bot")
 
 
 class PlayerInterface:
@@ -33,10 +30,13 @@ class PlayerInterface:
     name = ""
     rank = ""
 
+    logger = None
+
     def __init__(self, table, seat, dealer_seat):
         self.table = table
         self.seat = seat
         self.dealer_seat = dealer_seat
+        self.logger = DecisionsLogger()
 
         self.erase_state()
 
@@ -52,6 +52,9 @@ class PlayerInterface:
 
     def __repr__(self):
         return self.__str__()
+
+    def init_logger(self, logger):
+        self.logger.logger = logger
 
     def erase_state(self):
         self.discards = []
@@ -179,7 +182,7 @@ class Player(PlayerInterface):
         if self.ai.current_strategy:
             context.append(f"Current strategy: {self.ai.current_strategy}")
 
-        DecisionsLogger.debug(log.DRAW, context=context)
+        self.logger.debug(log.DRAW, context=context)
 
         self.last_draw = tile_136
         self.tiles.append(tile_136)

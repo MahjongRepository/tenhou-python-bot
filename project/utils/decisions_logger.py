@@ -6,48 +6,45 @@ from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
 from utils.settings_handler import settings
 
-logger = logging.getLogger("bot")
-
 
 class DecisionsLogger:
-    @staticmethod
-    def debug(message_id, message="", context=None):
+    logger = logging.getLogger()
+
+    def debug(self, message_id, message="", context=None):
         if not settings.PRINT_LOGS:
             return None
 
-        logger.debug(f"id={message_id}")
+        self.logger.debug(f"id={message_id}")
 
         if message:
-            logger.debug(f"msg={message}")
+            self.logger.debug(f"msg={message}")
 
         if context:
             if isinstance(context, list):
                 for x in context:
-                    DecisionsLogger.log_message(x)
+                    self.log_message(x)
             else:
-                DecisionsLogger.log_message(context)
+                self.log_message(context)
 
-    @staticmethod
-    def log_message(message):
+    def log_message(self, message):
         if hasattr(message, "serialize"):
             message = message.serialize()
 
         if isinstance(message, dict):
             message = deepcopy(message)
-            DecisionsLogger.serialize_dict_objects(message)
-            logger.debug(json.dumps(message))
+            self.serialize_dict_objects(message)
+            self.logger.debug(json.dumps(message))
         else:
-            logger.debug(message)
+            self.logger.debug(message)
 
-    @staticmethod
-    def serialize_dict_objects(d):
+    def serialize_dict_objects(self, d):
         for k, v in d.items():
             if isinstance(v, dict):
-                DecisionsLogger.serialize_dict_objects(v)
+                self.serialize_dict_objects(v)
             elif isinstance(v, list):
                 for i in range(len(v)):
                     if isinstance(v, dict):
-                        DecisionsLogger.serialize_dict_objects(v)
+                        self.serialize_dict_objects(v)
                     elif hasattr(v[i], "serialize"):
                         v[i] = v[i].serialize()
             elif hasattr(v, "serialize"):

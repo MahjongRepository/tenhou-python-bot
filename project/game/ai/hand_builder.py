@@ -7,7 +7,7 @@ from mahjong.constants import AKA_DORA_LIST
 from mahjong.shanten import Shanten
 from mahjong.tile import Tile, TilesConverter
 from mahjong.utils import is_honor, is_pair, is_terminal, is_tile_strictly_isolated, plus_dora, simplify
-from utils.decisions_logger import DecisionsLogger, MeldPrint
+from utils.decisions_logger import MeldPrint
 
 
 class HandBuilder:
@@ -47,9 +47,9 @@ class HandBuilder:
             discard_options, threatening_players = self.player.ai.defence.mark_tiles_danger_for_threats(discard_options)
 
             if threatening_players:
-                DecisionsLogger.debug(log.DEFENCE_THREATENING_ENEMY, "Threats", context=threatening_players)
+                self.player.logger.debug(log.DEFENCE_THREATENING_ENEMY, "Threats", context=threatening_players)
 
-        DecisionsLogger.debug(log.DISCARD_OPTIONS, "All discard candidates", discard_options)
+        self.player.logger.debug(log.DISCARD_OPTIONS, "All discard candidates", discard_options)
 
         tiles_we_can_discard = [x for x in discard_options if x.danger.is_danger_acceptable()]
         if not tiles_we_can_discard:
@@ -108,7 +108,7 @@ class HandBuilder:
         return self._choose_best_discard_with_4_or_more_shanten(results_with_same_shanten)
 
     def process_discard_option(self, discard_option, closed_hand, force_discard=False):
-        DecisionsLogger.debug(log.DISCARD, context=discard_option)
+        self.player.logger.debug(log.DISCARD, context=discard_option)
 
         self.player.in_tempai = discard_option.shanten == 0
         self.ai.waiting = discard_option.waiting
@@ -426,14 +426,14 @@ class HandBuilder:
             return None
 
         # we can't discard effective tile from the hand, let's fold
-        DecisionsLogger.debug(log.DISCARD_SAFE_TILE, "There are only dangerous tiles. Discard safest tile.")
+        self.player.logger.debug(log.DISCARD_SAFE_TILE, "There are only dangerous tiles. Discard safest tile.")
         return sorted(discard_options, key=self._sorting_rule_for_betaori)[0]
 
     def _choose_safest_tile(self, discard_options):
         return self._choose_safest_tile_or_skip_meld(discard_options, after_meld=False)
 
     def _choose_best_tile(self, discard_options):
-        DecisionsLogger.debug(log.DISCARD_OPTIONS, "All discard candidates", discard_options)
+        self.player.logger.debug(log.DISCARD_OPTIONS, "All discard candidates", discard_options)
 
         return discard_options[0]
 
@@ -717,7 +717,7 @@ class HandBuilder:
             return self._choose_best_tile(sorted(discard_options, key=self._sorting_rule_for_1_shanten))
         elif self.player.round_step < 13:
             # discard more dangerous tiles beforehand
-            DecisionsLogger.debug(
+            self.player.logger.debug(
                 log.DISCARD_OPTIONS,
                 "There are no threats yet, better discard useless dangerous tile beforehand",
                 discard_options,
@@ -725,7 +725,7 @@ class HandBuilder:
             danger_sign = -1
         else:
             # late round - discard safer tiles first
-            DecisionsLogger.debug(
+            self.player.logger.debug(
                 log.DISCARD_OPTIONS,
                 "There are no visible threats, but it's late, better keep useless dangerous tiles",
                 discard_options,
@@ -804,7 +804,7 @@ class HandBuilder:
         )
         assert possible_options
 
-        DecisionsLogger.debug(log.DISCARD_OPTIONS, "Candidates after filtering by ukeire2", context=possible_options)
+        self.player.logger.debug(log.DISCARD_OPTIONS, "Candidates after filtering by ukeire2", context=possible_options)
 
         return self._choose_best_tile_considering_threats(
             sorted(possible_options, key=lambda x: self._sorting_rule_for_2_3_shanten_with_isolated(x, closed_hand_34)),

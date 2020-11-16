@@ -32,6 +32,8 @@ class GameManager:
     To have a metrics how new version plays against old versions
     """
 
+    replay_name = ""
+
     tiles = None
     dead_wall = None
     clients = None
@@ -49,7 +51,7 @@ class GameManager:
     _unique_dealers = 0
     _need_to_check_same_winds = None
 
-    def __init__(self, clients, replays_directory):
+    def __init__(self, clients, replays_directory, replay_name):
         self._need_to_check_same_winds = True
         self.tiles = []
         self.dead_wall = []
@@ -60,6 +62,11 @@ class GameManager:
         self.agari = Agari()
         self.finished_hand = HandCalculator()
         self.replays_directory = replays_directory
+        self.replay_name = replay_name
+
+    @staticmethod
+    def generate_replay_name():
+        return f"{datetime.datetime.now().strftime('%Y-%m-%d_%H_%M_%S')}_{randint(0, 999):03}.txt"
 
     def init_game(self):
         """
@@ -67,9 +74,8 @@ class GameManager:
         Clients random placement and dealer selection.
         """
 
-        replay_name = f"{datetime.datetime.now().strftime('%Y-%m-%d_%H_%M_%S')}_{randint(0, 999):03}.txt"
-        logger.info("Replay name: {}".format(replay_name))
-        self.replay = TenhouReplay(replay_name, self.clients, self.replays_directory)
+        logger.info("Replay name: {}".format(self.replay_name))
+        self.replay = TenhouReplay(self.replay_name, self.clients, self.replays_directory)
 
         logger.info("Seed: {}".format(shuffle_seed()))
         logger.info("Aka dora: {}".format(settings.FIVE_REDS))
@@ -90,7 +96,7 @@ class GameManager:
         self._unique_dealers = 1
         self.round_number = 0
 
-    def play_game(self, total_results):
+    def play_game(self):
         """
         :param total_results: a dictionary with keys as client ids
         :return: game results
@@ -134,25 +140,8 @@ class GameManager:
             # important increment, we are building wall seed based on the round number
             self.round_number += 1
 
-            is_game_end = self._check_the_end_of_game()
-
-            for item in results:
-                loser = item["loser"]
-                winner = item["winner"]
-                if loser:
-                    total_results[loser.id]["lose_rounds"] += 1
-                if winner:
-                    total_results[winner.id]["win_rounds"] += 1
-
-            for client in self.clients:
-                if client.player.in_riichi:
-                    total_results[client.id]["riichi_rounds"] += 1
-
-                called_melds = [x for x in self.players_with_open_hands if x == client.seat]
-                if called_melds:
-                    total_results[client.id]["called_rounds"] += 1
-
             played_rounds += 1
+            is_game_end = self._check_the_end_of_game()
 
         self.recalculate_players_position()
         self.replay.end_game()

@@ -31,11 +31,11 @@ class ColoredFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-def set_up_logging(save_to_file=True, print_to_console=True):
+def set_up_logging(save_to_file=True, print_to_console=True, logger_name="bot"):
     """
     Logger for tenhou communication and AI output
     """
-    logger = logging.getLogger("bot")
+    logger = logging.getLogger(logger_name)
     logger.setLevel(logging.DEBUG)
 
     if print_to_console:
@@ -73,3 +73,5 @@ def set_up_logging(save_to_file=True, print_to_console=True):
         syslog.setFormatter(formatter)
 
         logger.addHandler(syslog)
+
+    return logger

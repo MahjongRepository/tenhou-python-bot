@@ -3,7 +3,6 @@ from game.ai.strategies.main import BaseStrategy
 from mahjong.constants import HONOR_INDICES, TERMINAL_INDICES
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_honor, is_tile_strictly_isolated
-from utils.decisions_logger import DecisionsLogger
 from utils.test_helpers import tiles_to_string
 
 
@@ -189,14 +188,14 @@ class TanyaoStrategy(BaseStrategy):
         }
 
         if selected_tile.shanten > shanten:
-            DecisionsLogger.debug(
+            self.player.logger.debug(
                 log.MELD_DEBUG, "Opening into tanyao increases number of shanten, let's not do that", logger_context
             )
             return False
 
         if selected_tile.shanten == shanten:
             if old_ukeire >= selected_tile.ukeire:
-                DecisionsLogger.debug(
+                self.player.logger.debug(
                     log.MELD_DEBUG,
                     "Opening into tanyao keeps same number of shanten and does not improve ukeire, let's not do that",
                     logger_context,
@@ -209,21 +208,21 @@ class TanyaoStrategy(BaseStrategy):
                 improvement_percent = selected_tile.ukeire * 100
 
             if improvement_percent < 30:
-                DecisionsLogger.debug(
+                self.player.logger.debug(
                     log.MELD_DEBUG,
                     "Opening into tanyao keeps same number of shanten and ukeire improvement is low, don't open",
                     logger_context,
                 )
                 return False
 
-            DecisionsLogger.debug(
+            self.player.logger.debug(
                 log.MELD_DEBUG,
                 "Opening into tanyao keeps same number of shanten and ukeire improvement is good, let's call meld",
                 logger_context,
             )
             return True
 
-        DecisionsLogger.debug(
+        self.player.logger.debug(
             log.MELD_DEBUG, "Opening into tanyao improves number of shanten, let's call meld", logger_context
         )
         return True

@@ -1,5 +1,4 @@
 import utils.decisions_constants as log
-from utils.decisions_logger import DecisionsLogger
 
 
 class PlacementHandler:
@@ -13,14 +12,14 @@ class PlacementHandler:
 
         if placement_evaluation == Placement.VERY_COMFORTABLE_FIRST:
             if self.is_late_round:
-                DecisionsLogger.debug(
+                self.player.logger.debug(
                     log.PLACEMENT_DANGER_MODIFIER,
                     "Very comfortable first and late round",
                     {"placement": placement, "placement_evaluation": placement_evaluation},
                 )
                 return Placement.NO_RISK_DANGER_MODIFIER
 
-            DecisionsLogger.debug(
+            self.player.logger.debug(
                 log.PLACEMENT_DANGER_MODIFIER,
                 "Very comfortable first and NOT late round",
                 {"placement": placement, "placement_evaluation": placement_evaluation},
@@ -29,7 +28,7 @@ class PlacementHandler:
 
         if placement_evaluation == Placement.COMFORTABLE_FIRST:
             if self.is_late_round:
-                DecisionsLogger.debug(
+                self.player.logger.debug(
                     log.PLACEMENT_DANGER_MODIFIER,
                     "Comfortable first and late round",
                     {"placement": placement, "placement_evaluation": placement_evaluation},
@@ -62,12 +61,12 @@ class PlacementHandler:
 
         if placement["place"] == 1:
             if has_yaku:
-                DecisionsLogger.debug(log.PLACEMENT_RIICHI_OR_DAMATEN, "1st place, has yaku", logger_context)
+                self.player.logger.debug(log.PLACEMENT_RIICHI_OR_DAMATEN, "1st place, has yaku", logger_context)
                 return Placement.MUST_DAMATEN
 
             # no yaku but we can just sit here and chill
             if placement_evaluation >= Placement.VERY_COMFORTABLE_FIRST:
-                DecisionsLogger.debug(
+                self.player.logger.debug(
                     log.PLACEMENT_RIICHI_OR_DAMATEN, "1st place, very comfortable first", logger_context
                 )
                 return Placement.MUST_DAMATEN
@@ -75,7 +74,7 @@ class PlacementHandler:
             if placement_evaluation >= Placement.COMFORTABLE_FIRST:
                 # just chill
                 if num_waits < 6 or self.player.round_step > 11:
-                    DecisionsLogger.debug(
+                    self.player.logger.debug(
                         log.PLACEMENT_RIICHI_OR_DAMATEN,
                         "1st place, comfortable first, late round, < 6 waits",
                         logger_context,
@@ -85,7 +84,7 @@ class PlacementHandler:
         if placement["place"] == 2:
             if cost_with_damaten < placement["diff_with_1st"] <= cost_with_riichi:
                 if placement["diff_with_4th"] >= Placement.COMFORTABLE_DIFF_FOR_RISK:
-                    DecisionsLogger.debug(
+                    self.player.logger.debug(
                         log.PLACEMENT_RIICHI_OR_DAMATEN, "2st place, we are good to risk", logger_context
                     )
                     return Placement.MUST_RIICHI
@@ -94,13 +93,13 @@ class PlacementHandler:
         if placement["place"] == 4:
             # TODO: consider going for better hand
             if cost_with_damaten < placement["diff_with_3rd"]:
-                DecisionsLogger.debug(log.PLACEMENT_RIICHI_OR_DAMATEN, "4st place, let's riichi", logger_context)
+                self.player.logger.debug(log.PLACEMENT_RIICHI_OR_DAMATEN, "4st place, let's riichi", logger_context)
                 return Placement.MUST_RIICHI
 
         # general rule:
         if placement["place"] != 4 and has_yaku:
             if placement["diff_with_next_up"] > cost_with_riichi * 2 and placement["diff_with_next_down"] <= 1000:
-                DecisionsLogger.debug(log.PLACEMENT_RIICHI_OR_DAMATEN, "not 4st place and has yaku", logger_context)
+                self.player.logger.debug(log.PLACEMENT_RIICHI_OR_DAMATEN, "not 4st place and has yaku", logger_context)
                 return Placement.MUST_DAMATEN
 
         return Placement.DEFAULT_RIICHI_DECISION
@@ -147,22 +146,22 @@ class PlacementHandler:
         if not self.is_west_4:
             # check if we can make it to the west round
             if num_players_over_30000 == 0:
-                DecisionsLogger.debug(log.AGARI, "Decided to take ron when no enemies have 30k", logger_context)
+                self.player.logger.debug(log.AGARI, "Decided to take ron when no enemies have 30k", logger_context)
                 return True
 
             if num_players_over_30000 == 1:
                 if enemy_seat == first_place.seat:
                     if first_place.scores < 30000 + direct_hit_cost:
-                        DecisionsLogger.debug(
+                        self.player.logger.debug(
                             log.AGARI, "Decided to take ron from first place, so no enemies have 30k", logger_context
                         )
                         return True
 
         if covered_cost < needed_cost:
-            DecisionsLogger.debug(log.AGARI, "Decided to skip ron", logger_context)
+            self.player.logger.debug(log.AGARI, "Decided to skip ron", logger_context)
             return False
 
-        DecisionsLogger.debug(log.AGARI, "Decided to take ron for better placement", logger_context)
+        self.player.logger.debug(log.AGARI, "Decided to take ron for better placement", logger_context)
         return True
 
     def get_minimal_cost_needed(self, placement=None):

@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 import re
 from optparse import OptionParser
@@ -11,16 +10,15 @@ from tenhou.decoder import TenhouDecoder
 from utils.decisions_logger import MeldPrint
 from utils.logger import set_up_logging
 
-logger = logging.getLogger("bot")
-
 
 class TenhouLogReproducer:
     """
     The way to debug bot decisions that it made in real tenhou.net games
     """
 
-    def __init__(self, log_id, file_path):
+    def __init__(self, log_id, file_path, logger):
         self.decoder = TenhouDecoder()
+        self.logger = logger
 
         if log_id:
             log_content = self._download_log_content(log_id)
@@ -84,7 +82,7 @@ class TenhouLogReproducer:
                 if action == "draw" and found_tile:
                     draw_tile_seen_number += 1
                     if draw_tile_seen_number == tile_number_to_stop:
-                        logger.info("Stop on player draw")
+                        self.logger.info("Stop on player draw")
 
                         table.player.draw_tile(tile)
 
@@ -152,7 +150,7 @@ class TenhouLogReproducer:
                     if action == "enemy_discard" and found_tile:
                         enemy_discard_seen_number += 1
                         if enemy_discard_seen_number == tile_number_to_stop:
-                            logger.info("Stop on enemy discard")
+                            self.logger.info("Stop on enemy discard")
                             table.player.should_call_kan(tile, open_kan=True, from_riichi=False)
                             table.player.try_to_call_meld(tile, is_kamicha_discard)
                             return
@@ -303,7 +301,7 @@ class TenhouLogReproducer:
         return result and result[0] or None
 
 
-def parse_args_and_start_reproducer():
+def parse_args_and_start_reproducer(logger):
     parser = OptionParser()
 
     parser.add_option(
@@ -356,7 +354,7 @@ def parse_args_and_start_reproducer():
 
     opts, _ = parser.parse_args()
 
-    reproducer = TenhouLogReproducer(opts.log, opts.file)
+    reproducer = TenhouLogReproducer(opts.log, opts.file, logger)
     if opts.meta:
         meta_information = reproducer.print_meta_info()
         logger.debug(json.dumps(meta_information, indent=2, ensure_ascii=False))
@@ -365,8 +363,8 @@ def parse_args_and_start_reproducer():
 
 
 def main():
-    set_up_logging(save_to_file=False)
-    parse_args_and_start_reproducer()
+    logger = set_up_logging(save_to_file=False)
+    parse_args_and_start_reproducer(logger)
 
 
 if __name__ == "__main__":

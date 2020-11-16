@@ -1,7 +1,7 @@
 import utils.decisions_constants as log
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_chi, is_honor, is_man, is_pin, is_pon, is_sou, is_terminal, plus_dora, simplify
-from utils.decisions_logger import DecisionsLogger, MeldPrint
+from utils.decisions_logger import MeldPrint
 
 
 class BaseStrategy:
@@ -192,7 +192,7 @@ class BaseStrategy:
 
         # each strategy can use their own value to min shanten number
         if shanten > self.min_shanten:
-            DecisionsLogger.debug(
+            self.player.logger.debug(
                 log.MELD_DEBUG,
                 "After meld shanten is too high for our strategy. Abort melding.",
             )
@@ -201,21 +201,21 @@ class BaseStrategy:
         # sometimes we had to call tile, even if it will not improve our hand
         # otherwise we can call only with improvements of shanten
         if not had_to_be_called and shanten >= self.player.ai.shanten:
-            DecisionsLogger.debug(
+            self.player.logger.debug(
                 log.MELD_DEBUG,
                 "Meld is not improving hand shanten. Abort melding.",
             )
             return None, None
 
         if not self.validate_meld(chosen_meld_dict):
-            DecisionsLogger.debug(
+            self.player.logger.debug(
                 log.MELD_DEBUG,
                 "Meld is suitable for strategy logic. Abort melding.",
             )
             return None, None
 
         if not self.should_push_against_threats(chosen_meld_dict):
-            DecisionsLogger.debug(
+            self.player.logger.debug(
                 log.MELD_DEBUG,
                 "Meld is too dangerous to call. Abort melding.",
             )
@@ -312,7 +312,7 @@ class BaseStrategy:
             meld.type = is_chi(meld_34) and MeldPrint.CHI or MeldPrint.PON
             meld.tiles = sorted(tiles)
 
-            DecisionsLogger.debug(
+            self.player.logger.debug(
                 log.MELD_HAND, f"Hand: {self._format_hand_for_print(closed_hand, discarded_tile, self.player.melds)}"
             )
 
@@ -328,11 +328,11 @@ class BaseStrategy:
 
             # we can't find a good discard candidate, so let's skip this
             if not selected_tile:
-                DecisionsLogger.debug(log.MELD_DEBUG, "Can't find discard candidate after meld. Abort melding.")
+                self.player.logger.debug(log.MELD_DEBUG, "Can't find discard candidate after meld. Abort melding.")
                 continue
 
             if not all_tiles_are_suitable and self.is_tile_suitable(selected_tile.tile_to_discard_136):
-                DecisionsLogger.debug(
+                self.player.logger.debug(
                     log.MELD_DEBUG,
                     "We have tiles in our hand that are not suitable to current strategy, "
                     "but we are going to discard tile that we need. Abort melding.",
@@ -342,7 +342,7 @@ class BaseStrategy:
             call_tile_34 = call_tile_136 // 4
             # we can't discard the same tile that we called
             if selected_tile.tile_to_discard_34 == call_tile_34:
-                DecisionsLogger.debug(
+                self.player.logger.debug(
                     log.MELD_DEBUG, "We can't discard same tile that we used for meld. Abort melding."
                 )
                 continue
@@ -377,7 +377,7 @@ class BaseStrategy:
                         tile_str = TilesConverter.to_one_line_string(
                             [selected_tile.tile_to_discard_136], print_aka_dora=self.player.table.has_aka_dora
                         )
-                        DecisionsLogger.debug(
+                        self.player.logger.debug(
                             log.MELD_DEBUG,
                             f"Kuikae discard {tile_str} candidate. Abort melding.",
                         )
@@ -392,7 +392,7 @@ class BaseStrategy:
             )
 
         if not final_results:
-            DecisionsLogger.debug(log.MELD_DEBUG, "There are no good discards after melding.")
+            self.player.logger.debug(log.MELD_DEBUG, "There are no good discards after melding.")
             return None
 
         final_results = sorted(
@@ -400,7 +400,7 @@ class BaseStrategy:
             key=lambda x: (x["discard_tile"].shanten, -x["discard_tile"].ukeire, x["discard_tile"].valuation),
         )
 
-        DecisionsLogger.debug(
+        self.player.logger.debug(
             log.MELD_PREPARE,
             "Tiles could be used for open meld",
             context=final_results,

@@ -22,7 +22,7 @@ from mahjong.shanten import Shanten
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_pon
 from utils.cache import build_estimate_hand_value_cache_key, build_shanten_cache_key
-from utils.decisions_logger import DecisionsLogger, MeldPrint
+from utils.decisions_logger import MeldPrint
 
 
 class MahjongAI:
@@ -80,7 +80,7 @@ class MahjongAI:
         self.finished_hand = HandCalculator()
 
     def init_hand(self):
-        DecisionsLogger.debug(
+        self.player.logger.debug(
             log.INIT_HAND,
             context=[
                 f"Round  wind: {DISPLAY_WINDS[self.table.round_wind_tile]}",
@@ -113,7 +113,7 @@ class MahjongAI:
         self.determine_strategy(tiles_136)
 
         if not self.current_strategy:
-            DecisionsLogger.debug(log.MELD_DEBUG, "We don't have active strategy. Abort melding.")
+            self.player.logger.debug(log.MELD_DEBUG, "We don't have active strategy. Abort melding.")
             return None, None
 
         closed_hand_34_previous = TilesConverter.to_34_array(closed_hand_136_previous)
@@ -126,7 +126,7 @@ class MahjongAI:
         if discard_option:
             self.last_discard_option = discard_option
 
-            DecisionsLogger.debug(
+            self.player.logger.debug(
                 log.MELD_CALL,
                 "We decided to open hand",
                 context=[
@@ -165,13 +165,13 @@ class MahjongAI:
                 break
 
         if self.current_strategy and (not old_strategy or self.current_strategy.type != old_strategy.type):
-            DecisionsLogger.debug(
+            self.player.logger.debug(
                 log.STRATEGY_ACTIVATE,
                 context=self.current_strategy,
             )
 
         if not self.current_strategy and old_strategy:
-            DecisionsLogger.debug(log.STRATEGY_DROP, context=old_strategy)
+            self.player.logger.debug(log.STRATEGY_DROP, context=old_strategy)
 
         return self.current_strategy and True or False
 
@@ -305,9 +305,9 @@ class MahjongAI:
         should_riichi = self.riichi.should_call_riichi()
 
         if should_riichi:
-            DecisionsLogger.debug(log.RIICHI, "Decided to riichi.")
+            self.player.logger.debug(log.RIICHI, "Decided to riichi.")
         else:
-            DecisionsLogger.debug(log.RIICHI, "Decided to stay damaten.")
+            self.player.logger.debug(log.RIICHI, "Decided to stay damaten.")
 
         return should_riichi
 
@@ -407,7 +407,7 @@ class MahjongAI:
 
             if new_waits_count == previous_waits_count:
                 kan_type = has_shouminkan_candidate and MeldPrint.SHOUMINKAN or MeldPrint.KAN
-                DecisionsLogger.debug(log.KAN_DEBUG, f"Open kan type='{kan_type}'")
+                self.player.logger.debug(log.KAN_DEBUG, f"Open kan type='{kan_type}'")
                 return kan_type
 
         return None

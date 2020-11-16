@@ -1,4 +1,4 @@
-![Mahjong bot](https://github.com/MahjongRepository/tenhou-python-bot/workflows/Mahjong%20bot/badge.svg)
+![Build](https://github.com/MahjongRepository/tenhou-python-bot/workflows/Mahjong%20bot/badge.svg) [[Tests coverage]](http://mahjongrepository.github.io/tenhou-python-bot/)
 
 Bot was tested with Python 3.6+ and PyPy3, we are not supporting Python 2.
 

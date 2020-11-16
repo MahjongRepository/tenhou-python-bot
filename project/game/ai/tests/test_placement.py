@@ -371,3 +371,36 @@ def test_skip_cheap_meld_2_shanten():
     tile = string_to_136_tile(sou="3")
     meld, _ = table.player.try_to_call_meld(tile, True)
     assert meld is not None
+
+
+def test_skip_cheap_meld_1_shanten_can_move_to_west():
+    table = Table()
+    player = table.player
+    table.has_aka_dora = True
+    table.has_open_tanyao = True
+    # orasu
+    table.round_wind_number = 7
+    table.dealer_seat = 1
+    player.dealer_seat = 1
+
+    table.add_dora_indicator(string_to_136_tile(sou="2"))
+
+    tiles = string_to_136_array(man="3488", sou="334678", pin="268")
+    table.player.init_hand(tiles)
+    table.player.round_step = 12
+
+    player.scores = 18000
+    assert table.players[0] == player
+    table.players[1].scores = 28000
+    table.players[2].scores = 29000
+    table.players[3].scores = 31000
+
+    # it's cheap, but with ron from first place we can move game to west round, so let's do it
+    tile = string_to_136_tile(sou="2")
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is not None
+
+    # now this is the cost we might win with
+    tile = string_to_136_tile(sou="3")
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is not None

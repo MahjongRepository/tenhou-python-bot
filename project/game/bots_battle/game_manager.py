@@ -143,7 +143,6 @@ class GameManager:
         self.replay.end_game()
 
         logger.info("Final Scores: {0}".format(self.players_sorted_by_scores()))
-        logger.info("The end of the game")
 
         return {"played_rounds": played_rounds}
 
@@ -800,22 +799,38 @@ class GameManager:
             return None
 
     def _check_the_end_of_game(self):
+        dealer_has_higher_scores = True
         has_player_with_30000_plus_scores = False
+        dealer = [x for x in self.clients if x.seat == self.dealer][0]
         for client in self.clients:
             # if someone has negative scores at the end of round, we need to end the game
             if client.player.scores < 0:
+                logger.info("Game end: negative scores")
                 return True
 
             if client.player.scores >= 30000:
                 has_player_with_30000_plus_scores = True
 
+            if client.seat == dealer.seat:
+                continue
+
+            if client.player.scores > dealer.player.scores:
+                dealer_has_higher_scores = False
+
+        # orasu
+        if self._unique_dealers == 7 and dealer_has_higher_scores:
+            logger.info("Game end: dealer has higher scores at the end of south wind")
+            return True
+
         # we have played all 8 winds (starting from wind 0)
         # and there is player with 30000+ scores
         if self._unique_dealers > 7 and has_player_with_30000_plus_scores:
+            logger.info("Game end: 30000+ scores and the end of south wind")
             return True
 
         # west round was finished, we don't want to play north round
         if self._unique_dealers > 11:
+            logger.info("Game end: the end of west wind")
             return True
 
         return False

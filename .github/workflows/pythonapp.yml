@@ -32,7 +32,7 @@ jobs:
       - name: Generate coverage report
         run: make tests_coverage
       - name: deploy docs
-        uses: ./htmlcov/
+        uses: ./
         with:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}

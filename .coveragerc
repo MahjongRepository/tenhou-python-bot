@@ -1,0 +1,17 @@
+[run]
+omit =
+    env/*
+    project/bots_battle.py
+    project/game/ai/configs/*
+    project/game/bots_battle/*
+    project/settings/*
+    */test_*.py
+    */__init__.py
+    project/reproducer.py
+    project/main.py
+    project/tenhou/*
+    project/utils/statistics.py
+    project/utils/logger.py
+    project/conftest.py
+    project/utils/settings_handler.py
+    project/game/client.py

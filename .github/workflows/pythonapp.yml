@@ -19,6 +19,24 @@ jobs:
         run: pip install -r requirements/lint.txt
       - name: Lint files
         run: make lint
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.8'
+      - name: Install libs
+        run: pip install -r requirements/lint.txt
+      - name: Generate coverage report
+        run: make tests_coverage
+      - name: deploy docs
+          uses: ./htmlcov/
+          with:
+            username: ${{ secrets.USERNAME }}
+            password: ${{ secrets.PASSWORD }}
+            remote_url: https://github.com/appleboy/gh-pages-action.git
   tests:
     runs-on: ubuntu-latest
     strategy:

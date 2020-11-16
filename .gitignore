@@ -32,3 +32,6 @@ experiments
 
 *.prof
 profile.py
+
+.coverage
+htmlcov

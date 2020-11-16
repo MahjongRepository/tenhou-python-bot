@@ -15,6 +15,9 @@ lint:
 tests:
 	PYTHONPATH=./project pytest -n 4
 
+tests_coverage:
+	PYTHONPATH=./project pytest --cov=. --cov-report html -n 4
+
 build_docker:
 	docker build -t mahjong_bot .
 

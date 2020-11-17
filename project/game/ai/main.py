@@ -58,7 +58,7 @@ class MahjongAI:
         self.hand_divider = HandDivider()
         self.finished_hand = HandCalculator()
         self.hand_builder = HandBuilder(player, self)
-        self.placement = player.config.placement_handler_class(player)
+        self.placement = player.config.PLACEMENT_HANDLER_CLASS(player)
 
         self.suji = Suji(player)
         self.kabe = Kabe(player)

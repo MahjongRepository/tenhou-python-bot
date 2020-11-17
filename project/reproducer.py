@@ -145,10 +145,6 @@ class TenhouLogReproducer:
                     # is it time to stop?
                     found_tile = TilesConverter.to_one_line_string([tile]) == needed_tile
                     is_kamicha_discard = player_seat == 3
-                    count_of_tiles_in_hand = TilesConverter.to_34_array(table.player.closed_hand)[tile // 4]
-                    # toimen discarded 5s and we don't have enough tiles in hand to call pon/kan
-                    if count_of_tiles_in_hand < 2 and not is_kamicha_discard:
-                        found_tile = False
 
                     if action == "enemy_discard" and found_tile:
                         enemy_discard_seen_number += 1

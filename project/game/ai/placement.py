@@ -204,20 +204,6 @@ class PlacementHandler:
 
         return minimal_cost
 
-    def _get_placement_evaluation(self, placement) -> int:
-        if not placement:
-            return Placement.NEUTRAL
-
-        if placement["place"] == 1 and placement["points"] >= Placement.COMFORTABLE_POINTS:
-            assert placement["diff_with_2nd"] >= 0
-            if placement["diff_with_2nd"] >= Placement.VERY_COMFORTABLE_DIFF:
-                return Placement.VERY_COMFORTABLE_FIRST
-
-            if placement["diff_with_2nd"] >= Placement.COMFORTABLE_DIFF:
-                return Placement.COMFORTABLE_FIRST
-
-        return Placement.NEUTRAL
-
     def get_current_placement(self):
         if not self.points_initialized:
             return None
@@ -235,6 +221,20 @@ class PlacementHandler:
             "diff_with_next_up": abs(self.player.scores - players_by_points[max(0, current_place - 1)].scores),
             "diff_with_next_down": abs(self.player.scores - players_by_points[min(3, current_place + 1)].scores),
         }
+
+    def _get_placement_evaluation(self, placement) -> int:
+        if not placement:
+            return Placement.NEUTRAL
+
+        if placement["place"] == 1 and placement["points"] >= Placement.COMFORTABLE_POINTS:
+            assert placement["diff_with_2nd"] >= 0
+            if placement["diff_with_2nd"] >= Placement.VERY_COMFORTABLE_DIFF:
+                return Placement.VERY_COMFORTABLE_FIRST
+
+            if placement["diff_with_2nd"] >= Placement.COMFORTABLE_DIFF:
+                return Placement.COMFORTABLE_FIRST
+
+        return Placement.NEUTRAL
 
     @property
     def points_initialized(self):
@@ -264,7 +264,7 @@ class DummyPlacementHandler(PlacementHandler):
     """
 
     def get_allowed_danger_modifier(self) -> int:
-        return Placement.NO_RISK_DANGER_MODIFIER
+        return Placement.DEFAULT_DANGER_MODIFIER
 
     def must_riichi(self, has_yaku, num_waits, cost_with_riichi, cost_with_damaten) -> int:
         return Placement.DEFAULT_RIICHI_DECISION
@@ -275,10 +275,10 @@ class DummyPlacementHandler(PlacementHandler):
     def should_call_win(self, cost, is_tsumo, enemy_seat):
         return True
 
-    def get_minimal_cost_needed(self) -> int:
+    def get_minimal_cost_needed(self, placement=None) -> int:
         return 0
 
-    def get_minimal_cost_needed_considering_west(self) -> int:
+    def get_minimal_cost_needed_considering_west(self, placement=None) -> int:
         return 0
 
 

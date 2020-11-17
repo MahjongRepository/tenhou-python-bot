@@ -6,7 +6,7 @@ class BotDefaultConfig:
     # with that it will be easier to track these flags usage over the code
     FEATURE_DEFENCE_ENABLED = True
 
-    placement_handler_class = PlacementHandler
+    PLACEMENT_HANDLER_CLASS = PlacementHandler
 
     TUNE_DANGER_BORDER_TEMPAI_VALUE = 0
     TUNE_DANGER_BORDER_1_SHANTEN_VALUE = 0

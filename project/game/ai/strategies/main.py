@@ -11,6 +11,7 @@ class BaseStrategy:
     FORMAL_TEMPAI = 3
     CHINITSU = 4
     CHIITOITSU = 5
+    COMMON_OPEN_TEMPAI = 6
 
     TYPES = {
         YAKUHAI: "Yakuhai",
@@ -19,6 +20,7 @@ class BaseStrategy:
         FORMAL_TEMPAI: "Formal Tempai",
         CHINITSU: "Chinitsu",
         CHIITOITSU: "Chiitoitsu",
+        COMMON_OPEN_TEMPAI: "Common Open Tempai",
     }
 
     not_suitable_tiles = []

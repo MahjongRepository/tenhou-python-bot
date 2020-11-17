@@ -8,6 +8,7 @@ from game.ai.helpers.suji import Suji
 from game.ai.riichi import Riichi
 from game.ai.strategies.chiitoitsu import ChiitoitsuStrategy
 from game.ai.strategies.chinitsu import ChinitsuStrategy
+from game.ai.strategies.common_open_tempai import CommonOpenTempaiStrategy
 from game.ai.strategies.formal_tempai import FormalTempaiStrategy
 from game.ai.strategies.honitsu import HonitsuStrategy
 from game.ai.strategies.main import BaseStrategy
@@ -158,6 +159,7 @@ class MahjongAI:
 
         strategies.append(ChiitoitsuStrategy(BaseStrategy.CHIITOITSU, self.player))
         strategies.append(FormalTempaiStrategy(BaseStrategy.FORMAL_TEMPAI, self.player))
+        strategies.append(CommonOpenTempaiStrategy(BaseStrategy.COMMON_OPEN_TEMPAI, self.player))
 
         for strategy in strategies:
             if strategy.should_activate_strategy(tiles_136):

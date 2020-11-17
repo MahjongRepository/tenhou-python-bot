@@ -765,7 +765,7 @@ class HandBuilder:
         # then we filter by ukeire2
         possible_options = sorted(possible_options, key=self._sorting_rule_for_1_2_3_shanten_simple)
         possible_options = self._filter_list_by_percentage(
-            possible_options, "ukeire_second", DiscardOption.UKEIRE_FIRST_FILTER_PERCENTAGE
+            possible_options, "ukeire_second", DiscardOption.UKEIRE_SECOND_FILTER_PERCENTAGE
         )
 
         threats_present = [x for x in discard_options if x.danger.get_max_danger() != 0]

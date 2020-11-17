@@ -5,5 +5,5 @@ def main():
     DocGen.generate_documentation()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

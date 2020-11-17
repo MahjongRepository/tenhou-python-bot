@@ -9,14 +9,21 @@ Also, this package contains tools to generate documentation and unit tests
 from the description of the situations.
 """
 
-ACTION_DISCARD = 'discard'
+ACTION_DISCARD = "discard"
 
 SYSTEM_TESTING_CASES = [
     {
-        'index': 1,
-        'description': 'Bot discarded 2s by suji because of 2 additional ukeire in ryanshanten, instead of discarding the safe tile.',
-        'reproducer_command': 'python reproducer.py --log 2020102200gm-0001-7994-1143916f --player 0 --wind 2 --honba 3 --tile=1s --n 2 --action=draw',
-        'action': ACTION_DISCARD,
-        'allowed_discards': ['3s', '5s']
-    }
+        "index": 1,
+        "description": "Bot discarded 2s by suji because of 2 additional ukeire in ryanshanten, instead of discarding the safe tile.",
+        "reproducer_command": "python reproducer.py --log 2020102200gm-0001-7994-1143916f --player 0 --wind 2 --honba 3 --tile=1s --n 2 --action=draw",
+        "action": ACTION_DISCARD,
+        "allowed_discards": ["3s", "5s"],
+    },
+    {
+        "index": 2,
+        "description": "6m and 8m have equal ukeire, but 6m is safe.",
+        "reproducer_command": "python reproducer.py --log 2020102204gm-0001-7994-fb636348 --player 3 --wind 7 --honba 0  --action=draw --tile=6z",
+        "action": ACTION_DISCARD,
+        "allowed_discards": ["6m", "3s"],
+    },
 ]

@@ -5,7 +5,7 @@ from mahjong.tile import TilesConverter
 class ChiitoitsuStrategy(BaseStrategy):
     min_shanten = 2
 
-    def should_activate_strategy(self, tiles_136):
+    def should_activate_strategy(self, tiles_136, meld_tile=None):
         """
         We can go for chiitoitsu strategy if we have 5 pairs
         """

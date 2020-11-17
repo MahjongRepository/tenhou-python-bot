@@ -47,7 +47,7 @@ class BaseStrategy:
     def get_open_hand_han(self):
         return 0
 
-    def should_activate_strategy(self, tiles_136):
+    def should_activate_strategy(self, tiles_136, meld_tile=None):
         """
         Based on player hand and table situation
         we can determine should we use this strategy or not.

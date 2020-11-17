@@ -2,7 +2,7 @@ from game.ai.strategies.main import BaseStrategy
 
 
 class FormalTempaiStrategy(BaseStrategy):
-    def should_activate_strategy(self, tiles_136):
+    def should_activate_strategy(self, tiles_136, meld_tile=None):
         """
         When we get closer to the end of the round, we start to consider
         going for formal tempai.

@@ -111,7 +111,7 @@ class MahjongAI:
         tiles_136_previous = self.player.tiles[:]
         closed_hand_136_previous = self.player.closed_hand[:]
         tiles_136 = tiles_136_previous + [tile_136]
-        self.determine_strategy(tiles_136)
+        self.determine_strategy(tiles_136, meld_tile=tile_136)
 
         if not self.current_strategy:
             self.player.logger.debug(log.MELD_DEBUG, "We don't have active strategy. Abort melding.")
@@ -139,7 +139,7 @@ class MahjongAI:
 
         return meld, discard_option
 
-    def determine_strategy(self, tiles_136):
+    def determine_strategy(self, tiles_136, meld_tile=None):
         # for already opened hand we don't need to give up on selected strategy
         if self.player.is_open_hand and self.current_strategy:
             return False
@@ -162,7 +162,7 @@ class MahjongAI:
         strategies.append(CommonOpenTempaiStrategy(BaseStrategy.COMMON_OPEN_TEMPAI, self.player))
 
         for strategy in strategies:
-            if strategy.should_activate_strategy(tiles_136):
+            if strategy.should_activate_strategy(tiles_136, meld_tile=meld_tile):
                 self.current_strategy = strategy
                 break
 

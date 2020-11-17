@@ -13,7 +13,7 @@ class TanyaoStrategy(BaseStrategy):
     def get_open_hand_han(self):
         return 1
 
-    def should_activate_strategy(self, tiles_136):
+    def should_activate_strategy(self, tiles_136, meld_tile=None):
         """
         Tanyao hand is a hand without terminal and honor tiles, to achieve this
         we will use different approaches

@@ -20,7 +20,7 @@ class YakuhaiStrategy(BaseStrategy):
         # kinda rough estimation
         return len(self.valued_anko) + len(self.valued_pairs)
 
-    def should_activate_strategy(self, tiles_136):
+    def should_activate_strategy(self, tiles_136, meld_tile=None):
         """
         We can go for yakuhai strategy if we have at least one yakuhai pair in the hand
         :return: boolean

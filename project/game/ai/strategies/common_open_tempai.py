@@ -7,7 +7,7 @@ from utils.test_helpers import tiles_to_string
 class CommonOpenTempaiStrategy(BaseStrategy):
     min_shanten = 1
 
-    def should_activate_strategy(self, tiles_136):
+    def should_activate_strategy(self, tiles_136, meld_tile=None):
         """
         We activate this strategy only when we have a chance to meld for good tempai.
         """
@@ -16,14 +16,16 @@ class CommonOpenTempaiStrategy(BaseStrategy):
             return False
 
         # we only use this strategy for meld opportunities, if it's a self draw, just skip it
-        if tiles_136 == self.player.tiles:
+        if meld_tile is None:
+            assert tiles_136 == self.player.tiles
             return False
 
         # only go from 1-shanten to tempai with this strategy
         if self.player.ai.shanten != 1:
             return False
 
-        tiles_34 = TilesConverter.to_34_array(tiles_136)
+        tiles_copy = self.player.closed_hand[:] + [meld_tile]
+        tiles_34 = TilesConverter.to_34_array(tiles_copy)
         # we only open for tempai with that strategy
         new_shanten = self.player.ai.calculate_shanten_or_get_from_cache(tiles_34, use_chiitoitsu=False)
 

@@ -404,3 +404,90 @@ def test_skip_cheap_meld_1_shanten_can_move_to_west():
     tile = string_to_136_tile(sou="3")
     meld, _ = table.player.try_to_call_meld(tile, True)
     assert meld is not None
+
+
+def test_take_cheap_meld_tempai():
+    table = Table()
+    player = table.player
+    table.has_aka_dora = True
+    table.has_open_tanyao = True
+    # orasu
+    table.round_wind_number = 7
+    table.dealer_seat = 1
+    player.dealer_seat = 1
+
+    table.add_dora_indicator(string_to_136_tile(man="2"))
+
+    tiles = string_to_136_array(man="23789", sou="3789", pin="99", honors="33")
+    table.player.init_hand(tiles)
+    table.player.round_step = 5
+
+    player.scores = 20000
+    assert table.players[0] == player
+    table.players[1].scores = 20900
+    table.players[2].scores = 35000
+    table.players[3].scores = 40000
+
+    # no yaku, skip
+    tile = string_to_136_tile(man="4")
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is None
+
+    # now this is the cost we might win with
+    tile = string_to_136_tile(man="1")
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is not None
+
+    # now this is not enough
+    player.scores = 20000
+    assert table.players[0] == player
+    table.players[1].scores = 30900
+    table.players[2].scores = 35000
+    table.players[3].scores = 40000
+
+    tile = string_to_136_tile(man="1")
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is None
+
+
+def test_take_cheap_meld_tempai_tanyao_not_activated():
+    table = Table()
+    player = table.player
+    table.has_aka_dora = True
+    table.has_open_tanyao = True
+    # orasu
+    table.round_wind_number = 7
+    table.dealer_seat = 1
+    player.dealer_seat = 1
+
+    # tanyao is not activated due to tanyao rules but we don't care and take this meld
+    tiles = string_to_136_array(man="23678", sou="3567", pin="2257")
+    table.player.init_hand(tiles)
+    table.player.round_step = 5
+
+    player.scores = 20000
+    assert table.players[0] == player
+    table.players[1].scores = 20900
+    table.players[2].scores = 35000
+    table.players[3].scores = 40000
+
+    # no yaku, skip
+    tile = string_to_136_tile(man="1")
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is None
+
+    # now this is the cost we might win with
+    tile = string_to_136_tile(man="4")
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is not None
+
+    # now this is not enough
+    player.scores = 20000
+    assert table.players[0] == player
+    table.players[1].scores = 30900
+    table.players[2].scores = 35000
+    table.players[3].scores = 40000
+
+    tile = string_to_136_tile(man="4")
+    meld, _ = table.player.try_to_call_meld(tile, True)
+    assert meld is None

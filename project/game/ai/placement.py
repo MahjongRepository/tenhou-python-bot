@@ -184,6 +184,26 @@ class PlacementHandler:
 
         return 0
 
+    def get_minimal_cost_needed_considering_west(self, placement=None) -> int:
+        minimal_cost = self.get_minimal_cost_needed(placement)
+        if not minimal_cost:
+            return 0
+
+        if not placement:
+            placement = self.get_current_placement()
+
+        if placement["place"] != 4:
+            return minimal_cost
+
+        num_players_over_30000 = len([x for x in self.player.table.players if x.scores >= 30000])
+        if num_players_over_30000 == 0:
+            return 1000
+
+        if num_players_over_30000 == 1:
+            minimal_cost = min(minimal_cost, self.player.table.get_players_sorted_by_scores()[0].scores - 30000)
+
+        return minimal_cost
+
     def _get_placement_evaluation(self, placement) -> int:
         if not placement:
             return Placement.NEUTRAL
@@ -256,6 +276,9 @@ class DummyPlacementHandler(PlacementHandler):
         return True
 
     def get_minimal_cost_needed(self) -> int:
+        return 0
+
+    def get_minimal_cost_needed_considering_west(self) -> int:
         return 0
 
 

@@ -79,13 +79,22 @@ class CommonOpenTempaiStrategy(BaseStrategy):
             self.player.logger.debug(log.MELD_DEBUG, "Common tempai: hand costs nothing, abort melding", logger_context)
             return False
 
+        # maybe we need a special handling due to placement
+        # we have already checked that our meld is enough, now let's check that maybe we don't need to aim
+        # for higher costs
+        enough_cost = 32000
+        if self.player.ai.placement.is_oorasu:
+            placement = self.player.ai.placement.get_current_placement()
+            if placement and placement["place"] == 4:
+                enough_cost = self.player.ai.placement.get_minimal_cost_needed_considering_west()
+
         if self.player.round_step <= 6:
-            if hand_cost >= 7700:
+            if hand_cost >= min(7700, enough_cost):
                 self.player.logger.debug(log.MELD_DEBUG, "Common tempai: the cost is good, call meld", logger_context)
                 return True
         elif self.player.round_step <= 12:
             if self.player.is_dealer:
-                if hand_cost >= 5800:
+                if hand_cost >= min(5800, enough_cost):
                     self.player.logger.debug(
                         log.MELD_DEBUG,
                         "Common tempai: the cost is ok for dealer and round step, call meld",
@@ -93,7 +102,7 @@ class CommonOpenTempaiStrategy(BaseStrategy):
                     )
                     return True
             else:
-                if hand_cost >= 3900:
+                if hand_cost >= min(3900, enough_cost):
                     self.player.logger.debug(
                         log.MELD_DEBUG,
                         "Common tempai: the cost is ok for non-dealer and round step, call meld",

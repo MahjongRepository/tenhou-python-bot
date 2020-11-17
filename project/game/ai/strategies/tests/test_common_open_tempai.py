@@ -42,6 +42,17 @@ def test_get_common_tempai_sandoko():
     assert tiles_to_string(meld.tiles) == "222s"
 
 
+def test_get_common_tempai_bad_atodzuke():
+    table = Table()
+
+    tiles = string_to_136_array(man="23789", sou="3", pin="99", honors="33444")
+    table.player.init_hand(tiles)
+
+    tile = string_to_136_tile(pin="9")
+    meld, _ = table.player.try_to_call_meld(tile, False)
+    assert meld is None
+
+
 def test_get_common_tempai_no_yaku():
     table = Table()
 

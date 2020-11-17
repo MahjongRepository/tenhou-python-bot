@@ -325,6 +325,11 @@ class MahjongAI:
         if self.table.count_of_remaining_tiles <= 1:
             return None
 
+        if self.player.config.FEATURE_DEFENCE_ENABLED:
+            threats = self.defence.get_threatening_players()
+        else:
+            threats = []
+
         if open_kan:
             # we don't want to start open our hand from called kan
             if not self.player.is_open_hand:
@@ -335,7 +340,11 @@ class MahjongAI:
                 return None
 
             # we have a bad wait, rinshan chance is low
-            if len(self.waiting) < 2:
+            if len(self.waiting) < 2 or self.ukeire < 5:
+                return None
+
+            # there are threats, open kan is probably a bad idea
+            if threats:
                 return None
 
         tile_34 = tile // 4
@@ -407,6 +416,25 @@ class MahjongAI:
 
             if new_waits_count == previous_waits_count:
                 kan_type = has_shouminkan_candidate and MeldPrint.SHOUMINKAN or MeldPrint.KAN
+                if kan_type == MeldPrint.SHOUMINKAN:
+                    if threats:
+                        # there are threats and we are not even in tempai - let's not do shouminkan
+                        if not self.player.in_tempai:
+                            return None
+
+                        # there are threats and our tempai is weak, let's not do shouminkan
+                        if len(self.waiting) < 2 or self.ukeire < 3:
+                            return None
+                    else:
+                        # no threats, but too many shanten, let's not do shouminkan
+                        if new_shanten > 2:
+                            return None
+
+                        # no threats, and ryanshanten, but ukeire is meh, let's not do shouminkan
+                        if new_shanten == 2:
+                            if self.ukeire < 16:
+                                return None
+
                 self.player.logger.debug(log.KAN_DEBUG, f"Open kan type='{kan_type}'")
                 return kan_type
 

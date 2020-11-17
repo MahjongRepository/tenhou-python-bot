@@ -1,3 +1,4 @@
+from game.ai.helpers.defence import EnemyDanger
 from game.ai.strategies.main import BaseStrategy
 from game.table import Table
 from mahjong.tile import TilesConverter
@@ -533,6 +534,42 @@ def test_call_shouminkan():
     assert table.player.should_call_kan(tile, False) == MeldPrint.SHOUMINKAN
 
 
+def test_shouminkan_and_weak_hand():
+    table = Table()
+    table.count_of_remaining_tiles = 40
+
+    tiles = string_to_136_array(man="135567", sou="248", pin="5", honors="666")
+    table.player.init_hand(tiles)
+    table.player.add_called_meld(make_meld(MeldPrint.PON, honors="666"))
+
+    tile = string_to_136_array(honors="6666")[3]
+    table.player.draw_tile(tile)
+
+    assert table.player.should_call_kan(tile, False) is None
+
+
+def test_shouminkan_and_threatening_riichi():
+    table = Table()
+    table.count_of_remaining_tiles = 40
+
+    enemy_seat = 2
+    table.add_called_riichi(enemy_seat)
+
+    threatening_players = table.player.ai.defence.get_threatening_players()
+    assert len(threatening_players) == 1
+    assert threatening_players[0].enemy.seat == enemy_seat
+    assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_RIICHI["id"]
+
+    tiles = string_to_136_array(man="135567", sou="234", pin="5", honors="666")
+    table.player.init_hand(tiles)
+    table.player.add_called_meld(make_meld(MeldPrint.PON, honors="666"))
+
+    tile = string_to_136_array(honors="6666")[3]
+    table.player.draw_tile(tile)
+
+    assert table.player.should_call_kan(tile, False) is None
+
+
 def test_call_closed_kan():
     table = Table()
     table.count_of_remaining_tiles = 10
@@ -610,6 +647,32 @@ def test_opened_kan_third_case():
     table.player.discard_tile()
 
     tile = string_to_136_array(sou="5555")[3]
+    assert table.player.should_call_kan(tile, True) is None
+    assert table.player.try_to_call_meld(tile, True) == (None, None)
+
+
+def test_opened_kan_and_threatening_riichi():
+    table = Table()
+    table.count_of_remaining_tiles = 10
+
+    enemy_seat = 2
+    table.add_called_riichi(enemy_seat)
+
+    threatening_players = table.player.ai.defence.get_threatening_players()
+    assert len(threatening_players) == 1
+    assert threatening_players[0].enemy.seat == enemy_seat
+    assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_RIICHI["id"]
+
+    tiles = string_to_136_array(man="2399", sou="111456", honors="111")
+    table.player.init_hand(tiles)
+    table.player.add_called_meld(make_meld(MeldPrint.PON, honors="111"))
+
+    # to rebuild all caches
+    table.player.draw_tile(string_to_136_tile(pin="9"))
+    table.player.discard_tile()
+
+    # our hand is open, in tempai and with a good wait but there is a riichi so calling open kan is a bad idea
+    tile = string_to_136_tile(sou="1")
     assert table.player.should_call_kan(tile, True) is None
     assert table.player.try_to_call_meld(tile, True) == (None, None)
 

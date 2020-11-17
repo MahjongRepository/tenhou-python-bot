@@ -10,7 +10,6 @@ class BaseStrategy:
     TANYAO = 2
     FORMAL_TEMPAI = 3
     CHINITSU = 4
-    CHIITOITSU = 5
     COMMON_OPEN_TEMPAI = 6
 
     TYPES = {
@@ -19,7 +18,6 @@ class BaseStrategy:
         TANYAO: "Tanyao",
         FORMAL_TEMPAI: "Formal Tempai",
         CHINITSU: "Chinitsu",
-        CHIITOITSU: "Chiitoitsu",
         COMMON_OPEN_TEMPAI: "Common Open Tempai",
     }
 

@@ -1,4 +1,3 @@
-from game.ai.strategies.chiitoitsu import ChiitoitsuStrategy
 from game.ai.strategies.main import BaseStrategy
 from game.table import Table
 from utils.test_helpers import string_to_136_array, string_to_136_tile, tiles_to_string
@@ -7,40 +6,33 @@ from utils.test_helpers import string_to_136_array, string_to_136_tile, tiles_to
 def test_should_activate_strategy():
     table = Table()
     player = table.player
-    strategy = ChiitoitsuStrategy(BaseStrategy.CHIITOITSU, player)
 
     # obvious chiitoitsu, let's activate
     tiles = string_to_136_array(sou="2266", man="3399", pin="289", honors="11")
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(honors="6"))
-    assert strategy.should_activate_strategy(player.tiles) is True
 
     # less than 5 pairs, don't activate
     tiles = string_to_136_array(sou="2266", man="3389", pin="289", honors="11")
     player.draw_tile(string_to_136_tile(honors="6"))
     player.init_hand(tiles)
-    assert strategy.should_activate_strategy(player.tiles) is False
 
     # 5 pairs, but we are already tempai, let's no consider this hand as chiitoitsu
     tiles = string_to_136_array(sou="234", man="223344", pin="5669")
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(pin="5"))
     player.discard_tile()
-    assert strategy.should_activate_strategy(player.tiles) is False
 
     tiles = string_to_136_array(sou="234", man="22334455669")
     player.init_hand(tiles)
-    assert strategy.should_activate_strategy(player.tiles) is False
 
 
 def test_dont_call_meld():
     table = Table()
     player = table.player
-    strategy = ChiitoitsuStrategy(BaseStrategy.CHIITOITSU, player)
 
     tiles = string_to_136_array(sou="112234", man="2334499")
     player.init_hand(tiles)
-    assert strategy.should_activate_strategy(player.tiles) is True
 
     tile = string_to_136_tile(man="9")
     meld, _ = player.try_to_call_meld(tile, True)
@@ -72,8 +64,6 @@ def test_5_pairs_yakuhai_not_chiitoitsu():
 
     tile = string_to_136_tile(honors="6")
     meld, _ = player.try_to_call_meld(tile, True)
-
-    assert player.ai.current_strategy.type != BaseStrategy.CHIITOITSU
 
     assert player.ai.current_strategy.type == BaseStrategy.YAKUHAI
 

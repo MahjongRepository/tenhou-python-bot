@@ -6,7 +6,6 @@ from game.ai.hand_builder import HandBuilder
 from game.ai.helpers.kabe import Kabe
 from game.ai.helpers.suji import Suji
 from game.ai.riichi import Riichi
-from game.ai.strategies.chiitoitsu import ChiitoitsuStrategy
 from game.ai.strategies.chinitsu import ChinitsuStrategy
 from game.ai.strategies.common_open_tempai import CommonOpenTempaiStrategy
 from game.ai.strategies.formal_tempai import FormalTempaiStrategy
@@ -157,7 +156,6 @@ class MahjongAI:
         strategies.append(HonitsuStrategy(BaseStrategy.HONITSU, self.player))
         strategies.append(ChinitsuStrategy(BaseStrategy.CHINITSU, self.player))
 
-        strategies.append(ChiitoitsuStrategy(BaseStrategy.CHIITOITSU, self.player))
         strategies.append(FormalTempaiStrategy(BaseStrategy.FORMAL_TEMPAI, self.player))
         strategies.append(CommonOpenTempaiStrategy(BaseStrategy.COMMON_OPEN_TEMPAI, self.player))
 

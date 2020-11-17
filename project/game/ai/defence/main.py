@@ -277,7 +277,7 @@ class TileDangerHandler:
                 cost_ratio = (hand_weighted_cost / threatening_player_hand_cost) * 100
 
                 # lots of ukeire
-                if discard_option.ukeire >= 28:
+                if discard_option.ukeire >= 32:
                     if cost_ratio >= 400:
                         danger_border = DangerBorder.IGNORE
                     elif cost_ratio >= 200:

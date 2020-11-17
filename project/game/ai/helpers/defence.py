@@ -266,7 +266,7 @@ class TileDanger:
     # borders indicating late round
     ALMOST_LATE_ROUND = 10
     LATE_ROUND = 12
-    VERY_LATE_ROUND = 16
+    VERY_LATE_ROUND = 15
 
     @staticmethod
     def make_unverified_suji_coeff(value):
@@ -394,10 +394,13 @@ class DangerBorder:
     def tune_for_round(player, danger_border, shanten):
         danger_border_dict = None
 
-        if shanten == 0 or shanten == 1:
+        if shanten == 0:
             if len(player.discards) > TileDanger.LATE_ROUND:
                 danger_border_dict = DangerBorder.late_danger_dict
             if len(player.discards) > TileDanger.VERY_LATE_ROUND:
+                danger_border_dict = DangerBorder.very_late_danger_dict
+        elif shanten == 1:
+            if len(player.discards) > TileDanger.LATE_ROUND:
                 danger_border_dict = DangerBorder.very_late_danger_dict
         elif shanten == 2:
             if len(player.discards) > TileDanger.ALMOST_LATE_ROUND:

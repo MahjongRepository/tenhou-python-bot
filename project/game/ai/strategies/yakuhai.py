@@ -102,6 +102,22 @@ class YakuhaiStrategy(BaseStrategy):
 
                 return True
 
+        # finally check if we need a cheap hand in oorasu - so don't skip first yakujai
+        if self.player.ai.placement.is_oorasu and opportunity_to_meld_yakuhai:
+            placement = self.player.ai.placement.get_current_placement()
+            if placement and placement["place"] == 4:
+                enough_cost = self.player.ai.placement.get_minimal_cost_needed_considering_west()
+                simple_han_scale = [0, 1000, 2000, 3900, 7700, 8000, 12000, 12000]
+                num_han = self.get_open_hand_han() + self.dora_count_total
+                if num_han >= len(simple_han_scale):
+                    # why are we even here?
+                    return True
+
+                # be pessimistic and don't count on direct ron
+                hand_cost = simple_han_scale[num_han]
+                if hand_cost >= enough_cost:
+                    return True
+
         return False
 
     def determine_what_to_discard(self, discard_options, hand, open_melds):

@@ -52,6 +52,7 @@ class TenhouLogReproducer:
         return meta_information
 
     def reproduce(self, player, wind, honba, needed_tile, action, tile_number_to_stop):
+
         player_position = self._find_player_position(player)
         round_content = self._find_needed_round(wind, honba)
 
@@ -70,6 +71,8 @@ class TenhouLogReproducer:
         # TODO get this info from log content
         table.has_aka_dora = True
         table.has_open_tanyao = True
+        table.player.init_logger(self.logger)
+
         draw_tile_seen_number = 0
         enemy_discard_seen_number = 0
         for tag in round_content:

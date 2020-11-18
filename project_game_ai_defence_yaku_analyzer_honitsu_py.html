@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
-    <title>Coverage for project/game/ai/defence/yaku_analyzer/honitsu.py: 89%</title>
+    <title>Coverage for project/game/ai/defence/yaku_analyzer/honitsu.py: 96%</title>
     <link rel="stylesheet" href="style.css" type="text/css">
     <script type="text/javascript" src="jquery.min.js"></script>
     <script type="text/javascript" src="jquery.hotkeys.js"></script>
@@ -17,13 +17,13 @@
 <div id="header">
     <div class="content">
         <h1>Coverage for <b>project/game/ai/defence/yaku_analyzer/honitsu.py</b> :
-            <span class="pc_cov">89%</span>
+            <span class="pc_cov">96%</span>
         </h1>
         <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
         <h2 class="stats">
             74 statements &nbsp;
-            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">66 run</button>
-            <button type="button" class="mis show_mis shortkey_m button_toggle_mis" title="Toggle lines missing">8 missing</button>
+            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">71 run</button>
+            <button type="button" class="mis show_mis shortkey_m button_toggle_mis" title="Toggle lines missing">3 missing</button>
             <button type="button" class="exc show_exc shortkey_x button_toggle_exc" title="Toggle lines excluded">0 excluded</button>
         </h2>
     </div>
@@ -77,7 +77,7 @@
     <p id="t24" class="pln"><span class="n"><a href="#t24">24</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t25" class="pln"><span class="n"><a href="#t25">25</a></span><span class="t">        <span class="com"># let's check if there is too little info to analyze</span>&nbsp;</span><span class="r"></span></p>
     <p id="t26" class="run"><span class="n"><a href="#t26">26</a></span><span class="t">        <span class="key">if</span> <span class="nam">total_discards</span> <span class="op">&lt;</span> <span class="nam">HonitsuAnalyzer</span><span class="op">.</span><span class="nam">MIN_DISCARD</span> <span class="key">and</span> <span class="nam">total_melds</span> <span class="op">&lt;</span> <span class="nam">HonitsuAnalyzer</span><span class="op">.</span><span class="nam">MAX_MELDS</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t27" class="mis show_mis"><span class="n"><a href="#t27">27</a></span><span class="t">            <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t27" class="run"><span class="n"><a href="#t27">27</a></span><span class="t">            <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p id="t28" class="pln"><span class="n"><a href="#t28">28</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t29" class="pln"><span class="n"><a href="#t29">29</a></span><span class="t">        <span class="com"># first of all - check melds, they must be all from one suit or honors</span>&nbsp;</span><span class="r"></span></p>
     <p id="t30" class="run"><span class="n"><a href="#t30">30</a></span><span class="t">        <span class="nam">current_suit</span> <span class="op">=</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
@@ -115,16 +115,16 @@
     <p id="t62" class="pln"><span class="n"><a href="#t62">62</a></span><span class="t">            <span class="key">and</span> <span class="nam">percentage_of_honor_tiles</span> <span class="op">&lt;=</span> <span class="nam">HonitsuAnalyzer</span><span class="op">.</span><span class="nam">HONORS_PERCENTAGE_BORDER</span>&nbsp;</span><span class="r"></span></p>
     <p id="t63" class="pln"><span class="n"><a href="#t63">63</a></span><span class="t">        <span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t64" class="run"><span class="n"><a href="#t64">64</a></span><span class="t">            <span class="key">if</span> <span class="key">not</span> <span class="nam">current_suit</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t65" class="mis show_mis"><span class="n"><a href="#t65">65</a></span><span class="t">                <span class="nam">current_suit</span> <span class="op">=</span> <span class="nam">less_suit</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t65" class="run"><span class="n"><a href="#t65">65</a></span><span class="t">                <span class="nam">current_suit</span> <span class="op">=</span> <span class="nam">less_suit</span>&nbsp;</span><span class="r"></span></p>
     <p id="t66" class="run"><span class="n"><a href="#t66">66</a></span><span class="t">            <span class="key">elif</span> <span class="nam">current_suit</span> <span class="op">!=</span> <span class="nam">less_suit</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t67" class="run"><span class="n"><a href="#t67">67</a></span><span class="t">                <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p id="t68" class="pln"><span class="n"><a href="#t68">68</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t69" class="pln"><span class="n"><a href="#t69">69</a></span><span class="t">        <span class="com"># still cannot determine the suit - this is probably not honitsu</span>&nbsp;</span><span class="r"></span></p>
     <p id="t70" class="run"><span class="n"><a href="#t70">70</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">current_suit</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t71" class="mis show_mis"><span class="n"><a href="#t71">71</a></span><span class="t">            <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t71" class="run"><span class="n"><a href="#t71">71</a></span><span class="t">            <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p id="t72" class="pln"><span class="n"><a href="#t72">72</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t73" class="run"><span class="n"><a href="#t73">73</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_check_discard_order</span><span class="op">(</span><span class="nam">current_suit</span><span class="op">,</span> <span class="nam">int</span><span class="op">(</span><span class="nam">total_discards</span> <span class="op">/</span> <span class="nam">HonitsuAnalyzer</span><span class="op">.</span><span class="nam">EARLY_DISCARD_DIVISOR</span><span class="op">)</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t74" class="mis show_mis"><span class="n"><a href="#t74">74</a></span><span class="t">            <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t74" class="run"><span class="n"><a href="#t74">74</a></span><span class="t">            <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p id="t75" class="pln"><span class="n"><a href="#t75">75</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t76" class="pln"><span class="n"><a href="#t76">76</a></span><span class="t">        <span class="com"># all checks have passed - assume this is honitsu</span>&nbsp;</span><span class="r"></span></p>
     <p id="t77" class="run"><span class="n"><a href="#t77">77</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">chosen_suit</span> <span class="op">=</span> <span class="nam">current_suit</span><span class="op">[</span><span class="str">"function"</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
@@ -153,7 +153,7 @@
     <p id="t100" class="run"><span class="n"><a href="#t100">100</a></span><span class="t">            <span class="key">elif</span> <span class="nam">number_of_revealed_tiles</span> <span class="op">==</span> <span class="num">3</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t101" class="run"><span class="n"><a href="#t101">101</a></span><span class="t">                <span class="key">return</span> <span class="op">[</span><span class="nam">TileDanger</span><span class="op">.</span><span class="nam">HONITSU_THIRD_HONOR_BONUS_DANGER</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p id="t102" class="run"><span class="n"><a href="#t102">102</a></span><span class="t">            <span class="key">elif</span> <span class="nam">number_of_revealed_tiles</span> <span class="op">==</span> <span class="num">2</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t103" class="mis show_mis"><span class="n"><a href="#t103">103</a></span><span class="t">                <span class="key">return</span> <span class="op">[</span><span class="nam">TileDanger</span><span class="op">.</span><span class="nam">HONITSU_SECOND_HONOR_BONUS_DANGER</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t103" class="run"><span class="n"><a href="#t103">103</a></span><span class="t">                <span class="key">return</span> <span class="op">[</span><span class="nam">TileDanger</span><span class="op">.</span><span class="nam">HONITSU_SECOND_HONOR_BONUS_DANGER</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p id="t104" class="pln"><span class="n"><a href="#t104">104</a></span><span class="t">            <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t105" class="run"><span class="n"><a href="#t105">105</a></span><span class="t">                <span class="key">return</span> <span class="op">[</span><span class="nam">TileDanger</span><span class="op">.</span><span class="nam">HONITSU_SHONPAI_HONOR_BONUS_DANGER</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p id="t106" class="pln"><span class="n"><a href="#t106">106</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -166,7 +166,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v5.3</a>,
-            created at 2020-11-18 02:42 +0000
+            created at 2020-11-18 09:55 +0000
         </p>
     </div>
 </div>

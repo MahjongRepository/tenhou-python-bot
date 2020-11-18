@@ -138,10 +138,15 @@ class GameManager:
             # important increment, we are building wall seed based on the round number
             self.round_number += 1
 
-        self.recalculate_players_position()
+        winner = self.recalculate_players_position()
+        # winner takes riichi sticks
+        winner.player.scores += self.riichi_sticks * 1000
         self.replay.end_game()
 
         logger.info("Final Scores: {0}".format(self.players_sorted_by_scores()))
+
+        total_scores = sum([x.player.scores for x in self.clients])
+        assert total_scores == 100000, total_scores
 
     def init_round(self):
         """
@@ -311,11 +316,11 @@ class GameManager:
                 tile = drawn_tile
                 current_client.table.add_discarded_tile(0, tile, True)
 
-            who_called_riichi = None
+            who_called_riichi_seat = None
             if in_tempai and not current_client.player.is_open_hand and current_client.player.can_call_riichi():
-                who_called_riichi = current_client.seat
+                who_called_riichi_seat = current_client.seat
                 for client in self.clients:
-                    client.table.add_called_riichi(self._enemy_position(who_called_riichi, client.seat))
+                    client.table.add_called_riichi_step_one(self._enemy_position(who_called_riichi_seat, client.seat))
                 self.replay.riichi(current_client.seat, 1)
 
             self.replay.discard(current_client.seat, tile)
@@ -327,8 +332,10 @@ class GameManager:
                 return result
 
             # if there is no challenger to ron, let's check can we call riichi with tile discard or not
-            if who_called_riichi:
+            if who_called_riichi_seat is not None:
                 self.call_riichi(current_client)
+                for client in self.clients:
+                    client.table.add_called_riichi_step_two(self._enemy_position(who_called_riichi_seat, client.seat))
                 self.replay.riichi(current_client.seat, 2)
 
                 count_of_riichi_players = 0
@@ -510,6 +517,9 @@ class GameManager:
                 if client.id == temp_client.id:
                     client.player.position = i + 1
 
+        # return winner of the game
+        return sorted([x for x in self.clients], key=lambda x: x.player.position)[0]
+
     def can_call_ron(self, client, win_tile, shifted_enemy_seat):
         if not client.player.in_tempai:
             return False
@@ -544,7 +554,7 @@ class GameManager:
 
     def call_riichi(self, client):
         client.player.in_riichi = True
-        client.player.scores -= 1000
+        # -1000 we will deduct in the bot logic
         self.riichi_sticks += 1
 
         if len(client.player.discards) == 1 and not self.players_with_open_hands:

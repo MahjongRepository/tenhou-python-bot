@@ -514,7 +514,7 @@ def _create_table(enemy_seat, discards, riichi_tile):
     table.has_aka_dora = True
     for discard in discards:
         table.add_discarded_tile(0, discard, False)
-    table.add_called_riichi(enemy_seat)
+    table.add_called_riichi_step_one(enemy_seat)
     table.add_discarded_tile(enemy_seat, riichi_tile, False)
     return table
 

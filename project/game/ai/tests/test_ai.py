@@ -553,7 +553,7 @@ def test_shouminkan_and_threatening_riichi():
     table.count_of_remaining_tiles = 40
 
     enemy_seat = 2
-    table.add_called_riichi(enemy_seat)
+    table.add_called_riichi_step_one(enemy_seat)
 
     threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 1
@@ -656,7 +656,7 @@ def test_opened_kan_and_threatening_riichi():
     table.count_of_remaining_tiles = 10
 
     enemy_seat = 2
-    table.add_called_riichi(enemy_seat)
+    table.add_called_riichi_step_one(enemy_seat)
 
     threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 1

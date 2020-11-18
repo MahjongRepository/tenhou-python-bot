@@ -1,7 +1,7 @@
 MAKE_FILE_PATH=$(abspath $(lastword $(MAKEFILE_LIST)))
 CURRENT_DIR=$(dir $(MAKE_FILE_PATH))
 
-check: format lint tests
+check: generate_system_tests format lint tests
 
 format:
 	isort project/*
@@ -11,6 +11,9 @@ lint:
 	isort --check-only project/*
 	black --check project/*
 	flake8 project/*
+
+generate_system_tests:
+	python project/system.py
 
 tests:
 	PYTHONPATH=./project pytest -n 4

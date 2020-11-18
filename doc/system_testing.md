@@ -10,7 +10,7 @@ And this documentation created to help debug filed unit tests.
 
 ## Case 1
 
-`Action: discard, allowed discard: 3s, 5s`
+Action: `discard`, allowed discard: `3s, 5s`, with riichi: `False`.
 
 Bot discarded 2s by suji because of 2 additional ukeire in ryanshanten, instead of discarding the safe tile.
 
@@ -22,7 +22,7 @@ Reproduce:
 
 ## Case 2
 
-`Action: discard, allowed discard: 6m, 3s`
+Action: `discard`, allowed discard: `6m, 3s`, with riichi: `False`.
 
 6m and 8m have equal ukeire, but 6m is safe.
 
@@ -31,3 +31,293 @@ Reproduce:
 > python reproducer.py --log 2020102204gm-0001-7994-fb636348 --player 3 --wind 7 --honba 0  --action=draw --tile=6z
 
 ![image](../project/system_testing/fixtures/2.png)
+
+## Case 3
+
+Action: `meld`, meld: `None`, tile after meld: `None`.
+
+It was a bad meld. We don't want to open hand here.
+
+Reproduce:
+
+> python reproducer.py --log 2020102208gm-0009-0000-40337c9c --player Xenia --wind 3 --honba 0  --action enemy_discard --tile 1s
+
+![image](../project/system_testing/fixtures/3.png)
+
+## Case 4
+
+Action: `meld`, meld: `None`, tile after meld: `None`.
+
+It was a bad meld. We don't want to open hand here.
+
+Reproduce:
+
+> python reproducer.py --log 2020102208gm-0009-0000-40337c9c --player Xenia --wind 4 --honba 0  --action enemy_discard --tile 5s
+
+![image](../project/system_testing/fixtures/4.png)
+
+## Case 5
+
+Action: `discard`, allowed discard: `1p, 4p`, with riichi: `True`.
+
+Riichi dora tanki is a better move here.
+
+Reproduce:
+
+> python reproducer.py --log 2020102517gm-0009-0000-67fd5f29 --player Xenia --wind 2 --honba 0 --action draw --n 1 --tile 7s
+
+![image](../project/system_testing/fixtures/5.png)
+
+## Case 6
+
+Action: `discard`, allowed discard: `1s`, with riichi: `False`.
+
+Let's defend here.
+
+Reproduce:
+
+> python reproducer.py --log 2020102602gm-0009-0000-ba58220e --player Kaavi --wind 6 --honba 1 --action draw --n 2 --tile 1s
+
+![image](../project/system_testing/fixtures/6.png)
+
+## Case 7
+
+Action: `discard`, allowed discard: `7p`, with riichi: `False`.
+
+7p was wrongly detected as dangerous tile, it is not like this
+
+Reproduce:
+
+> python reproducer.py --log 2020102608gm-0009-0000-ff33fd82 --player Wanjirou --wind 4 --honba 0 --action draw --n 1 --tile 7p
+
+![image](../project/system_testing/fixtures/7.png)
+
+## Case 8
+
+SKIPPED: **Need to investigate it.**
+
+Action: `discard`, allowed discard: `6s`, with riichi: `False`.
+
+Honors are dangerous on this late stage of the game. And we have 2 shanten. Let's fold with 6s
+
+Reproduce:
+
+> python reproducer.py --log 2020102619gm-0089-0000-dfaf5b1d --player Xenia --wind 4 --honba 0 --action draw --n 1 --tile 2m
+
+![image](../project/system_testing/fixtures/8.png)
+
+## Case 9
+
+Action: `discard`, allowed discard: `3p`, with riichi: `False`.
+
+Reproduce:
+
+> python reproducer.py --log 2020102701gm-0089-0000-8572de24 --player Ichihime --wind 7 --honba 1 --action draw --n 1 --tile 7s
+
+![image](../project/system_testing/fixtures/9.png)
+
+## Case 10
+
+Action: `meld`, meld: `None`, tile after meld: `None`.
+
+Reproduce:
+
+> python reproducer.py --log 2020102710gm-0009-7994-88f45f2d --player 3 --wind 5 --honba 0 --tile 4m --action enemy_discard
+
+![image](../project/system_testing/fixtures/10.png)
+
+## Case 11
+
+Action: `discard`, allowed discard: `7s`, with riichi: `True`.
+
+There is no need in damaten. Let's riichi.
+
+Reproduce:
+
+> python reproducer.py --log 2020102720gm-0089-0000-65eb30bf --player Xenia --wind 8 --honba 2 --action draw --n 1 --tile 4m
+
+![image](../project/system_testing/fixtures/11.png)
+
+## Case 12
+
+Action: `discard`, allowed discard: `7s`, with riichi: `False`.
+
+Chun is too dangerous to discard.
+
+Reproduce:
+
+> python reproducer.py --log 2020102721gm-0089-0000-67865130 --player Xenia --wind 5 --honba 0 --action draw --n 1 --tile 4m
+
+![image](../project/system_testing/fixtures/12.png)
+
+## Case 13
+
+Action: `discard`, allowed discard: `7m`, with riichi: `False`.
+
+Hatsu is too dangerous to discard.
+
+Reproduce:
+
+> python reproducer.py --log 2020102821gm-0089-0000-49e1d208 --player Ichihime --wind 1 --honba 2 --action draw --n 1 --tile 6z
+
+![image](../project/system_testing/fixtures/13.png)
+
+## Case 14
+
+Action: `discard`, allowed discard: `3p`, with riichi: `False`.
+
+3p is genbutsu
+
+Reproduce:
+
+> python reproducer.py --log 2020102908gm-0089-0000-e1512a30 --player Ichihime --wind 7 --honba 0 --action draw --n 2 --tile 6p
+
+![image](../project/system_testing/fixtures/14.png)
+
+## Case 15
+
+Action: `discard`, allowed discard: `5s`, with riichi: `False`.
+
+5p is too dangerous to discard
+
+Reproduce:
+
+> python reproducer.py --log 2020102900gm-0089-0000-5cc13112 --player Xenia --wind 2 --honba 2 --tile 5p --n 2 --action draw
+
+![image](../project/system_testing/fixtures/15.png)
+
+## Case 16
+
+Action: `discard`, allowed discard: `7s, 3m`, with riichi: `False`.
+
+We need to fold here
+
+Reproduce:
+
+> python reproducer.py --log 2020102921gm-0089-0000-764321f0 --player Xenia --wind 1 --honba 0 --action draw --n 1 --tile 3m
+
+![image](../project/system_testing/fixtures/16.png)
+
+## Case 17
+
+Action: `meld`, meld: `None`, tile after meld: `None`.
+
+Bad meld for honitsu.
+
+Reproduce:
+
+> python reproducer.py --log 2020102922gm-0089-0000-d3c4e90b --player Xenia --wind 1 --honba 0 --action enemy_discard --n 1 --tile 8p
+
+![image](../project/system_testing/fixtures/17.png)
+
+## Case 18
+
+Action: `discard`, allowed discard: `3p, 6s`, with riichi: `False`.
+
+Reproduce:
+
+> python reproducer.py --log 2020103005gm-0089-0000-01fc4f4d --player Kaavi --wind 3 --honba 0 --action draw --n 3 --tile 6s
+
+![image](../project/system_testing/fixtures/18.png)
+
+## Case 19
+
+Action: `meld`, meld: `None`, tile after meld: `None`.
+
+Reproduce:
+
+> python reproducer.py --log 2020111101gm-0009-7994-f22b8c57 --wind 4 --honba 2 --player 2 --tile 8m --action enemy_discard
+
+![image](../project/system_testing/fixtures/19.png)
+
+## Case 20
+
+SKIPPED: **Need to investigate it.**
+
+Action: `meld`, meld: `{'type': 'pon', 'tiles': [132, 133, 134]}`, tile after meld: `3p`.
+
+Reproduce:
+
+> python reproducer.py --log 2020111111gm-0009-7994-5550ade1 --wind 8 --honba 1 --player 0 --tile 7z --action enemy_discard
+
+![image](../project/system_testing/fixtures/20.png)
+
+## Case 21
+
+Action: `crash`.
+
+We are checking that bot doesnt crash on this action anymore.
+
+Reproduce:
+
+> python reproducer.py --log 2020111401gm-0009-7994-7429e8e0 --wind 1 --honba 1 --action draw --tile 3s --player 3
+
+## Case 22
+
+Action: `crash`.
+
+We are checking that bot doesnt crash on this action anymore.
+
+Reproduce:
+
+> python reproducer.py --log 2020111402gm-0009-7994-41f6c1a1 --wind 3 --honba 0 --action enemy_discard --tile 5p --player 1
+
+## Case 23
+
+Action: `crash`.
+
+We are checking that bot doesnt crash on this action anymore.
+
+Reproduce:
+
+> python reproducer.py --file failed_2020-11-11_13_06_26_885.txt --wind 3 --honba 0 --tile 1z --n 2 --player 3
+
+## Case 24
+
+Action: `crash`.
+
+We are checking that bot doesnt crash on this action anymore.
+
+Reproduce:
+
+> python reproducer.py --file failed_2020-11-11_12_52_06_023.txt --wind 8 --honba 0 --action enemy_discard --tile 3s --player 0
+
+## Case 25
+
+Action: `crash`.
+
+We are checking that bot doesnt crash on this action anymore.
+
+Reproduce:
+
+> python reproducer.py --file failed_2020-11-11_12_19_20_515.txt --wind 3 --honba 1 --tile 6s --player 2
+
+## Case 26
+
+Action: `discard`, allowed discard: `3s`, with riichi: `False`.
+
+Reproduce:
+
+> python reproducer.py --log 2020102620gm-0089-0000-c558d68c --player Kaavi --wind 1 --honba 2 --action draw --n 2 --tile 4p
+
+![image](../project/system_testing/fixtures/26.png)
+
+## Case 27
+
+Action: `crash`.
+
+We are checking that bot doesnt crash on this action anymore.
+
+Reproduce:
+
+> python reproducer.py --log 2020102208gm-0009-0000-1d3d08c8 --player Ichihime --wind 5 --honba 1 --tile 1z --action draw
+
+## Case 28
+
+Action: `meld`, meld: `None`, tile after meld: `None`.
+
+Reproduce:
+
+> python reproducer.py --log 2020102008gm-0001-7994-9438a8f4 --player Wanjirou --wind 3 --honba 0 --tile 7p --action enemy_discard
+
+![image](../project/system_testing/fixtures/28.png)

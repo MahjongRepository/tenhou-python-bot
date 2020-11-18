@@ -1,13 +1,14 @@
 from pathlib import Path
 
-from system_testing.cases import ACTION_DISCARD, SYSTEM_TESTING_CASES
+from system_testing.cases import ACTION_CRASH, ACTION_DISCARD, ACTION_MELD, SYSTEM_TESTING_CASES
+
+system_testing_folder = Path(__file__).parent.absolute()
+project_folder = Path(__file__).parent.parent.parent.absolute()
 
 
 class DocGen:
     @staticmethod
     def generate_documentation():
-        system_testing_folder = Path(__file__).parent.absolute()
-        project_folder = Path(__file__).parent.parent.parent.absolute()
         doc_file = system_testing_folder.parent.parent / "doc" / "system_testing.md"
         doc_content = []
 
@@ -29,11 +30,23 @@ class DocGen:
             relative_image_path = (system_testing_folder / "fixtures" / f"{index}.png").relative_to(project_folder)
 
             doc_content.append(f"## Case {index}")
+            if case.get("skip_reason"):
+                doc_content.append(f'SKIPPED: **{case.get("skip_reason")}**')
 
             if case["action"] == ACTION_DISCARD:
                 doc_content.append(
-                    f"`Action: {ACTION_DISCARD}, allowed discard: {', '.join(case['allowed_discards'])}`"
+                    f"Action: `{ACTION_DISCARD}`, allowed discard: `{', '.join(case['allowed_discards'])}`,"
+                    f" with riichi: `{case['with_riichi']}`."
                 )
+
+            if case["action"] == ACTION_MELD:
+                doc_content.append(
+                    f"Action: `{ACTION_MELD}`, meld: `{case['meld']}`, tile after meld: `{case['tile_after_meld']}`."
+                )
+
+            if case["action"] == ACTION_CRASH:
+                doc_content.append(f"Action: `{ACTION_CRASH}`.")
+                doc_content.append("We are checking that bot doesnt crash on this action anymore.")
 
             if case["description"]:
                 doc_content.append(case["description"])
@@ -41,6 +54,7 @@ class DocGen:
             doc_content.append("Reproduce:")
             doc_content.append("> " + case["reproducer_command"])
 
-            doc_content.append(f"![image](../{relative_image_path})")
+            if case["action"] != ACTION_CRASH:
+                doc_content.append(f"![image](../{relative_image_path})")
 
         doc_file.write_text("\n\n".join(doc_content))

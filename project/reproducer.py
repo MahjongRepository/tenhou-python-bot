@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import sys
 from optparse import OptionParser
 
 import requests
@@ -87,16 +88,18 @@ class TenhouLogReproducer:
                     if draw_tile_seen_number == tile_number_to_stop:
                         self.logger.info("Stop on player draw")
 
+                        discard_result = None
+                        with_riichi = False
                         table.player.draw_tile(tile)
 
                         # TODO suggest it only when it possible to open kan
                         table.player.should_call_kan(tile, open_kan=False, from_riichi=table.player.in_riichi)
 
                         if not table.player.in_riichi:
-                            table.player.discard_tile()
-                            table.player.can_call_riichi()
+                            discard_result = table.player.discard_tile()
+                            with_riichi = table.player.can_call_riichi()
 
-                        return
+                        return discard_result, with_riichi
 
                 table.player.draw_tile(tile)
 
@@ -151,8 +154,7 @@ class TenhouLogReproducer:
                         if enemy_discard_seen_number == tile_number_to_stop:
                             self.logger.info("Stop on enemy discard")
                             table.player.should_call_kan(tile, open_kan=True, from_riichi=False)
-                            table.player.try_to_call_meld(tile, is_kamicha_discard)
-                            return
+                            return table.player.try_to_call_meld(tile, is_kamicha_discard)
 
                     is_tsumogiri = last_draws[player_seat] == tile
                     table.add_discarded_tile(player_seat, tile, is_tsumogiri=is_tsumogiri)
@@ -301,6 +303,17 @@ class TenhouLogReproducer:
 
 
 def parse_args_and_start_reproducer(logger):
+    opts = parse_reproducer_args(sys.argv)
+
+    reproducer = TenhouLogReproducer(opts.log, opts.file, logger)
+    if opts.meta:
+        meta_information = reproducer.print_meta_info()
+        logger.debug(json.dumps(meta_information, indent=2, ensure_ascii=False))
+    else:
+        reproducer.reproduce(opts.player, opts.wind, opts.honba, opts.tile, opts.action, opts.n)
+
+
+def parse_reproducer_args(args):
     parser = OptionParser()
 
     parser.add_option(
@@ -351,14 +364,8 @@ def parse_args_and_start_reproducer(logger):
         help="Action where to stop. Available options: draw, enemy_discard",
     )
 
-    opts, _ = parser.parse_args()
-
-    reproducer = TenhouLogReproducer(opts.log, opts.file, logger)
-    if opts.meta:
-        meta_information = reproducer.print_meta_info()
-        logger.debug(json.dumps(meta_information, indent=2, ensure_ascii=False))
-    else:
-        reproducer.reproduce(opts.player, opts.wind, opts.honba, opts.tile, opts.action, opts.n)
+    opts, _ = parser.parse_args(args)
+    return opts
 
 
 def main():

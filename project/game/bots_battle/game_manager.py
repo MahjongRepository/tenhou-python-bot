@@ -118,8 +118,7 @@ class GameManager:
                 if result["winner"].player.is_dealer:
                     dealer_won = True
 
-            is_game_end = self._check_the_end_of_game()
-
+            old_dealer = self.dealer
             # if dealer won we need to increment honba sticks
             if dealer_won:
                 self.honba_sticks += 1
@@ -133,6 +132,8 @@ class GameManager:
 
                 new_dealer = self._move_position(self.dealer)
                 self.set_dealer(new_dealer)
+
+            is_game_end = self._check_the_end_of_game(old_dealer)
 
             # important increment, we are building wall seed based on the round number
             self.round_number += 1
@@ -781,10 +782,10 @@ class GameManager:
             self._need_to_check_same_winds = False
             return None
 
-    def _check_the_end_of_game(self):
+    def _check_the_end_of_game(self, dealer_seat):
         dealer_has_higher_scores = True
         has_player_with_30000_plus_scores = False
-        dealer = [x for x in self.clients if x.seat == self.dealer][0]
+        dealer = [x for x in self.clients if x.seat == dealer_seat][0]
         for client in self.clients:
             # if someone has negative scores at the end of round, we need to end the game
             if client.player.scores < 0:
@@ -800,8 +801,8 @@ class GameManager:
             if client.player.scores > dealer.player.scores:
                 dealer_has_higher_scores = False
 
-        # orasu
-        if self._unique_dealers == 7 and dealer_has_higher_scores:
+        # orasu ended
+        if self._unique_dealers == 8 and dealer_has_higher_scores:
             logger.info("Game end: dealer has higher scores at the end of south wind")
             return True
 

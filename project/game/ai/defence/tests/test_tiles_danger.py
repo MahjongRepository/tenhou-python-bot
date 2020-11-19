@@ -439,7 +439,7 @@ def test_tile_danger_against_tanyao_threat():
     _assert_discard(player, enemy_seat, TileDanger.SAFE_AGAINST_THREATENING_HAND, man="1")
     _assert_discard(player, enemy_seat, TileDanger.SAFE_AGAINST_THREATENING_HAND, pin="9")
     _assert_discard(player, enemy_seat, TileDanger.SAFE_AGAINST_THREATENING_HAND, honors="2")
-    _assert_discard(player, enemy_seat, TileDanger.SAFE_AGAINST_THREATENING_HAND, pin="5", positive=False)
+    _assert_discard_not_equal(player, enemy_seat, TileDanger.SAFE_AGAINST_THREATENING_HAND, pin="5")
 
 
 def test_tile_danger_against_honitsu_threat():
@@ -470,7 +470,7 @@ def test_tile_danger_against_honitsu_threat():
 
     _assert_discard(player, enemy_seat, TileDanger.SAFE_AGAINST_THREATENING_HAND, man="3")
     _assert_discard(player, enemy_seat, TileDanger.SAFE_AGAINST_THREATENING_HAND, sou="4")
-    _assert_discard(player, enemy_seat, TileDanger.SAFE_AGAINST_THREATENING_HAND, pin="5", positive=False)
+    _assert_discard_not_equal(player, enemy_seat, TileDanger.SAFE_AGAINST_THREATENING_HAND, pin="5")
 
 
 def test_tile_danger_against_toitoi_threat():
@@ -538,6 +538,31 @@ def test_tile_danger_matagi_suji_pattern():
 
     # 5s is not matagi anymore, because 6p is latest discard from the hand
     _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_MATAGI_SUJI, sou="5")
+
+
+def test_tile_danger_aidayonken_pattern():
+    enemy_seat = 1
+    table = _create_table(enemy_seat, discards=[], riichi_tile=string_to_136_tile(honors="7"))
+    player = table.player
+
+    tiles = string_to_136_array(man="11134", pin="1156", honors="2555")
+    tile = string_to_136_tile(sou="5")
+    player.init_hand(tiles)
+    player.draw_tile(tile)
+
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="1"), is_tsumogiri=False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="6"), is_tsumogiri=True)
+
+    # 1-6 was discarded NOT from hand
+    _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_AIDAYONKEN, sou="5")
+
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="6"), is_tsumogiri=False)
+
+    # 1-6 was discarded from hand
+    _assert_discard(player, enemy_seat, TileDanger.BONUS_AIDAYONKEN, sou="5")
+
+    # to be sure that we are not checking other suit
+    _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_AIDAYONKEN, pin="5")
 
 
 def _create_table(enemy_seat, discards, riichi_tile):

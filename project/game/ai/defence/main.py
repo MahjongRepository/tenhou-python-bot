@@ -7,7 +7,7 @@ from game.ai.helpers.defence import DangerBorder, TileDanger
 from game.ai.helpers.kabe import Kabe
 from game.ai.helpers.possible_forms import PossibleFormsAnalyzer
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_honor, is_terminal, plus_dora, simplify
+from mahjong.utils import is_honor, is_man, is_pin, is_sou, is_terminal, plus_dora, simplify
 from utils.general import is_tiles_same_suit
 
 
@@ -138,6 +138,14 @@ class TileDangerHandler:
                         discard_candidates,
                         enemy_analyzer.enemy.seat,
                         TileDanger.BONUS_MATAGI_SUJI,
+                    )
+                # check if there any aidayonken pattern for tiles that could be used in ryanmen
+                if self.is_aidayonken_pattern(enemy_analyzer, tile_34):
+                    self._update_discard_candidate(
+                        tile_34,
+                        discard_candidates,
+                        enemy_analyzer.enemy.seat,
+                        TileDanger.BONUS_AIDAYONKEN,
                     )
 
             dora_count = plus_dora(
@@ -605,6 +613,37 @@ class TileDangerHandler:
                 )
                 if not is_known_to_be_safe:
                     discard_candidate.danger.set_danger(player_seat, danger)
+
+    def is_aidayonken_pattern(self, enemy_analyzer, tile_analyze_34):
+        discards = enemy_analyzer.enemy.discards
+        # important to check only not tsumogiri discards
+        discards_34 = [x.value // 4 for x in discards if not x.is_tsumogiri]
+
+        for is_suit in [is_pin, is_sou, is_man]:
+            if not is_suit(tile_analyze_34):
+                continue
+
+            same_suit_simple_discards = []
+            for discard_34 in discards_34:
+                if is_suit(discard_34):
+                    # +1 here to make it easier to read
+                    same_suit_simple_discards.append(simplify(discard_34) + 1)
+
+            tile_analyze_simplified = simplify(tile_analyze_34) + 1
+
+            if 1 in same_suit_simple_discards and 6 in same_suit_simple_discards and tile_analyze_simplified in [2, 5]:
+                return True
+
+            if 2 in same_suit_simple_discards and 7 in same_suit_simple_discards and tile_analyze_simplified in [3, 6]:
+                return True
+
+            if 3 in same_suit_simple_discards and 8 in same_suit_simple_discards and tile_analyze_simplified in [4, 7]:
+                return True
+
+            if 4 in same_suit_simple_discards and 9 in same_suit_simple_discards and tile_analyze_simplified in [5, 8]:
+                return True
+
+        return False
 
     def _is_matagi_suji(self, enemy_analyzer, tile_analyze_34):
         discards = enemy_analyzer.enemy.discards

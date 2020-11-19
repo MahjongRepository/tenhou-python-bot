@@ -45,15 +45,15 @@ services:
       options:
         max-size: '10m'
         max-file: '5'
-  bot5:
-    image: mahjong_bot
-    volumes:
-      - ./project/:/app
-    command: pypy3 main.py -s bot_5_settings
-    restart: always
-    logging:
-      driver: json-file
-      options:
-        max-size: '10m'
-        max-file: '5'
+#  bot5:
+#    image: mahjong_bot
+#    volumes:
+#      - ./project/:/app
+#    command: pypy3 main.py -s bot_5_settings
+#    restart: always
+#    logging:
+#      driver: json-file
+#      options:
+#        max-size: '10m'
+#        max-file: '5'
 

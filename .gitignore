@@ -15,7 +15,6 @@ project/game/ai/common
 
 test_validate_hand.py
 loader.py
-socket_mock.py
 *.db
 temp
 *.log

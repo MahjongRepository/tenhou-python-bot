@@ -46,13 +46,8 @@ class Table:
             self.dora_indicators, print_aka_dora=self.player.table.has_aka_dora
         )
 
-        round_settings = {EAST: ["e", 0], SOUTH: ["s", 3], WEST: ["w", 7]}.get(self.round_wind_tile)
-
-        round_string, round_diff = round_settings
-        display_round = "{}{}".format(round_string, (self.round_wind_number + 1) - round_diff)
-
-        return "Round: {}, Honba: {}, Dora Indicators: {}".format(
-            display_round, self.count_of_honba_sticks, dora_string
+        return "Wind: {}, Honba: {}, Dora Indicators: {}".format(
+            self.round_number, self.count_of_honba_sticks, dora_string
         )
 
     def init_round(
@@ -213,9 +208,8 @@ class Table:
 
     def _add_revealed_tile(self, tile):
         self.revealed_tiles_136.append(tile)
-
-        tile //= 4
-        self.revealed_tiles[tile] += 1
+        tile_34 = tile // 4
+        self.revealed_tiles[tile_34] += 1
 
     def _init_players(self, bot_config):
         self.player = Player(self, 0, self.dealer_seat, bot_config)

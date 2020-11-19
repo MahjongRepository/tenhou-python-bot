@@ -5,7 +5,6 @@ import importlib
 from optparse import OptionParser
 
 from tenhou.main import connect_and_play
-from utils.logger import set_up_logging
 from utils.settings_handler import settings
 
 
@@ -77,7 +76,6 @@ def parse_args_and_set_up_settings():
 
 def main():
     parse_args_and_set_up_settings()
-    set_up_logging()
 
     if settings.SENTRY_URL:
         import sentry_sdk

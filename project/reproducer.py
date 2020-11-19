@@ -92,7 +92,6 @@ class TenhouLogReproducer:
                         with_riichi = False
                         table.player.draw_tile(tile)
 
-                        # TODO suggest it only when it possible to open kan
                         table.player.should_call_kan(tile, open_kan=False, from_riichi=table.player.in_riichi)
 
                         if not table.player.in_riichi:

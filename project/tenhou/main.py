@@ -1,12 +1,11 @@
-import logging
-
 from tenhou.client import TenhouClient
-
-logger = logging.getLogger("bot")
+from utils.logger import set_up_logging
 
 
 def connect_and_play():
-    client = TenhouClient()
+    logger = set_up_logging()
+
+    client = TenhouClient(logger)
     client.connect()
 
     try:

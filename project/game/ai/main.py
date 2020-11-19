@@ -378,13 +378,17 @@ class MahjongAI:
                 new_waits_count = self.hand_builder.count_tiles(new_waiting, closed_hand_34)
 
         closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
+        if not open_kan:
+            if not has_shouminkan_candidate and closed_hand_34[tile_34] != 4:
+                return None
+
+        if open_kan and closed_hand_34[tile_34] != 3:
+            return None
+
+        closed_hand_34 = TilesConverter.to_34_array(self.player.closed_hand)
         tiles_34 = TilesConverter.to_34_array(self.player.tiles)
 
         if not has_shouminkan_candidate:
-            # we don't have enough tiles in the hand
-            if closed_hand_34[tile_34] != 3 and closed_hand_34[tile_34] != 4:
-                return None
-
             if open_kan or from_riichi:
                 # this 4 tiles can only be used in kan, no other options
                 previous_waiting, previous_shanten = self.hand_builder.calculate_waits(

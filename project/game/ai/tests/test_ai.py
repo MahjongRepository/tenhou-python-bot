@@ -501,6 +501,7 @@ def test_call_upgrade_pon_and_bad_ukeire_after_call_second_case():
     player.add_called_meld(make_meld(MeldPrint.PON, honors="666"))
 
     tile = string_to_136_array(man="5555")[3]
+    player.draw_tile(tile)
 
     assert player.should_call_kan(tile, False) is None
 

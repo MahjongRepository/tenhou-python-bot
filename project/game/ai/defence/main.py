@@ -8,6 +8,7 @@ from game.ai.helpers.kabe import Kabe
 from game.ai.helpers.possible_forms import PossibleFormsAnalyzer
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_honor, is_terminal, plus_dora, simplify
+from utils.general import is_tiles_same_suit
 
 
 class TileDangerHandler:
@@ -101,7 +102,8 @@ class TileDangerHandler:
             )
 
             # for ryanmen waits we also account for number of dangerous suji tiles
-            if forms_count[PossibleFormsAnalyzer.POSSIBLE_RYANMEN_SIDES] == 1:
+            forms_ryanmen_count = forms_count[PossibleFormsAnalyzer.POSSIBLE_RYANMEN_SIDES]
+            if forms_ryanmen_count == 1:
                 self._update_discard_candidate(
                     tile_34,
                     discard_candidates,
@@ -114,7 +116,7 @@ class TileDangerHandler:
                     enemy_analyzer.enemy.seat,
                     TileDanger.make_unverified_suji_coeff(enemy_analyzer.unverified_suji_coeff),
                 )
-            elif forms_count[PossibleFormsAnalyzer.POSSIBLE_RYANMEN_SIDES] == 2:
+            elif forms_ryanmen_count == 2:
                 self._update_discard_candidate(
                     tile_34,
                     discard_candidates,
@@ -127,6 +129,16 @@ class TileDangerHandler:
                     enemy_analyzer.enemy.seat,
                     TileDanger.make_unverified_suji_coeff(enemy_analyzer.unverified_suji_coeff),
                 )
+
+            if forms_ryanmen_count == 1 or forms_ryanmen_count == 2:
+                # check if there any matagi-suji pattern for tiles that could be used in ryanmen
+                if self._is_matagi_suji(enemy_analyzer, tile_34):
+                    self._update_discard_candidate(
+                        tile_34,
+                        discard_candidates,
+                        enemy_analyzer.enemy.seat,
+                        TileDanger.BONUS_MATAGI_SUJI,
+                    )
 
             dora_count = plus_dora(
                 tile_136, self.player.table.dora_indicators, add_aka_dora=self.player.table.has_aka_dora
@@ -593,3 +605,51 @@ class TileDangerHandler:
                 )
                 if not is_known_to_be_safe:
                     discard_candidate.danger.set_danger(player_seat, danger)
+
+    def _is_matagi_suji(self, enemy_analyzer, tile_analyze_34):
+        discards = enemy_analyzer.enemy.discards
+
+        # too early to check matagi suji
+        if len(discards) <= 5:
+            return False
+        # on middle stage check matagi pattern only for one latest discard
+        elif len(discards) <= 9:
+            latest_discards = [x for x in discards if not x.is_tsumogiri][-1:]
+        else:
+            # on late stage check matagi pattern for two latest discards
+            latest_discards = [x for x in discards if not x.is_tsumogiri][-2:]
+
+        latest_discards_34 = [x.value // 4 for x in latest_discards]
+        # make sure that these discards are unique
+        latest_discards_34 = list(set(latest_discards_34))
+
+        for enemy_discard_34 in latest_discards_34:
+            if not is_tiles_same_suit(enemy_discard_34, tile_analyze_34):
+                continue
+
+            # +1 here to make it easier read matagi patterns
+            enemy_discard_simplified = simplify(enemy_discard_34) + 1
+            tile_analyze_simplified = simplify(tile_analyze_34) + 1
+
+            if enemy_discard_simplified == 2 and tile_analyze_simplified in [1, 4]:
+                return True
+
+            if enemy_discard_simplified == 3 and tile_analyze_simplified in [1, 4, 2, 5]:
+                return True
+
+            if enemy_discard_simplified == 4 and tile_analyze_simplified in [2, 5, 3, 6]:
+                return True
+
+            if enemy_discard_simplified == 5 and tile_analyze_simplified in [3, 6, 4, 7]:
+                return True
+
+            if enemy_discard_simplified == 6 and tile_analyze_simplified in [4, 7, 5, 8]:
+                return True
+
+            if enemy_discard_simplified == 7 and tile_analyze_simplified in [5, 8, 6, 9]:
+                return True
+
+            if enemy_discard_simplified == 8 and tile_analyze_simplified in [6, 9]:
+                return True
+
+        return False

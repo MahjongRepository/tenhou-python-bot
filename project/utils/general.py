@@ -5,8 +5,20 @@ from mahjong.constants import EAST
 from mahjong.utils import is_man, is_pin, is_sou, simplify
 
 
+# TODO move to mahjong lib
 def is_sangenpai(tile_34):
     return tile_34 >= 31
+
+
+# TODO move to mahjong lib
+def is_tiles_same_suit(first_tile_34, second_tile_34):
+    if is_pin(first_tile_34) and is_pin(second_tile_34):
+        return True
+    if is_man(first_tile_34) and is_man(second_tile_34):
+        return True
+    if is_sou(first_tile_34) and is_sou(second_tile_34):
+        return True
+    return False
 
 
 def make_random_letters_and_digit_string(length=15):

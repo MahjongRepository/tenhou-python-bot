@@ -168,17 +168,9 @@ class TileDanger:
         "value": 500,
         "description": "Base danger for possible wait in two ryanmens",
     }
-    BONUS_SENKI_SUJI = {
-        "value": 40,
-        "description": "Additional danger for senki-suji pattern",
-    }
-    BONUS_URA_SUJI = {
-        "value": 40,
-        "description": "Additional danger for ura-suji pattern",
-    }
     BONUS_MATAGI_SUJI = {
         "value": 80,
-        "description": "Additinal danger for matagi-suji pattern",
+        "description": "Additional danger for matagi-suji pattern",
     }
     BONUS_AIDAYONKEN = {
         "value": 80,

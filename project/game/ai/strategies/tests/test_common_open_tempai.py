@@ -28,6 +28,26 @@ def test_get_common_tempai_honro():
     assert tiles_to_string(meld.tiles) == "999p"
 
 
+def test_get_common_tempai_and_0_ukeire_crash():
+    """
+    Checks that we don't have crash anymore when bot tried to open hand with 0 ukeire
+    :return:
+    """
+    table = Table()
+    table.add_discarded_tile(1, string_to_136_tile(sou="1"), True)
+    table.add_discarded_tile(1, string_to_136_tile(sou="1"), True)
+    table.add_discarded_tile(1, string_to_136_tile(man="1"), True)
+    table.add_discarded_tile(1, string_to_136_tile(man="1"), True)
+
+    tiles = string_to_136_array(man="11999", sou="116", pin="99", honors="333")
+    table.player.init_hand(tiles)
+
+    tile = string_to_136_tile(pin="9")
+    meld, _ = table.player.try_to_call_meld(tile, False)
+    # no ukeire, no reason to open hand
+    assert meld is None
+
+
 def test_get_common_tempai_sandoko():
     table = Table()
 

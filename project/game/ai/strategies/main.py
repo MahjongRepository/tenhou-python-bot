@@ -305,10 +305,6 @@ class BaseStrategy:
                 "tempai_descriptor": selected_tile.tempai_descriptor,
             }
 
-            if selected_tile.ukeire == 0:
-                self.player.logger.debug(log.MELD_DEBUG, "0 ukeire, abort melding", logger_context)
-                return False
-
             if selected_tile.tempai_descriptor["hand_cost"]:
                 hand_cost = selected_tile.tempai_descriptor["hand_cost"]
             else:

@@ -1,3 +1,4 @@
+import pytest
 from game.ai.helpers.defence import EnemyDanger
 from game.table import Table
 from utils.decisions_logger import MeldPrint
@@ -321,19 +322,23 @@ def test_closed_kan_in_riichi():
     assert table.player.should_call_kan(tile, open_kan=False, from_riichi=True) == MeldPrint.KAN
 
 
+@pytest.mark.skip("We need to be able properly handle old waiting and new waiting calculations")
 def test_closed_kan_in_riichi_and_kan_that_breaking_hand_structure():
     table = Table()
     table.count_of_remaining_tiles = 10
-    table.add_discarded_tile(1, string_to_136_tile(man="1"), True)
-    table.add_discarded_tile(1, string_to_136_tile(man="1"), True)
+    table.add_discarded_tile(1, string_to_136_tile(man="2"), True)
+    table.add_discarded_tile(1, string_to_136_tile(man="2"), True)
+    table.add_discarded_tile(1, string_to_136_tile(man="2"), True)
+    table.add_discarded_tile(1, string_to_136_tile(man="2"), True)
 
-    tiles = string_to_136_array(man="11234", pin="456", sou="66678")
+    # 1113м456п234567с
+    tiles = string_to_136_array(man="1113", pin="456", sou="234567")
     table.player.init_hand(tiles)
 
     # to rebuild all caches
     table.player.draw_tile(string_to_136_tile(honors="6"))
     table.player.discard_tile()
 
-    tile = string_to_136_tile(sou="6")
+    tile = string_to_136_tile(man="1")
     table.player.draw_tile(tile)
     assert table.player.should_call_kan(tile, open_kan=False, from_riichi=True) is None

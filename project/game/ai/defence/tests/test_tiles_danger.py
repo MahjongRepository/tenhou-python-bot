@@ -514,7 +514,7 @@ def test_tile_danger_matagi_suji_pattern():
     table = _create_table(enemy_seat, discards=[], riichi_tile=string_to_136_tile(honors="7"))
     player = table.player
 
-    tiles = string_to_136_array(man="11134", pin="1156", honors="2555")
+    tiles = string_to_136_array(man="11134", pin="1156", honors="255", sou="4")
     tile = string_to_136_tile(sou="5")
     player.init_hand(tiles)
     player.draw_tile(tile)
@@ -527,17 +527,24 @@ def test_tile_danger_matagi_suji_pattern():
 
     table.add_discarded_tile(enemy_seat, string_to_136_tile(honors="6"), is_tsumogiri=True)
     table.add_discarded_tile(enemy_seat, string_to_136_tile(honors="6"), is_tsumogiri=True)
-    table.add_discarded_tile(enemy_seat, string_to_136_tile(honors="6"), is_tsumogiri=True)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="8"), is_tsumogiri=False)
     table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="6"), is_tsumogiri=False)
 
-    # on this stage let's check matagi pattern
-    _assert_discard(player, enemy_seat, TileDanger.BONUS_MATAGI_SUJI, sou="5")
+    # 8s in discard, so 5s is not matagi suji
+    _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_MATAGI_SUJI, sou="5")
+    # 4-7 is still matagi
+    _assert_discard(player, enemy_seat, TileDanger.BONUS_MATAGI_SUJI, sou="4")
 
     table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="6"), is_tsumogiri=True)
     table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="6"), is_tsumogiri=False)
 
-    # 5s is not matagi anymore, because 6p is latest discard from the hand
-    _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_MATAGI_SUJI, sou="5")
+    # 4s is not matagi anymore, because 6p is latest discard from the hand
+    _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_MATAGI_SUJI, sou="4")
+
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(honors="6"), is_tsumogiri=True)
+
+    # 4s is matagi again, because it is late stage and we are checking two latest discards from hand
+    _assert_discard(player, enemy_seat, TileDanger.BONUS_MATAGI_SUJI, sou="4")
 
 
 def test_tile_danger_aidayonken_pattern():
@@ -545,7 +552,7 @@ def test_tile_danger_aidayonken_pattern():
     table = _create_table(enemy_seat, discards=[], riichi_tile=string_to_136_tile(honors="7"))
     player = table.player
 
-    tiles = string_to_136_array(man="11134", pin="11256", honors="5", sou="25")
+    tiles = string_to_136_array(man="11345", pin="11256", honors="5", sou="25")
     tile = string_to_136_tile(sou="5")
     player.init_hand(tiles)
     player.draw_tile(tile)
@@ -566,7 +573,7 @@ def test_tile_danger_aidayonken_pattern():
     _assert_discard(player, enemy_seat, TileDanger.BONUS_AIDAYONKEN, pin="5")
 
     # to be sure that we are not checking other suit
-    # _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_AIDAYONKEN, pin="5")
+    _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_AIDAYONKEN, man="5")
 
 
 def _create_table(enemy_seat, discards, riichi_tile):

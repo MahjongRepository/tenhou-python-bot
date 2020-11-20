@@ -110,24 +110,12 @@ class TileDangerHandler:
                     enemy_analyzer.enemy.seat,
                     TileDanger.RYANMEN_BASE_SINGLE,
                 )
-                self._update_discard_candidate(
-                    tile_34,
-                    discard_candidates,
-                    enemy_analyzer.enemy.seat,
-                    TileDanger.make_unverified_suji_coeff(enemy_analyzer.unverified_suji_coeff),
-                )
             elif forms_ryanmen_count == 2:
                 self._update_discard_candidate(
                     tile_34,
                     discard_candidates,
                     enemy_analyzer.enemy.seat,
                     TileDanger.RYANMEN_BASE_DOUBLE,
-                )
-                self._update_discard_candidate(
-                    tile_34,
-                    discard_candidates,
-                    enemy_analyzer.enemy.seat,
-                    TileDanger.make_unverified_suji_coeff(enemy_analyzer.unverified_suji_coeff),
                 )
 
             if forms_ryanmen_count == 1 or forms_ryanmen_count == 2:
@@ -139,6 +127,7 @@ class TileDangerHandler:
                         enemy_analyzer.enemy.seat,
                         TileDanger.BONUS_MATAGI_SUJI,
                     )
+
                 # check if there any aidayonken pattern for tiles that could be used in ryanmen
                 if self.is_aidayonken_pattern(enemy_analyzer, tile_34):
                     self._update_discard_candidate(
@@ -147,6 +136,13 @@ class TileDangerHandler:
                         enemy_analyzer.enemy.seat,
                         TileDanger.BONUS_AIDAYONKEN,
                     )
+
+                self._update_discard_candidate(
+                    tile_34,
+                    discard_candidates,
+                    enemy_analyzer.enemy.seat,
+                    TileDanger.make_unverified_suji_coeff(enemy_analyzer.unverified_suji_coeff),
+                )
 
             dora_count = plus_dora(
                 tile_136, self.player.table.dora_indicators, add_aka_dora=self.player.table.has_aka_dora
@@ -668,6 +664,7 @@ class TileDangerHandler:
 
     def _is_matagi_suji(self, enemy_analyzer, tile_analyze_34):
         discards = enemy_analyzer.enemy.discards
+        discards_34 = [x.value // 4 for x in enemy_analyzer.enemy.discards]
 
         # too early to check matagi suji
         if len(discards) <= 5:
@@ -683,6 +680,16 @@ class TileDangerHandler:
         # make sure that these discards are unique
         latest_discards_34 = list(set(latest_discards_34))
 
+        matagi_patterns_config = [
+            {"tile": 2, "dangers": [[1, 4]]},
+            {"tile": 3, "dangers": [[1, 4], [2, 5]]},
+            {"tile": 4, "dangers": [[2, 5], [3, 6]]},
+            {"tile": 5, "dangers": [[3, 6], [4, 7]]},
+            {"tile": 6, "dangers": [[4, 7], [5, 8]]},
+            {"tile": 7, "dangers": [[5, 8], [6, 9]]},
+            {"tile": 8, "dangers": [[6, 9]]},
+        ]
+
         for enemy_discard_34 in latest_discards_34:
             if not is_tiles_same_suit(enemy_discard_34, tile_analyze_34):
                 continue
@@ -691,25 +698,25 @@ class TileDangerHandler:
             enemy_discard_simplified = simplify(enemy_discard_34) + 1
             tile_analyze_simplified = simplify(tile_analyze_34) + 1
 
-            if enemy_discard_simplified == 2 and tile_analyze_simplified in [1, 4]:
-                return True
+            for matagi_pattern_config in matagi_patterns_config:
+                if matagi_pattern_config["tile"] != enemy_discard_simplified:
+                    continue
 
-            if enemy_discard_simplified == 3 and tile_analyze_simplified in [1, 4, 2, 5]:
-                return True
+                same_suit_simple_discards = []
+                for is_suit in [is_pin, is_sou, is_man]:
+                    if not is_suit(tile_analyze_34):
+                        continue
 
-            if enemy_discard_simplified == 4 and tile_analyze_simplified in [2, 5, 3, 6]:
-                return True
+                    same_suit_simple_discards = []
+                    for discard_34 in discards_34:
+                        if is_suit(discard_34):
+                            # +1 here to make it easier to read
+                            same_suit_simple_discards.append(simplify(discard_34) + 1)
 
-            if enemy_discard_simplified == 5 and tile_analyze_simplified in [3, 6, 4, 7]:
-                return True
+                for danger in matagi_pattern_config["dangers"]:
 
-            if enemy_discard_simplified == 6 and tile_analyze_simplified in [4, 7, 5, 8]:
-                return True
-
-            if enemy_discard_simplified == 7 and tile_analyze_simplified in [5, 8, 6, 9]:
-                return True
-
-            if enemy_discard_simplified == 8 and tile_analyze_simplified in [6, 9]:
-                return True
+                    has_suji_in_discard = len(list(set(same_suit_simple_discards) & set(danger))) != 0
+                    if not has_suji_in_discard and tile_analyze_simplified in danger:
+                        return True
 
         return False

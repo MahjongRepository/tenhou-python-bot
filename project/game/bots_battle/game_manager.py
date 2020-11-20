@@ -66,7 +66,7 @@ class GameManager:
 
     @staticmethod
     def generate_replay_name():
-        return f"{datetime.datetime.now().strftime('%Y-%m-%d_%H_%M_%S')}_{randint(0, 999):03}.txt"
+        return f"{datetime.datetime.now().strftime('%Y-%m-%d_%H_%M_%S')}_{randint(0, 99999):03}.txt"
 
     def init_game(self):
         """

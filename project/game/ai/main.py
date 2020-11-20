@@ -94,7 +94,8 @@ class MahjongAI:
         )
 
     def draw_tile(self, tile_136):
-        self.determine_strategy(self.player.tiles)
+        if not self.player.in_riichi:
+            self.determine_strategy(self.player.tiles)
 
     def discard_tile(self, discard_tile):
         # we called meld and we had discard tile that we wanted to discard

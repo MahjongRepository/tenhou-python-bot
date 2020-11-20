@@ -545,24 +545,28 @@ def test_tile_danger_aidayonken_pattern():
     table = _create_table(enemy_seat, discards=[], riichi_tile=string_to_136_tile(honors="7"))
     player = table.player
 
-    tiles = string_to_136_array(man="11134", pin="1156", honors="2555")
+    tiles = string_to_136_array(man="11134", pin="11256", honors="5", sou="25")
     tile = string_to_136_tile(sou="5")
     player.init_hand(tiles)
     player.draw_tile(tile)
 
-    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="1"), is_tsumogiri=False)
-    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="6"), is_tsumogiri=True)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="1"), True)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="2"), True)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="6"), True)
 
-    # 1-6 was discarded NOT from hand
+    # there is 2 in enemy discard, in that case we don't want to add danger for 5
     _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_AIDAYONKEN, sou="5")
+    _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_AIDAYONKEN, sou="2")
 
-    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="6"), is_tsumogiri=False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="1"), True)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="6"), True)
 
-    # 1-6 was discarded from hand
-    _assert_discard(player, enemy_seat, TileDanger.BONUS_AIDAYONKEN, sou="5")
+    # enemy didn't discard suji discards let's add danger for 2-5 in that case
+    _assert_discard(player, enemy_seat, TileDanger.BONUS_AIDAYONKEN, pin="2")
+    _assert_discard(player, enemy_seat, TileDanger.BONUS_AIDAYONKEN, pin="5")
 
     # to be sure that we are not checking other suit
-    _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_AIDAYONKEN, pin="5")
+    # _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_AIDAYONKEN, pin="5")
 
 
 def _create_table(enemy_seat, discards, riichi_tile):

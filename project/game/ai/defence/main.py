@@ -616,8 +616,26 @@ class TileDangerHandler:
 
     def is_aidayonken_pattern(self, enemy_analyzer, tile_analyze_34):
         discards = enemy_analyzer.enemy.discards
-        # important to check only not tsumogiri discards
-        discards_34 = [x.value // 4 for x in discards if not x.is_tsumogiri]
+        discards_34 = [x.value // 4 for x in discards]
+
+        patterns_config = [
+            {
+                "pattern": [1, 6],
+                "danger": [2, 5],
+            },
+            {
+                "pattern": [2, 7],
+                "danger": [3, 6],
+            },
+            {
+                "pattern": [3, 8],
+                "danger": [4, 7],
+            },
+            {
+                "pattern": [4, 9],
+                "danger": [5, 8],
+            },
+        ]
 
         for is_suit in [is_pin, is_sou, is_man]:
             if not is_suit(tile_analyze_34):
@@ -629,19 +647,22 @@ class TileDangerHandler:
                     # +1 here to make it easier to read
                     same_suit_simple_discards.append(simplify(discard_34) + 1)
 
+            # +1 here to make it easier to read
             tile_analyze_simplified = simplify(tile_analyze_34) + 1
 
-            if 1 in same_suit_simple_discards and 6 in same_suit_simple_discards and tile_analyze_simplified in [2, 5]:
-                return True
+            for pattern_config in patterns_config:
+                has_pattern = (
+                    list(set(same_suit_simple_discards) & set(pattern_config["pattern"])) == pattern_config["pattern"]
+                )
+                if not has_pattern:
+                    continue
 
-            if 2 in same_suit_simple_discards and 7 in same_suit_simple_discards and tile_analyze_simplified in [3, 6]:
-                return True
-
-            if 3 in same_suit_simple_discards and 8 in same_suit_simple_discards and tile_analyze_simplified in [4, 7]:
-                return True
-
-            if 4 in same_suit_simple_discards and 9 in same_suit_simple_discards and tile_analyze_simplified in [5, 8]:
-                return True
+                has_suji_in_discard = len(list(set(same_suit_simple_discards) & set(pattern_config["danger"]))) != 0
+                # we found aidayonken pattern in the discard
+                # and aidayonken danger tiles are not in the discard
+                # in that case we can increase danger for them
+                if not has_suji_in_discard and tile_analyze_simplified in pattern_config["danger"]:
+                    return True
 
         return False
 

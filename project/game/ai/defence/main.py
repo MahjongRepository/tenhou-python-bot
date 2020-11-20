@@ -119,8 +119,8 @@ class TileDangerHandler:
                 )
 
             if forms_ryanmen_count == 1 or forms_ryanmen_count == 2:
-                # check if there any matagi-suji pattern for tiles that could be used in ryanmen
-                if self._is_matagi_suji(enemy_analyzer, tile_34):
+                has_matagi = self._is_matagi_suji(enemy_analyzer, tile_34)
+                if has_matagi:
                     self._update_discard_candidate(
                         tile_34,
                         discard_candidates,
@@ -128,13 +128,22 @@ class TileDangerHandler:
                         TileDanger.BONUS_MATAGI_SUJI,
                     )
 
-                # check if there any aidayonken pattern for tiles that could be used in ryanmen
-                if self.is_aidayonken_pattern(enemy_analyzer, tile_34):
+                has_aidayonken = self.is_aidayonken_pattern(enemy_analyzer, tile_34)
+                if has_aidayonken:
                     self._update_discard_candidate(
                         tile_34,
                         discard_candidates,
                         enemy_analyzer.enemy.seat,
                         TileDanger.BONUS_AIDAYONKEN,
+                    )
+
+                early_danger_bonus = self._get_early_danger_bonus(enemy_analyzer, tile_34, has_matagi or has_aidayonken)
+                if early_danger_bonus is not None:
+                    self._update_discard_candidate(
+                        tile_34,
+                        discard_candidates,
+                        enemy_analyzer.enemy.seat,
+                        early_danger_bonus,
                     )
 
                 self._update_discard_candidate(
@@ -614,7 +623,7 @@ class TileDangerHandler:
                     discard_candidate.danger.set_danger(player_seat, danger)
 
     def is_aidayonken_pattern(self, enemy_analyzer, tile_analyze_34):
-        discards = enemy_analyzer.enemy.discards
+        discards = enemy_analyzer.enemy_discards_until_all_tsumogiri
         discards_34 = [x.value // 4 for x in discards]
 
         patterns_config = [
@@ -723,3 +732,92 @@ class TileDangerHandler:
                         return True
 
         return False
+
+    def _get_early_danger_bonus(self, enemy_analyzer, tile_analyze_34, has_other_danger_bonus):
+        discards = enemy_analyzer.enemy_discards_until_all_tsumogiri
+        discards_34 = [x.value // 4 for x in discards]
+
+        assert not is_honor(tile_analyze_34)
+        # +1 here to make it easier to read
+        tile_analyze_simplified = simplify(tile_analyze_34) + 1
+        # we only those border tiles
+        if tile_analyze_simplified not in [1, 2, 8, 9]:
+            return None
+
+        # too early to make statements
+        if len(discards_34) <= 5:
+            return None
+
+        central_discards_34 = [x for x in discards_34 if not is_honor(x) and not is_terminal(x)]
+        # also too early to make statements
+        if len(central_discards_34) <= 3:
+            return None
+
+        # we also want to check how many non-tsumogiri tiles there were after those discards
+        latest_discards_34 = [x.value // 4 for x in discards if not x.is_tsumogiri][-3:]
+        if len(latest_discards_34) != 3:
+            return None
+
+        # no more than 3, but we expect at least 3 non-central tiles after that one for pattern to matter
+        num_early_discards = min(len(central_discards_34) - 3, 3)
+        first_central_discards_34 = central_discards_34[:num_early_discards]
+
+        patterns_config = []
+        if not has_other_danger_bonus:
+            # patterns lowering danger has higher priority in case they are possible
+            # +1 implied here to make it easier to read
+            patterns_config.extend(
+                [
+                    {
+                        "pattern": 2,
+                        "danger": [1],
+                        "bonus": TileDanger.BONUS_EARLY_2378,
+                    },
+                    {
+                        "pattern": 3,
+                        "danger": [1, 2],
+                        "bonus": TileDanger.BONUS_EARLY_2378,
+                    },
+                    {
+                        "pattern": 8,
+                        "danger": [9],
+                        "bonus": TileDanger.BONUS_EARLY_2378,
+                    },
+                    {
+                        "pattern": 7,
+                        "danger": [8, 9],
+                        "bonus": TileDanger.BONUS_EARLY_2378,
+                    },
+                ]
+            )
+        # patterns increasing danger have lower priority, but are always applied
+        patterns_config.extend(
+            [
+                {
+                    "pattern": 5,
+                    "danger": [1, 9],
+                    "bonus": TileDanger.BONUS_EARLY_5,
+                },
+            ]
+        )
+
+        # we return the first pattern we see
+        for enemy_discard_34 in first_central_discards_34:
+            # being also discarded late from hand kinda ruins our previous logic, so don't modify danger in that case
+            if enemy_discard_34 in latest_discards_34:
+                continue
+
+            if not is_tiles_same_suit(enemy_discard_34, tile_analyze_34):
+                continue
+
+            # +1 here to make it easier read matagi patterns
+            enemy_discard_simplified = simplify(enemy_discard_34) + 1
+            for pattern_config in patterns_config:
+                has_pattern = enemy_discard_simplified == pattern_config["pattern"]
+                if not has_pattern:
+                    continue
+
+                if tile_analyze_simplified in pattern_config["danger"]:
+                    return pattern_config["bonus"]
+
+        return None

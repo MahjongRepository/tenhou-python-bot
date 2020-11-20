@@ -30,6 +30,25 @@ class EnemyAnalyzer:
         return {"seat": self.enemy.seat, "threat_reason": self.threat_reason}
 
     @property
+    def enemy_discards_until_all_tsumogiri(self):
+        """
+        Return all enemy discards including the last one from the hand but not further
+        """
+        discards = self.enemy.discards
+
+        if not discards:
+            return []
+
+        discards_from_hand = [x for x in discards if not x.is_tsumogiri]
+        if not discards_from_hand:
+            return []
+
+        last_from_hand = discards_from_hand[-1]
+        index_of_last_from_hand = discards.index(last_from_hand)
+
+        return discards[: index_of_last_from_hand + 1]
+
+    @property
     def in_tempai(self) -> bool:
         """
         Try to detect is user in tempai or not

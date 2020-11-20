@@ -172,6 +172,8 @@ class TileDanger:
         "value": 500,
         "description": "Base danger for possible wait in two ryanmens",
     }
+
+    # bonus dangers for possible ryanmen waits
     BONUS_MATAGI_SUJI = {
         "value": 80,
         "description": "Additional danger for matagi-suji pattern",
@@ -179,6 +181,14 @@ class TileDanger:
     BONUS_AIDAYONKEN = {
         "value": 80,
         "description": "Additional danger for aidayonken pattern",
+    }
+    BONUS_EARLY_5 = {
+        "value": 80,
+        "description": "Additional danger for 1 and 9 in case of early 5 discarded in that suit",
+    }
+    BONUS_EARLY_2378 = {
+        "value": -80,
+        "description": "Negative danger for 1289 after early 28 or 28 after early 37",
     }
 
     # doras

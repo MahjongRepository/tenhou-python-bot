@@ -549,7 +549,8 @@ def test_tile_danger_matagi_suji_pattern():
 
 def test_tile_danger_aidayonken_pattern():
     enemy_seat = 1
-    table = _create_table(enemy_seat, discards=[], riichi_tile=string_to_136_tile(honors="7"))
+    table = Table()
+    table.has_aka_dora = True
     player = table.player
 
     tiles = string_to_136_array(man="11345", pin="11256", honors="5", sou="25")
@@ -560,13 +561,15 @@ def test_tile_danger_aidayonken_pattern():
     table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="1"), True)
     table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="2"), True)
     table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="6"), True)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="1"), True)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="6"), True)
+
+    table.add_called_riichi_step_one(enemy_seat)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(honors="7"), False)
 
     # there is 2 in enemy discard, in that case we don't want to add danger for 5
     _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_AIDAYONKEN, sou="5")
     _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_AIDAYONKEN, sou="2")
-
-    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="1"), True)
-    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="6"), True)
 
     # enemy didn't discard suji discards let's add danger for 2-5 in that case
     _assert_discard(player, enemy_seat, TileDanger.BONUS_AIDAYONKEN, pin="2")
@@ -574,6 +577,119 @@ def test_tile_danger_aidayonken_pattern():
 
     # to be sure that we are not checking other suit
     _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_AIDAYONKEN, man="5")
+
+
+# aidayonken should not matter after riichi
+def test_tile_danger_aidayonken_after_riichi():
+    enemy_seat = 1
+    table = Table()
+    table.has_aka_dora = True
+    player = table.player
+
+    tiles = string_to_136_array(man="11345", pin="11256", honors="5", sou="25")
+    tile = string_to_136_tile(sou="5")
+    player.init_hand(tiles)
+    player.draw_tile(tile)
+
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="1"), True)
+
+    table.add_called_riichi_step_one(enemy_seat)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(honors="7"), False)
+
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="2"), True)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="6"), True)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="1"), True)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="6"), True)
+
+    _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_AIDAYONKEN, sou="5")
+    _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_AIDAYONKEN, sou="2")
+    _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_AIDAYONKEN, pin="2")
+    _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_AIDAYONKEN, pin="5")
+    _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_AIDAYONKEN, man="5")
+
+
+def test_tile_danger_early_discard_early():
+    enemy_seat = 1
+    table = Table()
+    table.has_aka_dora = True
+    player = table.player
+
+    tiles = string_to_136_array(man="11345", pin="11256", honors="5", sou="19")
+    tile = string_to_136_tile(man="9")
+    player.init_hand(tiles)
+    player.draw_tile(tile)
+
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="2"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="5"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="3"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="1"), True)
+
+    table.add_called_riichi_step_one(enemy_seat)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="6"), False)
+
+    # too early to judge about early discards
+    _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_EARLY_2378, sou="1")
+    _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_EARLY_5, sou="9")
+
+
+def test_tile_danger_early_discard_normal():
+    enemy_seat = 1
+    table = Table()
+    table.has_aka_dora = True
+    player = table.player
+
+    tiles = string_to_136_array(man="11345", pin="11256", honors="5", sou="19")
+    tile = string_to_136_tile(man="9")
+    player.init_hand(tiles)
+    player.draw_tile(tile)
+
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="2"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="5"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="3"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="1"), True)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="1"), True)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="6"), False)
+    table.add_called_riichi_step_one(enemy_seat)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="8"), False)
+
+    # now that looks like 1 sou is not too dangerous and 9 sou is on the contrary very dangerous
+    _assert_discard(player, enemy_seat, TileDanger.BONUS_EARLY_2378, sou="1")
+    _assert_discard(player, enemy_seat, TileDanger.BONUS_EARLY_5, sou="9")
+
+    # check it's not vice versa
+    _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_EARLY_5, sou="1")
+    _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_EARLY_2378, sou="9")
+
+    # to be sure that we are not checking other suit
+    _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_EARLY_2378, man="9")
+
+
+def test_tile_danger_early_discard_early_riichi():
+    enemy_seat = 1
+    table = Table()
+    table.has_aka_dora = True
+    player = table.player
+
+    tiles = string_to_136_array(man="11345", pin="11256", honors="5", sou="19")
+    tile = string_to_136_tile(man="9")
+    player.init_hand(tiles)
+    player.draw_tile(tile)
+
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="2"), False)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="5"), False)
+    table.add_called_riichi_step_one(enemy_seat)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="8"), False)
+
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(man="3"), True)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="1"), True)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="1"), True)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="6"), True)
+    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="9"), True)
+
+    # too early to judge about early discards, despite lots of them, we only care about those
+    # before riichi
+    _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_EARLY_2378, sou="1")
+    _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_EARLY_5, sou="9")
 
 
 def _create_table(enemy_seat, discards, riichi_tile):

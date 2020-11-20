@@ -527,9 +527,12 @@ class TileDangerHandler:
                 riichi_on_suji = [x for x in suji_tiles if enemy_riichi_tile_34 == x]
 
                 # if it's 2378, then check if riichi was on suji tile
-                if simplify(tile_34) <= 2 or simplify(tile_34) >= 6:
+                if simplify(enemy_riichi_tile_34) == 4 and (simplify(tile_34) == 1 or simplify(tile_34) == 7):
+                    return TileDanger.SUJI_28_ON_RIICHI
+
+                if simplify(tile_34) == 2 or simplify(tile_34) == 6:
                     if 3 <= simplify(enemy_riichi_tile_34) <= 5 and riichi_on_suji:
-                        return TileDanger.SUJI_2378_ON_RIICHI
+                        return TileDanger.SUJI_37_ON_RIICHI
             elif enemy_analyzer.enemy.is_open_hand:
                 return TileDanger.SUJI_OPEN_HAND
 

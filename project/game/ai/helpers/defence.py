@@ -141,9 +141,13 @@ class TileDanger:
         "value": 120,
         "description": "Default suji",
     }
-    SUJI_2378_ON_RIICHI = {
+    SUJI_28_ON_RIICHI = {
         "value": 300,
-        "description": "Suji on 2, 3, 7 or 8 on riichi declaration",
+        "description": "Suji on 2 or 8 on riichi declaration",
+    }
+    SUJI_37_ON_RIICHI = {
+        "value": 400,
+        "description": "Suji on 3 or 7 on riichi declaration",
     }
 
     SUJI_19_NOT_SHONPAI_OPEN_HAND = {

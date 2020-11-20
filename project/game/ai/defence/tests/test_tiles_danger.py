@@ -298,7 +298,7 @@ def test_tile_danger_and_suji_7_on_riichi():
     player.init_hand(tiles)
     player.draw_tile(tile)
 
-    _assert_discard(player, enemy_seat, TileDanger.SUJI_2378_ON_RIICHI, sou="7")
+    _assert_discard(player, enemy_seat, TileDanger.SUJI_37_ON_RIICHI, sou="7")
 
 
 def test_tile_danger_and_suji_2_on_riichi():
@@ -311,7 +311,7 @@ def test_tile_danger_and_suji_2_on_riichi():
     player.init_hand(tiles)
     player.draw_tile(tile)
 
-    _assert_discard(player, enemy_seat, TileDanger.SUJI_2378_ON_RIICHI, sou="8")
+    _assert_discard(player, enemy_seat, TileDanger.SUJI_28_ON_RIICHI, sou="8")
 
 
 def test_tile_danger_and_suji_4_on_riichi():

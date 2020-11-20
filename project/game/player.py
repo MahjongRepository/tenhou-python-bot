@@ -224,7 +224,7 @@ class Player(PlayerInterface):
         )
 
     def should_call_kan(self, tile, open_kan, from_riichi=False):
-        return self.ai.should_call_kan(tile, open_kan, from_riichi)
+        return self.ai.kan.should_call_kan(tile, open_kan, from_riichi)
 
     def should_call_win(self, tile, is_tsumo, enemy_seat=None, is_chankan=False):
         return self.ai.should_call_win(tile, is_tsumo, enemy_seat, is_chankan)

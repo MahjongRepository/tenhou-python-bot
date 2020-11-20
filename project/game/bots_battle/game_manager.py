@@ -226,16 +226,11 @@ class GameManager:
             current_client.table.count_of_remaining_tiles -= 1
             self.replay.draw(current_client.seat, drawn_tile)
 
-            # we don't need to add tile to the hand when we are in riichi
-            if current_client.player.in_riichi:
-                tiles = current_client.player.tiles + [drawn_tile]
-            else:
-                current_client.player.draw_tile(drawn_tile)
-                tiles = current_client.player.tiles
-
-            is_win = self.agari.is_agari(TilesConverter.to_34_array(tiles), current_client.player.meld_34_tiles)
+            current_client.player.draw_tile(drawn_tile)
+            tiles = current_client.player.tiles
 
             # win by tsumo after tile draw
+            is_win = self.agari.is_agari(TilesConverter.to_34_array(tiles), current_client.player.meld_34_tiles)
             if is_win:
                 tiles.remove(drawn_tile)
                 can_win = True
@@ -313,7 +308,7 @@ class GameManager:
                 tile = current_client.player.discard_tile()
                 in_tempai = current_client.player.in_tempai
             else:
-                tile = drawn_tile
+                tile = current_client.player.discard_tile(drawn_tile)
                 current_client.table.add_discarded_tile(0, tile, True)
 
             who_called_riichi_seat = None

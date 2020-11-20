@@ -258,6 +258,8 @@ class TenhouClient(Client):
 
                 # draw tile message
                 if "<T" in message:
+                    self._random_sleep(0.5, 1)
+
                     drawn_tile = self.decoder.parse_tile(message)
                     self.table.count_of_remaining_tiles -= 1
 
@@ -271,14 +273,14 @@ class TenhouClient(Client):
                     if any(i in message for i in tsumo_win_suggestions) and self.player.should_call_win(
                         drawn_tile, is_tsumo=True
                     ):
-                        self._random_sleep(0.4, 0.6)
+                        self._random_sleep(0.8, 1.2)
                         self._send_message('<N type="7" />')
                         continue
 
                     # Kyuushuu kyuuhai 「九種九牌」
                     # (9 kinds of honor or terminal tiles)
                     if 't="64"' in message:
-                        self._random_sleep(0.3, 0.5)
+                        self._random_sleep(0.8, 1.2)
                         # TODO aim for kokushi
                         self._send_message('<N type="9" />')
                         continue
@@ -287,7 +289,7 @@ class TenhouClient(Client):
 
                     kan_type = self.player.should_call_kan(drawn_tile, False, main_player.in_riichi)
                     if kan_type:
-                        self._random_sleep(0.5, 1)
+                        self._random_sleep(1, 1.5)
 
                         if kan_type == MeldPrint.SHOUMINKAN:
                             meld_type = 5
@@ -320,7 +322,7 @@ class TenhouClient(Client):
 
                     # let's call riichi
                     if can_call_riichi:
-                        self._random_sleep(0.5, 1)
+                        self._random_sleep(1, 1.5)
                         self._send_message('<REACH hai="{}" />'.format(discarded_tile))
                         main_player.in_riichi = True
 
@@ -353,7 +355,7 @@ class TenhouClient(Client):
 
                 # the end of round
                 if "<AGARI" in message or "<RYUUKYOKU" in message:
-                    self._random_sleep(4, 6)
+                    self._random_sleep(3, 5)
                     self._send_message("<NEXTREADY />")
 
                 # set was called
@@ -384,7 +386,7 @@ class TenhouClient(Client):
                         tile = self.decoder.parse_tile(message)
                         enemy_seat = self.decoder.get_enemy_seat(message)
 
-                    self._random_sleep(0.4, 0.6)
+                    self._random_sleep(1, 1.5)
 
                     if main_player.should_call_win(tile, False, enemy_seat, is_chankan):
                         self._send_message('<N type="6" />')

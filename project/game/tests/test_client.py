@@ -22,7 +22,7 @@ def test_discard_tile():
 def test_call_meld_closed_kan():
     client = Client()
 
-    client.table.init_round(0, 0, 0, 0, 0, [0, 0, 0, 0])
+    client.table.init_round(0, 0, 0, 100, 0, [0, 0, 0, 0])
     assert client.table.count_of_remaining_tiles == 70
 
     meld = MeldPrint()

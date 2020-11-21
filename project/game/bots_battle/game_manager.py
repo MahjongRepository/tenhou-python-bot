@@ -158,6 +158,9 @@ class GameManager:
 
         self.tiles = self._generate_wall()
 
+        for client in self.clients:
+            client.erase_state()
+
         self.dead_wall = self._cut_tiles(14)
         self.add_new_dora_indicator()
 
@@ -181,7 +184,6 @@ class GameManager:
                 client_dealer,
                 player_scores,
             )
-            client.erase_state()
 
         # each player by rotation draw 4 tiles until they have 12
         # after this each player draw one more tile
@@ -309,7 +311,6 @@ class GameManager:
                 in_tempai = current_client.player.in_tempai
             else:
                 tile = current_client.player.discard_tile(drawn_tile, force_tsumogiri=True)
-                current_client.table.add_discarded_tile(0, tile, True)
 
             who_called_riichi_seat = None
             if in_tempai and not current_client.player.is_open_hand and current_client.player.can_call_riichi():
@@ -362,7 +363,7 @@ class GameManager:
                 else:
                     is_kamicha_discard = other_client.seat - current_client.seat == 1
 
-                other_client.table.revealed_tiles[tile // 4] -= 1
+                other_client.table.revealed_tiles[tile_34] -= 1
 
                 # opened kan
                 other_client_closed_hand_34 = TilesConverter.to_34_array(other_client.player.closed_hand)
@@ -411,7 +412,7 @@ class GameManager:
 
                 meld, discard_option = other_client.player.try_to_call_meld(tile, is_kamicha_discard)
 
-                other_client.table.revealed_tiles[tile // 4] += 1
+                other_client.table.revealed_tiles[tile_34] += 1
 
                 if meld:
                     meld.from_who = current_client.seat

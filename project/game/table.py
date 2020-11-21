@@ -89,6 +89,11 @@ class Table:
 
         self.latest_riichi_player_seat = None
 
+    def erase_state(self):
+        self.dora_indicators = []
+        self.revealed_tiles = [0] * 34
+        self.revealed_tiles_136 = []
+
     def add_called_meld(self, player_seat, meld):
         self.meld_was_called = True
 
@@ -210,6 +215,10 @@ class Table:
         self.revealed_tiles_136.append(tile)
         tile_34 = tile // 4
         self.revealed_tiles[tile_34] += 1
+
+        assert (
+            self.revealed_tiles[tile_34] <= 4
+        ), f"we have only 4 tiles in the game: {TilesConverter.to_one_line_string([tile])}"
 
     def _init_players(self, bot_config):
         self.player = Player(self, 0, self.dealer_seat, bot_config)

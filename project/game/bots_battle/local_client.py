@@ -37,3 +37,5 @@ class LocalClient(Client):
     def erase_state(self):
         self.is_daburi = False
         self.is_ippatsu = False
+
+        self.table.erase_state()

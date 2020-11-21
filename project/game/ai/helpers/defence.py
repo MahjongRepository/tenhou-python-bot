@@ -186,9 +186,13 @@ class TileDanger:
         "value": 80,
         "description": "Additional danger for 1 and 9 in case of early 5 discarded in that suit",
     }
-    BONUS_EARLY_2378 = {
+    BONUS_EARLY_28 = {
         "value": -80,
-        "description": "Negative danger for 1289 after early 28 or 28 after early 37",
+        "description": "Negative danger for 19 after early 28",
+    }
+    BONUS_EARLY_37 = {
+        "value": -60,
+        "description": "Negative danger for 1289 after early 37",
     }
 
     # doras

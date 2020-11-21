@@ -766,27 +766,28 @@ class TileDangerHandler:
         if not has_other_danger_bonus:
             # patterns lowering danger has higher priority in case they are possible
             # +1 implied here to make it easier to read
+            # order is important, as 28 priority pattern is higher than 37 one
             patterns_config.extend(
                 [
                     {
                         "pattern": 2,
                         "danger": [1],
-                        "bonus": TileDanger.BONUS_EARLY_2378,
-                    },
-                    {
-                        "pattern": 3,
-                        "danger": [1, 2],
-                        "bonus": TileDanger.BONUS_EARLY_2378,
+                        "bonus": TileDanger.BONUS_EARLY_28,
                     },
                     {
                         "pattern": 8,
                         "danger": [9],
-                        "bonus": TileDanger.BONUS_EARLY_2378,
+                        "bonus": TileDanger.BONUS_EARLY_28,
+                    },
+                    {
+                        "pattern": 3,
+                        "danger": [1, 2],
+                        "bonus": TileDanger.BONUS_EARLY_37,
                     },
                     {
                         "pattern": 7,
                         "danger": [8, 9],
-                        "bonus": TileDanger.BONUS_EARLY_2378,
+                        "bonus": TileDanger.BONUS_EARLY_37,
                     },
                 ]
             )

@@ -11,6 +11,7 @@ from utils.decisions_logger import DecisionsLogger, MeldPrint
 class PlayerInterface:
     table = None
     discards = None
+    tiles = None
     melds = None
     in_riichi = None
     round_step = None
@@ -57,6 +58,7 @@ class PlayerInterface:
         self.logger.logger = logger
 
     def erase_state(self):
+        self.tiles = []
         self.discards = []
         self.melds = []
         self.in_riichi = False
@@ -76,6 +78,10 @@ class PlayerInterface:
             # we will not have called pon set in the hand
             if pon_set:
                 self.melds.remove(pon_set[0])
+
+        # we need to add tile that we used for open can to the hand
+        if meld.type == MeldPrint.KAN and meld.opened:
+            self.tiles.append(meld.called_tile)
 
         self.melds.append(meld)
 
@@ -149,7 +155,6 @@ class PlayerInterface:
 class Player(PlayerInterface):
     ai: Optional[MahjongAI] = None
     config: Optional[BotDefaultConfig] = None
-    tiles = None
     last_draw = None
     in_tempai = False
 
@@ -161,7 +166,6 @@ class Player(PlayerInterface):
     def erase_state(self):
         super().erase_state()
 
-        self.tiles = []
         self.last_draw = None
         self.in_tempai = False
 

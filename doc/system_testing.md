@@ -321,3 +321,15 @@ Reproduce:
 > python reproducer.py --log 2020102008gm-0001-7994-9438a8f4 --player Wanjirou --wind 3 --honba 0 --tile 7p --action enemy_discard
 
 ![image](../project/system_testing/fixtures/28.png)
+
+## Case 29
+
+Action: `crash`.
+
+We are checking that bot doesnt crash on this action anymore.
+
+There was crash after open kan in the real game.
+
+Reproduce:
+
+> python reproducer.py --log 2020112003gm-0089-0000-72c1d092 --player Xenia --wind 7 --honba 0 --tile 1s

@@ -230,4 +230,10 @@ SYSTEM_TESTING_CASES = [
         "meld": None,
         "tile_after_meld": None,
     },
+    {
+        "index": 29,
+        "description": "There was crash after open kan in the real game.",
+        "reproducer_command": "python reproducer.py --log 2020112003gm-0089-0000-72c1d092 --player Xenia --wind 7 --honba 0 --tile 1s",
+        "action": ACTION_CRASH,
+    },
 ]

@@ -399,3 +399,15 @@ def test_system_case_28():
     result_meld, result_tile_after_meld = _run_reproducer("28.txt", reproducer_command)
     assert result_meld == needed_meld
     assert result_tile_after_meld == tile_after_meld
+
+
+def test_system_case_29():
+    """
+    Case #29
+    There was crash after open kan in the real game.
+    """
+
+    reproducer_command = (
+        "python reproducer.py --log 2020112003gm-0089-0000-72c1d092 --player Xenia --wind 7 --honba 0 --tile 1s"
+    )
+    _run_reproducer("29.txt", reproducer_command)

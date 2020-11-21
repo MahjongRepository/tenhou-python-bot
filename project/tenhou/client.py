@@ -306,7 +306,7 @@ class TenhouClient(Client):
                         discarded_tile = drawn_tile
                         # we had to add it to discards, to calculate remaining tiles correctly
                         self.table.add_discarded_tile(0, discarded_tile, True)
-                        self.player.tiles.remove(discarded_tile)
+                        self.player.discard_tile(drawn_tile, force_tsumogiri=True)
                         self._send_message('<D p="{}"/>'.format(discarded_tile))
                         self.logger.info(
                             "Discard: {}".format(

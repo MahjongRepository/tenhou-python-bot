@@ -196,13 +196,11 @@ class Player(PlayerInterface):
 
         self.ai.draw_tile(tile_136)
 
-    def discard_tile(self, discard_tile=None):
-        """
-        :param discard_tile: 136 tile format
-        :return:
-        """
-
-        tile_to_discard = self.ai.discard_tile(discard_tile)
+    def discard_tile(self, discard_tile=None, force_tsumogiri=False):
+        if force_tsumogiri:
+            tile_to_discard = discard_tile
+        else:
+            tile_to_discard = self.ai.discard_tile(discard_tile)
 
         is_tsumogiri = tile_to_discard == self.last_draw
         # it is important to use table method,

@@ -142,7 +142,7 @@ class TenhouLogReproducer:
                 player_seat = self._normalize_position(discard_tags.index(player_sign), player_position)
 
                 if player_seat == 0:
-                    table.player.discard_tile(tile)
+                    table.player.discard_tile(tile, force_tsumogiri=True)
                 else:
                     # is it time to stop?
                     found_tile = TilesConverter.to_one_line_string([tile]) == needed_tile

@@ -308,7 +308,7 @@ class GameManager:
                 tile = current_client.player.discard_tile()
                 in_tempai = current_client.player.in_tempai
             else:
-                tile = current_client.player.discard_tile(drawn_tile)
+                tile = current_client.player.discard_tile(drawn_tile, force_tsumogiri=True)
                 current_client.table.add_discarded_tile(0, tile, True)
 
             who_called_riichi_seat = None

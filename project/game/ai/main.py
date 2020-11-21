@@ -197,6 +197,8 @@ class MahjongAI:
             player_wind=self.player.player_wind,
             round_wind=self.player.table.round_wind_tile,
             is_tsumo=is_tsumo,
+            is_rinshan=is_rinshan,
+            is_chankan=is_chankan,
             options=OptionalRules(
                 has_aka_dora=self.player.table.has_aka_dora,
                 has_open_tanyao=self.player.table.has_open_tanyao,

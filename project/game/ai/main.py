@@ -176,7 +176,9 @@ class MahjongAI:
 
         return self.current_strategy and True or False
 
-    def estimate_hand_value_or_get_from_cache(self, win_tile_34, tiles=None, call_riichi=False, is_tsumo=False):
+    def estimate_hand_value_or_get_from_cache(
+        self, win_tile_34, tiles=None, call_riichi=False, is_tsumo=False, is_rinshan=False, is_chankan=False
+    ):
         win_tile_136 = win_tile_34 * 4
 
         # we don't need to think, that our waiting is aka dora
@@ -204,7 +206,9 @@ class MahjongAI:
             kyoutaku_number=self.player.table.count_of_riichi_sticks,
         )
 
-        return self._estimate_hand_value_or_get_from_cache(win_tile_136, tiles, call_riichi, is_tsumo, 0, config)
+        return self._estimate_hand_value_or_get_from_cache(
+            win_tile_136, tiles, call_riichi, is_tsumo, 0, config, is_rinshan, is_chankan
+        )
 
     def calculate_exact_hand_value_or_get_from_cache(
         self,
@@ -254,7 +258,7 @@ class MahjongAI:
         )
 
     def _estimate_hand_value_or_get_from_cache(
-        self, win_tile_136, tiles, call_riichi, is_tsumo, additional_han, config
+        self, win_tile_136, tiles, call_riichi, is_tsumo, additional_han, config, is_rinshan=False, is_chankan=False
     ):
         cache_key = build_estimate_hand_value_cache_key(
             tiles,
@@ -265,6 +269,8 @@ class MahjongAI:
             self.player.table.count_of_riichi_sticks,
             self.player.table.count_of_honba_sticks,
             additional_han,
+            is_rinshan,
+            is_chankan,
         )
         if self.hand_cache_estimation.get(cache_key):
             return self.hand_cache_estimation.get(cache_key)

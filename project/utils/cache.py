@@ -19,17 +19,19 @@ def build_estimate_hand_value_cache_key(
     count_of_riichi_sticks: int,
     count_of_honba_sticks: int,
     additional_han: int,
+    is_rinshan: bool,
+    is_chankan: bool,
 ):
     prepared_array = (
         tiles_136
         + [is_tsumo and 1 or 0]
         + [is_riichi and 1 or 0]
-        + [200]  # to be sure that hand and meld tiles will not be mixed together
         + (melds and [x.tiles for x in melds] or [])
-        + [200]
         + dora_indicators
         + [count_of_riichi_sticks]
         + [count_of_honba_sticks]
         + [additional_han]
+        + [is_rinshan and 1 or 0]
+        + [is_chankan and 1 or 0]
     )
     return hashlib.md5(marshal.dumps(prepared_array)).hexdigest()

@@ -242,8 +242,7 @@ class GameManager:
                 # in that case we can't call ron
                 if not current_client.player.in_riichi:
                     result = current_client.player.ai.estimate_hand_value_or_get_from_cache(
-                        drawn_tile_34,
-                        is_tsumo=True,
+                        drawn_tile_34, is_tsumo=True, is_rinshan=current_client.is_rinshan
                     )
                     can_win = result.error is None
 
@@ -286,6 +285,14 @@ class GameManager:
 
                     self.replay.open_meld(meld)
 
+                    if opened:
+                        result = self.check_clients_possible_ron(
+                            current_client, drawn_tile, is_tsumogiri=False, is_chankan=True
+                        )
+                        # the end of the round
+                        if result:
+                            return result
+
                     number_of_kan_sets_per_player[current_client.seat] += 1
                     if (
                         sum(number_of_kan_sets_per_player.values()) == 4
@@ -299,11 +306,14 @@ class GameManager:
 
                     self.add_new_dora_indicator()
 
+                    current_client.is_rinshan = True
+
                     # after that we will return to the current client next draw
                     continue
 
-            # we had to clear ippatsu, after tile draw
+            # we had to clear state after tile draw
             current_client.is_ippatsu = False
+            current_client.is_rinshan = False
 
             # if not in riichi, let's decide what tile to discard
             if not current_client.player.in_riichi:
@@ -407,6 +417,7 @@ class GameManager:
                     self.add_new_dora_indicator()
 
                     # move to draw tile action
+                    other_client.is_rinshan = True
                     self.current_client_seat = self._move_position(other_client.seat, shift=-1)
                     continue
 
@@ -462,15 +473,10 @@ class GameManager:
         result = self.process_the_end_of_the_round([], 0, None, None, False)
         return [result]
 
-    def check_clients_possible_ron(self, current_client, tile, is_tsumogiri) -> []:
+    def check_clients_possible_ron(self, current_client, tile, is_tsumogiri, is_chankan=False) -> []:
         """
         After tile discard let's check all other players can they win or not
         at this tile
-
-        :param current_client:
-        :param tile:
-        :param is_tsumogiri:
-        :return: None or ron result
         """
         possible_win_client = []
         for other_client in self.clients:
@@ -479,11 +485,14 @@ class GameManager:
                 continue
 
             # let's store other players discards
-            other_client.table.add_discarded_tile(
-                self._enemy_position(current_client.seat, other_client.seat), tile, is_tsumogiri
-            )
+            if not is_chankan:
+                other_client.table.add_discarded_tile(
+                    self._enemy_position(current_client.seat, other_client.seat), tile, is_tsumogiri
+                )
 
-            if self.can_call_ron(other_client, tile, self._enemy_position(current_client.seat, other_client.seat)):
+            if self.can_call_ron(
+                other_client, tile, self._enemy_position(current_client.seat, other_client.seat), is_chankan
+            ):
                 possible_win_client.append(other_client)
 
         if len(possible_win_client) == 3:
@@ -493,7 +502,12 @@ class GameManager:
         results = []
         for client in possible_win_client:
             result = self.process_the_end_of_the_round(
-                tiles=client.player.tiles, win_tile=tile, winner=client, loser=current_client, is_tsumo=False
+                tiles=client.player.tiles,
+                win_tile=tile,
+                winner=client,
+                loser=current_client,
+                is_tsumo=False,
+                is_chankan=is_chankan,
             )
             results.append(result)
 
@@ -515,7 +529,7 @@ class GameManager:
         # return winner of the game
         return sorted([x for x in self.clients], key=lambda x: x.player.position)[0]
 
-    def can_call_ron(self, client, win_tile, shifted_enemy_seat):
+    def can_call_ron(self, client, win_tile, shifted_enemy_seat, is_chankan):
         if not client.player.in_tempai:
             return False
 
@@ -537,12 +551,13 @@ class GameManager:
             result = client.player.ai.estimate_hand_value_or_get_from_cache(
                 win_tile // 4,
                 is_tsumo=False,
+                is_chankan=is_chankan,
             )
             if result.error:
                 return False
 
         # bot decided to not call ron
-        if not client.player.should_call_win(win_tile, False, shifted_enemy_seat):
+        if not client.player.should_call_win(win_tile, False, shifted_enemy_seat, is_chankan):
             return False
 
         return True
@@ -574,17 +589,17 @@ class GameManager:
         # first move should be dealer's move
         self.current_client_seat = dealer
 
-    def process_the_end_of_the_round(self, tiles, win_tile, winner, loser, is_tsumo):
+    def process_the_end_of_the_round(self, tiles, win_tile, winner, loser, is_tsumo, is_chankan=False):
         """
         Increment a round number and do a scores calculations
         """
 
         if winner:
-            return self.agari_result(winner, loser, is_tsumo, tiles, win_tile)
+            return self.agari_result(winner, loser, is_tsumo, tiles, win_tile, is_chankan)
         else:
             return self.retake()
 
-    def agari_result(self, winner, loser, is_tsumo, tiles, win_tile):
+    def agari_result(self, winner, loser, is_tsumo, tiles, win_tile, is_chankan):
         logger.info(
             "{}: {} + {}".format(
                 is_tsumo and "Tsumo" or "Ron",
@@ -633,6 +648,8 @@ class GameManager:
             is_ippatsu=winner.is_ippatsu,
             is_haitei=is_haitei,
             is_houtei=is_houtei,
+            is_rinshan=winner.is_rinshan,
+            is_chankan=is_chankan,
             options=OptionalRules(
                 has_aka_dora=settings.FIVE_REDS,
                 has_open_tanyao=settings.OPEN_TANYAO,

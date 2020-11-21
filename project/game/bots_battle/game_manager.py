@@ -391,7 +391,6 @@ class GameManager:
 
                     # we changed current client seat
                     self.players_with_open_hands.append(other_client.seat)
-                    other_client.player.tiles.append(tile)
 
                     number_of_kan_sets_per_player[other_client.seat] += 1
                     if (

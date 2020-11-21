@@ -53,7 +53,6 @@ class GameManager:
     _need_to_check_same_winds = None
 
     def __init__(self, clients, replays_directory, replay_name):
-        self._need_to_check_same_winds = True
         self.tiles = []
         self.dead_wall = []
         self.dora_indicators = []
@@ -153,6 +152,7 @@ class GameManager:
         """
         Generate players hands, dead wall and dora indicators
         """
+        self._need_to_check_same_winds = True
 
         self.players_with_open_hands = []
         self.dora_indicators = []

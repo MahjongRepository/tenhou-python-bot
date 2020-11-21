@@ -231,6 +231,9 @@ class Player(PlayerInterface):
     def should_call_win(self, tile, is_tsumo, enemy_seat=None, is_chankan=False):
         return self.ai.should_call_win(tile, is_tsumo, enemy_seat, is_chankan)
 
+    def should_call_kyuushu_kyuuhai(self):
+        return self.ai.should_call_kyuushu_kyuuhai()
+
     def try_to_call_meld(self, tile, is_kamicha_discard):
         return self.ai.try_to_call_meld(tile, is_kamicha_discard)
 

@@ -11,6 +11,7 @@ from mahjong.hand_calculating.hand import HandCalculator
 from mahjong.hand_calculating.hand_config import HandConfig, OptionalRules
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
+from mahjong.utils import is_honor, is_terminal
 from utils.decisions_logger import MeldPrint
 from utils.settings_handler import settings
 
@@ -230,6 +231,12 @@ class GameManager:
 
             current_client.player.draw_tile(drawn_tile)
             tiles = current_client.player.tiles
+
+            if (
+                self.player_can_call_kyuushu_kyuuhai(current_client.player)
+                and current_client.player.should_call_kyuushu_kyuuhai()
+            ):
+                return [self.abortive_retake(AbortiveDraw.NINE_DIFFERENT)]
 
             # win by tsumo after tile draw
             is_win = self.agari.is_agari(TilesConverter.to_34_array(tiles), current_client.player.meld_34_tiles)
@@ -908,6 +915,13 @@ class GameManager:
 
         for _client in self.clients:
             _client.table.add_dora_indicator(self.dora_indicators[-1])
+
+    def player_can_call_kyuushu_kyuuhai(self, player):
+        if len(player.discards) > 0 or len(player.melds) > 0:
+            return False
+        tiles_34 = [x // 4 for x in player.tiles]
+        terminals_and_honors = [x for x in tiles_34 if is_honor(x) or is_terminal(x)]
+        return len(list(set(terminals_and_honors))) >= 9
 
 
 # let's use tenhou constant values, to make things easier

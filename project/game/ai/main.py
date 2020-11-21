@@ -318,6 +318,14 @@ class MahjongAI:
 
         return should_riichi
 
+    def should_call_kyuushu_kyuuhai(self) -> bool:
+        """
+        Kyuushu kyuuhai 「九種九牌」
+        (9 kinds of honor or terminal tiles)
+        """
+        # TODO aim for kokushi
+        return True
+
     def should_call_win(self, tile, is_tsumo, enemy_seat=None, is_chankan=False):
         # don't skip win in riichi
         if self.player.in_riichi:

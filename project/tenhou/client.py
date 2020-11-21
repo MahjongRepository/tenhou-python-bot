@@ -277,15 +277,12 @@ class TenhouClient(Client):
                         self._send_message('<N type="7" />')
                         continue
 
-                    # Kyuushuu kyuuhai 「九種九牌」
-                    # (9 kinds of honor or terminal tiles)
-                    if 't="64"' in message:
-                        self._random_sleep(0.8, 1.2)
-                        # TODO aim for kokushi
+                    self.player.draw_tile(drawn_tile)
+
+                    if 't="64"' in message and self.player.should_call_kyuushu_kyuuhai():
+                        self._random_sleep(1.5, 2)
                         self._send_message('<N type="9" />')
                         continue
-
-                    self.player.draw_tile(drawn_tile)
 
                     kan_type = self.player.should_call_kan(drawn_tile, False, main_player.in_riichi)
                     if kan_type:

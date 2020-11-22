@@ -411,3 +411,18 @@ def test_system_case_29():
         "python reproducer.py --log 2020112003gm-0089-0000-72c1d092 --player Xenia --wind 7 --honba 0 --tile 1s"
     )
     _run_reproducer("29.txt", reproducer_command)
+
+
+def test_system_case_30():
+    """
+    Case #30
+    We are pushing here, even if it is karaten we still want to keep tempai.
+    """
+
+    reproducer_command = "python reproducer.py --log 2020112215gm-0009-0000-9c894eca --player 1 --wind 8 --honba 0 --action draw --n 1 --tile 7m"
+    allowed_discards = ["5m"]
+    with_riichi = False
+
+    result, with_riichi_result = _run_reproducer("30.txt", reproducer_command)
+    assert TilesConverter.to_one_line_string([result]) in allowed_discards
+    assert with_riichi == with_riichi_result

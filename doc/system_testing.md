@@ -333,3 +333,15 @@ There was crash after open kan in the real game.
 Reproduce:
 
 > python reproducer.py --log 2020112003gm-0089-0000-72c1d092 --player Xenia --wind 7 --honba 0 --tile 1s
+
+## Case 30
+
+Action: `discard`, allowed discard: `5m`, with riichi: `False`.
+
+We are pushing here, even if it is karaten we still want to keep tempai.
+
+Reproduce:
+
+> python reproducer.py --log 2020112215gm-0009-0000-9c894eca --player 1 --wind 8 --honba 0 --action draw --n 1 --tile 7m
+
+![image](../project/system_testing/fixtures/30.png)

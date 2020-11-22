@@ -236,4 +236,12 @@ SYSTEM_TESTING_CASES = [
         "reproducer_command": "python reproducer.py --log 2020112003gm-0089-0000-72c1d092 --player Xenia --wind 7 --honba 0 --tile 1s",
         "action": ACTION_CRASH,
     },
+    {
+        "index": 30,
+        "description": "We are pushing here, even if it is karaten we still want to keep tempai.",
+        "reproducer_command": "python reproducer.py --log 2020112215gm-0009-0000-9c894eca --player 1 --wind 8 --honba 0 --action draw --n 1 --tile 7m",
+        "action": ACTION_DISCARD,
+        "allowed_discards": ["5m"],
+        "with_riichi": False,
+    },
 ]

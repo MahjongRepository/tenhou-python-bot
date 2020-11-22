@@ -204,19 +204,20 @@ class TileDangerHandler:
                 )
                 continue
 
-            # never push with zero chance to win
-            # FIXME: we may actually want to push it for tempai in ryukoku, so reconsider
-            if discard_option.ukeire == 0:
-                discard_option.danger.set_danger_border(
-                    threatening_player.enemy.seat,
-                    DangerBorder.BETAORI,
-                    hand_weighted_cost,
-                    threatening_player_hand_cost,
-                )
-                continue
-
             if discard_option.shanten == 0:
                 hand_weighted_cost = self.player.ai.estimate_weighted_mean_hand_value(discard_option)
+
+                # we are not ready to push with hand that doesn't have chances to win
+                # or to get ryukoku payments
+                if hand_weighted_cost == 0:
+                    discard_option.danger.set_danger_border(
+                        threatening_player.enemy.seat,
+                        DangerBorder.BETAORI,
+                        hand_weighted_cost,
+                        threatening_player_hand_cost,
+                    )
+                    continue
+
                 discard_option.danger.weighted_cost = hand_weighted_cost
                 cost_ratio = (hand_weighted_cost / threatening_player_hand_cost) * 100
                 tune = self.player.config.TUNE_DANGER_BORDER_TEMPAI_VALUE

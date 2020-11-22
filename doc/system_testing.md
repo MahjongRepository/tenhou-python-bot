@@ -345,3 +345,15 @@ Reproduce:
 > python reproducer.py --log 2020112215gm-0009-0000-9c894eca --player 1 --wind 8 --honba 0 --action draw --n 1 --tile 7m
 
 ![image](../project/system_testing/fixtures/30.png)
+
+## Case 31
+
+Action: `discard`, allowed discard: `3z`, with riichi: `False`.
+
+Regression with honitsu and chinitsu detection
+
+Reproduce:
+
+> python reproducer.py --log 2020112219gm-0089-0000-8de03653 --player 安提洛科斯 --wind 1 --honba 0 --action draw --n 1 --tile 1s
+
+![image](../project/system_testing/fixtures/31.png)

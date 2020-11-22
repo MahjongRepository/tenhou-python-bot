@@ -244,4 +244,12 @@ SYSTEM_TESTING_CASES = [
         "allowed_discards": ["5m"],
         "with_riichi": False,
     },
+    {
+        "index": 31,
+        "description": "Regression with honitsu and chinitsu detection",
+        "reproducer_command": "python reproducer.py --log 2020112219gm-0089-0000-8de03653 --player 安提洛科斯 --wind 1 --honba 0 --action draw --n 1 --tile 1s",
+        "action": ACTION_DISCARD,
+        "allowed_discards": ["3z"],
+        "with_riichi": False,
+    },
 ]

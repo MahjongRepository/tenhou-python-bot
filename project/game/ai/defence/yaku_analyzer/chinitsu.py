@@ -36,7 +36,7 @@ class ChinitsuAnalyzer(HonitsuAnalyzerBase):
             suit = self._get_tile_suit(tile)
             if not current_suit:
                 current_suit = suit
-            elif suit != current_suit:
+            elif suit["name"] != current_suit["name"]:
                 return False
 
         assert current_suit
@@ -56,7 +56,7 @@ class ChinitsuAnalyzer(HonitsuAnalyzerBase):
             # not really suspicious
             less_suit = suits[0]
             less_suit_tiles = less_suit["count"]
-            if less_suit != current_suit:
+            if less_suit["name"] != current_suit["name"]:
                 return False
 
             percentage_of_less_suit = (less_suit_tiles / total_discards) * 100

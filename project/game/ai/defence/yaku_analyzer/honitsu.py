@@ -38,7 +38,7 @@ class HonitsuAnalyzer(HonitsuAnalyzerBase):
             suit = ChinitsuAnalyzer._get_tile_suit(tile)
             if not current_suit:
                 current_suit = suit
-            elif suit != current_suit:
+            elif suit["name"] != current_suit["name"]:
                 return False
 
         # let's check discards

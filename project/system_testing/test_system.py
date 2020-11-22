@@ -426,3 +426,18 @@ def test_system_case_30():
     result, with_riichi_result = _run_reproducer("30.txt", reproducer_command)
     assert TilesConverter.to_one_line_string([result]) in allowed_discards
     assert with_riichi == with_riichi_result
+
+
+def test_system_case_31():
+    """
+    Case #31
+    Regression with honitsu and chinitsu detection
+    """
+
+    reproducer_command = "python reproducer.py --log 2020112219gm-0089-0000-8de03653 --player 安提洛科斯 --wind 1 --honba 0 --action draw --n 1 --tile 1s"
+    allowed_discards = ["3z"]
+    with_riichi = False
+
+    result, with_riichi_result = _run_reproducer("31.txt", reproducer_command)
+    assert TilesConverter.to_one_line_string([result]) in allowed_discards
+    assert with_riichi == with_riichi_result

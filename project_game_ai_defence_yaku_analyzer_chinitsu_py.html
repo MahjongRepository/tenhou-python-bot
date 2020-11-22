@@ -89,7 +89,7 @@
     <p id="t36" class="run"><span class="n"><a href="#t36">36</a></span><span class="t">            <span class="nam">suit</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_get_tile_suit</span><span class="op">(</span><span class="nam">tile</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t37" class="run"><span class="n"><a href="#t37">37</a></span><span class="t">            <span class="key">if</span> <span class="key">not</span> <span class="nam">current_suit</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t38" class="run"><span class="n"><a href="#t38">38</a></span><span class="t">                <span class="nam">current_suit</span> <span class="op">=</span> <span class="nam">suit</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t39" class="run"><span class="n"><a href="#t39">39</a></span><span class="t">            <span class="key">elif</span> <span class="nam">suit</span> <span class="op">!=</span> <span class="nam">current_suit</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t39" class="run"><span class="n"><a href="#t39">39</a></span><span class="t">            <span class="key">elif</span> <span class="nam">suit</span><span class="op">[</span><span class="str">"name"</span><span class="op">]</span> <span class="op">!=</span> <span class="nam">current_suit</span><span class="op">[</span><span class="str">"name"</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t40" class="run"><span class="n"><a href="#t40">40</a></span><span class="t">                <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p id="t41" class="pln"><span class="n"><a href="#t41">41</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t42" class="run"><span class="n"><a href="#t42">42</a></span><span class="t">        <span class="key">assert</span> <span class="nam">current_suit</span>&nbsp;</span><span class="r"></span></p>
@@ -109,7 +109,7 @@
     <p id="t56" class="pln"><span class="n"><a href="#t56">56</a></span><span class="t">            <span class="com"># not really suspicious</span>&nbsp;</span><span class="r"></span></p>
     <p id="t57" class="run"><span class="n"><a href="#t57">57</a></span><span class="t">            <span class="nam">less_suit</span> <span class="op">=</span> <span class="nam">suits</span><span class="op">[</span><span class="num">0</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p id="t58" class="run"><span class="n"><a href="#t58">58</a></span><span class="t">            <span class="nam">less_suit_tiles</span> <span class="op">=</span> <span class="nam">less_suit</span><span class="op">[</span><span class="str">"count"</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t59" class="run"><span class="n"><a href="#t59">59</a></span><span class="t">            <span class="key">if</span> <span class="nam">less_suit</span> <span class="op">!=</span> <span class="nam">current_suit</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t59" class="run"><span class="n"><a href="#t59">59</a></span><span class="t">            <span class="key">if</span> <span class="nam">less_suit</span><span class="op">[</span><span class="str">"name"</span><span class="op">]</span> <span class="op">!=</span> <span class="nam">current_suit</span><span class="op">[</span><span class="str">"name"</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t60" class="mis show_mis"><span class="n"><a href="#t60">60</a></span><span class="t">                <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p id="t61" class="pln"><span class="n"><a href="#t61">61</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t62" class="run"><span class="n"><a href="#t62">62</a></span><span class="t">            <span class="nam">percentage_of_less_suit</span> <span class="op">=</span> <span class="op">(</span><span class="nam">less_suit_tiles</span> <span class="op">/</span> <span class="nam">total_discards</span><span class="op">)</span> <span class="op">*</span> <span class="num">100</span>&nbsp;</span><span class="r"></span></p>
@@ -147,7 +147,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v5.3</a>,
-            created at 2020-11-22 10:48 +0000
+            created at 2020-11-22 12:34 +0000
         </p>
     </div>
 </div>

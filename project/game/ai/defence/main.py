@@ -181,7 +181,7 @@ class TileDangerHandler:
 
         return discard_candidates
 
-    def calculate_danger_borders(self, discard_options, threatening_player):
+    def calculate_danger_borders(self, discard_options, threatening_player, all_threatening_players):
         min_shanten = min([x.shanten for x in discard_options])
 
         placement_adjustment = self.player.ai.placement.get_allowed_danger_modifier()
@@ -221,62 +221,67 @@ class TileDangerHandler:
                 cost_ratio = (hand_weighted_cost / threatening_player_hand_cost) * 100
                 tune = self.player.config.TUNE_DANGER_BORDER_TEMPAI_VALUE
 
-                # good wait
-                if discard_option.ukeire >= 6:
-                    if cost_ratio >= 100:
-                        danger_border = DangerBorder.IGNORE
-                    elif cost_ratio >= 70:
-                        danger_border = DangerBorder.VERY_HIGH
-                    elif cost_ratio >= 50:
-                        danger_border = DangerBorder.UPPER_MEDIUM
-                    elif cost_ratio >= 30:
-                        danger_border = DangerBorder.MEDIUM
-                    else:
-                        danger_border = DangerBorder.LOW
-                # moderate wait
-                elif discard_option.ukeire >= 4:
-                    if cost_ratio >= 400:
-                        danger_border = DangerBorder.IGNORE
-                    elif cost_ratio >= 200:
-                        danger_border = DangerBorder.EXTREME
-                    elif cost_ratio >= 100:
-                        danger_border = DangerBorder.VERY_HIGH
-                    elif cost_ratio >= 70:
-                        danger_border = DangerBorder.UPPER_MEDIUM
-                    elif cost_ratio >= 50:
-                        danger_border = DangerBorder.LOWER_MEDIUM
-                    elif cost_ratio >= 30:
-                        danger_border = DangerBorder.UPPER_LOW
-                    else:
-                        danger_border = DangerBorder.VERY_LOW
-                # weak wait
-                elif discard_option.ukeire >= 2:
-                    if cost_ratio >= 400:
-                        danger_border = DangerBorder.EXTREME
-                    elif cost_ratio >= 200:
-                        danger_border = DangerBorder.VERY_HIGH
-                    elif cost_ratio >= 100:
-                        danger_border = DangerBorder.UPPER_MEDIUM
-                    elif cost_ratio >= 70:
-                        danger_border = DangerBorder.MEDIUM
-                    elif cost_ratio >= 50:
-                        danger_border = DangerBorder.UPPER_LOW
-                    elif cost_ratio >= 30:
-                        danger_border = DangerBorder.LOW
-                    else:
-                        danger_border = DangerBorder.EXTREMELY_LOW
-                # waiting for 1 tile basically
+                if self.player.ai.placement.must_push(
+                    all_threatening_players, num_shanten=0, tempai_cost=hand_weighted_cost
+                ):
+                    danger_border = DangerBorder.IGNORE
                 else:
-                    if cost_ratio >= 400:
-                        danger_border = DangerBorder.HIGH
-                    elif cost_ratio >= 200:
-                        danger_border = DangerBorder.UPPER_MEDIUM
-                    elif cost_ratio >= 100:
-                        danger_border = DangerBorder.LOWER_MEDIUM
-                    elif cost_ratio >= 50:
-                        danger_border = DangerBorder.LOW
+                    # good wait
+                    if discard_option.ukeire >= 6:
+                        if cost_ratio >= 100:
+                            danger_border = DangerBorder.IGNORE
+                        elif cost_ratio >= 70:
+                            danger_border = DangerBorder.VERY_HIGH
+                        elif cost_ratio >= 50:
+                            danger_border = DangerBorder.UPPER_MEDIUM
+                        elif cost_ratio >= 30:
+                            danger_border = DangerBorder.MEDIUM
+                        else:
+                            danger_border = DangerBorder.LOW
+                    # moderate wait
+                    elif discard_option.ukeire >= 4:
+                        if cost_ratio >= 400:
+                            danger_border = DangerBorder.IGNORE
+                        elif cost_ratio >= 200:
+                            danger_border = DangerBorder.EXTREME
+                        elif cost_ratio >= 100:
+                            danger_border = DangerBorder.VERY_HIGH
+                        elif cost_ratio >= 70:
+                            danger_border = DangerBorder.UPPER_MEDIUM
+                        elif cost_ratio >= 50:
+                            danger_border = DangerBorder.LOWER_MEDIUM
+                        elif cost_ratio >= 30:
+                            danger_border = DangerBorder.UPPER_LOW
+                        else:
+                            danger_border = DangerBorder.VERY_LOW
+                    # weak wait
+                    elif discard_option.ukeire >= 2:
+                        if cost_ratio >= 400:
+                            danger_border = DangerBorder.EXTREME
+                        elif cost_ratio >= 200:
+                            danger_border = DangerBorder.VERY_HIGH
+                        elif cost_ratio >= 100:
+                            danger_border = DangerBorder.UPPER_MEDIUM
+                        elif cost_ratio >= 70:
+                            danger_border = DangerBorder.MEDIUM
+                        elif cost_ratio >= 50:
+                            danger_border = DangerBorder.UPPER_LOW
+                        elif cost_ratio >= 30:
+                            danger_border = DangerBorder.LOW
+                        else:
+                            danger_border = DangerBorder.EXTREMELY_LOW
+                    # waiting for 1 tile basically
                     else:
-                        danger_border = DangerBorder.EXTREMELY_LOW
+                        if cost_ratio >= 400:
+                            danger_border = DangerBorder.HIGH
+                        elif cost_ratio >= 200:
+                            danger_border = DangerBorder.UPPER_MEDIUM
+                        elif cost_ratio >= 100:
+                            danger_border = DangerBorder.LOWER_MEDIUM
+                        elif cost_ratio >= 50:
+                            danger_border = DangerBorder.LOW
+                        else:
+                            danger_border = DangerBorder.EXTREMELY_LOW
 
             if discard_option.shanten == 1:
                 tune = self.player.config.TUNE_DANGER_BORDER_1_SHANTEN_VALUE
@@ -301,77 +306,82 @@ class TileDangerHandler:
                 discard_option.danger.weighted_cost = int(hand_weighted_cost)
                 cost_ratio = (hand_weighted_cost / threatening_player_hand_cost) * 100
 
-                # lots of ukeire
-                if discard_option.ukeire >= 32:
-                    if cost_ratio >= 400:
-                        danger_border = DangerBorder.IGNORE
-                    elif cost_ratio >= 200:
-                        danger_border = DangerBorder.EXTREME
-                    elif cost_ratio >= 100:
-                        danger_border = DangerBorder.VERY_HIGH
-                    elif cost_ratio >= 50:
-                        danger_border = DangerBorder.MEDIUM
-                    elif cost_ratio >= 20:
-                        danger_border = DangerBorder.UPPER_LOW
-                    else:
-                        danger_border = DangerBorder.EXTREMELY_LOW
-                # very good ukeire
-                elif discard_option.ukeire >= 20:
-                    if cost_ratio >= 400:
-                        danger_border = DangerBorder.IGNORE
-                    elif cost_ratio >= 200:
-                        danger_border = DangerBorder.EXTREME
-                    elif cost_ratio >= 100:
-                        danger_border = DangerBorder.VERY_HIGH
-                    elif cost_ratio >= 50:
-                        danger_border = DangerBorder.LOWER_MEDIUM
-                    elif cost_ratio >= 20:
-                        danger_border = DangerBorder.LOW
-                    else:
-                        danger_border = DangerBorder.EXTREMELY_LOW
-                # good ukeire
-                elif discard_option.ukeire >= 12:
-                    if cost_ratio >= 400:
-                        danger_border = DangerBorder.VERY_HIGH
-                    elif cost_ratio >= 200:
-                        danger_border = DangerBorder.HIGH
-                    elif cost_ratio >= 100:
-                        danger_border = DangerBorder.UPPER_MEDIUM
-                    elif cost_ratio >= 50:
-                        danger_border = DangerBorder.UPPER_LOW
-                    elif cost_ratio >= 20:
-                        danger_border = DangerBorder.VERY_LOW
-                    else:
-                        danger_border = DangerBorder.BETAORI
-                # mediocre ukeire
-                elif discard_option.ukeire >= 7:
-                    if cost_ratio >= 400:
-                        danger_border = DangerBorder.HIGH
-                    elif cost_ratio >= 200:
-                        danger_border = DangerBorder.UPPER_MEDIUM
-                    elif cost_ratio >= 100:
-                        danger_border = DangerBorder.LOWER_MEDIUM
-                    elif cost_ratio >= 50:
-                        danger_border = DangerBorder.VERY_LOW
-                    elif cost_ratio >= 20:
-                        danger_border = DangerBorder.LOWEST
-                    else:
-                        danger_border = DangerBorder.BETAORI
-                # very low ukeire
-                elif discard_option.ukeire >= 3:
-                    if cost_ratio >= 400:
-                        danger_border = DangerBorder.MEDIUM
-                    elif cost_ratio >= 200:
-                        danger_border = DangerBorder.UPPER_LOW
-                    elif cost_ratio >= 100:
-                        danger_border = DangerBorder.VERY_LOW
-                    elif cost_ratio >= 50:
-                        danger_border = DangerBorder.LOWEST
-                    else:
-                        danger_border = DangerBorder.BETAORI
-                # little to no ukeire
+                if self.player.ai.placement.must_push(
+                    all_threatening_players, num_shanten=1, tempai_cost=hand_weighted_cost
+                ):
+                    danger_border = DangerBorder.IGNORE
                 else:
-                    danger_border = DangerBorder.BETAORI
+                    # lots of ukeire
+                    if discard_option.ukeire >= 32:
+                        if cost_ratio >= 400:
+                            danger_border = DangerBorder.IGNORE
+                        elif cost_ratio >= 200:
+                            danger_border = DangerBorder.EXTREME
+                        elif cost_ratio >= 100:
+                            danger_border = DangerBorder.VERY_HIGH
+                        elif cost_ratio >= 50:
+                            danger_border = DangerBorder.MEDIUM
+                        elif cost_ratio >= 20:
+                            danger_border = DangerBorder.UPPER_LOW
+                        else:
+                            danger_border = DangerBorder.EXTREMELY_LOW
+                    # very good ukeire
+                    elif discard_option.ukeire >= 20:
+                        if cost_ratio >= 400:
+                            danger_border = DangerBorder.IGNORE
+                        elif cost_ratio >= 200:
+                            danger_border = DangerBorder.EXTREME
+                        elif cost_ratio >= 100:
+                            danger_border = DangerBorder.VERY_HIGH
+                        elif cost_ratio >= 50:
+                            danger_border = DangerBorder.LOWER_MEDIUM
+                        elif cost_ratio >= 20:
+                            danger_border = DangerBorder.LOW
+                        else:
+                            danger_border = DangerBorder.EXTREMELY_LOW
+                    # good ukeire
+                    elif discard_option.ukeire >= 12:
+                        if cost_ratio >= 400:
+                            danger_border = DangerBorder.VERY_HIGH
+                        elif cost_ratio >= 200:
+                            danger_border = DangerBorder.HIGH
+                        elif cost_ratio >= 100:
+                            danger_border = DangerBorder.UPPER_MEDIUM
+                        elif cost_ratio >= 50:
+                            danger_border = DangerBorder.UPPER_LOW
+                        elif cost_ratio >= 20:
+                            danger_border = DangerBorder.VERY_LOW
+                        else:
+                            danger_border = DangerBorder.BETAORI
+                    # mediocre ukeire
+                    elif discard_option.ukeire >= 7:
+                        if cost_ratio >= 400:
+                            danger_border = DangerBorder.HIGH
+                        elif cost_ratio >= 200:
+                            danger_border = DangerBorder.UPPER_MEDIUM
+                        elif cost_ratio >= 100:
+                            danger_border = DangerBorder.LOWER_MEDIUM
+                        elif cost_ratio >= 50:
+                            danger_border = DangerBorder.VERY_LOW
+                        elif cost_ratio >= 20:
+                            danger_border = DangerBorder.LOWEST
+                        else:
+                            danger_border = DangerBorder.BETAORI
+                    # very low ukeire
+                    elif discard_option.ukeire >= 3:
+                        if cost_ratio >= 400:
+                            danger_border = DangerBorder.MEDIUM
+                        elif cost_ratio >= 200:
+                            danger_border = DangerBorder.UPPER_LOW
+                        elif cost_ratio >= 100:
+                            danger_border = DangerBorder.VERY_LOW
+                        elif cost_ratio >= 50:
+                            danger_border = DangerBorder.LOWEST
+                        else:
+                            danger_border = DangerBorder.BETAORI
+                    # little to no ukeire
+                    else:
+                        danger_border = DangerBorder.BETAORI
 
             if discard_option.shanten == 2:
                 tune = self.player.config.TUNE_DANGER_BORDER_2_SHANTEN_VALUE
@@ -454,7 +464,7 @@ class TileDangerHandler:
         threatening_players = self.get_threatening_players()
         for threatening_player in threatening_players:
             discard_options = self.calculate_tiles_danger(discard_options, threatening_player)
-            discard_options = self.calculate_danger_borders(discard_options, threatening_player)
+            discard_options = self.calculate_danger_borders(discard_options, threatening_player, threatening_players)
         return discard_options, threatening_players
 
     def total_possible_forms_for_tile(self, possible_forms, tile_34):

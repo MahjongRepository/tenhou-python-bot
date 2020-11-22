@@ -231,10 +231,118 @@ class PlacementHandler:
             if placement["diff_with_2nd"] >= Placement.VERY_COMFORTABLE_DIFF:
                 return Placement.VERY_COMFORTABLE_FIRST
 
-            if placement["diff_with_2nd"] >= Placement.COMFORTABLE_DIFF:
+            if placement["diff_with_2nd"] >= self.comfortable_diff:
                 return Placement.COMFORTABLE_FIRST
 
         return Placement.NEUTRAL
+
+    def must_push(self, threats, num_shanten, tempai_cost=0) -> bool:
+        if not self.is_oorasu:
+            return False
+
+        if not threats:
+            return False
+
+        placement = self.get_current_placement()
+        if not placement:
+            placement = self.get_current_placement()
+            if not placement:
+                return False
+
+        # always push if we are 4th - nothing to lose
+        if placement["place"] == 4:
+            # TODO: more subtle rules are possible for rare situations
+            return True
+
+        # if there are several threats let's follow our usual rules and otherwise hope that other player wins
+        if len(threats) > 1:
+            return False
+
+        # here we know there is exactly one threat
+        threat = threats[0]
+        players_by_points = self.table.get_players_sorted_by_scores()
+        fourth_place = players_by_points[3]
+        diff_with_4th = placement["diff_with_4th"]
+
+        if placement["place"] == 3:
+            # 4th place is not a threat so we don't fear his win
+            if threat.enemy != fourth_place:
+                return False
+
+            # it's not _must_ to push against dealer, let's decide considering other factors
+            if fourth_place.is_dealer:
+                return False
+
+            if num_shanten == 0 and self.player.round_step < 10:
+                # enemy player is gonna get us with tsumo mangan, let's attack if it's early
+                if diff_with_4th < self.comfortable_diff:
+                    return True
+            else:
+                if diff_with_4th < Placement.RYUKOKU_MINIMUM_DIFF:
+                    return True
+
+            return False
+
+        if placement["place"] == 2:
+            if threat.enemy == fourth_place:
+                if diff_with_4th < Placement.COMFORTABLE_DIFF_FOR_RISK + self.table_bonus_direct:
+                    return False
+
+            if placement["diff_with_3rd"] < self.comfortable_diff:
+                return False
+
+            if num_shanten == 0:
+                # we will push if we can get 1st with this hand with not much risk
+                if placement["diff_with_1st"] <= tempai_cost + self.table_bonus_indirect:
+                    return True
+            else:
+                if placement["diff_with_1st"] <= tempai_cost + self.table_bonus_indirect:
+                    return True
+
+            return False
+
+        if placement["place"] == 1:
+            second_place = players_by_points[1]
+            if threat.enemy != second_place:
+                return False
+
+            if placement["diff_with_3rd"] < self.comfortable_diff:
+                return False
+
+            if num_shanten == 0 and self.player.round_step < 10:
+                if placement["diff_with_2nd"] < self.comfortable_diff:
+                    return True
+            else:
+                if placement["diff_with_2nd"] <= Placement.RYUKOKU_MINIMUM_DIFF:
+                    return True
+
+            return True
+
+        # actually should never get here, but let's leave it in case we modify this code
+        return False
+
+    @property
+    def comfortable_diff(self) -> int:
+        if self.player.is_dealer:
+            base = Placement.COMFORTABLE_DIFF_DEALER
+        else:
+            base = Placement.COMFORTABLE_DIFF_NON_DEALER
+
+        bonus = self.table_bonus_tsumo
+
+        return base + bonus
+
+    @property
+    def table_bonus_direct(self) -> int:
+        return self.table.count_of_riichi_sticks * 1000 + self.table.count_of_honba_sticks * 600
+
+    @property
+    def table_bonus_tsumo(self) -> int:
+        return self.table.count_of_riichi_sticks * 1000 + self.table.count_of_honba_sticks * 400
+
+    @property
+    def table_bonus_indirect(self) -> int:
+        return self.table.count_of_riichi_sticks * 1000 + self.table.count_of_honba_sticks * 300
 
     @property
     def points_initialized(self):
@@ -281,13 +389,21 @@ class DummyPlacementHandler(PlacementHandler):
     def get_minimal_cost_needed_considering_west(self, placement=None) -> int:
         return 0
 
+    def must_push(self, threats, num_shanten, tempai_cost=0) -> bool:
+        return False
+
 
 class Placement:
     # TODO: account for honbas and riichi sticks on the table
     VERY_COMFORTABLE_DIFF = 24100
     COMFORTABLE_DIFF_FOR_RISK = 18100
-    COMFORTABLE_DIFF = 12100
+
+    COMFORTABLE_DIFF_DEALER = 12100
+    COMFORTABLE_DIFF_NON_DEALER = 10100
+
     COMFORTABLE_POINTS = 38000
+
+    RYUKOKU_MINIMUM_DIFF = 4000
 
     # player position in the game
     # must go in ascending order from bad to good, so we can use <, > operators with them

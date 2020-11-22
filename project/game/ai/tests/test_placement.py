@@ -575,3 +575,229 @@ def test_take_cheap_meld_yakuhai_1_shanten():
     tile = string_to_136_tile(honors="5")
     meld, _ = table.player.try_to_call_meld(tile, True)
     assert meld is None
+
+
+def test_must_push_4th():
+    table = Table()
+    player = table.player
+    table.has_aka_dora = True
+    table.has_open_tanyao = True
+    # orasu
+    table.round_wind_number = 7
+    table.dealer_seat = 1
+    player.dealer_seat = 1
+
+    table.add_dora_indicator(string_to_136_tile(sou="1"))
+
+    # we have 1-shanten with no doras, but we must push because we have 4th place in oorasu
+    tiles = string_to_136_array(man="3488", sou="334678", pin="456")
+    table.player.init_hand(tiles)
+    table.player.round_step = 5
+
+    player.scores = 18000
+    assert table.players[0] == player
+    table.players[1].scores = 28000
+    table.players[2].scores = 35000
+    table.players[3].scores = 40000
+
+    enemy_seat = 2
+    table.add_called_riichi_step_one(enemy_seat)
+
+    threatening_players = table.player.ai.defence.get_threatening_players()
+    assert len(threatening_players) == 1
+
+    assert player.ai.placement.must_push(threatening_players, 1)
+
+
+def test_must_push_3rd_and_last_place_riichi():
+    table = Table()
+    player = table.player
+    table.has_aka_dora = True
+    table.has_open_tanyao = True
+    # orasu
+    table.round_wind_number = 7
+    table.dealer_seat = 1
+    player.dealer_seat = 1
+
+    table.add_dora_indicator(string_to_136_tile(sou="1"))
+
+    # we have 1-shanten with no doras, but we must push because we have 4th place in oorasu
+    tiles = string_to_136_array(man="3488", sou="334678", pin="456")
+    table.player.init_hand(tiles)
+    table.player.round_step = 5
+
+    player.scores = 20000
+    assert table.players[0] == player
+    table.players[1].scores = 18000
+    table.players[2].scores = 35000
+    table.players[3].scores = 40000
+
+    enemy_seat = 1
+    table.add_called_riichi_step_one(enemy_seat)
+
+    threatening_players = table.player.ai.defence.get_threatening_players()
+    assert len(threatening_players) == 1
+
+    assert player.ai.placement.must_push(threatening_players, 1)
+
+
+def test_must_push_3rd_and_1st_place_riichi():
+    table = Table()
+    player = table.player
+    table.has_aka_dora = True
+    table.has_open_tanyao = True
+    # orasu
+    table.round_wind_number = 7
+    table.dealer_seat = 1
+    player.dealer_seat = 1
+
+    table.add_dora_indicator(string_to_136_tile(sou="1"))
+
+    # we have 1-shanten with no doras, but we must push because we have 4th place in oorasu
+    tiles = string_to_136_array(man="3488", sou="334678", pin="456")
+    table.player.init_hand(tiles)
+    table.player.round_step = 5
+
+    player.scores = 20000
+    assert table.players[0] == player
+    table.players[1].scores = 18000
+    table.players[2].scores = 35000
+    table.players[3].scores = 40000
+
+    enemy_seat = 3
+    table.add_called_riichi_step_one(enemy_seat)
+
+    threatening_players = table.player.ai.defence.get_threatening_players()
+    assert len(threatening_players) == 1
+
+    assert not player.ai.placement.must_push(threatening_players, 1)
+
+
+def test_must_push_3rd_and_multiple_riichi():
+    table = Table()
+    player = table.player
+    table.has_aka_dora = True
+    table.has_open_tanyao = True
+    # orasu
+    table.round_wind_number = 7
+    table.dealer_seat = 1
+    player.dealer_seat = 1
+
+    table.add_dora_indicator(string_to_136_tile(sou="1"))
+
+    # we have 1-shanten with no doras, but we must push because we have 4th place in oorasu
+    tiles = string_to_136_array(man="3488", sou="334678", pin="456")
+    table.player.init_hand(tiles)
+    table.player.round_step = 5
+
+    player.scores = 20000
+    assert table.players[0] == player
+    table.players[1].scores = 18000
+    table.players[2].scores = 35000
+    table.players[3].scores = 40000
+
+    table.add_called_riichi_step_one(1)
+    table.add_called_riichi_step_one(3)
+
+    threatening_players = table.player.ai.defence.get_threatening_players()
+    assert len(threatening_players) == 2
+
+    assert not player.ai.placement.must_push(threatening_players, 1)
+
+
+def test_must_push_2nd():
+    table = Table()
+    player = table.player
+    table.has_aka_dora = True
+    table.has_open_tanyao = True
+    # orasu
+    table.round_wind_number = 7
+    table.dealer_seat = 1
+    player.dealer_seat = 1
+
+    table.add_dora_indicator(string_to_136_tile(sou="1"))
+
+    # we have 1-shanten with no doras, but we must push because we have 4th place in oorasu
+    tiles = string_to_136_array(man="3488", sou="334678", pin="456")
+    table.player.init_hand(tiles)
+    table.player.round_step = 5
+
+    player.scores = 42000
+    assert table.players[0] == player
+    table.players[1].scores = 45000
+    table.players[2].scores = 5000
+    table.players[3].scores = 10000
+
+    enemy_seat = 3
+    table.add_called_riichi_step_one(enemy_seat)
+    table.count_of_riichi_sticks += 1
+
+    # we don't care about 3rd place riichi we just push
+    threatening_players = table.player.ai.defence.get_threatening_players()
+    assert len(threatening_players) == 1
+
+    # 2600 and a riichi stick is enough
+    assert player.ai.placement.must_push(threatening_players, 1, 2600)
+
+
+def test_must_push_1st_and_2nd_place_riichi():
+    table = Table()
+    player = table.player
+    table.has_aka_dora = True
+    table.has_open_tanyao = True
+    # orasu
+    table.round_wind_number = 7
+    table.dealer_seat = 1
+    player.dealer_seat = 1
+
+    table.add_dora_indicator(string_to_136_tile(sou="1"))
+
+    # we have 1-shanten with no doras, but we must push because we have 4th place in oorasu
+    tiles = string_to_136_array(man="3488", sou="334678", pin="456")
+    table.player.init_hand(tiles)
+    table.player.round_step = 5
+
+    player.scores = 45000
+    assert table.players[0] == player
+    table.players[1].scores = 42000
+    table.players[2].scores = 5000
+    table.players[3].scores = 8000
+
+    enemy_seat = 1
+    table.add_called_riichi_step_one(enemy_seat)
+
+    threatening_players = table.player.ai.defence.get_threatening_players()
+    assert len(threatening_players) == 1
+    assert player.ai.placement.must_push(threatening_players, 1)
+
+
+def test_must_push_1st_and_4th_place_riichi():
+    table = Table()
+    player = table.player
+    table.has_aka_dora = True
+    table.has_open_tanyao = True
+    # orasu
+    table.round_wind_number = 7
+    table.dealer_seat = 1
+    player.dealer_seat = 1
+
+    table.add_dora_indicator(string_to_136_tile(sou="1"))
+
+    # we have 1-shanten with no doras, but we must push because we have 4th place in oorasu
+    tiles = string_to_136_array(man="3488", sou="334678", pin="456")
+    table.player.init_hand(tiles)
+    table.player.round_step = 5
+
+    player.scores = 45000
+    assert table.players[0] == player
+    table.players[1].scores = 42000
+    table.players[2].scores = 5000
+    table.players[3].scores = 8000
+
+    enemy_seat = 3
+    table.add_called_riichi_step_one(enemy_seat)
+
+    threatening_players = table.player.ai.defence.get_threatening_players()
+    assert len(threatening_players) == 1
+
+    assert not player.ai.placement.must_push(threatening_players, 1)

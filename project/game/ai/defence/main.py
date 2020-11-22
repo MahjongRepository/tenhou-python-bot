@@ -222,7 +222,10 @@ class TileDangerHandler:
                 tune = self.player.config.TUNE_DANGER_BORDER_TEMPAI_VALUE
 
                 if self.player.ai.placement.must_push(
-                    all_threatening_players, num_shanten=0, tempai_cost=hand_weighted_cost
+                    all_threatening_players,
+                    discard_option.tile_to_discard_136,
+                    num_shanten=0,
+                    tempai_cost=hand_weighted_cost,
                 ):
                     danger_border = DangerBorder.IGNORE
                 else:
@@ -307,7 +310,10 @@ class TileDangerHandler:
                 cost_ratio = (hand_weighted_cost / threatening_player_hand_cost) * 100
 
                 if self.player.ai.placement.must_push(
-                    all_threatening_players, num_shanten=1, tempai_cost=hand_weighted_cost
+                    all_threatening_players,
+                    discard_option.tile_to_discard_136,
+                    num_shanten=1,
+                    tempai_cost=hand_weighted_cost,
                 ):
                     danger_border = DangerBorder.IGNORE
                 else:

@@ -6,6 +6,7 @@ from optparse import OptionParser
 
 import requests
 from game.table import Table
+from mahjong.constants import DISPLAY_WINDS
 from mahjong.tile import TilesConverter
 from tenhou.decoder import TenhouDecoder
 from utils.decisions_logger import MeldPrint
@@ -53,7 +54,6 @@ class TenhouLogReproducer:
         return meta_information
 
     def reproduce(self, player, wind, honba, needed_tile, action, tile_number_to_stop):
-
         player_position = self._find_player_position(player)
         round_content = self._find_needed_round(wind, honba)
 
@@ -73,6 +73,15 @@ class TenhouLogReproducer:
         table.has_aka_dora = True
         table.has_open_tanyao = True
         table.player.init_logger(self.logger)
+
+        players = {}
+        for round_item in self.rounds:
+            for tag in round_item:
+                if "<UN" in tag:
+                    players_temp = self.decoder.parse_names_and_ranks(tag)
+                    if players_temp:
+                        for x in players_temp:
+                            players[x["seat"]] = x
 
         draw_tile_seen_number = 0
         enemy_discard_seen_number = 0
@@ -107,7 +116,7 @@ class TenhouLogReproducer:
 
                 shifted_scores = []
                 for x in range(0, 4):
-                    shifted_scores.append(values["scores"][self._normalize_position(x, player_position)])
+                    shifted_scores.append(values["scores"][self._normalize_position(player_position, x)])
 
                 table.init_round(
                     values["round_wind_number"],
@@ -126,6 +135,12 @@ class TenhouLogReproducer:
                 ]
 
                 table.player.init_hand(hands[player_position])
+                table.player.name = players[player_position]["name"]
+
+                self.logger.info("Init round info")
+                self.logger.info(table.player.name)
+                self.logger.info(f"Scores: {table.player.scores}")
+                self.logger.info(f"Wind: {DISPLAY_WINDS[table.player.player_wind]}")
 
             if "DORA hai" in tag:
                 table.dora_indicators.append(int(self._get_attribute_content(tag, "hai")))

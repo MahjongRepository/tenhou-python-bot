@@ -1,4 +1,5 @@
 import utils.decisions_constants as log
+from mahjong.tile import TilesConverter
 
 
 class PlacementHandler:
@@ -236,7 +237,7 @@ class PlacementHandler:
 
         return Placement.NEUTRAL
 
-    def must_push(self, threats, num_shanten, tempai_cost=0) -> bool:
+    def must_push(self, threats, tile_136, num_shanten, tempai_cost=0) -> bool:
         if not self.is_oorasu:
             return False
 
@@ -245,11 +246,12 @@ class PlacementHandler:
 
         placement = self.get_current_placement()
         if not placement:
-            placement = self.get_current_placement()
-            if not placement:
-                return False
+            return False
 
         logger_context = {
+            "tile": TilesConverter.to_one_line_string([tile_136]),
+            "shanten": num_shanten,
+            "tempai_cost": tempai_cost,
             "placement": placement,
         }
 
@@ -418,7 +420,7 @@ class DummyPlacementHandler(PlacementHandler):
     def get_minimal_cost_needed_considering_west(self, placement=None) -> int:
         return 0
 
-    def must_push(self, threats, num_shanten, tempai_cost=0) -> bool:
+    def must_push(self, threats, tile_136, num_shanten, tempai_cost=0) -> bool:
         return False
 
 

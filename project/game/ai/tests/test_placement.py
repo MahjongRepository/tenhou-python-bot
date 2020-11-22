@@ -606,7 +606,7 @@ def test_must_push_4th():
     threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 1
 
-    assert player.ai.placement.must_push(threatening_players, 1)
+    assert player.ai.placement.must_push(threatening_players, 0, 1)
 
 
 def test_must_push_3rd_and_last_place_riichi():
@@ -638,7 +638,7 @@ def test_must_push_3rd_and_last_place_riichi():
     threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 1
 
-    assert player.ai.placement.must_push(threatening_players, 1)
+    assert player.ai.placement.must_push(threatening_players, 0, 1)
 
 
 def test_must_push_3rd_and_1st_place_riichi():
@@ -670,7 +670,7 @@ def test_must_push_3rd_and_1st_place_riichi():
     threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 1
 
-    assert not player.ai.placement.must_push(threatening_players, 1)
+    assert not player.ai.placement.must_push(threatening_players, 0, 1)
 
 
 def test_must_push_3rd_and_multiple_riichi():
@@ -702,7 +702,7 @@ def test_must_push_3rd_and_multiple_riichi():
     threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 2
 
-    assert not player.ai.placement.must_push(threatening_players, 1)
+    assert not player.ai.placement.must_push(threatening_players, 0, 1)
 
 
 def test_must_push_2nd():
@@ -737,7 +737,7 @@ def test_must_push_2nd():
     assert len(threatening_players) == 1
 
     # 2600 and a riichi stick is enough
-    assert player.ai.placement.must_push(threatening_players, 1, 2600)
+    assert player.ai.placement.must_push(threatening_players, 0, 1, 2600)
 
 
 def test_must_push_1st_and_2nd_place_riichi():
@@ -768,7 +768,7 @@ def test_must_push_1st_and_2nd_place_riichi():
 
     threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 1
-    assert player.ai.placement.must_push(threatening_players, 1)
+    assert player.ai.placement.must_push(threatening_players, 0, 1)
 
 
 def test_must_push_1st_and_4th_place_riichi():
@@ -800,4 +800,4 @@ def test_must_push_1st_and_4th_place_riichi():
     threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 1
 
-    assert not player.ai.placement.must_push(threatening_players, 1)
+    assert not player.ai.placement.must_push(threatening_players, 0, 1)

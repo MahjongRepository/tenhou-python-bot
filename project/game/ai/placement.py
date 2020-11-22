@@ -249,9 +249,14 @@ class PlacementHandler:
             if not placement:
                 return False
 
+        logger_context = {
+            "placement": placement,
+        }
+
         # always push if we are 4th - nothing to lose
         if placement["place"] == 4:
             # TODO: more subtle rules are possible for rare situations
+            self.player.logger.debug(log.PLACEMENT_PUSH_DECISION, "We are 4th in oorasu and must push", logger_context)
             return True
 
         # if there are several threats let's follow our usual rules and otherwise hope that other player wins
@@ -276,9 +281,19 @@ class PlacementHandler:
             if num_shanten == 0 and self.player.round_step < 10:
                 # enemy player is gonna get us with tsumo mangan, let's attack if it's early
                 if diff_with_4th < self.comfortable_diff:
+                    self.player.logger.debug(
+                        log.PLACEMENT_PUSH_DECISION,
+                        "We are 3rd in oorasu and must push in early game to secure 3rd place",
+                        logger_context,
+                    )
                     return True
             else:
                 if diff_with_4th < Placement.RYUKOKU_MINIMUM_DIFF:
+                    self.player.logger.debug(
+                        log.PLACEMENT_PUSH_DECISION,
+                        "We are 3rd in oorasu and must push to secure 3rd place",
+                        logger_context,
+                    )
                     return True
 
             return False
@@ -294,9 +309,15 @@ class PlacementHandler:
             if num_shanten == 0:
                 # we will push if we can get 1st with this hand with not much risk
                 if placement["diff_with_1st"] <= tempai_cost + self.table_bonus_indirect:
+                    self.player.logger.debug(
+                        log.PLACEMENT_PUSH_DECISION, "We are 2nd in oorasu and must push to reach 1st", logger_context
+                    )
                     return True
             else:
                 if placement["diff_with_1st"] <= tempai_cost + self.table_bonus_indirect:
+                    self.player.logger.debug(
+                        log.PLACEMENT_PUSH_DECISION, "We are 2nd in oorasu and must push to reach 1st", logger_context
+                    )
                     return True
 
             return False
@@ -311,12 +332,20 @@ class PlacementHandler:
 
             if num_shanten == 0 and self.player.round_step < 10:
                 if placement["diff_with_2nd"] < self.comfortable_diff:
+                    self.player.logger.debug(
+                        log.PLACEMENT_PUSH_DECISION,
+                        "We are 1st in oorasu and must push in early game to secure 1st",
+                        logger_context,
+                    )
                     return True
             else:
                 if placement["diff_with_2nd"] <= Placement.RYUKOKU_MINIMUM_DIFF:
+                    self.player.logger.debug(
+                        log.PLACEMENT_PUSH_DECISION, "We are 1st in oorasu and must push to secure 1st", logger_context
+                    )
                     return True
 
-            return True
+            return False
 
         # actually should never get here, but let's leave it in case we modify this code
         return False

@@ -143,7 +143,7 @@ class TenhouLogReproducer:
                 self.logger.info(f"Wind: {DISPLAY_WINDS[table.player.player_wind]}")
 
             if "DORA hai" in tag:
-                table.dora_indicators.append(int(self._get_attribute_content(tag, "hai")))
+                table.add_dora_indicator(int(self._get_attribute_content(tag, "hai")))
 
             if draw_regex.match(tag) and "UN" not in tag:
                 tile = self.decoder.parse_tile(tag)

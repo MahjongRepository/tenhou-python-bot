@@ -8,6 +8,7 @@ import requests
 from game.table import Table
 from mahjong.constants import DISPLAY_WINDS
 from mahjong.tile import TilesConverter
+from mahjong.utils import find_isolated_tile_indices
 from tenhou.decoder import TenhouDecoder
 from utils.decisions_logger import MeldPrint
 from utils.logger import set_up_logging
@@ -167,6 +168,7 @@ class TenhouLogReproducer:
                         enemy_discard_seen_number += 1
                         if enemy_discard_seen_number == tile_number_to_stop:
                             self.logger.info("Stop on enemy discard")
+                            self._rebuild_bot_shanten_cache(table.player)
                             table.player.should_call_kan(tile, open_kan=True, from_riichi=False)
                             return table.player.try_to_call_meld(tile, is_kamicha_discard)
 
@@ -200,6 +202,13 @@ class TenhouLogReproducer:
                 f"Check log with --meta tag first to be sure that these attrs are correct."
             )
         return found_round_item
+
+    def _rebuild_bot_shanten_cache(self, player):
+        isolated_tile_34 = find_isolated_tile_indices(TilesConverter.to_34_array(player.closed_hand))[0]
+        isolated_tile_136 = isolated_tile_34 * 4
+        player.table.revealed_tiles[isolated_tile_34] -= 1
+        player.draw_tile(isolated_tile_136)
+        player.discard_tile()
 
     def _find_player_position(self, player):
         # seat number was provided

@@ -309,13 +309,15 @@ class MahjongAI:
             number_of_tiles += discard_option.wait_to_ukeire[waiting]
 
         cost = number_of_tiles and int(weighted_hand_cost / number_of_tiles) or 0
+
         # we are karaten, or we don't have yaku
-        # in that case let's add tempai cost at the late game stages
-        if cost == 0:
-            if self.player.round_step > 12:
-                cost = 1000
-            if self.player.round_step > 15:
-                cost = 2500
+        # in that case let's add possible tempai cost
+        if cost == 0 and self.player.round_step > 12:
+            cost = 1000
+
+        if self.player.round_step > 15 and cost < 2500:
+            cost = 2500
+
         return cost
 
     def should_call_riichi(self):

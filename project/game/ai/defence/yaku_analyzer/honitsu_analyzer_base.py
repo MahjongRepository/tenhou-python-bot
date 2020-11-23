@@ -16,7 +16,7 @@ class HonitsuAnalyzerBase(YakuAnalyzer):
         # if enemy has not yet discarded his suit and there are less than 3 melds, consider tempai less probable
         suit_discards = [x for x in self.enemy.discards if self.chosen_suit(x.value // 4)]
 
-        if not suit_discards and len(self.enemy.melds):
+        if not suit_discards and len(self.enemy.melds) <= 3:
             return 0.5
 
         return 1

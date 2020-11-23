@@ -232,9 +232,7 @@ Reproduce:
 
 ## Case 20
 
-SKIPPED: **Need to investigate it.**
-
-Action: `meld`, meld: `{'type': 'pon', 'tiles': [132, 133, 134]}`, tile after meld: `3p`.
+Action: `meld`, meld: `{'type': 'pon', 'tiles': '777z'}`, tile after meld: `3p`.
 
 Reproduce:
 
@@ -357,3 +355,15 @@ Reproduce:
 > python reproducer.py --log 2020112219gm-0089-0000-8de03653 --player 安提洛科斯 --wind 1 --honba 0 --action draw --n 1 --tile 1s
 
 ![image](../project/system_testing/fixtures/31.png)
+
+## Case 32
+
+Action: `meld`, meld: `{'type': 'pon', 'tiles': '222z'}`, tile after meld: `3m`.
+
+Dealer should open yakuhai with two valued pairs in the hand.
+
+Reproduce:
+
+> python reproducer.py --log 2020112307gm-0089-0000-c294daec --player 3 --wind 8 --honba 0 --action enemy_discard --tile 2z
+
+![image](../project/system_testing/fixtures/32.png)

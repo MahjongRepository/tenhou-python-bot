@@ -72,9 +72,15 @@ class YakuhaiStrategy(BaseStrategy):
         if is_double_south_wind and (self.dora_count_total >= 1 or len(self.valued_pairs) >= 2):
             return True
 
-        # If we have 1+ dora in the hand and there are 2+ valuable pairs let's open hand
-        if len(self.valued_pairs) >= 2 and self.dora_count_total >= 1:
-            return True
+        #  there are 2+ valuable pairs let's open hand
+        if len(self.valued_pairs) >= 2:
+            # if we are dealer let's open hand
+            if self.player.is_dealer:
+                return True
+
+            # if we have 1+ dora in the hand it is fine to open yakuhai
+            if self.dora_count_total >= 1:
+                return True
 
         # If we have 2+ dora in the hand let's open hand
         if self.dora_count_total >= 2:

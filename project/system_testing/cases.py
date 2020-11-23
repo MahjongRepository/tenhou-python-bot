@@ -8,7 +8,6 @@ the old fixed bugs with decisions.
 Also, this package contains tools to generate documentation and unit tests
 from the description of the situations.
 """
-from mahjong.tile import TilesConverter
 from utils.decisions_logger import MeldPrint
 
 ACTION_DISCARD = "discard"
@@ -174,9 +173,8 @@ SYSTEM_TESTING_CASES = [
         "description": "",
         "reproducer_command": "python reproducer.py --log 2020111111gm-0009-7994-5550ade1 --wind 8 --honba 1 --player 0 --tile 7z --action enemy_discard",
         "action": ACTION_MELD,
-        "meld": {"type": MeldPrint.PON, "tiles": TilesConverter.string_to_136_array(honors="777")},
+        "meld": {"type": MeldPrint.PON, "tiles": "777z"},
         "tile_after_meld": "3p",
-        "skip_reason": "Need to investigate it.",
     },
     {
         "index": 21,
@@ -251,5 +249,13 @@ SYSTEM_TESTING_CASES = [
         "action": ACTION_DISCARD,
         "allowed_discards": ["3z"],
         "with_riichi": False,
+    },
+    {
+        "index": 32,
+        "description": "Dealer should open yakuhai with two valued pairs in the hand.",
+        "reproducer_command": "python reproducer.py --log 2020112307gm-0089-0000-c294daec --player 3 --wind 8 --honba 0 --action enemy_discard --tile 2z",
+        "action": ACTION_MELD,
+        "meld": {"type": MeldPrint.PON, "tiles": "222z"},
+        "tile_after_meld": "3m",
     },
 ]

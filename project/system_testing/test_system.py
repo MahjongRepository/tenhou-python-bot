@@ -59,7 +59,7 @@ def test_system_case_3():
 
     result_meld, result_tile_after_meld = _run_reproducer("3.txt", reproducer_command)
     assert result_meld == needed_meld
-    assert result_tile_after_meld == tile_after_meld
+    assert result_tile_after_meld is None
 
 
 def test_system_case_4():
@@ -74,7 +74,7 @@ def test_system_case_4():
 
     result_meld, result_tile_after_meld = _run_reproducer("4.txt", reproducer_command)
     assert result_meld == needed_meld
-    assert result_tile_after_meld == tile_after_meld
+    assert result_tile_after_meld is None
 
 
 def test_system_case_5():
@@ -163,7 +163,7 @@ def test_system_case_10():
 
     result_meld, result_tile_after_meld = _run_reproducer("10.txt", reproducer_command)
     assert result_meld == needed_meld
-    assert result_tile_after_meld == tile_after_meld
+    assert result_tile_after_meld is None
 
 
 def test_system_case_11():
@@ -268,7 +268,7 @@ def test_system_case_17():
 
     result_meld, result_tile_after_meld = _run_reproducer("17.txt", reproducer_command)
     assert result_meld == needed_meld
-    assert result_tile_after_meld == tile_after_meld
+    assert result_tile_after_meld is None
 
 
 def test_system_case_18():
@@ -296,23 +296,22 @@ def test_system_case_19():
 
     result_meld, result_tile_after_meld = _run_reproducer("19.txt", reproducer_command)
     assert result_meld == needed_meld
-    assert result_tile_after_meld == tile_after_meld
+    assert result_tile_after_meld is None
 
 
-@pytest.mark.skip("Need to investigate it.")
 def test_system_case_20():
     """
     Case #20
     """
 
     reproducer_command = "python reproducer.py --log 2020111111gm-0009-7994-5550ade1 --wind 8 --honba 1 --player 0 --tile 7z --action enemy_discard"
-    needed_meld = {"type": "pon", "tiles": [132, 133, 134]}
+    needed_meld = {"type": "pon", "tiles": "777z"}
     tile_after_meld = "3p"
 
     result_meld, result_tile_after_meld = _run_reproducer("20.txt", reproducer_command)
     assert result_meld.type == needed_meld["type"]
-    assert result_meld.tiles == needed_meld["tiles"]
-    assert result_tile_after_meld == tile_after_meld
+    assert TilesConverter.to_one_line_string(result_meld.tiles) == needed_meld["tiles"]
+    assert TilesConverter.to_one_line_string([result_tile_after_meld.tile_to_discard_136]) == tile_after_meld
 
 
 def test_system_case_21():
@@ -398,7 +397,7 @@ def test_system_case_28():
 
     result_meld, result_tile_after_meld = _run_reproducer("28.txt", reproducer_command)
     assert result_meld == needed_meld
-    assert result_tile_after_meld == tile_after_meld
+    assert result_tile_after_meld is None
 
 
 def test_system_case_29():
@@ -441,3 +440,19 @@ def test_system_case_31():
     result, with_riichi_result = _run_reproducer("31.txt", reproducer_command)
     assert TilesConverter.to_one_line_string([result]) in allowed_discards
     assert with_riichi == with_riichi_result
+
+
+def test_system_case_32():
+    """
+    Case #32
+    Dealer should open yakuhai with two valued pairs in the hand.
+    """
+
+    reproducer_command = "python reproducer.py --log 2020112307gm-0089-0000-c294daec --player 3 --wind 8 --honba 0 --action enemy_discard --tile 2z"
+    needed_meld = {"type": "pon", "tiles": "222z"}
+    tile_after_meld = "3m"
+
+    result_meld, result_tile_after_meld = _run_reproducer("32.txt", reproducer_command)
+    assert result_meld.type == needed_meld["type"]
+    assert TilesConverter.to_one_line_string(result_meld.tiles) == needed_meld["tiles"]
+    assert TilesConverter.to_one_line_string([result_tile_after_meld.tile_to_discard_136]) == tile_after_meld

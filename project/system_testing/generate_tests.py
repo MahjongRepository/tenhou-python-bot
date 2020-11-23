@@ -103,11 +103,21 @@ system_testing_folder = Path(__file__).parent.absolute()
 
                 if meld:
                     result.append(TestsGen.indent('assert result_meld.type == needed_meld["type"]'))
-                    result.append(TestsGen.indent('assert result_meld.tiles == needed_meld["tiles"]'))
+                    result.append(
+                        TestsGen.indent(
+                            'assert TilesConverter.to_one_line_string(result_meld.tiles) == needed_meld["tiles"]'
+                        )
+                    )
+                    result.append(
+                        TestsGen.indent(
+                            "assert TilesConverter.to_one_line_string([result_tile_after_meld.tile_to_discard_136]) "
+                            "== tile_after_meld"
+                        )
+                    )
                 else:
                     result.append(TestsGen.indent("assert result_meld == needed_meld"))
+                    result.append(TestsGen.indent("assert result_tile_after_meld is None"))
 
-                result.append(TestsGen.indent("assert result_tile_after_meld == tile_after_meld"))
                 result.append("\n")
 
             if action == ACTION_CRASH:

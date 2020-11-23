@@ -234,10 +234,11 @@ def test_open_hand_on_fifth_round_step():
 
 def test_open_hand_with_two_valuable_pairs():
     """
-    If we have two valuable pairs in the hand and 1+ dora
+    If we have two valuable pairs in the hand and 1+ dora or we are dealer
     let's open on one of this valuable pairs
     """
     table = Table()
+    table.player.seat = 3
 
     tiles = string_to_136_array(man="159", sou="128", pin="789", honors="5566")
     table.player.init_hand(tiles)

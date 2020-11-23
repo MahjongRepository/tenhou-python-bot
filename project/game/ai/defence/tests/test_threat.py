@@ -426,7 +426,7 @@ def test_is_threatening_and_atodzuke():
     assert len(threatening_players) == 1
     assert threatening_players[0].enemy.seat == enemy_seat
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_OPEN_HAND_UNKNOWN_COST["id"]
-    assert threatening_players[0].get_assumed_hand_cost(string_to_136_tile(honors="5")) == 1000
+    assert threatening_players[0].get_assumed_hand_cost(string_to_136_tile(honors="5")) == 2000
     assert threatening_players[0].get_assumed_hand_cost(string_to_136_tile(honors="6")) == 8000
 
     for tile_136 in range(0, 136):

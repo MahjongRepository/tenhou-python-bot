@@ -10,7 +10,7 @@ from game.ai.helpers.defence import EnemyDanger, TileDanger
 from game.ai.helpers.possible_forms import PossibleFormsAnalyzer
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_honor, plus_dora
+from mahjong.utils import is_honor, is_terminal, plus_dora
 from utils.general import separate_tiles_by_suits
 
 
@@ -215,21 +215,34 @@ class EnemyAnalyzer:
         if melds_han == 0:
             return 0
 
-        han = melds_han
-        han += self.threat_reason.get("dora_count", 0)
-        han += self._get_dora_scale_bonus(tile_136)
+        scale_index = melds_han
+        scale_index += self.threat_reason.get("dora_count", 0)
+        scale_index += self._get_dora_scale_bonus(tile_136)
 
         if self.enemy.is_dealer:
             scale = [1000, 2900, 5800, 12000, 12000, 18000, 18000, 24000, 24000, 24000, 36000, 36000, 48000]
         else:
             scale = [1000, 2000, 3900, 8000, 8000, 12000, 12000, 16000, 16000, 16000, 24000, 24000, 32000]
 
-        if han > len(scale) - 1:
-            han = len(scale) - 1
-        elif han == 0:
-            han = 1
+        # add more danger for kan sets (basically it is additional hand cost because of fu)
+        for meld in self.enemy.melds:
+            if meld.type != Meld.KAN and meld.type != Meld.SHOUMINKAN:
+                continue
 
-        return scale[han - 1]
+            if meld.opened:
+                # enemy will get additional fu for opened honors or terminals kan
+                if is_honor(meld.tiles[0] // 4) or is_terminal(meld.tiles[0] // 4):
+                    scale_index += 1
+            else:
+                # enemy will get additional fu for closed kan
+                scale_index += 1
+
+        if scale_index > len(scale) - 1:
+            scale_index = len(scale) - 1
+        elif scale_index == 0:
+            scale_index = 1
+
+        return scale[scale_index - 1]
 
     def _calculate_assumed_hand_cost_for_riichi(self, tile_136) -> int:
         scale_index = 0

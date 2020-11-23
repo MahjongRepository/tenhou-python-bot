@@ -379,3 +379,15 @@ Reproduce:
 > python reproducer.py --log 2020112309gm-0089-0000-53e7b431 --player 1 --wind 3 --honba 1 --action draw --n 1 --tile 6m
 
 ![image](../project/system_testing/fixtures/33.png)
+
+## Case 34
+
+Action: `discard`, allowed discard: `9p`, with riichi: `False`.
+
+Bot pushed too much against multiple threats.
+
+Reproduce:
+
+> python reproducer.py --log 2020112317gm-0089-0000-f4d22bba --player 2 --wind 6 --honba 0 --action draw --n 1 --tile 8s
+
+![image](../project/system_testing/fixtures/34.png)

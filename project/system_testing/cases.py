@@ -266,4 +266,12 @@ SYSTEM_TESTING_CASES = [
         "allowed_discards": ["6p"],
         "with_riichi": False,
     },
+    {
+        "index": 34,
+        "description": "Bot pushed too much against multiple threats.",
+        "reproducer_command": "python reproducer.py --log 2020112317gm-0089-0000-f4d22bba --player 2 --wind 6 --honba 0 --action draw --n 1 --tile 8s",
+        "action": ACTION_DISCARD,
+        "allowed_discards": ["9p"],
+        "with_riichi": False,
+    },
 ]

@@ -471,3 +471,18 @@ def test_system_case_33():
     result, with_riichi_result = _run_reproducer("33.txt", reproducer_command)
     assert TilesConverter.to_one_line_string([result]) in allowed_discards
     assert with_riichi == with_riichi_result
+
+
+def test_system_case_34():
+    """
+    Case #34
+    Bot pushed too much against multiple threats.
+    """
+
+    reproducer_command = "python reproducer.py --log 2020112317gm-0089-0000-f4d22bba --player 2 --wind 6 --honba 0 --action draw --n 1 --tile 8s"
+    allowed_discards = ["9p"]
+    with_riichi = False
+
+    result, with_riichi_result = _run_reproducer("34.txt", reproducer_command)
+    assert TilesConverter.to_one_line_string([result]) in allowed_discards
+    assert with_riichi == with_riichi_result

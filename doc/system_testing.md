@@ -367,3 +367,15 @@ Reproduce:
 > python reproducer.py --log 2020112307gm-0089-0000-c294daec --player 3 --wind 8 --honba 0 --action enemy_discard --tile 2z
 
 ![image](../project/system_testing/fixtures/32.png)
+
+## Case 33
+
+Action: `discard`, allowed discard: `6p`, with riichi: `False`.
+
+Bot wrongly detected honitsu for shimocha discards.
+
+Reproduce:
+
+> python reproducer.py --log 2020112309gm-0089-0000-53e7b431 --player 蒸気機関 --wind 3 --honba 1 --action draw --n 1 --tile 6m
+
+![image](../project/system_testing/fixtures/33.png)

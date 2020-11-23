@@ -45,22 +45,37 @@ class ChinitsuAnalyzer(HonitsuAnalyzerBase):
             return False
 
         # finally let's check if discard is not too full of chosen suit
+
+        discards = [x.value for x in self.enemy.discards]
+        discards_34 = TilesConverter.to_34_array(discards)
+        result = count_tiles_by_suits(discards_34)
+
+        suits = [x for x in result if x["name"] != "honor"]
+        suits = sorted(suits, key=lambda x: x["count"], reverse=False)
+
+        less_suits = [x for x in suits if x["count"] == suits[0]["count"]]
+        assert len(less_suits) != 0
+
+        current_suit_is_less_suit = False
+        for less_suit in less_suits:
+            if less_suit["name"] == current_suit["name"]:
+                current_suit_is_less_suit = True
+
+        if not current_suit_is_less_suit:
+            return False
+
+        less_suit = suits[0]
+        less_suit_tiles = less_suit["count"]
+
         if total_discards >= ChinitsuAnalyzer.MIN_DISCARD_FOR_LESS_SUIT:
-            discards = [x.value for x in self.enemy.discards]
-            discards_34 = TilesConverter.to_34_array(discards)
-            result = count_tiles_by_suits(discards_34)
-
-            suits = [x for x in result if x["name"] != "honor"]
-            suits = sorted(suits, key=lambda x: x["count"], reverse=False)
-
-            # not really suspicious
-            less_suit = suits[0]
-            less_suit_tiles = less_suit["count"]
-            if less_suit["name"] != current_suit["name"]:
-                return False
-
             percentage_of_less_suit = (less_suit_tiles / total_discards) * 100
             if percentage_of_less_suit > ChinitsuAnalyzer.LESS_SUIT_PERCENTAGE_BORDER:
+                return False
+        else:
+            if len(self.enemy.melds) < 2:
+                return False
+
+            if less_suit_tiles > 1:
                 return False
 
         self.chosen_suit = current_suit["function"]

@@ -456,3 +456,18 @@ def test_system_case_32():
     assert result_meld.type == needed_meld["type"]
     assert TilesConverter.to_one_line_string(result_meld.tiles) == needed_meld["tiles"]
     assert TilesConverter.to_one_line_string([result_tile_after_meld.tile_to_discard_136]) == tile_after_meld
+
+
+def test_system_case_33():
+    """
+    Case #33
+    Bot wrongly detected honitsu for shimocha discards.
+    """
+
+    reproducer_command = "python reproducer.py --log 2020112309gm-0089-0000-53e7b431 --player 蒸気機関 --wind 3 --honba 1 --action draw --n 1 --tile 6m"
+    allowed_discards = ["6p"]
+    with_riichi = False
+
+    result, with_riichi_result = _run_reproducer("33.txt", reproducer_command)
+    assert TilesConverter.to_one_line_string([result]) in allowed_discards
+    assert with_riichi == with_riichi_result

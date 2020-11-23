@@ -258,4 +258,12 @@ SYSTEM_TESTING_CASES = [
         "meld": {"type": MeldPrint.PON, "tiles": "222z"},
         "tile_after_meld": "3m",
     },
+    {
+        "index": 33,
+        "description": "Bot wrongly detected honitsu for shimocha discards.",
+        "reproducer_command": "python reproducer.py --log 2020112309gm-0089-0000-53e7b431 --player 蒸気機関 --wind 3 --honba 1 --action draw --n 1 --tile 6m",
+        "action": ACTION_DISCARD,
+        "allowed_discards": ["6p"],
+        "with_riichi": False,
+    },
 ]

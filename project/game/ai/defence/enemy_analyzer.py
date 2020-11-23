@@ -280,6 +280,15 @@ class EnemyAnalyzer:
             tile_34 = meld.tiles[0] // 4
             scale_index += len([x for x in self.enemy.valued_honors if x == tile_34])
 
+        # let's add more danger for all other opened kan sets on the table
+        for other_player in self.table.players:
+            if other_player.seat == self.enemy.seat:
+                continue
+
+            for meld in other_player.melds:
+                if meld.type == Meld.KAN or meld.type == Meld.SHOUMINKAN:
+                    scale_index += 1
+
         if scale_index > len(scale) - 1:
             scale_index = len(scale) - 1
 

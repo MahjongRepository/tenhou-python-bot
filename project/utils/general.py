@@ -1,8 +1,9 @@
 import random
 import string
+from typing import List
 
 from mahjong.constants import EAST
-from mahjong.utils import is_man, is_pin, is_sou, simplify
+from mahjong.utils import is_honor, is_man, is_pin, is_sou, simplify
 
 
 # TODO move to mahjong lib
@@ -18,6 +19,29 @@ def is_tiles_same_suit(first_tile_34, second_tile_34):
         return True
     if is_sou(first_tile_34) and is_sou(second_tile_34):
         return True
+    return False
+
+
+# TODO move to mahjong lib
+def is_dora_connector(tile_136: int, dora_indicators_136: List[int]) -> bool:
+    tile_34 = tile_136 // 4
+    if is_honor(tile_34):
+        return False
+
+    for dora_indicator in dora_indicators_136:
+        dora_indicator_34 = dora_indicator // 4
+        if not is_tiles_same_suit(dora_indicator_34, tile_34):
+            continue
+
+        simplified_tile = simplify(tile_34)
+        simplified_dora_indicator = simplify(dora_indicator_34)
+
+        if simplified_dora_indicator - 1 == simplified_tile:
+            return True
+
+        if simplified_dora_indicator + 1 == simplified_tile:
+            return True
+
     return False
 
 

@@ -8,7 +8,7 @@ from game.ai.helpers.kabe import Kabe
 from game.ai.helpers.possible_forms import PossibleFormsAnalyzer
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_honor, is_man, is_pin, is_sou, is_terminal, plus_dora, simplify
-from utils.general import is_tiles_same_suit
+from utils.general import is_dora_connector, is_tiles_same_suit
 
 
 class TileDangerHandler:
@@ -152,6 +152,14 @@ class TileDangerHandler:
                     enemy_analyzer.enemy.seat,
                     TileDanger.make_unverified_suji_coeff(enemy_analyzer.unverified_suji_coeff),
                 )
+
+                if is_dora_connector(tile_136, self.player.table.dora_indicators):
+                    self._update_discard_candidate(
+                        tile_34,
+                        discard_candidates,
+                        enemy_analyzer.enemy.seat,
+                        TileDanger.DORA_CONNECTOR_BONUS,
+                    )
 
             dora_count = plus_dora(
                 tile_136, self.player.table.dora_indicators, add_aka_dora=self.player.table.has_aka_dora

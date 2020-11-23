@@ -2,6 +2,7 @@ from game.ai.strategies.main import BaseStrategy
 from game.table import Table
 from mahjong.tile import TilesConverter
 from utils.decisions_logger import MeldPrint
+from utils.general import is_dora_connector
 from utils.test_helpers import make_meld, string_to_34_tile, string_to_136_array, string_to_136_tile, tiles_to_string
 
 
@@ -486,3 +487,45 @@ def test_shanten_and_hand_structure():
 
     shanten, _ = player.ai.hand_builder.calculate_shanten_and_decide_hand_structure(closed_hand_34)
     assert shanten == 1
+
+
+def test_is_dora_connector():
+    cases = [
+        {
+            "dora_indicators": [string_to_136_tile(sou="5")],
+            "dora_connectors": [string_to_136_tile(sou="4"), string_to_136_tile(sou="6")],
+        },
+        {
+            "dora_indicators": [string_to_136_tile(sou="5"), string_to_136_tile(sou="4")],
+            "dora_connectors": [
+                string_to_136_tile(sou="3"),
+                string_to_136_tile(sou="4"),
+                string_to_136_tile(sou="5"),
+                string_to_136_tile(sou="6"),
+            ],
+        },
+        {
+            "dora_indicators": [string_to_136_tile(pin="1")],
+            "dora_connectors": [
+                string_to_136_tile(pin="2"),
+            ],
+        },
+        {
+            "dora_indicators": [string_to_136_tile(man="9")],
+            "dora_connectors": [
+                string_to_136_tile(man="8"),
+            ],
+        },
+        {
+            "dora_indicators": [string_to_136_tile(honors="1")],
+            "dora_connectors": [],
+        },
+    ]
+
+    for case in cases:
+        dora_connectors_34 = [x // 4 for x in case["dora_connectors"]]
+        for tile_34 in range(0, 34):
+            if tile_34 in dora_connectors_34:
+                assert is_dora_connector(tile_34 * 4, case["dora_indicators"]) is True
+            else:
+                assert is_dora_connector(tile_34 * 4, case["dora_indicators"]) is False

@@ -240,8 +240,12 @@ class EnemyAnalyzer:
             scale = [2000, 3900, 5200, 8000, 8000, 12000, 12000, 16000, 16000, 32000]
 
         # it wasn't early riichi, let's think that it could be more expensive
-        if len(self.enemy.discards) > 6:
+        if 6 < len(self.enemy.discards) <= 12:
             scale_index += 1
+
+        # more late riichi, probably means more expensive riichi
+        if len(self.enemy.discards) > 12:
+            scale_index += 2
 
         total_dora_in_game = len(self.table.dora_indicators) * 4 + (3 * int(self.table.has_aka_dora))
         visible_tiles = self.table.revealed_tiles_136 + self.main_player.closed_hand

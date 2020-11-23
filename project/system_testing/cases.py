@@ -245,7 +245,7 @@ SYSTEM_TESTING_CASES = [
     {
         "index": 31,
         "description": "Regression with honitsu and chinitsu detection",
-        "reproducer_command": "python reproducer.py --log 2020112219gm-0089-0000-8de03653 --player 安提洛科斯 --wind 1 --honba 0 --action draw --n 1 --tile 1s",
+        "reproducer_command": "python reproducer.py --log 2020112219gm-0089-0000-8de03653 --player 0 --wind 1 --honba 0 --action draw --n 1 --tile 1s",
         "action": ACTION_DISCARD,
         "allowed_discards": ["3z"],
         "with_riichi": False,
@@ -261,7 +261,7 @@ SYSTEM_TESTING_CASES = [
     {
         "index": 33,
         "description": "Bot wrongly detected honitsu for shimocha discards.",
-        "reproducer_command": "python reproducer.py --log 2020112309gm-0089-0000-53e7b431 --player 蒸気機関 --wind 3 --honba 1 --action draw --n 1 --tile 6m",
+        "reproducer_command": "python reproducer.py --log 2020112309gm-0089-0000-53e7b431 --player 1 --wind 3 --honba 1 --action draw --n 1 --tile 6m",
         "action": ACTION_DISCARD,
         "allowed_discards": ["6p"],
         "with_riichi": False,

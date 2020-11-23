@@ -352,7 +352,7 @@ Regression with honitsu and chinitsu detection
 
 Reproduce:
 
-> python reproducer.py --log 2020112219gm-0089-0000-8de03653 --player 安提洛科斯 --wind 1 --honba 0 --action draw --n 1 --tile 1s
+> python reproducer.py --log 2020112219gm-0089-0000-8de03653 --player 0 --wind 1 --honba 0 --action draw --n 1 --tile 1s
 
 ![image](../project/system_testing/fixtures/31.png)
 
@@ -376,6 +376,6 @@ Bot wrongly detected honitsu for shimocha discards.
 
 Reproduce:
 
-> python reproducer.py --log 2020112309gm-0089-0000-53e7b431 --player 蒸気機関 --wind 3 --honba 1 --action draw --n 1 --tile 6m
+> python reproducer.py --log 2020112309gm-0089-0000-53e7b431 --player 1 --wind 3 --honba 1 --action draw --n 1 --tile 6m
 
 ![image](../project/system_testing/fixtures/33.png)

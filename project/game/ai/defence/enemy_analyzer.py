@@ -247,6 +247,9 @@ class EnemyAnalyzer:
         if len(self.enemy.discards) > 12:
             scale_index += 2
 
+        if self.enemy.is_ippatsu:
+            scale_index += 1
+
         total_dora_in_game = len(self.table.dora_indicators) * 4 + (3 * int(self.table.has_aka_dora))
         visible_tiles = self.table.revealed_tiles_136 + self.main_player.closed_hand
         visible_dora_tiles = sum(

@@ -188,6 +188,10 @@ class TenhouLogReproducer:
                 who_called_riichi = self._normalize_position(self.decoder.parse_who_called_riichi(tag), player_position)
                 table.add_called_riichi_step_one(who_called_riichi)
 
+            if "<REACH" in tag and 'step="2"' in tag:
+                who_called_riichi = self._normalize_position(self.decoder.parse_who_called_riichi(tag), player_position)
+                table.add_called_riichi_step_two(who_called_riichi)
+
     def _find_needed_round(self, wind, honba):
         found_round_item = None
         for round_item in self.rounds:

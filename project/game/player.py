@@ -13,7 +13,8 @@ class PlayerInterface:
     discards = None
     tiles = None
     melds = None
-    in_riichi = None
+    in_riichi: bool = False
+    is_ippatsu: bool = False
     round_step = None
 
     # current player seat
@@ -62,6 +63,7 @@ class PlayerInterface:
         self.discards = []
         self.melds = []
         self.in_riichi = False
+        self.is_ippatsu = False
         self.position = 0
         self.scores = None
         self.uma = 0

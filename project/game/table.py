@@ -125,6 +125,9 @@ class Table:
         for tile in tiles:
             self._add_revealed_tile(tile)
 
+        for player in self.players:
+            player.is_ippatsu = False
+
     def add_called_riichi_step_one(self, player_seat):
         """
         We need to mark player in riichi to properly defence against his riichi tile discard
@@ -143,6 +146,7 @@ class Table:
         if player.scores is not None:
             player.scores -= 1000
 
+        player.is_ippatsu = True
         self.count_of_riichi_sticks += 1
 
     def add_discarded_tile(self, player_seat, tile_136, is_tsumogiri):
@@ -163,6 +167,8 @@ class Table:
         if self.latest_riichi_player_seat == player_seat:
             self.latest_riichi_player_seat = None
             player.riichi_tile_136 = tile_136
+
+        player.is_ippatsu = False
 
     def add_dora_indicator(self, tile):
         self.dora_indicators.append(tile)

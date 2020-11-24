@@ -293,9 +293,13 @@ class GameManager:
                     self.replay.open_meld(meld)
 
                     if opened:
+                        for client in self.clients:
+                            client.is_ippatsu = False
+
                         result = self.check_clients_possible_ron(
                             current_client, drawn_tile, is_tsumogiri=False, is_chankan=True
                         )
+
                         # the end of the round
                         if result:
                             return result

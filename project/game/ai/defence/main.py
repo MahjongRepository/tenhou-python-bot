@@ -317,6 +317,7 @@ class TileDangerHandler:
 
                 discard_option.danger.weighted_cost = int(hand_weighted_cost)
                 cost_ratio = (hand_weighted_cost / threatening_player_hand_cost) * 100
+                average_tempai_waits = discard_option.average_second_level_waits
 
                 if self.player.ai.placement.must_push(
                     all_threatening_players,
@@ -327,7 +328,7 @@ class TileDangerHandler:
                     danger_border = DangerBorder.IGNORE
                 else:
                     # lots of ukeire
-                    if discard_option.ukeire >= 32:
+                    if discard_option.ukeire >= 32 and average_tempai_waits >= 6:
                         if cost_ratio >= 400:
                             danger_border = DangerBorder.IGNORE
                         elif cost_ratio >= 200:
@@ -341,7 +342,7 @@ class TileDangerHandler:
                         else:
                             danger_border = DangerBorder.EXTREMELY_LOW
                     # very good ukeire
-                    elif discard_option.ukeire >= 20:
+                    elif discard_option.ukeire >= 20 and average_tempai_waits >= 6:
                         if cost_ratio >= 400:
                             danger_border = DangerBorder.IGNORE
                         elif cost_ratio >= 200:
@@ -355,7 +356,7 @@ class TileDangerHandler:
                         else:
                             danger_border = DangerBorder.EXTREMELY_LOW
                     # good ukeire
-                    elif discard_option.ukeire >= 12:
+                    elif discard_option.ukeire >= 12 and average_tempai_waits >= 4:
                         if cost_ratio >= 400:
                             danger_border = DangerBorder.VERY_HIGH
                         elif cost_ratio >= 200:
@@ -369,7 +370,7 @@ class TileDangerHandler:
                         else:
                             danger_border = DangerBorder.BETAORI
                     # mediocre ukeire
-                    elif discard_option.ukeire >= 7:
+                    elif discard_option.ukeire >= 7 and average_tempai_waits >= 2:
                         if cost_ratio >= 400:
                             danger_border = DangerBorder.HIGH
                         elif cost_ratio >= 200:
@@ -383,7 +384,7 @@ class TileDangerHandler:
                         else:
                             danger_border = DangerBorder.BETAORI
                     # very low ukeire
-                    elif discard_option.ukeire >= 3:
+                    elif discard_option.ukeire >= 3 and average_tempai_waits >= 1:
                         if cost_ratio >= 400:
                             danger_border = DangerBorder.MEDIUM
                         elif cost_ratio >= 200:

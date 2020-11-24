@@ -353,6 +353,9 @@ class HandBuilder:
 
         discard_option.ukeire_second = sum_tiles
         if discard_option.shanten == 1:
+            if discard_option.ukeire != 0:
+                discard_option.average_second_level_waits = round(sum_tiles / discard_option.ukeire, 2)
+
             discard_option.second_level_cost = sum_cost
             if not average_costs:
                 discard_option.average_second_level_cost = 0

@@ -41,6 +41,8 @@ class DiscardOption:
     wait_to_ukeire = None
     # second level cost approximation for 1-shanten hands
     second_level_cost = None
+    # second level average number of waits approximation for 1-shanten hands
+    average_second_level_waits = None
     # second level average cost approximation for 1-shanten hands
     average_second_level_cost = None
     # special descriptor for tempai with additional info
@@ -59,6 +61,7 @@ class DiscardOption:
         self.had_to_be_discarded = False
         self.wait_to_ukeire = wait_to_ukeire
         self.second_level_cost = 0
+        self.average_second_level_waits = 0
         self.average_second_level_cost = 0
         self.tempai_descriptor = None
 
@@ -88,6 +91,8 @@ class DiscardOption:
         }
         if self.ukeire_second:
             data["ukeire2"] = self.ukeire_second
+        if self.average_second_level_waits:
+            data["average_second_level_waits"] = self.average_second_level_waits
         if self.average_second_level_cost:
             data["average_second_level_cost"] = self.average_second_level_cost
         if self.had_to_be_saved:

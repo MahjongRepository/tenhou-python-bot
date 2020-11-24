@@ -1,3 +1,4 @@
+import utils.decisions_constants as log
 from game.ai.strategies.main import BaseStrategy
 from mahjong.constants import EAST, SOUTH
 from mahjong.tile import TilesConverter
@@ -111,18 +112,42 @@ class YakuhaiStrategy(BaseStrategy):
         # finally check if we need a cheap hand in oorasu - so don't skip first yakujai
         if self.player.ai.placement.is_oorasu and opportunity_to_meld_yakuhai:
             placement = self.player.ai.placement.get_current_placement()
+            logger_context = {
+                "placement": placement,
+            }
+
             if placement and placement["place"] == 4:
                 enough_cost = self.player.ai.placement.get_minimal_cost_needed_considering_west()
                 simple_han_scale = [0, 1000, 2000, 3900, 7700, 8000, 12000, 12000]
                 num_han = self.get_open_hand_han() + self.dora_count_total
                 if num_han >= len(simple_han_scale):
                     # why are we even here?
+                    self.player.logger.debug(
+                        log.PLACEMENT_MELD_DECISION,
+                        "We are 4th in oorasu and have expensive hand, call meld",
+                        logger_context,
+                    )
                     return True
 
                 # be pessimistic and don't count on direct ron
                 hand_cost = simple_han_scale[num_han]
                 if hand_cost >= enough_cost:
+                    self.player.logger.debug(
+                        log.PLACEMENT_MELD_DECISION,
+                        "We are 4th in oorasu and our hand can give us 3rd with meld, take it",
+                        logger_context,
+                    )
                     return True
+
+            if (
+                placement
+                and placement["place"] == 3
+                and placement["diff_with_4th"] < self.player.ai.placement.comfortable_diff
+            ):
+                self.player.logger.debug(
+                    log.PLACEMENT_MELD_DECISION, "We are 3rd in oorasu and want to secure it, take meld", logger_context
+                )
+                return True
 
         return False
 

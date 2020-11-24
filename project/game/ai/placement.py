@@ -435,6 +435,10 @@ class DummyPlacementHandler(PlacementHandler):
     def must_push(self, threats, tile_136, num_shanten, tempai_cost=0) -> bool:
         return False
 
+    @property
+    def comfortable_diff(self) -> int:
+        return 0
+
 
 class Placement:
     # TODO: account for honbas and riichi sticks on the table

@@ -306,11 +306,11 @@
     <p id="t253" class="run"><span class="n"><a href="#t253">253</a></span><span class="t">            <span class="nam">scale</span> <span class="op">=</span> <span class="op">[</span><span class="num">2000</span><span class="op">,</span> <span class="num">3900</span><span class="op">,</span> <span class="num">5200</span><span class="op">,</span> <span class="num">8000</span><span class="op">,</span> <span class="num">8000</span><span class="op">,</span> <span class="num">12000</span><span class="op">,</span> <span class="num">12000</span><span class="op">,</span> <span class="num">16000</span><span class="op">,</span> <span class="num">16000</span><span class="op">,</span> <span class="num">32000</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p id="t254" class="pln"><span class="n"><a href="#t254">254</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t255" class="pln"><span class="n"><a href="#t255">255</a></span><span class="t">        <span class="com"># it wasn't early riichi, let's think that it could be more expensive</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t256" class="run"><span class="n"><a href="#t256">256</a></span><span class="t">        <span class="key">if</span> <span class="num">6</span> <span class="op">&lt;</span> <span class="nam">self</span><span class="op">.</span><span class="nam">enemy</span><span class="op">.</span><span class="nam">riichi_called_on_step</span> <span class="op">&lt;=</span> <span class="num">12</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t256" class="run"><span class="n"><a href="#t256">256</a></span><span class="t">        <span class="key">if</span> <span class="num">6</span> <span class="op">&lt;=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">enemy</span><span class="op">.</span><span class="nam">riichi_called_on_step</span> <span class="op">&lt;=</span> <span class="num">11</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t257" class="run"><span class="n"><a href="#t257">257</a></span><span class="t">            <span class="nam">scale_index</span> <span class="op">+=</span> <span class="num">1</span>&nbsp;</span><span class="r"></span></p>
     <p id="t258" class="pln"><span class="n"><a href="#t258">258</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t259" class="pln"><span class="n"><a href="#t259">259</a></span><span class="t">        <span class="com"># more late riichi, probably means more expensive riichi</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t260" class="run"><span class="n"><a href="#t260">260</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">enemy</span><span class="op">.</span><span class="nam">riichi_called_on_step</span> <span class="op">></span> <span class="num">12</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t260" class="run"><span class="n"><a href="#t260">260</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">enemy</span><span class="op">.</span><span class="nam">riichi_called_on_step</span> <span class="op">>=</span> <span class="num">12</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t261" class="run"><span class="n"><a href="#t261">261</a></span><span class="t">            <span class="nam">scale_index</span> <span class="op">+=</span> <span class="num">2</span>&nbsp;</span><span class="r"></span></p>
     <p id="t262" class="pln"><span class="n"><a href="#t262">262</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t263" class="run"><span class="n"><a href="#t263">263</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">enemy</span><span class="op">.</span><span class="nam">is_ippatsu</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -373,7 +373,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v5.3</a>,
-            created at 2020-11-24 11:13 +0000
+            created at 2020-11-24 11:17 +0000
         </p>
     </div>
 </div>

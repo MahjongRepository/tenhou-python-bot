@@ -83,25 +83,37 @@ class PlacementHandler:
                     return Placement.MUST_DAMATEN
 
         if placement["place"] == 2:
-            if cost_with_damaten < placement["diff_with_1st"] <= cost_with_riichi:
+            if cost_with_damaten < placement["diff_with_1st"] <= cost_with_riichi * 2:
                 if placement["diff_with_4th"] >= Placement.COMFORTABLE_DIFF_FOR_RISK:
                     self.player.logger.debug(
                         log.PLACEMENT_RIICHI_OR_DAMATEN, "2st place, we are good to risk", logger_context
                     )
                     return Placement.MUST_RIICHI
 
-        # TODO: special rules for 3rd place
+        # general rule for 2nd and 3rd places:
+        if (placement["place"] == 2 or placement["place"] == 3) and has_yaku:
+            # we can play more greedy on second place hoping for tsumo, ippatsu or uras
+            # moreover riichi cost here is a minimal one
+            if placement["place"] == 2:
+                if placement["diff_with_4th"] <= 1000:
+                    multiplier = 2
+                else:
+                    multiplier = 4
+            else:
+                multiplier = 2
+
+            if (
+                placement["diff_with_next_up"] > cost_with_riichi * multiplier
+                and placement["diff_with_next_down"] <= 1000
+            ):
+                self.player.logger.debug(log.PLACEMENT_RIICHI_OR_DAMATEN, "not 4st place and has yaku", logger_context)
+                return Placement.MUST_DAMATEN
+
         if placement["place"] == 4:
             # TODO: consider going for better hand
             if cost_with_damaten < placement["diff_with_3rd"]:
                 self.player.logger.debug(log.PLACEMENT_RIICHI_OR_DAMATEN, "4st place, let's riichi", logger_context)
                 return Placement.MUST_RIICHI
-
-        # general rule:
-        if placement["place"] != 4 and has_yaku:
-            if placement["diff_with_next_up"] > cost_with_riichi * 2 and placement["diff_with_next_down"] <= 1000:
-                self.player.logger.debug(log.PLACEMENT_RIICHI_OR_DAMATEN, "not 4st place and has yaku", logger_context)
-                return Placement.MUST_DAMATEN
 
         return Placement.DEFAULT_RIICHI_DECISION
 

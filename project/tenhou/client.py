@@ -575,6 +575,7 @@ class TenhouClient(Client):
 
         # upperdan lobby, we can play here from 4 dan and with 1800+ rate
         if dan >= 13 and rate >= 1800:
+            raise AssertionError("Stop to play for now")
             game_type = "41"
 
         return game_type

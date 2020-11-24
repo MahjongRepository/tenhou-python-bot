@@ -1,6 +1,6 @@
 from game.ai.placement import Placement
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_chi, is_honor, is_pair, simplify
+from mahjong.utils import is_chi, is_honor, is_pair, is_terminal, plus_dora, simplify
 
 
 class Riichi:
@@ -211,6 +211,15 @@ class Riichi:
         # our tanki wait is good, let's riichi
         if is_honor(waiting):
             return True
+
+        if count_tiles > 1:
+            # terminal tanki is ok, too, just should be more than one tile left
+            if is_terminal(waiting):
+                return True
+
+            # whatever dora wait is ok, too, just should be more than one tile left
+            if plus_dora(waiting * 4, self.player.table.dora_indicators, add_aka_dora=False) > 0:
+                return True
 
         simplified_waiting = simplify(waiting)
 

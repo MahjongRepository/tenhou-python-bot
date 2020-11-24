@@ -147,6 +147,7 @@ class Table:
             player.scores -= 1000
 
         player.is_ippatsu = True
+        player.riichi_called_on_step = len(player.discards)
         self.count_of_riichi_sticks += 1
 
     def add_discarded_tile(self, player_seat, tile_136, is_tsumogiri):

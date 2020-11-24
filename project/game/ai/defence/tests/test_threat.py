@@ -247,10 +247,12 @@ def test_threatening_riichi_player_and_default_hand_cost():
 def test_threatening_riichi_player_and_not_early_hand_bonus():
     table = Table()
     enemy_seat = 2
-    table.add_called_riichi_step_one(enemy_seat)
     discards = string_to_136_array(sou="1111222")
     for discard in discards:
         table.add_discarded_tile(enemy_seat, discard, False)
+    table.add_called_riichi_step_one(enemy_seat)
+    table.add_called_riichi_step_two(enemy_seat)
+    table.get_player(enemy_seat).is_ippatsu = False
 
     # +1 scale for riichi on 6+ turn
     threatening_player = table.player.ai.defence.get_threatening_players()[0]

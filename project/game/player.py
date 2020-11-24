@@ -15,6 +15,7 @@ class PlayerInterface:
     melds = None
     in_riichi: bool = False
     is_ippatsu: bool = False
+    riichi_called_on_step: int = 0
     round_step = None
 
     # current player seat
@@ -68,6 +69,7 @@ class PlayerInterface:
         self.scores = None
         self.uma = 0
         self.round_step = 0
+        self.riichi_called_on_step = 0
 
     def add_called_meld(self, meld: MeldPrint):
         # we already added shouminkan as a pon set

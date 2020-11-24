@@ -21,9 +21,9 @@
         </h1>
         <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
         <h2 class="stats">
-            257 statements &nbsp;
-            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">192 run</button>
-            <button type="button" class="mis show_mis shortkey_m button_toggle_mis" title="Toggle lines missing">65 missing</button>
+            260 statements &nbsp;
+            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">194 run</button>
+            <button type="button" class="mis show_mis shortkey_m button_toggle_mis" title="Toggle lines missing">66 missing</button>
             <button type="button" class="exc show_exc shortkey_x button_toggle_exc" title="Toggle lines excluded">0 excluded</button>
         </h2>
     </div>
@@ -488,40 +488,44 @@
     <p id="t435" class="run"><span class="n"><a href="#t435">435</a></span><span class="t">    <span class="key">def</span> <span class="nam">must_push</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">threats</span><span class="op">,</span> <span class="nam">tile_136</span><span class="op">,</span> <span class="nam">num_shanten</span><span class="op">,</span> <span class="nam">tempai_cost</span><span class="op">=</span><span class="num">0</span><span class="op">)</span> <span class="op">-></span> <span class="nam">bool</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t436" class="mis show_mis"><span class="n"><a href="#t436">436</a></span><span class="t">        <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p id="t437" class="pln"><span class="n"><a href="#t437">437</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p id="t438" class="pln"><span class="n"><a href="#t438">438</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p id="t439" class="run"><span class="n"><a href="#t439">439</a></span><span class="t"><span class="key">class</span> <span class="nam">Placement</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t440" class="pln"><span class="n"><a href="#t440">440</a></span><span class="t">    <span class="com"># TODO: account for honbas and riichi sticks on the table</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t441" class="run"><span class="n"><a href="#t441">441</a></span><span class="t">    <span class="nam">VERY_COMFORTABLE_DIFF</span> <span class="op">=</span> <span class="num">24100</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t442" class="run"><span class="n"><a href="#t442">442</a></span><span class="t">    <span class="nam">COMFORTABLE_DIFF_FOR_RISK</span> <span class="op">=</span> <span class="num">18100</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t443" class="pln"><span class="n"><a href="#t443">443</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p id="t444" class="run"><span class="n"><a href="#t444">444</a></span><span class="t">    <span class="nam">COMFORTABLE_DIFF_DEALER</span> <span class="op">=</span> <span class="num">12100</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t445" class="run"><span class="n"><a href="#t445">445</a></span><span class="t">    <span class="nam">COMFORTABLE_DIFF_NON_DEALER</span> <span class="op">=</span> <span class="num">10100</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t446" class="pln"><span class="n"><a href="#t446">446</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p id="t447" class="run"><span class="n"><a href="#t447">447</a></span><span class="t">    <span class="nam">COMFORTABLE_POINTS</span> <span class="op">=</span> <span class="num">38000</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t448" class="pln"><span class="n"><a href="#t448">448</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p id="t449" class="run"><span class="n"><a href="#t449">449</a></span><span class="t">    <span class="nam">RYUKOKU_MINIMUM_DIFF</span> <span class="op">=</span> <span class="num">4000</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t438" class="run"><span class="n"><a href="#t438">438</a></span><span class="t">    <span class="op">@</span><span class="nam">property</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t439" class="run"><span class="n"><a href="#t439">439</a></span><span class="t">    <span class="key">def</span> <span class="nam">comfortable_diff</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span> <span class="op">-></span> <span class="nam">int</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t440" class="mis show_mis"><span class="n"><a href="#t440">440</a></span><span class="t">        <span class="key">return</span> <span class="num">0</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t441" class="pln"><span class="n"><a href="#t441">441</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p id="t442" class="pln"><span class="n"><a href="#t442">442</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p id="t443" class="run"><span class="n"><a href="#t443">443</a></span><span class="t"><span class="key">class</span> <span class="nam">Placement</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t444" class="pln"><span class="n"><a href="#t444">444</a></span><span class="t">    <span class="com"># TODO: account for honbas and riichi sticks on the table</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t445" class="run"><span class="n"><a href="#t445">445</a></span><span class="t">    <span class="nam">VERY_COMFORTABLE_DIFF</span> <span class="op">=</span> <span class="num">24100</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t446" class="run"><span class="n"><a href="#t446">446</a></span><span class="t">    <span class="nam">COMFORTABLE_DIFF_FOR_RISK</span> <span class="op">=</span> <span class="num">18100</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t447" class="pln"><span class="n"><a href="#t447">447</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p id="t448" class="run"><span class="n"><a href="#t448">448</a></span><span class="t">    <span class="nam">COMFORTABLE_DIFF_DEALER</span> <span class="op">=</span> <span class="num">12100</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t449" class="run"><span class="n"><a href="#t449">449</a></span><span class="t">    <span class="nam">COMFORTABLE_DIFF_NON_DEALER</span> <span class="op">=</span> <span class="num">10100</span>&nbsp;</span><span class="r"></span></p>
     <p id="t450" class="pln"><span class="n"><a href="#t450">450</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p id="t451" class="pln"><span class="n"><a href="#t451">451</a></span><span class="t">    <span class="com"># player position in the game</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t452" class="pln"><span class="n"><a href="#t452">452</a></span><span class="t">    <span class="com"># must go in ascending order from bad to good, so we can use &lt;, > operators with them</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t453" class="run"><span class="n"><a href="#t453">453</a></span><span class="t">    <span class="nam">NEUTRAL</span> <span class="op">=</span> <span class="num">0</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t454" class="run"><span class="n"><a href="#t454">454</a></span><span class="t">    <span class="nam">COMFORTABLE_FIRST</span> <span class="op">=</span> <span class="num">1</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t455" class="run"><span class="n"><a href="#t455">455</a></span><span class="t">    <span class="nam">VERY_COMFORTABLE_FIRST</span> <span class="op">=</span> <span class="num">2</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t456" class="pln"><span class="n"><a href="#t456">456</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p id="t457" class="pln"><span class="n"><a href="#t457">457</a></span><span class="t">    <span class="com"># riichi definitions</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t458" class="run"><span class="n"><a href="#t458">458</a></span><span class="t">    <span class="nam">DEFAULT_RIICHI_DECISION</span> <span class="op">=</span> <span class="num">0</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t459" class="run"><span class="n"><a href="#t459">459</a></span><span class="t">    <span class="nam">MUST_RIICHI</span> <span class="op">=</span> <span class="num">1</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t460" class="run"><span class="n"><a href="#t460">460</a></span><span class="t">    <span class="nam">MUST_DAMATEN</span> <span class="op">=</span> <span class="num">2</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t461" class="pln"><span class="n"><a href="#t461">461</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p id="t462" class="pln"><span class="n"><a href="#t462">462</a></span><span class="t">    <span class="com"># danger modifier</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t463" class="run"><span class="n"><a href="#t463">463</a></span><span class="t">    <span class="nam">NO_RISK_DANGER_MODIFIER</span> <span class="op">=</span> <span class="op">-</span><span class="num">3</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t464" class="run"><span class="n"><a href="#t464">464</a></span><span class="t">    <span class="nam">MODERATE_DANGER_MODIFIER</span> <span class="op">=</span> <span class="op">-</span><span class="num">2</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t465" class="run"><span class="n"><a href="#t465">465</a></span><span class="t">    <span class="nam">DEFAULT_DANGER_MODIFIER</span> <span class="op">=</span> <span class="num">0</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t451" class="run"><span class="n"><a href="#t451">451</a></span><span class="t">    <span class="nam">COMFORTABLE_POINTS</span> <span class="op">=</span> <span class="num">38000</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t452" class="pln"><span class="n"><a href="#t452">452</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p id="t453" class="run"><span class="n"><a href="#t453">453</a></span><span class="t">    <span class="nam">RYUKOKU_MINIMUM_DIFF</span> <span class="op">=</span> <span class="num">4000</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t454" class="pln"><span class="n"><a href="#t454">454</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p id="t455" class="pln"><span class="n"><a href="#t455">455</a></span><span class="t">    <span class="com"># player position in the game</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t456" class="pln"><span class="n"><a href="#t456">456</a></span><span class="t">    <span class="com"># must go in ascending order from bad to good, so we can use &lt;, > operators with them</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t457" class="run"><span class="n"><a href="#t457">457</a></span><span class="t">    <span class="nam">NEUTRAL</span> <span class="op">=</span> <span class="num">0</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t458" class="run"><span class="n"><a href="#t458">458</a></span><span class="t">    <span class="nam">COMFORTABLE_FIRST</span> <span class="op">=</span> <span class="num">1</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t459" class="run"><span class="n"><a href="#t459">459</a></span><span class="t">    <span class="nam">VERY_COMFORTABLE_FIRST</span> <span class="op">=</span> <span class="num">2</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t460" class="pln"><span class="n"><a href="#t460">460</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p id="t461" class="pln"><span class="n"><a href="#t461">461</a></span><span class="t">    <span class="com"># riichi definitions</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t462" class="run"><span class="n"><a href="#t462">462</a></span><span class="t">    <span class="nam">DEFAULT_RIICHI_DECISION</span> <span class="op">=</span> <span class="num">0</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t463" class="run"><span class="n"><a href="#t463">463</a></span><span class="t">    <span class="nam">MUST_RIICHI</span> <span class="op">=</span> <span class="num">1</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t464" class="run"><span class="n"><a href="#t464">464</a></span><span class="t">    <span class="nam">MUST_DAMATEN</span> <span class="op">=</span> <span class="num">2</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t465" class="pln"><span class="n"><a href="#t465">465</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p id="t466" class="pln"><span class="n"><a href="#t466">466</a></span><span class="t">    <span class="com"># danger modifier</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t467" class="run"><span class="n"><a href="#t467">467</a></span><span class="t">    <span class="nam">NO_RISK_DANGER_MODIFIER</span> <span class="op">=</span> <span class="op">-</span><span class="num">3</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t468" class="run"><span class="n"><a href="#t468">468</a></span><span class="t">    <span class="nam">MODERATE_DANGER_MODIFIER</span> <span class="op">=</span> <span class="op">-</span><span class="num">2</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t469" class="run"><span class="n"><a href="#t469">469</a></span><span class="t">    <span class="nam">DEFAULT_DANGER_MODIFIER</span> <span class="op">=</span> <span class="num">0</span>&nbsp;</span><span class="r"></span></p>
 </div>
 <div id="footer">
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v5.3</a>,
-            created at 2020-11-24 20:30 +0000
+            created at 2020-11-24 20:50 +0000
         </p>
     </div>
 </div>

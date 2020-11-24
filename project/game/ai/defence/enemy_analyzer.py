@@ -253,11 +253,11 @@ class EnemyAnalyzer:
             scale = [2000, 3900, 5200, 8000, 8000, 12000, 12000, 16000, 16000, 32000]
 
         # it wasn't early riichi, let's think that it could be more expensive
-        if 6 < self.enemy.riichi_called_on_step <= 12:
+        if 6 <= self.enemy.riichi_called_on_step <= 11:
             scale_index += 1
 
         # more late riichi, probably means more expensive riichi
-        if self.enemy.riichi_called_on_step > 12:
+        if self.enemy.riichi_called_on_step >= 12:
             scale_index += 2
 
         if self.enemy.is_ippatsu:

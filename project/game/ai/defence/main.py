@@ -427,29 +427,37 @@ class TileDangerHandler:
                 discard_option.danger.weighted_cost = int(hand_weighted_cost)
                 cost_ratio = (hand_weighted_cost / threatening_player_hand_cost) * 100
 
-                # lots of ukeire
-                if discard_option.ukeire >= 40:
-                    if cost_ratio >= 400:
-                        danger_border = DangerBorder.HIGH
-                    elif cost_ratio >= 200:
-                        danger_border = DangerBorder.MEDIUM
-                    elif cost_ratio >= 100:
-                        danger_border = DangerBorder.EXTREMELY_LOW
-                    else:
-                        danger_border = DangerBorder.BETAORI
-                # very good ukeire
-                elif discard_option.ukeire >= 20:
-                    if cost_ratio >= 400:
-                        danger_border = DangerBorder.UPPER_MEDIUM
-                    elif cost_ratio >= 200:
-                        danger_border = DangerBorder.LOW
-                    elif cost_ratio >= 100:
-                        danger_border = DangerBorder.LOWEST
-                    else:
-                        danger_border = DangerBorder.BETAORI
-                # mediocre ukeire or worse
+                if self.player.ai.placement.must_push(
+                    all_threatening_players,
+                    discard_option.tile_to_discard_136,
+                    num_shanten=2,
+                    tempai_cost=hand_weighted_cost,
+                ):
+                    danger_border = DangerBorder.IGNORE
                 else:
-                    danger_border = DangerBorder.BETAORI
+                    # lots of ukeire
+                    if discard_option.ukeire >= 40:
+                        if cost_ratio >= 400:
+                            danger_border = DangerBorder.HIGH
+                        elif cost_ratio >= 200:
+                            danger_border = DangerBorder.MEDIUM
+                        elif cost_ratio >= 100:
+                            danger_border = DangerBorder.EXTREMELY_LOW
+                        else:
+                            danger_border = DangerBorder.BETAORI
+                    # very good ukeire
+                    elif discard_option.ukeire >= 20:
+                        if cost_ratio >= 400:
+                            danger_border = DangerBorder.UPPER_MEDIUM
+                        elif cost_ratio >= 200:
+                            danger_border = DangerBorder.LOW
+                        elif cost_ratio >= 100:
+                            danger_border = DangerBorder.LOWEST
+                        else:
+                            danger_border = DangerBorder.BETAORI
+                    # mediocre ukeire or worse
+                    else:
+                        danger_border = DangerBorder.BETAORI
 
             # if we could have chosen tempai, pushing 1 or more shanten is usually
             # a pretty bad idea, so tune down

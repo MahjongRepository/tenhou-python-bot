@@ -273,6 +273,10 @@ class PlacementHandler:
             self.player.logger.debug(log.PLACEMENT_PUSH_DECISION, "We are 4th in oorasu and must push", logger_context)
             return True
 
+        # don't force push with 2 or more shanten if we are not 4th
+        if num_shanten > 1:
+            return False
+
         # if there are several threats let's follow our usual rules and otherwise hope that other player wins
         if len(threats) > 1:
             return False

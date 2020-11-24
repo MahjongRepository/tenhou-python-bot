@@ -79,6 +79,7 @@ class DiscardOption:
             "danger": {
                 "max_danger": self.danger.get_max_danger(),
                 "sum_danger": self.danger.get_sum_danger(),
+                "weighted_danger": self.danger.get_weighted_danger(),
                 "min_border": self.danger.get_min_danger_border(),
                 "danger_border": self.danger.danger_border,
                 "weighted_cost": self.danger.weighted_cost,

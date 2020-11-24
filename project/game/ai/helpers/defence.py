@@ -504,10 +504,24 @@ class TileDangerHandler:
         dangers = self._danger_array
 
         weighted = 0
+        num_dangers = 0
 
         for cost, danger in zip(costs, dangers):
             if cost * 100 / max_cost >= self.COST_PERCENT_THRESHOLD:
-                weighted += cost * danger
+                # divide by 8000 so it's more human-readable
+                weighted += cost * danger / 8000
+                num_dangers += 1
+
+        assert num_dangers > 0
+
+        # this way we balance out tiles that are kinda safe against all the threats
+        # and tiles that are genbutsu against one threat and are dangerours against the other
+        if num_dangers == 1:
+            danger_multiplier = 1
+        else:
+            danger_multiplier = 0.8
+
+        weighted *= danger_multiplier
 
         return weighted
 

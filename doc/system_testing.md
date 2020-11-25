@@ -18,7 +18,7 @@ Reproduce:
 
 > python reproducer.py --log 2020102200gm-0001-7994-1143916f --player 0 --wind 2 --honba 3 --tile=1s --n 2 --action=draw
 
-![image](../project/system_testing/fixtures/1.png)
+![image](../project/system_testing/fixtures/1.jpg)
 
 ## Case 2
 
@@ -30,7 +30,7 @@ Reproduce:
 
 > python reproducer.py --log 2020102204gm-0001-7994-fb636348 --player 3 --wind 7 --honba 0  --action=draw --tile=6z
 
-![image](../project/system_testing/fixtures/2.png)
+![image](../project/system_testing/fixtures/2.jpg)
 
 ## Case 3
 
@@ -42,7 +42,7 @@ Reproduce:
 
 > python reproducer.py --log 2020102208gm-0009-0000-40337c9c --player Xenia --wind 3 --honba 0  --action enemy_discard --tile 1s
 
-![image](../project/system_testing/fixtures/3.png)
+![image](../project/system_testing/fixtures/3.jpg)
 
 ## Case 4
 
@@ -54,7 +54,7 @@ Reproduce:
 
 > python reproducer.py --log 2020102208gm-0009-0000-40337c9c --player Xenia --wind 4 --honba 0  --action enemy_discard --tile 5s
 
-![image](../project/system_testing/fixtures/4.png)
+![image](../project/system_testing/fixtures/4.jpg)
 
 ## Case 5
 
@@ -66,7 +66,7 @@ Reproduce:
 
 > python reproducer.py --log 2020102517gm-0009-0000-67fd5f29 --player Xenia --wind 2 --honba 0 --action draw --n 1 --tile 7s
 
-![image](../project/system_testing/fixtures/5.png)
+![image](../project/system_testing/fixtures/5.jpg)
 
 ## Case 6
 
@@ -78,7 +78,7 @@ Reproduce:
 
 > python reproducer.py --log 2020102602gm-0009-0000-ba58220e --player Kaavi --wind 6 --honba 1 --action draw --n 2 --tile 1s
 
-![image](../project/system_testing/fixtures/6.png)
+![image](../project/system_testing/fixtures/6.jpg)
 
 ## Case 7
 
@@ -90,7 +90,7 @@ Reproduce:
 
 > python reproducer.py --log 2020102608gm-0009-0000-ff33fd82 --player Wanjirou --wind 4 --honba 0 --action draw --n 1 --tile 7p
 
-![image](../project/system_testing/fixtures/7.png)
+![image](../project/system_testing/fixtures/7.jpg)
 
 ## Case 8
 
@@ -104,7 +104,7 @@ Reproduce:
 
 > python reproducer.py --log 2020102619gm-0089-0000-dfaf5b1d --player Xenia --wind 4 --honba 0 --action draw --n 1 --tile 2m
 
-![image](../project/system_testing/fixtures/8.png)
+![image](../project/system_testing/fixtures/8.jpg)
 
 ## Case 9
 
@@ -114,7 +114,7 @@ Reproduce:
 
 > python reproducer.py --log 2020102701gm-0089-0000-8572de24 --player Ichihime --wind 7 --honba 1 --action draw --n 1 --tile 7s
 
-![image](../project/system_testing/fixtures/9.png)
+![image](../project/system_testing/fixtures/9.jpg)
 
 ## Case 10
 
@@ -124,7 +124,7 @@ Reproduce:
 
 > python reproducer.py --log 2020102710gm-0009-7994-88f45f2d --player 3 --wind 5 --honba 0 --tile 4m --action enemy_discard
 
-![image](../project/system_testing/fixtures/10.png)
+![image](../project/system_testing/fixtures/10.jpg)
 
 ## Case 11
 
@@ -136,7 +136,7 @@ Reproduce:
 
 > python reproducer.py --log 2020102720gm-0089-0000-65eb30bf --player Xenia --wind 8 --honba 2 --action draw --n 1 --tile 4m
 
-![image](../project/system_testing/fixtures/11.png)
+![image](../project/system_testing/fixtures/11.jpg)
 
 ## Case 12
 
@@ -148,7 +148,7 @@ Reproduce:
 
 > python reproducer.py --log 2020102721gm-0089-0000-67865130 --player Xenia --wind 5 --honba 0 --action draw --n 1 --tile 4m
 
-![image](../project/system_testing/fixtures/12.png)
+![image](../project/system_testing/fixtures/12.jpg)
 
 ## Case 13
 
@@ -160,7 +160,7 @@ Reproduce:
 
 > python reproducer.py --log 2020102821gm-0089-0000-49e1d208 --player Ichihime --wind 1 --honba 2 --action draw --n 1 --tile 6z
 
-![image](../project/system_testing/fixtures/13.png)
+![image](../project/system_testing/fixtures/13.jpg)
 
 ## Case 14
 
@@ -172,7 +172,7 @@ Reproduce:
 
 > python reproducer.py --log 2020102908gm-0089-0000-e1512a30 --player Ichihime --wind 7 --honba 0 --action draw --n 2 --tile 6p
 
-![image](../project/system_testing/fixtures/14.png)
+![image](../project/system_testing/fixtures/14.jpg)
 
 ## Case 15
 
@@ -184,7 +184,7 @@ Reproduce:
 
 > python reproducer.py --log 2020102900gm-0089-0000-5cc13112 --player Xenia --wind 2 --honba 2 --tile 5p --n 2 --action draw
 
-![image](../project/system_testing/fixtures/15.png)
+![image](../project/system_testing/fixtures/15.jpg)
 
 ## Case 16
 
@@ -196,7 +196,7 @@ Reproduce:
 
 > python reproducer.py --log 2020102921gm-0089-0000-764321f0 --player Xenia --wind 1 --honba 0 --action draw --n 1 --tile 3m
 
-![image](../project/system_testing/fixtures/16.png)
+![image](../project/system_testing/fixtures/16.jpg)
 
 ## Case 17
 
@@ -208,7 +208,7 @@ Reproduce:
 
 > python reproducer.py --log 2020102922gm-0089-0000-d3c4e90b --player Xenia --wind 1 --honba 0 --action enemy_discard --n 1 --tile 8p
 
-![image](../project/system_testing/fixtures/17.png)
+![image](../project/system_testing/fixtures/17.jpg)
 
 ## Case 18
 
@@ -218,7 +218,7 @@ Reproduce:
 
 > python reproducer.py --log 2020103005gm-0089-0000-01fc4f4d --player Kaavi --wind 3 --honba 0 --action draw --n 3 --tile 6s
 
-![image](../project/system_testing/fixtures/18.png)
+![image](../project/system_testing/fixtures/18.jpg)
 
 ## Case 19
 
@@ -228,7 +228,7 @@ Reproduce:
 
 > python reproducer.py --log 2020111101gm-0009-7994-f22b8c57 --wind 4 --honba 2 --player 2 --tile 8m --action enemy_discard
 
-![image](../project/system_testing/fixtures/19.png)
+![image](../project/system_testing/fixtures/19.jpg)
 
 ## Case 20
 
@@ -238,7 +238,7 @@ Reproduce:
 
 > python reproducer.py --log 2020111111gm-0009-7994-5550ade1 --wind 8 --honba 1 --player 0 --tile 7z --action enemy_discard
 
-![image](../project/system_testing/fixtures/20.png)
+![image](../project/system_testing/fixtures/20.jpg)
 
 ## Case 21
 
@@ -298,7 +298,7 @@ Reproduce:
 
 > python reproducer.py --log 2020102620gm-0089-0000-c558d68c --player Kaavi --wind 1 --honba 2 --action draw --n 2 --tile 4p
 
-![image](../project/system_testing/fixtures/26.png)
+![image](../project/system_testing/fixtures/26.jpg)
 
 ## Case 27
 
@@ -318,7 +318,7 @@ Reproduce:
 
 > python reproducer.py --log 2020102008gm-0001-7994-9438a8f4 --player Wanjirou --wind 3 --honba 0 --tile 7p --action enemy_discard
 
-![image](../project/system_testing/fixtures/28.png)
+![image](../project/system_testing/fixtures/28.jpg)
 
 ## Case 29
 
@@ -342,7 +342,7 @@ Reproduce:
 
 > python reproducer.py --log 2020112215gm-0009-0000-9c894eca --player 1 --wind 8 --honba 0 --action draw --n 1 --tile 7m
 
-![image](../project/system_testing/fixtures/30.png)
+![image](../project/system_testing/fixtures/30.jpg)
 
 ## Case 31
 
@@ -354,7 +354,7 @@ Reproduce:
 
 > python reproducer.py --log 2020112219gm-0089-0000-8de03653 --player 0 --wind 1 --honba 0 --action draw --n 1 --tile 1s
 
-![image](../project/system_testing/fixtures/31.png)
+![image](../project/system_testing/fixtures/31.jpg)
 
 ## Case 32
 
@@ -366,7 +366,7 @@ Reproduce:
 
 > python reproducer.py --log 2020112307gm-0089-0000-c294daec --player 3 --wind 8 --honba 0 --action enemy_discard --tile 2z
 
-![image](../project/system_testing/fixtures/32.png)
+![image](../project/system_testing/fixtures/32.jpg)
 
 ## Case 33
 
@@ -378,7 +378,7 @@ Reproduce:
 
 > python reproducer.py --log 2020112309gm-0089-0000-53e7b431 --player 1 --wind 3 --honba 1 --action draw --n 1 --tile 6m
 
-![image](../project/system_testing/fixtures/33.png)
+![image](../project/system_testing/fixtures/33.jpg)
 
 ## Case 34
 
@@ -390,4 +390,64 @@ Reproduce:
 
 > python reproducer.py --log 2020112317gm-0089-0000-f4d22bba --player 2 --wind 6 --honba 0 --action draw --n 1 --tile 8s
 
-![image](../project/system_testing/fixtures/34.png)
+![image](../project/system_testing/fixtures/34.jpg)
+
+## Case 35
+
+Action: `discard`, allowed discard: `3s`, with riichi: `True`.
+
+Must riichi.
+
+Reproduce:
+
+> python reproducer.py --log 2020112504gm-0089-0000-e125fd6f --player 2 --wind 8 --honba 0 --action draw --n 1 --tile 2s
+
+![image](../project/system_testing/fixtures/35.jpg)
+
+## Case 36
+
+Action: `discard`, allowed discard: `4z`, with riichi: `False`.
+
+Must fold with north tiles.
+
+Reproduce:
+
+> python reproducer.py --log 2020112504gm-0089-0000-94960883 --player 1 --wind 1 --honba 0 --action draw --n 2 --tile 9p
+
+![image](../project/system_testing/fixtures/36.jpg)
+
+## Case 37
+
+Action: `meld`, meld: `{'type': 'pon', 'tiles': '444z'}`, tile after meld: `1p`.
+
+Must open meld to secure 3rd place.
+
+Reproduce:
+
+> python reproducer.py --log 2020112504gm-0029-0000-ca8a957c --player 2 --wind 8 --honba 0 --action enemy_discard --n 1 --tile 4z
+
+![image](../project/system_testing/fixtures/37.jpg)
+
+## Case 38
+
+Action: `discard`, allowed discard: `8p`, with riichi: `True`.
+
+It is fine to riichi with that hand.
+
+Reproduce:
+
+> python reproducer.py --log 2020112505gm-0089-0000-1a2861c9 --player 3 --wind 5 --honba 0 --action draw --n 1 --tile 9s
+
+![image](../project/system_testing/fixtures/38.jpg)
+
+## Case 39
+
+Action: `discard`, allowed discard: `3m, 2p, 8p`, with riichi: `False`.
+
+Better to fold that hand.
+
+Reproduce:
+
+> python reproducer.py --log 2020112507gm-0089-0000-07c68413 --player 0 --wind 4 --honba 0 --action draw --n 2 --tile 4m
+
+![image](../project/system_testing/fixtures/39.jpg)

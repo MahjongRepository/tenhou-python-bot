@@ -486,3 +486,79 @@ def test_system_case_34():
     result, with_riichi_result = _run_reproducer("34.txt", reproducer_command)
     assert TilesConverter.to_one_line_string([result]) in allowed_discards
     assert with_riichi == with_riichi_result
+
+
+def test_system_case_35():
+    """
+    Case #35
+    Must riichi.
+    """
+
+    reproducer_command = "python reproducer.py --log 2020112504gm-0089-0000-e125fd6f --player 2 --wind 8 --honba 0 --action draw --n 1 --tile 2s"
+    allowed_discards = ["3s"]
+    with_riichi = True
+
+    result, with_riichi_result = _run_reproducer("35.txt", reproducer_command)
+    assert TilesConverter.to_one_line_string([result]) in allowed_discards
+    assert with_riichi == with_riichi_result
+
+
+def test_system_case_36():
+    """
+    Case #36
+    Must fold with north tiles.
+    """
+
+    reproducer_command = "python reproducer.py --log 2020112504gm-0089-0000-94960883 --player 1 --wind 1 --honba 0 --action draw --n 2 --tile 9p"
+    allowed_discards = ["4z"]
+    with_riichi = False
+
+    result, with_riichi_result = _run_reproducer("36.txt", reproducer_command)
+    assert TilesConverter.to_one_line_string([result]) in allowed_discards
+    assert with_riichi == with_riichi_result
+
+
+def test_system_case_37():
+    """
+    Case #37
+    Must open meld to secure 3rd place.
+    """
+
+    reproducer_command = "python reproducer.py --log 2020112504gm-0029-0000-ca8a957c --player 2 --wind 8 --honba 0 --action enemy_discard --n 1 --tile 4z"
+    needed_meld = {"type": "pon", "tiles": "444z"}
+    tile_after_meld = "1p"
+
+    result_meld, result_tile_after_meld = _run_reproducer("37.txt", reproducer_command)
+    assert result_meld.type == needed_meld["type"]
+    assert TilesConverter.to_one_line_string(result_meld.tiles) == needed_meld["tiles"]
+    assert TilesConverter.to_one_line_string([result_tile_after_meld.tile_to_discard_136]) == tile_after_meld
+
+
+def test_system_case_38():
+    """
+    Case #38
+    It is fine to riichi with that hand.
+    """
+
+    reproducer_command = "python reproducer.py --log 2020112505gm-0089-0000-1a2861c9 --player 3 --wind 5 --honba 0 --action draw --n 1 --tile 9s"
+    allowed_discards = ["8p"]
+    with_riichi = True
+
+    result, with_riichi_result = _run_reproducer("38.txt", reproducer_command)
+    assert TilesConverter.to_one_line_string([result]) in allowed_discards
+    assert with_riichi == with_riichi_result
+
+
+def test_system_case_39():
+    """
+    Case #39
+    Better to fold that hand.
+    """
+
+    reproducer_command = "python reproducer.py --log 2020112507gm-0089-0000-07c68413 --player 0 --wind 4 --honba 0 --action draw --n 2 --tile 4m"
+    allowed_discards = ["3m", "2p", "8p"]
+    with_riichi = False
+
+    result, with_riichi_result = _run_reproducer("39.txt", reproducer_command)
+    assert TilesConverter.to_one_line_string([result]) in allowed_discards
+    assert with_riichi == with_riichi_result

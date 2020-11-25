@@ -27,7 +27,7 @@ class DocGen:
 
         for case in SYSTEM_TESTING_CASES:
             index = case["index"]
-            relative_image_path = (system_testing_folder / "fixtures" / f"{index}.png").relative_to(project_folder)
+            relative_image_path = (system_testing_folder / "fixtures" / f"{index}.jpg").relative_to(project_folder)
 
             doc_content.append(f"## Case {index}")
             if case.get("skip_reason"):

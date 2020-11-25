@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
-    <title>Coverage for project/game/ai/riichi.py: 60%</title>
+    <title>Coverage for project/game/ai/riichi.py: 62%</title>
     <link rel="stylesheet" href="style.css" type="text/css">
     <script type="text/javascript" src="jquery.min.js"></script>
     <script type="text/javascript" src="jquery.hotkeys.js"></script>
@@ -17,13 +17,13 @@
 <div id="header">
     <div class="content">
         <h1>Coverage for <b>project/game/ai/riichi.py</b> :
-            <span class="pc_cov">60%</span>
+            <span class="pc_cov">62%</span>
         </h1>
         <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
         <h2 class="stats">
             185 statements &nbsp;
-            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">111 run</button>
-            <button type="button" class="mis show_mis shortkey_m button_toggle_mis" title="Toggle lines missing">74 missing</button>
+            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">115 run</button>
+            <button type="button" class="mis show_mis shortkey_m button_toggle_mis" title="Toggle lines missing">70 missing</button>
             <button type="button" class="exc show_exc shortkey_x button_toggle_exc" title="Toggle lines excluded">0 excluded</button>
         </h2>
     </div>
@@ -353,11 +353,11 @@
     <p id="t300" class="pln"><span class="n"><a href="#t300">300</a></span><span class="t">            <span class="com"># wait is even better, but still don't call riichi on damaten mangan</span>&nbsp;</span><span class="r"></span></p>
     <p id="t301" class="run"><span class="n"><a href="#t301">301</a></span><span class="t">            <span class="key">if</span> <span class="nam">count_tiles</span> <span class="op">&lt;=</span> <span class="num">6</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t302" class="pln"><span class="n"><a href="#t302">302</a></span><span class="t">                <span class="com"># if it's early riichi more readily</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t303" class="mis show_mis"><span class="n"><a href="#t303">303</a></span><span class="t">                <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">round_step</span> <span class="op">></span> <span class="num">6</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t304" class="mis show_mis"><span class="n"><a href="#t304">304</a></span><span class="t">                    <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">is_dealer</span> <span class="key">and</span> <span class="nam">min_cost</span> <span class="op">>=</span> <span class="num">11600</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t303" class="run"><span class="n"><a href="#t303">303</a></span><span class="t">                <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">round_step</span> <span class="op">></span> <span class="num">6</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t304" class="run"><span class="n"><a href="#t304">304</a></span><span class="t">                    <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">is_dealer</span> <span class="key">and</span> <span class="nam">min_cost</span> <span class="op">>=</span> <span class="num">11600</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t305" class="mis show_mis"><span class="n"><a href="#t305">305</a></span><span class="t">                        <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p id="t306" class="pln"><span class="n"><a href="#t306">306</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p id="t307" class="mis show_mis"><span class="n"><a href="#t307">307</a></span><span class="t">                    <span class="key">if</span> <span class="key">not</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">is_dealer</span> <span class="key">and</span> <span class="nam">min_cost</span> <span class="op">>=</span> <span class="num">7700</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t307" class="run"><span class="n"><a href="#t307">307</a></span><span class="t">                    <span class="key">if</span> <span class="key">not</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">is_dealer</span> <span class="key">and</span> <span class="nam">min_cost</span> <span class="op">>=</span> <span class="num">7700</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t308" class="mis show_mis"><span class="n"><a href="#t308">308</a></span><span class="t">                        <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p id="t309" class="pln"><span class="n"><a href="#t309">309</a></span><span class="t">                <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t310" class="mis show_mis"><span class="n"><a href="#t310">310</a></span><span class="t">                    <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">is_dealer</span> <span class="key">and</span> <span class="nam">min_cost</span> <span class="op">>=</span> <span class="num">18000</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -366,7 +366,7 @@
     <p id="t313" class="mis show_mis"><span class="n"><a href="#t313">313</a></span><span class="t">                    <span class="key">if</span> <span class="key">not</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">is_dealer</span> <span class="key">and</span> <span class="nam">min_cost</span> <span class="op">>=</span> <span class="num">12000</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t314" class="mis show_mis"><span class="n"><a href="#t314">314</a></span><span class="t">                        <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p id="t315" class="pln"><span class="n"><a href="#t315">315</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p id="t316" class="mis show_mis"><span class="n"><a href="#t316">316</a></span><span class="t">                <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t316" class="run"><span class="n"><a href="#t316">316</a></span><span class="t">                <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
     <p id="t317" class="pln"><span class="n"><a href="#t317">317</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t318" class="pln"><span class="n"><a href="#t318">318</a></span><span class="t">            <span class="com"># if wait is good we only damaten haneman</span>&nbsp;</span><span class="r"></span></p>
     <p id="t319" class="run"><span class="n"><a href="#t319">319</a></span><span class="t">            <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">is_dealer</span> <span class="key">and</span> <span class="nam">min_cost</span> <span class="op">>=</span> <span class="num">18000</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -384,7 +384,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v5.3</a>,
-            created at 2020-11-24 22:58 +0000
+            created at 2020-11-25 03:29 +0000
         </p>
     </div>
 </div>

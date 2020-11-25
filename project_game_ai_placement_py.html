@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
-    <title>Coverage for project/game/ai/placement.py: 74%</title>
+    <title>Coverage for project/game/ai/placement.py: 76%</title>
     <link rel="stylesheet" href="style.css" type="text/css">
     <script type="text/javascript" src="jquery.min.js"></script>
     <script type="text/javascript" src="jquery.hotkeys.js"></script>
@@ -17,13 +17,13 @@
 <div id="header">
     <div class="content">
         <h1>Coverage for <b>project/game/ai/placement.py</b> :
-            <span class="pc_cov">74%</span>
+            <span class="pc_cov">76%</span>
         </h1>
         <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
         <h2 class="stats">
             262 statements &nbsp;
-            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">195 run</button>
-            <button type="button" class="mis show_mis shortkey_m button_toggle_mis" title="Toggle lines missing">67 missing</button>
+            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">198 run</button>
+            <button type="button" class="mis show_mis shortkey_m button_toggle_mis" title="Toggle lines missing">64 missing</button>
             <button type="button" class="exc show_exc shortkey_x button_toggle_exc" title="Toggle lines excluded">0 excluded</button>
         </h2>
     </div>
@@ -136,7 +136,7 @@
     <p id="t83" class="mis show_mis"><span class="n"><a href="#t83">83</a></span><span class="t">                    <span class="key">return</span> <span class="nam">Placement</span><span class="op">.</span><span class="nam">MUST_DAMATEN</span>&nbsp;</span><span class="r"></span></p>
     <p id="t84" class="pln"><span class="n"><a href="#t84">84</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t85" class="run"><span class="n"><a href="#t85">85</a></span><span class="t">        <span class="key">if</span> <span class="nam">placement</span><span class="op">[</span><span class="str">"place"</span><span class="op">]</span> <span class="op">==</span> <span class="num">2</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t86" class="mis show_mis"><span class="n"><a href="#t86">86</a></span><span class="t">            <span class="key">if</span> <span class="nam">cost_with_damaten</span> <span class="op">&lt;</span> <span class="nam">placement</span><span class="op">[</span><span class="str">"diff_with_1st"</span><span class="op">]</span> <span class="op">&lt;=</span> <span class="nam">cost_with_riichi</span> <span class="op">*</span> <span class="num">2</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t86" class="run"><span class="n"><a href="#t86">86</a></span><span class="t">            <span class="key">if</span> <span class="nam">cost_with_damaten</span> <span class="op">&lt;</span> <span class="nam">placement</span><span class="op">[</span><span class="str">"diff_with_1st"</span><span class="op">]</span> <span class="op">&lt;=</span> <span class="nam">cost_with_riichi</span> <span class="op">*</span> <span class="num">2</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t87" class="mis show_mis"><span class="n"><a href="#t87">87</a></span><span class="t">                <span class="key">if</span> <span class="nam">placement</span><span class="op">[</span><span class="str">"diff_with_4th"</span><span class="op">]</span> <span class="op">>=</span> <span class="nam">Placement</span><span class="op">.</span><span class="nam">COMFORTABLE_DIFF_FOR_RISK</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t88" class="mis show_mis"><span class="n"><a href="#t88">88</a></span><span class="t">                    <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">logger</span><span class="op">.</span><span class="nam">debug</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p id="t89" class="pln"><span class="n"><a href="#t89">89</a></span><span class="t">                        <span class="nam">log</span><span class="op">.</span><span class="nam">PLACEMENT_RIICHI_OR_DAMATEN</span><span class="op">,</span> <span class="str">"2st place, we are good to risk"</span><span class="op">,</span> <span class="nam">logger_context</span>&nbsp;</span><span class="r"></span></p>
@@ -148,10 +148,10 @@
     <p id="t95" class="pln"><span class="n"><a href="#t95">95</a></span><span class="t">            <span class="com"># we can play more greedy on second place hoping for tsumo, ippatsu or uras</span>&nbsp;</span><span class="r"></span></p>
     <p id="t96" class="pln"><span class="n"><a href="#t96">96</a></span><span class="t">            <span class="com"># moreover riichi cost here is a minimal one</span>&nbsp;</span><span class="r"></span></p>
     <p id="t97" class="run"><span class="n"><a href="#t97">97</a></span><span class="t">            <span class="key">if</span> <span class="nam">placement</span><span class="op">[</span><span class="str">"place"</span><span class="op">]</span> <span class="op">==</span> <span class="num">2</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t98" class="mis show_mis"><span class="n"><a href="#t98">98</a></span><span class="t">                <span class="key">if</span> <span class="nam">placement</span><span class="op">[</span><span class="str">"diff_with_4th"</span><span class="op">]</span> <span class="op">&lt;=</span> <span class="num">1000</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t98" class="run"><span class="n"><a href="#t98">98</a></span><span class="t">                <span class="key">if</span> <span class="nam">placement</span><span class="op">[</span><span class="str">"diff_with_4th"</span><span class="op">]</span> <span class="op">&lt;=</span> <span class="num">1000</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t99" class="mis show_mis"><span class="n"><a href="#t99">99</a></span><span class="t">                    <span class="nam">multiplier</span> <span class="op">=</span> <span class="num">2</span>&nbsp;</span><span class="r"></span></p>
     <p id="t100" class="pln"><span class="n"><a href="#t100">100</a></span><span class="t">                <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t101" class="mis show_mis"><span class="n"><a href="#t101">101</a></span><span class="t">                    <span class="nam">multiplier</span> <span class="op">=</span> <span class="num">4</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t101" class="run"><span class="n"><a href="#t101">101</a></span><span class="t">                    <span class="nam">multiplier</span> <span class="op">=</span> <span class="num">4</span>&nbsp;</span><span class="r"></span></p>
     <p id="t102" class="pln"><span class="n"><a href="#t102">102</a></span><span class="t">            <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t103" class="run"><span class="n"><a href="#t103">103</a></span><span class="t">                <span class="nam">multiplier</span> <span class="op">=</span> <span class="num">2</span>&nbsp;</span><span class="r"></span></p>
     <p id="t104" class="pln"><span class="n"><a href="#t104">104</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -529,7 +529,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v5.3</a>,
-            created at 2020-11-24 22:58 +0000
+            created at 2020-11-25 03:29 +0000
         </p>
     </div>
 </div>

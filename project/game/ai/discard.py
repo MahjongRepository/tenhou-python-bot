@@ -87,6 +87,7 @@ class DiscardOption:
                 "danger_border": self.danger.danger_border,
                 "weighted_cost": self.danger.weighted_cost,
                 "danger_reasons": self.danger.values,
+                "can_be_used_for_ryanmen": self.danger.can_be_used_for_ryanmen,
             },
         }
         if self.ukeire_second:

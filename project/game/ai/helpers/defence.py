@@ -451,6 +451,7 @@ class TileDangerHandler:
     values: dict
     weighted_cost: Optional[int]
     danger_border: dict
+    can_be_used_for_ryanmen: bool
 
     # if we estimate that one's threat cost is less than COST_PERCENT_THRESHOLD of other's
     # we ignore it when choosing tile for fold
@@ -463,6 +464,7 @@ class TileDangerHandler:
         self.values = {1: [], 2: [], 3: []}
         self.weighted_cost = 0
         self.danger_border = {1: {}, 2: {}, 3: {}}
+        self.can_be_used_for_ryanmen: bool = False
 
     def set_danger(self, player_seat, danger):
         self.values[player_seat].append(danger)

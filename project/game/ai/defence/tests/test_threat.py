@@ -260,6 +260,34 @@ def test_threatening_riichi_player_and_not_early_hand_bonus():
     assert threatening_player.get_assumed_hand_cost(string_to_136_tile(man="2")) == 3900
 
 
+def test_threatening_riichi_player_middle_tiles_bonus():
+    table = Table()
+    enemy_seat = 2
+    table.add_called_riichi_step_one(enemy_seat)
+    table.add_called_riichi_step_two(enemy_seat)
+    table.get_player(enemy_seat).is_ippatsu = False
+
+    # +1 scale 456 tiles
+    threatening_player = table.player.ai.defence.get_threatening_players()[0]
+    assert threatening_player.enemy.seat == enemy_seat
+
+    # +1 scale 456 tiles
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(man="4"), can_be_used_for_ryanmen=True) == 3900
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(man="5"), can_be_used_for_ryanmen=True) == 3900
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(man="6"), can_be_used_for_ryanmen=True) == 3900
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(man="5"), can_be_used_for_ryanmen=False) == 3900
+
+    # +1 scare for 2378 tiles that could be used in ryanmen
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(pin="2"), can_be_used_for_ryanmen=True) == 3900
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(pin="2"), can_be_used_for_ryanmen=False) == 2000
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(sou="7"), can_be_used_for_ryanmen=True) == 3900
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(sou="7"), can_be_used_for_ryanmen=False) == 2000
+
+    # not middle tiles
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(man="1"), can_be_used_for_ryanmen=True) == 2000
+    assert threatening_player.get_assumed_hand_cost(string_to_136_tile(pin="9"), can_be_used_for_ryanmen=True) == 2000
+
+
 def test_threatening_riichi_player_and_not_visible_dora():
     table = Table()
     enemy_seat = 2

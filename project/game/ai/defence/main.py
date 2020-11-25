@@ -126,6 +126,7 @@ class TileDangerHandler:
                         discard_candidates,
                         enemy_analyzer.enemy.seat,
                         TileDanger.BONUS_MATAGI_SUJI,
+                        can_be_used_for_ryanmen=True,
                     )
 
                 has_aidayonken = self.is_aidayonken_pattern(enemy_analyzer, tile_34)
@@ -135,6 +136,7 @@ class TileDangerHandler:
                         discard_candidates,
                         enemy_analyzer.enemy.seat,
                         TileDanger.BONUS_AIDAYONKEN,
+                        can_be_used_for_ryanmen=True,
                     )
 
                 early_danger_bonus = self._get_early_danger_bonus(enemy_analyzer, tile_34, has_matagi or has_aidayonken)
@@ -144,6 +146,7 @@ class TileDangerHandler:
                         discard_candidates,
                         enemy_analyzer.enemy.seat,
                         early_danger_bonus,
+                        can_be_used_for_ryanmen=True,
                     )
 
                 self._update_discard_candidate(
@@ -151,6 +154,7 @@ class TileDangerHandler:
                     discard_candidates,
                     enemy_analyzer.enemy.seat,
                     TileDanger.make_unverified_suji_coeff(enemy_analyzer.unverified_suji_coeff),
+                    can_be_used_for_ryanmen=True,
                 )
 
                 if is_dora_connector(tile_136, self.player.table.dora_indicators):
@@ -159,6 +163,7 @@ class TileDangerHandler:
                         discard_candidates,
                         enemy_analyzer.enemy.seat,
                         TileDanger.DORA_CONNECTOR_BONUS,
+                        can_be_used_for_ryanmen=True,
                     )
 
             dora_count = plus_dora(
@@ -203,7 +208,9 @@ class TileDangerHandler:
             if discard_option.danger.get_total_danger_for_player(threatening_player.enemy.seat) == 0:
                 threatening_player_hand_cost = 0
             else:
-                threatening_player_hand_cost = threatening_player.get_assumed_hand_cost(tile_136)
+                threatening_player_hand_cost = threatening_player.get_assumed_hand_cost(
+                    tile_136, discard_option.danger.can_be_used_for_ryanmen
+                )
 
             # fast path: we don't need to calculate all the stuff if this tile is safe against this enemy
             if threatening_player_hand_cost == 0:
@@ -641,9 +648,13 @@ class TileDangerHandler:
 
         return danger
 
-    def _update_discard_candidate(self, tile_34, discard_candidates, player_seat, danger):
+    def _update_discard_candidate(
+        self, tile_34, discard_candidates, player_seat, danger, can_be_used_for_ryanmen=False
+    ):
         for discard_candidate in discard_candidates:
             if discard_candidate.tile_to_discard_34 == tile_34:
+                discard_candidate.danger.can_be_used_for_ryanmen = can_be_used_for_ryanmen
+
                 # we found safe tile, in that case we can ignore all other metrics
                 if TileDanger.is_safe(danger):
                     discard_candidate.danger.clear_danger(player_seat)

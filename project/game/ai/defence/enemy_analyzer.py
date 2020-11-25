@@ -10,7 +10,7 @@ from game.ai.helpers.defence import EnemyDanger, TileDanger
 from game.ai.helpers.possible_forms import PossibleFormsAnalyzer
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_honor, is_terminal, plus_dora
+from mahjong.utils import is_honor, is_terminal, plus_dora, simplify
 from utils.general import separate_tiles_by_suits
 
 
@@ -153,12 +153,12 @@ class EnemyAnalyzer:
 
         return int(melds_han)
 
-    def get_assumed_hand_cost(self, tile_136) -> int:
+    def get_assumed_hand_cost(self, tile_136, can_be_used_for_ryanmen=False) -> int:
         """
         How much the hand could cost
         """
         if self.enemy.in_riichi:
-            return self._calculate_assumed_hand_cost_for_riichi(tile_136)
+            return self._calculate_assumed_hand_cost_for_riichi(tile_136, can_be_used_for_ryanmen)
         return self._calculate_assumed_hand_cost(tile_136)
 
     @property
@@ -244,8 +244,9 @@ class EnemyAnalyzer:
 
         return scale[scale_index - 1]
 
-    def _calculate_assumed_hand_cost_for_riichi(self, tile_136) -> int:
+    def _calculate_assumed_hand_cost_for_riichi(self, tile_136, can_be_used_for_ryanmen) -> int:
         scale_index = 0
+        tile_34 = tile_136 // 4
 
         if self.enemy.is_dealer:
             scale = [2900, 5800, 7700, 12000, 12000, 18000, 18000, 24000, 24000, 48000]
@@ -290,8 +291,8 @@ class EnemyAnalyzer:
                 scale_index += plus_dora(tile, self.table.dora_indicators, add_aka_dora=self.table.has_aka_dora)
 
             # higher danger for yakuhai
-            tile_34 = meld.tiles[0] // 4
-            scale_index += len([x for x in self.enemy.valued_honors if x == tile_34])
+            tile_meld_34 = meld.tiles[0] // 4
+            scale_index += len([x for x in self.enemy.valued_honors if x == tile_meld_34])
 
         # let's add more danger for all other opened kan sets on the table
         for other_player in self.table.players:
@@ -301,6 +302,17 @@ class EnemyAnalyzer:
             for meld in other_player.melds:
                 if meld.type == Meld.KAN or meld.type == Meld.SHOUMINKAN:
                     scale_index += 1
+
+        # additional danger for tiles that could be used for tanyao
+        if not is_honor(tile_34):
+            # +1 here to make it more readable
+            simplified_tile = simplify(tile_34) + 1
+
+            if simplified_tile in [4, 5, 6]:
+                scale_index += 1
+
+            if simplified_tile in [2, 3, 7, 8] and can_be_used_for_ryanmen:
+                scale_index += 1
 
         if scale_index > len(scale) - 1:
             scale_index = len(scale) - 1

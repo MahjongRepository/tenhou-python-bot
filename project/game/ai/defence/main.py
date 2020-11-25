@@ -653,7 +653,8 @@ class TileDangerHandler:
     ):
         for discard_candidate in discard_candidates:
             if discard_candidate.tile_to_discard_34 == tile_34:
-                discard_candidate.danger.can_be_used_for_ryanmen = can_be_used_for_ryanmen
+                if can_be_used_for_ryanmen:
+                    discard_candidate.danger.can_be_used_for_ryanmen = can_be_used_for_ryanmen
 
                 # we found safe tile, in that case we can ignore all other metrics
                 if TileDanger.is_safe(danger):

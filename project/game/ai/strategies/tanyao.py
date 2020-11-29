@@ -116,7 +116,7 @@ class TanyaoStrategy(BaseStrategy):
         return True
 
     def determine_what_to_discard(self, discard_options, hand, open_melds):
-        is_open_hand = len(open_melds) > 0
+        is_open_hand = self.player.is_open_hand
 
         # our hand is closed, we don't need to discard terminal tiles here
         if not is_open_hand:

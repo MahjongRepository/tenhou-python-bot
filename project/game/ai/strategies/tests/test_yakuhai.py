@@ -570,3 +570,20 @@ def test_tempai_with_open_yakuhai_meld_and_yakuhai_pair_in_the_hand():
 
     discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "6s"
+
+
+def test_tempai_with_closed_kan():
+    """
+    there was a bug where bot didn't handle tempai properly
+    with closed kan which was viewed as open one and thus open hand
+    """
+    table = Table()
+    player = table.player
+
+    tiles = string_to_136_array(man="56", pin="4444", sou="223789", honors="55")
+    player.init_hand(tiles)
+    player.table.add_called_meld(player.seat, make_meld(MeldPrint.KAN, False, pin="4444"))
+    player.draw_tile(string_to_136_tile(sou="1"))
+
+    discarded_tile, _ = player.discard_tile()
+    assert tiles_to_string([discarded_tile]) == "2s"

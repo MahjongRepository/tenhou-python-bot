@@ -152,7 +152,7 @@ class YakuhaiStrategy(BaseStrategy):
         return False
 
     def determine_what_to_discard(self, discard_options, hand, open_melds):
-        is_open_hand = len(open_melds) > 0
+        is_open_hand = self.player.is_open_hand
 
         tiles_34 = TilesConverter.to_34_array(hand)
 

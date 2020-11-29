@@ -79,7 +79,6 @@ class DiscardOption:
             "tile": TilesConverter.to_one_line_string(
                 [self.tile_to_discard_136], print_aka_dora=self.player.table.has_aka_dora
             ),
-            "with_riichi": self.with_riichi,
             "shanten": self.shanten,
             "ukeire": self.ukeire,
             "valuation": self.valuation,
@@ -94,6 +93,8 @@ class DiscardOption:
                 "can_be_used_for_ryanmen": self.danger.can_be_used_for_ryanmen,
             },
         }
+        if self.shanten == 0:
+            data["with_riichi"] = self.with_riichi
         if self.ukeire_second:
             data["ukeire2"] = self.ukeire_second
         if self.average_second_level_waits:

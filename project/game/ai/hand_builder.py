@@ -241,6 +241,21 @@ class HandBuilder:
         results = self.player.ai.hand_divider.divide_hand(tiles_34, self.player.melds)
         return results, tiles_34
 
+    def emulate_discard(self, discard_option):
+        player_tiles_original = self.player.tiles[:]
+        player_discards_original = self.player.discards[:]
+
+        tile_in_hand = discard_option.find_tile_in_hand(self.player.closed_hand)
+
+        self.player.discards.append(Tile(tile_in_hand, False))
+        self.player.tiles.remove(tile_in_hand)
+
+        return player_tiles_original, player_discards_original
+
+    def restore_after_emulate_discard(self, tiles_original, discards_original):
+        self.player.tiles = tiles_original
+        self.player.discards = discards_original
+
     def check_suji_and_kabe(self, tiles_34, waiting):
         # let's find suji-traps in our discard
         suji_tiles = self.player.ai.suji.find_suji([x.value for x in self.player.discards])
@@ -264,13 +279,7 @@ class HandBuilder:
 
         # we are going to do manipulations that require player hand and discards to be updated
         # so we save original tiles and discards here and restore it at the end of the function
-        player_tiles_original = self.player.tiles[:]
-        player_discards_original = self.player.discards[:]
-
-        tile_in_hand = discard_option.find_tile_in_hand(self.player.closed_hand)
-
-        self.player.discards.append(Tile(tile_in_hand, False))
-        self.player.tiles.remove(tile_in_hand)
+        player_tiles_original, player_discards_original = self.emulate_discard(discard_option)
 
         sum_tiles = 0
         sum_cost = 0
@@ -363,8 +372,7 @@ class HandBuilder:
                 discard_option.average_second_level_cost = int(sum(average_costs) / len(average_costs))
 
         # restore original state of player hand and discards
-        self.player.tiles = player_tiles_original
-        self.player.discards = player_discards_original
+        self.restore_after_emulate_discard(player_tiles_original, player_discards_original)
 
     def _decide_if_use_chiitoitsu(self, shanten_with_chiitoitsu, shanten_without_chiitoitsu):
         # if it's late get 1-shanten for chiitoitsu instead of 2-shanten for another hand

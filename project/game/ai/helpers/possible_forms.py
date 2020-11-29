@@ -66,23 +66,27 @@ class PossibleFormsAnalyzer:
                 # ryanmen
                 if 0 <= y <= 2:
                     if not (tile_34_index + 3) in safe_tiles:
-                        forms_count[self.POSSIBLE_RYANMEN] = (4 - suit[y + 1]) * (4 - suit[y + 2])
-                        forms_count[self.POSSIBLE_RYANMEN_SIDES] = 1
+                        forms_right = (4 - suit[y + 1]) * (4 - suit[y + 2])
+                        if forms_right != 0:
+                            forms_count[self.POSSIBLE_RYANMEN_SIDES] = 1
+                            forms_count[self.POSSIBLE_RYANMEN] = (4 - suit[y + 1]) * (4 - suit[y + 2])
                 elif 3 <= y <= 5:
                     if not (tile_34_index - 3) in safe_tiles:
                         forms_left = (4 - suit[y - 1]) * (4 - suit[y - 2])
                         if forms_left != 0:
                             forms_count[self.POSSIBLE_RYANMEN_SIDES] += 1
-                        forms_count[self.POSSIBLE_RYANMEN] += forms_left
+                            forms_count[self.POSSIBLE_RYANMEN] += forms_left
                     if not (tile_34_index + 3) in safe_tiles:
                         forms_right = (4 - suit[y + 1]) * (4 - suit[y + 2])
                         if forms_right != 0:
                             forms_count[self.POSSIBLE_RYANMEN_SIDES] += 1
-                        forms_count[self.POSSIBLE_RYANMEN] += forms_right
+                            forms_count[self.POSSIBLE_RYANMEN] += forms_right
                 else:
                     if not (tile_34_index - 3) in safe_tiles:
-                        forms_count[self.POSSIBLE_RYANMEN] = (4 - suit[y - 1]) * (4 - suit[y - 2])
-                        forms_count[self.POSSIBLE_RYANMEN_SIDES] = 1
+                        forms_left = (4 - suit[y - 1]) * (4 - suit[y - 2])
+                        if forms_left != 0:
+                            forms_count[self.POSSIBLE_RYANMEN] = (4 - suit[y - 1]) * (4 - suit[y - 2])
+                            forms_count[self.POSSIBLE_RYANMEN_SIDES] = 1
 
         for tile_34_index in range(EAST, 34):
             if closed_hand_34[tile_34_index] == 0:

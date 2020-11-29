@@ -1,26 +1,36 @@
 .idea
 env
 
+failed_*.txt
+
 *.py[cod]
 __pycache__
 .DS_Store
+.pytest_cache
 logs
-project/settings_local.py
-project/*_settings.py
+project/settings/*
+!project/settings/__init__.py
+!project/settings/base.py
 project/game/ai/common
 
-tests_validate_hand.py
+test_validate_hand.py
 loader.py
-socket_mock.py
 *.db
 temp
 *.log
+seeds.txt
 
 project/game/data/*
 project/analytics/data/*
+
+project/battle_results/**/*
+*.tar.gz
 
 # temporary files
 experiments
 
 *.prof
 profile.py
+
+.coverage
+htmlcov

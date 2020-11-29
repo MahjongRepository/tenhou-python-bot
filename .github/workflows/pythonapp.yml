@@ -1,0 +1,55 @@
+name: Mahjong bot
+
+on:
+  push:
+    branches: [master, dev]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.8'
+      - name: Install libs
+        run: pip install -r requirements/lint.txt
+      - name: Lint files
+        run: make lint
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.8'
+      - name: Install libs
+        run: pip install -r requirements/lint.txt
+      - name: Generate coverage report
+        run: make tests_coverage
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@3.7.1
+        with:
+          GITHUB_TOKEN: ${{ secrets.PASSWORD }}
+          BRANCH: gh-pages # The branch the action should deploy to.
+          FOLDER: htmlcov # The folder the action should deploy.
+          CLEAN: true # Automatically remove deleted files from the deploy branch
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8, 3.9]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install libs
+        run: pip install -r requirements/dev.txt
+      - name: Run tests
+        run: make tests

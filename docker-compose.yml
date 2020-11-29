@@ -1,0 +1,59 @@
+version: '3'
+
+services:
+  bot1:
+    image: mahjong_bot
+    volumes:
+      - ./project/:/app
+    command: pypy3 main.py -s bot_1_settings
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '5'
+  bot2:
+    image: mahjong_bot
+    volumes:
+      - ./project/:/app
+    command: pypy3 main.py -s bot_2_settings
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '5'
+  bot3:
+    image: mahjong_bot
+    volumes:
+      - ./project/:/app
+    command: pypy3 main.py -s bot_3_settings
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '5'
+  bot4:
+    image: mahjong_bot
+    volumes:
+      - ./project/:/app
+    command: pypy3 main.py -s bot_4_settings
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '5'
+#  bot5:
+#    image: mahjong_bot
+#    volumes:
+#      - ./project/:/app
+#    command: pypy3 main.py -s bot_5_settings
+#    restart: always
+#    logging:
+#      driver: json-file
+#      options:
+#        max-size: '10m'
+#        max-file: '5'
+

@@ -1,0 +1,9 @@
+-r ./base.txt
+
+# for bots battle
+tqdm==4.51.0
+
+# for unit tests
+pytest==6.1.2
+pytest-xdist==2.1.0
+pytest-cov==2.10.1

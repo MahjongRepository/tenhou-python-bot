@@ -1,23 +1,21 @@
-# -*- coding: utf-8 -*-
-import logging
-import copy
+from typing import Optional
+
 import utils.decisions_constants as log
-
-from mahjong.constants import EAST, SOUTH, WEST, NORTH, CHUN, HAKU, HATSU
-from mahjong.meld import Meld
-from mahjong.tile import TilesConverter, Tile
-
-from utils.decisions_logger import DecisionsLogger
-from utils.settings_handler import settings
-
-logger = logging.getLogger('tenhou')
+from game.ai.configs.default import BotDefaultConfig
+from game.ai.main import MahjongAI
+from mahjong.constants import CHUN, EAST, HAKU, HATSU, NORTH, SOUTH, WEST
+from mahjong.tile import Tile, TilesConverter
+from utils.decisions_logger import DecisionsLogger, MeldPrint
 
 
-class PlayerInterface(object):
+class PlayerInterface:
     table = None
     discards = None
+    tiles = None
     melds = None
-    in_riichi = None
+    in_riichi: bool = False
+    is_ippatsu: bool = False
+    riichi_called_on_step: int = 0
     round_step = None
 
     # current player seat
@@ -32,49 +30,62 @@ class PlayerInterface(object):
     scores = None
     uma = 0
 
-    name = ''
-    rank = ''
+    name = ""
+    rank = ""
+
+    logger = None
 
     def __init__(self, table, seat, dealer_seat):
         self.table = table
         self.seat = seat
         self.dealer_seat = dealer_seat
+        self.logger = DecisionsLogger()
 
         self.erase_state()
 
     def __str__(self):
-        result = u'{0}'.format(self.name)
+        result = "{0}".format(self.name)
         if self.scores is not None:
-            result += u' ({:,d})'.format(int(self.scores))
+            result += " ({:,d})".format(int(self.scores))
             if self.uma:
-                result += u' {0}'.format(self.uma)
+                result += " {0}".format(self.uma)
         else:
-            result += u' ({0})'.format(self.rank)
+            result += " ({0})".format(self.rank)
         return result
 
     def __repr__(self):
         return self.__str__()
 
+    def init_logger(self, logger):
+        self.logger.logger = logger
+
     def erase_state(self):
+        self.tiles = []
         self.discards = []
         self.melds = []
         self.in_riichi = False
+        self.is_ippatsu = False
         self.position = 0
         self.scores = None
         self.uma = 0
         self.round_step = 0
+        self.riichi_called_on_step = 0
 
-    def add_called_meld(self, meld: Meld):
+    def add_called_meld(self, meld: MeldPrint):
         # we already added shouminkan as a pon set
-        if meld.type == Meld.CHANKAN:
+        if meld.type == MeldPrint.SHOUMINKAN:
             tile_34 = meld.tiles[0] // 4
 
-            pon_set = [x for x in self.melds if x.type == Meld.PON and (x.tiles[0] // 4) == tile_34]
+            pon_set = [x for x in self.melds if x.type == MeldPrint.PON and (x.tiles[0] // 4) == tile_34]
 
             # when we are doing reconnect and we have called shouminkan set
             # we will not have called pon set in the hand
             if pon_set:
                 self.melds.remove(pon_set[0])
+
+        # we need to add tile that we used for open can to the hand
+        if meld.type == MeldPrint.KAN and meld.opened:
+            self.tiles.append(meld.called_tile)
 
         self.melds.append(meld)
 
@@ -93,7 +104,8 @@ class PlayerInterface(object):
 
     @property
     def player_wind(self):
-        position = self.dealer_seat
+        shift = self.dealer_seat - self.seat
+        position = [0, 1, 2, 3][shift]
         if position == 0:
             return EAST
         elif position == 1:
@@ -129,33 +141,37 @@ class PlayerInterface(object):
         Array of array with 34 tiles indices
         :return: array
         """
-        melds = [x.tiles for x in self.melds]
-        melds = copy.deepcopy(melds)
+        melds = [x.tiles[:] for x in self.melds]
         results = []
         for meld in melds:
-            results.append([meld[0] // 4, meld[1] // 4, meld[2] // 4])
+            meld_34 = [meld[0] // 4, meld[1] // 4, meld[2] // 4]
+            # kan
+            if len(meld) > 3:
+                meld_34.append(meld[3] // 4)
+            results.append(meld_34)
         return results
+
+    @property
+    def valued_honors(self):
+        return [CHUN, HAKU, HATSU, self.table.round_wind_tile, self.player_wind]
 
 
 class Player(PlayerInterface):
-    ai = None
-    tiles = None
+    ai: Optional[MahjongAI] = None
+    config: Optional[BotDefaultConfig] = None
     last_draw = None
     in_tempai = False
-    in_defence_mode = False
 
-    def __init__(self, table, seat, dealer_seat):
+    def __init__(self, table, seat, dealer_seat, bot_config: Optional[BotDefaultConfig]):
         super().__init__(table, seat, dealer_seat)
-
-        self.ai = settings.AI_CLASS(self)
+        self.config = bot_config or BotDefaultConfig()
+        self.ai = MahjongAI(self)
 
     def erase_state(self):
         super().erase_state()
 
-        self.tiles = []
         self.last_draw = None
         self.in_tempai = False
-        self.in_defence_mode = False
 
         if self.ai:
             self.ai.erase_state()
@@ -166,15 +182,15 @@ class Player(PlayerInterface):
         self.ai.init_hand()
 
     def draw_tile(self, tile_136):
-        DecisionsLogger.debug(
-            log.DRAW,
-            context=[
-                'Step: {}'.format(self.round_step),
-                'Hand: {}'.format(self.format_hand_for_print(tile_136)),
-                'In defence: {}'.format(self.ai.in_defence),
-                'Current strategy: {}'.format(self.ai.current_strategy)
-            ]
-        )
+        context = [
+            f"Step: {self.round_step}",
+            f"Remaining tiles: {self.table.count_of_remaining_tiles}",
+            f"Hand: {self.format_hand_for_print(tile_136)}",
+        ]
+        if self.ai.current_strategy:
+            context.append(f"Current strategy: {self.ai.current_strategy}")
+
+        self.logger.debug(log.DRAW, context=context)
 
         self.last_draw = tile_136
         self.tiles.append(tile_136)
@@ -184,13 +200,11 @@ class Player(PlayerInterface):
 
         self.ai.draw_tile(tile_136)
 
-    def discard_tile(self, discard_tile=None):
-        """
-        :param discard_tile: 136 tile format
-        :return:
-        """
-
-        tile_to_discard = self.ai.discard_tile(discard_tile)
+    def discard_tile(self, discard_tile=None, force_tsumogiri=False):
+        if force_tsumogiri:
+            tile_to_discard = discard_tile
+        else:
+            tile_to_discard = self.ai.discard_tile(discard_tile)
 
         is_tsumogiri = tile_to_discard == self.last_draw
         # it is important to use table method,
@@ -205,21 +219,24 @@ class Player(PlayerInterface):
         return result and self.ai.should_call_riichi()
 
     def formal_riichi_conditions(self):
-        return all([
-            self.in_tempai,
-
-            not self.in_riichi,
-            not self.is_open_hand,
-
-            self.scores >= 1000,
-            self.table.count_of_remaining_tiles > 4
-        ])
+        return all(
+            [
+                self.in_tempai,
+                not self.in_riichi,
+                not self.is_open_hand,
+                self.scores >= 1000,
+                self.table.count_of_remaining_tiles > 4,
+            ]
+        )
 
     def should_call_kan(self, tile, open_kan, from_riichi=False):
-        return self.ai.should_call_kan(tile, open_kan, from_riichi)
+        return self.ai.kan.should_call_kan(tile, open_kan, from_riichi)
 
-    def should_call_win(self, tile, enemy_seat):
-        return self.ai.should_call_win(tile, enemy_seat)
+    def should_call_win(self, tile, is_tsumo, enemy_seat=None, is_chankan=False):
+        return self.ai.should_call_win(tile, is_tsumo, enemy_seat, is_chankan)
+
+    def should_call_kyuushu_kyuuhai(self):
+        return self.ai.should_call_kyuushu_kyuuhai()
 
     def try_to_call_meld(self, tile, is_kamicha_discard):
         return self.ai.try_to_call_meld(tile, is_kamicha_discard)
@@ -227,29 +244,35 @@ class Player(PlayerInterface):
     def enemy_called_riichi(self, player_seat):
         self.ai.enemy_called_riichi(player_seat)
 
-    def total_tiles(self, tile, tiles_34):
+    def number_of_revealed_tiles(self, tile_34, closed_hand_34):
         """
         Return sum of all tiles (discarded + from melds + our hand)
-        :param tile: 34 tile format
-        :param tiles_34: cached list of tiles (to not build it for each iteration)
+        :param tile_34: 34 tile format
+        :param closed_hand_34: cached list of tiles (to not build it for each iteration)
         :return: int
         """
-        revealed_tiles = tiles_34[tile] + self.table.revealed_tiles[tile]
-        assert revealed_tiles <= 4, 'we have only 4 tiles in the game'
+        revealed_tiles = closed_hand_34[tile_34] + self.table.revealed_tiles[tile_34]
+        assert revealed_tiles <= 4, "we have only 4 tiles in the game"
         return revealed_tiles
 
     def format_hand_for_print(self, tile_136=None):
-        hand_string = '{}'.format(TilesConverter.to_one_line_string(self.closed_hand))
+        hand_string = "{}".format(
+            TilesConverter.to_one_line_string(self.closed_hand, print_aka_dora=self.table.has_aka_dora)
+        )
 
         if tile_136 is not None:
-            hand_string += ' + {}'.format(TilesConverter.to_one_line_string([tile_136]))
+            hand_string += " + {}".format(
+                TilesConverter.to_one_line_string([tile_136], print_aka_dora=self.table.has_aka_dora)
+            )
 
         melds = []
         for item in self.melds:
-            melds.append('{}'.format(TilesConverter.to_one_line_string(item.tiles)))
+            melds.append(
+                "{}".format(TilesConverter.to_one_line_string(item.tiles, print_aka_dora=self.table.has_aka_dora))
+            )
 
         if melds:
-            hand_string += ' [{}]'.format(', '.join(melds))
+            hand_string += " [{}]".format(", ".join(melds))
 
         return hand_string
 
@@ -257,10 +280,6 @@ class Player(PlayerInterface):
     def closed_hand(self):
         tiles = self.tiles[:]
         return [item for item in tiles if item not in self.meld_tiles]
-
-    @property
-    def valued_honors(self):
-        return [CHUN, HAKU, HATSU, self.table.round_wind_tile, self.player_wind]
 
 
 class EnemyPlayer(PlayerInterface):
@@ -270,11 +289,14 @@ class EnemyPlayer(PlayerInterface):
     # so, for example kamicha discard will be a safe tile for all players
     temporary_safe_tiles = None
 
+    riichi_tile_136 = None
+
     def erase_state(self):
         super().erase_state()
 
         self.safe_tiles = []
         self.temporary_safe_tiles = []
+        self.riichi_tile_136 = None
 
     def add_discarded_tile(self, tile: Tile):
         super().add_discarded_tile(tile)

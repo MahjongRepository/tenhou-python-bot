@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
-from mahjong.constants import EAST, SOUTH, WEST, NORTH
-from mahjong.meld import Meld
-from mahjong.tile import TilesConverter, Tile
-from mahjong.utils import plus_dora, is_aka_dora
+from game.player import EnemyPlayer, Player
+from mahjong.constants import EAST, NORTH, SOUTH, WEST
+from mahjong.tile import Tile, TilesConverter
+from mahjong.utils import plus_dora
+from utils.decisions_logger import MeldPrint
+from utils.general import is_sangenpai
 
-from game.player import Player, EnemyPlayer
 
-
-class Table(object):
+class Table:
     # our bot
     player = None
     # main bot + all other players
@@ -28,40 +27,32 @@ class Table(object):
 
     # array of tiles in 34 format
     revealed_tiles = None
+    revealed_tiles_136 = None
 
-    has_open_tanyao = False
-    has_aka_dora = False
+    # bot is playing mainly with ari-ari rules, so we can have them as default
+    has_open_tanyao = True
+    has_aka_dora = True
 
-    def __init__(self):
-        self._init_players()
+    latest_riichi_player_seat = None
+
+    def __init__(self, bot_config=None):
+        self._init_players(bot_config)
         self.dora_indicators = []
         self.revealed_tiles = [0] * 34
+        self.revealed_tiles_136 = []
 
     def __str__(self):
-        dora_string = TilesConverter.to_one_line_string(self.dora_indicators)
-
-        round_settings = {
-            EAST:  ['e', 0],
-            SOUTH: ['s', 3],
-            WEST:  ['w', 7]
-        }.get(self.round_wind_tile)
-
-        round_string, round_diff = round_settings
-        display_round = '{}{}'.format(round_string, (self.round_wind_number + 1) - round_diff)
-
-        return 'Round: {}, Honba: {}, Dora Indicators: {}'.format(
-            display_round,
-            self.count_of_honba_sticks,
-            dora_string
+        dora_string = TilesConverter.to_one_line_string(
+            self.dora_indicators, print_aka_dora=self.player.table.has_aka_dora
         )
 
-    def init_round(self,
-                   round_wind_number,
-                   count_of_honba_sticks,
-                   count_of_riichi_sticks,
-                   dora_indicator,
-                   dealer_seat,
-                   scores):
+        return "Wind: {}, Honba: {}, Dora Indicators: {}".format(
+            self.round_number, self.count_of_honba_sticks, dora_string
+        )
+
+    def init_round(
+        self, round_wind_number, count_of_honba_sticks, count_of_riichi_sticks, dora_indicator, dealer_seat, scores
+    ):
 
         # we need it to properly display log for each round
         self.round_number += 1
@@ -73,6 +64,7 @@ class Table(object):
         self.count_of_riichi_sticks = count_of_riichi_sticks
 
         self.revealed_tiles = [0] * 34
+        self.revealed_tiles_136 = []
 
         self.dora_indicators = []
         self.add_dora_indicator(dora_indicator)
@@ -95,6 +87,13 @@ class Table(object):
                 player.first_seat = seats[i - dealer_seat]
                 i += 1
 
+        self.latest_riichi_player_seat = None
+
+    def erase_state(self):
+        self.dora_indicators = []
+        self.revealed_tiles = [0] * 34
+        self.revealed_tiles_136 = []
+
     def add_called_meld(self, player_seat, meld):
         self.meld_was_called = True
 
@@ -103,11 +102,11 @@ class Table(object):
             # but if it's an opened kan, player will get a tile from
             # a dead wall, so total number of tiles in the wall is the same
             # as if he just draws a tile
-            if meld.type != Meld.KAN:
+            if meld.type != MeldPrint.KAN and meld.type != meld.SHOUMINKAN:
                 self.count_of_remaining_tiles += 1
         else:
             # can't have a pon or chi from the hand
-            assert meld.type == Meld.KAN or meld.type == meld.CHANKAN
+            assert meld.type == MeldPrint.KAN or meld.type == meld.SHOUMINKAN
             # player draws additional tile from the wall in case of closed kan or shouminkan
             self.count_of_remaining_tiles -= 1
 
@@ -120,18 +119,36 @@ class Table(object):
             tiles.remove(meld.called_tile)
 
         # for shouminkan we already added 3 tiles
-        if meld.type == meld.CHANKAN:
+        if meld.type == meld.SHOUMINKAN:
             tiles = [meld.tiles[0]]
 
         for tile in tiles:
             self._add_revealed_tile(tile)
 
-    def add_called_riichi(self, player_seat):
-        self.get_player(player_seat).in_riichi = True
+        for player in self.players:
+            player.is_ippatsu = False
+
+    def add_called_riichi_step_one(self, player_seat):
+        """
+        We need to mark player in riichi to properly defence against his riichi tile discard
+        """
+        player = self.get_player(player_seat)
+        player.in_riichi = True
 
         # we had to check will we go for defence or not
         if player_seat != 0:
             self.player.enemy_called_riichi(player_seat)
+            self.latest_riichi_player_seat = player_seat
+
+    def add_called_riichi_step_two(self, player_seat):
+        player = self.get_player(player_seat)
+
+        if player.scores is not None:
+            player.scores -= 1000
+
+        player.is_ippatsu = True
+        player.riichi_called_on_step = len(player.discards)
+        self.count_of_riichi_sticks += 1
 
     def add_discarded_tile(self, player_seat, tile_136, is_tsumogiri):
         """
@@ -139,20 +156,27 @@ class Table(object):
         :param tile_136: 136 format tile
         :param is_tsumogiri: was tile discarded from hand or not
         """
-        self.count_of_remaining_tiles -= 1
+        if player_seat != 0:
+            self.count_of_remaining_tiles -= 1
 
         tile = Tile(tile_136, is_tsumogiri)
-        self.get_player(player_seat).add_discarded_tile(tile)
+        player = self.get_player(player_seat)
+        player.add_discarded_tile(tile)
 
-        # cache already revealed tiles
-        self._add_revealed_tile(tile.value)
+        self._add_revealed_tile(tile_136)
+
+        if self.latest_riichi_player_seat == player_seat:
+            self.latest_riichi_player_seat = None
+            player.riichi_tile_136 = tile_136
+
+        player.is_ippatsu = False
 
     def add_dora_indicator(self, tile):
         self.dora_indicators.append(tile)
         self._add_revealed_tile(tile)
 
     def is_dora(self, tile):
-        return plus_dora(tile, self.dora_indicators) or is_aka_dora(tile, self.has_open_tanyao)
+        return plus_dora(tile, self.dora_indicators, add_aka_dora=self.has_aka_dora)
 
     def set_players_scores(self, scores, uma=None):
         for i in range(0, len(scores)):
@@ -171,8 +195,8 @@ class Table(object):
 
     def set_players_names_and_ranks(self, values):
         for x in range(0, len(values)):
-            self.get_player(x).name = values[x]['name']
-            self.get_player(x).rank = values[x]['rank']
+            self.get_player(x).name = values[x]["name"]
+            self.get_player(x).rank = values[x]["rank"]
 
     def get_player(self, player_seat):
         return self.players[player_seat]
@@ -191,12 +215,20 @@ class Table(object):
         else:
             return NORTH
 
-    def _add_revealed_tile(self, tile):
-        tile //= 4
-        self.revealed_tiles[tile] += 1
+    def is_common_yakuhai(self, tile_34):
+        return is_sangenpai(tile_34) or tile_34 == self.round_wind_tile
 
-    def _init_players(self,):
-        self.player = Player(self, 0, self.dealer_seat)
+    def _add_revealed_tile(self, tile):
+        self.revealed_tiles_136.append(tile)
+        tile_34 = tile // 4
+        self.revealed_tiles[tile_34] += 1
+
+        assert (
+            self.revealed_tiles[tile_34] <= 4
+        ), f"we have only 4 tiles in the game: {TilesConverter.to_one_line_string([tile])}"
+
+    def _init_players(self, bot_config):
+        self.player = Player(self, 0, self.dealer_seat, bot_config)
 
         self.players = [self.player]
         for seat in range(1, self.count_of_players):

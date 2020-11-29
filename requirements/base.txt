@@ -1,0 +1,8 @@
+# our core library
+mahjong==1.2.0.dev5
+
+# to send information about games to statistics server
+requests==2.24.0
+
+# to capture crash logs
+sentry-sdk==0.19.2

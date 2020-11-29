@@ -211,8 +211,8 @@ SYSTEM_TESTING_CASES = [
         "description": "",
         "reproducer_command": "python reproducer.py --log 2020102620gm-0089-0000-c558d68c --player Kaavi --wind 1 --honba 2 --action draw --n 2 --tile 4p",
         "action": ACTION_DISCARD,
-        "allowed_discards": ["3s"],
-        "with_riichi": False,
+        "allowed_discards": ["3s", "8p", "3p", "2p"],
+        "with_riichi": True,
     },
     {
         "index": 27,

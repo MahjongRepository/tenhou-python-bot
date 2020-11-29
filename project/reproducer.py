@@ -105,8 +105,7 @@ class TenhouLogReproducer:
                         table.player.should_call_kan(tile, open_kan=False, from_riichi=table.player.in_riichi)
 
                         if not table.player.in_riichi:
-                            discard_result = table.player.discard_tile()
-                            with_riichi = table.player.can_call_riichi()
+                            discard_result, with_riichi = table.player.discard_tile()
 
                         return discard_result, with_riichi
 

@@ -22,6 +22,8 @@ class DiscardOption:
 
     # in 136 tile format
     tile_to_discard_136 = None
+    # are we calling riichi on this tile or not
+    with_riichi = None
     # array of tiles that will improve our hand
     waiting = None
     # how much tiles will improve our hand
@@ -51,6 +53,7 @@ class DiscardOption:
     def __init__(self, player, tile_to_discard_136, shanten, waiting, ukeire, wait_to_ukeire=None):
         self.player = player
         self.tile_to_discard_136 = tile_to_discard_136
+        self.with_riichi = False
         self.shanten = shanten
         self.waiting = waiting
         self.ukeire = ukeire
@@ -76,6 +79,7 @@ class DiscardOption:
             "tile": TilesConverter.to_one_line_string(
                 [self.tile_to_discard_136], print_aka_dora=self.player.table.has_aka_dora
             ),
+            "with_riichi": self.with_riichi,
             "shanten": self.shanten,
             "ukeire": self.ukeire,
             "valuation": self.valuation,

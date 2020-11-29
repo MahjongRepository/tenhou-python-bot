@@ -151,7 +151,7 @@ def test_correct_discard_agari_no_yaku():
 
     tile = string_to_136_tile(sou="1")
     player.draw_tile(tile)
-    discard = player.discard_tile()
+    discard, _ = player.discard_tile()
     assert tiles_to_string([discard]) == "1s"
 
 

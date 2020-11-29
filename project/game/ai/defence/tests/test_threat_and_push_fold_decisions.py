@@ -7,7 +7,7 @@ from project.utils.test_helpers import make_meld
 
 
 def test_calculate_our_hand_cost():
-    table = Table()
+    table = _make_table()
     player = table.player
     enemy_seat = 2
     table.add_called_riichi_step_one(enemy_seat)
@@ -23,7 +23,7 @@ def test_calculate_our_hand_cost():
 
 
 def test_calculate_our_hand_cost_1_shanten():
-    table = Table()
+    table = _make_table()
     player = table.player
     enemy_seat = 2
 
@@ -58,7 +58,7 @@ def test_calculate_our_hand_cost_1_shanten():
 
 
 def test_calculate_our_hand_cost_1_shanten_karaten():
-    table = Table()
+    table = _make_table()
     player = table.player
     enemy_seat = 2
 
@@ -104,7 +104,7 @@ def test_calculate_our_hand_cost_1_shanten_karaten():
 
 
 def test_dont_open_bad_hand_if_there_are_expensive_threat():
-    table = Table()
+    table = _make_table()
     table.add_dora_indicator(string_to_136_tile(man="4"))
     player = table.player
     player.round_step = 10
@@ -137,7 +137,7 @@ def test_dont_open_bad_hand_if_there_are_expensive_threat():
 
 
 def test_dont_open_bad_hand_if_there_are_multiple_threats():
-    table = Table()
+    table = _make_table()
     table.add_dora_indicator(string_to_136_tile(man="4"))
     player = table.player
     player.round_step = 10
@@ -158,3 +158,11 @@ def test_dont_open_bad_hand_if_there_are_multiple_threats():
     # let's not push in that case
     meld, _ = player.try_to_call_meld(tile, False)
     assert meld is None
+
+
+def _make_table():
+    table = Table()
+    table.init_round(1, 0, 0, string_to_136_tile(honors="4"), 0, [250, 250, 250, 250])
+    # with that we don't have daburi anymore
+    table.player.round_step = 1
+    return table

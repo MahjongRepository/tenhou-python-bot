@@ -104,7 +104,7 @@ def test_open_hand_and_discard_tiles_logic():
 
     tile = string_to_136_tile(man="1")
     player.draw_tile(tile)
-    tile_to_discard = player.discard_tile()
+    tile_to_discard, _ = player.discard_tile()
 
     # we are in honitsu mode, so we should discard man suits
     assert tiles_to_string([tile_to_discard]) == "1m"
@@ -120,7 +120,7 @@ def test_riichi_and_tiles_from_another_suit_in_the_hand():
     player.init_hand(tiles)
 
     player.draw_tile(string_to_136_tile(man="9"))
-    tile_to_discard = player.discard_tile()
+    tile_to_discard, _ = player.discard_tile()
 
     # we don't need to go for honitsu here
     # we already in tempai
@@ -141,7 +141,7 @@ def test_discard_not_needed_winds():
     table.add_discarded_tile(1, string_to_136_tile(honors="3"), False)
     table.add_discarded_tile(1, string_to_136_tile(honors="3"), False)
 
-    tile_to_discard = player.discard_tile()
+    tile_to_discard, _ = player.discard_tile()
 
     # west was discarded three times, we don't need it
     assert tiles_to_string([tile_to_discard]) == "3z"
@@ -156,7 +156,7 @@ def test_discard_not_effective_tiles_first():
     tiles = string_to_136_array(man="33", pin="12788999", sou="5", honors="77")
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(honors="6"))
-    tile_to_discard = player.discard_tile()
+    tile_to_discard, _ = player.discard_tile()
 
     assert tiles_to_string([tile_to_discard]) == "5s"
 
@@ -170,7 +170,7 @@ def test_discard_not_effective_tiles_first_not_honitsu():
     tiles = string_to_136_array(man="33", pin="12788999", sou="5", honors="23")
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(honors="6"))
-    tile_to_discard = player.discard_tile()
+    tile_to_discard, _ = player.discard_tile()
 
     # this is not really a honitsu
     assert tiles_to_string([tile_to_discard]) == "2z" or tiles_to_string([tile_to_discard]) == "3z"
@@ -205,7 +205,7 @@ def test_open_hand_and_not_go_for_chiitoitsu():
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(pin="4"))
 
-    tile = player.discard_tile()
+    tile, _ = player.discard_tile()
     assert tiles_to_string([tile]) == "4p"
 
     tile = string_to_136_tile(honors="5")

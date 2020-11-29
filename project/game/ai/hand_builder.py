@@ -3,7 +3,6 @@ from typing import List
 import utils.decisions_constants as log
 from game.ai.discard import DiscardOption
 from game.ai.helpers.kabe import Kabe
-from mahjong.constants import AKA_DORA_LIST
 from mahjong.shanten import Shanten
 from mahjong.tile import Tile, TilesConverter
 from mahjong.utils import is_honor, is_pair, is_terminal, is_tile_strictly_isolated, plus_dora, simplify
@@ -20,7 +19,31 @@ class HandBuilder:
 
     def discard_tile(self):
         selected_tile = self.choose_tile_to_discard()
-        return self.process_discard_option(selected_tile, self.player.closed_hand)
+        return self.process_discard_option(selected_tile)
+
+    def formal_riichi_conditions_for_discard(self, discard_option):
+        remaining_tiles = self.player.table.count_of_remaining_tiles
+        scores = self.player.scores
+
+        return all(
+            [
+                # <= 0 because technically riichi from agari is possible
+                discard_option.shanten <= 0,
+                not self.player.in_riichi,
+                not self.player.is_open_hand,
+                # in some tests this value may be not initialized
+                scores and scores >= 1000 or False,
+                remaining_tiles and remaining_tiles > 4 or False,
+            ]
+        )
+
+    def mark_tiles_riichi_decision(self, discard_options):
+        for discard_option in discard_options:
+            if not self.formal_riichi_conditions_for_discard(discard_option):
+                continue
+
+            if self.player.ai.riichi.should_call_riichi(discard_option):
+                discard_option.with_riichi = True
 
     def choose_tile_to_discard(self, after_meld=False):
         """
@@ -33,6 +56,9 @@ class HandBuilder:
         discard_options, min_shanten = self.find_discard_options()
         if min_shanten == Shanten.AGARI_STATE:
             min_shanten = min([x.shanten for x in discard_options])
+
+        if not after_meld:
+            self.mark_tiles_riichi_decision(discard_options)
 
         one_shanten_ukeire2_calculated_beforehand = False
         if self.player.config.FEATURE_DEFENCE_ENABLED:
@@ -107,7 +133,7 @@ class HandBuilder:
 
         return self._choose_best_discard_with_4_or_more_shanten(results_with_same_shanten)
 
-    def process_discard_option(self, discard_option, closed_hand, force_discard=False):
+    def process_discard_option(self, discard_option):
         self.player.logger.debug(log.DISCARD, context=discard_option)
 
         self.player.in_tempai = discard_option.shanten == 0
@@ -116,15 +142,7 @@ class HandBuilder:
         self.ai.ukeire = discard_option.ukeire
         self.ai.ukeire_second = discard_option.ukeire_second
 
-        # when we called meld we don't need "smart" discard
-        if force_discard:
-            return discard_option.find_tile_in_hand(closed_hand)
-
-        last_draw_34 = self.player.last_draw and self.player.last_draw // 4 or None
-        if self.player.last_draw not in AKA_DORA_LIST and last_draw_34 == discard_option.tile_to_discard_34:
-            return self.player.last_draw
-        else:
-            return discard_option.find_tile_in_hand(closed_hand)
+        return discard_option.tile_to_discard_136, discard_option.with_riichi
 
     def calculate_shanten_and_decide_hand_structure(self, closed_hand_34):
         shanten_without_chiitoitsu = self.ai.calculate_shanten_or_get_from_cache(closed_hand_34, use_chiitoitsu=False)
@@ -275,7 +293,7 @@ class HandBuilder:
         self._assert_hand_correctness()
 
         not_suitable_tiles = self.ai.current_strategy and self.ai.current_strategy.not_suitable_tiles or []
-        call_riichi = not (self.player.is_open_hand or after_meld)
+        call_riichi = discard_option.with_riichi
 
         # we are going to do manipulations that require player hand and discards to be updated
         # so we save original tiles and discards here and restore it at the end of the function
@@ -555,22 +573,13 @@ class HandBuilder:
         return is_furiten
 
     def _choose_best_discard_in_tempai(self, discard_options, after_meld):
-        # first of all we find tiles that have the best hand cost * ukeire value
-        call_riichi = not (self.player.is_open_hand or after_meld)
-
         discard_desc = []
-        player_tiles_copy = self.player.tiles[:]
 
         closed_tiles_34 = TilesConverter.to_34_array(self.player.closed_hand)
 
         for discard_option in discard_options:
-            tile = discard_option.find_tile_in_hand(self.player.closed_hand)
-            # temporary remove discard option to estimate hand value
-            self.player.tiles = player_tiles_copy[:]
-            self.player.tiles.remove(tile)
-            # for kabe/suji handling
-            discarded_tile = Tile(tile, False)
-            self.player.discards.append(discarded_tile)
+            call_riichi = discard_option.with_riichi
+            tiles_original, discard_original = self.emulate_discard(discard_option)
 
             is_furiten = self._is_discard_option_furiten(discard_option)
 
@@ -659,8 +668,7 @@ class HandBuilder:
             discard_option.tempai_descriptor = tempai_descriptor
 
             # reverse all temporary tile tweaks
-            self.player.tiles = player_tiles_copy
-            self.player.discards.remove(discarded_tile)
+            self.restore_after_emulate_discard(tiles_original, discard_original)
 
         discard_desc = sorted(discard_desc, key=lambda k: (-k["cost_x_ukeire"], k["is_furiten"], k["weighted_danger"]))
 

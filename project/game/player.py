@@ -203,8 +203,9 @@ class Player(PlayerInterface):
     def discard_tile(self, discard_tile=None, force_tsumogiri=False):
         if force_tsumogiri:
             tile_to_discard = discard_tile
+            with_riichi = False
         else:
-            tile_to_discard = self.ai.discard_tile(discard_tile)
+            tile_to_discard, with_riichi = self.ai.discard_tile(discard_tile)
 
         is_tsumogiri = tile_to_discard == self.last_draw
         # it is important to use table method,
@@ -212,12 +213,9 @@ class Player(PlayerInterface):
         self.table.add_discarded_tile(0, tile_to_discard, is_tsumogiri)
         self.tiles.remove(tile_to_discard)
 
-        return tile_to_discard
+        return tile_to_discard, with_riichi
 
-    def can_call_riichi(self):
-        result = self.formal_riichi_conditions()
-        return result and self.ai.should_call_riichi()
-
+    # FIXME: remove this method and cleanup tests
     def formal_riichi_conditions(self):
         return all(
             [

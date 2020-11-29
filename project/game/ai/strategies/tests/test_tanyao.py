@@ -164,7 +164,7 @@ def test_open_hand_and_discard_tiles_logic():
 
     tile = string_to_136_tile(pin="5")
     table.player.draw_tile(tile)
-    tile_to_discard = table.player.discard_tile()
+    tile_to_discard, _ = table.player.discard_tile()
 
     assert tiles_to_string([tile_to_discard]) == "4z"
 
@@ -185,7 +185,7 @@ def test_open_hand_and_discard_tiles_logic_advanced():
     table.player.add_called_meld(meld)
     tile = string_to_136_tile(man="6")
     table.player.draw_tile(tile)
-    tile_to_discard = table.player.discard_tile()
+    tile_to_discard, _ = table.player.discard_tile()
     assert tiles_to_string([tile_to_discard]) == "2m" or tiles_to_string([tile_to_discard]) == "3m"
 
     # now same situation, but better ryanmen is no atodzuke
@@ -201,7 +201,7 @@ def test_open_hand_and_discard_tiles_logic_advanced():
     table.player.add_called_meld(meld)
     tile = string_to_136_tile(man="6")
     table.player.draw_tile(tile)
-    tile_to_discard = table.player.discard_tile()
+    tile_to_discard, _ = table.player.discard_tile()
     assert (
         tiles_to_string([tile_to_discard]) == "5s"
         or tiles_to_string([tile_to_discard]) == "6s"
@@ -224,7 +224,7 @@ def test_open_hand_and_discard_tiles_logic_advanced():
     table.player.add_called_meld(meld)
     tile = string_to_136_tile(man="8")
     table.player.draw_tile(tile)
-    tile_to_discard = table.player.discard_tile()
+    tile_to_discard, _ = table.player.discard_tile()
     assert (
         tiles_to_string([tile_to_discard]) == "2m"
         or tiles_to_string([tile_to_discard]) == "3m"
@@ -255,7 +255,7 @@ def test_we_cant_win_with_this_hand():
     table.player.add_called_meld(meld)
 
     table.player.draw_tile(string_to_136_tile(sou="1"))
-    discard = table.player.discard_tile()
+    discard, _ = table.player.discard_tile()
     # but for already open hand we cant do tsumo
     # because we don't have a yaku here
     # so, let's do tsumogiri
@@ -272,7 +272,7 @@ def test_choose_correct_waiting():
     _assert_tanyao(table.player)
 
     # discard 5p and riichi
-    discard = table.player.discard_tile()
+    discard, _ = table.player.discard_tile()
     assert tiles_to_string([discard]) == "5p"
 
     meld = make_meld(MeldPrint.CHI, man="234")
@@ -284,7 +284,7 @@ def test_choose_correct_waiting():
 
     # it is not a good idea to wait on 1-4, since we can't win on 1 with open hand
     # so let's continue to wait on 4 only
-    discard = table.player.discard_tile()
+    discard, _ = table.player.discard_tile()
     assert tiles_to_string([discard]) == "2p"
 
     table = _make_table()
@@ -298,7 +298,7 @@ def test_choose_correct_waiting():
     player.draw_tile(string_to_136_tile(sou="7"))
 
     # we can wait only on 1-4, so let's do it even if we can't get yaku on 1
-    discard = player.discard_tile()
+    discard, _ = player.discard_tile()
     assert tiles_to_string([discard]) == "7s"
 
 
@@ -317,7 +317,7 @@ def test_choose_balanced_ukeire_in_1_shanten():
 
     # there are lost of options to avoid atodzuke and even if it is atodzuke,
     # it is still a good one, so let's choose more efficient 8s discard instead of 2s
-    discard = player.discard_tile()
+    discard, _ = player.discard_tile()
     assert tiles_to_string([discard]) == "8s"
 
 
@@ -340,7 +340,7 @@ def test_choose_pseudo_atodzuke():
 
     _assert_tanyao(player)
 
-    discard = player.discard_tile()
+    discard, _ = player.discard_tile()
     assert tiles_to_string([discard]) == "5p"
 
 
@@ -354,7 +354,7 @@ def test_choose_correct_waiting_and_first_opened_meld():
 
     _assert_tanyao(table.player)
 
-    discard = table.player.discard_tile(tile_to_discard)
+    discard, _ = table.player.discard_tile(tile_to_discard)
     assert tiles_to_string([discard]) == "2m"
 
 
@@ -365,7 +365,7 @@ def test_we_dont_need_to_discard_terminals_from_closed_hand():
 
     tile = string_to_136_tile(pin="5")
     table.player.draw_tile(tile)
-    tile_to_discard = table.player.discard_tile()
+    tile_to_discard, _ = table.player.discard_tile()
 
     # our hand is closed, let's keep terminal for now
     assert tiles_to_string([tile_to_discard]) == "8p"
@@ -409,7 +409,7 @@ def test_dont_count_terminal_tiles_in_ukeire():
     tiles = string_to_136_array(man="234578", sou="235", pin="2246")
     table.player.init_hand(tiles)
     table.player.draw_tile(string_to_136_tile(pin="5"))
-    discard = table.player.discard_tile()
+    discard, _ = table.player.discard_tile()
     assert (
         tiles_to_string([discard]) == "5m" or tiles_to_string([discard]) == "2m" or tiles_to_string([discard]) == "5s"
     )
@@ -419,7 +419,7 @@ def test_dont_count_terminal_tiles_in_ukeire():
     table.player.init_hand(tiles)
     table.player.add_called_meld(make_meld(MeldPrint.CHI, man="234"))
     table.player.draw_tile(string_to_136_tile(pin="5"))
-    discard = table.player.discard_tile()
+    discard, _ = table.player.discard_tile()
     assert tiles_to_string([discard]) == "8m"
 
 
@@ -450,7 +450,7 @@ def test_correct_discard_agari_no_yaku():
 
     tile = string_to_136_tile(man="1")
     table.player.draw_tile(tile)
-    discard = table.player.discard_tile()
+    discard, _ = table.player.discard_tile()
     assert tiles_to_string([discard]) == "1m"
 
 

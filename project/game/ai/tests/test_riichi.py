@@ -9,9 +9,9 @@ def test_dont_call_riichi_with_yaku_and_central_tanki_wait():
     tiles = string_to_136_array(sou="234567", pin="234567", man="4")
     table.player.init_hand(tiles)
     table.player.draw_tile(string_to_136_tile(man="5"))
-    table.player.discard_tile()
+    _, with_riichi = table.player.discard_tile()
 
-    assert table.player.can_call_riichi() is False
+    assert with_riichi is False
 
 
 def test_dont_call_riichi_expensive_damaten_with_yaku():
@@ -27,22 +27,22 @@ def test_dont_call_riichi_expensive_damaten_with_yaku():
     tiles = string_to_136_array(man="67888", sou="678", pin="34678")
     table.player.init_hand(tiles)
     table.player.draw_tile(string_to_136_tile(honors="3"))
-    table.player.discard_tile()
-    assert table.player.can_call_riichi() is False
+    _, with_riichi = table.player.discard_tile()
+    assert with_riichi is False
 
     # let's test lots of doras hand, tanyao dora 8, also damaten baiman
     tiles = string_to_136_array(man="666888", sou="22", pin="34678")
     table.player.init_hand(tiles)
     table.player.draw_tile(string_to_136_tile(honors="3"))
-    table.player.discard_tile()
-    assert table.player.can_call_riichi() is False
+    _, with_riichi = table.player.discard_tile()
+    assert with_riichi is False
 
     # chuuren
     tiles = string_to_136_array(man="1112345678999")
     table.player.init_hand(tiles)
     table.player.draw_tile(string_to_136_tile(honors="3"))
-    table.player.discard_tile()
-    assert table.player.can_call_riichi() is False
+    _, with_riichi = table.player.discard_tile()
+    assert with_riichi is False
 
 
 def test_riichi_expensive_hand_without_yaku():
@@ -57,8 +57,8 @@ def test_riichi_expensive_hand_without_yaku():
     tiles = string_to_136_array(man="222", sou="22278", pin="22789")
     table.player.init_hand(tiles)
     table.player.draw_tile(string_to_136_tile(honors="3"))
-    table.player.discard_tile()
-    assert table.player.can_call_riichi() is True
+    _, with_riichi = table.player.discard_tile()
+    assert with_riichi is True
 
 
 def test_riichi_tanki_honor_without_yaku():
@@ -67,8 +67,8 @@ def test_riichi_tanki_honor_without_yaku():
     tiles = string_to_136_array(man="345678", sou="789", pin="123", honors="2")
     table.player.init_hand(tiles)
     table.player.draw_tile(string_to_136_tile(honors="3"))
-    table.player.discard_tile()
-    assert table.player.can_call_riichi() is True
+    _, with_riichi = table.player.discard_tile()
+    assert with_riichi is True
 
 
 def test_riichi_tanki_honor_chiitoitsu():
@@ -77,8 +77,8 @@ def test_riichi_tanki_honor_chiitoitsu():
     tiles = string_to_136_array(man="22336688", sou="99", pin="99", honors="2")
     table.player.init_hand(tiles)
     table.player.draw_tile(string_to_136_tile(honors="3"))
-    table.player.discard_tile()
-    assert table.player.can_call_riichi() is True
+    _, with_riichi = table.player.discard_tile()
+    assert with_riichi is True
 
 
 def test_always_call_daburi():
@@ -88,9 +88,9 @@ def test_always_call_daburi():
     tiles = string_to_136_array(sou="234567", pin="234567", man="4")
     table.player.init_hand(tiles)
     table.player.draw_tile(string_to_136_tile(man="5"))
-    table.player.discard_tile()
+    _, with_riichi = table.player.discard_tile()
 
-    assert table.player.can_call_riichi() is True
+    assert with_riichi is True
 
 
 def test_dont_call_karaten_tanki_riichi():
@@ -104,8 +104,8 @@ def test_dont_call_karaten_tanki_riichi():
         table.add_discarded_tile(1, string_to_136_tile(honors="3"), False)
 
     table.player.draw_tile(string_to_136_tile(honors="3"))
-    table.player.discard_tile()
-    assert table.player.can_call_riichi() is False
+    _, with_riichi = table.player.discard_tile()
+    assert with_riichi is False
 
 
 def test_dont_call_karaten_ryanmen_riichi():
@@ -125,8 +125,8 @@ def test_dont_call_karaten_ryanmen_riichi():
         table.add_discarded_tile(1, string_to_136_tile(sou="9"), False)
 
     table.player.draw_tile(string_to_136_tile(honors="3"))
-    table.player.discard_tile()
-    assert table.player.can_call_riichi() is False
+    _, with_riichi = table.player.discard_tile()
+    assert with_riichi is False
 
 
 def test_call_riichi_penchan_with_suji():
@@ -139,9 +139,9 @@ def test_call_riichi_penchan_with_suji():
     tiles = string_to_136_array(sou="11223", pin="234567", man="66")
     table.player.init_hand(tiles)
     table.player.draw_tile(string_to_136_tile(sou="6"))
-    table.player.discard_tile()
+    _, with_riichi = table.player.discard_tile()
 
-    assert table.player.can_call_riichi() is True
+    assert with_riichi is True
 
 
 def test_call_riichi_tanki_with_kabe():
@@ -160,9 +160,9 @@ def test_call_riichi_tanki_with_kabe():
     tiles = string_to_136_array(sou="1119", pin="234567", man="666")
     table.player.init_hand(tiles)
     table.player.draw_tile(string_to_136_tile(honors="1"))
-    table.player.discard_tile()
+    _, with_riichi = table.player.discard_tile()
 
-    assert table.player.can_call_riichi() is True
+    assert with_riichi is True
 
 
 def test_call_riichi_chiitoitsu_with_suji():
@@ -180,8 +180,8 @@ def test_call_riichi_chiitoitsu_with_suji():
     table.player.add_discarded_tile(Tile(string_to_136_tile(sou="6"), True))
 
     table.player.draw_tile(string_to_136_tile(honors="3"))
-    table.player.discard_tile()
-    assert table.player.can_call_riichi() is True
+    _, with_riichi = table.player.discard_tile()
+    assert with_riichi is True
 
 
 def test_dont_call_riichi_chiitoitsu_bad_wait():
@@ -198,8 +198,8 @@ def test_dont_call_riichi_chiitoitsu_bad_wait():
     table.player.init_hand(tiles)
 
     table.player.draw_tile(string_to_136_tile(honors="3"))
-    table.player.discard_tile()
-    assert table.player.can_call_riichi() is False
+    _, with_riichi = table.player.discard_tile()
+    assert with_riichi is False
 
 
 def _make_table(dora_indicators=None):

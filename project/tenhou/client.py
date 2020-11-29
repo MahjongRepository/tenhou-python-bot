@@ -313,11 +313,10 @@ class TenhouClient(Client):
                         )
                         continue
 
-                    discarded_tile = self.player.discard_tile()
-                    can_call_riichi = main_player.can_call_riichi()
+                    discarded_tile, with_riichi = self.player.discard_tile()
 
                     # let's call riichi
-                    if can_call_riichi:
+                    if with_riichi:
                         self._random_sleep(1, 1.5)
                         self._send_message('<REACH hai="{}" />'.format(discarded_tile))
                         main_player.in_riichi = True
@@ -364,7 +363,8 @@ class TenhouClient(Client):
                     # we had to do discard after this
                     if meld.who == 0:
                         if meld.type != MeldPrint.KAN and meld.type != MeldPrint.SHOUMINKAN:
-                            discarded_tile = self.player.discard_tile(tile_to_discard)
+                            discarded_tile, with_riichi = self.player.discard_tile(tile_to_discard)
+                            assert not with_riichi
 
                             self.player.tiles.append(meld_tile)
                             self._send_message('<D p="{}"/>'.format(discarded_tile))

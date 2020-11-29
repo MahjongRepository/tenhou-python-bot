@@ -49,7 +49,7 @@ def test_get_tempai():
     table.player.init_hand(tiles)
     table.player.add_called_meld(meld)
 
-    tile_to_discard = table.player.discard_tile()
+    tile_to_discard, _ = table.player.discard_tile()
     assert tiles_to_string([tile_to_discard]) == "8s"
 
 

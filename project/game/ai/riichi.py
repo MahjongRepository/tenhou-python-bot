@@ -7,33 +7,47 @@ class Riichi:
     def __init__(self, player):
         self.player = player
 
-    def should_call_riichi(self):
+    def should_call_riichi(self, discard_option):
+        assert discard_option.shanten == 0
+        assert not self.player.is_open_hand
+
+        hand_builder = self.player.ai.hand_builder
+
+        waiting = discard_option.waiting
         # empty waiting can be found in some cases
-        if not self.player.ai.waiting:
+        if not waiting:
             return False
 
-        # don't call karaten riichi
-        count_tiles = self.player.ai.hand_builder.count_tiles(
-            self.player.ai.waiting, TilesConverter.to_34_array(self.player.closed_hand)
-        )
+        # save original hand state
+        # we will restore it after we have finished our routines
+        tiles_original, discards_original = hand_builder.emulate_discard(discard_option)
+
+        count_tiles = hand_builder.count_tiles(waiting, TilesConverter.to_34_array(self.player.closed_hand))
         if count_tiles == 0:
-            return False
+            # don't call karaten riichi
+            should_riichi = False
+        else:
+            # we decide if we should riichi or not before making a discard, hence we check for round step == 0
+            first_discard = self.player.round_step == 0
+            if first_discard and not self.player.table.meld_was_called:
+                # it is daburi!
+                should_riichi = True
+            else:
+                # regular path
+                if len(waiting) == 1:
+                    should_riichi = self._should_call_riichi_one_sided(waiting)
+                else:
+                    should_riichi = self._should_call_riichi_many_sided(waiting)
 
-        # it is daburi!
-        first_discard = self.player.round_step == 1
-        if first_discard and not self.player.table.meld_was_called:
-            return True
+        hand_builder.restore_after_emulate_discard(tiles_original, discards_original)
 
-        if len(self.player.ai.waiting) == 1:
-            return self._should_call_riichi_one_sided()
+        return should_riichi
 
-        return self._should_call_riichi_many_sided()
-
-    def _should_call_riichi_one_sided(self):
+    def _should_call_riichi_one_sided(self, waiting):
         count_tiles = self.player.ai.hand_builder.count_tiles(
-            self.player.ai.waiting, TilesConverter.to_34_array(self.player.closed_hand)
+            waiting, TilesConverter.to_34_array(self.player.closed_hand)
         )
-        waiting = self.player.ai.waiting[0]
+        waiting = waiting[0]
         hand_value = self.player.ai.estimate_hand_value_or_get_from_cache(waiting, call_riichi=False)
         hand_value_with_riichi = self.player.ai.estimate_hand_value_or_get_from_cache(waiting, call_riichi=True)
 
@@ -249,21 +263,21 @@ class Riichi:
 
         return True
 
-    def _should_call_riichi_many_sided(self):
+    def _should_call_riichi_many_sided(self, waiting):
         count_tiles = self.player.ai.hand_builder.count_tiles(
-            self.player.ai.waiting, TilesConverter.to_34_array(self.player.closed_hand)
+            waiting, TilesConverter.to_34_array(self.player.closed_hand)
         )
         hand_costs = []
         hand_costs_with_riichi = []
         waits_with_yaku = 0
-        for waiting in self.player.ai.waiting:
-            hand_value = self.player.ai.estimate_hand_value_or_get_from_cache(waiting, call_riichi=False)
+        for wait in waiting:
+            hand_value = self.player.ai.estimate_hand_value_or_get_from_cache(wait, call_riichi=False)
             if hand_value.error is None:
                 hand_costs.append(hand_value.cost["main"])
                 if hand_value.yaku is not None and hand_value.cost is not None:
                     waits_with_yaku += 1
 
-            hand_value_with_riichi = self.player.ai.estimate_hand_value_or_get_from_cache(waiting, call_riichi=True)
+            hand_value_with_riichi = self.player.ai.estimate_hand_value_or_get_from_cache(wait, call_riichi=True)
             if hand_value_with_riichi.error is None:
                 hand_costs_with_riichi.append(hand_value_with_riichi.cost["main"])
 
@@ -271,7 +285,7 @@ class Riichi:
         min_cost_with_riichi = hand_costs_with_riichi and min(hand_costs_with_riichi) or 0
 
         must_riichi = self.player.ai.placement.must_riichi(
-            has_yaku=waits_with_yaku == len(self.player.ai.waiting),
+            has_yaku=waits_with_yaku == len(waiting),
             num_waits=count_tiles,
             cost_with_riichi=min_cost_with_riichi,
             cost_with_damaten=min_cost,
@@ -282,7 +296,7 @@ class Riichi:
             return False
 
         # if we have yaku on every wait
-        if waits_with_yaku == len(self.player.ai.waiting):
+        if waits_with_yaku == len(waiting):
             # let's not riichi this bad wait
             if count_tiles <= 2:
                 return False

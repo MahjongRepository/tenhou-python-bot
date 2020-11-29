@@ -369,8 +369,8 @@ def test_system_case_26():
     """
 
     reproducer_command = "python reproducer.py --log 2020102620gm-0089-0000-c558d68c --player Kaavi --wind 1 --honba 2 --action draw --n 2 --tile 4p"
-    allowed_discards = ["3s"]
-    with_riichi = False
+    allowed_discards = ["3s", "8p", "3p", "2p"]
+    with_riichi = True
 
     result, with_riichi_result = _run_reproducer("26.txt", reproducer_command)
     assert TilesConverter.to_one_line_string([result]) in allowed_discards

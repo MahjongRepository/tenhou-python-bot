@@ -107,7 +107,7 @@ def test_tempai_without_yaku():
     meld = make_meld(MeldPrint.CHI, sou="678")
     table.player.add_called_meld(meld)
 
-    discard = table.player.discard_tile()
+    discard, _ = table.player.discard_tile()
     assert tiles_to_string([discard]) != "7z"
 
 
@@ -374,7 +374,7 @@ def test_keep_yakuhai_in_closed_hand():
     tile = string_to_136_tile(honors="3")
     table.player.draw_tile(tile)
 
-    discard = table.player.discard_tile()
+    discard, _ = table.player.discard_tile()
     assert tiles_to_string([discard]) != "7z"
 
 
@@ -395,7 +395,7 @@ def test_keep_only_yakuhai_pon():
     assert strategy.should_activate_strategy(player.tiles) is True
 
     player.draw_tile(string_to_136_tile(man="4"))
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) != "7z"
 
 
@@ -418,7 +418,7 @@ def test_keep_only_yakuhai_pair():
     assert strategy.should_activate_strategy(player.tiles) is True
 
     player.draw_tile(string_to_136_tile(pin="1"))
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) != "7z"
 
 
@@ -443,7 +443,7 @@ def test_atodzuke_keep_yakuhai_wait():
     assert strategy.should_activate_strategy(player.tiles) is True
 
     player.draw_tile(string_to_136_tile(man="2"))
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "2m"
 
 
@@ -547,7 +547,7 @@ def test_atodzuke_choose_hidden_syanpon():
         table.add_discarded_tile(1, string_to_136_tile(sou="9"), False)
 
     player.draw_tile(string_to_136_tile(sou="6"))
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) != "6s"
     assert tiles_to_string([discarded_tile]) == "5s" or tiles_to_string([discarded_tile]) == "8s"
 
@@ -568,5 +568,5 @@ def test_tempai_with_open_yakuhai_meld_and_yakuhai_pair_in_the_hand():
 
     player.ai.current_strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
 
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "6s"

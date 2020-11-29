@@ -43,6 +43,8 @@ def find_discard_option(player, sou="", pin="", man="", honors=""):
     tile = string_to_136_tile(sou=sou, pin=pin, man=man, honors=honors)
     discard_option = [x for x in discard_options if x.tile_to_discard_34 == tile // 4][0]
 
+    player.ai.hand_builder.mark_tiles_riichi_decision(discard_options)
+
     for x in discard_options:
         if x.shanten in [1]:
             player.ai.hand_builder.calculate_second_level_ukeire(x)

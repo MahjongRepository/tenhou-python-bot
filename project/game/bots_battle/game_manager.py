@@ -328,13 +328,16 @@ class GameManager:
 
             # if not in riichi, let's decide what tile to discard
             if not current_client.player.in_riichi:
-                tile = current_client.player.discard_tile()
+                tile, with_riichi = current_client.player.discard_tile()
                 in_tempai = current_client.player.in_tempai
+                if with_riichi:
+                    assert in_tempai
             else:
-                tile = current_client.player.discard_tile(drawn_tile, force_tsumogiri=True)
+                tile, with_riichi = current_client.player.discard_tile(drawn_tile, force_tsumogiri=True)
+                assert not with_riichi
 
             who_called_riichi_seat = None
-            if in_tempai and not current_client.player.is_open_hand and current_client.player.can_call_riichi():
+            if in_tempai and not current_client.player.is_open_hand and with_riichi:
                 who_called_riichi_seat = current_client.seat
                 for client in self.clients:
                     client.table.add_called_riichi_step_one(self._enemy_position(who_called_riichi_seat, client.seat))
@@ -465,7 +468,8 @@ class GameManager:
 
                 self.replay.open_meld(meld)
                 current_client.player.tiles.append(tile)
-                discarded_tile = current_client.player.discard_tile(discard_option)
+                discarded_tile, with_riichi = current_client.player.discard_tile(discard_option)
+                assert not with_riichi
 
                 self.replay.discard(current_client.seat, discarded_tile)
 

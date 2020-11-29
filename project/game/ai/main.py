@@ -101,9 +101,9 @@ class MahjongAI:
         # we called meld and we had discard tile that we wanted to discard
         if discard_tile is not None:
             if not self.last_discard_option:
-                return discard_tile
+                return discard_tile, False
 
-            return self.hand_builder.process_discard_option(self.last_discard_option, self.player.closed_hand, True)
+            return self.hand_builder.process_discard_option(self.last_discard_option)
 
         return self.hand_builder.discard_tile()
 
@@ -297,7 +297,7 @@ class MahjongAI:
             tiles.remove(discard_option.find_tile_in_hand(self.player.closed_hand))
 
             hand_cost = self.estimate_hand_value_or_get_from_cache(
-                waiting, tiles=tiles, call_riichi=not self.player.is_open_hand, is_tsumo=True
+                waiting, tiles=tiles, call_riichi=discard_option.with_riichi, is_tsumo=True
             )
 
             if not hand_cost.cost:
@@ -319,16 +319,6 @@ class MahjongAI:
             cost = 2500
 
         return cost
-
-    def should_call_riichi(self):
-        should_riichi = self.riichi.should_call_riichi()
-
-        if should_riichi:
-            self.player.logger.debug(log.RIICHI, "Decided to riichi.")
-        else:
-            self.player.logger.debug(log.RIICHI, "Decided to stay damaten.")
-
-        return should_riichi
 
     def should_call_kyuushu_kyuuhai(self) -> bool:
         """

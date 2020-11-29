@@ -17,22 +17,22 @@ def test_discard_tile():
     player.init_hand(tiles)
     player.draw_tile(tile)
 
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "9m" or tiles_to_string([discarded_tile]) == "9p"
     assert player.ai.shanten == 2
 
     player.draw_tile(string_to_136_tile(pin="4"))
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "1p"
     assert player.ai.shanten == 2
 
     player.draw_tile(string_to_136_tile(pin="3"))
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "9p" or tiles_to_string([discarded_tile]) == "9m"
     assert player.ai.shanten == 1
 
     player.draw_tile(string_to_136_tile(man="4"))
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "5m"
     assert player.ai.shanten == 0
 
@@ -49,7 +49,7 @@ def test_discard_tile_force_tsumogiri():
     player.init_hand(tiles)
     player.draw_tile(tile)
 
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert discarded_tile == tile
 
     # add not red five pin
@@ -59,7 +59,7 @@ def test_discard_tile_force_tsumogiri():
     player.init_hand(tiles)
     player.draw_tile(tile)
 
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     # WE DON'T NEED TO DISCARD RED FIVE
     assert discarded_tile != tile
 
@@ -242,7 +242,7 @@ def test_discard_not_valuable_honor_first():
     tiles = string_to_136_array(sou="123456", pin="123455", man="9", honors="2")
     player.init_hand(tiles)
 
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "2z"
 
 
@@ -257,7 +257,7 @@ def test_slide_set_to_keep_dora_in_hand():
     player.draw_tile(tile)
 
     # 2p is a dora, we had to keep it
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "4p"
 
 
@@ -274,7 +274,7 @@ def test_keep_aka_dora_in_hand():
     player.draw_tile(FIVE_RED_SOU)
 
     # we had to keep red five and discard just 5s
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert discarded_tile != FIVE_RED_SOU
 
 
@@ -286,7 +286,7 @@ def test_dont_keep_honor_with_small_number_of_shanten():
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(honors="7"))
 
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "7z"
 
 
@@ -299,7 +299,7 @@ def test_prefer_valuable_tiles_with_almost_same_ukeire():
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(sou="5"))
 
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "1s"
 
 
@@ -312,7 +312,7 @@ def test_discard_less_valuable_isolated_tile_first():
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(sou="7"))
 
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     # we have a choice what to discard: 9p or 8m
     # 9p is less valuable
     assert tiles_to_string([discarded_tile]) == "9p"
@@ -321,7 +321,7 @@ def test_discard_less_valuable_isolated_tile_first():
     tiles = string_to_136_array(sou="2456", pin="129", man="234458")
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(sou="7"))
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     # but if 9p is dora
     # let's discard 8m instead
     assert tiles_to_string([discarded_tile]) == "8m"
@@ -336,7 +336,7 @@ def test_discard_tile_with_max_ukeire_second_level():
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(pin="6"))
 
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "3s"
 
 
@@ -357,7 +357,7 @@ def test_choose_best_option_with_melds():
 
     player.draw_tile(string_to_136_tile(sou="5"))
 
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     # we should discard best ukeire option here - 2s
     assert tiles_to_string([discarded_tile]) == "2s"
 
@@ -379,7 +379,7 @@ def test_choose_best_wait_with_melds():
     table.add_called_meld(0, meld)
 
     player.draw_tile(string_to_136_tile(sou="4"))
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     # double-pairs wait becomes better, because it has 4 tiles to wait for
     # against just 1 in ryanmen
     assert tiles_to_string([discarded_tile]) == "3s"
@@ -393,7 +393,7 @@ def test_discard_tile_with_better_wait_in_iishanten():
     tiles = string_to_136_array(man="123567", pin="113788", sou="99")
     player.init_hand(tiles)
 
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "8p"
 
 
@@ -411,7 +411,7 @@ def test_discard_tile_and_wrong_tiles_valuation():
     tiles = string_to_136_array(man="5", pin="256678", sou="2333467")
     player.init_hand(tiles)
 
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "2p"
 
     table = Table()
@@ -421,7 +421,7 @@ def test_discard_tile_and_wrong_tiles_valuation():
     tiles = string_to_136_array(man="45667", pin="34677", sou="38", honors="22")
     player.init_hand(tiles)
 
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "8s"
 
 
@@ -433,31 +433,31 @@ def test_choose_correct_wait_finished_yaku():
     tiles = string_to_136_array(man="23478", sou="23488", pin="235")
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(pin="4"))
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "5p"
 
     tiles = string_to_136_array(man="34578", sou="34588", pin="235")
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(pin="4"))
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "2p"
 
     tiles = string_to_136_array(man="34578", sou="34588", pin="235")
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(pin="4"))
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "2p"
 
     tiles = string_to_136_array(man="3457", sou="233445588")
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(man="8"))
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "2s"
 
     tiles = string_to_136_array(man="3457", sou="223344588")
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(man="8"))
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "5s"
 
 
@@ -471,7 +471,7 @@ def test_choose_correct_wait_yaku_versus_dora():
     tiles = string_to_136_array(man="23478", sou="23488", pin="235")
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(pin="4"))
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "5p"
 
     table = Table()
@@ -483,7 +483,7 @@ def test_choose_correct_wait_yaku_versus_dora():
     tiles = string_to_136_array(man="34578", sou="34588", pin="235")
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(pin="4"))
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "2p"
 
 
@@ -495,13 +495,13 @@ def test_choose_correct_wait_yaku_potentially():
     tiles = string_to_136_array(man="1134578", sou="567788")
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(man="9"))
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "5s"
 
     tiles = string_to_136_array(man="1134578", sou="556678")
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(man="9"))
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "8s"
 
 
@@ -516,19 +516,19 @@ def test_choose_better_tanki_honor():
     tiles = string_to_136_array(man="11447799", sou="556", honors="45")
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(honors="4"))
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "6s"
 
     tiles = string_to_136_array(man="11447799", sou="556", honors="45")
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(honors="5"))
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "6s"
 
     tiles = string_to_136_array(man="11447799", sou="556", honors="45")
     player.init_hand(tiles)
     player.draw_tile(string_to_136_tile(sou="6"))
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "5z"
 
 
@@ -725,7 +725,7 @@ def test_discard_tile_based_on_second_level_ukeire_and_cost():
     player.init_hand(tiles)
     player.draw_tile(tile)
 
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     discard_correct = tiles_to_string([discarded_tile]) == "2p" or tiles_to_string([discarded_tile]) == "3p"
     assert discard_correct is True
 
@@ -794,7 +794,7 @@ def test_choose_1_shanten_with_cost_possibility_draw():
 
     tile = string_to_136_tile(sou="7")
     player.draw_tile(tile)
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert player.ai.current_strategy is not None
     assert player.ai.current_strategy.type == BaseStrategy.YAKUHAI
     assert tiles_to_string([discarded_tile]) == "7m"
@@ -837,7 +837,7 @@ def _choose_tanki_with_kabe_helper(tiles, kabe_tiles, tile_to_draw, tile_to_disc
 
     player.init_hand(tiles)
     player.draw_tile(tile_to_draw)
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == tile_to_discard_str
 
 
@@ -853,7 +853,7 @@ def _choose_tanki_with_suji_helper(tiles, suji_tiles, tile_to_draw, tile_to_disc
         player.add_discarded_tile(Tile(tile, True))
 
     player.draw_tile(tile_to_draw)
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == tile_to_discard_str
 
 
@@ -871,7 +871,7 @@ def _avoid_furiten_helper(tiles, furiten_tile, other_tile, tile_to_draw, tile_to
         table.add_discarded_tile(1, other_tile, False)
 
     player.draw_tile(tile_to_draw)
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == tile_to_discard_str
 
 
@@ -889,5 +889,5 @@ def _choose_furiten_over_karaten_helper(tiles, furiten_tile, karaten_tile, tile_
         table.add_discarded_tile(1, karaten_tile, False)
 
     player.draw_tile(tile_to_draw)
-    discarded_tile = player.discard_tile()
+    discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == tile_to_discard_str

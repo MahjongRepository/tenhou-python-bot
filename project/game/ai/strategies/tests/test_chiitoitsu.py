@@ -48,7 +48,7 @@ def test_keep_chiitoitsu_tempai():
 
     player.draw_tile(string_to_136_tile(man="6"))
 
-    discard = player.discard_tile()
+    discard, _ = player.discard_tile()
     assert tiles_to_string([discard]) == "6m"
 
 

@@ -292,7 +292,7 @@ Reproduce:
 
 ## Case 26
 
-Action: `discard`, allowed discard: `3s, 8p, 3p, 2p`, with riichi: `True`.
+Action: `discard`, allowed discard: `3s, 8p, 3p, 2p`, with riichi: `None`.
 
 Reproduce:
 

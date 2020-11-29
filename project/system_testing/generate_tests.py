@@ -78,7 +78,8 @@ system_testing_folder = Path(__file__).parent.absolute()
                     TestsGen.indent(f'result, with_riichi_result = _run_reproducer("{index}.txt", reproducer_command)')
                 )
                 result.append(TestsGen.indent("assert TilesConverter.to_one_line_string([result]) in allowed_discards"))
-                result.append(TestsGen.indent("assert with_riichi == with_riichi_result"))
+                if with_riichi is not None:
+                    result.append(TestsGen.indent("assert with_riichi == with_riichi_result"))
                 result.append("\n")
 
             if action == ACTION_MELD:

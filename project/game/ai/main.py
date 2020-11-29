@@ -294,7 +294,7 @@ class MahjongAI:
         number_of_tiles = 0
         for waiting in discard_option.waiting:
             tiles = self.player.tiles[:]
-            tiles.remove(discard_option.find_tile_in_hand(self.player.closed_hand))
+            tiles.remove(discard_option.tile_to_discard_136)
 
             hand_cost = self.estimate_hand_value_or_get_from_cache(
                 waiting, tiles=tiles, call_riichi=discard_option.with_riichi, is_tsumo=True

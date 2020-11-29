@@ -106,13 +106,6 @@ class DiscardOption:
             data["had_to_be_discarded"] = self.had_to_be_discarded
         return data
 
-    def find_tile_in_hand(self, closed_hand):
-        """
-        Wrapper to return 136 tile with assertion that it is present in closed player hand
-        """
-        assert self.tile_to_discard_136 in closed_hand
-        return self.tile_to_discard_136
-
     def calculate_valuation(self):
         # base is 100 for ability to mark tiles as not needed (like set value to 50)
         value = 100

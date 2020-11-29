@@ -263,7 +263,7 @@ class HandBuilder:
         player_tiles_original = self.player.tiles[:]
         player_discards_original = self.player.discards[:]
 
-        tile_in_hand = discard_option.find_tile_in_hand(self.player.closed_hand)
+        tile_in_hand = discard_option.tile_to_discard_136
 
         self.player.discards.append(Tile(tile_in_hand, False))
         self.player.tiles.remove(tile_in_hand)
@@ -359,7 +359,7 @@ class HandBuilder:
                 # if we are going to have a tempai (on our second level) - let's also count its cost
                 if shanten == 0:
                     # temporary update players hand and discards for calculations
-                    next_tile_in_hand = best_one.find_tile_in_hand(self.player.closed_hand)
+                    next_tile_in_hand = best_one.tile_to_discard_136
                     tile_for_discard = Tile(next_tile_in_hand, False)
                     self.player.tiles.remove(next_tile_in_hand)
                     self.player.discards.append(tile_for_discard)

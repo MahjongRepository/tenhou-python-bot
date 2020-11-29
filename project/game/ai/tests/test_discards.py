@@ -820,7 +820,7 @@ def test_choose_1_shanten_with_cost_possibility_meld():
     assert player.ai.current_strategy is not None
     assert player.ai.current_strategy.type == BaseStrategy.YAKUHAI
 
-    discarded_tile = discard_option.find_tile_in_hand(player.closed_hand)
+    discarded_tile = discard_option.tile_to_discard_136
 
     assert tiles_to_string([discarded_tile]) == "7m"
 

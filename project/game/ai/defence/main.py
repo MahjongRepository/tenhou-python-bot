@@ -44,7 +44,7 @@ class TileDangerHandler:
         suji_tiles = self.player.ai.suji.find_suji([x.value for x in enemy_analyzer.enemy.discards])
         for discard_option in discard_candidates:
             tile_34 = discard_option.tile_to_discard_34
-            tile_136 = discard_option.find_tile_in_hand(self.player.closed_hand)
+            tile_136 = discard_option.tile_to_discard_136
             number_of_revealed_tiles = self.player.number_of_revealed_tiles(tile_34, closed_hand_34)
 
             # like 1-9 against tanyao etc.

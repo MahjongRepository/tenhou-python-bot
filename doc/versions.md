@@ -1,3 +1,33 @@
+### 0.5.0 version
+
+This version is much more stable than the previous one. It played 150,000 hanchans locally and 1,000 hanchans on tenhou.net. We found and fixed numerous crashes during these games.
+
+The main change for this version is an improved defense mechanism, now the bot is much smarter in terms of push/fold decisions.
+
+Also, there are a lot of improvements in other parts (377 commits since the previous version with 17,465 additions and 7,701 deletions of code lines).
+
+Statistics provided for 1,095 games in 上級 lobby.
+
+Stable rank was a third dan (三段) and bot achieved fourth dan (四段) with R1900 once.
+
+|   | Result |
+| --- | --- |
+| Average position | 2.48 |
+| Win rate | 21.09% |
+| Feed rate | 12.14% |
+| Riichi rate | 25.31% |
+| Call rate | 26.16% |
+
+For this version calculations of riichi and call rate were changed and now they are the same as tenhou.net calculation. But because of changes, it is not comparable with previous versions.
+
+| Places |  |
+| --- | --- |
+| First | 23.65% |
+| Second | 28.86% |
+| Third| 24.20% |
+| Fourth | 23.29% |
+| Bankruptcy | 6.76% |
+
 ### 0.4.0 version
 
 Version with various improvements in hand building and melds calling.

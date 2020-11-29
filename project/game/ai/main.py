@@ -25,7 +25,7 @@ from utils.cache import build_estimate_hand_value_cache_key, build_shanten_cache
 
 
 class MahjongAI:
-    version = "0.5.0-dev"
+    version = "0.5.0"
 
     agari = None
     shanten_calculator = None

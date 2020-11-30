@@ -314,4 +314,12 @@ SYSTEM_TESTING_CASES = [
         "allowed_discards": ["3m", "2p", "8p"],
         "with_riichi": False,
     },
+    {
+        "index": 40,
+        "description": "We should riichi with 2m, not with 5m.",
+        "reproducer_command": "python reproducer.py --log 2020113000gm-0009-7994-1460f04f --player 2 --wind 6 --honba 0 --action draw --n 1 --tile 3m",
+        "action": ACTION_DISCARD,
+        "allowed_discards": ["2m"],
+        "with_riichi": True,
+    },
 ]

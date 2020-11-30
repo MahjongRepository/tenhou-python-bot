@@ -451,3 +451,15 @@ Reproduce:
 > python reproducer.py --log 2020112507gm-0089-0000-07c68413 --player 0 --wind 4 --honba 0 --action draw --n 2 --tile 4m
 
 ![image](../project/system_testing/fixtures/39.jpg)
+
+## Case 40
+
+Action: `discard`, allowed discard: `2m`, with riichi: `True`.
+
+We should riichi with 2m, not with 5m.
+
+Reproduce:
+
+> python reproducer.py --log 2020113000gm-0009-7994-1460f04f --player 2 --wind 6 --honba 0 --action draw --n 1 --tile 3m
+
+![image](../project/system_testing/fixtures/40.jpg)

@@ -561,3 +561,18 @@ def test_system_case_39():
     result, with_riichi_result = _run_reproducer("39.txt", reproducer_command)
     assert TilesConverter.to_one_line_string([result]) in allowed_discards
     assert with_riichi == with_riichi_result
+
+
+def test_system_case_40():
+    """
+    Case #40
+    We should riichi with 2m, not with 5m.
+    """
+
+    reproducer_command = "python reproducer.py --log 2020113000gm-0009-7994-1460f04f --player 2 --wind 6 --honba 0 --action draw --n 1 --tile 3m"
+    allowed_discards = ["2m"]
+    with_riichi = True
+
+    result, with_riichi_result = _run_reproducer("40.txt", reproducer_command)
+    assert TilesConverter.to_one_line_string([result]) in allowed_discards
+    assert with_riichi == with_riichi_result

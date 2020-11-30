@@ -320,6 +320,6 @@ SYSTEM_TESTING_CASES = [
         "reproducer_command": "python reproducer.py --log 2020113000gm-0009-7994-1460f04f --player 2 --wind 6 --honba 0 --action draw --n 1 --tile 3m",
         "action": ACTION_DISCARD,
         "allowed_discards": ["2m"],
-        "with_riichi": True,
+        "with_riichi": None,
     },
 ]

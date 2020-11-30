@@ -454,7 +454,7 @@ Reproduce:
 
 ## Case 40
 
-Action: `discard`, allowed discard: `2m`, with riichi: `True`.
+Action: `discard`, allowed discard: `2m`, with riichi: `None`.
 
 We should riichi with 2m, not with 5m.
 

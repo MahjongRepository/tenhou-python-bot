@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
-    <title>Coverage for project/game/ai/hand_builder.py: 92%</title>
+    <title>Coverage for project/game/ai/hand_builder.py: 91%</title>
     <link rel="stylesheet" href="style.css" type="text/css">
     <script type="text/javascript" src="jquery.min.js"></script>
     <script type="text/javascript" src="jquery.hotkeys.js"></script>
@@ -17,13 +17,13 @@
 <div id="header">
     <div class="content">
         <h1>Coverage for <b>project/game/ai/hand_builder.py</b> :
-            <span class="pc_cov">92%</span>
+            <span class="pc_cov">91%</span>
         </h1>
         <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
         <h2 class="stats">
             554 statements &nbsp;
-            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">512 run</button>
-            <button type="button" class="mis show_mis shortkey_m button_toggle_mis" title="Toggle lines missing">42 missing</button>
+            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">505 run</button>
+            <button type="button" class="mis show_mis shortkey_m button_toggle_mis" title="Toggle lines missing">49 missing</button>
             <button type="button" class="exc show_exc shortkey_x button_toggle_exc" title="Toggle lines excluded">0 excluded</button>
         </h2>
     </div>
@@ -751,11 +751,11 @@
     <p id="t698" class="pln"><span class="n"><a href="#t698">698</a></span><span class="t">            <span class="nam">tile_34</span><span class="op">,</span> <span class="nam">TilesConverter</span><span class="op">.</span><span class="nam">to_34_array</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">closed_hand</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t699" class="pln"><span class="n"><a href="#t699">699</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t700" class="run"><span class="n"><a href="#t700">700</a></span><span class="t">        <span class="key">if</span> <span class="nam">is_honor</span><span class="op">(</span><span class="nam">tile_34</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t701" class="run"><span class="n"><a href="#t701">701</a></span><span class="t">            <span class="key">if</span> <span class="key">not</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">table</span><span class="op">.</span><span class="nam">is_common_yakuhai</span><span class="op">(</span><span class="nam">tile_34</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t702" class="run"><span class="n"><a href="#t702">702</a></span><span class="t">                <span class="key">if</span> <span class="nam">number_of_revealed_tiles</span> <span class="op">==</span> <span class="num">4</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t701" class="mis show_mis"><span class="n"><a href="#t701">701</a></span><span class="t">            <span class="key">if</span> <span class="key">not</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">table</span><span class="op">.</span><span class="nam">is_common_yakuhai</span><span class="op">(</span><span class="nam">tile_34</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t702" class="mis show_mis"><span class="n"><a href="#t702">702</a></span><span class="t">                <span class="key">if</span> <span class="nam">number_of_revealed_tiles</span> <span class="op">==</span> <span class="num">4</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t703" class="mis show_mis"><span class="n"><a href="#t703">703</a></span><span class="t">                    <span class="nam">simple_danger</span> <span class="op">=</span> <span class="num">0</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t704" class="run"><span class="n"><a href="#t704">704</a></span><span class="t">                <span class="key">elif</span> <span class="nam">number_of_revealed_tiles</span> <span class="op">==</span> <span class="num">3</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t705" class="run"><span class="n"><a href="#t705">705</a></span><span class="t">                    <span class="nam">simple_danger</span> <span class="op">=</span> <span class="num">10</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t704" class="mis show_mis"><span class="n"><a href="#t704">704</a></span><span class="t">                <span class="key">elif</span> <span class="nam">number_of_revealed_tiles</span> <span class="op">==</span> <span class="num">3</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t705" class="mis show_mis"><span class="n"><a href="#t705">705</a></span><span class="t">                    <span class="nam">simple_danger</span> <span class="op">=</span> <span class="num">10</span>&nbsp;</span><span class="r"></span></p>
     <p id="t706" class="mis show_mis"><span class="n"><a href="#t706">706</a></span><span class="t">                <span class="key">elif</span> <span class="nam">number_of_revealed_tiles</span> <span class="op">==</span> <span class="num">2</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t707" class="mis show_mis"><span class="n"><a href="#t707">707</a></span><span class="t">                    <span class="nam">simple_danger</span> <span class="op">=</span> <span class="num">20</span>&nbsp;</span><span class="r"></span></p>
     <p id="t708" class="pln"><span class="n"><a href="#t708">708</a></span><span class="t">                <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -773,7 +773,7 @@
     <p id="t720" class="run"><span class="n"><a href="#t720">720</a></span><span class="t">            <span class="nam">simple_danger</span> <span class="op">=</span> <span class="num">100</span>&nbsp;</span><span class="r"></span></p>
     <p id="t721" class="run"><span class="n"><a href="#t721">721</a></span><span class="t">        <span class="key">elif</span> <span class="nam">simplify</span><span class="op">(</span><span class="nam">tile_34</span><span class="op">)</span> <span class="op">&lt;</span> <span class="num">2</span> <span class="key">or</span> <span class="nam">simplify</span><span class="op">(</span><span class="nam">tile_34</span><span class="op">)</span> <span class="op">></span> <span class="num">6</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t722" class="pln"><span class="n"><a href="#t722">722</a></span><span class="t">            <span class="com"># 2, 3 or 7, 8</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t723" class="run"><span class="n"><a href="#t723">723</a></span><span class="t">            <span class="nam">simple_danger</span> <span class="op">=</span> <span class="num">200</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t723" class="mis show_mis"><span class="n"><a href="#t723">723</a></span><span class="t">            <span class="nam">simple_danger</span> <span class="op">=</span> <span class="num">200</span>&nbsp;</span><span class="r"></span></p>
     <p id="t724" class="pln"><span class="n"><a href="#t724">724</a></span><span class="t">        <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t725" class="pln"><span class="n"><a href="#t725">725</a></span><span class="t">            <span class="com"># 4, 5, 6</span>&nbsp;</span><span class="r"></span></p>
     <p id="t726" class="run"><span class="n"><a href="#t726">726</a></span><span class="t">            <span class="nam">simple_danger</span> <span class="op">=</span> <span class="num">300</span>&nbsp;</span><span class="r"></span></p>
@@ -785,8 +785,8 @@
     <p id="t732" class="pln"><span class="n"><a href="#t732">732</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t733" class="run"><span class="n"><a href="#t733">733</a></span><span class="t">        <span class="key">return</span> <span class="nam">simple_danger</span>&nbsp;</span><span class="r"></span></p>
     <p id="t734" class="pln"><span class="n"><a href="#t734">734</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p id="t735" class="run"><span class="n"><a href="#t735">735</a></span><span class="t">    <span class="key">def</span> <span class="nam">_sort_1_shanten_discard_options_no_threats</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">discard_options</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t736" class="run"><span class="n"><a href="#t736">736</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">round_step</span> <span class="op">&lt;</span> <span class="num">5</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t735" class="run"><span class="n"><a href="#t735">735</a></span><span class="t">    <span class="key">def</span> <span class="nam">_sort_1_shanten_discard_options_no_threats</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">discard_options</span><span class="op">,</span> <span class="nam">best_ukeire</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t736" class="run"><span class="n"><a href="#t736">736</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">round_step</span> <span class="op">&lt;</span> <span class="num">5</span> <span class="key">or</span> <span class="nam">best_ukeire</span> <span class="op">&lt;=</span> <span class="num">12</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t737" class="run"><span class="n"><a href="#t737">737</a></span><span class="t">            <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_choose_best_tile</span><span class="op">(</span><span class="nam">sorted</span><span class="op">(</span><span class="nam">discard_options</span><span class="op">,</span> <span class="nam">key</span><span class="op">=</span><span class="nam">self</span><span class="op">.</span><span class="nam">_sorting_rule_for_1_shanten</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t738" class="run"><span class="n"><a href="#t738">738</a></span><span class="t">        <span class="key">elif</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">round_step</span> <span class="op">&lt;</span> <span class="num">13</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t739" class="pln"><span class="n"><a href="#t739">739</a></span><span class="t">            <span class="com"># discard more dangerous tiles beforehand</span>&nbsp;</span><span class="r"></span></p>
@@ -798,12 +798,12 @@
     <p id="t745" class="run"><span class="n"><a href="#t745">745</a></span><span class="t">            <span class="nam">danger_sign</span> <span class="op">=</span> <span class="op">-</span><span class="num">1</span>&nbsp;</span><span class="r"></span></p>
     <p id="t746" class="pln"><span class="n"><a href="#t746">746</a></span><span class="t">        <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t747" class="pln"><span class="n"><a href="#t747">747</a></span><span class="t">            <span class="com"># late round - discard safer tiles first</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t748" class="run"><span class="n"><a href="#t748">748</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">logger</span><span class="op">.</span><span class="nam">debug</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t748" class="mis show_mis"><span class="n"><a href="#t748">748</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">logger</span><span class="op">.</span><span class="nam">debug</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p id="t749" class="pln"><span class="n"><a href="#t749">749</a></span><span class="t">                <span class="nam">log</span><span class="op">.</span><span class="nam">DISCARD_OPTIONS</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p id="t750" class="pln"><span class="n"><a href="#t750">750</a></span><span class="t">                <span class="str">"There are no visible threats, but it's late, better keep useless dangerous tiles"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p id="t751" class="pln"><span class="n"><a href="#t751">751</a></span><span class="t">                <span class="nam">discard_options</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p id="t752" class="pln"><span class="n"><a href="#t752">752</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t753" class="run"><span class="n"><a href="#t753">753</a></span><span class="t">            <span class="nam">danger_sign</span> <span class="op">=</span> <span class="num">1</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t753" class="mis show_mis"><span class="n"><a href="#t753">753</a></span><span class="t">            <span class="nam">danger_sign</span> <span class="op">=</span> <span class="num">1</span>&nbsp;</span><span class="r"></span></p>
     <p id="t754" class="pln"><span class="n"><a href="#t754">754</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t755" class="run"><span class="n"><a href="#t755">755</a></span><span class="t">        <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_choose_best_tile</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p id="t756" class="pln"><span class="n"><a href="#t756">756</a></span><span class="t">            <span class="nam">sorted</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
@@ -848,7 +848,7 @@
     <p id="t795" class="pln"><span class="n"><a href="#t795">795</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t796" class="pln"><span class="n"><a href="#t796">796</a></span><span class="t">        <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t797" class="pln"><span class="n"><a href="#t797">797</a></span><span class="t">            <span class="com"># if there are no theats we try to either keep or discard potentially dangerous tiles depending on the round</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t798" class="run"><span class="n"><a href="#t798">798</a></span><span class="t">            <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_sort_1_shanten_discard_options_no_threats</span><span class="op">(</span><span class="nam">possible_options</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t798" class="run"><span class="n"><a href="#t798">798</a></span><span class="t">            <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_sort_1_shanten_discard_options_no_threats</span><span class="op">(</span><span class="nam">possible_options</span><span class="op">,</span> <span class="nam">first_option</span><span class="op">.</span><span class="nam">ukeire</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t799" class="pln"><span class="n"><a href="#t799">799</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t800" class="run"><span class="n"><a href="#t800">800</a></span><span class="t">    <span class="key">def</span> <span class="nam">_choose_best_discard_with_2_3_shanten</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">discard_options</span><span class="op">,</span> <span class="nam">after_meld</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t801" class="run"><span class="n"><a href="#t801">801</a></span><span class="t">        <span class="nam">discard_options</span> <span class="op">=</span> <span class="nam">sorted</span><span class="op">(</span><span class="nam">discard_options</span><span class="op">,</span> <span class="nam">key</span><span class="op">=</span><span class="key">lambda</span> <span class="nam">x</span><span class="op">:</span> <span class="op">(</span><span class="nam">x</span><span class="op">.</span><span class="nam">shanten</span><span class="op">,</span> <span class="op">-</span><span class="nam">x</span><span class="op">.</span><span class="nam">ukeire</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -1110,7 +1110,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v5.3</a>,
-            created at 2020-12-06 15:05 +0000
+            created at 2020-12-06 15:08 +0000
         </p>
     </div>
 </div>

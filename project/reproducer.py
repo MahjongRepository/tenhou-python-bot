@@ -22,16 +22,18 @@ class TenhouLogReproducer:
     def __init__(self, log_id, file_path, logger):
         self.decoder = TenhouDecoder()
         self.logger = logger
+        self.table = None
 
+        log_content = None
         if log_id:
             log_content = self._download_log_content(log_id)
         elif file_path:
             with open(file_path, "r") as f:
                 log_content = f.read()
-        else:
-            raise AssertionError("log id or file path should be specified")
 
-        self.rounds = self._parse_rounds(log_content)
+        self.rounds = []
+        if log_content:
+            self.rounds = self._parse_rounds(log_content)
 
     def print_meta_info(self):
         meta_information = {"players": [], "game_rounds": []}
@@ -54,10 +56,7 @@ class TenhouLogReproducer:
 
         return meta_information
 
-    def reproduce(self, player, wind, honba, needed_tile, action, tile_number_to_stop):
-        player_position = self._find_player_position(player)
-        round_content = self._find_needed_round(wind, honba)
-
+    def play_round(self, round_content, player_position, needed_tile, action, tile_number_to_stop):
         draw_tags = ["T", "U", "V", "W"]
         discard_tags = ["D", "E", "F", "G"]
 
@@ -69,11 +68,11 @@ class TenhouLogReproducer:
         draw_regex = re.compile(r"^<[{}]+\d*".format("".join(draw_tags)))
         last_draws = {0: None, 1: None, 2: None, 3: None}
 
-        table = Table()
+        self.table = Table()
         # TODO get this info from log content
-        table.has_aka_dora = True
-        table.has_open_tanyao = True
-        table.player.init_logger(self.logger)
+        self.table.has_aka_dora = True
+        self.table.has_open_tanyao = True
+        self.table.player.init_logger(self.logger)
 
         players = {}
         for round_item in self.rounds:
@@ -89,7 +88,7 @@ class TenhouLogReproducer:
         for tag in round_content:
             if player_draw_regex.match(tag) and "UN" not in tag:
                 tile = self.decoder.parse_tile(tag)
-                table.count_of_remaining_tiles -= 1
+                self.table.count_of_remaining_tiles -= 1
 
                 # is it time to stop reproducing?
                 found_tile = TilesConverter.to_one_line_string([tile]) == needed_tile
@@ -97,19 +96,24 @@ class TenhouLogReproducer:
                     draw_tile_seen_number += 1
                     if draw_tile_seen_number == tile_number_to_stop:
                         self.logger.info("Stop on player draw")
+                        return self._process_draw_action(tile)
 
-                        discard_result = None
-                        with_riichi = False
-                        table.player.draw_tile(tile)
+                if action == "end":
+                    # discard tag and next agari tag
+                    next_next_tag_index = round_content.index(tag) + 2
+                    next_next_tag = round_content[next_next_tag_index]
+                    if self._is_agari(next_next_tag):
+                        return self._process_draw_action(tile)
 
-                        table.player.should_call_kan(tile, open_kan=False, from_riichi=table.player.in_riichi)
+                    # closed kan and agari tag
+                    next_next_tag_index = round_content.index(tag) + 3
+                    if next_next_tag_index > len(round_content):
+                        next_next_tag_index = len(round_content)
+                    next_next_tag = round_content[next_next_tag_index]
+                    if self._is_agari(next_next_tag):
+                        return self._process_draw_action(tile)
 
-                        if not table.player.in_riichi:
-                            discard_result, with_riichi = table.player.discard_tile()
-
-                        return discard_result, with_riichi
-
-                table.player.draw_tile(tile)
+                self.table.player.draw_tile(tile)
 
             if "INIT" in tag:
                 values = self.decoder.parse_initial_values(tag)
@@ -118,7 +122,7 @@ class TenhouLogReproducer:
                 for x in range(0, 4):
                     shifted_scores.append(values["scores"][self._normalize_position(player_position, x)])
 
-                table.init_round(
+                self.table.init_round(
                     values["round_wind_number"],
                     values["count_of_honba_sticks"],
                     values["count_of_riichi_sticks"],
@@ -134,16 +138,16 @@ class TenhouLogReproducer:
                     [int(x) for x in self.decoder.get_attribute_content(tag, "hai3").split(",")],
                 ]
 
-                table.player.init_hand(hands[player_position])
-                table.player.name = players[player_position]["name"]
+                self.table.player.init_hand(hands[player_position])
+                self.table.player.name = players and players[player_position]["name"] or None
 
                 self.logger.info("Init round info")
-                self.logger.info(table.player.name)
-                self.logger.info(f"Scores: {table.player.scores}")
-                self.logger.info(f"Wind: {DISPLAY_WINDS[table.player.player_wind]}")
+                self.logger.info(self.table.player.name)
+                self.logger.info(f"Scores: {self.table.player.scores}")
+                self.logger.info(f"Wind: {DISPLAY_WINDS[self.table.player.player_wind]}")
 
             if "DORA hai" in tag:
-                table.add_dora_indicator(int(self._get_attribute_content(tag, "hai")))
+                self.table.add_dora_indicator(int(self._get_attribute_content(tag, "hai")))
 
             if draw_regex.match(tag) and "UN" not in tag:
                 tile = self.decoder.parse_tile(tag)
@@ -157,7 +161,7 @@ class TenhouLogReproducer:
                 player_seat = self._normalize_position(discard_tags.index(player_sign), player_position)
 
                 if player_seat == 0:
-                    table.player.discard_tile(tile, force_tsumogiri=True)
+                    self.table.player.discard_tile(tile, force_tsumogiri=True)
                 else:
                     # is it time to stop?
                     found_tile = TilesConverter.to_one_line_string([tile]) == needed_tile
@@ -167,29 +171,46 @@ class TenhouLogReproducer:
                         enemy_discard_seen_number += 1
                         if enemy_discard_seen_number == tile_number_to_stop:
                             self.logger.info("Stop on enemy discard")
-                            self._rebuild_bot_shanten_cache(table.player)
-                            table.player.should_call_kan(tile, open_kan=True, from_riichi=False)
-                            return table.player.try_to_call_meld(tile, is_kamicha_discard)
+                            self._rebuild_bot_shanten_cache(self.table.player)
+                            self.table.player.should_call_kan(tile, open_kan=True, from_riichi=False)
+                            return self.table.player.try_to_call_meld(tile, is_kamicha_discard)
 
                     is_tsumogiri = last_draws[player_seat] == tile
-                    table.add_discarded_tile(player_seat, tile, is_tsumogiri=is_tsumogiri)
+                    self.table.add_discarded_tile(player_seat, tile, is_tsumogiri=is_tsumogiri)
 
             if "<N who=" in tag:
                 meld = self.decoder.parse_meld(tag)
                 player_seat = self._normalize_position(meld.who, player_position)
-                table.add_called_meld(player_seat, meld)
+                self.table.add_called_meld(player_seat, meld)
 
                 if player_seat == 0:
                     if meld.type != MeldPrint.KAN and meld.type != MeldPrint.SHOUMINKAN:
-                        table.player.draw_tile(meld.called_tile)
+                        self.table.player.draw_tile(meld.called_tile)
 
             if "<REACH" in tag and 'step="1"' in tag:
                 who_called_riichi = self._normalize_position(self.decoder.parse_who_called_riichi(tag), player_position)
-                table.add_called_riichi_step_one(who_called_riichi)
+                self.table.add_called_riichi_step_one(who_called_riichi)
 
             if "<REACH" in tag and 'step="2"' in tag:
                 who_called_riichi = self._normalize_position(self.decoder.parse_who_called_riichi(tag), player_position)
-                table.add_called_riichi_step_two(who_called_riichi)
+                self.table.add_called_riichi_step_two(who_called_riichi)
+
+    def reproduce(self, player, wind, honba, needed_tile, action, tile_number_to_stop):
+        player_position = self._find_player_position(player)
+        round_content = self._find_needed_round(wind, honba)
+        return self.play_round(round_content, player_position, needed_tile, action, tile_number_to_stop)
+
+    def _process_draw_action(self, tile):
+        discard_result = None
+        with_riichi = False
+        self.table.player.draw_tile(tile)
+
+        self.table.player.should_call_kan(tile, open_kan=False, from_riichi=self.table.player.in_riichi)
+
+        if not self.table.player.in_riichi:
+            discard_result, with_riichi = self.table.player.discard_tile()
+
+        return discard_result, with_riichi
 
     def _find_needed_round(self, wind, honba):
         found_round_item = None
@@ -315,6 +336,9 @@ class TenhouLogReproducer:
             return True
 
         return False
+
+    def _is_agari(self, tag):
+        return "AGARI" in tag
 
     def _parse_tile(self, tag):
         result = re.match(r"^<[defgtuvwDEFGTUVW]+\d*", tag).group()

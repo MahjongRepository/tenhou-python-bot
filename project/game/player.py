@@ -18,6 +18,9 @@ class PlayerInterface:
     riichi_called_on_step: int = 0
     round_step = None
 
+    # place where we will put different stat metrics
+    stat_collection = None
+
     # current player seat
     seat = 0
     # where is sitting dealer, based on this information we can calculate player wind
@@ -63,6 +66,7 @@ class PlayerInterface:
         self.tiles = []
         self.discards = []
         self.melds = []
+        self.stat_collection = {}
         self.in_riichi = False
         self.is_ippatsu = False
         self.position = 0

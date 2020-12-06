@@ -18,6 +18,9 @@ class EnemyAnalyzer:
     player = None
     threat_reason = None
 
+    RIICHI_COST_SCALE = [2000, 3900, 5200, 8000, 8000, 12000, 12000, 16000, 16000, 32000]
+    RIICHI_DEALER_COST_SCALE = [2900, 5800, 7700, 12000, 12000, 18000, 18000, 24000, 24000, 48000]
+
     def __init__(self, player):
         self.enemy = player
         self.table = player.table
@@ -249,9 +252,9 @@ class EnemyAnalyzer:
         tile_34 = tile_136 // 4
 
         if self.enemy.is_dealer:
-            scale = [2900, 5800, 7700, 12000, 12000, 18000, 18000, 24000, 24000, 48000]
+            scale = EnemyAnalyzer.RIICHI_DEALER_COST_SCALE
         else:
-            scale = [2000, 3900, 5200, 8000, 8000, 12000, 12000, 16000, 16000, 32000]
+            scale = EnemyAnalyzer.RIICHI_COST_SCALE
 
         # it wasn't early riichi, let's think that it could be more expensive
         if 6 <= self.enemy.riichi_called_on_step <= 11:
@@ -317,7 +320,18 @@ class EnemyAnalyzer:
         if scale_index > len(scale) - 1:
             scale_index = len(scale) - 1
 
-        return scale[scale_index]
+        result = scale[scale_index]
+
+        if "riichi_hand_cost" not in self.main_player.stat_collection:
+            self.main_player.stat_collection["riichi_hand_cost"] = {}
+
+        self.main_player.stat_collection["riichi_hand_cost"][self.enemy.seat] = {
+            "is_dealer": self.enemy.is_dealer,
+            "predicted_cost": result,
+            "riichi_called_on_step": self.enemy.riichi_called_on_step,
+        }
+
+        return result
 
     def _create_danger_reason(self, danger_reason, melds=None, dora_count=0, active_yaku=None, round_step=None):
         new_danger_reason = copy(danger_reason)

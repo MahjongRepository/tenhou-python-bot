@@ -732,8 +732,8 @@ class HandBuilder:
 
         return simple_danger
 
-    def _sort_1_shanten_discard_options_no_threats(self, discard_options):
-        if self.player.round_step < 5:
+    def _sort_1_shanten_discard_options_no_threats(self, discard_options, best_ukeire):
+        if self.player.round_step < 5 or best_ukeire <= 12:
             return self._choose_best_tile(sorted(discard_options, key=self._sorting_rule_for_1_shanten))
         elif self.player.round_step < 13:
             # discard more dangerous tiles beforehand
@@ -795,7 +795,7 @@ class HandBuilder:
             )
         else:
             # if there are no theats we try to either keep or discard potentially dangerous tiles depending on the round
-            return self._sort_1_shanten_discard_options_no_threats(possible_options)
+            return self._sort_1_shanten_discard_options_no_threats(possible_options, first_option.ukeire)
 
     def _choose_best_discard_with_2_3_shanten(self, discard_options, after_meld):
         discard_options = sorted(discard_options, key=lambda x: (x.shanten, -x.ukeire))

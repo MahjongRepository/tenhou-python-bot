@@ -57,6 +57,7 @@ class AgariRiichiCostCase(MainCase):
         - On Agari. Number of visible dora on the table
         - On Agari. Win tile (34 format)
         - On Agari. Win tile category (terminal, edge 2378, middle 456, honor, valuable honor)
+        - On Agari. Is win tile dora or not
         """
         self.reproducer.play_round(
             filtered_result["round_data"],

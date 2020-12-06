@@ -8,7 +8,7 @@ import requests
 from game.table import Table
 from mahjong.constants import DISPLAY_WINDS
 from mahjong.tile import TilesConverter
-from mahjong.utils import find_isolated_tile_indices
+from mahjong.utils import find_isolated_tile_indices, is_tile_strictly_isolated
 from tenhou.decoder import TenhouDecoder
 from utils.decisions_logger import MeldPrint
 from utils.logger import set_up_logging
@@ -228,9 +228,12 @@ class TenhouLogReproducer:
         return found_round_item
 
     def _rebuild_bot_shanten_cache(self, player):
-        isolated_tile_34 = find_isolated_tile_indices(TilesConverter.to_34_array(player.closed_hand))[0]
-        isolated_tile_136 = isolated_tile_34 * 4
-        player.table.revealed_tiles[isolated_tile_34] -= 1
+        isolated_tiles = find_isolated_tile_indices(TilesConverter.to_34_array(player.closed_hand))
+        strictly_isolated_tile = [
+            x for x in isolated_tiles if is_tile_strictly_isolated(TilesConverter.to_34_array(player.closed_hand), x)
+        ][0]
+        isolated_tile_136 = strictly_isolated_tile * 4
+        player.table.revealed_tiles[strictly_isolated_tile] -= 1
         player.draw_tile(isolated_tile_136)
         player.discard_tile()
 

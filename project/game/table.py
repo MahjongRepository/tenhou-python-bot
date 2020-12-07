@@ -47,7 +47,7 @@ class Table:
         )
 
         return "Wind: {}, Honba: {}, Dora Indicators: {}".format(
-            self.round_number, self.count_of_honba_sticks, dora_string
+            self.round_wind_number, self.count_of_honba_sticks, dora_string
         )
 
     def init_round(

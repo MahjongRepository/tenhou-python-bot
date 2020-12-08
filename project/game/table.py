@@ -33,8 +33,6 @@ class Table:
     has_open_tanyao = True
     has_aka_dora = True
 
-    latest_riichi_player_seat = None
-
     def __init__(self, bot_config=None):
         self._init_players(bot_config)
         self.dora_indicators = []
@@ -87,8 +85,6 @@ class Table:
                 player.first_seat = seats[i - dealer_seat]
                 i += 1
 
-        self.latest_riichi_player_seat = None
-
     def erase_state(self):
         self.dora_indicators = []
         self.revealed_tiles = [0] * 34
@@ -138,7 +134,6 @@ class Table:
         # we had to check will we go for defence or not
         if player_seat != 0:
             self.player.enemy_called_riichi(player_seat)
-            self.latest_riichi_player_seat = player_seat
 
     def add_called_riichi_step_two(self, player_seat):
         player = self.get_player(player_seat)
@@ -146,9 +141,35 @@ class Table:
         if player.scores is not None:
             player.scores -= 1000
 
-        player.is_ippatsu = True
-        player.riichi_called_on_step = len(player.discards)
         self.count_of_riichi_sticks += 1
+
+        player.is_ippatsu = True
+        assert len(player.discards) >= 1, "Player had to have at least one discarded tile after riichi"
+        latest_discard = player.discards[-1]
+        latest_discard.riichi_discard = True
+        player.riichi_tile_136 = latest_discard.value
+
+        player.is_oikake_riichi = len([x for x in self.players if x.in_riichi]) > 1
+        if not player.is_oikake_riichi:
+            other_riichi_players = [x for x in self.players if x.in_riichi and x != player]
+            player.is_oikake_riichi_against_dealer_riichi_threat = any([x.is_dealer for x in other_riichi_players])
+
+        open_hand_threat = False
+        for other_player in self.players:
+            if other_player == player:
+                continue
+
+            for meld in other_player.melds:
+                dora_number = 0
+                if meld.type == MeldPrint.CHI:
+                    continue
+
+                for tile in meld.tiles:
+                    dora_number += plus_dora(tile, self.dora_indicators, add_aka_dora=self.has_aka_dora)
+
+                if dora_number >= 3:
+                    open_hand_threat = True
+        player.is_riichi_against_open_hand_threat = open_hand_threat
 
     def add_discarded_tile(self, player_seat, tile_136, is_tsumogiri):
         """
@@ -160,14 +181,11 @@ class Table:
             self.count_of_remaining_tiles -= 1
 
         tile = Tile(tile_136, is_tsumogiri)
+        tile.riichi_discard = False
         player = self.get_player(player_seat)
         player.add_discarded_tile(tile)
 
         self._add_revealed_tile(tile_136)
-
-        if self.latest_riichi_player_seat == player_seat:
-            self.latest_riichi_player_seat = None
-            player.riichi_tile_136 = tile_136
 
         player.is_ippatsu = False
 

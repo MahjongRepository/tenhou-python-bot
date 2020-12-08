@@ -2,7 +2,7 @@ import pytest
 from game.ai.helpers.defence import EnemyDanger
 from game.table import Table
 from utils.decisions_logger import MeldPrint
-from utils.test_helpers import make_meld, string_to_136_array, string_to_136_tile
+from utils.test_helpers import enemy_called_riichi_helper, make_meld, string_to_136_array, string_to_136_tile
 
 
 def test_call_shouminkan_and_bad_ukeire_after_call():
@@ -190,7 +190,7 @@ def test_opened_kan_and_threatening_riichi():
     table.count_of_remaining_tiles = 10
 
     enemy_seat = 2
-    table.add_called_riichi_step_one(enemy_seat)
+    enemy_called_riichi_helper(table, enemy_seat)
 
     threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 1

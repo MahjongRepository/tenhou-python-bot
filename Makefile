@@ -32,6 +32,12 @@ run_battle:
 		-v /dev/urandom:/dev/urandom \
 		mahjong_bot pypy3 bots_battle.py -g $(GAMES) $(ARGS)
 
+run_stat:
+	docker run -u `id -u` -it --rm \
+		-v "$(CURRENT_DIR)project/:/app/" \
+		-v "$(db_folder):/app/statistics/db/" \
+		mahjong_bot pypy3 run_stat.py -p /app/statistics/db/$(file_name) -o $(offset) -l $(limit)
+
 run_on_tenhou:
 	docker-compose up
 

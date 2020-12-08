@@ -12,6 +12,8 @@ project/settings/*
 !project/settings/__init__.py
 !project/settings/base.py
 project/game/ai/common
+project/statistics/output
+project/statistics/db
 
 test_validate_hand.py
 loader.py

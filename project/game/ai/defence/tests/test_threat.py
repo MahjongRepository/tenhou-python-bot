@@ -4,7 +4,13 @@ from game.ai.helpers.defence import EnemyDanger
 from game.table import Table
 from mahjong.utils import is_honor
 from utils.decisions_logger import MeldPrint
-from utils.test_helpers import make_meld, string_to_34_tile, string_to_136_array, string_to_136_tile
+from utils.test_helpers import (
+    enemy_called_riichi_helper,
+    make_meld,
+    string_to_34_tile,
+    string_to_136_array,
+    string_to_136_tile,
+)
 
 
 def test_is_threatening_and_riichi():
@@ -14,7 +20,7 @@ def test_is_threatening_and_riichi():
     assert len(threatening_players) == 0
 
     enemy_seat = 2
-    table.add_called_riichi_step_one(enemy_seat)
+    enemy_called_riichi_helper(table, enemy_seat)
 
     threatening_players = table.player.ai.defence.get_threatening_players()
     assert len(threatening_players) == 1
@@ -232,7 +238,7 @@ def test_is_threatening_and_toitoi_melds():
 def test_threatening_riichi_player_and_default_hand_cost():
     table = Table()
     enemy_seat = 2
-    table.add_called_riichi_step_one(enemy_seat)
+    enemy_called_riichi_helper(table, enemy_seat)
 
     # non dealer
     threatening_player = table.player.ai.defence.get_threatening_players()[0]
@@ -247,12 +253,10 @@ def test_threatening_riichi_player_and_default_hand_cost():
 def test_threatening_riichi_player_and_not_early_hand_bonus():
     table = Table()
     enemy_seat = 2
-    discards = string_to_136_array(sou="1111222")
+    discards = string_to_136_array(sou="111122")
     for discard in discards:
         table.add_discarded_tile(enemy_seat, discard, False)
-    table.add_called_riichi_step_one(enemy_seat)
-    table.add_called_riichi_step_two(enemy_seat)
-    table.get_player(enemy_seat).is_ippatsu = False
+    enemy_called_riichi_helper(table, enemy_seat)
 
     # +1 scale for riichi on 6+ turn
     threatening_player = table.player.ai.defence.get_threatening_players()[0]
@@ -263,9 +267,7 @@ def test_threatening_riichi_player_and_not_early_hand_bonus():
 def test_threatening_riichi_player_middle_tiles_bonus():
     table = Table()
     enemy_seat = 2
-    table.add_called_riichi_step_one(enemy_seat)
-    table.add_called_riichi_step_two(enemy_seat)
-    table.get_player(enemy_seat).is_ippatsu = False
+    enemy_called_riichi_helper(table, enemy_seat)
 
     # +1 scale 456 tiles
     threatening_player = table.player.ai.defence.get_threatening_players()[0]
@@ -291,13 +293,13 @@ def test_threatening_riichi_player_middle_tiles_bonus():
 def test_threatening_riichi_player_and_not_visible_dora():
     table = Table()
     enemy_seat = 2
-    table.add_called_riichi_step_one(enemy_seat)
     table.add_dora_indicator(string_to_136_tile(sou="2"))
-    table.has_aka_dora = True
 
-    discards = string_to_136_array(sou="33")
+    discards = string_to_136_array(sou="3333222")
     for discard in discards:
         table.add_discarded_tile(enemy_seat, discard, False)
+
+    enemy_called_riichi_helper(table, enemy_seat)
 
     # +1 scale for riichi on 6+ turn
     threatening_player = table.player.ai.defence.get_threatening_players()[0]
@@ -310,7 +312,7 @@ def test_threatening_riichi_player_and_not_visible_dora():
 def test_threatening_riichi_player_with_kan():
     table = Table()
     enemy_seat = 2
-    table.add_called_riichi_step_one(enemy_seat)
+    enemy_called_riichi_helper(table, enemy_seat)
 
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.KAN, is_open=False, man="3333"))
 
@@ -327,7 +329,7 @@ def test_threatening_riichi_player_with_kan():
 def test_threatening_riichi_player_with_kan_aka():
     table = Table()
     enemy_seat = 2
-    table.add_called_riichi_step_one(enemy_seat)
+    enemy_called_riichi_helper(table, enemy_seat)
     table.has_aka_dora = True
 
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.KAN, is_open=False, man="5505"))
@@ -345,7 +347,7 @@ def test_threatening_riichi_player_with_kan_aka():
 def test_threatening_riichi_player_with_dora_kan():
     table = Table()
     enemy_seat = 2
-    table.add_called_riichi_step_one(enemy_seat)
+    enemy_called_riichi_helper(table, enemy_seat)
 
     table.add_dora_indicator(string_to_136_tile(man="2"))
 
@@ -368,7 +370,7 @@ def test_threatening_riichi_player_with_yakuhai_kan():
     table = Table()
     enemy_seat = 2
     table.round_wind_number = 1
-    table.add_called_riichi_step_one(enemy_seat)
+    enemy_called_riichi_helper(table, enemy_seat)
 
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.KAN, is_open=False, honors="1111"))
 
@@ -382,7 +384,7 @@ def test_threatening_riichi_player_with_double_yakuhai_kan():
     table = Table()
     enemy_seat = 2
     table.round_wind_number = 1
-    table.add_called_riichi_step_one(enemy_seat)
+    enemy_called_riichi_helper(table, enemy_seat)
 
     table.add_called_meld(enemy_seat, make_meld(MeldPrint.KAN, is_open=False, honors="1111"))
 
@@ -396,7 +398,7 @@ def test_threatening_riichi_player_with_double_yakuhai_kan():
 def test_number_of_unverified_suji():
     table = Table()
     enemy_seat = 2
-    table.add_called_riichi_step_one(enemy_seat)
+    enemy_called_riichi_helper(table, enemy_seat)
 
     threatening_player = table.player.ai.defence.get_threatening_players()[0]
     assert threatening_player.number_of_unverified_suji == 18

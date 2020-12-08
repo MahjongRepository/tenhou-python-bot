@@ -19,7 +19,7 @@ class LogParser:
                 tag_start = x + 1
 
             # not useful tags
-            skip_tags = ["SHUFFLE", "TAIKYOKU", "mjloggm", "GO"]
+            skip_tags = ["SHUFFLE", "TAIKYOKU", "mjloggm"]
             if tag and any([x in tag for x in skip_tags]):
                 tag = None
 
@@ -57,3 +57,22 @@ class LogParser:
 
     def is_agari_tag(self, tag):
         return tag and "AGARI" in tag
+
+    def is_start_game_tag(self, tag):
+        return tag and "<GO" in tag
+
+    def parse_lobby(self, tag):
+        game_rule_temp = int(self.get_attribute_content(tag, "type"))
+        rule = bin(game_rule_temp).replace("0b", "")
+        while len(rule) != 8:
+            rule = "0" + rule
+        result = None
+        if rule[0] == "0" and rule[2] == "0":
+            result = "ippan"
+        if rule[0] == "1" and rule[2] == "0":
+            result = "joukyuu"
+        if rule[0] == "0" and rule[2] == "1":
+            result = "tokujou"
+        if rule[0] == "1" and rule[2] == "1":
+            result = "houhou"
+        return result

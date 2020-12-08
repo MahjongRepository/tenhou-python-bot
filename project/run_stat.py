@@ -1,8 +1,13 @@
 import logging
+import os
 from optparse import OptionParser
 from statistics.cases.agari_riichi_cost import AgariRiichiCostCase
 
 from utils.logger import DATE_FORMAT, LOG_FORMAT
+
+stats_output_folder = os.path.join(os.path.dirname(os.path.realpath(__file__)), "statistics", "output")
+if not os.path.exists(stats_output_folder):
+    os.mkdir(stats_output_folder)
 
 
 def main():
@@ -14,7 +19,7 @@ def main():
     parser.add_option("-o", "--offset", type="int")
     opts, _ = parser.parse_args()
 
-    case = AgariRiichiCostCase(opts.db_path, opts.limit, opts.offset)
+    case = AgariRiichiCostCase(opts.db_path, stats_output_folder, opts.limit, opts.offset)
 
     case.prepare_statistics()
 

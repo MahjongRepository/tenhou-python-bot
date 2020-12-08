@@ -5,7 +5,13 @@ from game.ai.helpers.defence import TileDanger
 from game.table import Table
 from mahjong.constants import FIVE_RED_SOU
 from utils.decisions_logger import MeldPrint
-from utils.test_helpers import find_discard_option, make_meld, string_to_136_array, string_to_136_tile
+from utils.test_helpers import (
+    enemy_called_riichi_helper,
+    find_discard_option,
+    make_meld,
+    string_to_136_array,
+    string_to_136_tile,
+)
 
 
 def test_tile_danger_genbutsu():
@@ -564,7 +570,7 @@ def test_tile_danger_aidayonken_pattern():
     table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="1"), True)
     table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="6"), True)
 
-    table.add_called_riichi_step_one(enemy_seat)
+    enemy_called_riichi_helper(table, enemy_seat)
     table.add_discarded_tile(enemy_seat, string_to_136_tile(honors="7"), False)
 
     # there is 2 in enemy discard, in that case we don't want to add danger for 5
@@ -593,7 +599,7 @@ def test_tile_danger_aidayonken_after_riichi():
 
     table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="1"), True)
 
-    table.add_called_riichi_step_one(enemy_seat)
+    enemy_called_riichi_helper(table, enemy_seat)
     table.add_discarded_tile(enemy_seat, string_to_136_tile(honors="7"), False)
 
     table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="2"), True)
@@ -624,8 +630,7 @@ def test_tile_danger_early_discard_early():
     table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="7"), True)
     table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="1"), True)
 
-    table.add_called_riichi_step_one(enemy_seat)
-    table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="4"), False)
+    enemy_called_riichi_helper(table, enemy_seat, string_to_136_tile(pin="4"))
 
     # too early to judge about early discards
     _assert_discard_not_equal(player, enemy_seat, TileDanger.BONUS_EARLY_28, sou="1")
@@ -652,7 +657,7 @@ def test_tile_danger_early_discard_normal():
     table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="1"), True)
     table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="1"), True)
     table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="4"), False)
-    table.add_called_riichi_step_one(enemy_seat)
+    enemy_called_riichi_helper(table, enemy_seat)
     table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="2"), False)
 
     # now that looks like 1 sou is not too dangerous and 9 sou is on the contrary very dangerous
@@ -682,7 +687,7 @@ def test_tile_danger_early_discard_early_riichi():
 
     table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="2"), False)
     table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="7"), True)
-    table.add_called_riichi_step_one(enemy_seat)
+    enemy_called_riichi_helper(table, enemy_seat)
     table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="5"), False)
 
     table.add_discarded_tile(enemy_seat, string_to_136_tile(man="3"), True)
@@ -704,8 +709,7 @@ def _create_table(enemy_seat, discards, riichi_tile):
     table.has_aka_dora = True
     for discard in discards:
         table.add_discarded_tile(0, discard, False)
-    table.add_called_riichi_step_one(enemy_seat)
-    table.add_discarded_tile(enemy_seat, riichi_tile, False)
+    enemy_called_riichi_helper(table, enemy_seat, riichi_tile)
     return table
 
 

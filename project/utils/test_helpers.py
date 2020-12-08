@@ -52,3 +52,12 @@ def find_discard_option(player, sou="", pin="", man="", honors=""):
     discard_options, _ = player.ai.defence.mark_tiles_danger_for_threats(discard_options)
 
     return discard_option
+
+
+def enemy_called_riichi_helper(table, enemy_seat, riichi_tile=None):
+    if not riichi_tile:
+        riichi_tile = string_to_136_tile(honors="1")
+    table.add_discarded_tile(enemy_seat, riichi_tile, False)
+    table.add_called_riichi_step_one(enemy_seat)
+    table.add_called_riichi_step_two(enemy_seat)
+    table.get_player(enemy_seat).is_ippatsu = False

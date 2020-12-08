@@ -8,9 +8,10 @@ from game.ai.defence.yaku_analyzer.toitoi import ToitoiAnalyzer
 from game.ai.defence.yaku_analyzer.yakuhai import YakuhaiAnalyzer
 from game.ai.helpers.defence import EnemyDanger, TileDanger
 from game.ai.helpers.possible_forms import PossibleFormsAnalyzer
+from game.ai.statistics_collector import StatisticsCollector
 from mahjong.meld import Meld
 from mahjong.tile import TilesConverter
-from mahjong.utils import is_honor, is_terminal, plus_dora, simplify
+from mahjong.utils import is_honor, is_terminal, plus_dora
 from utils.general import separate_tiles_by_suits
 
 
@@ -249,89 +250,58 @@ class EnemyAnalyzer:
 
     def _calculate_assumed_hand_cost_for_riichi(self, tile_136, can_be_used_for_ryanmen) -> int:
         scale_index = 0
-        tile_34 = tile_136 // 4
 
         if self.enemy.is_dealer:
             scale = EnemyAnalyzer.RIICHI_DEALER_COST_SCALE
         else:
             scale = EnemyAnalyzer.RIICHI_COST_SCALE
 
+        riichi_stat = StatisticsCollector.collect_stat_for_enemy_riichi_hand_cost(
+            tile_136, self.enemy, self.main_player
+        )
+
         # it wasn't early riichi, let's think that it could be more expensive
-        if 6 <= self.enemy.riichi_called_on_step <= 11:
+        if 6 <= riichi_stat["riichi_called_on_step"] <= 11:
             scale_index += 1
 
         # more late riichi, probably means more expensive riichi
-        if self.enemy.riichi_called_on_step >= 12:
+        if riichi_stat["riichi_called_on_step"] >= 12:
             scale_index += 2
 
         if self.enemy.is_ippatsu:
             scale_index += 1
 
-        total_dora_in_game = len(self.table.dora_indicators) * 4 + (3 * int(self.table.has_aka_dora))
-        visible_tiles = self.table.revealed_tiles_136 + self.main_player.closed_hand
-        visible_dora_tiles = sum(
-            [plus_dora(x, self.table.dora_indicators, add_aka_dora=self.table.has_aka_dora) for x in visible_tiles]
-        )
-        live_dora_tiles = total_dora_in_game - visible_dora_tiles
-        assert live_dora_tiles >= 0, "Live dora tiles can't be less than 0"
         # there are too many live dora tiles, let's increase hand cost
-        if live_dora_tiles >= 4:
+        if riichi_stat["live_dora_tiles"] >= 4:
             scale_index += 1
 
         # if we are discarding dora we are obviously going to make enemy hand more expensive
         scale_index += self._get_dora_scale_bonus(tile_136)
 
-        # if enemy has closed kan, his hand is more expensive on average
-        for meld in self.enemy.melds:
-            # if he is in riichi he can only have closed kan
-            assert meld.type == Meld.KAN and not meld.opened
-
-            # plus two just because of riichi with kan
-            scale_index += 2
-
-            # higher danger for doras
-            for tile in meld.tiles:
-                scale_index += plus_dora(tile, self.table.dora_indicators, add_aka_dora=self.table.has_aka_dora)
-
-            # higher danger for yakuhai
-            tile_meld_34 = meld.tiles[0] // 4
-            scale_index += len([x for x in self.enemy.valued_honors if x == tile_meld_34])
+        # plus two just because of riichi with kan
+        scale_index += riichi_stat["number_of_kan_in_enemy_hand"] * 2
+        # higher danger for doras
+        scale_index += riichi_stat["number_of_dora_in_enemy_kan_sets"]
+        # higher danger for yakuhai
+        scale_index += riichi_stat["number_of_yakuhai_enemy_kan_sets"]
 
         # let's add more danger for all other opened kan sets on the table
-        for other_player in self.table.players:
-            if other_player.seat == self.enemy.seat:
-                continue
-
-            for meld in other_player.melds:
-                if meld.type == Meld.KAN or meld.type == Meld.SHOUMINKAN:
-                    scale_index += 1
+        scale_index += riichi_stat["number_of_other_player_kan_sets"]
 
         # additional danger for tiles that could be used for tanyao
-        if not is_honor(tile_34):
-            # +1 here to make it more readable
-            simplified_tile = simplify(tile_34) + 1
+        # 456
+        if riichi_stat["tile_category"] == "middle":
+            scale_index += 1
 
-            if simplified_tile in [4, 5, 6]:
-                scale_index += 1
-
-            if simplified_tile in [2, 3, 7, 8] and can_be_used_for_ryanmen:
-                scale_index += 1
+        # additional danger for tiles that could be used for tanyao
+        # 23 or 78
+        if riichi_stat["tile_category"] == "edge" and can_be_used_for_ryanmen:
+            scale_index += 1
 
         if scale_index > len(scale) - 1:
             scale_index = len(scale) - 1
 
-        result = scale[scale_index]
-
-        if "riichi_hand_cost" not in self.main_player.stat_collection:
-            self.main_player.stat_collection["riichi_hand_cost"] = {}
-
-        self.main_player.stat_collection["riichi_hand_cost"][self.enemy.seat] = {
-            "is_dealer": self.enemy.is_dealer,
-            "predicted_cost": result,
-            "riichi_called_on_step": self.enemy.riichi_called_on_step,
-        }
-
-        return result
+        return scale[scale_index]
 
     def _create_danger_reason(self, danger_reason, melds=None, dora_count=0, active_yaku=None, round_step=None):
         new_danger_reason = copy(danger_reason)

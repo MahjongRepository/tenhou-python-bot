@@ -1,7 +1,5 @@
 from statistics.cases.main import MainCase
 
-from game.ai.defence.enemy_analyzer import EnemyAnalyzer
-
 
 class AgariRiichiCostCase(MainCase):
     def _filter_rounds(self, log_id, parsed_rounds):
@@ -9,8 +7,12 @@ class AgariRiichiCostCase(MainCase):
         Find rounds where was agari riichi without tsumo and without ippatsu.
         """
         results = []
+        lobby = None
         for round_data in parsed_rounds:
             for tag in round_data:
+                if self.parser.is_start_game_tag(tag):
+                    lobby = self.parser.parse_lobby(tag)
+
                 if not self.parser.is_agari_tag(tag):
                     continue
 
@@ -30,9 +32,11 @@ class AgariRiichiCostCase(MainCase):
                 original_cost = int(self.parser.get_attribute_content(tag, "ten").split(",")[1])
                 results.append(
                     {
+                        "lobby": lobby,
                         "log_id": log_id,
                         "agari_position": int(self.parser.get_attribute_content(tag, "who")),
                         "player_position": int(self.parser.get_attribute_content(tag, "fromWho")),
+                        "win_tile_34": int(self.parser.get_attribute_content(tag, "machi")) // 4,
                         "original_cost": original_cost,
                         "round_data": round_data,
                     }
@@ -49,12 +53,14 @@ class AgariRiichiCostCase(MainCase):
         - On Riichi. Was it tsumogiri riichi or not
         - On Riichi. Was it dealer riichi or not
         - On Riichi. Was it first riichi or not
+        - On Riichi. Was it called against dealer riichi threat or not
         - On Riichi. Was it called against open hand threat or not (threat == someone opened dora pon)
+        - On Riichi. Discards before the riichi
         - On Agari. Riichi hand cost
         - On Agari. Round step number
         - On Agari. Number of kan sets in riichi hand
         - On Agari. Number of kan sets on the table
-        - On Agari. Number of visible dora on the table
+        - On Agari. Number of live dora
         - On Agari. Win tile (34 format)
         - On Agari. Win tile category (terminal, edge 2378, middle 456, honor, valuable honor)
         - On Agari. Is win tile dora or not
@@ -75,14 +81,8 @@ class AgariRiichiCostCase(MainCase):
         del filtered_result["player_position"]
         del filtered_result["agari_position"]
 
-        stat = self.reproducer.table.player.stat_collection["riichi_hand_cost"][agari_position]
+        key = f"{agari_position}_{filtered_result['win_tile_34']}"
+        stat = self.reproducer.table.player.stat_collection["riichi_hand_cost"][key]
         stat.update(filtered_result)
-        stat["rounded_original_cost"] = self._round_riichi_cost(stat["original_cost"], stat["is_dealer"])
-        return stat
 
-    def _round_riichi_cost(self, original_cost, is_dealer):
-        if is_dealer:
-            scale = EnemyAnalyzer.RIICHI_DEALER_COST_SCALE
-        else:
-            scale = EnemyAnalyzer.RIICHI_COST_SCALE
-        return min(scale, key=lambda x: abs(x - original_cost))
+        return stat

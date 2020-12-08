@@ -98,21 +98,6 @@ class TenhouLogReproducer:
                         self.logger.info("Stop on player draw")
                         return self._process_draw_action(tile)
 
-                if action == "end":
-                    # discard tag and next agari tag
-                    next_next_tag_index = round_content.index(tag) + 2
-                    next_next_tag = round_content[next_next_tag_index]
-                    if self._is_agari(next_next_tag):
-                        return self._process_draw_action(tile)
-
-                    # closed kan and agari tag
-                    next_next_tag_index = round_content.index(tag) + 3
-                    if next_next_tag_index > len(round_content):
-                        next_next_tag_index = len(round_content)
-                    next_next_tag = round_content[next_next_tag_index]
-                    if self._is_agari(next_next_tag):
-                        return self._process_draw_action(tile)
-
                 self.table.player.draw_tile(tile)
 
             if "INIT" in tag:
@@ -143,6 +128,7 @@ class TenhouLogReproducer:
 
                 self.logger.info("Init round info")
                 self.logger.info(self.table.player.name)
+                self.logger.info(f"Position: {player_position}")
                 self.logger.info(f"Scores: {self.table.player.scores}")
                 self.logger.info(f"Wind: {DISPLAY_WINDS[self.table.player.player_wind]}")
 

@@ -13,13 +13,7 @@ class PlayerInterface:
     discards = None
     tiles = None
     melds = None
-    in_riichi: bool = False
-    is_ippatsu: bool = False
-    riichi_called_on_step: int = 0
     round_step = None
-
-    # place where we will put different stat metrics
-    stat_collection = None
 
     # current player seat
     seat = 0
@@ -37,6 +31,12 @@ class PlayerInterface:
     rank = ""
 
     logger = None
+
+    in_riichi: bool = False
+    is_ippatsu: bool = False
+    is_oikake_riichi: bool = False
+    is_oikake_riichi_against_dealer_riichi_threat: bool = False
+    is_riichi_against_open_hand_threat: bool = False
 
     def __init__(self, table, seat, dealer_seat):
         self.table = table
@@ -66,14 +66,15 @@ class PlayerInterface:
         self.tiles = []
         self.discards = []
         self.melds = []
-        self.stat_collection = {}
         self.in_riichi = False
         self.is_ippatsu = False
+        self.is_oikake_riichi = False
+        self.is_oikake_riichi_against_dealer_riichi_threat = False
+        self.is_riichi_against_open_hand_threat = False
         self.position = 0
         self.scores = None
         self.uma = 0
         self.round_step = 0
-        self.riichi_called_on_step = 0
 
     def add_called_meld(self, meld: MeldPrint):
         # we already added shouminkan as a pon set

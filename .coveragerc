@@ -5,6 +5,7 @@ omit =
     project/game/ai/configs/*
     project/game/bots_battle/*
     project/settings/*
+    project/statistics/*
     */test_*.py
     */__init__.py
     project/reproducer.py

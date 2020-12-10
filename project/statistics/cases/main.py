@@ -1,4 +1,5 @@
 import csv
+import gc
 import logging
 import os
 from pathlib import Path
@@ -64,6 +65,12 @@ class MainCase:
                     if not data["is_dealer"]:
                         continue
                     writer.writerow(data)
+
+            # it is important for total allocated memory to free memory at the end of iteration
+            del logs
+            del results
+            del collected_statistics
+            gc.collect()
 
     def _filter_rounds(self, log_id, parsed_rounds):
         return []

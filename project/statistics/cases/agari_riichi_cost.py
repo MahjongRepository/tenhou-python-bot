@@ -2,6 +2,31 @@ from statistics.cases.main import MainCase
 
 
 class AgariRiichiCostCase(MainCase):
+    CSV_HEADER = [
+        "is_dealer",
+        "riichi_called_on_step",
+        "current_enemy_step",
+        "wind_number",
+        "scores",
+        "is_tsumogiri_riichi",
+        "is_oikake_riichi",
+        "is_oikake_riichi_against_dealer_riichi_threat",
+        "is_riichi_against_open_hand_threat",
+        "number_of_kan_in_enemy_hand",
+        "number_of_dora_in_enemy_kan_sets",
+        "number_of_yakuhai_enemy_kan_sets",
+        "number_of_other_player_kan_sets",
+        "live_dora_tiles",
+        "tile_plus_dora",
+        "tile_category",
+        "discards_before_riichi_34",
+        "predicted_cost",
+        "lobby",
+        "log_id",
+        "win_tile_34",
+        "original_cost",
+    ]
+
     def _filter_rounds(self, log_id, parsed_rounds):
         """
         Find rounds where was agari riichi without tsumo and without ippatsu.
@@ -65,24 +90,26 @@ class AgariRiichiCostCase(MainCase):
         - On Agari. Win tile category (terminal, edge 2378, middle 456, honor, valuable honor)
         - On Agari. Is win tile dora or not
         """
-        self.reproducer.play_round(
-            filtered_result["round_data"],
-            filtered_result["player_position"],
-            needed_tile=None,
-            action="end",
-            tile_number_to_stop=None,
-        )
-
-        agari_position = self.reproducer._normalize_position(
+        agari_seat = self.reproducer._normalize_position(
             filtered_result["agari_position"], filtered_result["player_position"]
         )
+
+        stat = self.reproducer.play_round(
+            filtered_result["round_data"],
+            filtered_result["player_position"],
+            context={
+                "action": "agari_riichi_cost",
+                "agari_seat": agari_seat,
+            },
+        )
+
+        if not stat:
+            return None
 
         del filtered_result["round_data"]
         del filtered_result["player_position"]
         del filtered_result["agari_position"]
 
-        key = f"{agari_position}_{filtered_result['win_tile_34']}"
-        stat = self.reproducer.table.player.stat_collection["riichi_hand_cost"][key]
         stat.update(filtered_result)
 
         return stat

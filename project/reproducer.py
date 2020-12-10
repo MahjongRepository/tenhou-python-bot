@@ -5,6 +5,8 @@ import sys
 from optparse import OptionParser
 
 import requests
+from game.ai.helpers.possible_forms import PossibleFormsAnalyzer
+from game.ai.statistics_collector import StatisticsCollector
 from game.table import Table
 from mahjong.constants import DISPLAY_WINDS
 from mahjong.tile import TilesConverter
@@ -56,7 +58,7 @@ class TenhouLogReproducer:
 
         return meta_information
 
-    def play_round(self, round_content, player_position, needed_tile, action, tile_number_to_stop):
+    def play_round(self, round_content, player_position, context):
         draw_tags = ["T", "U", "V", "W"]
         discard_tags = ["D", "E", "F", "G"]
 
@@ -91,12 +93,13 @@ class TenhouLogReproducer:
                 self.table.count_of_remaining_tiles -= 1
 
                 # is it time to stop reproducing?
-                found_tile = TilesConverter.to_one_line_string([tile]) == needed_tile
-                if action == "draw" and found_tile:
-                    draw_tile_seen_number += 1
-                    if draw_tile_seen_number == tile_number_to_stop:
-                        self.logger.info("Stop on player draw")
-                        return self._process_draw_action(tile)
+                if context["action"] == "draw":
+                    found_tile = TilesConverter.to_one_line_string([tile]) == context["needed_tile"]
+                    if found_tile:
+                        draw_tile_seen_number += 1
+                        if draw_tile_seen_number == context["tile_number_to_stop"]:
+                            self.logger.info("Stop on player draw")
+                            return self._process_draw_action(tile)
 
                 self.table.player.draw_tile(tile)
 
@@ -149,17 +152,18 @@ class TenhouLogReproducer:
                 if player_seat == 0:
                     self.table.player.discard_tile(tile, force_tsumogiri=True)
                 else:
-                    # is it time to stop?
-                    found_tile = TilesConverter.to_one_line_string([tile]) == needed_tile
                     is_kamicha_discard = player_seat == 3
 
-                    if action == "enemy_discard" and found_tile:
-                        enemy_discard_seen_number += 1
-                        if enemy_discard_seen_number == tile_number_to_stop:
-                            self.logger.info("Stop on enemy discard")
-                            self._rebuild_bot_shanten_cache(self.table.player)
-                            self.table.player.should_call_kan(tile, open_kan=True, from_riichi=False)
-                            return self.table.player.try_to_call_meld(tile, is_kamicha_discard)
+                    # is it time to stop?
+                    if context["action"] == "enemy_discard":
+                        found_tile = TilesConverter.to_one_line_string([tile]) == context["needed_tile"]
+                        if found_tile:
+                            enemy_discard_seen_number += 1
+                            if enemy_discard_seen_number == context["tile_number_to_stop"]:
+                                self.logger.info("Stop on enemy discard")
+                                self._rebuild_bot_shanten_cache(self.table.player)
+                                self.table.player.should_call_kan(tile, open_kan=True, from_riichi=False)
+                                return self.table.player.try_to_call_meld(tile, is_kamicha_discard)
 
                     is_tsumogiri = last_draws[player_seat] == tile
                     self.table.add_discarded_tile(player_seat, tile, is_tsumogiri=is_tsumogiri)
@@ -181,10 +185,46 @@ class TenhouLogReproducer:
                 who_called_riichi = self._normalize_position(self.decoder.parse_who_called_riichi(tag), player_position)
                 self.table.add_called_riichi_step_two(who_called_riichi)
 
-    def reproduce(self, player, wind, honba, needed_tile, action, tile_number_to_stop):
+            if context["action"] == "agari_riichi_cost" and self._is_agari(tag):
+                previous_tag = round_content[round_content.index(tag) - 1]
+                # let's process only discards for now
+                # there is also possible shouminkan, we will skip it
+                if self._is_discard(previous_tag):
+                    tile_136 = self._parse_tile(previous_tag)
+                    tile_34 = tile_136 // 4
+                    # self._rebuild_bot_shanten_cache(self.table.player)
+
+                    threats = self.table.player.ai.defence.get_threatening_players()
+                    threat = [x for x in threats if x.enemy.seat == context["agari_seat"]][0]
+                    assert threat.enemy.in_riichi
+
+                    self.table.player.table.revealed_tiles[tile_34] -= 1
+                    self.table.player.tiles.append(tile_136)
+
+                    possible_forms = self.table.player.ai.defence.possible_forms_analyzer.calculate_possible_forms(
+                        threat.enemy.all_safe_tiles
+                    )
+                    can_be_used_for_ryanmen = False
+                    if self.table.player.ai.defence.total_possible_forms_for_tile(possible_forms, tile_34) != 0:
+                        forms_count = possible_forms[tile_34]
+                        forms_ryanmen_count = forms_count[PossibleFormsAnalyzer.POSSIBLE_RYANMEN_SIDES]
+                        can_be_used_for_ryanmen = forms_ryanmen_count == 1 or forms_ryanmen_count == 2
+
+                    self.table.player.table.revealed_tiles[tile_34] += 1
+                    self.table.player.tiles.remove(tile_136)
+
+                    riichi_stat = StatisticsCollector.collect_stat_for_enemy_riichi_hand_cost(
+                        tile_136, threat.enemy, self.table.player
+                    )
+                    riichi_stat["predicted_cost"] = threat._calculate_assumed_hand_cost_for_riichi(
+                        tile_136, can_be_used_for_ryanmen
+                    )
+                    return riichi_stat
+
+    def reproduce(self, player, wind, honba, context):
         player_position = self._find_player_position(player)
         round_content = self._find_needed_round(wind, honba)
-        return self.play_round(round_content, player_position, needed_tile, action, tile_number_to_stop)
+        return self.play_round(round_content, player_position, context)
 
     def _process_draw_action(self, tile):
         discard_result = None
@@ -349,7 +389,16 @@ def parse_args_and_start_reproducer(logger):
         meta_information = reproducer.print_meta_info()
         logger.debug(json.dumps(meta_information, indent=2, ensure_ascii=False))
     else:
-        reproducer.reproduce(opts.player, opts.wind, opts.honba, opts.tile, opts.action, opts.n)
+        reproducer.reproduce(
+            opts.player,
+            opts.wind,
+            opts.honba,
+            context={
+                "action": opts.action,
+                "needed_tile": opts.tile,
+                "tile_number_to_stop": opts.n,
+            },
+        )
 
 
 def parse_reproducer_args(args):

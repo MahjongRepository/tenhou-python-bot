@@ -40,7 +40,8 @@ system_testing_folder = Path(__file__).parent.absolute()
         )
         result.append(
             TestsGen.indent(
-                "return reproducer.reproduce(opts.player, opts.wind, opts.honba, opts.tile, opts.action, opts.n)"
+                "return reproducer.reproduce(opts.player, opts.wind, opts.honba, "
+                "context={'action': opts.action, 'needed_tile': opts.tile, 'tile_number_to_stop': opts.n})"
             )
         )
         result.append("\n")

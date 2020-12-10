@@ -27,3 +27,15 @@ def load_logs_from_db(db_path: str, limit: int, offset: int):
             print(log_id)
 
     return results
+
+
+def get_total_logs_count(db_path: str):
+    connection = sqlite3.connect(db_path)
+
+    with connection:
+        cursor = connection.cursor()
+        cursor.execute(
+            "SELECT COUNT(*) FROM logs where is_sanma = 0;",
+        )
+        result = cursor.fetchall()
+        return result[0][0]

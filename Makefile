@@ -34,9 +34,11 @@ run_battle:
 
 run_stat:
 	docker run -u `id -u` -it --rm \
+        --cpus=".9" \
+        --memory="2g" \
 		-v "$(CURRENT_DIR)project/:/app/" \
 		-v "$(db_folder):/app/statistics/db/" \
-		mahjong_bot pypy3 run_stat.py -p /app/statistics/db/$(file_name) -o $(offset) -l $(limit)
+		mahjong_bot pypy3 run_stat.py -p /app/statistics/db/$(file_name)
 
 run_on_tenhou:
 	docker-compose up

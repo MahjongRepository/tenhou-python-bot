@@ -14,7 +14,12 @@ def _run_reproducer(file_name, reproducer_command):
     log_file_path = system_testing_folder / "fixtures" / file_name
     opts = parse_reproducer_args(reproducer_command.replace("python ", "").split(" "))
     reproducer = TenhouLogReproducer(log_id=None, file_path=log_file_path, logger=logger)
-    return reproducer.reproduce(opts.player, opts.wind, opts.honba, opts.tile, opts.action, opts.n)
+    return reproducer.reproduce(
+        opts.player,
+        opts.wind,
+        opts.honba,
+        context={"action": opts.action, "needed_tile": opts.tile, "tile_number_to_stop": opts.n},
+    )
 
 
 def test_system_case_1():

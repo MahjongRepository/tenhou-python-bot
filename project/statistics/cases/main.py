@@ -46,7 +46,7 @@ class MainCase:
                 except Exception:
                     logger.error(f"Error in statistics calculation for {filtered_result['log_id']}")
 
-            csv_file_name = f"{Path(self.db_path).name}_{offset:06d}_{offset + limit:06d}.csv"
+            csv_file_name = f"{Path(self.db_path).name}_{offset:07d}_{offset + limit:07d}.csv"
             regular_csv_file_path = os.path.join(self.stats_output_folder, csv_file_name)
             dealer_csv_file_path = os.path.join(self.stats_output_folder, f"dealer_{csv_file_name}")
 

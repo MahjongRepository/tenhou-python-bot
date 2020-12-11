@@ -37,6 +37,9 @@ class AgariRiichiCostCase(MainCase):
             for tag in round_data:
                 if self.parser.is_start_game_tag(tag):
                     lobby = self.parser.parse_lobby(tag)
+                    # we don't want to get stat from ippan for now
+                    if lobby == 'ippan':
+                        return []
 
                 if not self.parser.is_agari_tag(tag):
                     continue

@@ -67,8 +67,7 @@ class LogParser:
     def parse_lobby(self, tag):
         game_rule_temp = int(self.get_attribute_content(tag, "type"))
         rule = bin(game_rule_temp).replace("0b", "")
-        while len(rule) != 8:
-            rule = "0" + rule
+        rule = rule.zfill(8)
         result = None
         if rule[0] == "0" and rule[2] == "0":
             result = "ippan"

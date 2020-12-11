@@ -250,57 +250,57 @@ class TileDangerHandler:
                         if cost_ratio >= 100:
                             danger_border = DangerBorder.IGNORE
                         elif cost_ratio >= 70:
-                            danger_border = DangerBorder.VERY_HIGH
+                            danger_border = DangerBorder.IGNORE
                         elif cost_ratio >= 50:
-                            danger_border = DangerBorder.UPPER_MEDIUM
+                            danger_border = DangerBorder.EXTREME
                         elif cost_ratio >= 30:
-                            danger_border = DangerBorder.MEDIUM
+                            danger_border = DangerBorder.VERY_HIGH
                         else:
-                            danger_border = DangerBorder.LOW
+                            danger_border = DangerBorder.MEDIUM
                     # moderate wait
                     elif discard_option.ukeire >= 4:
                         if cost_ratio >= 400:
                             danger_border = DangerBorder.IGNORE
                         elif cost_ratio >= 200:
-                            danger_border = DangerBorder.EXTREME
+                            danger_border = DangerBorder.IGNORE
                         elif cost_ratio >= 100:
-                            danger_border = DangerBorder.VERY_HIGH
+                            danger_border = DangerBorder.IGNORE
                         elif cost_ratio >= 70:
-                            danger_border = DangerBorder.UPPER_MEDIUM
+                            danger_border = DangerBorder.EXTREME
                         elif cost_ratio >= 50:
-                            danger_border = DangerBorder.LOWER_MEDIUM
+                            danger_border = DangerBorder.HIGH
                         elif cost_ratio >= 30:
-                            danger_border = DangerBorder.UPPER_LOW
+                            danger_border = DangerBorder.UPPER_MEDIUM
                         else:
-                            danger_border = DangerBorder.VERY_LOW
+                            danger_border = DangerBorder.LOWER_MEDIUM
                     # weak wait
                     elif discard_option.ukeire >= 2:
                         if cost_ratio >= 400:
-                            danger_border = DangerBorder.EXTREME
+                            danger_border = DangerBorder.IGNORE
                         elif cost_ratio >= 200:
-                            danger_border = DangerBorder.VERY_HIGH
+                            danger_border = DangerBorder.IGNORE
                         elif cost_ratio >= 100:
-                            danger_border = DangerBorder.UPPER_MEDIUM
+                            danger_border = DangerBorder.EXTREME
                         elif cost_ratio >= 70:
-                            danger_border = DangerBorder.MEDIUM
+                            danger_border = DangerBorder.VERY_HIGH
                         elif cost_ratio >= 50:
-                            danger_border = DangerBorder.UPPER_LOW
+                            danger_border = DangerBorder.UPPER_MEDIUM
                         elif cost_ratio >= 30:
-                            danger_border = DangerBorder.LOW
+                            danger_border = DangerBorder.MEDIUM
                         else:
-                            danger_border = DangerBorder.EXTREMELY_LOW
+                            danger_border = DangerBorder.UPPER_LOW
                     # waiting for 1 tile basically
                     else:
                         if cost_ratio >= 400:
-                            danger_border = DangerBorder.HIGH
+                            danger_border = DangerBorder.IGNORE
                         elif cost_ratio >= 200:
-                            danger_border = DangerBorder.UPPER_MEDIUM
+                            danger_border = DangerBorder.EXTREME
                         elif cost_ratio >= 100:
-                            danger_border = DangerBorder.LOWER_MEDIUM
+                            danger_border = DangerBorder.HIGH
                         elif cost_ratio >= 50:
-                            danger_border = DangerBorder.LOW
+                            danger_border = DangerBorder.MEDIUM
                         else:
-                            danger_border = DangerBorder.EXTREMELY_LOW
+                            danger_border = DangerBorder.UPPER_LOW
 
             if discard_option.shanten == 1:
                 tune = self.player.config.TUNE_DANGER_BORDER_1_SHANTEN_VALUE

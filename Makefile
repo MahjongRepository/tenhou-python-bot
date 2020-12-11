@@ -35,7 +35,7 @@ run_battle:
 run_stat:
 	docker run -u `id -u` -it --rm \
         --cpus=".9" \
-        --memory="2g" \
+        --memory="4g" \
 		-v "$(CURRENT_DIR)project/:/app/" \
 		-v "$(db_folder):/app/statistics/db/" \
 		mahjong_bot pypy3 run_stat.py -p /app/statistics/db/$(file_name)

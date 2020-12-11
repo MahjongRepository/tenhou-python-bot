@@ -41,6 +41,12 @@ class AgariRiichiCostCase(MainCase):
                     if lobby == "ippan":
                         return []
 
+                # in old logs riichi was called without step attribute
+                # which makes it is hard to parse
+                # so let's just skip these logs for now
+                if self.parser.is_riichi_tag(tag) and "step" not in tag:
+                    return []
+
                 if not self.parser.is_agari_tag(tag):
                     continue
 

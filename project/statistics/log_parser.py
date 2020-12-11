@@ -61,6 +61,9 @@ class LogParser:
     def is_start_game_tag(self, tag):
         return tag and "<GO" in tag
 
+    def is_riichi_tag(self, tag):
+        return tag and "<REACH" in tag
+
     def parse_lobby(self, tag):
         game_rule_temp = int(self.get_attribute_content(tag, "type"))
         rule = bin(game_rule_temp).replace("0b", "")

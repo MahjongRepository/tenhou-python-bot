@@ -50,21 +50,22 @@ class MainCase:
             regular_csv_file_path = os.path.join(self.stats_output_folder, csv_file_name)
             dealer_csv_file_path = os.path.join(self.stats_output_folder, f"dealer_{csv_file_name}")
 
-            with open(regular_csv_file_path, "w") as csv_file:
-                writer = csv.DictWriter(csv_file, fieldnames=collected_statistics[0].keys())
-                writer.writeheader()
-                for data in collected_statistics:
-                    if data["is_dealer"]:
-                        continue
-                    writer.writerow(data)
+            if collected_statistics:
+                with open(regular_csv_file_path, "w") as csv_file:
+                    writer = csv.DictWriter(csv_file, fieldnames=collected_statistics[0].keys())
+                    writer.writeheader()
+                    for data in collected_statistics:
+                        if data["is_dealer"]:
+                            continue
+                        writer.writerow(data)
 
-            with open(dealer_csv_file_path, "w") as csv_file:
-                writer = csv.DictWriter(csv_file, fieldnames=collected_statistics[0].keys())
-                writer.writeheader()
-                for data in collected_statistics:
-                    if not data["is_dealer"]:
-                        continue
-                    writer.writerow(data)
+                with open(dealer_csv_file_path, "w") as csv_file:
+                    writer = csv.DictWriter(csv_file, fieldnames=collected_statistics[0].keys())
+                    writer.writeheader()
+                    for data in collected_statistics:
+                        if not data["is_dealer"]:
+                            continue
+                        writer.writerow(data)
 
             # it is important for total allocated memory to free memory at the end of iteration
             del logs

@@ -76,23 +76,10 @@ def test_parse_log_link():
 def test_auth_message():
     decoder = TenhouDecoder()
     message = """<HELO uname="%4E%6F%4E%61%6D%65"
-                       auth="20160318-54ebe070" ratingscale=""
                        PF4="9,45,1290.90,-5184.0,69,95,129,157,71,4303,831,830,33,1761"/>"""
 
-    auth_string, rating_string, _ = decoder.parse_hello_string(message)
-
-    assert auth_string == "20160318-54ebe070"
+    rating_string, _ = decoder.parse_hello_string(message)
     assert rating_string == "9,45,1290.90,-5184.0,69,95,129,157,71,4303,831,830,33,1761"
-
-
-def test_generate_auth_token():
-    client = TenhouDecoder()
-
-    string = "20160318-54ebe070"
-    assert client.generate_auth_token(string) == "20160318-72b5ba21"
-
-    string = "20160319-5b859bb3"
-    assert client.generate_auth_token(string) == "20160319-9bc528f3"
 
 
 def test_decode_new_dora_indicator():

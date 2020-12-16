@@ -31,19 +31,15 @@ class TenhouDecoder:
 
     def parse_hello_string(self, message):
         rating_string = ""
-        auth_message = ""
         new_rank_message = ""
 
-        if "auth=" in message:
-            auth_message = self.get_attribute_content(message, "auth")
-            # for NoName we don't have rating attribute
-            if "PF4=" in message:
-                rating_string = self.get_attribute_content(message, "PF4")
+        if "PF4=" in message:
+            rating_string = self.get_attribute_content(message, "PF4")
 
         if "nintei" in message:
             new_rank_message = unquote(self.get_attribute_content(message, "nintei"))
 
-        return auth_message, rating_string, new_rank_message
+        return rating_string, new_rank_message
 
     def parse_initial_values(self, message):
         """
@@ -235,56 +231,6 @@ class TenhouDecoder:
     def parse_nuki(self, data, meld):
         meld.type = MeldPrint.NUKI
         meld.tiles = [data >> 8]
-
-    def generate_auth_token(self, auth_string):
-        translation_table = [
-            63006,
-            9570,
-            49216,
-            45888,
-            9822,
-            23121,
-            59830,
-            51114,
-            54831,
-            4189,
-            580,
-            5203,
-            42174,
-            59972,
-            55457,
-            59009,
-            59347,
-            64456,
-            8673,
-            52710,
-            49975,
-            2006,
-            62677,
-            3463,
-            17754,
-            5357,
-        ]
-
-        parts = auth_string.split("-")
-        if len(parts) != 2:
-            return False
-
-        first_part = parts[0]
-        second_part = parts[1]
-        if len(first_part) != 8 or len(second_part) != 8:
-            return False
-
-        table_index = int("2" + first_part[2:8]) % (12 - int(first_part[7:8])) * 2
-
-        a = translation_table[table_index] ^ int(second_part[0:4], 16)
-        b = translation_table[table_index + 1] ^ int(second_part[4:8], 16)
-
-        postfix = format(a, "2x") + format(b, "2x")
-
-        result = first_part + "-" + postfix
-
-        return result
 
     def get_attribute_content(self, message, attribute_name):
         result = re.findall(r'{}="([^"]*)"'.format(attribute_name), message)

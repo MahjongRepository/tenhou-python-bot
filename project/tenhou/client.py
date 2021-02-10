@@ -5,6 +5,7 @@ from threading import Thread
 from time import sleep
 from urllib.parse import quote
 
+import requests
 from game.client import Client
 from mahjong.tile import TilesConverter
 from tenhou.decoder import TenhouDecoder
@@ -174,6 +175,25 @@ class TenhouClient(Client):
 
                     if "<LN" in message:
                         self._send_message(self._pxr_tag())
+
+                    # send end game message to api
+                    if settings.TOURNAMENT_API_TOKEN and settings.TOURNAMENT_API_URL:
+                        if "<CHAT" in message:
+                            # uname means that other player sent this message, we don't need to parse it
+                            if not self.decoder.get_attribute_content(message, "uname"):
+                                text = self.decoder.get_attribute_content(message, "text")
+                                if text and text.startswith("#END"):
+                                    try:
+                                        requests.post(
+                                            settings.TOURNAMENT_API_URL,
+                                            data={
+                                                "api_token": settings.TOURNAMENT_API_TOKEN,
+                                                "message": text,
+                                            },
+                                        )
+                                        self.logger.error("Successfully sent end game message")
+                                    except Exception:
+                                        self.logger.error("Can't sent end game message")
 
                 current_time = datetime.datetime.now()
                 time_difference = current_time - start_time

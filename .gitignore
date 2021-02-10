@@ -36,3 +36,6 @@ profile.py
 
 .coverage
 htmlcov
+
+docker-compose.production.yml
+docker-compose.tournament.yml

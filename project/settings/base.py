@@ -19,6 +19,9 @@ LOG_PREFIX = ""
 
 PRINT_LOGS = True
 
+TOURNAMENT_API_TOKEN = None
+TOURNAMENT_API_URL = None
+
 """
   Game type decoding:
 

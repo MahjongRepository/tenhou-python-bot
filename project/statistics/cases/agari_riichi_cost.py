@@ -53,7 +53,9 @@ class AgariRiichiCostCase(MainCase):
                 if "yaku=" not in tag:
                     continue
 
-                yaku_list = [int(x) for x in self.parser.get_attribute_content(tag, "yaku").split(",")[::2]]
+                yaku_temp = [int(x) for x in self.parser.get_attribute_content(tag, "yaku").split(",")]
+                yaku_list = yaku_temp[::2]
+                han = sum(yaku_temp[1::2])
 
                 # we are looking for riichi hands only
                 if 1 not in yaku_list:
@@ -63,6 +65,7 @@ class AgariRiichiCostCase(MainCase):
                 if 2 in yaku_list or 0 in yaku_list:
                     continue
 
+                fu = int(self.parser.get_attribute_content(tag, "ten").split(",")[0])
                 original_cost = int(self.parser.get_attribute_content(tag, "ten").split(",")[1])
                 results.append(
                     {
@@ -71,6 +74,8 @@ class AgariRiichiCostCase(MainCase):
                         "agari_position": int(self.parser.get_attribute_content(tag, "who")),
                         "player_position": int(self.parser.get_attribute_content(tag, "fromWho")),
                         "win_tile_34": int(self.parser.get_attribute_content(tag, "machi")) // 4,
+                        "han": han,
+                        "fu": fu,
                         "original_cost": original_cost,
                         "round_data": round_data,
                     }
@@ -91,6 +96,8 @@ class AgariRiichiCostCase(MainCase):
         - On Riichi. Was it called against open hand threat or not (threat == someone opened dora pon)
         - On Riichi. Discards before the riichi
         - On Agari. Riichi hand cost
+        - On Agari. Riichi hand han
+        - On Agari. Riichi hand fu
         - On Agari. Round step number
         - On Agari. Number of kan sets in riichi hand
         - On Agari. Number of kan sets on the table

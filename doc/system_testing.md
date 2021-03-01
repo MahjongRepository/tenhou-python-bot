@@ -463,3 +463,17 @@ Reproduce:
 > python reproducer.py --log 2020113000gm-0009-7994-1460f04f --player 2 --wind 6 --honba 0 --action draw --n 1 --tile 3m
 
 ![image](../project/system_testing/fixtures/40.jpg)
+
+## Case 41
+
+SKIPPED: **TODO**
+
+Action: `meld`, meld: `{'type': 'chi', 'tiles': '345s'}`, tile after meld: `7s`.
+
+Must open meld to secure 1st place.
+
+Reproduce:
+
+> python reproducer.py --log 2021030108gm-0029-0000-85ff9521 --player 0 --wind 8 --honba 0 --action enemy_discard --n 1 --tile 5s
+
+![image](../project/system_testing/fixtures/41.jpg)

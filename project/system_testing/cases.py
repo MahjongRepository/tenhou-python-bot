@@ -322,4 +322,13 @@ SYSTEM_TESTING_CASES = [
         "allowed_discards": ["2m"],
         "with_riichi": None,
     },
+    {
+        "index": 41,
+        "description": "Must open meld to secure 1st place.",
+        "reproducer_command": "python reproducer.py --log 2021030108gm-0029-0000-85ff9521 --player 0 --wind 8 --honba 0 --action enemy_discard --n 1 --tile 5s",
+        "action": ACTION_MELD,
+        "meld": {"type": MeldPrint.CHI, "tiles": "345s"},
+        "tile_after_meld": "7s",
+        "skip_reason": "TODO",
+    },
 ]

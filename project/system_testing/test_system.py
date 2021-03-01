@@ -580,3 +580,20 @@ def test_system_case_40():
 
     result, with_riichi_result = _run_reproducer("40.txt", reproducer_command)
     assert TilesConverter.to_one_line_string([result]) in allowed_discards
+
+
+@pytest.mark.skip("TODO")
+def test_system_case_41():
+    """
+    Case #41
+    Must open meld to secure 1st place.
+    """
+
+    reproducer_command = "python reproducer.py --log 2021030108gm-0029-0000-85ff9521 --player 0 --wind 8 --honba 0 --action enemy_discard --n 1 --tile 5s"
+    needed_meld = {"type": "chi", "tiles": "345s"}
+    tile_after_meld = "7s"
+
+    result_meld, result_tile_after_meld = _run_reproducer("41.txt", reproducer_command)
+    assert result_meld.type == needed_meld["type"]
+    assert TilesConverter.to_one_line_string(result_meld.tiles) == needed_meld["tiles"]
+    assert TilesConverter.to_one_line_string([result_tile_after_meld.tile_to_discard_136]) == tile_after_meld

@@ -127,7 +127,6 @@ def test_system_case_7():
     assert with_riichi == with_riichi_result
 
 
-@pytest.mark.skip("Need to investigate it.")
 def test_system_case_8():
     """
     Case #8

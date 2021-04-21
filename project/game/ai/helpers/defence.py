@@ -11,12 +11,6 @@ class TileDanger:
         "description": "Tile can't be used by analyzed threat",
     }
 
-    # honor tiles
-    HONOR_THIRD = {
-        "value": 40,
-        "description": "Third honor tile (early game)",
-    }
-
     NON_YAKUHAI_HONOR_SECOND_EARLY = {
         "value": 60,
         "description": "Second non-yakuhai honor (early game)",
@@ -65,6 +59,15 @@ class TileDanger:
     DOUBLE_YAKUHAI_HONOR_SHONPAI_MID = {
         "value": 480,
         "description": "Shonpai double-yakuhai honor (mid game)",
+    }
+
+    HONOR_THIRD_EARLY = {
+        "value": 40,
+        "description": "Third honor tile (early game)",
+    }
+    HONOR_THIRD_LATE = {
+        "value": 80,
+        "description": "Third honor tile (late game)",
     }
 
     NON_YAKUHAI_HONOR_SECOND_LATE = {

@@ -78,7 +78,6 @@ SYSTEM_TESTING_CASES = [
         "action": ACTION_DISCARD,
         "allowed_discards": ["6s"],
         "with_riichi": False,
-        "skip_reason": "Need to investigate it.",
     },
     {
         "index": 9,

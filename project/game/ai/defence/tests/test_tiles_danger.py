@@ -71,7 +71,7 @@ def test_tile_danger_and_honor_third():
     player.init_hand(tiles)
     player.draw_tile(tile)
 
-    _assert_discard(player, enemy_seat, TileDanger.HONOR_THIRD, honors="1")
+    _assert_discard(player, enemy_seat, TileDanger.HONOR_THIRD_EARLY, honors="1")
 
 
 def test_tile_danger_and_non_yakuhai_honor_second():

@@ -644,7 +644,10 @@ class TileDangerHandler:
                     danger = TileDanger.DOUBLE_YAKUHAI_HONOR_SECOND_LATE
 
         if number_of_revealed_tiles == 3:
-            danger = TileDanger.HONOR_THIRD
+            if len(enemy_analyzer.enemy.discards) <= 12:
+                danger = TileDanger.HONOR_THIRD_EARLY
+            else:
+                danger = TileDanger.HONOR_THIRD_LATE
 
         return danger
 

@@ -94,8 +94,6 @@ Reproduce:
 
 ## Case 8
 
-SKIPPED: **Need to investigate it.**
-
 Action: `discard`, allowed discard: `6s`, with riichi: `False`.
 
 Honors are dangerous on this late stage of the game. And we have 2 shanten. Let's fold with 6s

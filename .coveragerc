@@ -2,6 +2,7 @@
 omit =
     env/*
     project/bots_battle.py
+    project/run_stat.py
     project/game/ai/configs/*
     project/game/bots_battle/*
     project/settings/*

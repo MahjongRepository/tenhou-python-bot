@@ -398,7 +398,6 @@ def test_tile_danger_and_aka_dora():
     _assert_discard(player, enemy_seat, TileDanger.DORA_BONUS, sou="5")
 
 
-@pytest.mark.skip("Skipped until danger values tuning is finished")
 def test_tile_total_danger():
     enemy_seat = 1
     table = _create_table(enemy_seat, discards=[], riichi_tile=string_to_136_tile(honors="7"))
@@ -412,7 +411,7 @@ def test_tile_total_danger():
 
     discard_option = find_discard_option(player, sou="4")
 
-    assert discard_option.danger.get_total_danger_for_player(enemy_seat) == 388
+    assert discard_option.danger.get_total_danger_for_player(enemy_seat) == 916
 
 
 def test_tile_danger_against_tanyao_threat():

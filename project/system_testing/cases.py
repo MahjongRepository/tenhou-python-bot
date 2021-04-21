@@ -328,6 +328,5 @@ SYSTEM_TESTING_CASES = [
         "action": ACTION_MELD,
         "meld": {"type": MeldPrint.CHI, "tiles": "345s"},
         "tile_after_meld": "7s",
-        "skip_reason": "TODO",
     },
 ]

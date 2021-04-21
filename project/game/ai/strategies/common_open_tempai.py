@@ -91,8 +91,14 @@ class CommonOpenTempaiStrategy(BaseStrategy):
         enough_cost = 32000
         if self.player.ai.placement.is_oorasu:
             placement = self.player.ai.placement.get_current_placement()
-            if placement and placement["place"] == 4:
-                enough_cost = self.player.ai.placement.get_minimal_cost_needed_considering_west()
+            if placement:
+                # we are in good position
+                if placement["place"] == 1:
+                    enough_cost = 1000
+
+                # we are in bad position
+                if placement["place"] == 4:
+                    enough_cost = self.player.ai.placement.get_minimal_cost_needed_considering_west()
 
         if self.player.round_step <= 6:
             if hand_cost >= min(7700, enough_cost):

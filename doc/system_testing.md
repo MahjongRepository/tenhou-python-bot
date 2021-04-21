@@ -464,8 +464,6 @@ Reproduce:
 
 ## Case 41
 
-SKIPPED: **TODO**
-
 Action: `meld`, meld: `{'type': 'chi', 'tiles': '345s'}`, tile after meld: `7s`.
 
 Must open meld to secure 1st place.

@@ -581,7 +581,6 @@ def test_system_case_40():
     assert TilesConverter.to_one_line_string([result]) in allowed_discards
 
 
-@pytest.mark.skip("TODO")
 def test_system_case_41():
     """
     Case #41

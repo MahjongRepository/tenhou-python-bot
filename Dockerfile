@@ -1,4 +1,4 @@
-FROM pypy:3.7-7.3.2-slim
+FROM pypy:3.7-7.3.4-slim
 
 RUN useradd -ms /bin/bash docker-user
 

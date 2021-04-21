@@ -1,32 +1,28 @@
-### 0.5.0 version
+### 0.5.1 version
 
-This version is much more stable than the previous one. It played 150,000 hanchans locally and 1,000 hanchans on tenhou.net. We found and fixed numerous crashes during these games.
+This version is much more stable than the previous one. It played 150,000 hanchans locally and 2,000 hanchans on tenhou.net. We found and fixed numerous crashes during these games.
 
 The main change for this version is an improved defense mechanism, now the bot is much smarter in terms of push/fold decisions.
 
 Also, there are a lot of improvements in other parts (377 commits since the previous version with 17,465 additions and 7,701 deletions of code lines).
 
-Statistics provided for 1,095 games in 上級 lobby.
+The bot that played only ippan lobby (一般) was able to achieve a limit of 4 dan and 1800 rate in 685 games. His statistic:
 
-Stable rank was a third dan (三段) and bot achieved fourth dan (四段) with R1900 once.
-
-|   | Result |
+|   | Statistics |
 | --- | --- |
-| Average position | 2.48 |
-| Win rate | 21.09% |
-| Feed rate | 12.14% |
-| Riichi rate | 25.31% |
-| Call rate | 26.16% |
-
-For this version calculations of riichi and call rate were changed and now they are the same as tenhou.net calculation. But because of changes, it is not comparable with previous versions.
+| Average position | 2.34 |
+| Win rate | 22.11% |
+| Feed rate | 10.41% |
+| Riichi rate | 24.81% |
+| Call rate | 26.14% |
 
 | Places |  |
 | --- | --- |
-| First | 23.65% |
-| Second | 28.86% |
-| Third| 24.20% |
-| Fourth | 23.29% |
-| Bankruptcy | 6.76% |
+| First | 25.99% |
+| Second | 30.51% |
+| Third| 27.01% |
+| Fourth | 16.50% |
+| Bankruptcy | 4.53% |
 
 ### 0.4.0 version
 

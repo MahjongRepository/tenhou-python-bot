@@ -1,6 +1,5 @@
 from copy import copy
 
-import pytest
 from game.ai.helpers.defence import TileDanger
 from game.table import Table
 from mahjong.constants import FIVE_RED_SOU

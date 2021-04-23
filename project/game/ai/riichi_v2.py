@@ -1,3 +1,4 @@
+from game.ai.discard import DiscardOption
 from game.ai.placement import Placement
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_chi, is_honor, is_pair, is_terminal, plus_dora, simplify
@@ -13,31 +14,59 @@ class RiichiV2:
 
         hand_builder = self.player.ai.hand_builder
 
-        waiting = discard_option.waiting
+        riichi_waiting = discard_option.waiting
         # empty waiting can be found in some cases
-        if not waiting:
+        if not riichi_waiting:
             return False
 
         # save original hand state
         # we will restore it after we have finished our routines
         tiles_original, discards_original = hand_builder.emulate_discard(discard_option)
 
-        count_tiles = hand_builder.count_tiles(waiting, TilesConverter.to_34_array(self.player.closed_hand))
+        should_riichi = False
+        count_tiles = hand_builder.count_tiles(riichi_waiting, TilesConverter.to_34_array(self.player.closed_hand))
         if count_tiles == 0:
             # don't call karaten riichi
             should_riichi = False
         else:
+            should_continue = True
+
             # we decide if we should riichi or not before making a discard, hence we check for round step == 0
             first_discard = self.player.round_step == 0
             if first_discard and not self.player.table.meld_was_called:
                 # it is daburi!
                 should_riichi = True
-            else:
-                # regular path
-                if len(waiting) == 1:
-                    should_riichi = self._should_call_riichi_one_sided(waiting)
+                should_continue = False
+
+            if should_continue:
+                # check if we can easily improve our hand with going to 1 shanten
+                closed_tiles_34 = TilesConverter.to_34_array(tiles_original)
+                tiles_34 = TilesConverter.to_34_array(tiles_original)
+                for tile_34 in range(34):
+                    closed_tiles_34[tile_34] -= 1
+                    temp_waiting, shanten = self.player.ai.hand_builder.calculate_waits(
+                        closed_tiles_34, tiles_34, use_chiitoitsu=False
+                    )
+                    closed_tiles_34[tile_34] += 1
+
+                    if temp_waiting and shanten == 1:
+                        wait_to_ukeire = dict(
+                            zip(
+                                temp_waiting,
+                                [self.player.ai.hand_builder.count_tiles([x], closed_tiles_34) for x in temp_waiting],
+                            )
+                        )
+                        ukeire = sum(wait_to_ukeire.values())
+                        # let's be in dama, we can improve our hand with a lot of tiles
+                        if ukeire >= 30:
+                            should_riichi = False
+                            should_continue = False
+
+            if should_continue:
+                if len(riichi_waiting) == 1:
+                    should_riichi = self._should_call_riichi_one_sided(riichi_waiting)
                 else:
-                    should_riichi = self._should_call_riichi_many_sided(waiting)
+                    should_riichi = self._should_call_riichi_many_sided(discard_option, tiles_original)
 
         hand_builder.restore_after_emulate_discard(tiles_original, discards_original)
 
@@ -263,7 +292,9 @@ class RiichiV2:
 
         return True
 
-    def _should_call_riichi_many_sided(self, waiting):
+    def _should_call_riichi_many_sided(self, discard_option: DiscardOption, tiles_original) -> bool:
+        waiting = discard_option.waiting
+
         count_tiles = self.player.ai.hand_builder.count_tiles(
             waiting, TilesConverter.to_34_array(self.player.closed_hand)
         )
@@ -338,5 +369,4 @@ class RiichiV2:
 
             return True
 
-        # if we don't have yaku on every wait and it's two-sided or more, we call riichi
         return True

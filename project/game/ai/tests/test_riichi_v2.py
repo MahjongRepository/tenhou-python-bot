@@ -4,6 +4,18 @@ from mahjong.tile import Tile
 from utils.test_helpers import string_to_136_array, string_to_136_tile, tiles_to_string
 
 
+def test_dont_call_riichi_with_good_change_to_improve_hand():
+    table = _make_table()
+
+    tiles = string_to_136_array(sou="345", pin="66", man="12334566")
+    table.player.init_hand(tiles)
+    table.player.draw_tile(string_to_136_tile(sou="7"))
+    discard, with_riichi = table.player.discard_tile()
+
+    assert tiles_to_string([discard]) == "7s"
+    assert with_riichi is False
+
+
 def test_dont_call_riichi_with_yaku_and_central_tanki_wait():
     table = _make_table()
 

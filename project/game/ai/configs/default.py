@@ -5,6 +5,7 @@ class BotDefaultConfig:
     # all features that we are testing should starts with FEATURE_ prefix
     # with that it will be easier to track these flags usage over the code
     FEATURE_DEFENCE_ENABLED = True
+    FEATURE_USE_NEW_RIICHI_LOGIC = False
 
     PLACEMENT_HANDLER_CLASS = PlacementHandler
 

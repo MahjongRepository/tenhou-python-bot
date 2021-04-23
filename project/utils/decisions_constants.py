@@ -16,7 +16,8 @@ MELD_PREPARE = "meld_prepare"
 MELD_HAND = "meld_hand"
 MELD_DEBUG = "meld_debug"
 
-RIICHI = "riichi"
+RIICHI_CALL = "riichi_call"
+RIICHI_SKIP = "riichi_skip"
 
 AGARI = "agari"
 

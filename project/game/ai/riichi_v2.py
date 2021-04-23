@@ -1,3 +1,4 @@
+import utils.decisions_constants as log
 from game.ai.discard import DiscardOption
 from game.ai.placement import Placement
 from mahjong.tile import TilesConverter
@@ -34,7 +35,10 @@ class RiichiV2:
             # we decide if we should riichi or not before making a discard, hence we check for round step == 0
             first_discard = self.player.round_step == 0
             if first_discard and not self.player.table.meld_was_called:
-                # it is daburi!
+                self.player.logger.debug(
+                    log.RIICHI_CALL,
+                    "Daburi! No way we can miss it.",
+                )
                 should_riichi = True
                 should_continue = False
 
@@ -59,6 +63,9 @@ class RiichiV2:
                         ukeire = sum(wait_to_ukeire.values())
                         # let's be in dama, we can improve our hand with a lot of tiles
                         if ukeire >= 30:
+                            self.player.logger.debug(
+                                log.RIICHI_SKIP, "We can improve our hand easily.", {"ukeire": ukeire}
+                            )
                             should_riichi = False
                             should_continue = False
 
@@ -66,7 +73,7 @@ class RiichiV2:
                 if len(riichi_waiting) == 1:
                     should_riichi = self._should_call_riichi_one_sided(riichi_waiting)
                 else:
-                    should_riichi = self._should_call_riichi_many_sided(discard_option, tiles_original)
+                    should_riichi = self._should_call_riichi_many_sided(discard_option)
 
         hand_builder.restore_after_emulate_discard(tiles_original, discards_original)
 
@@ -292,7 +299,7 @@ class RiichiV2:
 
         return True
 
-    def _should_call_riichi_many_sided(self, discard_option: DiscardOption, tiles_original) -> bool:
+    def _should_call_riichi_many_sided(self, discard_option: DiscardOption) -> bool:
         waiting = discard_option.waiting
 
         count_tiles = self.player.ai.hand_builder.count_tiles(

@@ -20,10 +20,7 @@ class RiichiV2:
         riichi_waiting = discard_option.waiting
         # empty waiting can be found in some cases
         if not riichi_waiting:
-            self.player.logger.debug(
-                log.RIICHI_SKIP,
-                "No waiting",
-            )
+            self.player.logger.debug(log.RIICHI_SKIP, "No waiting", {"tile": discard_option.tile_print})
             return False
 
         # save original hand state
@@ -34,10 +31,7 @@ class RiichiV2:
         count_tiles = hand_builder.count_tiles(riichi_waiting, TilesConverter.to_34_array(self.player.closed_hand))
         if count_tiles == 0:
             # don't call karaten riichi
-            self.player.logger.debug(
-                log.RIICHI_SKIP,
-                "No remained tiles",
-            )
+            self.player.logger.debug(log.RIICHI_SKIP, "No remained tiles", {"tile": discard_option.tile_print})
             should_riichi = False
         else:
             should_continue = True
@@ -46,8 +40,7 @@ class RiichiV2:
             first_discard = self.player.round_step == 0
             if first_discard and not self.player.table.meld_was_called:
                 self.player.logger.debug(
-                    log.RIICHI_CALL,
-                    "Daburi! No way we can miss it.",
+                    log.RIICHI_CALL, "Daburi! No way we can miss it.", {"tile": discard_option.tile_print}
                 )
                 should_riichi = True
                 should_continue = False
@@ -74,14 +67,16 @@ class RiichiV2:
                         # let's be in dama, we can improve our hand with a lot of tiles
                         if ukeire >= 30:
                             self.player.logger.debug(
-                                log.RIICHI_SKIP, "We can improve our hand easily.", {"ukeire": ukeire}
+                                log.RIICHI_SKIP,
+                                "We can improve our hand easily.",
+                                {"tile": discard_option.tile_print, "ukeire": ukeire},
                             )
                             should_riichi = False
                             should_continue = False
 
             if should_continue:
                 if len(riichi_waiting) == 1:
-                    should_riichi = self._should_call_riichi_one_sided(riichi_waiting)
+                    should_riichi = self._should_call_riichi_one_sided(discard_option)
                 else:
                     should_riichi = self._should_call_riichi_many_sided(discard_option)
 
@@ -89,7 +84,9 @@ class RiichiV2:
 
         return should_riichi
 
-    def _should_call_riichi_one_sided(self, waiting):
+    def _should_call_riichi_one_sided(self, discard_option: DiscardOption):
+        waiting = discard_option.waiting
+
         count_tiles = self.player.ai.hand_builder.count_tiles(
             waiting, TilesConverter.to_34_array(self.player.closed_hand)
         )
@@ -109,6 +106,7 @@ class RiichiV2:
                 log.RIICHI_CALL,
                 "Based on placements",
                 {
+                    "tile": discard_option.tile_print,
                     "has_yaku": (hand_value.yaku is not None and hand_value.cost is not None),
                     "count_tiles": count_tiles,
                     "cost_with_riichi": hand_value_with_riichi.cost["main"],
@@ -122,6 +120,7 @@ class RiichiV2:
                 log.RIICHI_SKIP,
                 "Based on placements",
                 {
+                    "tile": discard_option.tile_print,
                     "has_yaku": (hand_value.yaku is not None and hand_value.cost is not None),
                     "count_tiles": count_tiles,
                     "cost_with_riichi": hand_value_with_riichi.cost["main"],
@@ -143,6 +142,7 @@ class RiichiV2:
         have_suji, have_kabe = self.player.ai.hand_builder.check_suji_and_kabe(closed_tiles_34, waiting)
 
         logger_context = {
+            "tile": discard_option.tile_print,
             "is_dealer": self.player.is_dealer,
             "round_step": self.player.round_step,
             "count_tiles": count_tiles,
@@ -293,6 +293,7 @@ class RiichiV2:
                 log.RIICHI_CALL,
                 "Based on placements",
                 {
+                    "tile": discard_option.tile_print,
                     "has_yaku": waits_with_yaku == len(waiting),
                     "count_tiles": count_tiles,
                     "cost_with_riichi": min_cost_with_riichi,
@@ -305,6 +306,7 @@ class RiichiV2:
                 log.RIICHI_SKIP,
                 "Based on placements",
                 {
+                    "tile": discard_option.tile_print,
                     "has_yaku": waits_with_yaku == len(waiting),
                     "count_tiles": count_tiles,
                     "cost_with_riichi": min_cost_with_riichi,
@@ -314,6 +316,7 @@ class RiichiV2:
             return False
 
         logger_context = {
+            "tile": discard_option.tile_print,
             "is_dealer": self.player.is_dealer,
             "round_step": self.player.round_step,
             "count_tiles": count_tiles,

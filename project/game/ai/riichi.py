@@ -2,6 +2,11 @@ from game.ai.placement import Placement
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_chi, is_honor, is_pair, is_terminal, plus_dora, simplify
 
+# DEPRECATED code
+# we keep it in the repo
+# to be able compare new riichi logic and old riichi logic
+# later in bots battle
+
 
 class Riichi:
     def __init__(self, player):

@@ -1,4 +1,3 @@
-from game.ai.configs.new_riichi_feature import NewRiichiConfig
 from game.table import Table
 from mahjong.tile import Tile
 from utils.test_helpers import string_to_136_array, string_to_136_tile, tiles_to_string
@@ -216,7 +215,7 @@ def test_dont_call_riichi_chiitoitsu_bad_wait():
 
 
 def _make_table(dora_indicators=None):
-    table = Table(bot_config=NewRiichiConfig)
+    table = Table()
     table.count_of_remaining_tiles = 60
     table.player.scores = 25000
 

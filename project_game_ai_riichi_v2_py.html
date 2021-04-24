@@ -99,7 +99,7 @@
     <p id="t45" class="run"><span class="n"><a href="#t45">45</a></span><span class="t">                <span class="nam">should_riichi</span> <span class="op">=</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
     <p id="t46" class="run"><span class="n"><a href="#t46">46</a></span><span class="t">                <span class="nam">should_continue</span> <span class="op">=</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p id="t47" class="pln"><span class="n"><a href="#t47">47</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p id="t48" class="run"><span class="n"><a href="#t48">48</a></span><span class="t">            <span class="key">if</span> <span class="nam">should_continue</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t48" class="run"><span class="n"><a href="#t48">48</a></span><span class="t">            <span class="key">if</span> <span class="nam">should_continue</span> <span class="key">and</span> <span class="nam">count_tiles</span> <span class="op">&lt;=</span> <span class="num">4</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t49" class="pln"><span class="n"><a href="#t49">49</a></span><span class="t">                <span class="com"># check if we can easily improve our hand with going to 1 shanten</span>&nbsp;</span><span class="r"></span></p>
     <p id="t50" class="run"><span class="n"><a href="#t50">50</a></span><span class="t">                <span class="nam">closed_tiles_34</span> <span class="op">=</span> <span class="nam">TilesConverter</span><span class="op">.</span><span class="nam">to_34_array</span><span class="op">(</span><span class="nam">tiles_original</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t51" class="run"><span class="n"><a href="#t51">51</a></span><span class="t">                <span class="nam">tiles_34</span> <span class="op">=</span> <span class="nam">TilesConverter</span><span class="op">.</span><span class="nam">to_34_array</span><span class="op">(</span><span class="nam">tiles_original</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -123,7 +123,7 @@
     <p id="t69" class="run"><span class="n"><a href="#t69">69</a></span><span class="t">                            <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">logger</span><span class="op">.</span><span class="nam">debug</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p id="t70" class="pln"><span class="n"><a href="#t70">70</a></span><span class="t">                                <span class="nam">log</span><span class="op">.</span><span class="nam">RIICHI_SKIP</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p id="t71" class="pln"><span class="n"><a href="#t71">71</a></span><span class="t">                                <span class="str">"We can improve our hand easily."</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t72" class="pln"><span class="n"><a href="#t72">72</a></span><span class="t">                                <span class="op">{</span><span class="str">"tile"</span><span class="op">:</span> <span class="nam">discard_option</span><span class="op">.</span><span class="nam">tile_print</span><span class="op">,</span> <span class="str">"ukeire"</span><span class="op">:</span> <span class="nam">ukeire</span><span class="op">}</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t72" class="pln"><span class="n"><a href="#t72">72</a></span><span class="t">                                <span class="op">{</span><span class="str">"tile"</span><span class="op">:</span> <span class="nam">discard_option</span><span class="op">.</span><span class="nam">tile_print</span><span class="op">,</span> <span class="str">"count_tiles"</span><span class="op">:</span> <span class="nam">count_tiles</span><span class="op">,</span> <span class="str">"ukeire"</span><span class="op">:</span> <span class="nam">ukeire</span><span class="op">}</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p id="t73" class="pln"><span class="n"><a href="#t73">73</a></span><span class="t">                            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t74" class="run"><span class="n"><a href="#t74">74</a></span><span class="t">                            <span class="nam">should_riichi</span> <span class="op">=</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p id="t75" class="run"><span class="n"><a href="#t75">75</a></span><span class="t">                            <span class="nam">should_continue</span> <span class="op">=</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
@@ -600,7 +600,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v5.5</a>,
-            created at 2021-04-24 11:03 +0000
+            created at 2021-04-24 14:16 +0000
         </p>
     </div>
 </div>

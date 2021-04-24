@@ -45,7 +45,7 @@ class RiichiV2:
                 should_riichi = True
                 should_continue = False
 
-            if should_continue:
+            if should_continue and count_tiles <= 4:
                 # check if we can easily improve our hand with going to 1 shanten
                 closed_tiles_34 = TilesConverter.to_34_array(tiles_original)
                 tiles_34 = TilesConverter.to_34_array(tiles_original)
@@ -69,7 +69,7 @@ class RiichiV2:
                             self.player.logger.debug(
                                 log.RIICHI_SKIP,
                                 "We can improve our hand easily.",
-                                {"tile": discard_option.tile_print, "ukeire": ukeire},
+                                {"tile": discard_option.tile_print, "count_tiles": count_tiles, "ukeire": ukeire},
                             )
                             should_riichi = False
                             should_continue = False

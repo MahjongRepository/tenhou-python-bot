@@ -606,9 +606,9 @@ class TenhouClient(Client):
         is_hanchan = rules[4] == "1"
         is_open_tanyao = rules[5] == "0"
         is_aka = rules[6] == "0"
-        is_hirosima = rules[3] == "1"
+        is_sanma = rules[3] == "1"
 
-        if is_hirosima:
+        if is_sanma:
             return False
 
         self.table.has_aka_dora = is_aka

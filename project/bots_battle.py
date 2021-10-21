@@ -1,5 +1,4 @@
 import datetime
-import itertools
 import logging
 import os
 import random
@@ -32,11 +31,6 @@ def main(number_of_games, print_logs):
     if not os.path.exists(replays_directory):
         os.mkdir(replays_directory)
 
-    possible_configurations = list(itertools.combinations(BattleConfig.CLIENTS_CONFIGS, 4))
-    assert len(BattleConfig.CLIENTS_CONFIGS) == 12
-    assert len(possible_configurations) == 495
-
-    chosen_configuration = 0
     for i in trange(number_of_games):
         if i < len(seeds):
             seed_value = seeds[i]
@@ -45,10 +39,7 @@ def main(number_of_games, print_logs):
 
         replay_name = GameManager.generate_replay_name()
 
-        clients = [
-            LocalClient(possible_configurations[chosen_configuration][x](), print_logs, replay_name, i)
-            for x in range(0, 4)
-        ]
+        clients = [LocalClient(BattleConfig.CLIENTS_CONFIGS[x](), print_logs, replay_name, i) for x in range(0, 4)]
         manager = GameManager(clients, replays_directory, replay_name)
 
         try:
@@ -57,10 +48,6 @@ def main(number_of_games, print_logs):
         except Exception as e:
             manager.replay.save_failed_log()
             logger.error(f"Hanchan seed={seed_value} crashed", exc_info=e)
-
-        chosen_configuration += 1
-        if chosen_configuration == len(possible_configurations):
-            chosen_configuration = 0
 
 
 def _set_up_bots_battle_game_logger():

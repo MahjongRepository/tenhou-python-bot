@@ -6,7 +6,6 @@ from game.ai.hand_builder import HandBuilder
 from game.ai.helpers.kabe import Kabe
 from game.ai.helpers.suji import Suji
 from game.ai.kan import Kan
-from game.ai.riichi import Riichi
 from game.ai.strategies.chinitsu import ChinitsuStrategy
 from game.ai.strategies.common_open_tempai import CommonOpenTempaiStrategy
 from game.ai.strategies.formal_tempai import FormalTempaiStrategy
@@ -25,7 +24,7 @@ from utils.cache import build_estimate_hand_value_cache_key, build_shanten_cache
 
 
 class MahjongAI:
-    version = "0.5.1"
+    version = "0.6.0-dev"
 
     agari = None
     shanten_calculator = None
@@ -53,10 +52,10 @@ class MahjongAI:
         self.agari = Agari()
         self.shanten_calculator = Shanten()
         self.defence = TileDangerHandler(player)
-        self.riichi = Riichi(player)
         self.hand_divider = HandDivider()
         self.finished_hand = HandCalculator()
         self.hand_builder = HandBuilder(player, self)
+        self.riichi = player.config.RIICHI_HANDLER_CLASS(player)
         self.placement = player.config.PLACEMENT_HANDLER_CLASS(player)
 
         self.suji = Suji(player)

@@ -1,4 +1,5 @@
 from game.ai.placement import PlacementHandler
+from game.ai.riichi import Riichi
 
 
 class BotDefaultConfig:
@@ -7,9 +8,8 @@ class BotDefaultConfig:
     FEATURE_DEFENCE_ENABLED = True
 
     PLACEMENT_HANDLER_CLASS = PlacementHandler
+    RIICHI_HANDLER_CLASS = Riichi
 
     TUNE_DANGER_BORDER_TEMPAI_VALUE = 0
     TUNE_DANGER_BORDER_1_SHANTEN_VALUE = 0
     TUNE_DANGER_BORDER_2_SHANTEN_VALUE = 0
-
-    # TODO move all separate configs as subclasses here

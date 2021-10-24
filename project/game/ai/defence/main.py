@@ -1,5 +1,5 @@
 from copy import copy
-from typing import List
+from typing import List, Optional
 
 from game.ai.defence.enemy_analyzer import EnemyAnalyzer
 from game.ai.discard import DiscardOption
@@ -13,11 +13,13 @@ from utils.general import is_dora_connector, is_tiles_same_suit
 
 class TileDangerHandler:
     player = None
-    _analyzed_enemies: List[EnemyAnalyzer] = None
+    _analyzed_enemies: Optional[List[EnemyAnalyzer]] = None
+    _threats_cache: Optional[List[EnemyAnalyzer]] = None
 
     def __init__(self, player):
         self.player = player
         self._analyzed_enemies = []
+        self._threats_cache = []
 
         self.possible_forms_analyzer = PossibleFormsAnalyzer(player)
 
@@ -484,12 +486,19 @@ class TileDangerHandler:
             )
         return discard_options
 
-    def get_threatening_players(self):
+    def get_threatening_players(self, from_cache: bool = True) -> List[EnemyAnalyzer]:
+        if from_cache and self._threats_cache is not None:
+            return self._threats_cache
+
         result = []
         for player in self.analyzed_enemies:
             if player.is_threatening:
                 result.append(player)
+
         return result
+
+    def erase_threats_cache(self):
+        self._threats_cache = None
 
     def mark_tiles_danger_for_threats(self, discard_options):
         threatening_players = self.get_threatening_players()

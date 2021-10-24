@@ -197,6 +197,9 @@ class Player(PlayerInterface):
 
         self.logger.debug(log.DRAW, context=context)
 
+        # it is important to recalculate all threats here
+        self.ai.defence.erase_threats_cache()
+
         self.last_draw = tile_136
         self.tiles.append(tile_136)
 
@@ -220,28 +223,20 @@ class Player(PlayerInterface):
 
         return tile_to_discard, with_riichi
 
-    # FIXME: remove this method and cleanup tests
-    def formal_riichi_conditions(self):
-        return all(
-            [
-                self.in_tempai,
-                not self.in_riichi,
-                not self.is_open_hand,
-                self.scores >= 1000,
-                self.table.count_of_remaining_tiles > 4,
-            ]
-        )
-
     def should_call_kan(self, tile, open_kan, from_riichi=False):
+        self.ai.defence.erase_threats_cache()
         return self.ai.kan.should_call_kan(tile, open_kan, from_riichi)
 
     def should_call_win(self, tile, is_tsumo, enemy_seat=None, is_chankan=False):
+        self.ai.defence.erase_threats_cache()
         return self.ai.should_call_win(tile, is_tsumo, enemy_seat, is_chankan)
 
     def should_call_kyuushu_kyuuhai(self):
+        self.ai.defence.erase_threats_cache()
         return self.ai.should_call_kyuushu_kyuuhai()
 
     def try_to_call_meld(self, tile, is_kamicha_discard):
+        self.ai.defence.erase_threats_cache()
         return self.ai.try_to_call_meld(tile, is_kamicha_discard)
 
     def enemy_called_riichi(self, player_seat):
@@ -278,6 +273,18 @@ class Player(PlayerInterface):
             hand_string += " [{}]".format(", ".join(melds))
 
         return hand_string
+
+    # FIXME: remove this method and cleanup tests
+    def formal_riichi_conditions(self):
+        return all(
+            [
+                self.in_tempai,
+                not self.in_riichi,
+                not self.is_open_hand,
+                self.scores >= 1000,
+                self.table.count_of_remaining_tiles > 4,
+            ]
+        )
 
     @property
     def closed_hand(self):

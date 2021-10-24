@@ -89,7 +89,7 @@ def test_shouminkan_and_threatening_riichi():
     enemy_seat = 2
     table.add_called_riichi_step_one(enemy_seat)
 
-    threatening_players = table.player.ai.defence.get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players(from_cache=False)
     assert len(threatening_players) == 1
     assert threatening_players[0].enemy.seat == enemy_seat
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_RIICHI["id"]
@@ -192,7 +192,7 @@ def test_opened_kan_and_threatening_riichi():
     enemy_seat = 2
     enemy_called_riichi_helper(table, enemy_seat)
 
-    threatening_players = table.player.ai.defence.get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players(from_cache=False)
     assert len(threatening_players) == 1
     assert threatening_players[0].enemy.seat == enemy_seat
     assert threatening_players[0].threat_reason["id"] == EnemyDanger.THREAT_RIICHI["id"]

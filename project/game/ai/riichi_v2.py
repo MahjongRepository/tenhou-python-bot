@@ -25,22 +25,23 @@ class RiichiV2:
         count_tiles = hand_builder.count_tiles(waiting, TilesConverter.to_34_array(self.player.closed_hand))
         if count_tiles == 0:
             # don't call karaten riichi
-            should_riichi = False
+            hand_builder.restore_after_emulate_discard(tiles_original, discards_original)
+            return False
+
+        # we decide if we should riichi or not before making a discard, hence we check for round step == 0
+        first_discard = self.player.round_step == 0
+        if first_discard and not self.player.table.meld_was_called:
+            hand_builder.restore_after_emulate_discard(tiles_original, discards_original)
+            # it is daburi!
+            return True
+
+        # regular path
+        if len(waiting) == 1:
+            should_riichi = self._should_call_riichi_one_sided(waiting)
         else:
-            # we decide if we should riichi or not before making a discard, hence we check for round step == 0
-            first_discard = self.player.round_step == 0
-            if first_discard and not self.player.table.meld_was_called:
-                # it is daburi!
-                should_riichi = True
-            else:
-                # regular path
-                if len(waiting) == 1:
-                    should_riichi = self._should_call_riichi_one_sided(waiting)
-                else:
-                    should_riichi = self._should_call_riichi_many_sided(waiting)
+            should_riichi = self._should_call_riichi_many_sided(waiting)
 
         hand_builder.restore_after_emulate_discard(tiles_original, discards_original)
-
         return should_riichi
 
     def _should_call_riichi_one_sided(self, waiting):

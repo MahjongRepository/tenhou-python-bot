@@ -433,7 +433,7 @@ def test_tile_danger_against_tanyao_threat():
     table.add_discarded_tile(enemy_seat, string_to_136_tile(sou="4"), False)
     table.add_discarded_tile(enemy_seat, string_to_136_tile(man="3"), False)
 
-    threatening_players = table.player.ai.defence.get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players(from_cache=False)
     assert len(threatening_players) == 1
     assert threatening_players[0].enemy.seat == enemy_seat
 
@@ -465,7 +465,7 @@ def test_tile_danger_against_honitsu_threat():
     table.add_discarded_tile(enemy_seat, string_to_136_tile(man="2"), False)
     table.add_discarded_tile(enemy_seat, string_to_136_tile(pin="1"), False)
 
-    threatening_players = table.player.ai.defence.get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players(from_cache=False)
     assert len(threatening_players) == 1
     assert threatening_players[0].enemy.seat == enemy_seat
 
@@ -498,7 +498,7 @@ def test_tile_danger_against_toitoi_threat():
 
     table.add_dora_indicator(string_to_136_tile(pin="1"))
 
-    threatening_players = table.player.ai.defence.get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players(from_cache=False)
     assert len(threatening_players) == 1
     assert threatening_players[0].enemy.seat == enemy_seat
 

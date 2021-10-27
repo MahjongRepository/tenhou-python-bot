@@ -1,3 +1,7 @@
+from typing import List
+
+from game.ai.defence.enemy_analyzer import EnemyAnalyzer
+from game.ai.discard import DiscardOption
 from game.ai.placement import Placement
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_chi, is_honor, is_pair, is_terminal, plus_dora, simplify
@@ -7,49 +11,50 @@ class Riichi:
     def __init__(self, player):
         self.player = player
 
-    def should_call_riichi(self, discard_option):
+    def should_call_riichi(self, discard_option: DiscardOption, threats: List[EnemyAnalyzer]):
         assert discard_option.shanten == 0
         assert not self.player.is_open_hand
 
         hand_builder = self.player.ai.hand_builder
 
-        waiting = discard_option.waiting
+        waiting_34 = discard_option.waiting
         # empty waiting can be found in some cases
-        if not waiting:
+        if not waiting_34:
             return False
 
         # save original hand state
         # we will restore it after we have finished our routines
         tiles_original, discards_original = hand_builder.emulate_discard(discard_option)
 
-        count_tiles = hand_builder.count_tiles(waiting, TilesConverter.to_34_array(self.player.closed_hand))
+        count_tiles = hand_builder.count_tiles(waiting_34, TilesConverter.to_34_array(self.player.closed_hand))
         if count_tiles == 0:
             # don't call karaten riichi
-            should_riichi = False
+            hand_builder.restore_after_emulate_discard(tiles_original, discards_original)
+            return False
+
+        # we decide if we should riichi or not before making a discard, hence we check for round step == 0
+        first_discard = self.player.round_step == 0
+        if first_discard and not self.player.table.meld_was_called:
+            hand_builder.restore_after_emulate_discard(tiles_original, discards_original)
+            # it is daburi!
+            return True
+
+        # regular path
+        if len(waiting_34) == 1:
+            should_riichi = self._should_call_riichi_one_sided(waiting_34, threats)
         else:
-            # we decide if we should riichi or not before making a discard, hence we check for round step == 0
-            first_discard = self.player.round_step == 0
-            if first_discard and not self.player.table.meld_was_called:
-                # it is daburi!
-                should_riichi = True
-            else:
-                # regular path
-                if len(waiting) == 1:
-                    should_riichi = self._should_call_riichi_one_sided(waiting)
-                else:
-                    should_riichi = self._should_call_riichi_many_sided(waiting)
+            should_riichi = self._should_call_riichi_many_sided(waiting_34, threats)
 
         hand_builder.restore_after_emulate_discard(tiles_original, discards_original)
-
         return should_riichi
 
-    def _should_call_riichi_one_sided(self, waiting):
+    def _should_call_riichi_one_sided(self, waiting_34: List[int], threats: List[EnemyAnalyzer]):
         count_tiles = self.player.ai.hand_builder.count_tiles(
-            waiting, TilesConverter.to_34_array(self.player.closed_hand)
+            waiting_34, TilesConverter.to_34_array(self.player.closed_hand)
         )
-        waiting = waiting[0]
-        hand_value = self.player.ai.estimate_hand_value_or_get_from_cache(waiting, call_riichi=False)
-        hand_value_with_riichi = self.player.ai.estimate_hand_value_or_get_from_cache(waiting, call_riichi=True)
+        waiting_34 = waiting_34[0]
+        hand_value = self.player.ai.estimate_hand_value_or_get_from_cache(waiting_34, call_riichi=False)
+        hand_value_with_riichi = self.player.ai.estimate_hand_value_or_get_from_cache(waiting_34, call_riichi=True)
 
         must_riichi = self.player.ai.placement.must_riichi(
             has_yaku=(hand_value.yaku is not None and hand_value.cost is not None),
@@ -67,19 +72,20 @@ class Riichi:
         for meld in closed_melds:
             tiles.extend(meld.tiles[:3])
 
-        results, tiles_34 = self.player.ai.hand_builder.divide_hand(tiles, waiting)
+        results, tiles_34 = self.player.ai.hand_builder.divide_hand(tiles, waiting_34)
         result = results[0]
 
         closed_tiles_34 = TilesConverter.to_34_array(self.player.closed_hand)
 
-        have_suji, have_kabe = self.player.ai.hand_builder.check_suji_and_kabe(closed_tiles_34, waiting)
+        have_suji, have_kabe = self.player.ai.hand_builder.check_suji_and_kabe(closed_tiles_34, waiting_34)
 
         # what if we have yaku
         if hand_value.yaku is not None and hand_value.cost is not None:
             min_cost = hand_value.cost["main"]
+            min_cost_with_riichi = hand_value_with_riichi and hand_value_with_riichi.cost["main"] or 0
 
             # tanki honor is a good wait, let's damaten only if hand is already expensive
-            if is_honor(waiting):
+            if is_honor(waiting_34):
                 if self.player.is_dealer and min_cost < 12000:
                     return True
 
@@ -89,10 +95,10 @@ class Riichi:
                 return False
 
             is_chiitoitsu = len([x for x in result if is_pair(x)]) == 7
-            simplified_waiting = simplify(waiting)
+            simplified_waiting = simplify(waiting_34)
 
             for hand_set in result:
-                if waiting not in hand_set:
+                if waiting_34 not in hand_set:
                     continue
 
                 # tanki wait but not chiitoitsu
@@ -113,8 +119,12 @@ class Riichi:
                         if not self.player.is_dealer and min_cost >= 5200:
                             return False
 
-                    # only riichi if we have suji-trab or there is kabe
+                    # only riichi if we have suji-trap or there is kabe
                     if not have_suji and not have_kabe:
+                        return False
+
+                    # let's not push these bad wait against threats
+                    if threats:
                         return False
 
                     return True
@@ -149,17 +159,30 @@ class Riichi:
                     if not have_suji and not have_kabe:
                         return False
 
+                    # let's not push these bad wait against threats
+                    if threats:
+                        return False
+
                     return True
 
                 # 1-sided wait means kanchan or penchan
                 if is_chi(hand_set):
-                    # let's not riichi kanchan on 4, 5, 6
-                    if 3 <= simplified_waiting <= 5:
-                        return False
-
-                    # now checking waiting for 2, 3, 7, 8
                     # if we only have 1 tile to wait for, let's damaten
                     if count_tiles == 1:
+                        return False
+
+                    # for dealer it is always riichi
+                    if self.player.is_dealer:
+                        return True
+                    # let's not push cheap hands against threats
+                    elif threats and min_cost_with_riichi <= 5200:
+                        return False
+
+                    if 3 <= simplified_waiting <= 5:
+                        if min_cost_with_riichi >= 2600:
+                            return True
+
+                        # for not dealer let's not riichi cheap kanchan on 4, 5, 6
                         return False
 
                     # if we have 2 tiles to wait for and hand cost is good without riichi,
@@ -215,7 +238,7 @@ class Riichi:
                             if self.player.is_dealer and 2000 < min_cost < 7700:
                                 return True
 
-                    # otherwise only riichi if we have suji-trab or there is kabe
+                    # otherwise only riichi if we have suji-trap or there is kabe
                     if not have_suji and not have_kabe:
                         return False
 
@@ -223,22 +246,22 @@ class Riichi:
 
         # what if we don't have yaku
         # our tanki wait is good, let's riichi
-        if is_honor(waiting):
+        if is_honor(waiting_34):
             return True
 
         if count_tiles > 1:
             # terminal tanki is ok, too, just should be more than one tile left
-            if is_terminal(waiting):
+            if is_terminal(waiting_34):
                 return True
 
             # whatever dora wait is ok, too, just should be more than one tile left
-            if plus_dora(waiting * 4, self.player.table.dora_indicators, add_aka_dora=False) > 0:
+            if plus_dora(waiting_34 * 4, self.player.table.dora_indicators, add_aka_dora=False) > 0:
                 return True
 
-        simplified_waiting = simplify(waiting)
+        simplified_waiting = simplify(waiting_34)
 
         for hand_set in result:
-            if waiting not in hand_set:
+            if waiting_34 not in hand_set:
                 continue
 
             if is_pair(hand_set):
@@ -258,19 +281,20 @@ class Riichi:
             # let's only riichi this bad wait if
             # it has all 4 tiles available or it
             # it's not too early
-            if is_chi(hand_set) and 4 <= simplified_waiting <= 6:
+            # and there are no threats
+            if not threats and is_chi(hand_set) and 4 <= simplified_waiting <= 6:
                 return count_tiles == 4 or self.player.round_step >= 6
 
         return True
 
-    def _should_call_riichi_many_sided(self, waiting):
+    def _should_call_riichi_many_sided(self, waiting_34: List[int], threats: List[EnemyAnalyzer]):
         count_tiles = self.player.ai.hand_builder.count_tiles(
-            waiting, TilesConverter.to_34_array(self.player.closed_hand)
+            waiting_34, TilesConverter.to_34_array(self.player.closed_hand)
         )
         hand_costs = []
         hand_costs_with_riichi = []
         waits_with_yaku = 0
-        for wait in waiting:
+        for wait in waiting_34:
             hand_value = self.player.ai.estimate_hand_value_or_get_from_cache(wait, call_riichi=False)
             if hand_value.error is None:
                 hand_costs.append(hand_value.cost["main"])
@@ -285,7 +309,7 @@ class Riichi:
         min_cost_with_riichi = hand_costs_with_riichi and min(hand_costs_with_riichi) or 0
 
         must_riichi = self.player.ai.placement.must_riichi(
-            has_yaku=waits_with_yaku == len(waiting),
+            has_yaku=waits_with_yaku == len(waiting_34),
             num_waits=count_tiles,
             cost_with_riichi=min_cost_with_riichi,
             cost_with_damaten=min_cost,
@@ -295,10 +319,20 @@ class Riichi:
         elif must_riichi == Placement.MUST_DAMATEN:
             return False
 
+        is_dealer_threat = any([x.enemy.is_dealer for x in threats])
+
+        # we don't want to push cheap hand against dealer
+        if is_dealer_threat and min_cost_with_riichi <= 2600:
+            return False
+
         # if we have yaku on every wait
-        if waits_with_yaku == len(waiting):
+        if waits_with_yaku == len(waiting_34):
             # let's not riichi this bad wait
             if count_tiles <= 2:
+                return False
+
+            # chasing riichi on late steps of the game is not profitable
+            if threats and self.player.round_step >= 9:
                 return False
 
             # if wait is slightly better, we will riichi only a cheap hand

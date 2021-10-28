@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
-    <title>Coverage for project/game/ai/strategies_v2/yakuhai.py: 83%</title>
+    <title>Coverage for project/game/ai/strategies_v2/yakuhai.py: 84%</title>
     <link rel="icon" sizes="32x32" href="favicon_32.png">
     <link rel="stylesheet" href="style.css" type="text/css">
     <script type="text/javascript" src="jquery.min.js"></script>
@@ -18,13 +18,13 @@
 <div id="header">
     <div class="content">
         <h1>Coverage for <b>project/game/ai/strategies_v2/yakuhai.py</b> :
-            <span class="pc_cov">83%</span>
+            <span class="pc_cov">84%</span>
         </h1>
         <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
         <h2 class="stats">
-            135 statements &nbsp;
-            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">112 run</button>
-            <button type="button" class="mis show_mis shortkey_m button_toggle_mis" title="Toggle lines missing">23 missing</button>
+            151 statements &nbsp;
+            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">127 run</button>
+            <button type="button" class="mis show_mis shortkey_m button_toggle_mis" title="Toggle lines missing">24 missing</button>
             <button type="button" class="exc show_exc shortkey_x button_toggle_exc" title="Toggle lines excluded">0 excluded</button>
         </h2>
     </div>
@@ -303,14 +303,40 @@
     <p id="t249" class="pln"><span class="n"><a href="#t249">249</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t250" class="run"><span class="n"><a href="#t250">250</a></span><span class="t">        <span class="key">return</span> <span class="nam">super</span><span class="op">(</span><span class="nam">YakuhaiStrategy</span><span class="op">,</span> <span class="nam">self</span><span class="op">)</span><span class="op">.</span><span class="nam">try_to_call_meld</span><span class="op">(</span><span class="nam">tile</span><span class="op">,</span> <span class="nam">is_kamicha_discard</span><span class="op">,</span> <span class="nam">tiles_136</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t251" class="pln"><span class="n"><a href="#t251">251</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p id="t252" class="run"><span class="n"><a href="#t252">252</a></span><span class="t">    <span class="key">def</span> <span class="nam">_is_yakuhai_pon</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">meld</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t253" class="run"><span class="n"><a href="#t253">253</a></span><span class="t">        <span class="key">return</span> <span class="nam">meld</span><span class="op">.</span><span class="nam">type</span> <span class="op">==</span> <span class="nam">MeldPrint</span><span class="op">.</span><span class="nam">PON</span> <span class="key">and</span> <span class="nam">meld</span><span class="op">.</span><span class="nam">tiles</span><span class="op">[</span><span class="num">0</span><span class="op">]</span> <span class="op">//</span> <span class="num">4</span> <span class="key">in</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">valued_honors</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t252" class="run"><span class="n"><a href="#t252">252</a></span><span class="t">    <span class="key">def</span> <span class="nam">validate_meld</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">chosen_meld_dict</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t253" class="pln"><span class="n"><a href="#t253">253</a></span><span class="t">        <span class="com"># choose if base method requires us to keep hand closed</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t254" class="run"><span class="n"><a href="#t254">254</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">super</span><span class="op">(</span><span class="nam">YakuhaiStrategy</span><span class="op">,</span> <span class="nam">self</span><span class="op">)</span><span class="op">.</span><span class="nam">validate_meld</span><span class="op">(</span><span class="nam">chosen_meld_dict</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t255" class="mis show_mis"><span class="n"><a href="#t255">255</a></span><span class="t">            <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t256" class="pln"><span class="n"><a href="#t256">256</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p id="t257" class="run"><span class="n"><a href="#t257">257</a></span><span class="t">        <span class="nam">closed_tiles_34</span> <span class="op">=</span> <span class="nam">TilesConverter</span><span class="op">.</span><span class="nam">to_34_array</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">closed_hand</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t258" class="run"><span class="n"><a href="#t258">258</a></span><span class="t">        <span class="nam">pairs_before_meld</span> <span class="op">=</span> <span class="nam">len</span><span class="op">(</span><span class="op">[</span><span class="nam">x</span> <span class="key">for</span> <span class="nam">x</span> <span class="key">in</span> <span class="nam">closed_tiles_34</span> <span class="key">if</span> <span class="nam">x</span> <span class="op">==</span> <span class="num">2</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t259" class="run"><span class="n"><a href="#t259">259</a></span><span class="t">        <span class="nam">valued_pairs_before_meld</span> <span class="op">=</span> <span class="nam">len</span><span class="op">(</span><span class="op">[</span><span class="nam">x</span> <span class="key">for</span> <span class="nam">x</span> <span class="key">in</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">valued_honors</span> <span class="key">if</span> <span class="nam">closed_tiles_34</span><span class="op">[</span><span class="nam">x</span><span class="op">]</span> <span class="op">==</span> <span class="num">2</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t260" class="pln"><span class="n"><a href="#t260">260</a></span><span class="t">        <span class="com"># we don't have valued pairs to keep</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t261" class="run"><span class="n"><a href="#t261">261</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">valued_pairs_before_meld</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t262" class="run"><span class="n"><a href="#t262">262</a></span><span class="t">            <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t263" class="pln"><span class="n"><a href="#t263">263</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p id="t264" class="pln"><span class="n"><a href="#t264">264</a></span><span class="t">        <span class="com"># it is fine to destroy pairs if we have plenty of them</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t265" class="run"><span class="n"><a href="#t265">265</a></span><span class="t">        <span class="key">if</span> <span class="nam">pairs_before_meld</span> <span class="op">></span> <span class="num">2</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t266" class="run"><span class="n"><a href="#t266">266</a></span><span class="t">            <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t267" class="pln"><span class="n"><a href="#t267">267</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p id="t268" class="run"><span class="n"><a href="#t268">268</a></span><span class="t">        <span class="nam">closed_tiles_34</span> <span class="op">=</span> <span class="nam">TilesConverter</span><span class="op">.</span><span class="nam">to_34_array</span><span class="op">(</span><span class="nam">chosen_meld_dict</span><span class="op">[</span><span class="str">"closed_hand_tiles_after_meld"</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t269" class="run"><span class="n"><a href="#t269">269</a></span><span class="t">        <span class="nam">pairs_after_meld</span> <span class="op">=</span> <span class="nam">len</span><span class="op">(</span><span class="op">[</span><span class="nam">x</span> <span class="key">for</span> <span class="nam">x</span> <span class="key">in</span> <span class="nam">closed_tiles_34</span> <span class="key">if</span> <span class="nam">x</span> <span class="op">==</span> <span class="num">2</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t270" class="run"><span class="n"><a href="#t270">270</a></span><span class="t">        <span class="nam">valued_pairs_after_meld</span> <span class="op">=</span> <span class="nam">len</span><span class="op">(</span><span class="op">[</span><span class="nam">x</span> <span class="key">for</span> <span class="nam">x</span> <span class="key">in</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">valued_honors</span> <span class="key">if</span> <span class="nam">closed_tiles_34</span><span class="op">[</span><span class="nam">x</span><span class="op">]</span> <span class="op">==</span> <span class="num">2</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t271" class="pln"><span class="n"><a href="#t271">271</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p id="t272" class="pln"><span class="n"><a href="#t272">272</a></span><span class="t">        <span class="com"># condition to prevent calling from form 344m 77z on 4m</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t273" class="run"><span class="n"><a href="#t273">273</a></span><span class="t">        <span class="key">if</span> <span class="nam">pairs_after_meld</span> <span class="op">&lt;</span> <span class="nam">pairs_before_meld</span> <span class="key">and</span> <span class="nam">valued_pairs_before_meld</span> <span class="op">==</span> <span class="nam">valued_pairs_after_meld</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t274" class="run"><span class="n"><a href="#t274">274</a></span><span class="t">            <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t275" class="pln"><span class="n"><a href="#t275">275</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p id="t276" class="run"><span class="n"><a href="#t276">276</a></span><span class="t">        <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t277" class="pln"><span class="n"><a href="#t277">277</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p id="t278" class="run"><span class="n"><a href="#t278">278</a></span><span class="t">    <span class="key">def</span> <span class="nam">_is_yakuhai_pon</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">meld</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t279" class="run"><span class="n"><a href="#t279">279</a></span><span class="t">        <span class="key">return</span> <span class="nam">meld</span><span class="op">.</span><span class="nam">type</span> <span class="op">==</span> <span class="nam">MeldPrint</span><span class="op">.</span><span class="nam">PON</span> <span class="key">and</span> <span class="nam">meld</span><span class="op">.</span><span class="nam">tiles</span><span class="op">[</span><span class="num">0</span><span class="op">]</span> <span class="op">//</span> <span class="num">4</span> <span class="key">in</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">valued_honors</span>&nbsp;</span><span class="r"></span></p>
 </div>
 <div id="footer">
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v6.0.2</a>,
-            created at 2021-10-28 05:55 +0000
+            created at 2021-10-28 07:04 +0000
         </p>
     </div>
 </div>

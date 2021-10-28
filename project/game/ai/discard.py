@@ -35,8 +35,6 @@ class DiscardOption:
     shanten = None
     # sometimes we had to force tile to be discarded
     had_to_be_discarded = False
-    # special cases where we had to save tile in hand (usually for atodzuke opened hand)
-    had_to_be_saved = False
     # calculated tile value, for sorting
     valuation = None
     # how danger this tile is
@@ -62,7 +60,6 @@ class DiscardOption:
         self.ukeire_second = 0
         self.count_of_dora = 0
         self.danger = TileDangerHandler()
-        self.had_to_be_saved = False
         self.had_to_be_discarded = False
         self.wait_to_ukeire = wait_to_ukeire
         self.second_level_cost = 0
@@ -103,8 +100,6 @@ class DiscardOption:
             data["average_second_level_waits"] = self.average_second_level_waits
         if self.average_second_level_cost:
             data["average_second_level_cost"] = self.average_second_level_cost
-        if self.had_to_be_saved:
-            data["had_to_be_saved"] = self.had_to_be_saved
         if self.had_to_be_discarded:
             data["had_to_be_discarded"] = self.had_to_be_discarded
         return data

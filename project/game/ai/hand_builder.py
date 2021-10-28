@@ -95,12 +95,6 @@ class HandBuilder:
                 # so just choose the safest one
                 return self._choose_safest_tile(had_to_be_discarded_tiles)
 
-            # remove needed tiles from discard options
-            tiles_we_can_discard = [x for x in tiles_we_can_discard if not x.had_to_be_saved]
-            if not tiles_we_can_discard:
-                # no acceptable tiles that allow us to keep our strategy - we go betaori
-                return self._choose_safest_tile_or_skip_meld(discard_options, after_meld)
-
         # we check this after strategy checks to allow discarding safe 99 from tempai to get tanyao for example
         min_acceptable_shanten = min([x.shanten for x in tiles_we_can_discard])
         assert min_acceptable_shanten >= min_shanten

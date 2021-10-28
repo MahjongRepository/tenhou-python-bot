@@ -229,7 +229,7 @@
     <p id="t175" class="run"><span class="n"><a href="#t175">175</a></span><span class="t">                    <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">is_dealer</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t176" class="mis show_mis"><span class="n"><a href="#t176">176</a></span><span class="t">                        <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
     <p id="t177" class="pln"><span class="n"><a href="#t177">177</a></span><span class="t">                    <span class="com"># let's not push cheap hands against threats</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t178" class="run"><span class="n"><a href="#t178">178</a></span><span class="t">                    <span class="key">elif</span> <span class="nam">threats</span> <span class="key">and</span> <span class="nam">min_cost_with_riichi</span> <span class="op">&lt;=</span> <span class="num">5200</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t178" class="run"><span class="n"><a href="#t178">178</a></span><span class="t">                    <span class="key">elif</span> <span class="nam">threats</span> <span class="key">and</span> <span class="nam">min_cost_with_riichi</span> <span class="op">&lt;</span> <span class="num">2600</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t179" class="mis show_mis"><span class="n"><a href="#t179">179</a></span><span class="t">                        <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p id="t180" class="pln"><span class="n"><a href="#t180">180</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t181" class="run"><span class="n"><a href="#t181">181</a></span><span class="t">                    <span class="key">if</span> <span class="num">3</span> <span class="op">&lt;=</span> <span class="nam">simplified_waiting</span> <span class="op">&lt;=</span> <span class="num">5</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -376,7 +376,7 @@
     <p id="t322" class="run"><span class="n"><a href="#t322">322</a></span><span class="t">        <span class="nam">is_dealer_threat</span> <span class="op">=</span> <span class="nam">any</span><span class="op">(</span><span class="op">[</span><span class="nam">x</span><span class="op">.</span><span class="nam">enemy</span><span class="op">.</span><span class="nam">is_dealer</span> <span class="key">for</span> <span class="nam">x</span> <span class="key">in</span> <span class="nam">threats</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t323" class="pln"><span class="n"><a href="#t323">323</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t324" class="pln"><span class="n"><a href="#t324">324</a></span><span class="t">        <span class="com"># we don't want to push cheap hand against dealer</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t325" class="run"><span class="n"><a href="#t325">325</a></span><span class="t">        <span class="key">if</span> <span class="nam">is_dealer_threat</span> <span class="key">and</span> <span class="nam">min_cost_with_riichi</span> <span class="op">&lt;=</span> <span class="num">2600</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t325" class="run"><span class="n"><a href="#t325">325</a></span><span class="t">        <span class="key">if</span> <span class="nam">is_dealer_threat</span> <span class="key">and</span> <span class="nam">min_cost_with_riichi</span> <span class="op">&lt;=</span> <span class="num">1300</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t326" class="mis show_mis"><span class="n"><a href="#t326">326</a></span><span class="t">            <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p id="t327" class="pln"><span class="n"><a href="#t327">327</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t328" class="pln"><span class="n"><a href="#t328">328</a></span><span class="t">        <span class="com"># if we have yaku on every wait</span>&nbsp;</span><span class="r"></span></p>
@@ -433,7 +433,7 @@
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v6.0.2</a>,
-            created at 2021-10-27 11:43 +0000
+            created at 2021-10-28 00:42 +0000
         </p>
     </div>
 </div>

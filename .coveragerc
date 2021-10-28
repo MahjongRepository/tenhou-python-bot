@@ -20,3 +20,4 @@ omit =
     project/system_testing/generate_documentation.py
     project/system_testing/cases.py
     project/system.py
+    project/run_stat.py

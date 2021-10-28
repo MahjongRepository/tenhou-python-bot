@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
-    <title>Coverage for project/game/ai/strategies/tanyao.py: 96%</title>
+    <title>Coverage for project/game/ai/strategies_v2/tanyao.py: 92%</title>
     <link rel="icon" sizes="32x32" href="favicon_32.png">
     <link rel="stylesheet" href="style.css" type="text/css">
     <script type="text/javascript" src="jquery.min.js"></script>
@@ -17,14 +17,14 @@
 <body class="pyfile">
 <div id="header">
     <div class="content">
-        <h1>Coverage for <b>project/game/ai/strategies/tanyao.py</b> :
-            <span class="pc_cov">96%</span>
+        <h1>Coverage for <b>project/game/ai/strategies_v2/tanyao.py</b> :
+            <span class="pc_cov">92%</span>
         </h1>
         <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
         <h2 class="stats">
             118 statements &nbsp;
-            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">113 run</button>
-            <button type="button" class="mis show_mis shortkey_m button_toggle_mis" title="Toggle lines missing">5 missing</button>
+            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">108 run</button>
+            <button type="button" class="mis show_mis shortkey_m button_toggle_mis" title="Toggle lines missing">10 missing</button>
             <button type="button" class="exc show_exc shortkey_x button_toggle_exc" title="Toggle lines excluded">0 excluded</button>
         </h2>
     </div>
@@ -53,7 +53,7 @@
 </div>
 <div id="source">
     <p id="t1" class="run"><span class="n"><a href="#t1">1</a></span><span class="t"><span class="key">import</span> <span class="nam">utils</span><span class="op">.</span><span class="nam">decisions_constants</span> <span class="key">as</span> <span class="nam">log</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t2" class="run"><span class="n"><a href="#t2">2</a></span><span class="t"><span class="key">from</span> <span class="nam">game</span><span class="op">.</span><span class="nam">ai</span><span class="op">.</span><span class="nam">strategies</span><span class="op">.</span><span class="nam">main</span> <span class="key">import</span> <span class="nam">BaseStrategy</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t2" class="run"><span class="n"><a href="#t2">2</a></span><span class="t"><span class="key">from</span> <span class="nam">game</span><span class="op">.</span><span class="nam">ai</span><span class="op">.</span><span class="nam">strategies_v2</span><span class="op">.</span><span class="nam">main</span> <span class="key">import</span> <span class="nam">BaseStrategy</span>&nbsp;</span><span class="r"></span></p>
     <p id="t3" class="run"><span class="n"><a href="#t3">3</a></span><span class="t"><span class="key">from</span> <span class="nam">mahjong</span><span class="op">.</span><span class="nam">constants</span> <span class="key">import</span> <span class="nam">HONOR_INDICES</span><span class="op">,</span> <span class="nam">TERMINAL_INDICES</span>&nbsp;</span><span class="r"></span></p>
     <p id="t4" class="run"><span class="n"><a href="#t4">4</a></span><span class="t"><span class="key">from</span> <span class="nam">mahjong</span><span class="op">.</span><span class="nam">tile</span> <span class="key">import</span> <span class="nam">TilesConverter</span>&nbsp;</span><span class="r"></span></p>
     <p id="t5" class="run"><span class="n"><a href="#t5">5</a></span><span class="t"><span class="key">from</span> <span class="nam">mahjong</span><span class="op">.</span><span class="nam">utils</span> <span class="key">import</span> <span class="nam">is_honor</span><span class="op">,</span> <span class="nam">is_tile_strictly_isolated</span>&nbsp;</span><span class="r"></span></p>
@@ -65,7 +65,7 @@
     <p id="t11" class="run"><span class="n"><a href="#t11">11</a></span><span class="t">    <span class="nam">not_suitable_tiles</span> <span class="op">=</span> <span class="nam">TERMINAL_INDICES</span> <span class="op">+</span> <span class="nam">HONOR_INDICES</span>&nbsp;</span><span class="r"></span></p>
     <p id="t12" class="pln"><span class="n"><a href="#t12">12</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t13" class="run"><span class="n"><a href="#t13">13</a></span><span class="t">    <span class="key">def</span> <span class="nam">get_open_hand_han</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t14" class="run"><span class="n"><a href="#t14">14</a></span><span class="t">        <span class="key">return</span> <span class="num">1</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t14" class="mis show_mis"><span class="n"><a href="#t14">14</a></span><span class="t">        <span class="key">return</span> <span class="num">1</span>&nbsp;</span><span class="r"></span></p>
     <p id="t15" class="pln"><span class="n"><a href="#t15">15</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t16" class="run"><span class="n"><a href="#t16">16</a></span><span class="t">    <span class="key">def</span> <span class="nam">should_activate_strategy</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">tiles_136</span><span class="op">,</span> <span class="nam">meld_tile</span><span class="op">=</span><span class="key">None</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t17" class="pln"><span class="n"><a href="#t17">17</a></span><span class="t">        <span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
@@ -165,7 +165,7 @@
     <p id="t111" class="pln"><span class="n"><a href="#t111">111</a></span><span class="t">        <span class="com"># if we have only two central doras let's</span>&nbsp;</span><span class="r"></span></p>
     <p id="t112" class="pln"><span class="n"><a href="#t112">112</a></span><span class="t">        <span class="com"># wait for 5th turn before opening our hand</span>&nbsp;</span><span class="r"></span></p>
     <p id="t113" class="run"><span class="n"><a href="#t113">113</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">dora_count_central</span> <span class="op">==</span> <span class="num">2</span> <span class="key">and</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">round_step</span> <span class="op">&lt;</span> <span class="num">5</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t114" class="run"><span class="n"><a href="#t114">114</a></span><span class="t">            <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t114" class="mis show_mis"><span class="n"><a href="#t114">114</a></span><span class="t">            <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p id="t115" class="pln"><span class="n"><a href="#t115">115</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t116" class="run"><span class="n"><a href="#t116">116</a></span><span class="t">        <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
     <p id="t117" class="pln"><span class="n"><a href="#t117">117</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -226,7 +226,7 @@
     <p id="t172" class="pln"><span class="n"><a href="#t172">172</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t173" class="pln"><span class="n"><a href="#t173">173</a></span><span class="t">        <span class="com"># choose if base method requires us to keep hand closed</span>&nbsp;</span><span class="r"></span></p>
     <p id="t174" class="run"><span class="n"><a href="#t174">174</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">super</span><span class="op">(</span><span class="nam">TanyaoStrategy</span><span class="op">,</span> <span class="nam">self</span><span class="op">)</span><span class="op">.</span><span class="nam">validate_meld</span><span class="op">(</span><span class="nam">chosen_meld_dict</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t175" class="run"><span class="n"><a href="#t175">175</a></span><span class="t">            <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t175" class="mis show_mis"><span class="n"><a href="#t175">175</a></span><span class="t">            <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p id="t176" class="pln"><span class="n"><a href="#t176">176</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t177" class="pln"><span class="n"><a href="#t177">177</a></span><span class="t">        <span class="com"># otherwise let's not open hand if that does not improve our ukeire</span>&nbsp;</span><span class="r"></span></p>
     <p id="t178" class="run"><span class="n"><a href="#t178">178</a></span><span class="t">        <span class="nam">closed_tiles_34</span> <span class="op">=</span> <span class="nam">TilesConverter</span><span class="op">.</span><span class="nam">to_34_array</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">closed_hand</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -269,12 +269,12 @@
     <p id="t215" class="mis show_mis"><span class="n"><a href="#t215">215</a></span><span class="t">                <span class="nam">improvement_percent</span> <span class="op">=</span> <span class="nam">selected_tile</span><span class="op">.</span><span class="nam">ukeire</span> <span class="op">*</span> <span class="num">100</span>&nbsp;</span><span class="r"></span></p>
     <p id="t216" class="pln"><span class="n"><a href="#t216">216</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t217" class="run"><span class="n"><a href="#t217">217</a></span><span class="t">            <span class="key">if</span> <span class="nam">improvement_percent</span> <span class="op">&lt;</span> <span class="num">30</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t218" class="run"><span class="n"><a href="#t218">218</a></span><span class="t">                <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">logger</span><span class="op">.</span><span class="nam">debug</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t218" class="mis show_mis"><span class="n"><a href="#t218">218</a></span><span class="t">                <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">logger</span><span class="op">.</span><span class="nam">debug</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p id="t219" class="pln"><span class="n"><a href="#t219">219</a></span><span class="t">                    <span class="nam">log</span><span class="op">.</span><span class="nam">MELD_DEBUG</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p id="t220" class="pln"><span class="n"><a href="#t220">220</a></span><span class="t">                    <span class="str">"Opening into tanyao keeps same number of shanten and ukeire improvement is low, don't open"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p id="t221" class="pln"><span class="n"><a href="#t221">221</a></span><span class="t">                    <span class="nam">logger_context</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p id="t222" class="pln"><span class="n"><a href="#t222">222</a></span><span class="t">                <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t223" class="run"><span class="n"><a href="#t223">223</a></span><span class="t">                <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t223" class="mis show_mis"><span class="n"><a href="#t223">223</a></span><span class="t">                <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p id="t224" class="pln"><span class="n"><a href="#t224">224</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t225" class="run"><span class="n"><a href="#t225">225</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">logger</span><span class="op">.</span><span class="nam">debug</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p id="t226" class="pln"><span class="n"><a href="#t226">226</a></span><span class="t">                <span class="nam">log</span><span class="op">.</span><span class="nam">MELD_DEBUG</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>

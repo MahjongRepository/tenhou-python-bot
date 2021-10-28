@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=emulateIE7" />
-    <title>Coverage for project/game/ai/strategies/common_open_tempai.py: 75%</title>
+    <title>Coverage for project/game/ai/strategies_v2/common_open_tempai.py: 69%</title>
     <link rel="icon" sizes="32x32" href="favicon_32.png">
     <link rel="stylesheet" href="style.css" type="text/css">
     <script type="text/javascript" src="jquery.min.js"></script>
@@ -17,14 +17,14 @@
 <body class="pyfile">
 <div id="header">
     <div class="content">
-        <h1>Coverage for <b>project/game/ai/strategies/common_open_tempai.py</b> :
-            <span class="pc_cov">75%</span>
+        <h1>Coverage for <b>project/game/ai/strategies_v2/common_open_tempai.py</b> :
+            <span class="pc_cov">69%</span>
         </h1>
         <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
         <h2 class="stats">
             64 statements &nbsp;
-            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">48 run</button>
-            <button type="button" class="mis show_mis shortkey_m button_toggle_mis" title="Toggle lines missing">16 missing</button>
+            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">44 run</button>
+            <button type="button" class="mis show_mis shortkey_m button_toggle_mis" title="Toggle lines missing">20 missing</button>
             <button type="button" class="exc show_exc shortkey_x button_toggle_exc" title="Toggle lines excluded">0 excluded</button>
         </h2>
     </div>
@@ -53,7 +53,7 @@
 </div>
 <div id="source">
     <p id="t1" class="run"><span class="n"><a href="#t1">1</a></span><span class="t"><span class="key">import</span> <span class="nam">utils</span><span class="op">.</span><span class="nam">decisions_constants</span> <span class="key">as</span> <span class="nam">log</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t2" class="run"><span class="n"><a href="#t2">2</a></span><span class="t"><span class="key">from</span> <span class="nam">game</span><span class="op">.</span><span class="nam">ai</span><span class="op">.</span><span class="nam">strategies</span><span class="op">.</span><span class="nam">main</span> <span class="key">import</span> <span class="nam">BaseStrategy</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t2" class="run"><span class="n"><a href="#t2">2</a></span><span class="t"><span class="key">from</span> <span class="nam">game</span><span class="op">.</span><span class="nam">ai</span><span class="op">.</span><span class="nam">strategies_v2</span><span class="op">.</span><span class="nam">main</span> <span class="key">import</span> <span class="nam">BaseStrategy</span>&nbsp;</span><span class="r"></span></p>
     <p id="t3" class="run"><span class="n"><a href="#t3">3</a></span><span class="t"><span class="key">from</span> <span class="nam">mahjong</span><span class="op">.</span><span class="nam">tile</span> <span class="key">import</span> <span class="nam">TilesConverter</span>&nbsp;</span><span class="r"></span></p>
     <p id="t4" class="run"><span class="n"><a href="#t4">4</a></span><span class="t"><span class="key">from</span> <span class="nam">utils</span><span class="op">.</span><span class="nam">test_helpers</span> <span class="key">import</span> <span class="nam">tiles_to_string</span>&nbsp;</span><span class="r"></span></p>
     <p id="t5" class="pln"><span class="n"><a href="#t5">5</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -102,7 +102,7 @@
     <p id="t48" class="pln"><span class="n"><a href="#t48">48</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t49" class="pln"><span class="n"><a href="#t49">49</a></span><span class="t">        <span class="com"># choose if base method requires us to keep hand closed</span>&nbsp;</span><span class="r"></span></p>
     <p id="t50" class="run"><span class="n"><a href="#t50">50</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">super</span><span class="op">(</span><span class="nam">CommonOpenTempaiStrategy</span><span class="op">,</span> <span class="nam">self</span><span class="op">)</span><span class="op">.</span><span class="nam">validate_meld</span><span class="op">(</span><span class="nam">chosen_meld_dict</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t51" class="run"><span class="n"><a href="#t51">51</a></span><span class="t">            <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t51" class="mis show_mis"><span class="n"><a href="#t51">51</a></span><span class="t">            <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p id="t52" class="pln"><span class="n"><a href="#t52">52</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t53" class="run"><span class="n"><a href="#t53">53</a></span><span class="t">        <span class="nam">selected_tile</span> <span class="op">=</span> <span class="nam">chosen_meld_dict</span><span class="op">[</span><span class="str">"discard_tile"</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p id="t54" class="run"><span class="n"><a href="#t54">54</a></span><span class="t">        <span class="nam">logger_context</span> <span class="op">=</span> <span class="op">{</span>&nbsp;</span><span class="r"></span></p>
@@ -144,9 +144,9 @@
     <p id="t90" class="pln"><span class="n"><a href="#t90">90</a></span><span class="t">        <span class="com"># for higher costs</span>&nbsp;</span><span class="r"></span></p>
     <p id="t91" class="run"><span class="n"><a href="#t91">91</a></span><span class="t">        <span class="nam">enough_cost</span> <span class="op">=</span> <span class="num">32000</span>&nbsp;</span><span class="r"></span></p>
     <p id="t92" class="run"><span class="n"><a href="#t92">92</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">ai</span><span class="op">.</span><span class="nam">placement</span><span class="op">.</span><span class="nam">is_oorasu</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t93" class="run"><span class="n"><a href="#t93">93</a></span><span class="t">            <span class="nam">placement</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">ai</span><span class="op">.</span><span class="nam">placement</span><span class="op">.</span><span class="nam">get_current_placement</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t94" class="run"><span class="n"><a href="#t94">94</a></span><span class="t">            <span class="key">if</span> <span class="nam">placement</span> <span class="key">and</span> <span class="nam">placement</span><span class="op">[</span><span class="str">"place"</span><span class="op">]</span> <span class="op">==</span> <span class="num">4</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t95" class="run"><span class="n"><a href="#t95">95</a></span><span class="t">                <span class="nam">enough_cost</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">ai</span><span class="op">.</span><span class="nam">placement</span><span class="op">.</span><span class="nam">get_minimal_cost_needed_considering_west</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t93" class="mis show_mis"><span class="n"><a href="#t93">93</a></span><span class="t">            <span class="nam">placement</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">ai</span><span class="op">.</span><span class="nam">placement</span><span class="op">.</span><span class="nam">get_current_placement</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t94" class="mis show_mis"><span class="n"><a href="#t94">94</a></span><span class="t">            <span class="key">if</span> <span class="nam">placement</span> <span class="key">and</span> <span class="nam">placement</span><span class="op">[</span><span class="str">"place"</span><span class="op">]</span> <span class="op">==</span> <span class="num">4</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t95" class="mis show_mis"><span class="n"><a href="#t95">95</a></span><span class="t">                <span class="nam">enough_cost</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">ai</span><span class="op">.</span><span class="nam">placement</span><span class="op">.</span><span class="nam">get_minimal_cost_needed_considering_west</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p id="t96" class="pln"><span class="n"><a href="#t96">96</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t97" class="run"><span class="n"><a href="#t97">97</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">round_step</span> <span class="op">&lt;=</span> <span class="num">6</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p id="t98" class="run"><span class="n"><a href="#t98">98</a></span><span class="t">            <span class="key">if</span> <span class="nam">hand_cost</span> <span class="op">>=</span> <span class="nam">min</span><span class="op">(</span><span class="num">7700</span><span class="op">,</span> <span class="nam">enough_cost</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>

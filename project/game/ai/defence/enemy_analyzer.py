@@ -16,7 +16,7 @@ from utils.general import separate_tiles_by_suits
 
 
 class EnemyAnalyzer:
-    player = None
+    enemy = None
     threat_reason = None
 
     RIICHI_COST_SCALE = [2000, 3900, 5200, 8000, 8000, 12000, 12000, 16000, 16000, 32000]

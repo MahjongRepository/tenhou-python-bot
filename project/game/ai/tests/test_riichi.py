@@ -1,6 +1,6 @@
 from game.table import Table
 from mahjong.tile import Tile
-from utils.test_helpers import string_to_136_array, string_to_136_tile
+from utils.test_helpers import enemy_called_riichi_helper, string_to_136_array, string_to_136_tile
 
 
 def test_dont_call_riichi_with_yaku_and_central_tanki_wait():
@@ -45,7 +45,7 @@ def test_dont_call_riichi_expensive_damaten_with_yaku():
     assert with_riichi is False
 
 
-def test_riichi_expensive_hand_without_yaku():
+def test_riichi_expensive_hand_without_yaku_2():
     table = _make_table(
         dora_indicators=[
             string_to_136_tile(man="1"),
@@ -202,13 +202,37 @@ def test_dont_call_riichi_chiitoitsu_bad_wait():
     assert with_riichi is False
 
 
-def _make_table(dora_indicators=None):
+def test_dont_call_pinfu_nomi_chasing_riichi():
+    table = _make_table()
+    enemy_called_riichi_helper(table, 3)
+
+    tiles = string_to_136_array(man="123", sou="234567", pin="2278")
+    table.player.init_hand(tiles)
+    table.player.draw_tile(string_to_136_tile(honors="3"))
+
+    # on early stages it is fine to call chasing riichi here
+    _, with_riichi = table.player.discard_tile()
+    assert with_riichi is True
+
+    table.player.round_step = 9
+    table.player.draw_tile(string_to_136_tile(honors="3"))
+
+    # on late stage let's save riichi stick
+    _, with_riichi = table.player.discard_tile()
+    assert with_riichi is False
+
+
+def _make_table(dora_indicators=None) -> Table:
     table = Table()
+
     table.count_of_remaining_tiles = 60
     table.player.scores = 25000
 
     # with that we don't have daburi anymore
     table.player.round_step = 1
+
+    # with that we are not dealer anymore
+    table.player.seat = 1
 
     if dora_indicators:
         for x in dora_indicators:

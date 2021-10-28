@@ -38,11 +38,12 @@ class HandBuilder:
         )
 
     def mark_tiles_riichi_decision(self, discard_options):
+        threats = self.player.ai.defence.get_threatening_players()
         for discard_option in discard_options:
             if not self.formal_riichi_conditions_for_discard(discard_option):
                 continue
 
-            if self.player.ai.riichi.should_call_riichi(discard_option):
+            if self.player.ai.riichi.should_call_riichi(discard_option, threats):
                 discard_option.with_riichi = True
 
     def choose_tile_to_discard(self, after_meld=False):

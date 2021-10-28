@@ -603,7 +603,7 @@ def test_must_push_4th():
     enemy_seat = 2
     table.add_called_riichi_step_one(enemy_seat)
 
-    threatening_players = table.player.ai.defence.get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players(from_cache=False)
     assert len(threatening_players) == 1
 
     assert player.ai.placement.must_push(threatening_players, 0, 1)
@@ -635,7 +635,7 @@ def test_must_push_3rd_and_last_place_riichi():
     enemy_seat = 1
     table.add_called_riichi_step_one(enemy_seat)
 
-    threatening_players = table.player.ai.defence.get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players(from_cache=False)
     assert len(threatening_players) == 1
 
     assert player.ai.placement.must_push(threatening_players, 0, 1)
@@ -667,7 +667,7 @@ def test_must_push_3rd_and_1st_place_riichi():
     enemy_seat = 3
     table.add_called_riichi_step_one(enemy_seat)
 
-    threatening_players = table.player.ai.defence.get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players(from_cache=False)
     assert len(threatening_players) == 1
 
     assert not player.ai.placement.must_push(threatening_players, 0, 1)
@@ -699,7 +699,7 @@ def test_must_push_3rd_and_multiple_riichi():
     table.add_called_riichi_step_one(1)
     table.add_called_riichi_step_one(3)
 
-    threatening_players = table.player.ai.defence.get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players(from_cache=False)
     assert len(threatening_players) == 2
 
     assert not player.ai.placement.must_push(threatening_players, 0, 1)
@@ -733,7 +733,7 @@ def test_must_push_2nd():
     table.count_of_riichi_sticks += 1
 
     # we don't care about 3rd place riichi we just push
-    threatening_players = table.player.ai.defence.get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players(from_cache=False)
     assert len(threatening_players) == 1
 
     # 2600 and a riichi stick is enough
@@ -766,7 +766,7 @@ def test_must_push_1st_and_2nd_place_riichi():
     enemy_seat = 1
     table.add_called_riichi_step_one(enemy_seat)
 
-    threatening_players = table.player.ai.defence.get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players(from_cache=False)
     assert len(threatening_players) == 1
     assert player.ai.placement.must_push(threatening_players, 0, 1)
 
@@ -797,7 +797,7 @@ def test_must_push_1st_and_4th_place_riichi():
     enemy_seat = 3
     table.add_called_riichi_step_one(enemy_seat)
 
-    threatening_players = table.player.ai.defence.get_threatening_players()
+    threatening_players = table.player.ai.defence.get_threatening_players(from_cache=False)
     assert len(threatening_players) == 1
 
     assert not player.ai.placement.must_push(threatening_players, 0, 1)

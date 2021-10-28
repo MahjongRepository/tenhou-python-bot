@@ -1,3 +1,5 @@
+from typing import List
+
 from game.ai.helpers.defence import TileDangerHandler
 from game.ai.strategies.main import BaseStrategy
 from mahjong.tile import TilesConverter
@@ -25,7 +27,7 @@ class DiscardOption:
     # are we calling riichi on this tile or not
     with_riichi = None
     # array of tiles that will improve our hand
-    waiting = None
+    waiting: List[int] = None
     # how much tiles will improve our hand
     ukeire = None
     ukeire_second = None

@@ -22,8 +22,8 @@
         </h1>
         <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
         <h2 class="stats">
-            151 statements &nbsp;
-            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">127 run</button>
+            152 statements &nbsp;
+            <button type="button" class="run shortkey_r button_toggle_run" title="Toggle lines run">128 run</button>
             <button type="button" class="mis show_mis shortkey_m button_toggle_mis" title="Toggle lines missing">24 missing</button>
             <button type="button" class="exc show_exc shortkey_x button_toggle_exc" title="Toggle lines excluded">0 excluded</button>
         </h2>
@@ -325,18 +325,26 @@
     <p id="t271" class="pln"><span class="n"><a href="#t271">271</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p id="t272" class="pln"><span class="n"><a href="#t272">272</a></span><span class="t">        <span class="com"># condition to prevent calling from form 344m 77z on 4m</span>&nbsp;</span><span class="r"></span></p>
     <p id="t273" class="run"><span class="n"><a href="#t273">273</a></span><span class="t">        <span class="key">if</span> <span class="nam">pairs_after_meld</span> <span class="op">&lt;</span> <span class="nam">pairs_before_meld</span> <span class="key">and</span> <span class="nam">valued_pairs_before_meld</span> <span class="op">==</span> <span class="nam">valued_pairs_after_meld</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t274" class="run"><span class="n"><a href="#t274">274</a></span><span class="t">            <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t275" class="pln"><span class="n"><a href="#t275">275</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p id="t276" class="run"><span class="n"><a href="#t276">276</a></span><span class="t">        <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t277" class="pln"><span class="n"><a href="#t277">277</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p id="t278" class="run"><span class="n"><a href="#t278">278</a></span><span class="t">    <span class="key">def</span> <span class="nam">_is_yakuhai_pon</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">meld</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p id="t279" class="run"><span class="n"><a href="#t279">279</a></span><span class="t">        <span class="key">return</span> <span class="nam">meld</span><span class="op">.</span><span class="nam">type</span> <span class="op">==</span> <span class="nam">MeldPrint</span><span class="op">.</span><span class="nam">PON</span> <span class="key">and</span> <span class="nam">meld</span><span class="op">.</span><span class="nam">tiles</span><span class="op">[</span><span class="num">0</span><span class="op">]</span> <span class="op">//</span> <span class="num">4</span> <span class="key">in</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">valued_honors</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t274" class="run"><span class="n"><a href="#t274">274</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">logger</span><span class="op">.</span><span class="nam">debug</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t275" class="pln"><span class="n"><a href="#t275">275</a></span><span class="t">                <span class="nam">log</span><span class="op">.</span><span class="nam">MELD_DEBUG</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t276" class="pln"><span class="n"><a href="#t276">276</a></span><span class="t">                <span class="str">"Yakuhai: let's skip meld that destroying our pair"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t277" class="pln"><span class="n"><a href="#t277">277</a></span><span class="t">                <span class="op">{</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t278" class="pln"><span class="n"><a href="#t278">278</a></span><span class="t">                    <span class="str">"pairs_after_meld"</span><span class="op">:</span> <span class="nam">pairs_after_meld</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t279" class="pln"><span class="n"><a href="#t279">279</a></span><span class="t">                    <span class="str">"pairs_before_meld"</span><span class="op">:</span> <span class="nam">pairs_before_meld</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t280" class="pln"><span class="n"><a href="#t280">280</a></span><span class="t">                <span class="op">}</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t281" class="pln"><span class="n"><a href="#t281">281</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t282" class="run"><span class="n"><a href="#t282">282</a></span><span class="t">            <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t283" class="pln"><span class="n"><a href="#t283">283</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p id="t284" class="run"><span class="n"><a href="#t284">284</a></span><span class="t">        <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t285" class="pln"><span class="n"><a href="#t285">285</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p id="t286" class="run"><span class="n"><a href="#t286">286</a></span><span class="t">    <span class="key">def</span> <span class="nam">_is_yakuhai_pon</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">meld</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p id="t287" class="run"><span class="n"><a href="#t287">287</a></span><span class="t">        <span class="key">return</span> <span class="nam">meld</span><span class="op">.</span><span class="nam">type</span> <span class="op">==</span> <span class="nam">MeldPrint</span><span class="op">.</span><span class="nam">PON</span> <span class="key">and</span> <span class="nam">meld</span><span class="op">.</span><span class="nam">tiles</span><span class="op">[</span><span class="num">0</span><span class="op">]</span> <span class="op">//</span> <span class="num">4</span> <span class="key">in</span> <span class="nam">self</span><span class="op">.</span><span class="nam">player</span><span class="op">.</span><span class="nam">valued_honors</span>&nbsp;</span><span class="r"></span></p>
 </div>
 <div id="footer">
     <div class="content">
         <p>
             <a class="nav" href="index.html">&#xab; index</a> &nbsp; &nbsp; <a class="nav" href="https://coverage.readthedocs.io">coverage.py v6.0.2</a>,
-            created at 2021-10-28 07:04 +0000
+            created at 2021-10-28 07:15 +0000
         </p>
     </div>
 </div>

@@ -1,3 +1,4 @@
+from game.ai.open_hand import OpenHandHandler
 from game.ai.placement import PlacementHandler
 from game.ai.riichi import Riichi
 
@@ -8,6 +9,7 @@ class BotDefaultConfig:
     FEATURE_DEFENCE_ENABLED = True
 
     PLACEMENT_HANDLER_CLASS = PlacementHandler
+    OPEN_HAND_HANDLER_CLASS = OpenHandHandler
     RIICHI_HANDLER_CLASS = Riichi
 
     TUNE_DANGER_BORDER_TEMPAI_VALUE = 0

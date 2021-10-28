@@ -566,7 +566,7 @@ def test_tempai_with_open_yakuhai_meld_and_yakuhai_pair_in_the_hand():
     player.add_called_meld(make_meld(MeldPrint.PON, honors="777"))
     player.draw_tile(string_to_136_tile(sou="8"))
 
-    player.ai.current_strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
+    player.ai.open_hand_handler.current_strategy = YakuhaiStrategy(BaseStrategy.YAKUHAI, player)
 
     discarded_tile, _ = player.discard_tile()
     assert tiles_to_string([discarded_tile]) == "6s"

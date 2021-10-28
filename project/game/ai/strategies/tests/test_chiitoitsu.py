@@ -65,7 +65,7 @@ def test_5_pairs_yakuhai_not_chiitoitsu():
     tile = string_to_136_tile(honors="6")
     meld, _ = player.try_to_call_meld(tile, True)
 
-    assert player.ai.current_strategy.type == BaseStrategy.YAKUHAI
+    assert player.ai.open_hand_handler.current_strategy.type == BaseStrategy.YAKUHAI
 
     assert meld is not None
 

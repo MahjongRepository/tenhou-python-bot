@@ -572,7 +572,7 @@ def test_kuikae_advanced():
     table.player.init_hand(tiles)
     table.player.add_called_meld(make_meld(MeldPrint.CHI, man="234"))
     # just force tanyao for the test
-    table.player.ai.current_strategy = TanyaoStrategy(BaseStrategy.TANYAO, table.player)
+    table.player.ai.open_hand_handler.current_strategy = TanyaoStrategy(BaseStrategy.TANYAO, table.player)
     _assert_tanyao(table.player)
 
     tile = string_to_136_array(sou="4444")[1]
@@ -586,7 +586,7 @@ def test_kuikae_advanced():
     table.player.init_hand(tiles)
     table.player.add_called_meld(make_meld(MeldPrint.CHI, man="234"))
     # just force tanyao for the test
-    table.player.ai.current_strategy = TanyaoStrategy(BaseStrategy.TANYAO, table.player)
+    table.player.ai.open_hand_handler.current_strategy = TanyaoStrategy(BaseStrategy.TANYAO, table.player)
     _assert_tanyao(table.player)
 
     tile = string_to_136_array(sou="4444")[1]
@@ -600,7 +600,7 @@ def test_kuikae_advanced():
     table.player.init_hand(tiles)
     table.player.add_called_meld(make_meld(MeldPrint.CHI, man="234"))
     # just force tanyao for the test
-    table.player.ai.current_strategy = TanyaoStrategy(BaseStrategy.TANYAO, table.player)
+    table.player.ai.open_hand_handler.current_strategy = TanyaoStrategy(BaseStrategy.TANYAO, table.player)
     _assert_tanyao(table.player)
 
     tile = string_to_136_array(sou="4444")[1]
@@ -614,7 +614,7 @@ def test_kuikae_advanced():
     table.player.init_hand(tiles)
     table.player.add_called_meld(make_meld(MeldPrint.CHI, man="234"))
     # just force tanyao for the test
-    table.player.ai.current_strategy = TanyaoStrategy(BaseStrategy.TANYAO, table.player)
+    table.player.ai.open_hand_handler.current_strategy = TanyaoStrategy(BaseStrategy.TANYAO, table.player)
     _assert_tanyao(table.player)
 
     tile = string_to_136_array(sou="4444")[1]
@@ -628,7 +628,7 @@ def test_kuikae_advanced():
     table.player.init_hand(tiles)
     table.player.add_called_meld(make_meld(MeldPrint.CHI, man="234"))
     # just force tanyao for the test
-    table.player.ai.current_strategy = TanyaoStrategy(BaseStrategy.TANYAO, table.player)
+    table.player.ai.open_hand_handler.current_strategy = TanyaoStrategy(BaseStrategy.TANYAO, table.player)
     _assert_tanyao(table.player)
 
     tile = string_to_136_array(sou="2222")[2]
@@ -657,5 +657,5 @@ def _make_table():
 
 
 def _assert_tanyao(player):
-    assert player.ai.current_strategy is not None
-    assert player.ai.current_strategy.type == BaseStrategy.TANYAO
+    assert player.ai.open_hand_handler.current_strategy is not None
+    assert player.ai.open_hand_handler.current_strategy.type == BaseStrategy.TANYAO

@@ -192,8 +192,8 @@ class Player(PlayerInterface):
             f"Remaining tiles: {self.table.count_of_remaining_tiles}",
             f"Hand: {self.format_hand_for_print(tile_136)}",
         ]
-        if self.ai.current_strategy:
-            context.append(f"Current strategy: {self.ai.current_strategy}")
+        if self.ai.open_hand_handler.current_strategy:
+            context.append(f"Current strategy: {self.ai.open_hand_handler.current_strategy}")
 
         self.logger.debug(log.DRAW, context=context)
 

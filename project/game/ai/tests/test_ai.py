@@ -345,8 +345,8 @@ def test_chose_strategy_and_reset_strategy():
 
     tile = string_to_136_tile(sou="7")
     player.draw_tile(tile)
-    assert player.ai.current_strategy is not None
-    assert player.ai.current_strategy.type == BaseStrategy.TANYAO
+    assert player.ai.open_hand_handler.current_strategy is not None
+    assert player.ai.open_hand_handler.current_strategy.type == BaseStrategy.TANYAO
 
     # we draw a tile that will change our selected strategy
     tiles = string_to_136_array(man="33355788", sou="3479", honors="3")
@@ -354,13 +354,13 @@ def test_chose_strategy_and_reset_strategy():
 
     tile = string_to_136_tile(sou="2")
     meld, _ = player.try_to_call_meld(tile, False)
-    assert player.ai.current_strategy is not None
-    assert player.ai.current_strategy.type == BaseStrategy.TANYAO
+    assert player.ai.open_hand_handler.current_strategy is not None
+    assert player.ai.open_hand_handler.current_strategy.type == BaseStrategy.TANYAO
     assert meld is None
 
     tile = string_to_136_tile(sou="8")
     player.draw_tile(tile)
-    assert player.ai.current_strategy is None
+    assert player.ai.open_hand_handler.current_strategy is None
 
     # for already opened hand we don't need to give up on selected strategy
     tiles = string_to_136_array(man="33355788", sou="3479", honors="3")
@@ -373,8 +373,8 @@ def test_chose_strategy_and_reset_strategy():
     tile = string_to_136_tile(sou="8")
     player.draw_tile(tile)
 
-    assert player.ai.current_strategy is not None
-    assert player.ai.current_strategy.type == BaseStrategy.TANYAO
+    assert player.ai.open_hand_handler.current_strategy is not None
+    assert player.ai.open_hand_handler.current_strategy.type == BaseStrategy.TANYAO
 
 
 def test_remaining_tiles_and_enemy_discard():

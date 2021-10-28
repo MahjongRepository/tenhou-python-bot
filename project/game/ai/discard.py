@@ -121,7 +121,10 @@ class DiscardOption:
                 value += honored_value * len(count_of_winds)
         else:
             # aim for tanyao
-            if self.player.ai.current_strategy and self.player.ai.current_strategy.type == BaseStrategy.TANYAO:
+            if (
+                self.player.ai.open_hand_handler.current_strategy
+                and self.player.ai.open_hand_handler.current_strategy.type == BaseStrategy.TANYAO
+            ):
                 suit_tile_grades = [10, 20, 30, 50, 40, 50, 30, 20, 10]
             # usual hand
             else:

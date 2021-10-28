@@ -84,8 +84,8 @@ class HandBuilder:
             return self._choose_safest_tile_or_skip_meld(discard_options, after_meld)
 
         # our strategy can affect discard options
-        if self.ai.current_strategy:
-            tiles_we_can_discard = self.ai.current_strategy.determine_what_to_discard(
+        if self.ai.open_hand_handler.current_strategy:
+            tiles_we_can_discard = self.ai.open_hand_handler.current_strategy.determine_what_to_discard(
                 tiles_we_can_discard, self.player.closed_hand, self.player.melds
             )
 
@@ -293,7 +293,11 @@ class HandBuilder:
     def calculate_second_level_ukeire(self, discard_option, after_meld=False):
         self._assert_hand_correctness()
 
-        not_suitable_tiles = self.ai.current_strategy and self.ai.current_strategy.not_suitable_tiles or []
+        not_suitable_tiles = (
+            self.ai.open_hand_handler.current_strategy
+            and self.ai.open_hand_handler.current_strategy.not_suitable_tiles
+            or []
+        )
         call_riichi = discard_option.with_riichi
 
         # we are going to do manipulations that require player hand and discards to be updated

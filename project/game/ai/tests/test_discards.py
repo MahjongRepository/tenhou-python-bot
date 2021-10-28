@@ -115,7 +115,7 @@ def test_calculate_suit_tiles_value_and_tanyao_hand():
     table = Table()
     player = table.player
     table.has_aka_dora = False
-    player.ai.current_strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
+    player.ai.open_hand_handler.current_strategy = TanyaoStrategy(BaseStrategy.TANYAO, player)
 
     # 0 - 8   man
     # 9 - 17  pin
@@ -795,8 +795,8 @@ def test_choose_1_shanten_with_cost_possibility_draw():
     tile = string_to_136_tile(sou="7")
     player.draw_tile(tile)
     discarded_tile, _ = player.discard_tile()
-    assert player.ai.current_strategy is not None
-    assert player.ai.current_strategy.type == BaseStrategy.YAKUHAI
+    assert player.ai.open_hand_handler.current_strategy is not None
+    assert player.ai.open_hand_handler.current_strategy.type == BaseStrategy.YAKUHAI
     assert tiles_to_string([discarded_tile]) == "7m"
 
 
@@ -817,8 +817,8 @@ def test_choose_1_shanten_with_cost_possibility_meld():
     assert meld.type == MeldPrint.PON
     assert tiles_to_string(meld.tiles) == "777s"
 
-    assert player.ai.current_strategy is not None
-    assert player.ai.current_strategy.type == BaseStrategy.YAKUHAI
+    assert player.ai.open_hand_handler.current_strategy is not None
+    assert player.ai.open_hand_handler.current_strategy.type == BaseStrategy.YAKUHAI
 
     discarded_tile = discard_option.tile_to_discard_136
 

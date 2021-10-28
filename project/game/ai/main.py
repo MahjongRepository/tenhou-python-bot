@@ -6,13 +6,6 @@ from game.ai.hand_builder import HandBuilder
 from game.ai.helpers.kabe import Kabe
 from game.ai.helpers.suji import Suji
 from game.ai.kan import Kan
-from game.ai.strategies.chinitsu import ChinitsuStrategy
-from game.ai.strategies.common_open_tempai import CommonOpenTempaiStrategy
-from game.ai.strategies.formal_tempai import FormalTempaiStrategy
-from game.ai.strategies.honitsu import HonitsuStrategy
-from game.ai.strategies.main import BaseStrategy
-from game.ai.strategies.tanyao import TanyaoStrategy
-from game.ai.strategies.yakuhai import YakuhaiStrategy
 from mahjong.agari import Agari
 from mahjong.constants import AKA_DORA_LIST, DISPLAY_WINDS
 from mahjong.hand_calculating.divider import HandDivider
@@ -38,9 +31,6 @@ class MahjongAI:
     ukeire_second = 0
     waiting = None
 
-    current_strategy = None
-    last_discard_option = None
-
     hand_cache_shanten = {}
     hand_cache_estimation = {}
 
@@ -57,6 +47,7 @@ class MahjongAI:
         self.hand_builder = HandBuilder(player, self)
         self.riichi = player.config.RIICHI_HANDLER_CLASS(player)
         self.placement = player.config.PLACEMENT_HANDLER_CLASS(player)
+        self.open_hand_handler = player.config.OPEN_HAND_HANDLER_CLASS(player)
 
         self.suji = Suji(player)
         self.kabe = Kabe(player)
@@ -69,8 +60,8 @@ class MahjongAI:
         self.ukeire_second = 0
         self.waiting = None
 
-        self.current_strategy = None
-        self.last_discard_option = None
+        self.open_hand_handler.current_strategy = None
+        self.open_hand_handler.last_discard_option = None
 
         self.hand_cache_shanten = {}
         self.hand_cache_estimation = {}
@@ -94,86 +85,20 @@ class MahjongAI:
 
     def draw_tile(self, tile_136):
         if not self.player.in_riichi:
-            self.determine_strategy(self.player.tiles)
+            self.open_hand_handler.determine_strategy(self.player.tiles)
 
     def discard_tile(self, discard_tile):
         # we called meld and we had discard tile that we wanted to discard
         if discard_tile is not None:
-            if not self.last_discard_option:
+            if not self.open_hand_handler.last_discard_option:
                 return discard_tile, False
 
-            return self.hand_builder.process_discard_option(self.last_discard_option)
+            return self.hand_builder.process_discard_option(self.open_hand_handler.last_discard_option)
 
         return self.hand_builder.discard_tile()
 
     def try_to_call_meld(self, tile_136, is_kamicha_discard):
-        tiles_136_previous = self.player.tiles[:]
-        closed_hand_136_previous = self.player.closed_hand[:]
-        tiles_136 = tiles_136_previous + [tile_136]
-        self.determine_strategy(tiles_136, meld_tile=tile_136)
-
-        if not self.current_strategy:
-            self.player.logger.debug(log.MELD_DEBUG, "We don't have active strategy. Abort melding.")
-            return None, None
-
-        closed_hand_34_previous = TilesConverter.to_34_array(closed_hand_136_previous)
-        previous_shanten, _ = self.hand_builder.calculate_shanten_and_decide_hand_structure(closed_hand_34_previous)
-
-        if previous_shanten == Shanten.AGARI_STATE and not self.current_strategy.can_meld_into_agari():
-            return None, None
-
-        meld, discard_option = self.current_strategy.try_to_call_meld(tile_136, is_kamicha_discard, tiles_136)
-        if discard_option:
-            self.last_discard_option = discard_option
-
-            self.player.logger.debug(
-                log.MELD_CALL,
-                "We decided to open hand",
-                context=[
-                    f"Hand: {self.player.format_hand_for_print(tile_136)}",
-                    f"Meld: {meld.serialize()}",
-                    f"Discard after meld: {discard_option.serialize()}",
-                ],
-            )
-
-        return meld, discard_option
-
-    def determine_strategy(self, tiles_136, meld_tile=None):
-        # for already opened hand we don't need to give up on selected strategy
-        if self.player.is_open_hand and self.current_strategy:
-            return False
-
-        old_strategy = self.current_strategy
-        self.current_strategy = None
-
-        # order is important, we add strategies with the highest priority first
-        strategies = []
-
-        if self.player.table.has_open_tanyao:
-            strategies.append(TanyaoStrategy(BaseStrategy.TANYAO, self.player))
-
-        strategies.append(YakuhaiStrategy(BaseStrategy.YAKUHAI, self.player))
-        strategies.append(HonitsuStrategy(BaseStrategy.HONITSU, self.player))
-        strategies.append(ChinitsuStrategy(BaseStrategy.CHINITSU, self.player))
-
-        strategies.append(FormalTempaiStrategy(BaseStrategy.FORMAL_TEMPAI, self.player))
-        strategies.append(CommonOpenTempaiStrategy(BaseStrategy.COMMON_OPEN_TEMPAI, self.player))
-
-        for strategy in strategies:
-            if strategy.should_activate_strategy(tiles_136, meld_tile=meld_tile):
-                self.current_strategy = strategy
-                break
-
-        if self.current_strategy and (not old_strategy or self.current_strategy.type != old_strategy.type):
-            self.player.logger.debug(
-                log.STRATEGY_ACTIVATE,
-                context=self.current_strategy,
-            )
-
-        if not self.current_strategy and old_strategy:
-            self.player.logger.debug(log.STRATEGY_DROP, context=old_strategy)
-
-        return self.current_strategy and True or False
+        return self.open_hand_handler.try_to_call_meld(tile_136, is_kamicha_discard)
 
     def estimate_hand_value_or_get_from_cache(
         self, win_tile_34, tiles=None, call_riichi=False, is_tsumo=False, is_rinshan=False, is_chankan=False

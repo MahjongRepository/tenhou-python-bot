@@ -175,7 +175,7 @@ class Riichi:
                     if self.player.is_dealer:
                         return True
                     # let's not push cheap hands against threats
-                    elif threats and min_cost_with_riichi <= 5200:
+                    elif threats and min_cost_with_riichi < 2600:
                         return False
 
                     if 3 <= simplified_waiting <= 5:
@@ -322,7 +322,7 @@ class Riichi:
         is_dealer_threat = any([x.enemy.is_dealer for x in threats])
 
         # we don't want to push cheap hand against dealer
-        if is_dealer_threat and min_cost_with_riichi <= 2600:
+        if is_dealer_threat and min_cost_with_riichi <= 1300:
             return False
 
         # if we have yaku on every wait

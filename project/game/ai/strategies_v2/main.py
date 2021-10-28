@@ -45,30 +45,25 @@ class BaseStrategy:
     def get_open_hand_han(self):
         return 0
 
-    def should_activate_strategy(self, tiles_136, meld_tile=None):
+    def should_activate_strategy(self, tiles_136, meld_tile=None) -> bool:
         """
         Based on player hand and table situation
         we can determine should we use this strategy or not.
-        :param: tiles_136
-        :return: boolean
         """
         self.calculate_dora_count(tiles_136)
-
         return True
 
-    def can_meld_into_agari(self):
+    def can_meld_into_agari(self) -> bool:
         """
-        Is melding into agari allowed with this strategy
-        :return: boolean
+        Is melding into agari allowed with this strategy.
+        By default, the logic is the following: if we have any
+        non-suitable tiles, we can meld into agari state,
+        because we'll throw them away after meld.
+        Otherwise, there is no point.
         """
-        # By default, the logic is the following: if we have any
-        # non-suitable tiles, we can meld into agari state, because we'll
-        # throw them away after meld.
-        # Otherwise, there is no point.
         for tile in self.player.tiles:
             if not self.is_tile_suitable(tile):
                 return True
-
         return False
 
     def is_tile_suitable(self, tile):
@@ -403,6 +398,7 @@ class BaseStrategy:
             self.player.add_called_meld(meld)
 
             selected_tile = self.player.ai.hand_builder.choose_tile_to_discard(after_meld=True)
+            closed_hand_tiles_after_meld = self.player.closed_hand[:]
 
             # restore original tiles and melds state
             self.player.tiles = tiles_original
@@ -470,6 +466,7 @@ class BaseStrategy:
                     "discard_tile": selected_tile,
                     "meld_print": TilesConverter.to_one_line_string([meld_34[0] * 4, meld_34[1] * 4, meld_34[2] * 4]),
                     "meld": meld,
+                    "closed_hand_tiles_after_meld": closed_hand_tiles_after_meld,
                 }
             )
 

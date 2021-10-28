@@ -249,5 +249,31 @@ class YakuhaiStrategy(BaseStrategy):
 
         return super(YakuhaiStrategy, self).try_to_call_meld(tile, is_kamicha_discard, tiles_136)
 
+    def validate_meld(self, chosen_meld_dict):
+        # choose if base method requires us to keep hand closed
+        if not super(YakuhaiStrategy, self).validate_meld(chosen_meld_dict):
+            return False
+
+        closed_tiles_34 = TilesConverter.to_34_array(self.player.closed_hand)
+        pairs_before_meld = len([x for x in closed_tiles_34 if x == 2])
+        valued_pairs_before_meld = len([x for x in self.player.valued_honors if closed_tiles_34[x] == 2])
+        # we don't have valued pairs to keep
+        if not valued_pairs_before_meld:
+            return True
+
+        # it is fine to destroy pairs if we have plenty of them
+        if pairs_before_meld > 2:
+            return True
+
+        closed_tiles_34 = TilesConverter.to_34_array(chosen_meld_dict["closed_hand_tiles_after_meld"])
+        pairs_after_meld = len([x for x in closed_tiles_34 if x == 2])
+        valued_pairs_after_meld = len([x for x in self.player.valued_honors if closed_tiles_34[x] == 2])
+
+        # condition to prevent calling from form 344m 77z on 4m
+        if pairs_after_meld < pairs_before_meld and valued_pairs_before_meld == valued_pairs_after_meld:
+            return False
+
+        return True
+
     def _is_yakuhai_pon(self, meld):
         return meld.type == MeldPrint.PON and meld.tiles[0] // 4 in self.player.valued_honors

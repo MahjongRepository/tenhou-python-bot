@@ -213,7 +213,7 @@ def test_open_hand_and_not_go_for_chiitoitsu():
     assert tiles_to_string(meld.tiles) == "555z"
 
 
-def test_open_hand_and_not_go_for_atodzuke_yakuhai_v2():
+def test_open_hand_and_not_go_for_atodzuke_yakuhai():
     table = make_open_hand_v2_table()
     # dora here to activate honitsu strategy
     table.add_dora_indicator(string_to_136_tile(sou="9"))

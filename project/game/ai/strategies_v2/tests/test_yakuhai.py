@@ -1,4 +1,3 @@
-import pytest
 from game.ai.strategies_v2.main import BaseStrategy
 from game.ai.strategies_v2.tests.test_chiitoitsu import make_open_hand_v2_table
 from game.ai.strategies_v2.yakuhai import YakuhaiStrategy
@@ -447,7 +446,6 @@ def test_atodzuke_keep_yakuhai_wait():
     assert tiles_to_string([discarded_tile]) == "2m"
 
 
-@pytest.mark.skip("Need to implement logic for these tests. Github issue #98")
 def test_atodzuke_dont_destroy_second_pair():
     # make sure yakuhai strategy is activated by adding 3 doras to the hand
     table = make_open_hand_v2_table()

@@ -166,7 +166,7 @@ class TanyaoStrategy(BaseStrategy):
         return tile not in self.not_suitable_tiles
 
     def validate_meld(self, chosen_meld_dict):
-        # if we have already opened our hand, let's go by default riles
+        # if we have already opened our hand, let's go by default rules
         if self.player.is_open_hand:
             return True
 

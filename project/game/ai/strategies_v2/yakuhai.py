@@ -271,6 +271,14 @@ class YakuhaiStrategy(BaseStrategy):
 
         # condition to prevent calling from form 344m 77z on 4m
         if pairs_after_meld < pairs_before_meld and valued_pairs_before_meld == valued_pairs_after_meld:
+            self.player.logger.debug(
+                log.MELD_DEBUG,
+                "Yakuhai: let's skip meld that destroying our pair",
+                {
+                    "pairs_after_meld": pairs_after_meld,
+                    "pairs_before_meld": pairs_before_meld,
+                },
+            )
             return False
 
         return True

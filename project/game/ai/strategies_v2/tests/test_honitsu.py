@@ -1,4 +1,3 @@
-import pytest
 from game.ai.strategies_v2.honitsu import HonitsuStrategy
 from game.ai.strategies_v2.main import BaseStrategy
 from game.ai.strategies_v2.tests.test_chiitoitsu import make_open_hand_v2_table
@@ -214,8 +213,7 @@ def test_open_hand_and_not_go_for_chiitoitsu():
     assert tiles_to_string(meld.tiles) == "555z"
 
 
-@pytest.mark.skip("Skipped, needs strategies refactoring, ref #153")
-def test_open_hand_and_not_go_for_atodzuke_yakuhai():
+def test_open_hand_and_not_go_for_atodzuke_yakuhai_v2():
     table = make_open_hand_v2_table()
     # dora here to activate honitsu strategy
     table.add_dora_indicator(string_to_136_tile(sou="9"))

@@ -29,13 +29,18 @@ class OpenHandHandlerV2:
         # order is important, we add strategies with the highest priority first
         strategies = []
 
+        # first priority
         if self.player.table.has_open_tanyao:
             strategies.append(TanyaoStrategy(BaseStrategy.TANYAO, self.player))
 
-        strategies.append(YakuhaiStrategy(BaseStrategy.YAKUHAI, self.player))
+        # second priority
         strategies.append(HonitsuStrategy(BaseStrategy.HONITSU, self.player))
         strategies.append(ChinitsuStrategy(BaseStrategy.CHINITSU, self.player))
 
+        # third priority
+        strategies.append(YakuhaiStrategy(BaseStrategy.YAKUHAI, self.player))
+
+        # fourth priority
         strategies.append(FormalTempaiStrategy(BaseStrategy.FORMAL_TEMPAI, self.player))
         strategies.append(CommonOpenTempaiStrategy(BaseStrategy.COMMON_OPEN_TEMPAI, self.player))
 

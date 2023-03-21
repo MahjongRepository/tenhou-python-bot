@@ -5,4 +5,4 @@ mahjong==1.2.0.dev7
 requests==2.26.0
 
 # to capture crash logs
-sentry-sdk==1.4.3
+sentry-sdk==1.14.0

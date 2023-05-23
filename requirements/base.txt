@@ -2,7 +2,7 @@
 mahjong==1.2.0.dev7
 
 # to send information about games to statistics server
-requests==2.26.0
+requests==2.31.0
 
 # to capture crash logs
 sentry-sdk==1.4.3

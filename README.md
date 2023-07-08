@@ -1,5 +1,7 @@
 ![Build](https://github.com/MahjongRepository/tenhou-python-bot/workflows/Mahjong%20bot/badge.svg) [[Tests coverage]](http://mahjongrepository.github.io/tenhou-python-bot/)
 
+The project is not maintained anymore, and exists primary for historical reasons and references.
+
 Bot was tested with Python 3.7+ and PyPy3, we are not supporting Python 2.
 
 # What do we have here?
@@ -12,9 +14,7 @@ You can find it here: https://github.com/MahjongRepository/mahjong
 
 ## Mahjong bot
 
-For research purposes we built a simple bot to play riichi mahjong on tenhou.net server.
-
-Here you can read about bot played games statistic: [versions history](doc/versions.md)
+For research purposes we built a simple bot to play riichi mahjong. It can be run locally.
 
 # For developers
 

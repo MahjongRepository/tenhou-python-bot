@@ -4,7 +4,6 @@ Endpoint to run bot. It will play a game on tenhou.net
 import importlib
 from optparse import OptionParser
 
-from tenhou.main import connect_and_play
 from utils.settings_handler import settings
 
 
@@ -84,8 +83,6 @@ def main():
             settings.SENTRY_URL,
             traces_sample_rate=1.0,
         )
-
-    connect_and_play()
 
 
 if __name__ == "__main__":

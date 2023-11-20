@@ -1,5 +1,5 @@
 import utils.decisions_constants as log
-from game.ai.strategies.main import BaseStrategy
+from game.ai.strategies_v2.main import BaseStrategy
 from mahjong.constants import HONOR_INDICES, TERMINAL_INDICES
 from mahjong.tile import TilesConverter
 from mahjong.utils import is_honor, is_tile_strictly_isolated
@@ -166,7 +166,7 @@ class TanyaoStrategy(BaseStrategy):
         return tile not in self.not_suitable_tiles
 
     def validate_meld(self, chosen_meld_dict):
-        # if we have already opened our hand, let's go by default rules
+        # if we have already opened our hand, let's go by default riles
         if self.player.is_open_hand:
             return True
 
